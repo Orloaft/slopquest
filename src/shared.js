@@ -41,6 +41,39 @@ export const SKILLS = {
   woodcutting: { label: "Woodcutting" }
 };
 
+export const TREE_TYPES = {
+  oak: {
+    label: "Oak",
+    requiredLevel: 1,
+    chopsRequired: 7,
+    baseSwingMs: 1700,
+    minSwingMs: 850,
+    xp: 28,
+    itemId: "logs",
+    dropLabel: "Oak Logs",
+    textureKey: "spriteTree",
+    width: 58,
+    height: 76,
+    zoneWidth: 54,
+    zoneHeight: 80
+  },
+  pine: {
+    label: "Pine",
+    requiredLevel: 10,
+    chopsRequired: 10,
+    baseSwingMs: 2200,
+    minSwingMs: 1000,
+    xp: 55,
+    itemId: "pine_logs",
+    dropLabel: "Pine Logs",
+    textureKey: "spritePine",
+    width: 54,
+    height: 84,
+    zoneWidth: 50,
+    zoneHeight: 86
+  }
+};
+
 export const MONSTERS = {
   rat: { name: "Rat", maxHp: 28, speed: 2.4, damage: [3, 7], attackMs: 1000, xp: 16, gold: [3, 8], aggro: 5.5, range: 1 },
   spider: { name: "Spider", maxHp: 36, speed: 2.7, damage: [4, 9], attackMs: 950, xp: 22, gold: [4, 10], aggro: 5.5, range: 1 },

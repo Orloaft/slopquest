@@ -13,6 +13,7 @@ import {
   SKILLS,
   SHOP,
   START,
+  TREE_TYPES,
   isBlockedTile,
   isSafeZone,
   makeFloorTiles,
@@ -33,13 +34,25 @@ const TREE_SNAPSHOT_RADIUS_SQ = TREE_SNAPSHOT_RADIUS ** 2;
 const METRIC_WINDOW = 60;
 const SPATIAL_CELL_SIZE = 8;
 const TREE_RESPAWN_MS = 30000;
-const WOODCUT_SWING_MS = 760;
 const INVENTORY_SIZE = 30;
 const ITEMS = {
   axe: { id: "axe", label: "Bronze Axe", icon: "A" },
-  logs: { id: "logs", label: "Logs", icon: "L" },
+  logs: { id: "logs", label: "Oak Logs", icon: "L" },
+  pine_logs: { id: "pine_logs", label: "Pine Logs", icon: "P" },
   potion: { id: "potion", label: "Health Potion", icon: "P" }
 };
+const COMPOSED_TREE_NODES = [
+  { floor: 0, x: 12.8, y: 10.7, type: "oak" },
+  { floor: 0, x: 36.2, y: 17.4, type: "oak" },
+  { floor: 0, x: 20.2, y: 31.6, type: "pine" },
+  { floor: 3, x: 8.5, y: 10.4, type: "oak" },
+  { floor: 3, x: 14.2, y: 29.8, type: "pine" },
+  { floor: 3, x: 19.5, y: 7.4, type: "oak" },
+  { floor: 3, x: 31.3, y: 23.8, type: "pine" },
+  { floor: 3, x: 45.2, y: 15.3, type: "oak" },
+  { floor: 4, x: 9, y: 9.5, type: "oak" },
+  { floor: 4, x: 44, y: 30.2, type: "pine" }
+];
 const QUESTS = {
   southgate: {
     id: "southgate",
@@ -501,9 +514,15 @@ function cutTree(player, id) {
     event("float", "You need an axe.", player.x, player.y, player.floor, "#f7d486");
     return;
   }
+  const treeSpec = treeTypeSpec(tree);
+  const level = skillLevel(player, "woodcutting");
+  if (level < treeSpec.requiredLevel) {
+    event("float", `Requires Woodcutting ${treeSpec.requiredLevel}.`, tree.x, tree.y, tree.floor, "#f7d486");
+    return;
+  }
   player.targetId = null;
-  player.action = { type: "woodcutting", treeId: tree.id, nextAt: performance.now(), swings: 0 };
-  event("float", "You start chopping.", tree.x, tree.y, tree.floor, "#d8c68a");
+  player.action = { type: "woodcutting", treeId: tree.id, nextAt: performance.now(), swings: 0, remaining: treeSpec.chopsRequired };
+  event("float", `You start chopping ${treeSpec.label}.`, tree.x, tree.y, tree.floor, "#d8c68a");
 }
 
 function updatePlayerAction(player, now) {
@@ -516,22 +535,36 @@ function updatePlayerAction(player, now) {
   if (now < player.action.nextAt) return;
 
   player.action.swings += 1;
-  player.action.nextAt = now + WOODCUT_SWING_MS;
+  const treeSpec = treeTypeSpec(tree);
+  const level = skillLevel(player, "woodcutting");
+  player.action.nextAt = now + woodcutSwingMs(level, treeSpec);
   const angle = Math.atan2(tree.y - player.y, tree.x - player.x);
   event("effect", "chop", tree.x, tree.y - 0.35, tree.floor, null, player.id, tree.id, { fromX: player.x, fromY: player.y, angle });
-  const level = skillLevel(player, "woodcutting");
-  const successChance = clamp(0.25 + player.action.swings * 0.16 + level * 0.025, 0.35, 0.95);
-  if (Math.random() > successChance) {
-    if (player.action.swings % 2 === 0) event("float", "Chop", tree.x, tree.y, tree.floor, "#d8c68a");
+  player.action.remaining -= woodcutPower(level, treeSpec);
+  if (player.action.remaining > 0) {
+    if (player.action.swings % 3 === 0) event("float", "Chop", tree.x, tree.y, tree.floor, "#d8c68a");
     return;
   }
 
   tree.active = false;
   tree.respawnAt = performance.now() + TREE_RESPAWN_MS;
   player.action = null;
-  addSkillXp(player, "woodcutting", 18);
-  dropItem(tree.floor, tree.x + 0.12, tree.y, [{ id: "logs", qty: 1 }], "Logs");
-  event("float", "+18 Woodcutting", tree.x, tree.y, tree.floor, "#9ee6b1");
+  addSkillXp(player, "woodcutting", treeSpec.xp);
+  dropItem(tree.floor, tree.x + 0.12, tree.y, [{ id: treeSpec.itemId, qty: 1 }], treeSpec.dropLabel);
+  event("float", `+${treeSpec.xp} Woodcutting`, tree.x, tree.y, tree.floor, "#9ee6b1");
+}
+
+function treeTypeSpec(tree) {
+  return TREE_TYPES[tree.type] ?? TREE_TYPES.oak;
+}
+
+function woodcutSwingMs(level, treeSpec) {
+  const aboveRequirement = Math.max(0, level - treeSpec.requiredLevel);
+  return clamp(treeSpec.baseSwingMs - aboveRequirement * 75, treeSpec.minSwingMs, treeSpec.baseSwingMs);
+}
+
+function woodcutPower(level, treeSpec) {
+  return 1 + Math.floor(Math.max(0, level - treeSpec.requiredLevel) / 8);
 }
 
 function dropItem(floor, x, y, items, label) {
@@ -584,10 +617,20 @@ function spawnTreeNodes() {
       for (let x = 0; x < rows[y].length; x += 1) {
         if (rows[y][x] !== "f") continue;
         const id = `tree-${floor}-${x}-${y}`;
-        treeNodes.set(id, { id, floor, tileX: x, tileY: y, x: x + 0.5, y: y + 0.95, active: true, respawnAt: 0 });
+        treeNodes.set(id, { id, floor, tileX: x, tileY: y, x: x + 0.5, y: y + 0.95, type: treeTypeForTile(floor, x, y), active: true, respawnAt: 0 });
       }
     }
   }
+  for (const tree of COMPOSED_TREE_NODES) {
+    const id = `tree-composed-${tree.floor}-${String(tree.x).replace(".", "_")}-${String(tree.y).replace(".", "_")}`;
+    treeNodes.set(id, { id, floor: tree.floor, tileX: Math.floor(tree.x), tileY: Math.floor(tree.y), x: tree.x, y: tree.y, type: tree.type, active: true, respawnAt: 0 });
+  }
+}
+
+function treeTypeForTile(floor, x, y) {
+  const value = (floor * 73856093) ^ (x * 19349663) ^ (y * 83492791);
+  if ((floor === 3 || floor === 4) && Math.abs(value) % 5 === 0) return "pine";
+  return "oak";
 }
 
 function updateNpcs(dt, now) {
@@ -870,8 +913,12 @@ function serializeNpc(npc) {
 }
 
 function serializeTree(tree) {
+  const spec = treeTypeSpec(tree);
   return {
     id: tree.id,
+    type: tree.type,
+    label: spec.label,
+    requiredLevel: spec.requiredLevel,
     floor: tree.floor,
     x: tree.x,
     y: tree.y,

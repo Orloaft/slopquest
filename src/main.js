@@ -8,6 +8,7 @@ import {
   NPCS,
   SHOP,
   TILE_SIZE,
+  TREE_TYPES,
   isBlockedTile,
   makeFloorTiles,
   tileAt,
@@ -108,6 +109,7 @@ let currentFloor = null;
 let clickDestination = null;
 let clickPath = [];
 let pendingTreeCut = null;
+let pendingAttackTarget = null;
 let clickMarker = null;
 let mapLayer;
 let entityLayer;
@@ -424,8 +426,11 @@ function syncEntities() {
       entityLayer.add(view);
     }
     view.setPosition(tree.x * TILE_SIZE, tree.y * TILE_SIZE);
+    if (view.treeType !== tree.type) {
+      updateTreeViewTexture(view, tree);
+    }
     view.treeSprite.setVisible(tree.active);
-    view.stump.setVisible(!tree.active);
+    view.stump.setVisible(false);
     view.zone.input.enabled = tree.active;
   }
   for (const [id, view] of treeViews) {
@@ -479,9 +484,10 @@ function createNpcView(npc) {
 
 function createTreeView(tree) {
   const view = scene.add.container(tree.x * TILE_SIZE, tree.y * TILE_SIZE);
-  const treeSprite = scene.add.image(0, 4, "spriteTree").setOrigin(0.5, 1).setDisplaySize(58, 76);
+  const spec = treeTypeSpec(tree);
+  const treeSprite = scene.add.image(0, 4, spec.textureKey).setOrigin(0.5, 1).setDisplaySize(spec.width, spec.height);
   const stump = scene.add.rectangle(0, 12, 20, 12, 0x705036).setStrokeStyle(2, 0x2d1f14).setVisible(false);
-  const zone = scene.add.zone(0, -18, 54, 80).setInteractive({ cursor: "pointer" });
+  const zone = scene.add.zone(0, -18, spec.zoneWidth, spec.zoneHeight).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (pointer, localX, localY, event) => {
     event.stopPropagation();
     startTreeCutPath(tree);
@@ -490,7 +496,20 @@ function createTreeView(tree) {
   view.treeSprite = treeSprite;
   view.stump = stump;
   view.zone = zone;
+  view.treeType = tree.type;
   return view;
+}
+
+function updateTreeViewTexture(view, tree) {
+  const spec = treeTypeSpec(tree);
+  view.treeSprite.setTexture(spec.textureKey);
+  view.treeSprite.setDisplaySize(spec.width, spec.height);
+  view.zone.setSize(spec.zoneWidth, spec.zoneHeight);
+  view.treeType = tree.type;
+}
+
+function treeTypeSpec(tree) {
+  return TREE_TYPES[tree.type] ?? TREE_TYPES.oak;
 }
 
 function createMonsterView(monster) {
@@ -508,8 +527,7 @@ function createMonsterView(monster) {
   const zone = scene.add.zone(0, 0, 54, 56).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (pointer, localX, localY, event) => {
     event.stopPropagation();
-    clearClickDestination();
-    send({ type: "target", id: monster.id });
+    startAttackPath(monster);
   });
   view.add([targetRing, shadow, sprite, nameText, hpBack, hp, zone]);
   view.nameText = nameText;
@@ -685,6 +703,20 @@ function inputTowardDestination(me) {
     clearClickDestination();
     return null;
   }
+  if (pendingAttackTarget) {
+    const monster = latestState?.monsters?.find((item) => item.id === pendingAttackTarget);
+    if (!monster || monster.floor !== me.floor) {
+      clearClickDestination();
+      return null;
+    }
+    if (isInAttackRange(me, monster)) {
+      const monsterId = pendingAttackTarget;
+      clearClickDestination();
+      sendStopInput();
+      send({ type: "target", id: monsterId });
+      return null;
+    }
+  }
   if (pendingTreeCut) {
     const tree = latestState?.trees?.find((item) => item.id === pendingTreeCut && item.active);
     if (!tree || tree.floor !== me.floor) {
@@ -705,6 +737,8 @@ function inputTowardDestination(me) {
   if (distance < 0.22) {
     if (clickPath.length) {
       clickDestination = clickPath.shift();
+    } else if (pendingAttackTarget && refreshAttackPath(me)) {
+      return null;
     } else {
       clearClickDestination();
     }
@@ -717,6 +751,35 @@ function inputTowardDestination(me) {
     up: dy < -0.12,
     down: dy > 0.12
   };
+}
+
+function startAttackPath(monster) {
+  const me = self();
+  if (!me || monster.floor !== me.floor) return;
+  clearClickDestination();
+  send({ type: "target", id: monster.id });
+  if (isInAttackRange(me, monster)) return;
+
+  pendingAttackTarget = monster.id;
+  if (!refreshAttackPath(me, monster)) {
+    pendingAttackTarget = null;
+  }
+}
+
+function refreshAttackPath(me, monster = null) {
+  const target = monster ?? latestState?.monsters?.find((item) => item.id === pendingAttackTarget);
+  if (!target || target.floor !== me.floor) return false;
+  if (isInAttackRange(me, target)) return true;
+  const destination = nearestEntityApproachTile(me, target, attackRange(me) - 0.08);
+  return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, target.id));
+}
+
+function isInAttackRange(me, monster) {
+  return Phaser.Math.Distance.Between(me.x, me.y, monster.x, monster.y) <= attackRange(me) + 0.08;
+}
+
+function attackRange(me) {
+  return (CLASSES[me.classKey] ?? CLASSES.adventurer).range;
 }
 
 function startTreeCutPath(tree) {
@@ -757,7 +820,28 @@ function nearestTreeApproachTile(me, tree) {
   return candidates[0] ?? null;
 }
 
-function startPathToTile(floor, tx, ty, treeId = null) {
+function nearestEntityApproachTile(me, entity, maxRange) {
+  const entityTileX = Math.floor(entity.x);
+  const entityTileY = Math.floor(entity.y);
+  const candidates = [];
+  for (let y = entityTileY - 2; y <= entityTileY + 2; y += 1) {
+    for (let x = entityTileX - 2; x <= entityTileX + 2; x += 1) {
+      if (!canStandAtTile(entity.floor, x, y)) continue;
+      const center = { x: x + 0.5, y: y + 0.5 };
+      const targetDistance = Phaser.Math.Distance.Between(center.x, center.y, entity.x, entity.y);
+      if (targetDistance > maxRange) continue;
+      candidates.push({
+        x,
+        y,
+        score: Phaser.Math.Distance.Between(me.x, me.y, center.x, center.y) + targetDistance * 0.25
+      });
+    }
+  }
+  candidates.sort((a, b) => a.score - b.score);
+  return candidates[0] ?? null;
+}
+
+function startPathToTile(floor, tx, ty, treeId = null, attackId = null) {
   const me = self();
   if (!me || floor !== me.floor || !canStandAtTile(floor, tx, ty)) return false;
   const path = findTilePath(floor, Math.floor(me.x), Math.floor(me.y), tx, ty);
@@ -765,6 +849,7 @@ function startPathToTile(floor, tx, ty, treeId = null) {
   clickPath = path.slice(1).map((node) => ({ floor, x: node.x + 0.5, y: node.y + 0.5 }));
   clickDestination = clickPath.shift() ?? { floor, x: tx + 0.5, y: ty + 0.5 };
   pendingTreeCut = treeId;
+  pendingAttackTarget = attackId;
   drawClickMarker({ floor, x: tx + 0.5, y: ty + 0.5 });
   return true;
 }
@@ -892,6 +977,7 @@ function clearClickDestination() {
   clickDestination = null;
   clickPath = [];
   pendingTreeCut = null;
+  pendingAttackTarget = null;
   if (clickMarker) clickMarker.setVisible(false);
 }
 
@@ -975,7 +1061,10 @@ function addComposedMapObjects(floor) {
     3: woodsObjects,
     4: northTownObjects
   }[floor] ?? [];
-  objects.sort((a, b) => a.y - b.y).forEach(placeMapSprite);
+  objects
+    .filter((item) => item.key !== "spriteTree" && item.key !== "spritePine")
+    .sort((a, b) => a.y - b.y)
+    .forEach(placeMapSprite);
 }
 
 function placeMapSprite(item) {
