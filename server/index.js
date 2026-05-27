@@ -48,13 +48,12 @@ const ITEMS = {
   potion: { id: "potion", label: "Health Potion", icon: "P", iconUrl: "/icons/item-potion.png" }
 };
 const FISHING_NODES = [
-  { id: "fish-0-7-9", floor: 0, x: 7.2, y: 9.5 },
-  { id: "fish-0-7-15", floor: 0, x: 7.2, y: 15.5 },
-  { id: "fish-0-7-27", floor: 0, x: 7.2, y: 27.5 },
-  { id: "fish-3-24-7", floor: 3, x: 24.4, y: 7.5 },
-  { id: "fish-3-28-18", floor: 3, x: 28.4, y: 18.5 },
-  { id: "fish-3-20-23", floor: 3, x: 20.5, y: 22.7 },
-  { id: "fish-3-36-26", floor: 3, x: 36.5, y: 25.7 }
+  { id: "fish-0-5-9", floor: 0, x: 5.35, y: 9.5, approachX: 7.5, approachY: 9.5 },
+  { id: "fish-0-5-15", floor: 0, x: 5.35, y: 15.5, approachX: 7.5, approachY: 15.5 },
+  { id: "fish-0-5-21", floor: 0, x: 5.35, y: 21.5, approachX: 7.5, approachY: 21.5 },
+  { id: "fish-3-36-7", floor: 3, x: 36.5, y: 7.5, approachX: 34.5, approachY: 7.5 },
+  { id: "fish-3-40-9", floor: 3, x: 40.5, y: 9.5, approachX: 42.5, approachY: 9.5 },
+  { id: "fish-3-37-11", floor: 3, x: 37.5, y: 10.5, approachX: 37.5, approachY: 12.5 }
 ];
 const COMPOSED_TREE_NODES = [
   { floor: 0, x: 12.8, y: 10.7, type: "oak" },
@@ -545,19 +544,30 @@ function talkNpc(player, id) {
     const state = player.quests.southgate;
     if (!state.accepted) {
       state.accepted = true;
-      event("system", `${npc.name}: Southgate Cemetery is restless. Defeat ${QUESTS.southgate.targetCount} undead and return stronger.`);
+      eventDialogue(player, [
+        { speaker: npc.name, text: "Southgate Cemetery is restless again. The dead are testing the gate." },
+        { speaker: player.name, text: "What do you need from me?" },
+        { speaker: npc.name, text: `Defeat ${QUESTS.southgate.targetCount} undead beyond the south gate, then return stronger.` }
+      ]);
       event("float", "Quest accepted", player.x, player.y, player.floor, "#f7d486");
       return;
     }
     if (state.claimed) {
-      event("system", `${npc.name}: The cemetery is quieter because of you.`);
+      eventDialogue(player, [
+        { speaker: npc.name, text: "The cemetery is quieter because of you." },
+        { speaker: player.name, text: "I will keep an eye on the road south." }
+      ]);
       return;
     }
-    event("system", `${npc.name}: Keep thinning the undead beyond the south gate.`);
+    eventDialogue(player, [
+      { speaker: npc.name, text: "Keep thinning the undead beyond the south gate." },
+      { speaker: player.name, text: `${state.progress}/${QUESTS.southgate.targetCount} so far. I will return when it is done.` }
+    ]);
     return;
   }
 
-  event("system", `${npc.name}: ${npc.dialogue}`);
+  const dialogue = npcDialogueLines(player, npc);
+  if (dialogue) eventDialogue(player, dialogue, npc.role === "vendor" ? { opensShop: true } : {});
 }
 
 function cutTree(player, id) {
@@ -580,7 +590,7 @@ function cutTree(player, id) {
 
 function fishNode(player, id) {
   const node = FISHING_NODES.find((item) => item.id === id);
-  if (!node || player.dead || node.floor !== player.floor || distance(player, node) > 1.95) return;
+  if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.45) return;
   if (!hasInventoryItem(player, "fishing_rod")) {
     event("float", "You need a fishing rod.", player.x, player.y, player.floor, "#f7d486");
     return;
@@ -667,7 +677,7 @@ function updatePlayerAction(player, now) {
 
 function updateFishingAction(player, now) {
   const node = FISHING_NODES.find((item) => item.id === player.action.nodeId);
-  if (!node || player.dead || node.floor !== player.floor || distance(player, node) > 2 || !hasInventoryItem(player, "fishing_rod")) {
+  if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.65 || !hasInventoryItem(player, "fishing_rod")) {
     player.action = null;
     return;
   }
@@ -707,6 +717,32 @@ function updateCookingAction(player, now) {
 
 function treeTypeSpec(tree) {
   return TREE_TYPES[tree.type] ?? TREE_TYPES.oak;
+}
+
+function fishingApproachPoint(node) {
+  return {
+    floor: node.floor,
+    x: node.approachX ?? node.x,
+    y: node.approachY ?? node.y
+  };
+}
+
+function npcDialogueLines(player, npc) {
+  if (npc.role === "vendor") {
+    return [
+      { speaker: npc.name, text: "Fresh supplies, sharp edges, and the little things that keep you alive." },
+      { speaker: player.name, text: "Show me what you have." },
+      { speaker: npc.name, text: "Take your time. Good tools pay for themselves out there." }
+    ];
+  }
+  return [
+    { speaker: npc.name, text: npc.dialogue },
+    { speaker: player.name, text: "I will remember that." }
+  ];
+}
+
+function eventDialogue(player, lines, extra = {}) {
+  event("dialogue", "", null, null, null, null, null, null, { to: player.id, lines, ...extra });
 }
 
 function woodcutSwingMs(level, treeSpec) {
@@ -1098,7 +1134,12 @@ function serializeTree(tree) {
 
 function serializeFishingNode(node) {
   return {
-    ...node,
+    id: node.id,
+    floor: node.floor,
+    x: node.x,
+    y: node.y,
+    approachX: node.approachX,
+    approachY: node.approachY,
     label: "Fishing spot"
   };
 }
@@ -1132,7 +1173,9 @@ function inTreeInterestRange(viewer, entity) {
 }
 
 function eventVisibleTo(viewer, item) {
+  if (item.to && item.to !== viewer.id) return false;
   if (item.type === "chat" || item.type === "system") return true;
+  if (item.type === "dialogue") return true;
   if (item.floor === null || item.x === null || item.y === null) return true;
   return inInterestRange(viewer, item);
 }

@@ -189,6 +189,7 @@ export function makeFloorTiles(floor) {
     fillRect(rows, 24, 1, 4, MAP_ROWS - 2, "t");
     fillRect(rows, 7, 23, 36, 3, "t");
     fillRect(rows, 34, 5, 8, 7, "d");
+    fillRect(rows, 35, 6, 6, 5, "~");
     rows[31][25] = "S";
     rows[2][25] = "N";
     scatter(rows, "F", "f", 120, 31);

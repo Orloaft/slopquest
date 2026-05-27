@@ -45,10 +45,23 @@ const dom = {
   armorText: document.querySelector("#armorText"),
   buffTracker: document.querySelector("#buffTracker"),
   questTracker: document.querySelector("#questTracker"),
+  menuBackdrop: document.querySelector("#menuBackdrop"),
+  skillsButton: document.querySelector("#skillsButton"),
+  inventoryButton: document.querySelector("#inventoryButton"),
+  skillsPanel: document.querySelector("#skillsPanel"),
+  inventoryPanel: document.querySelector("#inventoryPanel"),
+  skillsCloseButton: document.querySelector("#skillsCloseButton"),
+  inventoryCloseButton: document.querySelector("#inventoryCloseButton"),
   skillTracker: document.querySelector("#skillTracker"),
   inventoryGrid: document.querySelector("#inventoryGrid"),
   netStats: document.querySelector("#netStats"),
   vendor: document.querySelector("#vendor"),
+  vendorCloseButton: document.querySelector("#vendorCloseButton"),
+  dialogue: document.querySelector("#dialogue"),
+  dialogueSpeaker: document.querySelector("#dialogueSpeaker"),
+  dialogueLine: document.querySelector("#dialogueLine"),
+  dialogueNextButton: document.querySelector("#dialogueNextButton"),
+  itemPopover: document.querySelector("#itemPopover"),
   death: document.querySelector("#death"),
   chatLog: document.querySelector("#chatLog"),
   chatForm: document.querySelector("#chatForm"),
@@ -65,8 +78,15 @@ dom.refreshRosterButton.addEventListener("click", () => send({ type: "characters
 dom.abilityOne.addEventListener("click", () => send({ type: "ability", slot: "1" }));
 dom.potionButton.addEventListener("click", () => send({ type: "ability", slot: "2" }));
 dom.lootButton.addEventListener("click", () => send({ type: "loot" }));
-dom.vendorButton.addEventListener("click", () => dom.vendor.classList.toggle("hidden"));
+dom.vendorButton.addEventListener("click", () => toggleCenterPanel(dom.vendor));
 dom.respawnButton.addEventListener("click", () => send({ type: "respawn" }));
+dom.skillsButton.addEventListener("click", () => toggleCenterPanel(dom.skillsPanel));
+dom.inventoryButton.addEventListener("click", () => toggleCenterPanel(dom.inventoryPanel));
+dom.skillsCloseButton.addEventListener("click", () => hideCenterPanels());
+dom.inventoryCloseButton.addEventListener("click", () => hideCenterPanels());
+dom.vendorCloseButton.addEventListener("click", () => hideCenterPanels());
+dom.menuBackdrop.addEventListener("click", () => hideCenterPanels());
+dom.dialogueNextButton.addEventListener("click", advanceDialogue);
 dom.vendor.querySelectorAll("[data-buy]").forEach((button) => {
   button.addEventListener("click", () => send({ type: "buy", item: button.dataset.buy }));
 });
@@ -130,6 +150,7 @@ const fishingViews = new Map();
 const fireViews = new Map();
 const floaters = [];
 let selectedInventoryItem = null;
+let activeDialogue = null;
 const DIRECTIONS = ["up", "right", "down", "left"];
 const WALK_FRAME_MS = 125;
 const DYNAMIC_PATH_REFRESH_MS = 350;
@@ -164,7 +185,7 @@ function create() {
   makeSpriteTexture(this, "forestTiles", "spriteTree", 578, 28, 120, 150);
   makeSpriteTexture(this, "forestTiles", "spritePine", 820, 30, 82, 150);
   makeSpriteTexture(this, "forestTiles", "spriteRock", 640, 500, 92, 72);
-  makeSpriteTexture(this, "waterFishingSpots", "spriteFishingSpot", 640, 128, 160, 96);
+  makeSpriteTexture(this, "waterFishingSpots", "spriteFishingRipple", 920, 800, 70, 70);
   makeSpriteTexture(this, "graveyardTiles", "spriteGrave", 580, 360, 58, 78);
   makeSpriteTexture(this, "graveyardTiles", "spriteFence", 20, 552, 126, 66);
   makeSpriteTexture(this, "graveyardTiles", "spriteDeadTree", 548, 18, 116, 198);
@@ -208,7 +229,7 @@ function create() {
     if (!isTextEntryFocused()) send({ type: "loot" });
   });
   keys.B.on("down", () => {
-    if (!isTextEntryFocused()) dom.vendor.classList.toggle("hidden");
+    if (!isTextEntryFocused()) toggleCenterPanel(dom.vendor);
   });
   keys.ENTER.on("down", () => {
     if (!isTextEntryFocused()) dom.chatInput.focus();
@@ -563,15 +584,14 @@ function treeTypeSpec(tree) {
 
 function createFishingNodeView(node) {
   const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE);
-  const ring = scene.add.ellipse(0, 8, 38, 16, 0x4db6d8, 0.24).setStrokeStyle(2, 0x8fd8ff, 0.75);
-  const sprite = scene.add.image(0, -4, "spriteFishingSpot").setDisplaySize(44, 30);
-  const label = scene.add.text(0, -27, "Fishing spot", textStyle(10, "#8fd8ff")).setOrigin(0.5);
-  const zone = scene.add.zone(0, -2, 54, 44).setInteractive({ cursor: "pointer" });
+  const ring = scene.add.ellipse(0, 2, 34, 14, 0x4db6d8, 0.16).setStrokeStyle(1, 0xbbeeff, 0.55);
+  const sprite = scene.add.image(0, 0, "spriteFishingRipple").setDisplaySize(34, 34);
+  const zone = scene.add.zone(0, 0, 48, 42).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (pointer, localX, localY, event) => {
     event.stopPropagation();
     startFishingPath(node);
   });
-  view.add([ring, sprite, label, zone]);
+  view.add([ring, sprite, zone]);
   view.sprite = sprite;
   return view;
 }
@@ -701,7 +721,7 @@ function renderHud(me) {
   dom.death.classList.toggle("hidden", !me.dead);
   const nearVendor = me.floor === NPCS[0].floor && Phaser.Math.Distance.Between(me.x, me.y, NPCS[0].x, NPCS[0].y) < 2.2;
   dom.vendorButton.classList.toggle("lit", nearVendor);
-  if (!nearVendor) dom.vendor.classList.add("hidden");
+  if (!nearVendor && !dom.vendor.classList.contains("hidden")) hideCenterPanels();
 }
 
 function renderMetrics(metrics) {
@@ -757,15 +777,38 @@ function renderInventory(inventory = []) {
       if (!item) return `<button class="inventory-slot empty" type="button" data-slot="${index}">.</button>`;
       const qty = item.qty > 1 ? `<span>${item.qty}</span>` : "";
       const selected = selectedInventoryItem === item.id ? " selected" : "";
-      return `<button class="inventory-slot${selected}" type="button" data-slot="${index}" data-item="${escapeHtml(item.id)}" title="${escapeHtml(item.label)}">${iconMarkup(item.iconUrl, item.icon, "item-icon")}${qty}</button>`;
+      return `<button class="inventory-slot${selected}" type="button" data-slot="${index}" data-item="${escapeHtml(item.id)}" data-label="${escapeHtml(item.label)}">${iconMarkup(item.iconUrl, item.icon, "item-icon")}${qty}</button>`;
     })
     .join("");
   dom.inventoryGrid.querySelectorAll("[data-item]").forEach((slot) => {
     slot.addEventListener("click", () => handleInventoryClick(slot.dataset.item));
+    slot.addEventListener("mouseenter", () => showItemPopover(slot, slot.dataset.label));
+    slot.addEventListener("mousemove", () => positionItemPopover(slot));
+    slot.addEventListener("mouseleave", hideItemPopover);
     slot.addEventListener("dblclick", () => {
       if (slot.dataset.item === "cooked_fish") send({ type: "eatItem", item: "cooked_fish" });
     });
   });
+}
+
+function showItemPopover(slot, label) {
+  dom.itemPopover.textContent = label;
+  dom.itemPopover.classList.remove("hidden");
+  positionItemPopover(slot);
+}
+
+function positionItemPopover(slot) {
+  if (dom.itemPopover.classList.contains("hidden")) return;
+  const rect = slot.getBoundingClientRect();
+  const popoverRect = dom.itemPopover.getBoundingClientRect();
+  const x = Math.min(window.innerWidth - popoverRect.width - 8, rect.left + rect.width / 2 - popoverRect.width / 2);
+  const y = rect.top > popoverRect.height + 14 ? rect.top - popoverRect.height - 8 : rect.bottom + 8;
+  dom.itemPopover.style.left = `${Math.max(8, x)}px`;
+  dom.itemPopover.style.top = `${Math.max(8, Math.min(window.innerHeight - popoverRect.height - 8, y))}px`;
+}
+
+function hideItemPopover() {
+  dom.itemPopover.classList.add("hidden");
 }
 
 function handleInventoryClick(itemId) {
@@ -907,7 +950,7 @@ function inputTowardDestination(me) {
       clearClickDestination();
       return null;
     }
-    if (Phaser.Math.Distance.Between(me.x, me.y, node.x, node.y) <= 1.85) {
+    if (isNearFishingSpot(me, node)) {
       const nodeId = pendingFishingNode;
       clearClickDestination();
       sendStopInput();
@@ -1057,7 +1100,7 @@ function startFishingPath(node) {
   if (!me || !node || node.floor !== me.floor) return;
   clearClickDestination();
   pendingFishingNode = node.id;
-  if (Phaser.Math.Distance.Between(me.x, me.y, node.x, node.y) <= 1.85) {
+  if (isNearFishingSpot(me, node)) {
     pendingFishingNode = null;
     send({ type: "fishNode", id: node.id });
     return;
@@ -1068,9 +1111,30 @@ function startFishingPath(node) {
 function refreshFishingPath(me, node = null) {
   const target = node ?? latestState?.fishingNodes?.find((item) => item.id === pendingFishingNode);
   if (!target || target.floor !== me.floor) return false;
-  if (Phaser.Math.Distance.Between(me.x, me.y, target.x, target.y) <= 1.85) return true;
-  const destination = nearestEntityApproachTile(me, target, 1.75);
+  if (isNearFishingSpot(me, target)) return true;
+  const destination = fishingApproachTile(me, target) ?? nearestEntityApproachTile(me, fishingApproachPoint(target), 1.15);
   return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, null, null, target.id));
+}
+
+function isNearFishingSpot(me, node) {
+  const approach = fishingApproachPoint(node);
+  return Phaser.Math.Distance.Between(me.x, me.y, approach.x, approach.y) <= 1.35;
+}
+
+function fishingApproachPoint(node) {
+  return {
+    floor: node.floor,
+    x: node.approachX ?? node.x,
+    y: node.approachY ?? node.y
+  };
+}
+
+function fishingApproachTile(me, node) {
+  const approach = fishingApproachPoint(node);
+  const tx = Math.floor(approach.x);
+  const ty = Math.floor(approach.y);
+  if (canStandAtTile(node.floor, tx, ty)) return { x: tx, y: ty };
+  return nearestEntityApproachTile(me, approach, 1.2);
 }
 
 function startCookingPath(fire) {
@@ -1127,7 +1191,26 @@ function resolveNpc(npcOrId) {
 }
 
 function openVendor() {
-  dom.vendor.classList.remove("hidden");
+  showCenterPanel(dom.vendor);
+}
+
+function toggleCenterPanel(panel) {
+  if (panel.classList.contains("hidden")) showCenterPanel(panel);
+  else hideCenterPanels();
+}
+
+function showCenterPanel(panel) {
+  hideCenterPanels();
+  dom.menuBackdrop.classList.remove("hidden");
+  panel.classList.remove("hidden");
+}
+
+function hideCenterPanels() {
+  dom.menuBackdrop.classList.add("hidden");
+  dom.skillsPanel.classList.add("hidden");
+  dom.inventoryPanel.classList.add("hidden");
+  dom.vendor.classList.add("hidden");
+  closeDialogue(false);
 }
 
 function nearestTreeApproachTile(me, tree) {
@@ -1472,6 +1555,7 @@ function placeMapSprite(item) {
 function consumeEvents(events) {
   for (const event of events) {
     if (event.type === "system" || event.type === "chat") addChat(event.text);
+    if (event.type === "dialogue") openDialogue(event);
     if (event.type === "effect" && self()?.floor === event.floor) playCombatEffect(event);
     if ((event.type === "hit" || event.type === "float") && self()?.floor === event.floor) {
       const floater = scene.add.text(event.x * TILE_SIZE, event.y * TILE_SIZE, String(event.text), textStyle(13, event.color ?? "#fff")).setOrigin(0.5);
@@ -1479,6 +1563,47 @@ function consumeEvents(events) {
       floaters.push(floater);
       fxLayer.add(floater);
     }
+  }
+}
+
+function openDialogue(event) {
+  const lines = Array.isArray(event.lines) ? event.lines : [];
+  if (!lines.length) return;
+  hideCenterPanels();
+  activeDialogue = { lines, index: 0, opensShop: Boolean(event.opensShop) };
+  dom.menuBackdrop.classList.remove("hidden");
+  dom.dialogue.classList.remove("hidden");
+  renderDialogueLine();
+}
+
+function renderDialogueLine() {
+  const line = activeDialogue?.lines?.[activeDialogue.index];
+  if (!line) {
+    closeDialogue();
+    return;
+  }
+  dom.dialogueSpeaker.textContent = line.speaker ?? "";
+  dom.dialogueLine.textContent = line.text ?? "";
+  dom.dialogueNextButton.textContent = activeDialogue.index >= activeDialogue.lines.length - 1 ? "Done" : "Continue";
+}
+
+function advanceDialogue() {
+  if (!activeDialogue) return;
+  activeDialogue.index += 1;
+  renderDialogueLine();
+}
+
+function closeDialogue(openFollowup = true) {
+  const opensShop = Boolean(activeDialogue?.opensShop);
+  activeDialogue = null;
+  dom.dialogue.classList.add("hidden");
+  if (openFollowup && opensShop) {
+    dom.menuBackdrop.classList.remove("hidden");
+    dom.vendor.classList.remove("hidden");
+    return;
+  }
+  if ([dom.skillsPanel, dom.inventoryPanel, dom.vendor].every((panel) => panel.classList.contains("hidden"))) {
+    dom.menuBackdrop.classList.add("hidden");
   }
 }
 

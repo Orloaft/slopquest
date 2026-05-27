@@ -48,17 +48,34 @@
           </div>
           <div id="buffTracker" class="buff-tracker hidden"></div>
           <div id="questTracker" class="quest-tracker"></div>
-          <details class="hud-section" open>
-            <summary>Skills</summary>
-            <div id="skillTracker" class="skill-tracker"></div>
-          </details>
-          <details class="hud-section inventory-wrap" open>
-            <summary>Inventory</summary>
-            <div id="inventoryGrid" class="inventory-grid"></div>
-          </details>
+          <div class="menu-buttons">
+            <button id="skillsButton" type="button">Skills</button>
+            <button id="inventoryButton" type="button">Inventory</button>
+          </div>
           <div id="netStats" class="net-stats">net -</div>
-          <div id="vendor" class="vendor hidden">
-            <div class="vendor-title">Wayfarer Trader</div>
+        </div>
+
+        <div id="menuBackdrop" class="menu-backdrop hidden"></div>
+        <div id="skillsPanel" class="center-panel menu-panel hidden">
+          <div class="panel-head">
+            <strong>Skills</strong>
+            <button id="skillsCloseButton" type="button">Close</button>
+          </div>
+          <div id="skillTracker" class="skill-tracker"></div>
+        </div>
+        <div id="inventoryPanel" class="center-panel menu-panel hidden">
+          <div class="panel-head">
+            <strong>Inventory</strong>
+            <button id="inventoryCloseButton" type="button">Close</button>
+          </div>
+          <div id="inventoryGrid" class="inventory-grid"></div>
+        </div>
+        <div id="vendor" class="center-panel vendor hidden">
+          <div class="panel-head">
+            <strong>Wayfarer Trader</strong>
+            <button id="vendorCloseButton" type="button">Close</button>
+          </div>
+          <div class="shop-grid">
             <button data-buy="weapon"><img src="/icons/shop-weapon.png" alt="" />Buy weapon</button>
             <button data-buy="armor"><img src="/icons/shop-armor.png" alt="" />Buy armor</button>
             <button data-buy="axe"><img src="/icons/item-axe.png" alt="" />Buy axe</button>
@@ -66,6 +83,11 @@
             <button data-buy="flint_steel"><img src="/icons/item-flint-steel.png" alt="" />Buy flint and steel</button>
             <button data-buy="potion"><img src="/icons/item-potion.png" alt="" />Buy potion</button>
           </div>
+        </div>
+        <div id="dialogue" class="center-panel dialogue hidden">
+          <div class="dialogue-speaker" id="dialogueSpeaker"></div>
+          <div class="dialogue-line" id="dialogueLine"></div>
+          <button id="dialogueNextButton" type="button">Continue</button>
         </div>
 
         <div class="bottom-left panel chat">
@@ -81,6 +103,8 @@
           <button id="lootButton"><b>F</b><span>Loot</span></button>
           <button id="vendorButton"><b>B</b><span>Buy</span></button>
         </div>
+
+        <div id="itemPopover" class="item-popover hidden"></div>
 
         <div id="death" class="death hidden panel">
           <strong>You fell.</strong>
