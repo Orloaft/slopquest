@@ -17,34 +17,28 @@ export const ZONES = {
 const FLOOR_TILE_CACHE = new Map();
 
 export const CLASSES = {
-  knight: {
-    label: "Knight",
-    maxHp: 150,
-    maxMana: 35,
+  adventurer: {
+    label: "Adventurer",
+    maxHp: 120,
+    maxMana: 60,
     speed: 4.25,
     range: 1.35,
-    attackDamage: [10, 16],
-    abilityDamage: [24, 34],
-    abilityCost: 8,
-    attackMs: 760,
-    abilityMs: 3200,
-    hpPerLevel: 24,
-    manaPerLevel: 5
-  },
-  caster: {
-    label: "Caster",
-    maxHp: 95,
-    maxMana: 115,
-    speed: 4.15,
-    range: 6,
+    magicRange: 6,
     attackDamage: [8, 13],
-    abilityDamage: [29, 42],
-    abilityCost: 22,
-    attackMs: 940,
-    abilityMs: 2600,
-    hpPerLevel: 12,
-    manaPerLevel: 21
+    abilityDamage: [18, 28],
+    abilityCost: 14,
+    attackMs: 820,
+    abilityMs: 2800,
+    hpPerDefense: 10,
+    manaPerMagic: 8
   }
+};
+
+export const SKILLS = {
+  attack: { label: "Attack" },
+  defense: { label: "Defense" },
+  magic: { label: "Magic" },
+  woodcutting: { label: "Woodcutting" }
 };
 
 export const MONSTERS = {

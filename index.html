@@ -16,16 +16,7 @@
           Name
           <input id="nameInput" maxlength="18" autocomplete="off" value="wanderer" />
         </label>
-        <div class="class-row" role="group" aria-label="Class">
-          <button class="class-card selected" data-class="knight">
-            <strong>Knight</strong>
-            <span>High health, close-range strike</span>
-          </button>
-          <button class="class-card" data-class="caster">
-            <strong>Caster</strong>
-            <span>Ranged bolts, more mana</span>
-          </button>
-        </div>
+        <p class="subcopy">Everyone starts as an Adventurer and grows through skills.</p>
         <button id="joinButton" class="primary">Enter world</button>
       </section>
 
@@ -49,6 +40,7 @@
             <span>Armor</span><b id="armorText">Cloth</b>
           </div>
           <div id="questTracker" class="quest-tracker"></div>
+          <div id="skillTracker" class="skill-tracker"></div>
           <div id="netStats" class="net-stats">net -</div>
           <div id="vendor" class="vendor hidden">
             <div class="vendor-title">Wayfarer Trader</div>

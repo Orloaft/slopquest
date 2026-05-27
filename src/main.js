@@ -20,7 +20,6 @@ let latestState = null;
 let stateVersion = 0;
 let syncedStateVersion = -1;
 let hudStateVersion = -1;
-let selectedClass = "knight";
 const chatLines = [];
 
 const dom = {
@@ -42,6 +41,7 @@ const dom = {
   weaponText: document.querySelector("#weaponText"),
   armorText: document.querySelector("#armorText"),
   questTracker: document.querySelector("#questTracker"),
+  skillTracker: document.querySelector("#skillTracker"),
   netStats: document.querySelector("#netStats"),
   vendor: document.querySelector("#vendor"),
   death: document.querySelector("#death"),
@@ -54,13 +54,6 @@ const dom = {
   vendorButton: document.querySelector("#vendorButton"),
   respawnButton: document.querySelector("#respawnButton")
 };
-
-document.querySelectorAll("[data-class]").forEach((button) => {
-  button.addEventListener("click", () => {
-    selectedClass = button.dataset.class;
-    document.querySelectorAll("[data-class]").forEach((el) => el.classList.toggle("selected", el === button));
-  });
-});
 
 dom.joinButton.addEventListener("click", connect);
 dom.abilityOne.addEventListener("click", () => send({ type: "ability", slot: "1" }));
@@ -108,6 +101,8 @@ let fxLayer;
 const playerViews = new Map();
 const monsterViews = new Map();
 const corpseViews = new Map();
+const npcViews = new Map();
+const treeViews = new Map();
 const floaters = [];
 const DIRECTIONS = ["up", "right", "down", "left"];
 const WALK_FRAME_MS = 125;
@@ -209,7 +204,7 @@ function connect() {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
   socket = new WebSocket(`${protocol}://${location.hostname}:8787`);
   socket.addEventListener("open", () => {
-    send({ type: "join", name: dom.nameInput.value, class: selectedClass });
+    send({ type: "join", name: dom.nameInput.value });
     dom.join.classList.add("hidden");
     dom.hud.classList.remove("hidden");
     addChat("Connected to Waystone.");
@@ -242,13 +237,6 @@ function drawMap(floor) {
   addTileDecorations(rows);
   addComposedMapObjects(floor);
 
-  for (const npc of NPCS.filter((item) => item.floor === floor)) {
-    const sign = scene.add.container(npc.x * TILE_SIZE, npc.y * TILE_SIZE);
-    const body = scene.add.rectangle(0, 0, 26, 34, 0xcaa35a).setStrokeStyle(2, 0x22170e);
-    const label = scene.add.text(0, -28, npc.name, textStyle(12, "#f5ddb1")).setOrigin(0.5);
-    sign.add([body, label]);
-    mapLayer.add(sign);
-  }
 }
 
 function syncEntities() {
@@ -256,6 +244,8 @@ function syncEntities() {
   const visiblePlayers = new Set();
   const visibleMonsters = new Set();
   const visibleCorpses = new Set();
+  const visibleNpcs = new Set();
+  const visibleTrees = new Set();
 
   for (const player of latestState.players.filter((item) => item.floor === me.floor)) {
     visiblePlayers.add(player.id);
@@ -266,7 +256,7 @@ function syncEntities() {
       entityLayer.add(view);
     }
     setEntityTarget(view, player.x * TILE_SIZE, player.y * TILE_SIZE);
-    setActorAnimation(view, player.classKey === "caster" ? "caster" : "knight", player.dir, player.moving, 40, 48);
+    setActorAnimation(view, "knight", player.dir, player.moving, 40, 48);
     view.setAlpha(player.dead ? 0.45 : 1);
     view.nameText.setText(player.name);
     view.hp.width = 34 * (player.hp / player.maxHp);
@@ -331,6 +321,45 @@ function syncEntities() {
       corpseViews.delete(id);
     }
   }
+
+  for (const npc of (latestState.npcs ?? []).filter((item) => item.floor === me.floor)) {
+    visibleNpcs.add(npc.id);
+    let view = npcViews.get(npc.id);
+    if (!view) {
+      view = createNpcView(npc);
+      npcViews.set(npc.id, view);
+      entityLayer.add(view);
+    }
+    setEntityTarget(view, npc.x * TILE_SIZE, npc.y * TILE_SIZE);
+    setActorAnimation(view, npc.role === "quest" ? "caster" : "knight", npc.dir, npc.moving, 40, 48);
+    view.nameText.setText(npc.name);
+  }
+  for (const [id, view] of npcViews) {
+    if (!visibleNpcs.has(id)) {
+      view.destroy();
+      npcViews.delete(id);
+    }
+  }
+
+  for (const tree of (latestState.trees ?? []).filter((item) => item.floor === me.floor)) {
+    visibleTrees.add(tree.id);
+    let view = treeViews.get(tree.id);
+    if (!view) {
+      view = createTreeView(tree);
+      treeViews.set(tree.id, view);
+      entityLayer.add(view);
+    }
+    view.setPosition(tree.x * TILE_SIZE, tree.y * TILE_SIZE);
+    view.treeSprite.setVisible(tree.active);
+    view.stump.setVisible(!tree.active);
+    view.zone.input.enabled = tree.active;
+  }
+  for (const [id, view] of treeViews) {
+    if (!visibleTrees.has(id)) {
+      view.destroy();
+      treeViews.delete(id);
+    }
+  }
 }
 
 function createPlayerView(player) {
@@ -339,7 +368,7 @@ function createPlayerView(player) {
   view.targetY = view.y;
   const targetRing = scene.add.ellipse(0, 8, 34, 18).setStrokeStyle(2, 0x86efac, 0.8);
   const shadow = scene.add.ellipse(0, 13, 26, 10, 0x000000, 0.26);
-  const family = player.classKey === "caster" ? "caster" : "knight";
+  const family = "knight";
   const sprite = scene.add.sprite(0, -10, actorTextureKey(family, player.dir, 0)).setDisplaySize(40, 48);
   const nameText = scene.add.text(0, -43, player.name, textStyle(11, "#eef6ee")).setOrigin(0.5);
   const hpBack = scene.add.rectangle(-17, -31, 34, 4, 0x191d1a).setOrigin(0, 0.5);
@@ -350,6 +379,44 @@ function createPlayerView(player) {
   view.targetRing = targetRing;
   view.sprite = sprite;
   setActorAnimation(view, family, player.dir, player.moving, 40, 48);
+  return view;
+}
+
+function createNpcView(npc) {
+  const view = scene.add.container(npc.x * TILE_SIZE, npc.y * TILE_SIZE);
+  view.targetX = view.x;
+  view.targetY = view.y;
+  const shadow = scene.add.ellipse(0, 13, 26, 10, 0x000000, 0.26);
+  const family = npc.role === "quest" ? "caster" : "knight";
+  const sprite = scene.add.sprite(0, -10, actorTextureKey(family, npc.dir, 0)).setDisplaySize(40, 48);
+  const nameText = scene.add.text(0, -45, npc.name, textStyle(11, npc.role === "quest" ? "#f7d486" : "#f5ddb1")).setOrigin(0.5);
+  const zone = scene.add.zone(0, 0, 50, 58).setInteractive({ cursor: "pointer" });
+  zone.on("pointerdown", (pointer, localX, localY, event) => {
+    event.stopPropagation();
+    clearClickDestination();
+    send({ type: "talkNpc", id: npc.id });
+  });
+  view.add([shadow, sprite, nameText, zone]);
+  view.nameText = nameText;
+  view.sprite = sprite;
+  setActorAnimation(view, family, npc.dir, npc.moving, 40, 48);
+  return view;
+}
+
+function createTreeView(tree) {
+  const view = scene.add.container(tree.x * TILE_SIZE, tree.y * TILE_SIZE);
+  const treeSprite = scene.add.image(0, 4, "spriteTree").setOrigin(0.5, 1).setDisplaySize(58, 76);
+  const stump = scene.add.rectangle(0, 12, 20, 12, 0x705036).setStrokeStyle(2, 0x2d1f14).setVisible(false);
+  const zone = scene.add.zone(0, -18, 54, 80).setInteractive({ cursor: "pointer" });
+  zone.on("pointerdown", (pointer, localX, localY, event) => {
+    event.stopPropagation();
+    clearClickDestination();
+    send({ type: "cutTree", id: tree.id });
+  });
+  view.add([treeSprite, stump, zone]);
+  view.treeSprite = treeSprite;
+  view.stump = stump;
+  view.zone = zone;
   return view;
 }
 
@@ -403,6 +470,7 @@ function setEntityTarget(view, x, y) {
 function interpolateEntities() {
   for (const view of playerViews.values()) easeToTarget(view);
   for (const view of monsterViews.values()) easeToTarget(view);
+  for (const view of npcViews.values()) easeToTarget(view);
 }
 
 function easeToTarget(view) {
@@ -422,6 +490,7 @@ function setActorAnimation(view, family, dir = "down", moving = false, width = 4
 function animateEntities() {
   for (const view of playerViews.values()) animateActor(view);
   for (const view of monsterViews.values()) animateActor(view);
+  for (const view of npcViews.values()) animateActor(view);
 }
 
 function animateActor(view) {
@@ -437,7 +506,7 @@ function animateActor(view) {
 }
 
 function renderHud(me) {
-  const spec = CLASSES[me.classKey];
+  const spec = CLASSES[me.classKey] ?? CLASSES.adventurer;
   dom.charName.textContent = me.name;
   dom.classLabel.textContent = spec.label;
   setBar(dom.hpBar, dom.hpText, me.hp, me.maxHp, "HP");
@@ -448,10 +517,11 @@ function renderHud(me) {
   dom.levelText.textContent = me.level;
   dom.goldText.textContent = me.gold;
   dom.potionText.textContent = me.potions;
-  dom.weaponText.textContent = me.weaponTier ? (me.classKey === "knight" ? SHOP.weapon.knightName : SHOP.weapon.casterName) : "Basic";
+  dom.weaponText.textContent = me.weaponTier ? SHOP.weapon.knightName : "Basic";
   dom.armorText.textContent = me.armorTier ? SHOP.armor.name : "Cloth";
   renderQuestTracker(me.quests);
-  dom.abilityOne.querySelector("span").textContent = me.classKey === "knight" ? "Cleave" : "Flare";
+  renderSkillTracker(me.skills);
+  dom.abilityOne.querySelector("span").textContent = "Magic";
   dom.death.classList.toggle("hidden", !me.dead);
   const nearVendor = me.floor === NPCS[0].floor && Phaser.Math.Distance.Between(me.x, me.y, NPCS[0].x, NPCS[0].y) < 2.2;
   dom.vendorButton.classList.toggle("lit", nearVendor);
@@ -463,17 +533,23 @@ function renderMetrics(metrics) {
     dom.netStats.textContent = "net -";
     return;
   }
-  dom.netStats.textContent = `zone ${metrics.zone} | net ${formatBytes(metrics.bytesOutPerSecond)}/s | tick ${metrics.tickMs}ms | snap ${metrics.snapshotMs}ms | seen ${metrics.visiblePlayers}p/${metrics.visibleMonsters}m | cells ${metrics.spatialCells}`;
+  dom.netStats.textContent = `zone ${metrics.zone} | net ${formatBytes(metrics.bytesOutPerSecond)}/s | tick ${metrics.tickMs}ms | snap ${metrics.snapshotMs}ms | seen ${metrics.visiblePlayers}p/${metrics.visibleMonsters}m/${metrics.visibleTrees ?? 0}t | cells ${metrics.spatialCells}`;
 }
 
 function renderQuestTracker(quests = []) {
-  const quest = quests.find((item) => !item.claimed) ?? quests[0];
+  const quest = quests.find((item) => item.accepted && !item.claimed) ?? quests.find((item) => !item.claimed) ?? quests[0];
   if (!quest) {
     dom.questTracker.textContent = "";
     return;
   }
-  const status = quest.claimed ? "Complete" : `${quest.progress}/${quest.target}`;
+  const status = quest.claimed ? "Complete" : quest.accepted ? `${quest.progress}/${quest.target}` : "Talk to Mira";
   dom.questTracker.textContent = `${quest.title}: ${status}`;
+}
+
+function renderSkillTracker(skills = []) {
+  dom.skillTracker.innerHTML = skills
+    .map((skill) => `<span>${escapeHtml(skill.label)}</span><b>${skill.level}</b>`)
+    .join("");
 }
 
 function sendInput(time) {
@@ -576,9 +652,6 @@ function addTileDecorations(rows) {
   for (let y = 0; y < rows.length; y += 1) {
     for (let x = 0; x < rows[y].length; x += 1) {
       const tile = rows[y][x];
-      if (tile === "f") {
-        decorations.push({ key: (x + y) % 3 === 0 ? "spritePine" : "spriteTree", x: x + 0.5, y: y + 1.1, w: 58, h: 76 });
-      }
       if (tile === "r") decorations.push({ key: "spriteRock", x: x + 0.5, y: y + 0.78, w: 38, h: 28 });
       if (tile === "h") decorations.push({ key: "spriteGrave", x: x + 0.5, y: y + 0.95, w: 24, h: 34 });
       if (tile === "q") decorations.push({ key: "spriteFence", x: x + 0.5, y: y + 0.78, w: 46, h: 24 });

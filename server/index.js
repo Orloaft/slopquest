@@ -10,10 +10,12 @@ import {
   MONSTERS,
   MONSTER_SPAWNS,
   NPCS,
+  SKILLS,
   SHOP,
   START,
   isBlockedTile,
   isSafeZone,
+  makeFloorTiles,
   portalFor,
   tileAt,
   xpForLevel,
@@ -28,10 +30,12 @@ const SNAPSHOT_RADIUS = 18;
 const SNAPSHOT_RADIUS_SQ = SNAPSHOT_RADIUS ** 2;
 const METRIC_WINDOW = 60;
 const SPATIAL_CELL_SIZE = 8;
+const TREE_RESPAWN_MS = 30000;
 const QUESTS = {
   southgate: {
     id: "southgate",
     title: "Thin the Cemetery",
+    giverId: "cemetery-warden",
     zone: "cemetery",
     targetTypes: new Set(["skeleton", "ghoul"]),
     targetCount: 3,
@@ -46,6 +50,8 @@ const db = loadDb();
 const clients = new Map();
 const monsters = new Map();
 const corpses = new Map();
+const treeNodes = new Map();
+const npcs = new Map();
 let spatial = createSpatialIndex();
 let nextMonsterId = 1;
 let nextCorpseId = 1;
@@ -63,6 +69,8 @@ let saveInFlight = false;
 for (const spawn of MONSTER_SPAWNS) {
   spawnMonster(spawn);
 }
+spawnNpcs();
+spawnTreeNodes();
 
 const wss = new WebSocketServer({ port: PORT });
 console.log(`Waystone server listening on ws://0.0.0.0:${PORT}`);
@@ -93,6 +101,8 @@ wss.on("connection", (socket) => {
     if (message.type === "loot") lootAdjacent(session.player);
     if (message.type === "lootCorpse") lootCorpse(session.player, String(message.id ?? ""));
     if (message.type === "buy") buyItem(session.player, String(message.item ?? ""));
+    if (message.type === "talkNpc") talkNpc(session.player, String(message.id ?? ""));
+    if (message.type === "cutTree") cutTree(session.player, String(message.id ?? ""));
     if (message.type === "chat") chat(session.player, String(message.text ?? ""));
     if (message.type === "respawn") respawn(session.player);
   });
@@ -118,6 +128,8 @@ setInterval(() => {
   last = now;
   const started = performance.now();
   updatePlayers(dt, now);
+  updateNpcs(dt, now);
+  updateTreeNodes(now);
   rebuildSpatialIndex();
   updateMonsters(dt, now);
   recordSample(metrics.tickSamples, performance.now() - started);
@@ -147,9 +159,8 @@ setInterval(() => {
 
 function joinWorld(socket, message) {
   const name = cleanName(message.name);
-  const classKey = CLASSES[message.class] ? message.class : "knight";
   const saved = db.players[name.toLowerCase()];
-  const player = saved ? hydratePlayer(saved) : createPlayer(name, classKey);
+  const player = saved ? hydratePlayer(saved) : createPlayer(name);
   player.id = crypto.randomUUID();
   player.online = true;
   player.targetId = null;
@@ -163,12 +174,12 @@ function joinWorld(socket, message) {
   event("system", `${player.name} entered the world.`);
 }
 
-function createPlayer(name, classKey) {
-  const spec = CLASSES[classKey];
+function createPlayer(name) {
+  const spec = CLASSES.adventurer;
   return {
     id: "",
     name,
-    classKey,
+    classKey: "adventurer",
     floor: START.floor,
     x: START.x,
     y: START.y,
@@ -184,15 +195,15 @@ function createPlayer(name, classKey) {
     potions: 2,
     weaponTier: 0,
     armorTier: 0,
-    quests: createQuestState()
+    quests: createQuestState(),
+    skills: createSkillState()
   };
 }
 
 function hydratePlayer(saved) {
-  const player = { ...createPlayer(saved.name, saved.classKey), ...saved };
-  const spec = CLASSES[player.classKey] ?? CLASSES.knight;
-  player.maxHp = spec.maxHp + (player.level - 1) * spec.hpPerLevel;
-  player.maxMana = spec.maxMana + (player.level - 1) * spec.manaPerLevel;
+  const player = { ...createPlayer(saved.name), ...saved, classKey: "adventurer" };
+  player.skills = normalizeSkillState(player.skills);
+  recalculateVitals(player);
   player.hp = clamp(player.hp, 1, player.maxHp);
   player.mana = clamp(player.mana, 0, player.maxMana);
   player.quests = normalizeQuestState(player.quests);
@@ -205,7 +216,7 @@ function updatePlayers(dt, now) {
     const input = now - session.lastInputAt > 280 ? sanitizeInput({}) : session.input;
     player.moving = false;
     if (player.dead) continue;
-    const spec = CLASSES[player.classKey] ?? CLASSES.knight;
+    const spec = CLASSES.adventurer;
 
     let dx = Number(input.right) - Number(input.left);
     let dy = Number(input.down) - Number(input.up);
@@ -264,12 +275,13 @@ function updateMonsters(dt, now) {
 function autoAttack(player, now) {
   const monster = monsters.get(player.targetId);
   if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
-  const spec = CLASSES[player.classKey] ?? CLASSES.knight;
+  const spec = CLASSES.adventurer;
   if (distance(player, monster) > spec.range) return;
   if (now - player.lastAttack < spec.attackMs) return;
   player.lastAttack = now;
-  const damage = roll(spec.attackDamage) + player.weaponTier * SHOP.weapon.damageBonus;
-  damageMonster(player, monster, damage, player.classKey === "caster" ? "bolt" : "hit");
+  const damage = roll(spec.attackDamage) + skillLevel(player, "attack") + player.weaponTier * SHOP.weapon.damageBonus;
+  addSkillXp(player, "attack", Math.max(1, Math.floor(damage * 1.5)));
+  damageMonster(player, monster, damage, "hit");
 }
 
 function useAbility(player, slot) {
@@ -283,17 +295,18 @@ function useAbility(player, slot) {
   }
 
   const now = performance.now();
-  const spec = CLASSES[player.classKey] ?? CLASSES.knight;
+  const spec = CLASSES.adventurer;
   const monster = monsters.get(player.targetId);
   if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
-  if (distance(player, monster) > spec.range + 0.6) return;
+  if (distance(player, monster) > spec.magicRange) return;
   if (now < player.cooldowns.ability) return;
   if (player.mana < spec.abilityCost) return;
 
   player.cooldowns.ability = now + spec.abilityMs;
   player.mana -= spec.abilityCost;
-  const damage = roll(spec.abilityDamage) + player.weaponTier * SHOP.weapon.damageBonus;
-  damageMonster(player, monster, damage, player.classKey === "caster" ? "flare" : "cleave");
+  const damage = roll(spec.abilityDamage) + skillLevel(player, "magic");
+  addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.8)));
+  damageMonster(player, monster, damage, "flare");
 }
 
 function damageMonster(player, monster, damage, kind) {
@@ -323,6 +336,7 @@ function damageMonster(player, monster, damage, kind) {
 
 function damagePlayer(player, damage, source) {
   player.hp = clamp(player.hp - damage, 0, player.maxHp);
+  addSkillXp(player, "defense", Math.max(1, damage));
   event("hit", damage, player.x, player.y - 0.55, player.floor, "#ff6b6b", source);
   if (player.hp > 0) return;
   player.dead = true;
@@ -396,6 +410,120 @@ function chat(player, text) {
   const clean = text.trim().slice(0, 120);
   if (!clean) return;
   event("chat", `${player.name}: ${clean}`);
+}
+
+function talkNpc(player, id) {
+  const npc = npcs.get(id);
+  if (!npc || player.dead || npc.floor !== player.floor || distance(player, npc) > 2.4) return;
+
+  if (npc.id === QUESTS.southgate.giverId) {
+    const state = player.quests.southgate;
+    if (!state.accepted) {
+      state.accepted = true;
+      event("system", `${npc.name}: Southgate Cemetery is restless. Defeat ${QUESTS.southgate.targetCount} undead and return stronger.`);
+      event("float", "Quest accepted", player.x, player.y, player.floor, "#f7d486");
+      return;
+    }
+    if (state.claimed) {
+      event("system", `${npc.name}: The cemetery is quieter because of you.`);
+      return;
+    }
+    event("system", `${npc.name}: Keep thinning the undead beyond the south gate.`);
+    return;
+  }
+
+  event("system", `${npc.name}: ${npc.dialogue}`);
+}
+
+function cutTree(player, id) {
+  const tree = treeNodes.get(id);
+  if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distance(player, tree) > 1.8) return;
+  const level = skillLevel(player, "woodcutting");
+  const successChance = clamp(0.55 + level * 0.025, 0.55, 0.9);
+  if (Math.random() > successChance) {
+    event("float", "The bark resists.", tree.x, tree.y, tree.floor, "#d8c68a");
+    return;
+  }
+
+  tree.active = false;
+  tree.respawnAt = performance.now() + TREE_RESPAWN_MS;
+  player.gold += 1;
+  addSkillXp(player, "woodcutting", 18);
+  event("float", "+18 Woodcutting", tree.x, tree.y, tree.floor, "#9ee6b1");
+}
+
+function spawnNpcs() {
+  for (const npc of NPCS) {
+    npcs.set(npc.id, {
+      ...npc,
+      role: npc.id === "trader" ? "vendor" : "guide",
+      dir: "down",
+      moving: false,
+      dialogue: npc.id === "trader" ? "Need supplies? Stand close and open the shop." : "Northwatch is quiet for now."
+    });
+  }
+  npcs.set("cemetery-warden", {
+    id: "cemetery-warden",
+    name: "Mira Gravewatch",
+    role: "quest",
+    floor: 0,
+    x: 18.5,
+    y: 18.5,
+    homeX: 18.5,
+    homeY: 18.5,
+    dir: "down",
+    moving: false,
+    wanderTarget: null,
+    wanderNextAt: performance.now() + 1400,
+    dialogue: "Southgate Cemetery is restless."
+  });
+}
+
+function spawnTreeNodes() {
+  for (let floor = 0; floor <= 4; floor += 1) {
+    const rows = makeFloorTiles(floor);
+    for (let y = 0; y < rows.length; y += 1) {
+      for (let x = 0; x < rows[y].length; x += 1) {
+        if (rows[y][x] !== "f") continue;
+        const id = `tree-${floor}-${x}-${y}`;
+        treeNodes.set(id, { id, floor, tileX: x, tileY: y, x: x + 0.5, y: y + 0.95, active: true, respawnAt: 0 });
+      }
+    }
+  }
+}
+
+function updateNpcs(dt, now) {
+  const npc = npcs.get("cemetery-warden");
+  if (!npc) return;
+  npc.moving = false;
+  if (now >= npc.wanderNextAt && !npc.wanderTarget) {
+    npc.wanderTarget = pickNpcWanderTarget(npc);
+    npc.wanderNextAt = now + roll([1800, 4200]);
+  }
+  if (!npc.wanderTarget) return;
+  const dist = distance(npc, npc.wanderTarget);
+  if (dist < 0.18) {
+    npc.wanderTarget = null;
+    return;
+  }
+  moveEntity(npc, ((npc.wanderTarget.x - npc.x) / dist) * 1.35 * dt, ((npc.wanderTarget.y - npc.y) / dist) * 1.35 * dt);
+}
+
+function pickNpcWanderTarget(npc) {
+  for (let i = 0; i < 8; i += 1) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 1 + Math.random() * 4;
+    const x = clamp(npc.homeX + Math.cos(angle) * radius, 10, 28);
+    const y = clamp(npc.homeY + Math.sin(angle) * radius, 13, 22);
+    if (canStand(npc.floor, x, y)) return { x, y };
+  }
+  return null;
+}
+
+function updateTreeNodes(now) {
+  for (const tree of treeNodes.values()) {
+    if (!tree.active && now >= tree.respawnAt) tree.active = true;
+  }
 }
 
 function spawnMonster(spawn) {
@@ -504,9 +632,7 @@ function nearestPlayer(monster, maxDistance) {
 function awardLevels(player) {
   while (player.xp >= xpForLevel(player.level + 1)) {
     player.level += 1;
-    const spec = CLASSES[player.classKey] ?? CLASSES.knight;
-    player.maxHp += spec.hpPerLevel;
-    player.maxMana += spec.manaPerLevel;
+    recalculateVitals(player);
     player.hp = player.maxHp;
     player.mana = player.maxMana;
     event("system", `${player.name} reached level ${player.level}.`);
@@ -514,7 +640,7 @@ function awardLevels(player) {
 }
 
 function armorReduction(player) {
-  return player.armorTier * SHOP.armor.armorBonus;
+  return Math.floor(skillLevel(player, "defense") / 3) + player.armorTier * SHOP.armor.armorBonus;
 }
 
 function broadcastState() {
@@ -550,11 +676,25 @@ function buildSnapshotFor(viewer) {
     visibleCorpses.push(corpse);
   }
 
+  const visibleNpcs = [];
+  for (const npc of querySpatial(spatial.npcs, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
+    if (!inInterestRange(viewer, npc)) continue;
+    visibleNpcs.push(serializeNpc(npc));
+  }
+
+  const visibleTrees = [];
+  for (const tree of querySpatial(spatial.trees, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
+    if (!inInterestRange(viewer, tree)) continue;
+    visibleTrees.push(serializeTree(tree));
+  }
+
   return {
     type: "state",
     players,
     monsters: visibleMonsters,
     corpses: visibleCorpses,
+    npcs: visibleNpcs,
+    trees: visibleTrees,
     events: events.filter((item) => eventVisibleTo(viewer, item)),
     metrics: {
       clients: clients.size,
@@ -563,6 +703,7 @@ function buildSnapshotFor(viewer) {
       visiblePlayers: players.length,
       visibleMonsters: visibleMonsters.length,
       visibleCorpses: visibleCorpses.length,
+      visibleTrees: visibleTrees.length,
       spatialCells: spatial.cellCount,
       tickMs: round(avg(metrics.tickSamples)),
       snapshotMs: round(avg(metrics.snapshotSamples)),
@@ -593,7 +734,8 @@ function serializePlayer(player) {
     armorTier: player.armorTier,
     targetId: player.targetId,
     dead: player.dead,
-    quests: serializeQuests(player)
+    quests: serializeQuests(player),
+    skills: serializeSkills(player)
   };
 }
 
@@ -610,6 +752,30 @@ function serializeMonster(monster) {
     hp: Math.round(monster.hp),
     maxHp: monster.maxHp,
     zone: monster.zone
+  };
+}
+
+function serializeNpc(npc) {
+  return {
+    id: npc.id,
+    name: npc.name,
+    role: npc.role,
+    floor: npc.floor,
+    x: round(npc.x),
+    y: round(npc.y),
+    dir: npc.dir,
+    moving: npc.moving,
+    dialogue: npc.dialogue
+  };
+}
+
+function serializeTree(tree) {
+  return {
+    id: tree.id,
+    floor: tree.floor,
+    x: tree.x,
+    y: tree.y,
+    active: tree.active
   };
 }
 
@@ -639,7 +805,8 @@ function persistPlayerToDb(player) {
     potions: player.potions,
     weaponTier: player.weaponTier,
     armorTier: player.armorTier,
-    quests: normalizeQuestState(player.quests)
+    quests: normalizeQuestState(player.quests),
+    skills: normalizeSkillState(player.skills)
   };
 }
 
@@ -696,7 +863,7 @@ function cleanName(name) {
 
 function createQuestState() {
   return Object.fromEntries(
-    Object.values(QUESTS).map((quest) => [quest.id, { progress: 0, complete: false, claimed: false }])
+    Object.values(QUESTS).map((quest) => [quest.id, { accepted: false, progress: 0, complete: false, claimed: false }])
   );
 }
 
@@ -705,6 +872,7 @@ function normalizeQuestState(saved = {}) {
   for (const [id, state] of Object.entries(saved)) {
     if (!quests[id]) continue;
     quests[id] = {
+      accepted: Boolean(state.accepted) || Boolean(state.progress) || Boolean(state.complete) || Boolean(state.claimed),
       progress: clamp(Number(state.progress ?? 0), 0, QUESTS[id].targetCount),
       complete: Boolean(state.complete),
       claimed: Boolean(state.claimed)
@@ -716,7 +884,7 @@ function normalizeQuestState(saved = {}) {
 function updateQuestProgress(player, monster) {
   const quest = QUESTS.southgate;
   const state = player.quests[quest.id];
-  if (!state || state.claimed || monster.zone !== quest.zone || !quest.targetTypes.has(monster.type)) return;
+  if (!state || !state.accepted || state.claimed || monster.zone !== quest.zone || !quest.targetTypes.has(monster.type)) return;
 
   state.progress = clamp(state.progress + 1, 0, quest.targetCount);
   if (state.progress < quest.targetCount) return;
@@ -734,6 +902,7 @@ function serializeQuests(player) {
     return {
       id: quest.id,
       title: quest.title,
+      accepted: state.accepted,
       progress: state.progress,
       target: quest.targetCount,
       complete: state.complete,
@@ -744,8 +913,55 @@ function serializeQuests(player) {
   });
 }
 
+function createSkillState() {
+  return Object.fromEntries(Object.keys(SKILLS).map((id) => [id, { xp: 0 }]));
+}
+
+function normalizeSkillState(saved = {}) {
+  const skills = createSkillState();
+  for (const id of Object.keys(skills)) {
+    skills[id].xp = Math.max(0, Number(saved[id]?.xp ?? 0));
+  }
+  return skills;
+}
+
+function serializeSkills(player) {
+  return Object.entries(player.skills).map(([id, state]) => ({
+    id,
+    label: SKILLS[id]?.label ?? id,
+    xp: Math.floor(state.xp),
+    level: skillLevel(player, id),
+    nextXp: xpForLevel(skillLevel(player, id) + 1)
+  }));
+}
+
+function skillLevel(player, id) {
+  return Math.max(1, levelForXp(player.skills[id]?.xp ?? 0));
+}
+
+function addSkillXp(player, id, amount) {
+  if (!player.skills[id]) player.skills[id] = { xp: 0 };
+  const before = skillLevel(player, id);
+  player.skills[id].xp += amount;
+  const after = skillLevel(player, id);
+  if (after > before) event("system", `${player.name} reached ${SKILLS[id].label} ${after}.`);
+  if (id === "defense" || id === "magic") recalculateVitals(player);
+}
+
+function levelForXp(xp) {
+  let level = 1;
+  while (xp >= xpForLevel(level + 1)) level += 1;
+  return level;
+}
+
+function recalculateVitals(player) {
+  const spec = CLASSES.adventurer;
+  player.maxHp = spec.maxHp + (skillLevel(player, "defense") - 1) * spec.hpPerDefense;
+  player.maxMana = spec.maxMana + (skillLevel(player, "magic") - 1) * spec.manaPerMagic;
+}
+
 function createSpatialIndex() {
-  return { players: new Map(), monsters: new Map(), corpses: new Map(), cellCount: 0 };
+  return { players: new Map(), monsters: new Map(), corpses: new Map(), npcs: new Map(), trees: new Map(), cellCount: 0 };
 }
 
 function rebuildSpatialIndex() {
@@ -755,7 +971,9 @@ function rebuildSpatialIndex() {
     if (!monster.deadUntil) addToSpatial(spatial.monsters, monster);
   }
   for (const corpse of corpses.values()) addToSpatial(spatial.corpses, corpse);
-  spatial.cellCount = spatial.players.size + spatial.monsters.size + spatial.corpses.size;
+  for (const npc of npcs.values()) addToSpatial(spatial.npcs, npc);
+  for (const tree of treeNodes.values()) addToSpatial(spatial.trees, tree);
+  spatial.cellCount = spatial.players.size + spatial.monsters.size + spatial.corpses.size + spatial.npcs.size + spatial.trees.size;
 }
 
 function addToSpatial(index, entity) {
