@@ -33,3 +33,7 @@ ask to initialize TIB as its own repo or do that first.
 - Use `assetsources/rejected` for project-local rejected copies.
 - Use `public/` only for game-ready assets.
 - Use lowercase hyphenated runtime filenames.
+- For top-down character/enemy sprites, game-ready means four-direction movement in row order `up`, `right`, `down`, `left`.
+- Treat the approved walk sheet as the identity lock. Attack/action sheets must match the walk sheet's proportions, palette, outline weight, gear, and silhouette before import.
+- Send dark-background GIF previews for walk, attack/action, and walk-vs-action identity comparison before copying generated sprites into `public/`.
+- Validate generated sheets through `sprite_processor grid-sheet`; require transparent corners, `0` chroma remnants, stable post-alignment drift, and matching runtime frame counts.
