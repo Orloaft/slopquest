@@ -27,6 +27,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "..", "data");
 const SAVE_FILE = join(DATA_DIR, "players.json");
 const PORT = Number(process.env.PORT ?? 8787);
+const E2E_TEST = process.env.E2E_TEST === "1";
 const SNAPSHOT_RADIUS = 18;
 const SNAPSHOT_RADIUS_SQ = SNAPSHOT_RADIUS ** 2;
 const TREE_SNAPSHOT_RADIUS = 32;
@@ -150,6 +151,7 @@ wss.on("connection", (socket) => {
     if (message.type === "fishNode") fishNode(session.player, String(message.id ?? ""));
     if (message.type === "makeFire") makeFire(session.player, String(message.logItem ?? "logs"));
     if (message.type === "cookFish") cookFish(session.player, String(message.id ?? ""));
+    if (E2E_TEST && message.type === "e2eGrantItems") grantE2EItems(session.player, message);
     if (message.type === "eatItem") eatItem(session.player, String(message.item ?? ""));
     if (message.type === "chat") chat(session.player, String(message.text ?? ""));
     if (message.type === "respawn") respawn(session.player);
@@ -158,7 +160,7 @@ wss.on("connection", (socket) => {
   socket.on("close", () => {
     const session = clients.get(socket);
     if (session) {
-      persistPlayer(session.player);
+      if (!E2E_TEST || !session.player.name.startsWith("e2e_")) persistPlayer(session.player);
       clients.delete(socket);
       event("system", `${session.player.name} left the world.`);
     }
@@ -704,7 +706,7 @@ function updateCookingAction(player, now) {
   if (!removeInventoryItem(player, "raw_fish", 1)) return;
   const level = skillLevel(player, "cooking");
   const successChance = clamp(0.45 + level * 0.035, 0.45, 0.92);
-  const cooked = Math.random() < successChance;
+  const cooked = E2E_TEST || Math.random() < successChance;
   const result = cooked ? "cooked_fish" : "burnt_fish";
   if (!addInventoryItem(player, result, 1)) {
     addInventoryItem(player, "raw_fish", 1);
@@ -713,6 +715,21 @@ function updateCookingAction(player, now) {
   }
   if (cooked) addSkillXp(player, "cooking", 22);
   event("float", cooked ? "+22 Cooking" : "Burnt", fire.x, fire.y, fire.floor, cooked ? "#9ee6b1" : "#a8a29e");
+}
+
+function grantE2EItems(player, message) {
+  if (!E2E_TEST) return;
+  for (const item of message.items ?? []) {
+    const id = String(item.id ?? "");
+    const qty = Number(item.qty ?? 1);
+    if (ITEMS[id]) addInventoryItem(player, id, qty);
+  }
+  if (Number.isFinite(message.gold)) player.gold = Math.max(0, Math.floor(message.gold));
+  if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y) && canStand(message.floor, message.x, message.y)) {
+    player.floor = Math.floor(message.floor);
+    player.x = Number(message.x);
+    player.y = Number(message.y);
+  }
 }
 
 function treeTypeSpec(tree) {
@@ -1417,6 +1434,7 @@ function fishingCatchMs(level) {
 }
 
 function cookingMs(level) {
+  if (E2E_TEST) return 150;
   return clamp(2800 - (level - 1) * 55, 1300, 2800);
 }
 

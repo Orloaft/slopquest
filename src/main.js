@@ -22,6 +22,9 @@ let stateVersion = 0;
 let syncedStateVersion = -1;
 let hudStateVersion = -1;
 const chatLines = [];
+const E2E_MODE = new URLSearchParams(location.search).has("e2e");
+let renderedSkillSignature = "";
+let renderedInventorySignature = "";
 
 const dom = {
   join: document.querySelector("#join"),
@@ -109,9 +112,26 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden) sendStopInput();
 });
 ensureSocket();
+if (E2E_MODE) {
+  window.__TIB_E2E__ = {
+    getState: () => latestState,
+    self: () => self(),
+    fireScreenPoint: (id = null) => {
+      const fire = (latestState?.fires ?? []).find((item) => !id || item.id === id);
+      const camera = scene?.cameras?.main;
+      if (!fire || !camera) return null;
+      return {
+        x: (fire.x * TILE_SIZE - camera.worldView.x) * camera.zoom,
+        y: (fire.y * TILE_SIZE - camera.worldView.y) * camera.zoom
+      };
+    },
+    send,
+    stateVersion: () => stateVersion
+  };
+}
 
 const game = new Phaser.Game({
-  type: Phaser.AUTO,
+  type: E2E_MODE ? Phaser.CANVAS : Phaser.AUTO,
   parent: "game",
   width: window.innerWidth,
   height: window.innerHeight,
@@ -156,6 +176,7 @@ const DIRECTIONS = ["up", "right", "down", "left"];
 const WALK_FRAME_MS = 125;
 const DYNAMIC_PATH_REFRESH_MS = 350;
 const DYNAMIC_PATH_REFRESH_DISTANCE = 0.65;
+const COOKABLE_ITEMS = new Set(["raw_fish"]);
 
 function preload() {
   scene = this;
@@ -752,6 +773,9 @@ function renderBuffTracker(buffs = {}) {
 }
 
 function renderSkillTracker(skills = []) {
+  const signature = skills.map((skill) => `${skill.id}:${skill.level}:${skill.xp}:${skill.nextXp}`).join("|");
+  if (signature === renderedSkillSignature) return;
+  renderedSkillSignature = signature;
   dom.skillTracker.innerHTML = skills
     .map((skill) => {
       const previousXp = xpForLevel(skill.level);
@@ -780,6 +804,9 @@ function renderInventory(inventory = []) {
   } else if (selectedInventoryItem && !slots.some((item) => item?.id === selectedInventoryItem)) {
     clearInventorySelection();
   }
+  const signature = `${slots.map((item) => item ? `${item.id}:${item.qty}:${item.label}:${item.iconUrl}` : "-").join("|")}|selected:${selectedInventorySlot ?? ""}:${selectedInventoryItem ?? ""}`;
+  if (signature === renderedInventorySignature) return;
+  renderedInventorySignature = signature;
   dom.inventoryGrid.innerHTML = slots
     .map((item, index) => {
       if (!item) return `<button class="inventory-slot empty" type="button" data-slot="${index}">.</button>`;
@@ -839,6 +866,16 @@ function handleInventoryClick(slotIndex, itemId) {
     renderInventory(self()?.inventory ?? []);
     return;
   }
+  if (pendingCookingFire && isCookableItem(itemId)) {
+    const fire = latestState?.fires?.find((item) => item.id === pendingCookingFire);
+    clearInventorySelection();
+    hideItemPopover();
+    hideCenterPanels();
+    if (fire) startCookingPath(fire, itemId);
+    else pendingCookingFire = null;
+    renderInventory(self()?.inventory ?? []);
+    return;
+  }
   if (selectedInventorySlot === slotIndex && selectedInventoryItem === itemId) {
     clearInventorySelection();
   } else {
@@ -857,6 +894,10 @@ function firemakingLogItem(firstItemId, secondItemId) {
   const items = [firstItemId, secondItemId];
   if (!items.includes("flint_steel")) return null;
   return items.find((item) => item === "logs" || item === "pine_logs") ?? null;
+}
+
+function isCookableItem(itemId) {
+  return COOKABLE_ITEMS.has(itemId);
 }
 
 function iconMarkup(url, fallback, className) {
@@ -1172,11 +1213,16 @@ function fishingApproachTile(me, node) {
   return nearestEntityApproachTile(me, approach, 1.2);
 }
 
-function startCookingPath(fire) {
+function startCookingPath(fire, itemId = selectedInventoryItem) {
   const me = self();
-  if (!me || !fire || fire.floor !== me.floor || selectedInventoryItem !== "raw_fish") return;
+  if (!me || !fire || fire.floor !== me.floor) return;
   clearClickDestination();
   pendingCookingFire = fire.id;
+  if (!isCookableItem(itemId)) {
+    showCenterPanel(dom.inventoryPanel);
+    renderInventory(me.inventory ?? []);
+    return;
+  }
   if (Phaser.Math.Distance.Between(me.x, me.y, fire.x, fire.y) <= 1.8) {
     pendingCookingFire = null;
     send({ type: "cookFish", id: fire.id });

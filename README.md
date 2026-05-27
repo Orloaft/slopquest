@@ -11,11 +11,21 @@ npm run dev
 
 Open `http://localhost:5173/`. Friends on the same network can use the Vite network URL printed by the dev server, while the authoritative WebSocket server runs on port `8787`.
 
+## Checks
+
+```bash
+npm run check
+npm run test:e2e
+npm run test:visual
+```
+
+`test:e2e` runs the Playwright browser flow. `test:visual` runs the same feature flow in Chromium with screenshot pixel checks for the visible skills panel, campfire, and cooked-fish inventory state.
+
 ## Current MVP Loop
 
 - WASD or arrow-key movement with server-authoritative positions.
 - Left-click a walkable tile to move toward it.
-- Two archetypes: Knight and Caster.
+- Everyone starts as an Adventurer and grows through combat and profession skills.
 - Click a monster to auto-attack it.
 - `Tab` cycles through nearby attack targets.
 - `1` uses the class active ability.
@@ -23,8 +33,13 @@ Open `http://localhost:5173/`. Friends on the same network can use the Vite netw
 - `F` loots adjacent corpses and item drops.
 - Click a dropped corpse/item bundle to loot that specific drop.
 - Use the startup roster to play or delete saved characters, or create a fresh character.
-- Buy an axe from the starting-town trader before chopping trees for logs.
 - `B` opens the vendor panel near the trader in town.
+- Buy an axe from the starting-town trader before chopping trees for logs.
+- Buy a fishing rod before fishing at water nodes.
+- Buy flint and steel, then use it with logs to light a campfire.
+- Click a campfire to open inventory, select raw fish, and cook it.
+- `Skills` opens the profession/combat progress panel.
+- `Inventory` opens item slots; clicking compatible items selects or uses them.
 - Chat supports lightweight party/system messages.
 - Characters persist to `data/players.json`.
 
