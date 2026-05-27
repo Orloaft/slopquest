@@ -168,6 +168,7 @@ function preload() {
   this.load.image("graveyardTiles", "/graveyardtiles.png");
   this.load.image("effectsSheet", "/effects.png");
   this.load.image("waterFishingSpots", "/water-fishing-spots.png");
+  this.load.image("spriteCampfire", "/campfire.png");
 }
 
 function create() {
@@ -599,15 +600,14 @@ function createFishingNodeView(node) {
 function createFireView(fire) {
   const view = scene.add.container(fire.x * TILE_SIZE, fire.y * TILE_SIZE);
   const glow = scene.add.ellipse(0, 7, 34, 16, 0xff7a2f, 0.28);
-  const logs = scene.add.rectangle(0, 12, 26, 7, 0x6b3f20).setStrokeStyle(1, 0x2c1b10);
-  const flame = scene.add.triangle(0, -4, 0, 16, 12, -11, 24, 16, 0xffb23d).setStrokeStyle(2, 0xff6f2c);
+  const sprite = scene.add.image(0, 1, "spriteCampfire").setDisplaySize(58, 58);
   const zone = scene.add.zone(0, -2, 48, 48).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (pointer, localX, localY, event) => {
     event.stopPropagation();
     startCookingPath(fire);
   });
-  view.add([glow, logs, flame, zone]);
-  view.flame = flame;
+  view.add([glow, sprite, zone]);
+  view.sprite = sprite;
   return view;
 }
 
@@ -825,6 +825,8 @@ function handleInventoryClick(itemId) {
   if (fireLog) {
     send({ type: "makeFire", logItem: fireLog });
     selectedInventoryItem = null;
+    hideItemPopover();
+    hideCenterPanels();
     renderInventory(self()?.inventory ?? []);
     return;
   }

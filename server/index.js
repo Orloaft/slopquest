@@ -605,7 +605,7 @@ function makeFire(player, logItem = "logs") {
   if (player.dead || !hasInventoryItem(player, "flint_steel")) return;
   const itemId = logItem === "pine_logs" ? "pine_logs" : "logs";
   if (!removeInventoryItem(player, itemId, 1)) return;
-  const placement = nearestFirePlacement(player);
+  const placement = firePlacementAtPlayer(player);
   if (!placement) {
     addInventoryItem(player, itemId, 1);
     event("float", "No room for a fire.", player.x, player.y, player.floor, "#f7d486");
@@ -1420,15 +1420,9 @@ function cookingMs(level) {
   return clamp(2800 - (level - 1) * 55, 1300, 2800);
 }
 
-function nearestFirePlacement(player) {
-  const candidates = [
-    { x: player.x + 0.65, y: player.y },
-    { x: player.x - 0.65, y: player.y },
-    { x: player.x, y: player.y + 0.65 },
-    { x: player.x, y: player.y - 0.65 },
-    { x: player.x, y: player.y }
-  ];
-  return candidates.find((candidate) => canStand(player.floor, candidate.x, candidate.y) && !fireTooClose(player.floor, candidate.x, candidate.y)) ?? null;
+function firePlacementAtPlayer(player) {
+  if (!canStand(player.floor, player.x, player.y) || fireTooClose(player.floor, player.x, player.y)) return null;
+  return { x: player.x, y: player.y };
 }
 
 function fireTooClose(floor, x, y) {
