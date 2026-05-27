@@ -75,6 +75,13 @@ dom.chatForm.addEventListener("submit", (event) => {
   dom.chatInput.value = "";
   dom.chatInput.blur();
 });
+document.addEventListener("focusin", () => {
+  if (isTextEntryFocused()) sendStopInput();
+  refreshKeyboardCapture();
+});
+document.addEventListener("focusout", () => setTimeout(refreshKeyboardCapture, 0));
+document.addEventListener("keydown", stopTextEntryKeyPropagation);
+document.addEventListener("keyup", stopTextEntryKeyPropagation);
 window.addEventListener("blur", () => sendStopInput());
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) sendStopInput();
@@ -165,19 +172,36 @@ function create() {
   this.cameras.main.setBounds(0, 0, MAP_COLS * TILE_SIZE, MAP_ROWS * TILE_SIZE);
   this.cameras.main.setZoom(1.35);
 
-  cursors = this.input.keyboard.createCursorKeys();
+  cursors = this.input.keyboard.addKeys({
+    up: Phaser.Input.Keyboard.KeyCodes.UP,
+    down: Phaser.Input.Keyboard.KeyCodes.DOWN,
+    left: Phaser.Input.Keyboard.KeyCodes.LEFT,
+    right: Phaser.Input.Keyboard.KeyCodes.RIGHT
+  }, false);
   this.input.keyboard.addCapture([Phaser.Input.Keyboard.KeyCodes.TAB]);
-  keys = this.input.keyboard.addKeys("W,A,S,D,ONE,TWO,F,B,ENTER,TAB");
-  keys.ONE.on("down", () => send({ type: "ability", slot: "1" }));
-  keys.TWO.on("down", () => send({ type: "ability", slot: "2" }));
-  keys.F.on("down", () => send({ type: "loot" }));
-  keys.B.on("down", () => dom.vendor.classList.toggle("hidden"));
-  keys.ENTER.on("down", () => dom.chatInput.focus());
+  keys = this.input.keyboard.addKeys("W,A,S,D,ONE,TWO,F,B,ENTER,TAB", false);
+  keys.ONE.on("down", () => {
+    if (!isTextEntryFocused()) send({ type: "ability", slot: "1" });
+  });
+  keys.TWO.on("down", () => {
+    if (!isTextEntryFocused()) send({ type: "ability", slot: "2" });
+  });
+  keys.F.on("down", () => {
+    if (!isTextEntryFocused()) send({ type: "loot" });
+  });
+  keys.B.on("down", () => {
+    if (!isTextEntryFocused()) dom.vendor.classList.toggle("hidden");
+  });
+  keys.ENTER.on("down", () => {
+    if (!isTextEntryFocused()) dom.chatInput.focus();
+  });
   this.input.keyboard.on("keydown-TAB", (event) => {
+    if (isTextEntryFocused()) return;
     event.preventDefault();
     cycleTarget();
   });
   this.input.on("pointerdown", handleWorldClick);
+  refreshKeyboardCapture();
 }
 
 function update(time) {
@@ -618,7 +642,7 @@ function lootLabel(corpse) {
 }
 
 function sendInput(time) {
-  if (document.activeElement === dom.chatInput) {
+  if (isTextEntryFocused()) {
     sendStopInput();
     return;
   }
@@ -685,7 +709,7 @@ function inputTowardDestination(me) {
 
 function cycleTarget() {
   const me = self();
-  if (!me || document.activeElement === dom.chatInput) return;
+  if (!me || isTextEntryFocused()) return;
   const candidates = latestState.monsters
     .filter((monster) => monster.floor === me.floor)
     .map((monster) => ({ ...monster, dist: Phaser.Math.Distance.Between(me.x, me.y, monster.x, monster.y) }))
@@ -696,6 +720,30 @@ function cycleTarget() {
   const next = candidates[(currentIndex + 1) % candidates.length];
   clearClickDestination();
   send({ type: "target", id: next.id });
+}
+
+function isTextEntryFocused() {
+  return isTextEntryElement(document.activeElement);
+}
+
+function isTextEntryElement(element) {
+  if (!element) return false;
+  if (element.isContentEditable) return true;
+  return ["INPUT", "TEXTAREA", "SELECT"].includes(element.tagName);
+}
+
+function stopTextEntryKeyPropagation(event) {
+  if (isTextEntryElement(event.target)) event.stopPropagation();
+}
+
+function refreshKeyboardCapture() {
+  const keyboard = scene?.input?.keyboard;
+  if (!keyboard) return;
+  if (isTextEntryFocused()) {
+    keyboard.disableGlobalCapture();
+  } else {
+    keyboard.enableGlobalCapture();
+  }
 }
 
 function drawClickMarker(destination) {
