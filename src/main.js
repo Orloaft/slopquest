@@ -149,6 +149,7 @@ const treeViews = new Map();
 const fishingViews = new Map();
 const fireViews = new Map();
 const floaters = [];
+let selectedInventorySlot = null;
 let selectedInventoryItem = null;
 let activeDialogue = null;
 const DIRECTIONS = ["up", "right", "down", "left"];
@@ -772,19 +773,26 @@ function renderSkillTracker(skills = []) {
 
 function renderInventory(inventory = []) {
   const slots = Array.from({ length: 30 }, (_, index) => inventory[index] ?? null);
-  if (selectedInventoryItem && !slots.some((item) => item?.id === selectedInventoryItem)) {
+  const selectedSlotItem = selectedInventorySlot === null ? null : slots[selectedInventorySlot];
+  if (selectedInventorySlot !== null && selectedSlotItem?.id !== selectedInventoryItem) {
+    selectedInventorySlot = null;
     selectedInventoryItem = null;
+  } else if (selectedInventoryItem && !slots.some((item) => item?.id === selectedInventoryItem)) {
+    clearInventorySelection();
   }
   dom.inventoryGrid.innerHTML = slots
     .map((item, index) => {
       if (!item) return `<button class="inventory-slot empty" type="button" data-slot="${index}">.</button>`;
       const qty = item.qty > 1 ? `<span>${item.qty}</span>` : "";
-      const selected = selectedInventoryItem === item.id ? " selected" : "";
+      const selected = selectedInventorySlot === index && selectedInventoryItem === item.id ? " selected" : "";
       return `<button class="inventory-slot${selected}" type="button" data-slot="${index}" data-item="${escapeHtml(item.id)}" data-label="${escapeHtml(item.label)}">${iconMarkup(item.iconUrl, item.icon, "item-icon")}${qty}</button>`;
     })
     .join("");
   dom.inventoryGrid.querySelectorAll("[data-item]").forEach((slot) => {
-    slot.addEventListener("click", () => handleInventoryClick(slot.dataset.item));
+    slot.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      handleInventoryClick(Number(slot.dataset.slot), slot.dataset.item);
+    });
     slot.addEventListener("mouseenter", () => showItemPopover(slot, slot.dataset.label));
     slot.addEventListener("mousemove", () => positionItemPopover(slot));
     slot.addEventListener("mouseleave", hideItemPopover);
@@ -793,8 +801,9 @@ function renderInventory(inventory = []) {
     });
   });
   dom.inventoryGrid.querySelectorAll(".inventory-slot.empty").forEach((slot) => {
-    slot.addEventListener("click", () => {
-      selectedInventoryItem = null;
+    slot.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      clearInventorySelection();
       renderInventory(self()?.inventory ?? []);
     });
   });
@@ -820,18 +829,28 @@ function hideItemPopover() {
   dom.itemPopover.classList.add("hidden");
 }
 
-function handleInventoryClick(itemId) {
+function handleInventoryClick(slotIndex, itemId) {
   const fireLog = firemakingLogItem(selectedInventoryItem, itemId);
   if (fireLog) {
     send({ type: "makeFire", logItem: fireLog });
-    selectedInventoryItem = null;
+    clearInventorySelection();
     hideItemPopover();
     hideCenterPanels();
     renderInventory(self()?.inventory ?? []);
     return;
   }
-  selectedInventoryItem = selectedInventoryItem === itemId ? null : itemId;
+  if (selectedInventorySlot === slotIndex && selectedInventoryItem === itemId) {
+    clearInventorySelection();
+  } else {
+    selectedInventorySlot = slotIndex;
+    selectedInventoryItem = itemId;
+  }
   renderInventory(self()?.inventory ?? []);
+}
+
+function clearInventorySelection() {
+  selectedInventorySlot = null;
+  selectedInventoryItem = null;
 }
 
 function firemakingLogItem(firstItemId, secondItemId) {

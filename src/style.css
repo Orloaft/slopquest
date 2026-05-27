@@ -442,8 +442,10 @@ canvas {
 
 .inventory-slot.selected {
   border-color: rgba(247, 212, 134, 0.95);
-  background: rgba(93, 71, 31, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(247, 212, 134, 0.35);
+  background: rgba(115, 86, 35, 0.86);
+  box-shadow:
+    inset 0 0 0 2px rgba(247, 212, 134, 0.72),
+    0 0 16px rgba(247, 212, 134, 0.28);
 }
 
 .inventory-slot span {
