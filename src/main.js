@@ -685,7 +685,7 @@ function sendInput(time) {
 }
 
 function sendStopInput() {
-  const input = { up: false, down: false, left: false, right: false };
+  const input = { up: false, down: false, left: false, right: false, moveX: 0, moveY: 0 };
   const signature = JSON.stringify(input);
   if (signature === lastInputSignature) return;
   lastInputSignature = signature;
@@ -780,6 +780,10 @@ function inputTowardDestination(me) {
   }
 
   return {
+    up: dy < -0.12,
+    down: dy > 0.12,
+    left: dx < -0.12,
+    right: dx > 0.12,
     moveX: dx / distance,
     moveY: dy / distance
   };
