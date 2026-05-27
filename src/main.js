@@ -110,6 +110,8 @@ let clickDestination = null;
 let clickPath = [];
 let pendingTreeCut = null;
 let pendingAttackTarget = null;
+let pendingLootTarget = null;
+let pendingNpcTalk = null;
 let clickMarker = null;
 let mapLayer;
 let entityLayer;
@@ -383,8 +385,7 @@ function syncEntities() {
       const zone = scene.add.zone(0, -4, 44, 34).setInteractive({ cursor: "pointer" });
       zone.on("pointerdown", (pointer, localX, localY, event) => {
         event.stopPropagation();
-        clearClickDestination();
-        send({ type: "lootCorpse", id: corpse.id });
+        startLootPath(corpse);
       });
       view.add(zone);
       corpseViews.set(corpse.id, view);
@@ -472,8 +473,7 @@ function createNpcView(npc) {
   const zone = scene.add.zone(0, 0, 50, 58).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (pointer, localX, localY, event) => {
     event.stopPropagation();
-    clearClickDestination();
-    send({ type: "talkNpc", id: npc.id });
+    startNpcTalkPath(npc);
   });
   view.add([shadow, sprite, nameText, zone]);
   view.nameText = nameText;
@@ -673,7 +673,9 @@ function sendInput(time) {
     up: keys.W.isDown || cursors.up.isDown || Boolean(clickInput?.up),
     down: keys.S.isDown || cursors.down.isDown || Boolean(clickInput?.down),
     left: keys.A.isDown || cursors.left.isDown || Boolean(clickInput?.left),
-    right: keys.D.isDown || cursors.right.isDown || Boolean(clickInput?.right)
+    right: keys.D.isDown || cursors.right.isDown || Boolean(clickInput?.right),
+    moveX: clickInput?.moveX ?? 0,
+    moveY: clickInput?.moveY ?? 0
   };
   const signature = JSON.stringify(input);
   if (time - lastInputAt < 50 && signature === lastInputSignature) return;
@@ -731,13 +733,45 @@ function inputTowardDestination(me) {
       return null;
     }
   }
+  if (pendingLootTarget) {
+    const corpse = latestState?.corpses?.find((item) => item.id === pendingLootTarget);
+    if (!corpse || corpse.floor !== me.floor) {
+      clearClickDestination();
+      return null;
+    }
+    if (Phaser.Math.Distance.Between(me.x, me.y, corpse.x, corpse.y) <= 1.85) {
+      const corpseId = pendingLootTarget;
+      clearClickDestination();
+      sendStopInput();
+      send({ type: "lootCorpse", id: corpseId });
+      return null;
+    }
+  }
+  if (pendingNpcTalk) {
+    const npc = latestState?.npcs?.find((item) => item.id === pendingNpcTalk);
+    if (!npc || npc.floor !== me.floor) {
+      clearClickDestination();
+      return null;
+    }
+    if (Phaser.Math.Distance.Between(me.x, me.y, npc.x, npc.y) <= 2.25) {
+      const npcId = pendingNpcTalk;
+      clearClickDestination();
+      sendStopInput();
+      send({ type: "talkNpc", id: npcId });
+      return null;
+    }
+  }
   const dx = clickDestination.x - me.x;
   const dy = clickDestination.y - me.y;
   const distance = Math.hypot(dx, dy);
-  if (distance < 0.22) {
+  if (distance < 0.16) {
     if (clickPath.length) {
       clickDestination = clickPath.shift();
     } else if (pendingAttackTarget && refreshAttackPath(me)) {
+      return null;
+    } else if (pendingLootTarget && refreshLootPath(me)) {
+      return null;
+    } else if (pendingNpcTalk && refreshNpcTalkPath(me)) {
       return null;
     } else {
       clearClickDestination();
@@ -746,10 +780,8 @@ function inputTowardDestination(me) {
   }
 
   return {
-    left: dx < -0.12,
-    right: dx > 0.12,
-    up: dy < -0.12,
-    down: dy > 0.12
+    moveX: dx / distance,
+    moveY: dy / distance
   };
 }
 
@@ -799,6 +831,54 @@ function startTreeCutPath(tree) {
   }
 }
 
+function startLootPath(corpse) {
+  const me = self();
+  if (!me || corpse.floor !== me.floor) return;
+  clearClickDestination();
+  pendingLootTarget = corpse.id;
+  if (Phaser.Math.Distance.Between(me.x, me.y, corpse.x, corpse.y) <= 1.85) {
+    pendingLootTarget = null;
+    send({ type: "lootCorpse", id: corpse.id });
+    return;
+  }
+
+  if (!refreshLootPath(me, corpse)) {
+    pendingLootTarget = null;
+  }
+}
+
+function refreshLootPath(me, corpse = null) {
+  const target = corpse ?? latestState?.corpses?.find((item) => item.id === pendingLootTarget);
+  if (!target || target.floor !== me.floor) return false;
+  if (Phaser.Math.Distance.Between(me.x, me.y, target.x, target.y) <= 1.85) return true;
+  const destination = nearestEntityApproachTile(me, target, 1.8);
+  return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, target.id));
+}
+
+function startNpcTalkPath(npc) {
+  const me = self();
+  if (!me || npc.floor !== me.floor) return;
+  clearClickDestination();
+  pendingNpcTalk = npc.id;
+  if (Phaser.Math.Distance.Between(me.x, me.y, npc.x, npc.y) <= 2.25) {
+    pendingNpcTalk = null;
+    send({ type: "talkNpc", id: npc.id });
+    return;
+  }
+
+  if (!refreshNpcTalkPath(me, npc)) {
+    pendingNpcTalk = null;
+  }
+}
+
+function refreshNpcTalkPath(me, npc = null) {
+  const target = npc ?? latestState?.npcs?.find((item) => item.id === pendingNpcTalk);
+  if (!target || target.floor !== me.floor) return false;
+  if (Phaser.Math.Distance.Between(me.x, me.y, target.x, target.y) <= 2.25) return true;
+  const destination = nearestEntityApproachTile(me, target, 2.15);
+  return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, null, target.id));
+}
+
 function nearestTreeApproachTile(me, tree) {
   const treeTileX = Math.floor(tree.x);
   const treeTileY = Math.floor(tree.y);
@@ -841,17 +921,37 @@ function nearestEntityApproachTile(me, entity, maxRange) {
   return candidates[0] ?? null;
 }
 
-function startPathToTile(floor, tx, ty, treeId = null, attackId = null) {
+function startPathToTile(floor, tx, ty, treeId = null, attackId = null, lootId = null, npcId = null) {
   const me = self();
   if (!me || floor !== me.floor || !canStandAtTile(floor, tx, ty)) return false;
   const path = findTilePath(floor, Math.floor(me.x), Math.floor(me.y), tx, ty);
   if (!path.length) return false;
-  clickPath = path.slice(1).map((node) => ({ floor, x: node.x + 0.5, y: node.y + 0.5 }));
+  clickPath = simplifyTilePath(path).slice(1).map((node) => ({ floor, x: node.x + 0.5, y: node.y + 0.5 }));
   clickDestination = clickPath.shift() ?? { floor, x: tx + 0.5, y: ty + 0.5 };
   pendingTreeCut = treeId;
   pendingAttackTarget = attackId;
+  pendingLootTarget = lootId;
+  pendingNpcTalk = npcId;
   drawClickMarker({ floor, x: tx + 0.5, y: ty + 0.5 });
   return true;
+}
+
+function simplifyTilePath(path) {
+  if (path.length <= 2) return path;
+  const simplified = [path[0]];
+  for (let i = 1; i < path.length - 1; i += 1) {
+    const previous = simplified[simplified.length - 1];
+    const current = path[i];
+    const next = path[i + 1];
+    const dx1 = Math.sign(current.x - previous.x);
+    const dy1 = Math.sign(current.y - previous.y);
+    const dx2 = Math.sign(next.x - current.x);
+    const dy2 = Math.sign(next.y - current.y);
+    if (dx1 === dx2 && dy1 === dy2) continue;
+    simplified.push(current);
+  }
+  simplified.push(path[path.length - 1]);
+  return simplified;
 }
 
 function findTilePath(floor, startX, startY, goalX, goalY) {
@@ -978,6 +1078,8 @@ function clearClickDestination() {
   clickPath = [];
   pendingTreeCut = null;
   pendingAttackTarget = null;
+  pendingLootTarget = null;
+  pendingNpcTalk = null;
   if (clickMarker) clickMarker.setVisible(false);
 }
 

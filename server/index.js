@@ -46,9 +46,13 @@ const COMPOSED_TREE_NODES = [
   { floor: 0, x: 36.2, y: 17.4, type: "oak" },
   { floor: 0, x: 20.2, y: 31.6, type: "pine" },
   { floor: 3, x: 8.5, y: 10.4, type: "oak" },
+  { floor: 3, x: 11.5, y: 18.8, type: "pine" },
   { floor: 3, x: 14.2, y: 29.8, type: "pine" },
   { floor: 3, x: 19.5, y: 7.4, type: "oak" },
+  { floor: 3, x: 23.4, y: 27.2, type: "pine" },
+  { floor: 3, x: 28.8, y: 9.6, type: "pine" },
   { floor: 3, x: 31.3, y: 23.8, type: "pine" },
+  { floor: 3, x: 38.6, y: 17.8, type: "pine" },
   { floor: 3, x: 45.2, y: 15.3, type: "oak" },
   { floor: 4, x: 9, y: 9.5, type: "oak" },
   { floor: 4, x: 44, y: 30.2, type: "pine" }
@@ -271,8 +275,9 @@ function updatePlayers(dt, now) {
     if (player.dead) continue;
     const spec = CLASSES.adventurer;
 
-    let dx = Number(input.right) - Number(input.left);
-    let dy = Number(input.down) - Number(input.up);
+    const hasMoveVector = Math.hypot(Number(input.moveX), Number(input.moveY)) > 0.01;
+    let dx = hasMoveVector ? Number(input.moveX) : Number(input.right) - Number(input.left);
+    let dy = hasMoveVector ? Number(input.moveY) : Number(input.down) - Number(input.up);
     if (dx || dy) {
       player.action = null;
       const length = Math.hypot(dx, dy);
@@ -629,7 +634,8 @@ function spawnTreeNodes() {
 
 function treeTypeForTile(floor, x, y) {
   const value = (floor * 73856093) ^ (x * 19349663) ^ (y * 83492791);
-  if ((floor === 3 || floor === 4) && Math.abs(value) % 5 === 0) return "pine";
+  if (floor === 3 && Math.abs(value) % 3 === 0) return "pine";
+  if (floor === 4 && Math.abs(value) % 4 === 0) return "pine";
   return "oak";
 }
 
@@ -1003,11 +1009,16 @@ async function flushSaveQueue() {
 }
 
 function sanitizeInput(input) {
+  const moveX = clamp(Number(input?.moveX ?? 0), -1, 1);
+  const moveY = clamp(Number(input?.moveY ?? 0), -1, 1);
+  const hasMoveVector = Number.isFinite(moveX) && Number.isFinite(moveY) && Math.hypot(moveX, moveY) > 0.01;
   return {
     up: Boolean(input?.up),
     down: Boolean(input?.down),
     left: Boolean(input?.left),
-    right: Boolean(input?.right)
+    right: Boolean(input?.right),
+    moveX: hasMoveVector ? moveX : 0,
+    moveY: hasMoveVector ? moveY : 0
   };
 }
 
