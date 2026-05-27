@@ -1,0 +1,212 @@
+{
+  "source_size": [
+    1774,
+    887
+  ],
+  "grid": [
+    8,
+    2
+  ],
+  "cell_size": [
+    221,
+    443
+  ],
+  "sequences": {
+    "walk": {
+      "row": 0,
+      "frames": 8,
+      "normalized_frame_size": [
+        168,
+        236
+      ],
+      "source_bboxes": [
+        [
+          78,
+          126,
+          214,
+          330
+        ],
+        [
+          87,
+          126,
+          207,
+          330
+        ],
+        [
+          87,
+          125,
+          209,
+          329
+        ],
+        [
+          86,
+          131,
+          205,
+          334
+        ],
+        [
+          73,
+          140,
+          191,
+          335
+        ],
+        [
+          65,
+          152,
+          176,
+          340
+        ],
+        [
+          51,
+          141,
+          168,
+          340
+        ],
+        [
+          40,
+          141,
+          146,
+          340
+        ]
+      ],
+      "anchors": [
+        [
+          84.0,
+          220
+        ],
+        [
+          84.0,
+          220
+        ],
+        [
+          84.0,
+          220
+        ],
+        [
+          83.5,
+          220
+        ],
+        [
+          84.0,
+          220
+        ],
+        [
+          83.5,
+          220
+        ],
+        [
+          83.5,
+          220
+        ],
+        [
+          84.0,
+          220
+        ]
+      ],
+      "anchor_drift_px": {
+        "x_range": 0.5,
+        "y_range": 0
+      },
+      "gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/whisp-v1/whisp_walk_inspection.gif",
+      "png_frames": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/whisp-v1/walk"
+    },
+    "attack": {
+      "row": 1,
+      "frames": 8,
+      "normalized_frame_size": [
+        253,
+        243
+      ],
+      "source_bboxes": [
+        [
+          79,
+          75,
+          202,
+          286
+        ],
+        [
+          62,
+          75,
+          208,
+          283
+        ],
+        [
+          54,
+          80,
+          218,
+          283
+        ],
+        [
+          40,
+          102,
+          221,
+          283
+        ],
+        [
+          0,
+          117,
+          221,
+          283
+        ],
+        [
+          0,
+          165,
+          221,
+          288
+        ],
+        [
+          0,
+          133,
+          183,
+          286
+        ],
+        [
+          17,
+          94,
+          152,
+          299
+        ]
+      ],
+      "anchors": [
+        [
+          126.5,
+          227
+        ],
+        [
+          126.0,
+          227
+        ],
+        [
+          126.0,
+          227
+        ],
+        [
+          126.5,
+          227
+        ],
+        [
+          126.5,
+          227
+        ],
+        [
+          126.5,
+          227
+        ],
+        [
+          126.5,
+          227
+        ],
+        [
+          126.5,
+          227
+        ]
+      ],
+      "anchor_drift_px": {
+        "x_range": 0.5,
+        "y_range": 0
+      },
+      "gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/whisp-v1/whisp_attack_inspection.gif",
+      "png_frames": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/whisp-v1/attack"
+    }
+  }
+}

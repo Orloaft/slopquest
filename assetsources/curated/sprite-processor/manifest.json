@@ -1,0 +1,5158 @@
+[
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/import-ready/woodland-enemies-sheet.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet",
+    "returncode": 0,
+    "contours": 194,
+    "source_rows": 22,
+    "sequence_rows": 15,
+    "frames": 107,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_14/row_14_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 4,
+        "frames": 8,
+        "baseline_y": 204.38,
+        "width_range": [
+          45,
+          85
+        ],
+        "height_range": [
+          29,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 4,
+        "frames": 8,
+        "baseline_y": 200.38,
+        "width_range": [
+          41,
+          60
+        ],
+        "height_range": [
+          45,
+          62
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 6,
+        "frames": 8,
+        "baseline_y": 316.0,
+        "width_range": [
+          31,
+          72
+        ],
+        "height_range": [
+          31,
+          76
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 6,
+        "frames": 6,
+        "baseline_y": 312.5,
+        "width_range": [
+          65,
+          83
+        ],
+        "height_range": [
+          39,
+          67
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 8,
+        "frames": 7,
+        "baseline_y": 422.57,
+        "width_range": [
+          57,
+          91
+        ],
+        "height_range": [
+          29,
+          58
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 9,
+        "frames": 6,
+        "baseline_y": 443.0,
+        "width_range": [
+          76,
+          100
+        ],
+        "height_range": [
+          50,
+          101
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 11,
+        "frames": 11,
+        "baseline_y": 542.45,
+        "width_range": [
+          58,
+          98
+        ],
+        "height_range": [
+          31,
+          64
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 13,
+        "frames": 8,
+        "baseline_y": 641.38,
+        "width_range": [
+          45,
+          78
+        ],
+        "height_range": [
+          31,
+          65
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 13,
+        "frames": 6,
+        "baseline_y": 651.67,
+        "width_range": [
+          63,
+          87
+        ],
+        "height_range": [
+          34,
+          62
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 15,
+        "frames": 7,
+        "baseline_y": 757.71,
+        "width_range": [
+          53,
+          88
+        ],
+        "height_range": [
+          61,
+          84
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 15,
+        "frames": 6,
+        "baseline_y": 759.0,
+        "width_range": [
+          73,
+          85
+        ],
+        "height_range": [
+          37,
+          50
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 17,
+        "frames": 7,
+        "baseline_y": 844.57,
+        "width_range": [
+          29,
+          49
+        ],
+        "height_range": [
+          29,
+          51
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 17,
+        "frames": 6,
+        "baseline_y": 869.0,
+        "width_range": [
+          23,
+          91
+        ],
+        "height_range": [
+          38,
+          77
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 21,
+        "frames": 8,
+        "baseline_y": 982.0,
+        "width_range": [
+          40,
+          79
+        ],
+        "height_range": [
+          28,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 21,
+        "frames": 5,
+        "baseline_y": 985.2,
+        "width_range": [
+          90,
+          127
+        ],
+        "height_range": [
+          58,
+          82
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/woodland-enemies-sheet/row_14/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/import-ready/town-npcs-sheet.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet",
+    "returncode": 0,
+    "contours": 333,
+    "source_rows": 17,
+    "sequence_rows": 12,
+    "frames": 281,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_11/row_11_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 1,
+        "frames": 24,
+        "baseline_y": 174.75,
+        "width_range": [
+          28,
+          38
+        ],
+        "height_range": [
+          45,
+          60
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 2,
+        "frames": 24,
+        "baseline_y": 230.29,
+        "width_range": [
+          24,
+          33
+        ],
+        "height_range": [
+          45,
+          52
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 3,
+        "frames": 24,
+        "baseline_y": 285.62,
+        "width_range": [
+          23,
+          32
+        ],
+        "height_range": [
+          45,
+          50
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 4,
+        "frames": 24,
+        "baseline_y": 340.33,
+        "width_range": [
+          25,
+          36
+        ],
+        "height_range": [
+          41,
+          52
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 6,
+        "frames": 24,
+        "baseline_y": 450.04,
+        "width_range": [
+          30,
+          41
+        ],
+        "height_range": [
+          56,
+          64
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 7,
+        "frames": 24,
+        "baseline_y": 506.0,
+        "width_range": [
+          22,
+          41
+        ],
+        "height_range": [
+          49,
+          57
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 8,
+        "frames": 19,
+        "baseline_y": 565.21,
+        "width_range": [
+          23,
+          41
+        ],
+        "height_range": [
+          49,
+          58
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 9,
+        "frames": 24,
+        "baseline_y": 617.54,
+        "width_range": [
+          29,
+          41
+        ],
+        "height_range": [
+          49,
+          107
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 11,
+        "frames": 24,
+        "baseline_y": 727.5,
+        "width_range": [
+          32,
+          42
+        ],
+        "height_range": [
+          53,
+          62
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 12,
+        "frames": 24,
+        "baseline_y": 785.62,
+        "width_range": [
+          25,
+          40
+        ],
+        "height_range": [
+          51,
+          59
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 13,
+        "frames": 24,
+        "baseline_y": 845.0,
+        "width_range": [
+          27,
+          41
+        ],
+        "height_range": [
+          51,
+          61
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 16,
+        "frames": 22,
+        "baseline_y": 1008.36,
+        "width_range": [
+          33,
+          103
+        ],
+        "height_range": [
+          78,
+          98
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/town-npcs-sheet/row_11/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/import-ready/skill-icons-sheet.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet",
+    "returncode": 0,
+    "contours": 232,
+    "source_rows": 19,
+    "sequence_rows": 6,
+    "frames": 91,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_05/row_05_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 0,
+        "frames": 14,
+        "baseline_y": 172.64,
+        "width_range": [
+          46,
+          76
+        ],
+        "height_range": [
+          56,
+          70
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 3,
+        "frames": 14,
+        "baseline_y": 331.86,
+        "width_range": [
+          64,
+          76
+        ],
+        "height_range": [
+          69,
+          74
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 6,
+        "frames": 16,
+        "baseline_y": 483.44,
+        "width_range": [
+          41,
+          65
+        ],
+        "height_range": [
+          48,
+          66
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 10,
+        "frames": 15,
+        "baseline_y": 638.4,
+        "width_range": [
+          52,
+          68
+        ],
+        "height_range": [
+          42,
+          67
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 13,
+        "frames": 16,
+        "baseline_y": 788.62,
+        "width_range": [
+          51,
+          73
+        ],
+        "height_range": [
+          56,
+          63
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 16,
+        "frames": 16,
+        "baseline_y": 946.0,
+        "width_range": [
+          50,
+          70
+        ],
+        "height_range": [
+          52,
+          66
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skill-icons-sheet/row_05/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/import-ready/consumables-tools-icons.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons",
+    "returncode": 0,
+    "contours": 314,
+    "source_rows": 19,
+    "sequence_rows": 16,
+    "frames": 256,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_14/row_14_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_15/row_15_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 1,
+        "frames": 24,
+        "baseline_y": 172.5,
+        "width_range": [
+          30,
+          54
+        ],
+        "height_range": [
+          43,
+          66
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 2,
+        "frames": 9,
+        "baseline_y": 225.89,
+        "width_range": [
+          38,
+          47
+        ],
+        "height_range": [
+          39,
+          49
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 3,
+        "frames": 16,
+        "baseline_y": 255.19,
+        "width_range": [
+          35,
+          41
+        ],
+        "height_range": [
+          62,
+          69
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 4,
+        "frames": 8,
+        "baseline_y": 289.88,
+        "width_range": [
+          41,
+          48
+        ],
+        "height_range": [
+          40,
+          48
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 5,
+        "frames": 25,
+        "baseline_y": 345.72,
+        "width_range": [
+          34,
+          59
+        ],
+        "height_range": [
+          35,
+          79
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 7,
+        "frames": 15,
+        "baseline_y": 466.07,
+        "width_range": [
+          31,
+          60
+        ],
+        "height_range": [
+          34,
+          62
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 8,
+        "frames": 8,
+        "baseline_y": 496.5,
+        "width_range": [
+          24,
+          31
+        ],
+        "height_range": [
+          90,
+          95
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 9,
+        "frames": 15,
+        "baseline_y": 537.47,
+        "width_range": [
+          32,
+          61
+        ],
+        "height_range": [
+          53,
+          65
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 10,
+        "frames": 22,
+        "baseline_y": 603.5,
+        "width_range": [
+          34,
+          69
+        ],
+        "height_range": [
+          39,
+          87
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 12,
+        "frames": 22,
+        "baseline_y": 729.0,
+        "width_range": [
+          35,
+          58
+        ],
+        "height_range": [
+          50,
+          64
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 13,
+        "frames": 21,
+        "baseline_y": 796.9,
+        "width_range": [
+          36,
+          58
+        ],
+        "height_range": [
+          46,
+          56
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 14,
+        "frames": 20,
+        "baseline_y": 861.05,
+        "width_range": [
+          33,
+          59
+        ],
+        "height_range": [
+          43,
+          61
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 16,
+        "frames": 22,
+        "baseline_y": 984.5,
+        "width_range": [
+          37,
+          77
+        ],
+        "height_range": [
+          44,
+          69
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 17,
+        "frames": 8,
+        "baseline_y": 1057.38,
+        "width_range": [
+          34,
+          52
+        ],
+        "height_range": [
+          50,
+          63
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 17,
+        "frames": 7,
+        "baseline_y": 1042.14,
+        "width_range": [
+          36,
+          52
+        ],
+        "height_range": [
+          35,
+          48
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_14/aligned"
+      },
+      {
+        "row": 15,
+        "source_baseline_row": 18,
+        "frames": 14,
+        "baseline_y": 1082.14,
+        "width_range": [
+          31,
+          61
+        ],
+        "height_range": [
+          32,
+          67
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_15/row_15_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/consumables-tools-icons/row_15/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/weapons-tools-icons.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons",
+    "returncode": 0,
+    "contours": 234,
+    "source_rows": 14,
+    "sequence_rows": 9,
+    "frames": 196,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_08/row_08_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 0,
+        "frames": 22,
+        "baseline_y": 178.36,
+        "width_range": [
+          48,
+          277
+        ],
+        "height_range": [
+          95,
+          97
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 2,
+        "frames": 21,
+        "baseline_y": 318.14,
+        "width_range": [
+          48,
+          328
+        ],
+        "height_range": [
+          98,
+          101
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 4,
+        "frames": 21,
+        "baseline_y": 459.33,
+        "width_range": [
+          49,
+          328
+        ],
+        "height_range": [
+          99,
+          104
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 6,
+        "frames": 24,
+        "baseline_y": 602.5,
+        "width_range": [
+          48,
+          115
+        ],
+        "height_range": [
+          101,
+          107
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 8,
+        "frames": 22,
+        "baseline_y": 746.45,
+        "width_range": [
+          49,
+          168
+        ],
+        "height_range": [
+          99,
+          114
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 10,
+        "frames": 27,
+        "baseline_y": 851.59,
+        "width_range": [
+          26,
+          61
+        ],
+        "height_range": [
+          37,
+          55
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 11,
+        "frames": 27,
+        "baseline_y": 911.96,
+        "width_range": [
+          25,
+          58
+        ],
+        "height_range": [
+          35,
+          57
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 12,
+        "frames": 5,
+        "baseline_y": 957.0,
+        "width_range": [
+          20,
+          38
+        ],
+        "height_range": [
+          37,
+          42
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 13,
+        "frames": 27,
+        "baseline_y": 993.3,
+        "width_range": [
+          26,
+          54
+        ],
+        "height_range": [
+          36,
+          72
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/weapons-tools-icons/row_08/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/goblin-enemies-sheet.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet",
+    "returncode": 0,
+    "contours": 220,
+    "source_rows": 19,
+    "sequence_rows": 15,
+    "frames": 181,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_14/row_14_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 1,
+        "frames": 13,
+        "baseline_y": 154.38,
+        "width_range": [
+          52,
+          85
+        ],
+        "height_range": [
+          59,
+          70
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 1,
+        "frames": 4,
+        "baseline_y": 154.25,
+        "width_range": [
+          63,
+          92
+        ],
+        "height_range": [
+          61,
+          71
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 3,
+        "frames": 18,
+        "baseline_y": 227.44,
+        "width_range": [
+          48,
+          80
+        ],
+        "height_range": [
+          29,
+          138
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 5,
+        "frames": 17,
+        "baseline_y": 355.94,
+        "width_range": [
+          47,
+          83
+        ],
+        "height_range": [
+          41,
+          107
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 8,
+        "frames": 17,
+        "baseline_y": 433.53,
+        "width_range": [
+          48,
+          113
+        ],
+        "height_range": [
+          29,
+          76
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 10,
+        "frames": 9,
+        "baseline_y": 558.56,
+        "width_range": [
+          47,
+          68
+        ],
+        "height_range": [
+          56,
+          74
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 10,
+        "frames": 4,
+        "baseline_y": 561.25,
+        "width_range": [
+          66,
+          112
+        ],
+        "height_range": [
+          61,
+          70
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 11,
+        "frames": 5,
+        "baseline_y": 591.4,
+        "width_range": [
+          65,
+          80
+        ],
+        "height_range": [
+          45,
+          131
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 12,
+        "frames": 9,
+        "baseline_y": 639.67,
+        "width_range": [
+          46,
+          92
+        ],
+        "height_range": [
+          28,
+          73
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 12,
+        "frames": 4,
+        "baseline_y": 638.0,
+        "width_range": [
+          72,
+          90
+        ],
+        "height_range": [
+          30,
+          61
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 14,
+        "frames": 9,
+        "baseline_y": 766.0,
+        "width_range": [
+          47,
+          68
+        ],
+        "height_range": [
+          51,
+          60
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 14,
+        "frames": 4,
+        "baseline_y": 782.75,
+        "width_range": [
+          69,
+          94
+        ],
+        "height_range": [
+          58,
+          94
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 15,
+        "frames": 17,
+        "baseline_y": 836.47,
+        "width_range": [
+          47,
+          100
+        ],
+        "height_range": [
+          27,
+          134
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 17,
+        "frames": 22,
+        "baseline_y": 946.45,
+        "width_range": [
+          16,
+          44
+        ],
+        "height_range": [
+          42,
+          47
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 18,
+        "frames": 29,
+        "baseline_y": 993.76,
+        "width_range": [
+          2,
+          56
+        ],
+        "height_range": [
+          26,
+          100
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-enemies-sheet/row_14/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/cave-enemies-sheet-01.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01",
+    "returncode": 0,
+    "contours": 186,
+    "source_rows": 25,
+    "sequence_rows": 21,
+    "frames": 97,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_14/row_14_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_15/row_15_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_16/row_16_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_17/row_17_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_18/row_18_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_19/row_19_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_20/row_20_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 1,
+        "frames": 5,
+        "baseline_y": 183.6,
+        "width_range": [
+          71,
+          96
+        ],
+        "height_range": [
+          39,
+          62
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 2,
+        "frames": 5,
+        "baseline_y": 199.4,
+        "width_range": [
+          65,
+          81
+        ],
+        "height_range": [
+          30,
+          78
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 4,
+        "frames": 5,
+        "baseline_y": 285.0,
+        "width_range": [
+          93,
+          108
+        ],
+        "height_range": [
+          37,
+          69
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 4,
+        "frames": 2,
+        "baseline_y": 278.5,
+        "width_range": [
+          24,
+          28
+        ],
+        "height_range": [
+          27,
+          30
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 5,
+        "frames": 5,
+        "baseline_y": 302.2,
+        "width_range": [
+          65,
+          92
+        ],
+        "height_range": [
+          25,
+          70
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 7,
+        "frames": 5,
+        "baseline_y": 377.2,
+        "width_range": [
+          80,
+          89
+        ],
+        "height_range": [
+          28,
+          47
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 8,
+        "frames": 5,
+        "baseline_y": 419.0,
+        "width_range": [
+          100,
+          116
+        ],
+        "height_range": [
+          43,
+          88
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 9,
+        "frames": 5,
+        "baseline_y": 471.0,
+        "width_range": [
+          95,
+          105
+        ],
+        "height_range": [
+          32,
+          55
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 10,
+        "frames": 5,
+        "baseline_y": 524.6,
+        "width_range": [
+          95,
+          102
+        ],
+        "height_range": [
+          42,
+          91
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 11,
+        "frames": 5,
+        "baseline_y": 558.8,
+        "width_range": [
+          87,
+          94
+        ],
+        "height_range": [
+          38,
+          59
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 13,
+        "frames": 2,
+        "baseline_y": 610.5,
+        "width_range": [
+          34,
+          37
+        ],
+        "height_range": [
+          55,
+          58
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 14,
+        "frames": 4,
+        "baseline_y": 628.75,
+        "width_range": [
+          71,
+          101
+        ],
+        "height_range": [
+          78,
+          87
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 15,
+        "frames": 5,
+        "baseline_y": 652.2,
+        "width_range": [
+          92,
+          99
+        ],
+        "height_range": [
+          51,
+          61
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 18,
+        "frames": 5,
+        "baseline_y": 744.6,
+        "width_range": [
+          67,
+          101
+        ],
+        "height_range": [
+          30,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 18,
+        "frames": 5,
+        "baseline_y": 729.4,
+        "width_range": [
+          79,
+          95
+        ],
+        "height_range": [
+          27,
+          79
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_14/aligned"
+      },
+      {
+        "row": 15,
+        "source_baseline_row": 20,
+        "frames": 5,
+        "baseline_y": 828.6,
+        "width_range": [
+          79,
+          94
+        ],
+        "height_range": [
+          41,
+          57
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_15/row_15_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_15/aligned"
+      },
+      {
+        "row": 16,
+        "source_baseline_row": 20,
+        "frames": 5,
+        "baseline_y": 824.8,
+        "width_range": [
+          57,
+          95
+        ],
+        "height_range": [
+          28,
+          78
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_16/row_16_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_16/aligned"
+      },
+      {
+        "row": 17,
+        "source_baseline_row": 22,
+        "frames": 5,
+        "baseline_y": 911.4,
+        "width_range": [
+          75,
+          91
+        ],
+        "height_range": [
+          35,
+          60
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_17/row_17_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_17/aligned"
+      },
+      {
+        "row": 18,
+        "source_baseline_row": 22,
+        "frames": 5,
+        "baseline_y": 916.6,
+        "width_range": [
+          88,
+          100
+        ],
+        "height_range": [
+          45,
+          83
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_18/row_18_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_18/aligned"
+      },
+      {
+        "row": 19,
+        "source_baseline_row": 24,
+        "frames": 4,
+        "baseline_y": 990.0,
+        "width_range": [
+          83,
+          94
+        ],
+        "height_range": [
+          42,
+          50
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_19/row_19_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_19/aligned"
+      },
+      {
+        "row": 20,
+        "source_baseline_row": 24,
+        "frames": 5,
+        "baseline_y": 999.6,
+        "width_range": [
+          60,
+          108
+        ],
+        "height_range": [
+          46,
+          66
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_20/row_20_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-01/row_20/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/cave-enemies-sheet-02.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02",
+    "returncode": 0,
+    "contours": 189,
+    "source_rows": 19,
+    "sequence_rows": 20,
+    "frames": 161,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_14/row_14_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_15/row_15_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_16/row_16_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_17/row_17_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_18/row_18_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_19/row_19_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 1,
+        "frames": 16,
+        "baseline_y": 154.12,
+        "width_range": [
+          39,
+          81
+        ],
+        "height_range": [
+          31,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 2,
+        "frames": 13,
+        "baseline_y": 216.38,
+        "width_range": [
+          31,
+          78
+        ],
+        "height_range": [
+          30,
+          67
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 3,
+        "frames": 5,
+        "baseline_y": 239.6,
+        "width_range": [
+          46,
+          73
+        ],
+        "height_range": [
+          37,
+          64
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 4,
+        "frames": 18,
+        "baseline_y": 289.17,
+        "width_range": [
+          30,
+          85
+        ],
+        "height_range": [
+          30,
+          60
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 5,
+        "frames": 5,
+        "baseline_y": 328.6,
+        "width_range": [
+          56,
+          76
+        ],
+        "height_range": [
+          38,
+          42
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 6,
+        "frames": 16,
+        "baseline_y": 373.19,
+        "width_range": [
+          50,
+          132
+        ],
+        "height_range": [
+          29,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 7,
+        "frames": 12,
+        "baseline_y": 435.67,
+        "width_range": [
+          46,
+          82
+        ],
+        "height_range": [
+          26,
+          54
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 8,
+        "frames": 6,
+        "baseline_y": 492.83,
+        "width_range": [
+          52,
+          247
+        ],
+        "height_range": [
+          32,
+          56
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 9,
+        "frames": 10,
+        "baseline_y": 538.5,
+        "width_range": [
+          44,
+          111
+        ],
+        "height_range": [
+          30,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 10,
+        "frames": 5,
+        "baseline_y": 560.4,
+        "width_range": [
+          55,
+          69
+        ],
+        "height_range": [
+          42,
+          56
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 11,
+        "frames": 6,
+        "baseline_y": 593.67,
+        "width_range": [
+          38,
+          83
+        ],
+        "height_range": [
+          30,
+          45
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 12,
+        "frames": 6,
+        "baseline_y": 625.83,
+        "width_range": [
+          42,
+          74
+        ],
+        "height_range": [
+          30,
+          58
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 12,
+        "frames": 4,
+        "baseline_y": 619.75,
+        "width_range": [
+          77,
+          95
+        ],
+        "height_range": [
+          39,
+          65
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 13,
+        "frames": 6,
+        "baseline_y": 651.5,
+        "width_range": [
+          36,
+          57
+        ],
+        "height_range": [
+          30,
+          53
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 14,
+        "frames": 5,
+        "baseline_y": 692.8,
+        "width_range": [
+          47,
+          69
+        ],
+        "height_range": [
+          36,
+          56
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_14/aligned"
+      },
+      {
+        "row": 15,
+        "source_baseline_row": 14,
+        "frames": 5,
+        "baseline_y": 689.8,
+        "width_range": [
+          47,
+          96
+        ],
+        "height_range": [
+          31,
+          63
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_15/row_15_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_15/aligned"
+      },
+      {
+        "row": 16,
+        "source_baseline_row": 15,
+        "frames": 5,
+        "baseline_y": 709.2,
+        "width_range": [
+          51,
+          81
+        ],
+        "height_range": [
+          32,
+          49
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_16/row_16_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_16/aligned"
+      },
+      {
+        "row": 17,
+        "source_baseline_row": 16,
+        "frames": 6,
+        "baseline_y": 757.17,
+        "width_range": [
+          38,
+          75
+        ],
+        "height_range": [
+          30,
+          58
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_17/row_17_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_17/aligned"
+      },
+      {
+        "row": 18,
+        "source_baseline_row": 17,
+        "frames": 9,
+        "baseline_y": 773.78,
+        "width_range": [
+          61,
+          105
+        ],
+        "height_range": [
+          42,
+          73
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_18/row_18_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_18/aligned"
+      },
+      {
+        "row": 19,
+        "source_baseline_row": 18,
+        "frames": 3,
+        "baseline_y": 1004.0,
+        "width_range": [
+          377,
+          562
+        ],
+        "height_range": [
+          217,
+          224
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_19/row_19_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/cave-enemies-sheet-02/row_19/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/wild-game-animals-sheet.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet",
+    "returncode": 0,
+    "contours": 122,
+    "source_rows": 13,
+    "sequence_rows": 11,
+    "frames": 90,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_10/row_10_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 1,
+        "frames": 5,
+        "baseline_y": 204.6,
+        "width_range": [
+          60,
+          90
+        ],
+        "height_range": [
+          27,
+          65
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 1,
+        "frames": 5,
+        "baseline_y": 203.2,
+        "width_range": [
+          66,
+          109
+        ],
+        "height_range": [
+          44,
+          75
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 2,
+        "frames": 12,
+        "baseline_y": 308.0,
+        "width_range": [
+          34,
+          96
+        ],
+        "height_range": [
+          34,
+          76
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 3,
+        "frames": 12,
+        "baseline_y": 414.75,
+        "width_range": [
+          41,
+          108
+        ],
+        "height_range": [
+          34,
+          73
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 4,
+        "frames": 12,
+        "baseline_y": 523.42,
+        "width_range": [
+          41,
+          113
+        ],
+        "height_range": [
+          36,
+          76
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 6,
+        "frames": 5,
+        "baseline_y": 639.2,
+        "width_range": [
+          64,
+          113
+        ],
+        "height_range": [
+          48,
+          79
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 6,
+        "frames": 5,
+        "baseline_y": 641.8,
+        "width_range": [
+          76,
+          115
+        ],
+        "height_range": [
+          51,
+          81
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 8,
+        "frames": 5,
+        "baseline_y": 749.6,
+        "width_range": [
+          84,
+          102
+        ],
+        "height_range": [
+          33,
+          65
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 8,
+        "frames": 5,
+        "baseline_y": 750.0,
+        "width_range": [
+          68,
+          105
+        ],
+        "height_range": [
+          26,
+          51
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 10,
+        "frames": 12,
+        "baseline_y": 861.0,
+        "width_range": [
+          41,
+          112
+        ],
+        "height_range": [
+          28,
+          76
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 12,
+        "frames": 12,
+        "baseline_y": 980.08,
+        "width_range": [
+          41,
+          108
+        ],
+        "height_range": [
+          30,
+          70
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/wild-game-animals-sheet/row_10/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/herbs-shrubs-foraging.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging",
+    "returncode": 0,
+    "contours": 175,
+    "source_rows": 21,
+    "sequence_rows": 10,
+    "frames": 123,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_09/row_09_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 2,
+        "frames": 15,
+        "baseline_y": 205.6,
+        "width_range": [
+          38,
+          72
+        ],
+        "height_range": [
+          26,
+          70
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 4,
+        "frames": 11,
+        "baseline_y": 296.73,
+        "width_range": [
+          37,
+          70
+        ],
+        "height_range": [
+          27,
+          71
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 6,
+        "frames": 12,
+        "baseline_y": 388.67,
+        "width_range": [
+          36,
+          60
+        ],
+        "height_range": [
+          26,
+          79
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 8,
+        "frames": 13,
+        "baseline_y": 475.77,
+        "width_range": [
+          35,
+          74
+        ],
+        "height_range": [
+          25,
+          75
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 10,
+        "frames": 15,
+        "baseline_y": 566.33,
+        "width_range": [
+          30,
+          71
+        ],
+        "height_range": [
+          24,
+          75
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 12,
+        "frames": 12,
+        "baseline_y": 655.33,
+        "width_range": [
+          36,
+          72
+        ],
+        "height_range": [
+          31,
+          75
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 14,
+        "frames": 10,
+        "baseline_y": 743.0,
+        "width_range": [
+          30,
+          67
+        ],
+        "height_range": [
+          33,
+          69
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 16,
+        "frames": 13,
+        "baseline_y": 832.0,
+        "width_range": [
+          32,
+          70
+        ],
+        "height_range": [
+          24,
+          69
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 18,
+        "frames": 12,
+        "baseline_y": 920.08,
+        "width_range": [
+          34,
+          74
+        ],
+        "height_range": [
+          27,
+          71
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 20,
+        "frames": 10,
+        "baseline_y": 1002.5,
+        "width_range": [
+          34,
+          70
+        ],
+        "height_range": [
+          31,
+          64
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/herbs-shrubs-foraging/row_09/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/ore-rock-gathering-nodes.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes",
+    "returncode": 0,
+    "contours": 239,
+    "source_rows": 27,
+    "sequence_rows": 15,
+    "frames": 110,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_14/row_14_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 2,
+        "frames": 10,
+        "baseline_y": 180.0,
+        "width_range": [
+          33,
+          142
+        ],
+        "height_range": [
+          32,
+          72
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 4,
+        "frames": 10,
+        "baseline_y": 262.4,
+        "width_range": [
+          32,
+          131
+        ],
+        "height_range": [
+          32,
+          70
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 6,
+        "frames": 10,
+        "baseline_y": 337.8,
+        "width_range": [
+          26,
+          147
+        ],
+        "height_range": [
+          30,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 8,
+        "frames": 10,
+        "baseline_y": 409.4,
+        "width_range": [
+          29,
+          146
+        ],
+        "height_range": [
+          29,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 10,
+        "frames": 5,
+        "baseline_y": 486.6,
+        "width_range": [
+          32,
+          139
+        ],
+        "height_range": [
+          34,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 10,
+        "frames": 4,
+        "baseline_y": 476.0,
+        "width_range": [
+          88,
+          126
+        ],
+        "height_range": [
+          29,
+          57
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 12,
+        "frames": 5,
+        "baseline_y": 540.6,
+        "width_range": [
+          29,
+          126
+        ],
+        "height_range": [
+          29,
+          58
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 13,
+        "frames": 4,
+        "baseline_y": 566.25,
+        "width_range": [
+          101,
+          147
+        ],
+        "height_range": [
+          37,
+          70
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 14,
+        "frames": 5,
+        "baseline_y": 606.6,
+        "width_range": [
+          28,
+          126
+        ],
+        "height_range": [
+          29,
+          59
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 15,
+        "frames": 5,
+        "baseline_y": 639.2,
+        "width_range": [
+          32,
+          147
+        ],
+        "height_range": [
+          35,
+          69
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 18,
+        "frames": 12,
+        "baseline_y": 722.83,
+        "width_range": [
+          32,
+          139
+        ],
+        "height_range": [
+          34,
+          69
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 20,
+        "frames": 5,
+        "baseline_y": 792.0,
+        "width_range": [
+          32,
+          139
+        ],
+        "height_range": [
+          34,
+          71
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 21,
+        "frames": 7,
+        "baseline_y": 844.29,
+        "width_range": [
+          63,
+          70
+        ],
+        "height_range": [
+          58,
+          65
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 22,
+        "frames": 4,
+        "baseline_y": 873.0,
+        "width_range": [
+          97,
+          141
+        ],
+        "height_range": [
+          37,
+          71
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 25,
+        "frames": 14,
+        "baseline_y": 975.29,
+        "width_range": [
+          33,
+          47
+        ],
+        "height_range": [
+          32,
+          43
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ore-rock-gathering-nodes/row_14/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/water-fishing-spots.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots",
+    "returncode": 0,
+    "contours": 328,
+    "source_rows": 26,
+    "sequence_rows": 18,
+    "frames": 101,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_14/row_14_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_15/row_15_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_16/row_16_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_17/row_17_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 1,
+        "frames": 4,
+        "baseline_y": 154.0,
+        "width_range": [
+          58,
+          118
+        ],
+        "height_range": [
+          46,
+          76
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 3,
+        "frames": 8,
+        "baseline_y": 226.5,
+        "width_range": [
+          44,
+          149
+        ],
+        "height_range": [
+          45,
+          128
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 4,
+        "frames": 4,
+        "baseline_y": 280.25,
+        "width_range": [
+          62,
+          114
+        ],
+        "height_range": [
+          46,
+          84
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 7,
+        "frames": 18,
+        "baseline_y": 397.11,
+        "width_range": [
+          22,
+          126
+        ],
+        "height_range": [
+          25,
+          101
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 11,
+        "frames": 2,
+        "baseline_y": 521.0,
+        "width_range": [
+          55,
+          62
+        ],
+        "height_range": [
+          46,
+          63
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 12,
+        "frames": 4,
+        "baseline_y": 541.5,
+        "width_range": [
+          65,
+          114
+        ],
+        "height_range": [
+          35,
+          89
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 13,
+        "frames": 6,
+        "baseline_y": 564.33,
+        "width_range": [
+          141,
+          153
+        ],
+        "height_range": [
+          92,
+          93
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 14,
+        "frames": 2,
+        "baseline_y": 614.0,
+        "width_range": [
+          28,
+          32
+        ],
+        "height_range": [
+          24,
+          25
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 15,
+        "frames": 4,
+        "baseline_y": 645.25,
+        "width_range": [
+          29,
+          82
+        ],
+        "height_range": [
+          38,
+          58
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 16,
+        "frames": 2,
+        "baseline_y": 668.0,
+        "width_range": [
+          35,
+          45
+        ],
+        "height_range": [
+          27,
+          31
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 16,
+        "frames": 2,
+        "baseline_y": 652.0,
+        "width_range": [
+          33,
+          35
+        ],
+        "height_range": [
+          26,
+          35
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 17,
+        "frames": 4,
+        "baseline_y": 690.0,
+        "width_range": [
+          22,
+          132
+        ],
+        "height_range": [
+          33,
+          66
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 19,
+        "frames": 6,
+        "baseline_y": 746.5,
+        "width_range": [
+          31,
+          132
+        ],
+        "height_range": [
+          27,
+          112
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 20,
+        "frames": 7,
+        "baseline_y": 783.43,
+        "width_range": [
+          20,
+          89
+        ],
+        "height_range": [
+          25,
+          48
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 21,
+        "frames": 4,
+        "baseline_y": 838.0,
+        "width_range": [
+          67,
+          73
+        ],
+        "height_range": [
+          32,
+          47
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_14/aligned"
+      },
+      {
+        "row": 15,
+        "source_baseline_row": 21,
+        "frames": 2,
+        "baseline_y": 840.5,
+        "width_range": [
+          32,
+          79
+        ],
+        "height_range": [
+          31,
+          31
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_15/row_15_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_15/aligned"
+      },
+      {
+        "row": 16,
+        "source_baseline_row": 22,
+        "frames": 20,
+        "baseline_y": 889.2,
+        "width_range": [
+          25,
+          81
+        ],
+        "height_range": [
+          26,
+          85
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_16/row_16_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_16/aligned"
+      },
+      {
+        "row": 17,
+        "source_baseline_row": 24,
+        "frames": 2,
+        "baseline_y": 980.5,
+        "width_range": [
+          25,
+          27
+        ],
+        "height_range": [
+          25,
+          27
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_17/row_17_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/water-fishing-spots/row_17/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/tree-cutting-progression-01.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01",
+    "returncode": 0,
+    "contours": 191,
+    "source_rows": 21,
+    "sequence_rows": 15,
+    "frames": 106,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_14/row_14_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 0,
+        "frames": 3,
+        "baseline_y": 115.0,
+        "width_range": [
+          29,
+          30
+        ],
+        "height_range": [
+          29,
+          29
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 0,
+        "frames": 3,
+        "baseline_y": 115.33,
+        "width_range": [
+          29,
+          29
+        ],
+        "height_range": [
+          28,
+          30
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 2,
+        "frames": 12,
+        "baseline_y": 213.42,
+        "width_range": [
+          30,
+          150
+        ],
+        "height_range": [
+          26,
+          73
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 3,
+        "frames": 2,
+        "baseline_y": 236.5,
+        "width_range": [
+          48,
+          49
+        ],
+        "height_range": [
+          41,
+          45
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 4,
+        "frames": 10,
+        "baseline_y": 286.7,
+        "width_range": [
+          26,
+          191
+        ],
+        "height_range": [
+          27,
+          128
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 5,
+        "frames": 6,
+        "baseline_y": 375.83,
+        "width_range": [
+          38,
+          88
+        ],
+        "height_range": [
+          29,
+          72
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 6,
+        "frames": 10,
+        "baseline_y": 424.4,
+        "width_range": [
+          33,
+          196
+        ],
+        "height_range": [
+          25,
+          130
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 7,
+        "frames": 3,
+        "baseline_y": 490.0,
+        "width_range": [
+          28,
+          37
+        ],
+        "height_range": [
+          25,
+          34
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 9,
+        "frames": 8,
+        "baseline_y": 555.62,
+        "width_range": [
+          124,
+          197
+        ],
+        "height_range": [
+          47,
+          126
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 12,
+        "frames": 9,
+        "baseline_y": 678.56,
+        "width_range": [
+          74,
+          167
+        ],
+        "height_range": [
+          30,
+          114
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 14,
+        "frames": 7,
+        "baseline_y": 779.14,
+        "width_range": [
+          10,
+          41
+        ],
+        "height_range": [
+          35,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 15,
+        "frames": 8,
+        "baseline_y": 798.88,
+        "width_range": [
+          112,
+          174
+        ],
+        "height_range": [
+          43,
+          111
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 16,
+        "frames": 2,
+        "baseline_y": 870.0,
+        "width_range": [
+          43,
+          47
+        ],
+        "height_range": [
+          40,
+          57
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 17,
+        "frames": 9,
+        "baseline_y": 912.56,
+        "width_range": [
+          68,
+          178
+        ],
+        "height_range": [
+          24,
+          102
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 20,
+        "frames": 14,
+        "baseline_y": 995.86,
+        "width_range": [
+          5,
+          65
+        ],
+        "height_range": [
+          24,
+          86
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-01/row_14/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/tree-cutting-progression-02.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02",
+    "returncode": 0,
+    "contours": 110,
+    "source_rows": 23,
+    "sequence_rows": 15,
+    "frames": 61,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_14/row_14_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 2,
+        "frames": 3,
+        "baseline_y": 214.0,
+        "width_range": [
+          63,
+          68
+        ],
+        "height_range": [
+          45,
+          53
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 3,
+        "frames": 3,
+        "baseline_y": 235.33,
+        "width_range": [
+          128,
+          220
+        ],
+        "height_range": [
+          131,
+          146
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 4,
+        "frames": 2,
+        "baseline_y": 281.5,
+        "width_range": [
+          83,
+          85
+        ],
+        "height_range": [
+          50,
+          52
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 7,
+        "frames": 3,
+        "baseline_y": 377.33,
+        "width_range": [
+          130,
+          181
+        ],
+        "height_range": [
+          65,
+          128
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 8,
+        "frames": 2,
+        "baseline_y": 407.0,
+        "width_range": [
+          71,
+          86
+        ],
+        "height_range": [
+          48,
+          53
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 10,
+        "frames": 2,
+        "baseline_y": 471.5,
+        "width_range": [
+          77,
+          88
+        ],
+        "height_range": [
+          52,
+          52
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 11,
+        "frames": 7,
+        "baseline_y": 526.43,
+        "width_range": [
+          73,
+          182
+        ],
+        "height_range": [
+          44,
+          442
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 12,
+        "frames": 2,
+        "baseline_y": 593.5,
+        "width_range": [
+          27,
+          46
+        ],
+        "height_range": [
+          29,
+          37
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 12,
+        "frames": 2,
+        "baseline_y": 598.5,
+        "width_range": [
+          71,
+          79
+        ],
+        "height_range": [
+          45,
+          49
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 13,
+        "frames": 6,
+        "baseline_y": 656.5,
+        "width_range": [
+          148,
+          178
+        ],
+        "height_range": [
+          67,
+          579
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 15,
+        "frames": 3,
+        "baseline_y": 732.67,
+        "width_range": [
+          58,
+          74
+        ],
+        "height_range": [
+          55,
+          56
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 16,
+        "frames": 10,
+        "baseline_y": 799.1,
+        "width_range": [
+          32,
+          175
+        ],
+        "height_range": [
+          26,
+          151
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 17,
+        "frames": 4,
+        "baseline_y": 846.25,
+        "width_range": [
+          28,
+          57
+        ],
+        "height_range": [
+          31,
+          40
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 19,
+        "frames": 3,
+        "baseline_y": 909.33,
+        "width_range": [
+          48,
+          60
+        ],
+        "height_range": [
+          32,
+          53
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 20,
+        "frames": 9,
+        "baseline_y": 952.22,
+        "width_range": [
+          50,
+          178
+        ],
+        "height_range": [
+          36,
+          133
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/tree-cutting-progression-02/row_14/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/selected/manual-slicing/goblin-camp-props.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props",
+    "returncode": 0,
+    "contours": 177,
+    "source_rows": 25,
+    "sequence_rows": 26,
+    "frames": 131,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_14/row_14_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_15/row_15_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_16/row_16_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_17/row_17_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_18/row_18_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_19/row_19_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_20/row_20_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_21/row_21_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_22/row_22_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_23/row_23_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_24/row_24_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_25/row_25_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 0,
+        "frames": 3,
+        "baseline_y": 118.67,
+        "width_range": [
+          34,
+          69
+        ],
+        "height_range": [
+          29,
+          39
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 1,
+        "frames": 5,
+        "baseline_y": 150.0,
+        "width_range": [
+          69,
+          71
+        ],
+        "height_range": [
+          51,
+          68
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 2,
+        "frames": 5,
+        "baseline_y": 179.6,
+        "width_range": [
+          73,
+          217
+        ],
+        "height_range": [
+          89,
+          99
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 3,
+        "frames": 3,
+        "baseline_y": 202.33,
+        "width_range": [
+          130,
+          180
+        ],
+        "height_range": [
+          104,
+          123
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 4,
+        "frames": 5,
+        "baseline_y": 223.4,
+        "width_range": [
+          69,
+          70
+        ],
+        "height_range": [
+          68,
+          70
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 5,
+        "frames": 2,
+        "baseline_y": 249.5,
+        "width_range": [
+          85,
+          112
+        ],
+        "height_range": [
+          57,
+          59
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 5,
+        "frames": 2,
+        "baseline_y": 269.0,
+        "width_range": [
+          25,
+          61
+        ],
+        "height_range": [
+          32,
+          81
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 6,
+        "frames": 13,
+        "baseline_y": 304.85,
+        "width_range": [
+          33,
+          138
+        ],
+        "height_range": [
+          31,
+          125
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 7,
+        "frames": 3,
+        "baseline_y": 340.33,
+        "width_range": [
+          135,
+          199
+        ],
+        "height_range": [
+          118,
+          143
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 8,
+        "frames": 4,
+        "baseline_y": 382.5,
+        "width_range": [
+          18,
+          46
+        ],
+        "height_range": [
+          24,
+          48
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 9,
+        "frames": 6,
+        "baseline_y": 412.83,
+        "width_range": [
+          19,
+          66
+        ],
+        "height_range": [
+          25,
+          64
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 10,
+        "frames": 4,
+        "baseline_y": 468.75,
+        "width_range": [
+          84,
+          152
+        ],
+        "height_range": [
+          78,
+          127
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 11,
+        "frames": 6,
+        "baseline_y": 494.83,
+        "width_range": [
+          30,
+          77
+        ],
+        "height_range": [
+          37,
+          145
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 12,
+        "frames": 2,
+        "baseline_y": 515.5,
+        "width_range": [
+          85,
+          102
+        ],
+        "height_range": [
+          151,
+          162
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 14,
+        "frames": 4,
+        "baseline_y": 571.75,
+        "width_range": [
+          85,
+          215
+        ],
+        "height_range": [
+          75,
+          209
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_14/aligned"
+      },
+      {
+        "row": 15,
+        "source_baseline_row": 15,
+        "frames": 2,
+        "baseline_y": 623.0,
+        "width_range": [
+          25,
+          30
+        ],
+        "height_range": [
+          40,
+          42
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_15/row_15_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_15/aligned"
+      },
+      {
+        "row": 16,
+        "source_baseline_row": 16,
+        "frames": 8,
+        "baseline_y": 651.5,
+        "width_range": [
+          26,
+          115
+        ],
+        "height_range": [
+          38,
+          121
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_16/row_16_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_16/aligned"
+      },
+      {
+        "row": 17,
+        "source_baseline_row": 17,
+        "frames": 6,
+        "baseline_y": 695.17,
+        "width_range": [
+          30,
+          132
+        ],
+        "height_range": [
+          33,
+          105
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_17/row_17_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_17/aligned"
+      },
+      {
+        "row": 18,
+        "source_baseline_row": 18,
+        "frames": 7,
+        "baseline_y": 721.86,
+        "width_range": [
+          41,
+          81
+        ],
+        "height_range": [
+          35,
+          63
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_18/row_18_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_18/aligned"
+      },
+      {
+        "row": 19,
+        "source_baseline_row": 19,
+        "frames": 4,
+        "baseline_y": 778.25,
+        "width_range": [
+          31,
+          111
+        ],
+        "height_range": [
+          33,
+          83
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_19/row_19_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_19/aligned"
+      },
+      {
+        "row": 20,
+        "source_baseline_row": 20,
+        "frames": 7,
+        "baseline_y": 809.43,
+        "width_range": [
+          33,
+          126
+        ],
+        "height_range": [
+          37,
+          126
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_20/row_20_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_20/aligned"
+      },
+      {
+        "row": 21,
+        "source_baseline_row": 20,
+        "frames": 4,
+        "baseline_y": 807.25,
+        "width_range": [
+          56,
+          118
+        ],
+        "height_range": [
+          92,
+          228
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_21/row_21_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_21/aligned"
+      },
+      {
+        "row": 22,
+        "source_baseline_row": 22,
+        "frames": 2,
+        "baseline_y": 897.0,
+        "width_range": [
+          52,
+          58
+        ],
+        "height_range": [
+          42,
+          43
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_22/row_22_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_22/aligned"
+      },
+      {
+        "row": 23,
+        "source_baseline_row": 22,
+        "frames": 2,
+        "baseline_y": 912.0,
+        "width_range": [
+          63,
+          80
+        ],
+        "height_range": [
+          48,
+          63
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_23/row_23_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_23/aligned"
+      },
+      {
+        "row": 24,
+        "source_baseline_row": 23,
+        "frames": 4,
+        "baseline_y": 937.75,
+        "width_range": [
+          31,
+          93
+        ],
+        "height_range": [
+          39,
+          76
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_24/row_24_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_24/aligned"
+      },
+      {
+        "row": 25,
+        "source_baseline_row": 24,
+        "frames": 18,
+        "baseline_y": 981.28,
+        "width_range": [
+          29,
+          160
+        ],
+        "height_range": [
+          33,
+          166
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_25/row_25_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin-camp-props/row_25/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/rejected/desert-enemies-sheet.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet",
+    "returncode": 0,
+    "contours": 130,
+    "source_rows": 24,
+    "sequence_rows": 8,
+    "frames": 81,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_07/row_07_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 3,
+        "frames": 10,
+        "baseline_y": 213.5,
+        "width_range": [
+          80,
+          122
+        ],
+        "height_range": [
+          83,
+          94
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 6,
+        "frames": 10,
+        "baseline_y": 333.7,
+        "width_range": [
+          99,
+          123
+        ],
+        "height_range": [
+          39,
+          96
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 9,
+        "frames": 10,
+        "baseline_y": 446.2,
+        "width_range": [
+          92,
+          133
+        ],
+        "height_range": [
+          52,
+          93
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 12,
+        "frames": 10,
+        "baseline_y": 554.9,
+        "width_range": [
+          72,
+          125
+        ],
+        "height_range": [
+          79,
+          88
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 15,
+        "frames": 10,
+        "baseline_y": 666.1,
+        "width_range": [
+          53,
+          139
+        ],
+        "height_range": [
+          75,
+          93
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 18,
+        "frames": 10,
+        "baseline_y": 772.9,
+        "width_range": [
+          75,
+          138
+        ],
+        "height_range": [
+          60,
+          86
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 21,
+        "frames": 10,
+        "baseline_y": 886.0,
+        "width_range": [
+          86,
+          133
+        ],
+        "height_range": [
+          76,
+          93
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 23,
+        "frames": 11,
+        "baseline_y": 991.45,
+        "width_range": [
+          2,
+          119
+        ],
+        "height_range": [
+          30,
+          898
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/desert-enemies-sheet/row_07/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/goblin.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin",
+    "returncode": 0,
+    "contours": 61,
+    "source_rows": 16,
+    "sequence_rows": 15,
+    "frames": 59,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_14/row_14_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 1,
+        "frames": 4,
+        "baseline_y": 159.0,
+        "width_range": [
+          98,
+          101
+        ],
+        "height_range": [
+          77,
+          77
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 2,
+        "frames": 5,
+        "baseline_y": 251.0,
+        "width_range": [
+          6,
+          22
+        ],
+        "height_range": [
+          26,
+          26
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 3,
+        "frames": 4,
+        "baseline_y": 300.0,
+        "width_range": [
+          88,
+          94
+        ],
+        "height_range": [
+          110,
+          110
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 4,
+        "frames": 4,
+        "baseline_y": 401.0,
+        "width_range": [
+          18,
+          26
+        ],
+        "height_range": [
+          26,
+          26
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 5,
+        "frames": 4,
+        "baseline_y": 453.5,
+        "width_range": [
+          99,
+          101
+        ],
+        "height_range": [
+          107,
+          108
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 6,
+        "frames": 4,
+        "baseline_y": 554.0,
+        "width_range": [
+          20,
+          24
+        ],
+        "height_range": [
+          26,
+          26
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 7,
+        "frames": 4,
+        "baseline_y": 604.0,
+        "width_range": [
+          85,
+          88
+        ],
+        "height_range": [
+          114,
+          114
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 8,
+        "frames": 2,
+        "baseline_y": 709.0,
+        "width_range": [
+          22,
+          23
+        ],
+        "height_range": [
+          26,
+          26
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 9,
+        "frames": 4,
+        "baseline_y": 766.0,
+        "width_range": [
+          94,
+          96
+        ],
+        "height_range": [
+          116,
+          116
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 10,
+        "frames": 5,
+        "baseline_y": 859.0,
+        "width_range": [
+          6,
+          22
+        ],
+        "height_range": [
+          26,
+          26
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 11,
+        "frames": 4,
+        "baseline_y": 908.0,
+        "width_range": [
+          89,
+          93
+        ],
+        "height_range": [
+          110,
+          110
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 12,
+        "frames": 4,
+        "baseline_y": 1011.0,
+        "width_range": [
+          18,
+          26
+        ],
+        "height_range": [
+          26,
+          27
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 13,
+        "frames": 4,
+        "baseline_y": 1066.0,
+        "width_range": [
+          100,
+          102
+        ],
+        "height_range": [
+          111,
+          111
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 14,
+        "frames": 3,
+        "baseline_y": 1164.0,
+        "width_range": [
+          20,
+          41
+        ],
+        "height_range": [
+          26,
+          26
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 15,
+        "frames": 4,
+        "baseline_y": 1213.0,
+        "width_range": [
+          86,
+          87
+        ],
+        "height_range": [
+          114,
+          114
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/goblin/row_14/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/skeleton.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton",
+    "returncode": 0,
+    "contours": 60,
+    "source_rows": 16,
+    "sequence_rows": 16,
+    "frames": 60,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_13/row_13_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_14/row_14_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_15/row_15_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 0,
+        "frames": 2,
+        "baseline_y": 120.0,
+        "width_range": [
+          21,
+          21
+        ],
+        "height_range": [
+          26,
+          26
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 1,
+        "frames": 4,
+        "baseline_y": 170.0,
+        "width_range": [
+          93,
+          94
+        ],
+        "height_range": [
+          87,
+          89
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 2,
+        "frames": 5,
+        "baseline_y": 264.0,
+        "width_range": [
+          10,
+          25
+        ],
+        "height_range": [
+          25,
+          25
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 3,
+        "frames": 4,
+        "baseline_y": 316.0,
+        "width_range": [
+          68,
+          82
+        ],
+        "height_range": [
+          109,
+          112
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 4,
+        "frames": 4,
+        "baseline_y": 413.0,
+        "width_range": [
+          17,
+          29
+        ],
+        "height_range": [
+          25,
+          25
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 5,
+        "frames": 4,
+        "baseline_y": 464.25,
+        "width_range": [
+          90,
+          93
+        ],
+        "height_range": [
+          110,
+          111
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 6,
+        "frames": 3,
+        "baseline_y": 562.0,
+        "width_range": [
+          20,
+          39
+        ],
+        "height_range": [
+          25,
+          25
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 7,
+        "frames": 4,
+        "baseline_y": 609.5,
+        "width_range": [
+          63,
+          80
+        ],
+        "height_range": [
+          109,
+          110
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 8,
+        "frames": 2,
+        "baseline_y": 715.0,
+        "width_range": [
+          16,
+          17
+        ],
+        "height_range": [
+          25,
+          26
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 9,
+        "frames": 4,
+        "baseline_y": 769.0,
+        "width_range": [
+          83,
+          84
+        ],
+        "height_range": [
+          112,
+          114
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 10,
+        "frames": 5,
+        "baseline_y": 864.0,
+        "width_range": [
+          10,
+          25
+        ],
+        "height_range": [
+          25,
+          25
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 11,
+        "frames": 4,
+        "baseline_y": 918.75,
+        "width_range": [
+          67,
+          77
+        ],
+        "height_range": [
+          112,
+          113
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 12,
+        "frames": 4,
+        "baseline_y": 1012.0,
+        "width_range": [
+          21,
+          29
+        ],
+        "height_range": [
+          26,
+          26
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 13,
+        "frames": 4,
+        "baseline_y": 1065.75,
+        "width_range": [
+          89,
+          90
+        ],
+        "height_range": [
+          108,
+          110
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_13/aligned"
+      },
+      {
+        "row": 14,
+        "source_baseline_row": 14,
+        "frames": 3,
+        "baseline_y": 1164.0,
+        "width_range": [
+          20,
+          39
+        ],
+        "height_range": [
+          25,
+          25
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_14/row_14_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_14/aligned"
+      },
+      {
+        "row": 15,
+        "source_baseline_row": 15,
+        "frames": 4,
+        "baseline_y": 1212.0,
+        "width_range": [
+          63,
+          77
+        ],
+        "height_range": [
+          109,
+          110
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_15/row_15_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/skeleton/row_15/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/ratandspiders.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders",
+    "returncode": 0,
+    "contours": 161,
+    "source_rows": 18,
+    "sequence_rows": 14,
+    "frames": 141,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_10/row_10_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_11/row_11_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_12/row_12_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_13/row_13_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 0,
+        "frames": 3,
+        "baseline_y": 110.67,
+        "width_range": [
+          42,
+          42
+        ],
+        "height_range": [
+          24,
+          31
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 0,
+        "frames": 4,
+        "baseline_y": 109.25,
+        "width_range": [
+          39,
+          90
+        ],
+        "height_range": [
+          24,
+          31
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 1,
+        "frames": 12,
+        "baseline_y": 188.25,
+        "width_range": [
+          42,
+          110
+        ],
+        "height_range": [
+          40,
+          61
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 2,
+        "frames": 12,
+        "baseline_y": 263.83,
+        "width_range": [
+          39,
+          111
+        ],
+        "height_range": [
+          35,
+          52
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 3,
+        "frames": 12,
+        "baseline_y": 336.0,
+        "width_range": [
+          39,
+          108
+        ],
+        "height_range": [
+          36,
+          49
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 4,
+        "frames": 10,
+        "baseline_y": 403.4,
+        "width_range": [
+          64,
+          99
+        ],
+        "height_range": [
+          34,
+          44
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 5,
+        "frames": 10,
+        "baseline_y": 469.4,
+        "width_range": [
+          93,
+          102
+        ],
+        "height_range": [
+          31,
+          42
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 6,
+        "frames": 10,
+        "baseline_y": 532.0,
+        "width_range": [
+          99,
+          111
+        ],
+        "height_range": [
+          27,
+          31
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 9,
+        "frames": 12,
+        "baseline_y": 651.25,
+        "width_range": [
+          44,
+          83
+        ],
+        "height_range": [
+          40,
+          55
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 10,
+        "frames": 12,
+        "baseline_y": 721.25,
+        "width_range": [
+          47,
+          85
+        ],
+        "height_range": [
+          36,
+          41
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 12,
+        "frames": 12,
+        "baseline_y": 792.92,
+        "width_range": [
+          42,
+          90
+        ],
+        "height_range": [
+          39,
+          52
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_10/aligned"
+      },
+      {
+        "row": 11,
+        "source_baseline_row": 14,
+        "frames": 12,
+        "baseline_y": 863.92,
+        "width_range": [
+          40,
+          80
+        ],
+        "height_range": [
+          38,
+          42
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_11/row_11_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_11/aligned"
+      },
+      {
+        "row": 12,
+        "source_baseline_row": 16,
+        "frames": 10,
+        "baseline_y": 931.6,
+        "width_range": [
+          72,
+          93
+        ],
+        "height_range": [
+          38,
+          41
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_12/row_12_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_12/aligned"
+      },
+      {
+        "row": 13,
+        "source_baseline_row": 17,
+        "frames": 10,
+        "baseline_y": 989.8,
+        "width_range": [
+          94,
+          105
+        ],
+        "height_range": [
+          27,
+          29
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_13/row_13_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/ratandspiders/row_13/aligned"
+      }
+    ]
+  },
+  {
+    "source": "/home/orlovboros/projects/tib/assetsources/meleeslashandmagicmissle.png",
+    "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle",
+    "returncode": 0,
+    "contours": 98,
+    "source_rows": 16,
+    "sequence_rows": 11,
+    "frames": 60,
+    "preview_gifs": [
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_00/row_00_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_01/row_01_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_02/row_02_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_03/row_03_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_04/row_04_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_05/row_05_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_06/row_06_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_07/row_07_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_08/row_08_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_09/row_09_preview.gif",
+      "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_10/row_10_preview.gif"
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "source_baseline_row": 0,
+        "frames": 4,
+        "baseline_y": 115.0,
+        "width_range": [
+          101,
+          134
+        ],
+        "height_range": [
+          24,
+          36
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_00/row_00_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_00/aligned"
+      },
+      {
+        "row": 1,
+        "source_baseline_row": 2,
+        "frames": 7,
+        "baseline_y": 227.71,
+        "width_range": [
+          9,
+          71
+        ],
+        "height_range": [
+          44,
+          88
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_01/row_01_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_01/aligned"
+      },
+      {
+        "row": 2,
+        "source_baseline_row": 4,
+        "frames": 6,
+        "baseline_y": 325.17,
+        "width_range": [
+          37,
+          82
+        ],
+        "height_range": [
+          40,
+          71
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_02/row_02_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_02/aligned"
+      },
+      {
+        "row": 3,
+        "source_baseline_row": 6,
+        "frames": 6,
+        "baseline_y": 433.33,
+        "width_range": [
+          37,
+          82
+        ],
+        "height_range": [
+          43,
+          73
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_03/row_03_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_03/aligned"
+      },
+      {
+        "row": 4,
+        "source_baseline_row": 7,
+        "frames": 2,
+        "baseline_y": 520.0,
+        "width_range": [
+          30,
+          57
+        ],
+        "height_range": [
+          26,
+          43
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_04/row_04_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_04/aligned"
+      },
+      {
+        "row": 5,
+        "source_baseline_row": 8,
+        "frames": 3,
+        "baseline_y": 536.33,
+        "width_range": [
+          77,
+          111
+        ],
+        "height_range": [
+          55,
+          72
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_05/row_05_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_05/aligned"
+      },
+      {
+        "row": 6,
+        "source_baseline_row": 10,
+        "frames": 6,
+        "baseline_y": 676.67,
+        "width_range": [
+          64,
+          138
+        ],
+        "height_range": [
+          24,
+          62
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_06/row_06_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_06/aligned"
+      },
+      {
+        "row": 7,
+        "source_baseline_row": 11,
+        "frames": 7,
+        "baseline_y": 750.43,
+        "width_range": [
+          39,
+          115
+        ],
+        "height_range": [
+          26,
+          53
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_07/row_07_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_07/aligned"
+      },
+      {
+        "row": 8,
+        "source_baseline_row": 12,
+        "frames": 7,
+        "baseline_y": 825.86,
+        "width_range": [
+          33,
+          125
+        ],
+        "height_range": [
+          25,
+          59
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_08/row_08_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_08/aligned"
+      },
+      {
+        "row": 9,
+        "source_baseline_row": 13,
+        "frames": 8,
+        "baseline_y": 902.25,
+        "width_range": [
+          26,
+          80
+        ],
+        "height_range": [
+          24,
+          58
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_09/row_09_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_09/aligned"
+      },
+      {
+        "row": 10,
+        "source_baseline_row": 14,
+        "frames": 4,
+        "baseline_y": 974.25,
+        "width_range": [
+          97,
+          143
+        ],
+        "height_range": [
+          28,
+          52
+        ],
+        "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_10/row_10_preview.gif",
+        "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/sprite-processor/meleeslashandmagicmissle/row_10/aligned"
+      }
+    ]
+  }
+]

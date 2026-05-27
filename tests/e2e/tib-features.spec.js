@@ -45,6 +45,18 @@ test("skills, firemaking, and cooking are usable and visually present", async ({
   expect(visualStats(await page.locator("#inventoryPanel").screenshot()).meaningfulPixels).toBeGreaterThan(750);
 });
 
+test("actor animation frames keep a stable bottom-center anchor", async ({ page }) => {
+  await page.goto("/?e2e");
+  await joinFreshCharacter(page);
+  const drift = await page.waitForFunction(() => {
+    const rows = window.__TIB_E2E__?.actorFrameAnchorDrift?.();
+    return rows?.length ? rows : false;
+  });
+  const rows = await drift.jsonValue();
+  const unstable = rows.filter((row) => row.driftX > 0.5 || row.driftY > 0);
+  expect(unstable).toEqual([]);
+});
+
 async function joinFreshCharacter(page) {
   const name = `e2e_${Date.now().toString(36)}`;
   await page.locator("#nameInput").fill(name);

@@ -1,0 +1,2214 @@
+{
+  "generated": [
+    "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/knight-player-walk-directions.gif",
+    "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/caster-npc-walk-directions.gif",
+    "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/goblin-orc-walk-directions.gif",
+    "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/skeleton-ghoul-boss-walk-directions.gif",
+    "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/rat-walk-directions.gif",
+    "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/spider-walk-directions.gif"
+  ],
+  "families": {
+    "knight-player": {
+      "display": "Player / Knight",
+      "directions": {
+        "up": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                6,
+                1,
+                70,
+                92
+              ],
+              "anchor": [
+                38.0,
+                92
+              ],
+              "dx": -5,
+              "dy": -1
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                3,
+                2,
+                68,
+                92
+              ],
+              "anchor": [
+                35.5,
+                92
+              ],
+              "dx": -2,
+              "dy": -1
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                0,
+                3,
+                64,
+                92
+              ],
+              "anchor": [
+                32.0,
+                92
+              ],
+              "dx": 1,
+              "dy": -1
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                0,
+                3,
+                61,
+                92
+              ],
+              "anchor": [
+                30.5,
+                92
+              ],
+              "dx": 2,
+              "dy": -1
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "right": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                13,
+                1,
+                67,
+                92
+              ],
+              "anchor": [
+                40.0,
+                92
+              ],
+              "dx": -13,
+              "dy": -1
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                18,
+                2,
+                71,
+                92
+              ],
+              "anchor": [
+                44.5,
+                92
+              ],
+              "dx": -18,
+              "dy": -1
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                21,
+                3,
+                75,
+                92
+              ],
+              "anchor": [
+                48.0,
+                92
+              ],
+              "dx": -21,
+              "dy": -1
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                24,
+                4,
+                78,
+                92
+              ],
+              "anchor": [
+                51.0,
+                92
+              ],
+              "dx": -24,
+              "dy": -1
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "down": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                7,
+                2,
+                72,
+                92
+              ],
+              "anchor": [
+                39.5,
+                92
+              ],
+              "dx": -6,
+              "dy": -2
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                3,
+                3,
+                69,
+                92
+              ],
+              "anchor": [
+                36.0,
+                92
+              ],
+              "dx": -3,
+              "dy": -2
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                0,
+                3,
+                65,
+                92
+              ],
+              "anchor": [
+                32.5,
+                92
+              ],
+              "dx": 0,
+              "dy": -2
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                0,
+                3,
+                61,
+                92
+              ],
+              "anchor": [
+                30.5,
+                92
+              ],
+              "dx": 2,
+              "dy": -2
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 1.0,
+            "y": 0
+          }
+        },
+        "left": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                11,
+                1,
+                65,
+                92
+              ],
+              "anchor": [
+                38.0,
+                92
+              ],
+              "dx": -11,
+              "dy": -1
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                7,
+                2,
+                60,
+                92
+              ],
+              "anchor": [
+                33.5,
+                92
+              ],
+              "dx": -6,
+              "dy": -1
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                3,
+                3,
+                57,
+                92
+              ],
+              "anchor": [
+                30.0,
+                92
+              ],
+              "dx": -3,
+              "dy": -1
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                0,
+                4,
+                54,
+                92
+              ],
+              "anchor": [
+                27.0,
+                92
+              ],
+              "dx": 0,
+              "dy": -1
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        }
+      },
+      "gif": "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/knight-player-walk-directions.gif",
+      "frames": 80,
+      "duration_seconds": 8.0,
+      "animated_adjacent_diffs_min": 14844,
+      "magentaish_pixels_first_frame": 0,
+      "sequence": [
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "ellipsis": true
+        }
+      ]
+    },
+    "caster-npc": {
+      "display": "NPC / Caster",
+      "directions": {
+        "up": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                5,
+                0,
+                70,
+                96
+              ],
+              "anchor": [
+                37.5,
+                96
+              ],
+              "dx": -4,
+              "dy": 0
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                2,
+                0,
+                66,
+                96
+              ],
+              "anchor": [
+                34.0,
+                96
+              ],
+              "dx": -1,
+              "dy": 0
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                0,
+                0,
+                63,
+                96
+              ],
+              "anchor": [
+                31.5,
+                96
+              ],
+              "dx": 2,
+              "dy": 0
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                0,
+                0,
+                59,
+                96
+              ],
+              "anchor": [
+                29.5,
+                96
+              ],
+              "dx": 4,
+              "dy": 0
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "right": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                18,
+                3,
+                78,
+                96
+              ],
+              "anchor": [
+                48.0,
+                96
+              ],
+              "dx": -18,
+              "dy": -3
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                23,
+                3,
+                82,
+                96
+              ],
+              "anchor": [
+                52.5,
+                96
+              ],
+              "dx": -22,
+              "dy": -3
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                27,
+                4,
+                82,
+                96
+              ],
+              "anchor": [
+                54.5,
+                96
+              ],
+              "dx": -24,
+              "dy": -3
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                31,
+                4,
+                82,
+                96
+              ],
+              "anchor": [
+                56.5,
+                96
+              ],
+              "dx": -26,
+              "dy": -3
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "down": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                4,
+                1,
+                67,
+                96
+              ],
+              "anchor": [
+                35.5,
+                96
+              ],
+              "dx": -4,
+              "dy": -1
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                0,
+                2,
+                64,
+                96
+              ],
+              "anchor": [
+                32.0,
+                96
+              ],
+              "dx": 0,
+              "dy": -1
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                0,
+                2,
+                60,
+                96
+              ],
+              "anchor": [
+                30.0,
+                96
+              ],
+              "dx": 2,
+              "dy": -1
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                0,
+                3,
+                57,
+                96
+              ],
+              "anchor": [
+                28.5,
+                96
+              ],
+              "dx": 4,
+              "dy": -1
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 1.0,
+            "y": 0
+          }
+        },
+        "left": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                4,
+                3,
+                64,
+                96
+              ],
+              "anchor": [
+                34.0,
+                96
+              ],
+              "dx": -4,
+              "dy": -3
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                0,
+                3,
+                59,
+                96
+              ],
+              "anchor": [
+                29.5,
+                96
+              ],
+              "dx": 0,
+              "dy": -3
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                0,
+                4,
+                55,
+                96
+              ],
+              "anchor": [
+                27.5,
+                96
+              ],
+              "dx": 2,
+              "dy": -3
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                0,
+                4,
+                51,
+                96
+              ],
+              "anchor": [
+                25.5,
+                96
+              ],
+              "dx": 4,
+              "dy": -3
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        }
+      },
+      "gif": "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/caster-npc-walk-directions.gif",
+      "frames": 80,
+      "duration_seconds": 8.0,
+      "animated_adjacent_diffs_min": 16934,
+      "magentaish_pixels_first_frame": 0,
+      "sequence": [
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "ellipsis": true
+        }
+      ]
+    },
+    "goblin-orc": {
+      "display": "Goblin / Orc",
+      "directions": {
+        "up": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                8,
+                8,
+                108,
+                121
+              ],
+              "anchor": [
+                58.0,
+                121
+              ],
+              "dx": -7,
+              "dy": -3
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                8,
+                8,
+                108,
+                126
+              ],
+              "anchor": [
+                58.0,
+                126
+              ],
+              "dx": -7,
+              "dy": -8
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                8,
+                8,
+                107,
+                126
+              ],
+              "anchor": [
+                57.5,
+                126
+              ],
+              "dx": -6,
+              "dy": -8
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                8,
+                9,
+                109,
+                126
+              ],
+              "anchor": [
+                58.5,
+                126
+              ],
+              "dx": -8,
+              "dy": -8
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 1.0,
+            "y": 0
+          }
+        },
+        "right": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                8,
+                8,
+                96,
+                122
+              ],
+              "anchor": [
+                52.0,
+                122
+              ],
+              "dx": -7,
+              "dy": -8
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                9,
+                8,
+                97,
+                122
+              ],
+              "anchor": [
+                53.0,
+                122
+              ],
+              "dx": -8,
+              "dy": -8
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                8,
+                8,
+                94,
+                122
+              ],
+              "anchor": [
+                51.0,
+                122
+              ],
+              "dx": -6,
+              "dy": -8
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                8,
+                8,
+                97,
+                122
+              ],
+              "anchor": [
+                52.5,
+                122
+              ],
+              "dx": -8,
+              "dy": -8
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "down": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                8,
+                8,
+                107,
+                116
+              ],
+              "anchor": [
+                57.5,
+                116
+              ],
+              "dx": -6,
+              "dy": -8
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                9,
+                8,
+                109,
+                116
+              ],
+              "anchor": [
+                59.0,
+                116
+              ],
+              "dx": -8,
+              "dy": -8
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                8,
+                8,
+                107,
+                116
+              ],
+              "anchor": [
+                57.5,
+                116
+              ],
+              "dx": -6,
+              "dy": -8
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                8,
+                8,
+                109,
+                116
+              ],
+              "anchor": [
+                58.5,
+                116
+              ],
+              "dx": -8,
+              "dy": -8
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 1.0,
+            "y": 0
+          }
+        },
+        "left": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                9,
+                8,
+                97,
+                122
+              ],
+              "anchor": [
+                53.0,
+                122
+              ],
+              "dx": -8,
+              "dy": -8
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                8,
+                8,
+                96,
+                122
+              ],
+              "anchor": [
+                52.0,
+                122
+              ],
+              "dx": -7,
+              "dy": -8
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                8,
+                8,
+                94,
+                122
+              ],
+              "anchor": [
+                51.0,
+                122
+              ],
+              "dx": -6,
+              "dy": -8
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                8,
+                8,
+                97,
+                122
+              ],
+              "anchor": [
+                52.5,
+                122
+              ],
+              "dx": -8,
+              "dy": -8
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        }
+      },
+      "gif": "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/goblin-orc-walk-directions.gif",
+      "frames": 80,
+      "duration_seconds": 8.0,
+      "animated_adjacent_diffs_min": 28320,
+      "magentaish_pixels_first_frame": 56,
+      "sequence": [
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "ellipsis": true
+        }
+      ]
+    },
+    "skeleton-ghoul-boss": {
+      "display": "Skeleton / Ghoul / Boss",
+      "directions": {
+        "up": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                9,
+                8,
+                104,
+                124
+              ],
+              "anchor": [
+                56.5,
+                124
+              ],
+              "dx": -8,
+              "dy": -7
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                8,
+                9,
+                101,
+                124
+              ],
+              "anchor": [
+                54.5,
+                124
+              ],
+              "dx": -6,
+              "dy": -7
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                8,
+                8,
+                103,
+                125
+              ],
+              "anchor": [
+                55.5,
+                125
+              ],
+              "dx": -8,
+              "dy": -8
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                8,
+                8,
+                102,
+                122
+              ],
+              "anchor": [
+                55.0,
+                122
+              ],
+              "dx": -7,
+              "dy": -5
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 1.0,
+            "y": 0
+          }
+        },
+        "right": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                8,
+                8,
+                88,
+                118
+              ],
+              "anchor": [
+                48.0,
+                118
+              ],
+              "dx": -8,
+              "dy": -7
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                8,
+                8,
+                74,
+                117
+              ],
+              "anchor": [
+                41.0,
+                117
+              ],
+              "dx": -1,
+              "dy": -6
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                8,
+                8,
+                71,
+                119
+              ],
+              "anchor": [
+                39.5,
+                119
+              ],
+              "dx": 0,
+              "dy": -8
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                8,
+                9,
+                85,
+                118
+              ],
+              "anchor": [
+                46.5,
+                118
+              ],
+              "dx": -6,
+              "dy": -7
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 1.0,
+            "y": 0
+          }
+        },
+        "down": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                8,
+                8,
+                100,
+                119
+              ],
+              "anchor": [
+                54.0,
+                119
+              ],
+              "dx": -7,
+              "dy": -7
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                8,
+                8,
+                100,
+                118
+              ],
+              "anchor": [
+                54.0,
+                118
+              ],
+              "dx": -7,
+              "dy": -6
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                8,
+                8,
+                101,
+                118
+              ],
+              "anchor": [
+                54.5,
+                118
+              ],
+              "dx": -8,
+              "dy": -6
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                8,
+                8,
+                98,
+                120
+              ],
+              "anchor": [
+                53.0,
+                120
+              ],
+              "dx": -6,
+              "dy": -8
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "left": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                8,
+                8,
+                88,
+                118
+              ],
+              "anchor": [
+                48.0,
+                118
+              ],
+              "dx": -8,
+              "dy": -7
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                8,
+                8,
+                74,
+                117
+              ],
+              "anchor": [
+                41.0,
+                117
+              ],
+              "dx": -1,
+              "dy": -6
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                8,
+                8,
+                71,
+                119
+              ],
+              "anchor": [
+                39.5,
+                119
+              ],
+              "dx": 0,
+              "dy": -8
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                8,
+                9,
+                85,
+                118
+              ],
+              "anchor": [
+                46.5,
+                118
+              ],
+              "dx": -6,
+              "dy": -7
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 1.0,
+            "y": 0
+          }
+        }
+      },
+      "gif": "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/skeleton-ghoul-boss-walk-directions.gif",
+      "frames": 80,
+      "duration_seconds": 8.0,
+      "animated_adjacent_diffs_min": 21952,
+      "magentaish_pixels_first_frame": 92,
+      "sequence": [
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "ellipsis": true
+        }
+      ]
+    },
+    "rat": {
+      "display": "Rat",
+      "directions": {
+        "up": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                32,
+                8,
+                54,
+                46
+              ],
+              "anchor": [
+                43.0,
+                46
+              ],
+              "dx": -16,
+              "dy": -8
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                0,
+                8,
+                27,
+                46
+              ],
+              "anchor": [
+                13.5,
+                46
+              ],
+              "dx": 14,
+              "dy": -8
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                44,
+                43,
+                54,
+                46
+              ],
+              "anchor": [
+                49.0,
+                46
+              ],
+              "dx": -22,
+              "dy": -8
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                0,
+                16,
+                54,
+                46
+              ],
+              "anchor": [
+                27.0,
+                46
+              ],
+              "dx": 0,
+              "dy": -8
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "right": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                21,
+                15,
+                112,
+                48
+              ],
+              "anchor": [
+                66.5,
+                48
+              ],
+              "dx": -16,
+              "dy": -15
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                16,
+                16,
+                112,
+                48
+              ],
+              "anchor": [
+                64.0,
+                48
+              ],
+              "dx": -13,
+              "dy": -15
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                14,
+                19,
+                112,
+                48
+              ],
+              "anchor": [
+                63.0,
+                48
+              ],
+              "dx": -12,
+              "dy": -15
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                8,
+                17,
+                110,
+                48
+              ],
+              "anchor": [
+                59.0,
+                48
+              ],
+              "dx": -8,
+              "dy": -15
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "down": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                0,
+                14,
+                54,
+                46
+              ],
+              "anchor": [
+                27.0,
+                46
+              ],
+              "dx": 0,
+              "dy": -14
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                0,
+                14,
+                35,
+                46
+              ],
+              "anchor": [
+                17.5,
+                46
+              ],
+              "dx": 10,
+              "dy": -14
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                0,
+                14,
+                54,
+                46
+              ],
+              "anchor": [
+                27.0,
+                46
+              ],
+              "dx": 0,
+              "dy": -14
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                0,
+                14,
+                35,
+                46
+              ],
+              "anchor": [
+                17.5,
+                46
+              ],
+              "dx": 10,
+              "dy": -14
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "left": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                0,
+                15,
+                91,
+                48
+              ],
+              "anchor": [
+                45.5,
+                48
+              ],
+              "dx": 6,
+              "dy": -15
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                0,
+                16,
+                96,
+                48
+              ],
+              "anchor": [
+                48.0,
+                48
+              ],
+              "dx": 3,
+              "dy": -15
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                0,
+                19,
+                98,
+                48
+              ],
+              "anchor": [
+                49.0,
+                48
+              ],
+              "dx": 2,
+              "dy": -15
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                2,
+                17,
+                104,
+                48
+              ],
+              "anchor": [
+                53.0,
+                48
+              ],
+              "dx": -2,
+              "dy": -15
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        }
+      },
+      "gif": "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/rat-walk-directions.gif",
+      "frames": 80,
+      "duration_seconds": 8.0,
+      "animated_adjacent_diffs_min": 3501,
+      "magentaish_pixels_first_frame": 0,
+      "sequence": [
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "ellipsis": true
+        }
+      ]
+    },
+    "spider": {
+      "display": "Spider",
+      "directions": {
+        "up": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                18,
+                0,
+                58,
+                36
+              ],
+              "anchor": [
+                38.0,
+                36
+              ],
+              "dx": -9,
+              "dy": 18
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                0,
+                2,
+                14,
+                36
+              ],
+              "anchor": [
+                7.0,
+                36
+              ],
+              "dx": 22,
+              "dy": 18
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                28,
+                0,
+                58,
+                35
+              ],
+              "anchor": [
+                43.0,
+                35
+              ],
+              "dx": -14,
+              "dy": 19
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                0,
+                0,
+                58,
+                54
+              ],
+              "anchor": [
+                29.0,
+                54
+              ],
+              "dx": 0,
+              "dy": 0
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.0,
+            "y": 0
+          }
+        },
+        "right": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                28,
+                4,
+                113,
+                43
+              ],
+              "anchor": [
+                70.5,
+                43
+              ],
+              "dx": -28,
+              "dy": -4
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                21,
+                6,
+                104,
+                43
+              ],
+              "anchor": [
+                62.5,
+                43
+              ],
+              "dx": -20,
+              "dy": -4
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                20,
+                5,
+                101,
+                43
+              ],
+              "anchor": [
+                60.5,
+                43
+              ],
+              "dx": -18,
+              "dy": -4
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                10,
+                5,
+                90,
+                43
+              ],
+              "anchor": [
+                50.0,
+                43
+              ],
+              "dx": -7,
+              "dy": -4
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "down": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                27,
+                0,
+                58,
+                36
+              ],
+              "anchor": [
+                42.5,
+                36
+              ],
+              "dx": -14,
+              "dy": 18
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                0,
+                0,
+                58,
+                54
+              ],
+              "anchor": [
+                29.0,
+                54
+              ],
+              "dx": 0,
+              "dy": 0
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                27,
+                0,
+                58,
+                36
+              ],
+              "anchor": [
+                42.5,
+                36
+              ],
+              "dx": -14,
+              "dy": 18
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                0,
+                0,
+                58,
+                54
+              ],
+              "anchor": [
+                29.0,
+                54
+              ],
+              "dx": 0,
+              "dy": 0
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        },
+        "left": {
+          "offsets": [
+            {
+              "frame": 0,
+              "bbox": [
+                5,
+                4,
+                90,
+                43
+              ],
+              "anchor": [
+                47.5,
+                43
+              ],
+              "dx": -4,
+              "dy": -4
+            },
+            {
+              "frame": 1,
+              "bbox": [
+                14,
+                6,
+                97,
+                43
+              ],
+              "anchor": [
+                55.5,
+                43
+              ],
+              "dx": -12,
+              "dy": -4
+            },
+            {
+              "frame": 2,
+              "bbox": [
+                17,
+                5,
+                98,
+                43
+              ],
+              "anchor": [
+                57.5,
+                43
+              ],
+              "dx": -14,
+              "dy": -4
+            },
+            {
+              "frame": 3,
+              "bbox": [
+                28,
+                5,
+                108,
+                43
+              ],
+              "anchor": [
+                68.0,
+                43
+              ],
+              "dx": -25,
+              "dy": -4
+            }
+          ],
+          "post_alignment_drift": {
+            "x": 0.5,
+            "y": 0
+          }
+        }
+      },
+      "gif": "/home/orlovboros/projects/tib/assetsources/review-gifs/animated-pass-2026-05-27/spider-walk-directions.gif",
+      "frames": 80,
+      "duration_seconds": 8.0,
+      "animated_adjacent_diffs_min": 2894,
+      "magentaish_pixels_first_frame": 0,
+      "sequence": [
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "direction": "up",
+          "source_frame": 0
+        },
+        {
+          "direction": "up",
+          "source_frame": 1
+        },
+        {
+          "direction": "up",
+          "source_frame": 2
+        },
+        {
+          "direction": "up",
+          "source_frame": 3
+        },
+        {
+          "ellipsis": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,214 @@
+{
+  "anchor_mode": "bottom_center",
+  "canvas": {
+    "width": 82,
+    "height": 55
+  },
+  "pre_alignment_drift": {
+    "x": 8.5,
+    "y": 17,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/frame_000.png",
+        "x": 37.5,
+        "y": 58,
+        "bbox": [
+          5,
+          5,
+          70,
+          58
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/frame_001.png",
+        "x": 46.0,
+        "y": 52,
+        "bbox": [
+          5,
+          5,
+          87,
+          52
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/frame_002.png",
+        "x": 37.5,
+        "y": 41,
+        "bbox": [
+          5,
+          5,
+          70,
+          41
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/frame_003.png",
+        "x": 44.0,
+        "y": 55,
+        "bbox": [
+          5,
+          0,
+          83,
+          55
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/frame_004.png",
+        "x": 38.0,
+        "y": 45,
+        "bbox": [
+          5,
+          5,
+          71,
+          45
+        ]
+      }
+    ]
+  },
+  "post_alignment_drift": {
+    "x": 0.5,
+    "y": 0,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/aligned/000_frame_000.png",
+        "x": 41.5,
+        "y": 55,
+        "bbox": [
+          9,
+          2,
+          74,
+          55
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/aligned/001_frame_001.png",
+        "x": 41.0,
+        "y": 55,
+        "bbox": [
+          0,
+          8,
+          82,
+          55
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/aligned/002_frame_002.png",
+        "x": 41.5,
+        "y": 55,
+        "bbox": [
+          9,
+          19,
+          74,
+          55
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/aligned/003_frame_003.png",
+        "x": 41.0,
+        "y": 55,
+        "bbox": [
+          2,
+          0,
+          80,
+          55
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/aligned/004_frame_004.png",
+        "x": 41.0,
+        "y": 55,
+        "bbox": [
+          8,
+          15,
+          74,
+          55
+        ]
+      }
+    ]
+  },
+  "aligned_frames": [
+    "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/aligned/000_frame_000.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/aligned/001_frame_001.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/aligned/002_frame_002.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/aligned/003_frame_003.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/aligned/004_frame_004.png"
+  ],
+  "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/row_07_preview.gif",
+  "offsets": [
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/frame_000.png",
+      "source_bbox": [
+        5,
+        5,
+        70,
+        58
+      ],
+      "anchor": [
+        37.5,
+        58
+      ],
+      "dx": 4,
+      "dy": -3
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/frame_001.png",
+      "source_bbox": [
+        5,
+        5,
+        87,
+        52
+      ],
+      "anchor": [
+        46.0,
+        52
+      ],
+      "dx": -5,
+      "dy": 3
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/frame_002.png",
+      "source_bbox": [
+        5,
+        5,
+        70,
+        41
+      ],
+      "anchor": [
+        37.5,
+        41
+      ],
+      "dx": 4,
+      "dy": 14
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/frame_003.png",
+      "source_bbox": [
+        5,
+        0,
+        83,
+        55
+      ],
+      "anchor": [
+        44.0,
+        55
+      ],
+      "dx": -3,
+      "dy": 0
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/game-ready-enemies/woodland-enemies-sheet/row_07/frame_004.png",
+      "source_bbox": [
+        5,
+        5,
+        71,
+        45
+      ],
+      "anchor": [
+        38.0,
+        45
+      ],
+      "dx": 3,
+      "dy": 10
+    }
+  ]
+}

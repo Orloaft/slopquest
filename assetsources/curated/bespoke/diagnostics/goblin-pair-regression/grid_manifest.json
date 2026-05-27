@@ -1,0 +1,551 @@
+{
+  "source": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/goblin_pair/goblin_pair_generated_chroma.png",
+  "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression",
+  "cleaned_image": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/goblin_pair_generated_chroma_alpha.png",
+  "chroma": [
+    0,
+    255,
+    0
+  ],
+  "tolerance": 40,
+  "grid": {
+    "columns": 8,
+    "rows": 2,
+    "cell_width": 128,
+    "cell_height": 128
+  },
+  "chroma_remnant_pixels": 0,
+  "alpha_corners": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "preview_background": [
+    28,
+    32,
+    38
+  ],
+  "rows": [
+    {
+      "row": 0,
+      "name": "walk",
+      "frames": 8,
+      "source_boxes": [
+        [
+          17,
+          54,
+          103,
+          105
+        ],
+        [
+          146,
+          53,
+          233,
+          106
+        ],
+        [
+          276,
+          53,
+          365,
+          107
+        ],
+        [
+          407,
+          54,
+          494,
+          105
+        ],
+        [
+          537,
+          55,
+          623,
+          106
+        ],
+        [
+          664,
+          57,
+          748,
+          107
+        ],
+        [
+          789,
+          56,
+          872,
+          105
+        ],
+        [
+          914,
+          55,
+          999,
+          106
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 3.0,
+        "y": 5,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/frame_000.png",
+            "x": 43.0,
+            "y": 51,
+            "bbox": [
+              0,
+              0,
+              86,
+              51
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/frame_001.png",
+            "x": 43.5,
+            "y": 53,
+            "bbox": [
+              0,
+              0,
+              87,
+              53
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/frame_002.png",
+            "x": 44.5,
+            "y": 54,
+            "bbox": [
+              0,
+              0,
+              89,
+              54
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/frame_003.png",
+            "x": 43.5,
+            "y": 51,
+            "bbox": [
+              0,
+              0,
+              87,
+              51
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/frame_004.png",
+            "x": 43.0,
+            "y": 51,
+            "bbox": [
+              0,
+              0,
+              86,
+              51
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/frame_005.png",
+            "x": 42.0,
+            "y": 50,
+            "bbox": [
+              0,
+              0,
+              84,
+              50
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/frame_006.png",
+            "x": 41.5,
+            "y": 49,
+            "bbox": [
+              0,
+              0,
+              83,
+              49
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/frame_007.png",
+            "x": 42.5,
+            "y": 51,
+            "bbox": [
+              0,
+              0,
+              85,
+              51
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 1.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/aligned/000_frame_000.png",
+            "x": 45.0,
+            "y": 54,
+            "bbox": [
+              2,
+              3,
+              88,
+              54
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/aligned/001_frame_001.png",
+            "x": 45.5,
+            "y": 54,
+            "bbox": [
+              2,
+              1,
+              89,
+              54
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/aligned/002_frame_002.png",
+            "x": 44.5,
+            "y": 54,
+            "bbox": [
+              0,
+              0,
+              89,
+              54
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/aligned/003_frame_003.png",
+            "x": 45.5,
+            "y": 54,
+            "bbox": [
+              2,
+              3,
+              89,
+              54
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/aligned/004_frame_004.png",
+            "x": 45.0,
+            "y": 54,
+            "bbox": [
+              2,
+              3,
+              88,
+              54
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/aligned/005_frame_005.png",
+            "x": 45.0,
+            "y": 54,
+            "bbox": [
+              3,
+              4,
+              87,
+              54
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/aligned/006_frame_006.png",
+            "x": 45.5,
+            "y": 54,
+            "bbox": [
+              4,
+              5,
+              87,
+              54
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/aligned/007_frame_007.png",
+            "x": 44.5,
+            "y": 54,
+            "bbox": [
+              2,
+              3,
+              87,
+              54
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.5231,
+          0.5006,
+          0.541,
+          0.3816,
+          0.4796,
+          0.4709,
+          0.5065
+        ],
+        "average_changed_fraction": 0.4862
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/walk_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/alignment_report.json"
+    },
+    {
+      "row": 1,
+      "name": "attack",
+      "frames": 8,
+      "source_boxes": [
+        [
+          18,
+          182,
+          104,
+          233
+        ],
+        [
+          144,
+          183,
+          230,
+          234
+        ],
+        [
+          275,
+          176,
+          384,
+          235
+        ],
+        [
+          414,
+          176,
+          512,
+          233
+        ],
+        [
+          547,
+          176,
+          640,
+          234
+        ],
+        [
+          669,
+          176,
+          768,
+          235
+        ],
+        [
+          791,
+          182,
+          877,
+          233
+        ],
+        [
+          915,
+          182,
+          1001,
+          234
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 11.5,
+        "y": 8,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/frame_000.png",
+            "x": 43.0,
+            "y": 51,
+            "bbox": [
+              0,
+              0,
+              86,
+              51
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/frame_001.png",
+            "x": 43.0,
+            "y": 51,
+            "bbox": [
+              0,
+              0,
+              86,
+              51
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/frame_002.png",
+            "x": 54.5,
+            "y": 59,
+            "bbox": [
+              0,
+              0,
+              109,
+              59
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/frame_003.png",
+            "x": 49.0,
+            "y": 57,
+            "bbox": [
+              0,
+              0,
+              98,
+              57
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/frame_004.png",
+            "x": 46.5,
+            "y": 58,
+            "bbox": [
+              0,
+              0,
+              93,
+              58
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/frame_005.png",
+            "x": 49.5,
+            "y": 59,
+            "bbox": [
+              0,
+              0,
+              99,
+              59
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/frame_006.png",
+            "x": 43.0,
+            "y": 51,
+            "bbox": [
+              0,
+              0,
+              86,
+              51
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/frame_007.png",
+            "x": 43.0,
+            "y": 52,
+            "bbox": [
+              0,
+              0,
+              86,
+              52
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 1.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/aligned/000_frame_000.png",
+            "x": 55.0,
+            "y": 59,
+            "bbox": [
+              12,
+              8,
+              98,
+              59
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/aligned/001_frame_001.png",
+            "x": 55.0,
+            "y": 59,
+            "bbox": [
+              12,
+              8,
+              98,
+              59
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/aligned/002_frame_002.png",
+            "x": 54.5,
+            "y": 59,
+            "bbox": [
+              0,
+              0,
+              109,
+              59
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/aligned/003_frame_003.png",
+            "x": 55.0,
+            "y": 59,
+            "bbox": [
+              6,
+              2,
+              104,
+              59
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/aligned/004_frame_004.png",
+            "x": 54.5,
+            "y": 59,
+            "bbox": [
+              8,
+              1,
+              101,
+              59
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/aligned/005_frame_005.png",
+            "x": 55.5,
+            "y": 59,
+            "bbox": [
+              6,
+              0,
+              105,
+              59
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/aligned/006_frame_006.png",
+            "x": 55.0,
+            "y": 59,
+            "bbox": [
+              12,
+              8,
+              98,
+              59
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/aligned/007_frame_007.png",
+            "x": 55.0,
+            "y": 59,
+            "bbox": [
+              12,
+              7,
+              98,
+              59
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.0003,
+          0.5212,
+          0.4652,
+          0.4172,
+          0.4127,
+          0.4553,
+          0.3597
+        ],
+        "average_changed_fraction": 0.3759
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/attack_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/alignment_report.json"
+    }
+  ],
+  "preview_gifs": [
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/walk/walk_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/diagnostics/goblin-pair-regression/attack/attack_preview.gif"
+  ]
+}

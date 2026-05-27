@@ -1,0 +1,328 @@
+{
+  "anchor_mode": "bottom_center",
+  "canvas": {
+    "width": 81,
+    "height": 76
+  },
+  "pre_alignment_drift": {
+    "x": 2.0,
+    "y": 7,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_000.png",
+        "x": 48.5,
+        "y": 77,
+        "bbox": [
+          8,
+          8,
+          89,
+          77
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_001.png",
+        "x": 48.5,
+        "y": 77,
+        "bbox": [
+          8,
+          8,
+          89,
+          77
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_002.png",
+        "x": 48.5,
+        "y": 78,
+        "bbox": [
+          8,
+          8,
+          89,
+          78
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_003.png",
+        "x": 46.5,
+        "y": 82,
+        "bbox": [
+          8,
+          8,
+          85,
+          82
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_004.png",
+        "x": 46.5,
+        "y": 84,
+        "bbox": [
+          8,
+          8,
+          85,
+          84
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_005.png",
+        "x": 48.5,
+        "y": 80,
+        "bbox": [
+          8,
+          8,
+          89,
+          80
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_006.png",
+        "x": 48.5,
+        "y": 77,
+        "bbox": [
+          8,
+          8,
+          89,
+          77
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_007.png",
+        "x": 48.5,
+        "y": 78,
+        "bbox": [
+          8,
+          8,
+          89,
+          78
+        ]
+      }
+    ]
+  },
+  "post_alignment_drift": {
+    "x": 0.0,
+    "y": 0,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/000_frame_000.png",
+        "x": 40.5,
+        "y": 76,
+        "bbox": [
+          0,
+          7,
+          81,
+          76
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/001_frame_001.png",
+        "x": 40.5,
+        "y": 76,
+        "bbox": [
+          0,
+          7,
+          81,
+          76
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/002_frame_002.png",
+        "x": 40.5,
+        "y": 76,
+        "bbox": [
+          0,
+          6,
+          81,
+          76
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/003_frame_003.png",
+        "x": 40.5,
+        "y": 76,
+        "bbox": [
+          2,
+          2,
+          79,
+          76
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/004_frame_004.png",
+        "x": 40.5,
+        "y": 76,
+        "bbox": [
+          2,
+          0,
+          79,
+          76
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/005_frame_005.png",
+        "x": 40.5,
+        "y": 76,
+        "bbox": [
+          0,
+          4,
+          81,
+          76
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/006_frame_006.png",
+        "x": 40.5,
+        "y": 76,
+        "bbox": [
+          0,
+          7,
+          81,
+          76
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/007_frame_007.png",
+        "x": 40.5,
+        "y": 76,
+        "bbox": [
+          0,
+          6,
+          81,
+          76
+        ]
+      }
+    ]
+  },
+  "aligned_frames": [
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/000_frame_000.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/001_frame_001.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/002_frame_002.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/003_frame_003.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/004_frame_004.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/005_frame_005.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/006_frame_006.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/aligned/007_frame_007.png"
+  ],
+  "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/attack_preview.gif",
+  "offsets": [
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_000.png",
+      "source_bbox": [
+        8,
+        8,
+        89,
+        77
+      ],
+      "anchor": [
+        48.5,
+        77
+      ],
+      "dx": -8,
+      "dy": -1
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_001.png",
+      "source_bbox": [
+        8,
+        8,
+        89,
+        77
+      ],
+      "anchor": [
+        48.5,
+        77
+      ],
+      "dx": -8,
+      "dy": -1
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_002.png",
+      "source_bbox": [
+        8,
+        8,
+        89,
+        78
+      ],
+      "anchor": [
+        48.5,
+        78
+      ],
+      "dx": -8,
+      "dy": -2
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_003.png",
+      "source_bbox": [
+        8,
+        8,
+        85,
+        82
+      ],
+      "anchor": [
+        46.5,
+        82
+      ],
+      "dx": -6,
+      "dy": -6
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_004.png",
+      "source_bbox": [
+        8,
+        8,
+        85,
+        84
+      ],
+      "anchor": [
+        46.5,
+        84
+      ],
+      "dx": -6,
+      "dy": -8
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_005.png",
+      "source_bbox": [
+        8,
+        8,
+        89,
+        80
+      ],
+      "anchor": [
+        48.5,
+        80
+      ],
+      "dx": -8,
+      "dy": -4
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_006.png",
+      "source_bbox": [
+        8,
+        8,
+        89,
+        77
+      ],
+      "anchor": [
+        48.5,
+        77
+      ],
+      "dx": -8,
+      "dy": -1
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/attack/frame_007.png",
+      "source_bbox": [
+        8,
+        8,
+        89,
+        78
+      ],
+      "anchor": [
+        48.5,
+        78
+      ],
+      "dx": -8,
+      "dy": -2
+    }
+  ]
+}

@@ -1,0 +1,328 @@
+{
+  "anchor_mode": "bottom_center",
+  "canvas": {
+    "width": 84,
+    "height": 72
+  },
+  "pre_alignment_drift": {
+    "x": 3.0,
+    "y": 5,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_000.png",
+        "x": 48.5,
+        "y": 77,
+        "bbox": [
+          8,
+          8,
+          89,
+          77
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_001.png",
+        "x": 49.0,
+        "y": 79,
+        "bbox": [
+          8,
+          8,
+          90,
+          79
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_002.png",
+        "x": 50.0,
+        "y": 80,
+        "bbox": [
+          8,
+          8,
+          92,
+          80
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_003.png",
+        "x": 49.0,
+        "y": 77,
+        "bbox": [
+          8,
+          8,
+          90,
+          77
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_004.png",
+        "x": 48.5,
+        "y": 77,
+        "bbox": [
+          8,
+          8,
+          89,
+          77
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_005.png",
+        "x": 47.5,
+        "y": 76,
+        "bbox": [
+          8,
+          8,
+          87,
+          76
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_006.png",
+        "x": 47.0,
+        "y": 75,
+        "bbox": [
+          8,
+          8,
+          86,
+          75
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_007.png",
+        "x": 48.0,
+        "y": 77,
+        "bbox": [
+          8,
+          8,
+          88,
+          77
+        ]
+      }
+    ]
+  },
+  "post_alignment_drift": {
+    "x": 1.0,
+    "y": 0,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/000_frame_000.png",
+        "x": 42.5,
+        "y": 72,
+        "bbox": [
+          2,
+          3,
+          83,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/001_frame_001.png",
+        "x": 42.0,
+        "y": 72,
+        "bbox": [
+          1,
+          1,
+          83,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/002_frame_002.png",
+        "x": 42.0,
+        "y": 72,
+        "bbox": [
+          0,
+          0,
+          84,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/003_frame_003.png",
+        "x": 42.0,
+        "y": 72,
+        "bbox": [
+          1,
+          3,
+          83,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/004_frame_004.png",
+        "x": 42.5,
+        "y": 72,
+        "bbox": [
+          2,
+          3,
+          83,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/005_frame_005.png",
+        "x": 41.5,
+        "y": 72,
+        "bbox": [
+          2,
+          4,
+          81,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/006_frame_006.png",
+        "x": 42.0,
+        "y": 72,
+        "bbox": [
+          3,
+          5,
+          81,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/007_frame_007.png",
+        "x": 42.0,
+        "y": 72,
+        "bbox": [
+          2,
+          3,
+          82,
+          72
+        ]
+      }
+    ]
+  },
+  "aligned_frames": [
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/000_frame_000.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/001_frame_001.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/002_frame_002.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/003_frame_003.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/004_frame_004.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/005_frame_005.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/006_frame_006.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/aligned/007_frame_007.png"
+  ],
+  "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/walk_preview.gif",
+  "offsets": [
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_000.png",
+      "source_bbox": [
+        8,
+        8,
+        89,
+        77
+      ],
+      "anchor": [
+        48.5,
+        77
+      ],
+      "dx": -6,
+      "dy": -5
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_001.png",
+      "source_bbox": [
+        8,
+        8,
+        90,
+        79
+      ],
+      "anchor": [
+        49.0,
+        79
+      ],
+      "dx": -7,
+      "dy": -7
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_002.png",
+      "source_bbox": [
+        8,
+        8,
+        92,
+        80
+      ],
+      "anchor": [
+        50.0,
+        80
+      ],
+      "dx": -8,
+      "dy": -8
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_003.png",
+      "source_bbox": [
+        8,
+        8,
+        90,
+        77
+      ],
+      "anchor": [
+        49.0,
+        77
+      ],
+      "dx": -7,
+      "dy": -5
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_004.png",
+      "source_bbox": [
+        8,
+        8,
+        89,
+        77
+      ],
+      "anchor": [
+        48.5,
+        77
+      ],
+      "dx": -6,
+      "dy": -5
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_005.png",
+      "source_bbox": [
+        8,
+        8,
+        87,
+        76
+      ],
+      "anchor": [
+        47.5,
+        76
+      ],
+      "dx": -6,
+      "dy": -4
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_006.png",
+      "source_bbox": [
+        8,
+        8,
+        86,
+        75
+      ],
+      "anchor": [
+        47.0,
+        75
+      ],
+      "dx": -5,
+      "dy": -3
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/mushroom_brute/grid/walk/frame_007.png",
+      "source_bbox": [
+        8,
+        8,
+        88,
+        77
+      ],
+      "anchor": [
+        48.0,
+        77
+      ],
+      "dx": -6,
+      "dy": -5
+    }
+  ]
+}

@@ -126,7 +126,8 @@ if (E2E_MODE) {
       };
     },
     send,
-    stateVersion: () => stateVersion
+    stateVersion: () => stateVersion,
+    actorFrameAnchorDrift: () => actorFrameAnchorDrift()
   };
 }
 
@@ -1793,15 +1794,65 @@ function updateFloaters() {
 function createActorFrames(scene) {
   const knightRows = { up: 74, right: 202, down: 328, left: 456 };
   const casterRows = { up: 692, right: 818, down: 948, left: 1078 };
-  const monsterRows = { up: 48, right: 204, down: 360, left: 516 };
   const knightXs = [330, 456, 582, 708];
   const casterXs = [334, 460, 586, 712];
-  const monsterXs = [298, 490, 682, 874];
+  const goblinFrames = {
+    up: paddedSpriteFrames([
+      [305, 46, 100, 113],
+      [496, 41, 100, 118],
+      [687, 41, 99, 118],
+      [876, 41, 101, 118]
+    ]),
+    right: paddedSpriteFrames([
+      [305, 190, 95, 110],
+      [502, 190, 90, 110],
+      [694, 190, 89, 110],
+      [878, 190, 94, 110]
+    ]),
+    down: paddedSpriteFrames([
+      [303, 346, 99, 108],
+      [492, 346, 101, 108],
+      [685, 346, 99, 108],
+      [873, 346, 101, 108]
+    ]),
+    left: paddedSpriteFrames([
+      [307, 490, 89, 114],
+      [499, 490, 89, 114],
+      [689, 490, 86, 114],
+      [877, 490, 89, 114]
+    ])
+  };
+  const skeletonFrames = {
+    up: paddedSpriteFrames([
+      [298, 54, 96, 116],
+      [471, 54, 93, 116],
+      [647, 54, 95, 117],
+      [826, 55, 94, 115]
+    ]),
+    right: paddedSpriteFrames([
+      [296, 204, 83, 112],
+      [484, 206, 68, 111],
+      [662, 206, 70, 111],
+      [832, 206, 82, 110]
+    ]),
+    down: paddedSpriteFrames([
+      [296, 352, 92, 111],
+      [468, 355, 92, 110],
+      [648, 355, 93, 110],
+      [828, 353, 90, 112]
+    ]),
+    left: paddedSpriteFrames([
+      [306, 499, 80, 110],
+      [479, 500, 66, 109],
+      [661, 500, 63, 112],
+      [839, 499, 77, 110]
+    ])
+  };
 
   createFrameSet(scene, "playerSheet", "knight", knightRows, knightXs, 78, 92);
   createFrameSet(scene, "playerSheet", "caster", casterRows, casterXs, 82, 96);
-  createFrameSet(scene, "goblinSheet", "goblin", monsterRows, monsterXs, 118, 106);
-  createFrameSet(scene, "skeletonSheet", "skeleton", monsterRows, monsterXs, 118, 106);
+  createExplicitFrameSet(scene, "goblinSheet", "goblin", goblinFrames);
+  createExplicitFrameSet(scene, "skeletonSheet", "skeleton", skeletonFrames);
   createExplicitFrameSet(scene, "ratSpiderSheet", "rat", {
     up: spriteFrames([700, 748, 796, 844], 126, 54, 46),
     right: spriteFrames([132, 260, 388, 516], 124, 112, 48),
@@ -1835,22 +1886,35 @@ function effectFrameKey(family, frame) {
 
 function createFrameSet(scene, sourceKey, family, rows, xs, width, height) {
   for (const dir of DIRECTIONS) {
-    xs.forEach((x, index) => {
-      makeTransparentCrop(scene, sourceKey, actorFrameKey(family, dir, index), x, rows[dir], width, height);
-    });
+    createAlignedTransparentFrames(
+      scene,
+      sourceKey,
+      xs.map((x, index) => ({ key: actorFrameKey(family, dir, index), x, y: rows[dir], w: width, h: height }))
+    );
   }
 }
 
 function createExplicitFrameSet(scene, sourceKey, family, framesByDir) {
   for (const dir of DIRECTIONS) {
-    framesByDir[dir].forEach((frame, index) => {
-      makeTransparentCrop(scene, sourceKey, actorFrameKey(family, dir, index), frame.x, frame.y, frame.w, frame.h);
-    });
+    createAlignedTransparentFrames(
+      scene,
+      sourceKey,
+      framesByDir[dir].map((frame, index) => ({ key: actorFrameKey(family, dir, index), ...frame }))
+    );
   }
 }
 
 function spriteFrames(xs, y, w, h) {
   return xs.map((x) => ({ x, y, w, h }));
+}
+
+function paddedSpriteFrames(boxes, padding = 8) {
+  return boxes.map(([x, y, w, h]) => ({
+    x: Math.max(0, x - padding),
+    y: Math.max(0, y - padding),
+    w: w + padding * 2,
+    h: h + padding * 2
+  }));
 }
 
 function actorFrameKey(family, dir, frame) {
@@ -1869,6 +1933,26 @@ function actorFlipX(family, dir) {
   return (mirrorRightFromLeft(family) && dir === "right") || (mirrorLeftFromRight(family) && dir === "left");
 }
 
+function actorFrameAnchorDrift() {
+  if (!scene) return [];
+  const families = ["knight", "caster", "goblin", "skeleton", "rat", "spider"];
+  return families.flatMap((family) =>
+    DIRECTIONS.map((dir) => {
+      const anchors = [0, 1, 2, 3].map((frame) => {
+        const image = scene.textures.get(actorFrameKey(family, dir, frame)).getSourceImage();
+        const bbox = opaqueBoundingBox(image);
+        return bbox ? { x: bbox.x + bbox.w / 2, y: bbox.y + bbox.h } : { x: 0, y: 0 };
+      });
+      return {
+        family,
+        dir,
+        driftX: Math.max(...anchors.map((anchor) => anchor.x)) - Math.min(...anchors.map((anchor) => anchor.x)),
+        driftY: Math.max(...anchors.map((anchor) => anchor.y)) - Math.min(...anchors.map((anchor) => anchor.y))
+      };
+    })
+  );
+}
+
 function mirrorRightFromLeft(family) {
   return family === "knight" || family === "caster" || family === "goblin" || family === "skeleton";
 }
@@ -1878,6 +1962,11 @@ function mirrorLeftFromRight(family) {
 }
 
 function makeTransparentCrop(scene, sourceKey, newKey, sx, sy, sw, sh) {
+  const canvas = createTransparentCropCanvas(scene, sourceKey, sx, sy, sw, sh);
+  addNearestCanvasTexture(scene, newKey, canvas);
+}
+
+function createTransparentCropCanvas(scene, sourceKey, sx, sy, sw, sh) {
   const source = scene.textures.get(sourceKey).getSourceImage();
   const canvas = document.createElement("canvas");
   canvas.width = sw;
@@ -1886,8 +1975,60 @@ function makeTransparentCrop(scene, sourceKey, newKey, sx, sy, sw, sh) {
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(source, sx, sy, sw, sh, 0, 0, sw, sh);
   chromaKeyMagenta(ctx, sw, sh);
-  scene.textures.addCanvas(newKey, canvas);
-  scene.textures.get(newKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
+  return canvas;
+}
+
+function createAlignedTransparentFrames(scene, sourceKey, frames) {
+  const crops = frames.map((frame) => {
+    const canvas = createTransparentCropCanvas(scene, sourceKey, frame.x, frame.y, frame.w, frame.h);
+    const bbox = opaqueBoundingBox(canvas) ?? { x: 0, y: 0, w: frame.w, h: frame.h };
+    const anchor = { x: bbox.x + bbox.w / 2, y: bbox.y + bbox.h };
+    return { ...frame, canvas, bbox, anchor };
+  });
+  const maxLeft = Math.max(...crops.map((crop) => crop.anchor.x - crop.bbox.x));
+  const maxRight = Math.max(...crops.map((crop) => crop.bbox.x + crop.bbox.w - crop.anchor.x));
+  const maxUp = Math.max(...crops.map((crop) => crop.anchor.y - crop.bbox.y));
+  const maxDown = Math.max(...crops.map((crop) => crop.bbox.y + crop.bbox.h - crop.anchor.y));
+  const sourceW = Math.max(...crops.map((crop) => crop.w));
+  const sourceH = Math.max(...crops.map((crop) => crop.h));
+  const canvasW = Math.max(sourceW, Math.ceil(maxLeft + maxRight));
+  const canvasH = Math.max(sourceH, Math.ceil(maxUp + maxDown));
+  const targetAnchor = { x: Math.round(canvasW / 2), y: canvasH };
+
+  for (const crop of crops) {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasW;
+    canvas.height = canvasH;
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(crop.canvas, Math.round(targetAnchor.x - crop.anchor.x), Math.round(targetAnchor.y - crop.anchor.y));
+    addNearestCanvasTexture(scene, crop.key, canvas);
+  }
+}
+
+function opaqueBoundingBox(canvas) {
+  const ctx = canvas.getContext("2d");
+  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  let minX = canvas.width;
+  let minY = canvas.height;
+  let maxX = -1;
+  let maxY = -1;
+  for (let y = 0; y < canvas.height; y += 1) {
+    for (let x = 0; x < canvas.width; x += 1) {
+      if (image.data[(y * canvas.width + x) * 4 + 3] === 0) continue;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  if (maxX < minX || maxY < minY) return null;
+  return { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
+}
+
+function addNearestCanvasTexture(scene, key, canvas) {
+  scene.textures.addCanvas(key, canvas);
+  scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
 
 function makeTileTexture(scene, sourceKey, newKey, sx, sy, sw, sh) {

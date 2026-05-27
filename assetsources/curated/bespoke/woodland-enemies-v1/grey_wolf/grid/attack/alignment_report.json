@@ -1,0 +1,328 @@
+{
+  "anchor_mode": "bottom_center",
+  "canvas": {
+    "width": 106,
+    "height": 73
+  },
+  "pre_alignment_drift": {
+    "x": 13.0,
+    "y": 7,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_000.png",
+        "x": 48.0,
+        "y": 74,
+        "bbox": [
+          8,
+          8,
+          88,
+          74
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_001.png",
+        "x": 48.0,
+        "y": 74,
+        "bbox": [
+          8,
+          8,
+          88,
+          74
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_002.png",
+        "x": 61.0,
+        "y": 75,
+        "bbox": [
+          8,
+          8,
+          114,
+          75
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_003.png",
+        "x": 55.5,
+        "y": 79,
+        "bbox": [
+          8,
+          8,
+          103,
+          79
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_004.png",
+        "x": 53.0,
+        "y": 81,
+        "bbox": [
+          8,
+          8,
+          98,
+          81
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_005.png",
+        "x": 56.0,
+        "y": 77,
+        "bbox": [
+          8,
+          8,
+          104,
+          77
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_006.png",
+        "x": 48.0,
+        "y": 74,
+        "bbox": [
+          8,
+          8,
+          88,
+          74
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_007.png",
+        "x": 48.0,
+        "y": 75,
+        "bbox": [
+          8,
+          8,
+          88,
+          75
+        ]
+      }
+    ]
+  },
+  "post_alignment_drift": {
+    "x": 0.5,
+    "y": 0,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/000_frame_000.png",
+        "x": 53.0,
+        "y": 73,
+        "bbox": [
+          13,
+          7,
+          93,
+          73
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/001_frame_001.png",
+        "x": 53.0,
+        "y": 73,
+        "bbox": [
+          13,
+          7,
+          93,
+          73
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/002_frame_002.png",
+        "x": 53.0,
+        "y": 73,
+        "bbox": [
+          0,
+          6,
+          106,
+          73
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/003_frame_003.png",
+        "x": 53.5,
+        "y": 73,
+        "bbox": [
+          6,
+          2,
+          101,
+          73
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/004_frame_004.png",
+        "x": 53.0,
+        "y": 73,
+        "bbox": [
+          8,
+          0,
+          98,
+          73
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/005_frame_005.png",
+        "x": 53.0,
+        "y": 73,
+        "bbox": [
+          5,
+          4,
+          101,
+          73
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/006_frame_006.png",
+        "x": 53.0,
+        "y": 73,
+        "bbox": [
+          13,
+          7,
+          93,
+          73
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/007_frame_007.png",
+        "x": 53.0,
+        "y": 73,
+        "bbox": [
+          13,
+          6,
+          93,
+          73
+        ]
+      }
+    ]
+  },
+  "aligned_frames": [
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/000_frame_000.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/001_frame_001.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/002_frame_002.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/003_frame_003.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/004_frame_004.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/005_frame_005.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/006_frame_006.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/aligned/007_frame_007.png"
+  ],
+  "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/attack_preview.gif",
+  "offsets": [
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_000.png",
+      "source_bbox": [
+        8,
+        8,
+        88,
+        74
+      ],
+      "anchor": [
+        48.0,
+        74
+      ],
+      "dx": 5,
+      "dy": -1
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_001.png",
+      "source_bbox": [
+        8,
+        8,
+        88,
+        74
+      ],
+      "anchor": [
+        48.0,
+        74
+      ],
+      "dx": 5,
+      "dy": -1
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_002.png",
+      "source_bbox": [
+        8,
+        8,
+        114,
+        75
+      ],
+      "anchor": [
+        61.0,
+        75
+      ],
+      "dx": -8,
+      "dy": -2
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_003.png",
+      "source_bbox": [
+        8,
+        8,
+        103,
+        79
+      ],
+      "anchor": [
+        55.5,
+        79
+      ],
+      "dx": -2,
+      "dy": -6
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_004.png",
+      "source_bbox": [
+        8,
+        8,
+        98,
+        81
+      ],
+      "anchor": [
+        53.0,
+        81
+      ],
+      "dx": 0,
+      "dy": -8
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_005.png",
+      "source_bbox": [
+        8,
+        8,
+        104,
+        77
+      ],
+      "anchor": [
+        56.0,
+        77
+      ],
+      "dx": -3,
+      "dy": -4
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_006.png",
+      "source_bbox": [
+        8,
+        8,
+        88,
+        74
+      ],
+      "anchor": [
+        48.0,
+        74
+      ],
+      "dx": 5,
+      "dy": -1
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v1/grey_wolf/grid/attack/frame_007.png",
+      "source_bbox": [
+        8,
+        8,
+        88,
+        75
+      ],
+      "anchor": [
+        48.0,
+        75
+      ],
+      "dx": 5,
+      "dy": -2
+    }
+  ]
+}

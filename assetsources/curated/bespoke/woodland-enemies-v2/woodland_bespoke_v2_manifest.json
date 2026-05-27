@@ -1,0 +1,291 @@
+{
+  "output_root": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2",
+  "contact": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/woodland_bespoke_v2_contact.png",
+  "enemies": [
+    {
+      "slug": "goblin_raider",
+      "label": "Goblin Raider",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/goblin_raider_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/goblin_raider_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/goblin_raider_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/goblin_raider_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "goblin_scout",
+      "label": "Goblin Scout",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/goblin_scout_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/grid/goblin_scout_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/goblin_scout_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/goblin_scout_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "goblin_shaman",
+      "label": "Goblin Shaman",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/goblin_shaman_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/goblin_shaman_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/goblin_shaman_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/goblin_shaman_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "grey_wolf",
+      "label": "Grey Wolf",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grey_wolf_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grid/grey_wolf_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grey_wolf_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grey_wolf_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "dire_wolf",
+      "label": "Dire Wolf",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/grid/dire_wolf_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "wild_boar",
+      "label": "Wild Boar",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/wild_boar/wild_boar_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/wild_boar/grid/wild_boar_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/wild_boar/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/wild_boar/wild_boar_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/wild_boar/wild_boar_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "thorn_hedgehog",
+      "label": "Thorn Hedgehog",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/thorn_hedgehog_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/thorn_hedgehog_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/thorn_hedgehog_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/thorn_hedgehog_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "forest_spider",
+      "label": "Forest Spider",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_spider/forest_spider_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_spider/grid/forest_spider_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_spider/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_spider/forest_spider_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_spider/forest_spider_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "forest_slime",
+      "label": "Forest Slime",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_slime/forest_slime_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_slime/grid/forest_slime_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_slime/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_slime/forest_slime_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_slime/forest_slime_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "mushroom_brute",
+      "label": "Mushroom Brute",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/grid/mushroom_brute_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "sapling_deer",
+      "label": "Sapling Deer",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/sapling_deer_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/sapling_deer_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/sapling_deer_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/sapling_deer_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "ancient_treant",
+      "label": "Ancient Treant",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/ancient_treant_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "bone_druid",
+      "label": "Bone Druid",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/grid/bone_druid_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "forest_pixie",
+      "label": "Forest Pixie",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/forest_pixie_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/forest_pixie_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/forest_pixie_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/forest_pixie_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "bog_wraith",
+      "label": "Bog Wraith",
+      "generated_chroma": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/bog_wraith_generated_chroma.png",
+      "cleaned_alpha_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/bog_wraith_generated_chroma_alpha.png",
+      "grid_manifest": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/grid_manifest.json",
+      "gifs": {
+        "walk": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/bog_wraith_walk_inspection.gif",
+        "attack": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/bog_wraith_attack_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    }
+  ]
+}

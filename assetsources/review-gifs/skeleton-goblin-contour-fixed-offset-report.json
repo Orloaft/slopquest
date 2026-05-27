@@ -1,0 +1,780 @@
+{
+  "skeleton": {
+    "gif": "tib/assetsources/review-gifs/skeleton-walk-directions-contour-fixed.gif",
+    "frames": 80,
+    "duration_ms": 8000,
+    "animated_first_diffs": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "magentaish_first_frame": 0,
+    "offset_report": {
+      "up": {
+        "source_direction": "up",
+        "frames": [
+          {
+            "source_box": [
+              298,
+              54,
+              96,
+              116
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              104,
+              124
+            ],
+            "applied_draw_shift": [
+              124,
+              108
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              471,
+              54,
+              93,
+              116
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              101,
+              124
+            ],
+            "applied_draw_shift": [
+              126,
+              108
+            ],
+            "placed_anchor": [
+              180.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              647,
+              54,
+              95,
+              117
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              103,
+              125
+            ],
+            "applied_draw_shift": [
+              124,
+              107
+            ],
+            "placed_anchor": [
+              179.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              826,
+              55,
+              94,
+              115
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              102,
+              123
+            ],
+            "applied_draw_shift": [
+              125,
+              109
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          }
+        ]
+      },
+      "right": {
+        "source_direction": "left",
+        "frames": [
+          {
+            "source_box": [
+              306,
+              499,
+              80,
+              110
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              88,
+              118
+            ],
+            "applied_draw_shift": [
+              132,
+              114
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              479,
+              500,
+              66,
+              109
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              74,
+              117
+            ],
+            "applied_draw_shift": [
+              139,
+              115
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              661,
+              500,
+              63,
+              112
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              71,
+              120
+            ],
+            "applied_draw_shift": [
+              140,
+              112
+            ],
+            "placed_anchor": [
+              179.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              839,
+              499,
+              77,
+              110
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              85,
+              118
+            ],
+            "applied_draw_shift": [
+              134,
+              114
+            ],
+            "placed_anchor": [
+              180.5,
+              232
+            ]
+          }
+        ]
+      },
+      "down": {
+        "source_direction": "down",
+        "frames": [
+          {
+            "source_box": [
+              296,
+              352,
+              92,
+              111
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              100,
+              119
+            ],
+            "applied_draw_shift": [
+              126,
+              113
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              468,
+              355,
+              92,
+              110
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              100,
+              118
+            ],
+            "applied_draw_shift": [
+              126,
+              114
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              648,
+              355,
+              93,
+              110
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              101,
+              118
+            ],
+            "applied_draw_shift": [
+              126,
+              114
+            ],
+            "placed_anchor": [
+              180.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              828,
+              353,
+              90,
+              112
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              98,
+              120
+            ],
+            "applied_draw_shift": [
+              127,
+              112
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          }
+        ]
+      },
+      "left": {
+        "source_direction": "right",
+        "frames": [
+          {
+            "source_box": [
+              296,
+              204,
+              83,
+              112
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              91,
+              120
+            ],
+            "applied_draw_shift": [
+              130,
+              112
+            ],
+            "placed_anchor": [
+              179.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              484,
+              206,
+              68,
+              111
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              76,
+              119
+            ],
+            "applied_draw_shift": [
+              138,
+              113
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              662,
+              206,
+              70,
+              111
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              78,
+              119
+            ],
+            "applied_draw_shift": [
+              137,
+              113
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              832,
+              206,
+              82,
+              110
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              90,
+              118
+            ],
+            "applied_draw_shift": [
+              131,
+              114
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "goblin": {
+    "gif": "tib/assetsources/review-gifs/goblin-walk-directions-contour-fixed.gif",
+    "frames": 80,
+    "duration_ms": 8000,
+    "animated_first_diffs": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "magentaish_first_frame": 0,
+    "offset_report": {
+      "up": {
+        "source_direction": "up",
+        "frames": [
+          {
+            "source_box": [
+              305,
+              46,
+              100,
+              113
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              108,
+              121
+            ],
+            "applied_draw_shift": [
+              122,
+              111
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              496,
+              41,
+              100,
+              118
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              108,
+              126
+            ],
+            "applied_draw_shift": [
+              122,
+              106
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              687,
+              41,
+              99,
+              118
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              107,
+              126
+            ],
+            "applied_draw_shift": [
+              122,
+              106
+            ],
+            "placed_anchor": [
+              179.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              876,
+              41,
+              101,
+              118
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              109,
+              126
+            ],
+            "applied_draw_shift": [
+              122,
+              106
+            ],
+            "placed_anchor": [
+              180.5,
+              232
+            ]
+          }
+        ]
+      },
+      "right": {
+        "source_direction": "left",
+        "frames": [
+          {
+            "source_box": [
+              307,
+              490,
+              89,
+              114
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              97,
+              122
+            ],
+            "applied_draw_shift": [
+              128,
+              110
+            ],
+            "placed_anchor": [
+              180.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              499,
+              490,
+              89,
+              114
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              97,
+              122
+            ],
+            "applied_draw_shift": [
+              128,
+              110
+            ],
+            "placed_anchor": [
+              180.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              689,
+              490,
+              86,
+              114
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              94,
+              122
+            ],
+            "applied_draw_shift": [
+              129,
+              110
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              877,
+              490,
+              89,
+              114
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              97,
+              122
+            ],
+            "applied_draw_shift": [
+              128,
+              110
+            ],
+            "placed_anchor": [
+              180.5,
+              232
+            ]
+          }
+        ]
+      },
+      "down": {
+        "source_direction": "down",
+        "frames": [
+          {
+            "source_box": [
+              303,
+              346,
+              99,
+              108
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              107,
+              116
+            ],
+            "applied_draw_shift": [
+              122,
+              116
+            ],
+            "placed_anchor": [
+              179.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              492,
+              346,
+              101,
+              108
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              109,
+              116
+            ],
+            "applied_draw_shift": [
+              122,
+              116
+            ],
+            "placed_anchor": [
+              180.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              685,
+              346,
+              99,
+              108
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              107,
+              116
+            ],
+            "applied_draw_shift": [
+              122,
+              116
+            ],
+            "placed_anchor": [
+              179.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              873,
+              346,
+              101,
+              108
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              109,
+              116
+            ],
+            "applied_draw_shift": [
+              122,
+              116
+            ],
+            "placed_anchor": [
+              180.5,
+              232
+            ]
+          }
+        ]
+      },
+      "left": {
+        "source_direction": "right",
+        "frames": [
+          {
+            "source_box": [
+              305,
+              190,
+              95,
+              110
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              103,
+              118
+            ],
+            "applied_draw_shift": [
+              124,
+              114
+            ],
+            "placed_anchor": [
+              179.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              502,
+              190,
+              90,
+              110
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              98,
+              118
+            ],
+            "applied_draw_shift": [
+              127,
+              114
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              694,
+              190,
+              89,
+              110
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              97,
+              118
+            ],
+            "applied_draw_shift": [
+              128,
+              114
+            ],
+            "placed_anchor": [
+              180.5,
+              232
+            ]
+          },
+          {
+            "source_box": [
+              878,
+              190,
+              94,
+              110
+            ],
+            "crop_bbox": [
+              8,
+              8,
+              102,
+              118
+            ],
+            "applied_draw_shift": [
+              125,
+              114
+            ],
+            "placed_anchor": [
+              180.0,
+              232
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
