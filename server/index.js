@@ -34,13 +34,28 @@ const TREE_SNAPSHOT_RADIUS_SQ = TREE_SNAPSHOT_RADIUS ** 2;
 const METRIC_WINDOW = 60;
 const SPATIAL_CELL_SIZE = 8;
 const TREE_RESPAWN_MS = 30000;
+const FIRE_DURATION_MS = 120000;
 const INVENTORY_SIZE = 30;
 const ITEMS = {
   axe: { id: "axe", label: "Bronze Axe", icon: "A", iconUrl: "/icons/item-axe.png" },
+  fishing_rod: { id: "fishing_rod", label: "Fishing Rod", icon: "R", iconUrl: "/icons/item-fishing-rod.png" },
+  flint_steel: { id: "flint_steel", label: "Flint and Steel", icon: "F", iconUrl: "/icons/item-flint-steel.png" },
   logs: { id: "logs", label: "Oak Logs", icon: "L", iconUrl: "/icons/item-logs.png" },
   pine_logs: { id: "pine_logs", label: "Pine Logs", icon: "P", iconUrl: "/icons/item-pine-logs.png" },
+  raw_fish: { id: "raw_fish", label: "Raw Fish", icon: "rF", iconUrl: "/icons/item-raw-fish.png" },
+  cooked_fish: { id: "cooked_fish", label: "Cooked Fish", icon: "cF", iconUrl: "/icons/item-cooked-fish.png" },
+  burnt_fish: { id: "burnt_fish", label: "Burnt Fish", icon: "bF", iconUrl: "/icons/item-burnt-fish.png" },
   potion: { id: "potion", label: "Health Potion", icon: "P", iconUrl: "/icons/item-potion.png" }
 };
+const FISHING_NODES = [
+  { id: "fish-0-7-9", floor: 0, x: 7.2, y: 9.5 },
+  { id: "fish-0-7-15", floor: 0, x: 7.2, y: 15.5 },
+  { id: "fish-0-7-27", floor: 0, x: 7.2, y: 27.5 },
+  { id: "fish-3-24-7", floor: 3, x: 24.4, y: 7.5 },
+  { id: "fish-3-28-18", floor: 3, x: 28.4, y: 18.5 },
+  { id: "fish-3-20-23", floor: 3, x: 20.5, y: 22.7 },
+  { id: "fish-3-36-26", floor: 3, x: 36.5, y: 25.7 }
+];
 const COMPOSED_TREE_NODES = [
   { floor: 0, x: 12.8, y: 10.7, type: "oak" },
   { floor: 0, x: 36.2, y: 17.4, type: "oak" },
@@ -77,10 +92,12 @@ const clients = new Map();
 const monsters = new Map();
 const corpses = new Map();
 const treeNodes = new Map();
+const fires = new Map();
 const npcs = new Map();
 let spatial = createSpatialIndex();
 let nextMonsterId = 1;
 let nextCorpseId = 1;
+let nextFireId = 1;
 const events = [];
 const metrics = {
   tickSamples: [],
@@ -131,6 +148,10 @@ wss.on("connection", (socket) => {
     if (message.type === "buy") buyItem(session.player, String(message.item ?? ""));
     if (message.type === "talkNpc") talkNpc(session.player, String(message.id ?? ""));
     if (message.type === "cutTree") cutTree(session.player, String(message.id ?? ""));
+    if (message.type === "fishNode") fishNode(session.player, String(message.id ?? ""));
+    if (message.type === "makeFire") makeFire(session.player, String(message.logItem ?? "logs"));
+    if (message.type === "cookFish") cookFish(session.player, String(message.id ?? ""));
+    if (message.type === "eatItem") eatItem(session.player, String(message.item ?? ""));
     if (message.type === "chat") chat(session.player, String(message.text ?? ""));
     if (message.type === "respawn") respawn(session.player);
   });
@@ -158,6 +179,7 @@ setInterval(() => {
   updatePlayers(dt, now);
   updateNpcs(dt, now);
   updateTreeNodes(now);
+  updateFires(now);
   rebuildSpatialIndex();
   updateMonsters(dt, now);
   recordSample(metrics.tickSamples, performance.now() - started);
@@ -197,6 +219,8 @@ function joinWorld(socket, message) {
   player.action = null;
   player.portalReadyAt = 0;
   player.dead = player.hp <= 0;
+  player.wellFedUntil = Number(player.wellFedUntil ?? 0);
+  player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
 
   clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now() });
   socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4] }));
@@ -250,6 +274,8 @@ function createPlayer(name) {
     potions: 2,
     weaponTier: 0,
     armorTier: 0,
+    wellFedUntil: 0,
+    foodRegenUntil: 0,
     inventory: createInventory(),
     quests: createQuestState(),
     skills: createSkillState()
@@ -264,6 +290,8 @@ function hydratePlayer(saved) {
   player.mana = clamp(player.mana, 0, player.maxMana);
   player.quests = normalizeQuestState(player.quests);
   player.inventory = normalizeInventory(player.inventory);
+  player.wellFedUntil = Number(player.wellFedUntil ?? 0);
+  player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
   return player;
 }
 
@@ -274,6 +302,7 @@ function updatePlayers(dt, now) {
     player.moving = false;
     if (player.dead) continue;
     const spec = CLASSES.adventurer;
+    const speed = spec.speed + (isWellFed(player, now) ? 0.25 : 0);
 
     const hasMoveVector = Math.hypot(Number(input.moveX), Number(input.moveY)) > 0.01;
     let dx = hasMoveVector ? Number(input.moveX) : Number(input.right) - Number(input.left);
@@ -284,7 +313,7 @@ function updatePlayers(dt, now) {
       dx /= length;
       dy /= length;
       player.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up";
-      moveEntity(player, dx * spec.speed * dt, dy * spec.speed * dt);
+      moveEntity(player, dx * speed * dt, dy * speed * dt);
     }
 
     const portal = now >= player.portalReadyAt ? portalFor(player.floor, player.x, player.y) : null;
@@ -297,6 +326,9 @@ function updatePlayers(dt, now) {
       event("system", `${player.name} changes depth.`);
     }
 
+    if (now < player.foodRegenUntil && player.hp < player.maxHp) {
+      player.hp = clamp(player.hp + dt * 2.8, 0, player.maxHp);
+    }
     player.mana = clamp(player.mana + dt * 2.5, 0, player.maxMana);
     autoAttack(player, now);
     updatePlayerAction(player, now);
@@ -339,7 +371,7 @@ function autoAttack(player, now) {
   if (distance(player, monster) > spec.range) return;
   if (now - player.lastAttack < spec.attackMs) return;
   player.lastAttack = now;
-  const damage = roll(spec.attackDamage) + skillLevel(player, "attack") + player.weaponTier * SHOP.weapon.damageBonus;
+  const damage = roll(spec.attackDamage) + skillLevel(player, "attack") + player.weaponTier * SHOP.weapon.damageBonus + wellFedPower(player);
   addSkillXp(player, "attack", Math.max(1, Math.floor(damage * 1.5)));
   damageMonster(player, monster, damage, "hit");
 }
@@ -364,7 +396,7 @@ function useAbility(player, slot) {
 
   player.cooldowns.ability = now + spec.abilityMs;
   player.mana -= spec.abilityCost;
-  const damage = roll(spec.abilityDamage) + skillLevel(player, "magic");
+  const damage = roll(spec.abilityDamage) + skillLevel(player, "magic") + wellFedPower(player);
   addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.8)));
   damageMonster(player, monster, damage, "flare");
 }
@@ -463,6 +495,22 @@ function buyItem(player, item) {
     player.gold -= SHOP.axe.cost;
     event("system", `${player.name} bought a bronze axe.`);
   }
+  if (item === "fishing_rod" && !hasInventoryItem(player, "fishing_rod") && player.gold >= SHOP.fishing_rod.cost) {
+    if (!addInventoryItem(player, "fishing_rod", 1)) {
+      event("system", "Your inventory is full.");
+      return;
+    }
+    player.gold -= SHOP.fishing_rod.cost;
+    event("system", `${player.name} bought a fishing rod.`);
+  }
+  if (item === "flint_steel" && !hasInventoryItem(player, "flint_steel") && player.gold >= SHOP.flint_steel.cost) {
+    if (!addInventoryItem(player, "flint_steel", 1)) {
+      event("system", "Your inventory is full.");
+      return;
+    }
+    player.gold -= SHOP.flint_steel.cost;
+    event("system", `${player.name} bought flint and steel.`);
+  }
 }
 
 function respawn(player) {
@@ -530,8 +578,66 @@ function cutTree(player, id) {
   event("float", `You start chopping ${treeSpec.label}.`, tree.x, tree.y, tree.floor, "#d8c68a");
 }
 
+function fishNode(player, id) {
+  const node = FISHING_NODES.find((item) => item.id === id);
+  if (!node || player.dead || node.floor !== player.floor || distance(player, node) > 1.95) return;
+  if (!hasInventoryItem(player, "fishing_rod")) {
+    event("float", "You need a fishing rod.", player.x, player.y, player.floor, "#f7d486");
+    return;
+  }
+  player.targetId = null;
+  const level = skillLevel(player, "fishing");
+  player.action = { type: "fishing", nodeId: node.id, nextAt: performance.now() + fishingCatchMs(level), startedAt: performance.now() };
+  event("float", "You cast your line.", node.x, node.y, node.floor, "#8fd8ff");
+}
+
+function makeFire(player, logItem = "logs") {
+  if (player.dead || !hasInventoryItem(player, "flint_steel")) return;
+  const itemId = logItem === "pine_logs" ? "pine_logs" : "logs";
+  if (!removeInventoryItem(player, itemId, 1)) return;
+  const placement = nearestFirePlacement(player);
+  if (!placement) {
+    addInventoryItem(player, itemId, 1);
+    event("float", "No room for a fire.", player.x, player.y, player.floor, "#f7d486");
+    return;
+  }
+  const fire = {
+    id: `fire-${nextFireId++}`,
+    floor: player.floor,
+    x: placement.x,
+    y: placement.y,
+    expiresAt: performance.now() + FIRE_DURATION_MS,
+    owner: player.name
+  };
+  fires.set(fire.id, fire);
+  addSkillXp(player, "firemaking", itemId === "pine_logs" ? 18 : 10);
+  event("effect", "fire", fire.x, fire.y, fire.floor, null, player.id, fire.id);
+  event("float", "Fire lit", fire.x, fire.y, fire.floor, "#ffb35c");
+}
+
+function cookFish(player, id) {
+  const fire = fires.get(id);
+  if (!fire || player.dead || fire.floor !== player.floor || distance(player, fire) > 1.9) return;
+  if (!hasInventoryItem(player, "raw_fish")) return;
+  player.targetId = null;
+  player.action = { type: "cooking", fireId: fire.id, nextAt: performance.now() + cookingMs(skillLevel(player, "cooking")) };
+  event("float", "Cooking...", fire.x, fire.y, fire.floor, "#ffcf7a");
+}
+
+function eatItem(player, itemId) {
+  if (player.dead || itemId !== "cooked_fish" || !removeInventoryItem(player, "cooked_fish", 1)) return;
+  const now = performance.now();
+  player.foodRegenUntil = Math.max(player.foodRegenUntil ?? 0, now + 18000);
+  player.wellFedUntil = Math.max(player.wellFedUntil ?? 0, now + 90000);
+  player.hp = clamp(player.hp + 6, 0, player.maxHp);
+  event("float", "Well fed", player.x, player.y, player.floor, "#9ee6b1");
+}
+
 function updatePlayerAction(player, now) {
-  if (!player.action || player.action.type !== "woodcutting") return;
+  if (!player.action) return;
+  if (player.action.type === "fishing") return updateFishingAction(player, now);
+  if (player.action.type === "cooking") return updateCookingAction(player, now);
+  if (player.action.type !== "woodcutting") return;
   const tree = treeNodes.get(player.action.treeId);
   if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distance(player, tree) > 1.9) {
     player.action = null;
@@ -557,6 +663,46 @@ function updatePlayerAction(player, now) {
   addSkillXp(player, "woodcutting", treeSpec.xp);
   dropItem(tree.floor, tree.x + 0.12, tree.y, [{ id: treeSpec.itemId, qty: 1 }], treeSpec.dropLabel);
   event("float", `+${treeSpec.xp} Woodcutting`, tree.x, tree.y, tree.floor, "#9ee6b1");
+}
+
+function updateFishingAction(player, now) {
+  const node = FISHING_NODES.find((item) => item.id === player.action.nodeId);
+  if (!node || player.dead || node.floor !== player.floor || distance(player, node) > 2 || !hasInventoryItem(player, "fishing_rod")) {
+    player.action = null;
+    return;
+  }
+  if (now < player.action.nextAt) return;
+  player.action = null;
+  if (!addInventoryItem(player, "raw_fish", 1)) {
+    event("system", "Your inventory is full.");
+    return;
+  }
+  const xp = 18;
+  addSkillXp(player, "fishing", xp);
+  event("effect", "fish", node.x, node.y, node.floor, null, player.id, node.id);
+  event("float", `+${xp} Fishing`, node.x, node.y, node.floor, "#8fd8ff");
+}
+
+function updateCookingAction(player, now) {
+  const fire = fires.get(player.action.fireId);
+  if (!fire || player.dead || fire.floor !== player.floor || distance(player, fire) > 2) {
+    player.action = null;
+    return;
+  }
+  if (now < player.action.nextAt) return;
+  player.action = null;
+  if (!removeInventoryItem(player, "raw_fish", 1)) return;
+  const level = skillLevel(player, "cooking");
+  const successChance = clamp(0.45 + level * 0.035, 0.45, 0.92);
+  const cooked = Math.random() < successChance;
+  const result = cooked ? "cooked_fish" : "burnt_fish";
+  if (!addInventoryItem(player, result, 1)) {
+    addInventoryItem(player, "raw_fish", 1);
+    event("system", "Your inventory is full.");
+    return;
+  }
+  if (cooked) addSkillXp(player, "cooking", 22);
+  event("float", cooked ? "+22 Cooking" : "Burnt", fire.x, fire.y, fire.floor, cooked ? "#9ee6b1" : "#a8a29e");
 }
 
 function treeTypeSpec(tree) {
@@ -670,6 +816,12 @@ function pickNpcWanderTarget(npc) {
 function updateTreeNodes(now) {
   for (const tree of treeNodes.values()) {
     if (!tree.active && now >= tree.respawnAt) tree.active = true;
+  }
+}
+
+function updateFires(now) {
+  for (const [id, fire] of fires) {
+    if (now >= fire.expiresAt) fires.delete(id);
   }
 }
 
@@ -787,7 +939,7 @@ function awardLevels(player) {
 }
 
 function armorReduction(player) {
-  return Math.floor(skillLevel(player, "defense") / 3) + player.armorTier * SHOP.armor.armorBonus;
+  return Math.floor(skillLevel(player, "defense") / 3) + player.armorTier * SHOP.armor.armorBonus + wellFedPower(player);
 }
 
 function broadcastState() {
@@ -835,6 +987,13 @@ function buildSnapshotFor(viewer) {
     visibleTrees.push(serializeTree(tree));
   }
 
+  const visibleFishingNodes = FISHING_NODES
+    .filter((node) => inInterestRange(viewer, node))
+    .map(serializeFishingNode);
+  const visibleFires = [...fires.values()]
+    .filter((fire) => inInterestRange(viewer, fire))
+    .map(serializeFire);
+
   return {
     type: "state",
     players,
@@ -842,6 +1001,8 @@ function buildSnapshotFor(viewer) {
     corpses: visibleCorpses,
     npcs: visibleNpcs,
     trees: visibleTrees,
+    fishingNodes: visibleFishingNodes,
+    fires: visibleFires,
     events: events.filter((item) => eventVisibleTo(viewer, item)),
     metrics: {
       clients: clients.size,
@@ -851,6 +1012,8 @@ function buildSnapshotFor(viewer) {
       visibleMonsters: visibleMonsters.length,
       visibleCorpses: visibleCorpses.length,
       visibleTrees: visibleTrees.length,
+      visibleFishingNodes: visibleFishingNodes.length,
+      visibleFires: visibleFires.length,
       spatialCells: spatial.cellCount,
       tickMs: round(avg(metrics.tickSamples)),
       snapshotMs: round(avg(metrics.snapshotSamples)),
@@ -881,7 +1044,8 @@ function serializePlayer(player) {
     armorTier: player.armorTier,
     targetId: player.targetId,
     dead: player.dead,
-    action: player.action ? { type: player.action.type, treeId: player.action.treeId } : null,
+    action: player.action ? { type: player.action.type, treeId: player.action.treeId, nodeId: player.action.nodeId, fireId: player.action.fireId } : null,
+    buffs: serializeBuffs(player),
     inventory: serializeInventory(player.inventory),
     quests: serializeQuests(player),
     skills: serializeSkills(player)
@@ -932,6 +1096,31 @@ function serializeTree(tree) {
   };
 }
 
+function serializeFishingNode(node) {
+  return {
+    ...node,
+    label: "Fishing spot"
+  };
+}
+
+function serializeFire(fire) {
+  return {
+    id: fire.id,
+    floor: fire.floor,
+    x: fire.x,
+    y: fire.y,
+    remainingMs: Math.max(0, Math.round(fire.expiresAt - performance.now()))
+  };
+}
+
+function serializeBuffs(player) {
+  const now = performance.now();
+  return {
+    wellFed: Math.max(0, Math.round((player.wellFedUntil ?? 0) - now)),
+    foodRegen: Math.max(0, Math.round((player.foodRegenUntil ?? 0) - now))
+  };
+}
+
 function inInterestRange(viewer, entity) {
   if (viewer.floor !== entity.floor) return false;
   return distanceSq(viewer, entity) <= SNAPSHOT_RADIUS_SQ;
@@ -963,6 +1152,8 @@ function persistPlayerToDb(player) {
     potions: player.potions,
     weaponTier: player.weaponTier,
     armorTier: player.armorTier,
+    wellFedUntil: player.wellFedUntil ?? 0,
+    foodRegenUntil: player.foodRegenUntil ?? 0,
     inventory: serializeInventory(player.inventory),
     quests: normalizeQuestState(player.quests),
     skills: normalizeSkillState(player.skills),
@@ -1112,7 +1303,7 @@ function hasInventoryItem(player, id) {
 function addInventoryItem(player, id, qty = 1) {
   if (!ITEMS[id]) return false;
   let remaining = Math.max(1, Math.floor(qty));
-  const stackable = id !== "axe";
+  const stackable = !["axe", "fishing_rod", "flint_steel"].includes(id);
   if (stackable) {
     const existing = player.inventory.find((item) => item?.id === id);
     if (existing) {
@@ -1126,6 +1317,24 @@ function addInventoryItem(player, id, qty = 1) {
     remaining -= stackable ? remaining : 1;
   }
   return remaining === 0;
+}
+
+function removeInventoryItem(player, id, qty = 1) {
+  let remaining = Math.max(1, Math.floor(qty));
+  const available = player.inventory.reduce((sum, item) => sum + (item?.id === id ? item.qty : 0), 0);
+  if (available < remaining) return false;
+  for (const item of player.inventory) {
+    if (!item || item.id !== id) continue;
+    const taken = Math.min(item.qty, remaining);
+    item.qty -= taken;
+    remaining -= taken;
+    if (remaining <= 0) break;
+  }
+  if (remaining > 0) return false;
+  for (let i = 0; i < player.inventory.length; i += 1) {
+    if (player.inventory[i]?.qty <= 0) player.inventory[i] = null;
+  }
+  return true;
 }
 
 function normalizeSkillState(saved = {}) {
@@ -1158,6 +1367,37 @@ function addSkillXp(player, id, amount) {
   const after = skillLevel(player, id);
   if (after > before) event("system", `${player.name} reached ${SKILLS[id].label} ${after}.`);
   if (id === "defense" || id === "magic") recalculateVitals(player);
+}
+
+function fishingCatchMs(level) {
+  return clamp(3600 - (level - 1) * 80, 1600, 3600);
+}
+
+function cookingMs(level) {
+  return clamp(2800 - (level - 1) * 55, 1300, 2800);
+}
+
+function nearestFirePlacement(player) {
+  const candidates = [
+    { x: player.x + 0.65, y: player.y },
+    { x: player.x - 0.65, y: player.y },
+    { x: player.x, y: player.y + 0.65 },
+    { x: player.x, y: player.y - 0.65 },
+    { x: player.x, y: player.y }
+  ];
+  return candidates.find((candidate) => canStand(player.floor, candidate.x, candidate.y) && !fireTooClose(player.floor, candidate.x, candidate.y)) ?? null;
+}
+
+function fireTooClose(floor, x, y) {
+  return [...fires.values()].some((fire) => fire.floor === floor && Math.hypot(fire.x - x, fire.y - y) < 1.2);
+}
+
+function isWellFed(player, now = performance.now()) {
+  return now < (player.wellFedUntil ?? 0);
+}
+
+function wellFedPower(player) {
+  return isWellFed(player) ? 2 : 0;
 }
 
 function levelForXp(xp) {

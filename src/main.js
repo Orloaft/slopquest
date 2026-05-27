@@ -43,6 +43,7 @@ const dom = {
   potionText: document.querySelector("#potionText"),
   weaponText: document.querySelector("#weaponText"),
   armorText: document.querySelector("#armorText"),
+  buffTracker: document.querySelector("#buffTracker"),
   questTracker: document.querySelector("#questTracker"),
   skillTracker: document.querySelector("#skillTracker"),
   inventoryGrid: document.querySelector("#inventoryGrid"),
@@ -112,6 +113,8 @@ let pendingTreeCut = null;
 let pendingAttackTarget = null;
 let pendingLootTarget = null;
 let pendingNpcTalk = null;
+let pendingFishingNode = null;
+let pendingCookingFire = null;
 let dynamicPathTarget = null;
 let lastDynamicPathRefreshAt = 0;
 let clickMarker = null;
@@ -123,7 +126,10 @@ const monsterViews = new Map();
 const corpseViews = new Map();
 const npcViews = new Map();
 const treeViews = new Map();
+const fishingViews = new Map();
+const fireViews = new Map();
 const floaters = [];
+let selectedInventoryItem = null;
 const DIRECTIONS = ["up", "right", "down", "left"];
 const WALK_FRAME_MS = 125;
 const DYNAMIC_PATH_REFRESH_MS = 350;
@@ -140,6 +146,7 @@ function preload() {
   this.load.image("forestTiles", "/foresttiles.png");
   this.load.image("graveyardTiles", "/graveyardtiles.png");
   this.load.image("effectsSheet", "/effects.png");
+  this.load.image("waterFishingSpots", "/water-fishing-spots.png");
 }
 
 function create() {
@@ -157,6 +164,7 @@ function create() {
   makeSpriteTexture(this, "forestTiles", "spriteTree", 578, 28, 120, 150);
   makeSpriteTexture(this, "forestTiles", "spritePine", 820, 30, 82, 150);
   makeSpriteTexture(this, "forestTiles", "spriteRock", 640, 500, 92, 72);
+  makeSpriteTexture(this, "waterFishingSpots", "spriteFishingSpot", 640, 128, 160, 96);
   makeSpriteTexture(this, "graveyardTiles", "spriteGrave", 580, 360, 58, 78);
   makeSpriteTexture(this, "graveyardTiles", "spriteFence", 20, 552, 126, 66);
   makeSpriteTexture(this, "graveyardTiles", "spriteDeadTree", 548, 18, 116, 198);
@@ -326,6 +334,8 @@ function syncEntities() {
   const visibleCorpses = new Set();
   const visibleNpcs = new Set();
   const visibleTrees = new Set();
+  const visibleFishingNodes = new Set();
+  const visibleFires = new Set();
 
   for (const player of latestState.players.filter((item) => item.floor === me.floor)) {
     visiblePlayers.add(player.id);
@@ -336,7 +346,7 @@ function syncEntities() {
       entityLayer.add(view);
     }
     setEntityTarget(view, player.x * TILE_SIZE, player.y * TILE_SIZE);
-    setActorAnimation(view, "knight", player.dir, player.moving || player.action?.type === "woodcutting", 40, 48);
+    setActorAnimation(view, "knight", player.dir, player.moving || ["woodcutting", "fishing", "cooking"].includes(player.action?.type), 40, 48);
     view.setAlpha(player.dead ? 0.45 : 1);
     view.nameText.setText(player.name);
     view.hp.width = 34 * (player.hp / player.maxHp);
@@ -444,6 +454,41 @@ function syncEntities() {
       treeViews.delete(id);
     }
   }
+
+  for (const node of (latestState.fishingNodes ?? []).filter((item) => item.floor === me.floor)) {
+    visibleFishingNodes.add(node.id);
+    let view = fishingViews.get(node.id);
+    if (!view) {
+      view = createFishingNodeView(node);
+      fishingViews.set(node.id, view);
+      entityLayer.add(view);
+    }
+    view.setPosition(node.x * TILE_SIZE, node.y * TILE_SIZE);
+    view.sprite.setScale(1 + Math.sin(scene.time.now / 360 + node.x) * 0.04);
+  }
+  for (const [id, view] of fishingViews) {
+    if (!visibleFishingNodes.has(id)) {
+      view.destroy();
+      fishingViews.delete(id);
+    }
+  }
+
+  for (const fire of (latestState.fires ?? []).filter((item) => item.floor === me.floor)) {
+    visibleFires.add(fire.id);
+    let view = fireViews.get(fire.id);
+    if (!view) {
+      view = createFireView(fire);
+      fireViews.set(fire.id, view);
+      entityLayer.add(view);
+    }
+    view.setPosition(fire.x * TILE_SIZE, fire.y * TILE_SIZE);
+  }
+  for (const [id, view] of fireViews) {
+    if (!visibleFires.has(id)) {
+      view.destroy();
+      fireViews.delete(id);
+    }
+  }
 }
 
 function createPlayerView(player) {
@@ -516,6 +561,36 @@ function treeTypeSpec(tree) {
   return TREE_TYPES[tree.type] ?? TREE_TYPES.oak;
 }
 
+function createFishingNodeView(node) {
+  const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE);
+  const ring = scene.add.ellipse(0, 8, 38, 16, 0x4db6d8, 0.24).setStrokeStyle(2, 0x8fd8ff, 0.75);
+  const sprite = scene.add.image(0, -4, "spriteFishingSpot").setDisplaySize(44, 30);
+  const label = scene.add.text(0, -27, "Fishing spot", textStyle(10, "#8fd8ff")).setOrigin(0.5);
+  const zone = scene.add.zone(0, -2, 54, 44).setInteractive({ cursor: "pointer" });
+  zone.on("pointerdown", (pointer, localX, localY, event) => {
+    event.stopPropagation();
+    startFishingPath(node);
+  });
+  view.add([ring, sprite, label, zone]);
+  view.sprite = sprite;
+  return view;
+}
+
+function createFireView(fire) {
+  const view = scene.add.container(fire.x * TILE_SIZE, fire.y * TILE_SIZE);
+  const glow = scene.add.ellipse(0, 7, 34, 16, 0xff7a2f, 0.28);
+  const logs = scene.add.rectangle(0, 12, 26, 7, 0x6b3f20).setStrokeStyle(1, 0x2c1b10);
+  const flame = scene.add.triangle(0, -4, 0, 16, 12, -11, 24, 16, 0xffb23d).setStrokeStyle(2, 0xff6f2c);
+  const zone = scene.add.zone(0, -2, 48, 48).setInteractive({ cursor: "pointer" });
+  zone.on("pointerdown", (pointer, localX, localY, event) => {
+    event.stopPropagation();
+    startCookingPath(fire);
+  });
+  view.add([glow, logs, flame, zone]);
+  view.flame = flame;
+  return view;
+}
+
 function createMonsterView(monster) {
   const view = scene.add.container(monster.x * TILE_SIZE, monster.y * TILE_SIZE);
   view.targetX = view.x;
@@ -586,6 +661,10 @@ function animateEntities() {
   for (const view of playerViews.values()) animateActor(view);
   for (const view of monsterViews.values()) animateActor(view);
   for (const view of npcViews.values()) animateActor(view);
+  for (const view of fireViews.values()) {
+    if (!view.flame) continue;
+    view.flame.setScale(1 + Math.sin(scene.time.now / 95) * 0.08, 1 + Math.cos(scene.time.now / 120) * 0.06);
+  }
 }
 
 function animateActor(view) {
@@ -614,6 +693,7 @@ function renderHud(me) {
   dom.potionText.textContent = me.potions;
   dom.weaponText.textContent = me.weaponTier ? SHOP.weapon.knightName : "Basic";
   dom.armorText.textContent = me.armorTier ? SHOP.armor.name : "Cloth";
+  renderBuffTracker(me.buffs);
   renderQuestTracker(me.quests);
   renderSkillTracker(me.skills);
   renderInventory(me.inventory);
@@ -642,6 +722,14 @@ function renderQuestTracker(quests = []) {
   dom.questTracker.textContent = `${quest.title}: ${status}`;
 }
 
+function renderBuffTracker(buffs = {}) {
+  const active = [];
+  if ((buffs.wellFed ?? 0) > 0) active.push(`Well fed ${Math.ceil(buffs.wellFed / 1000)}s`);
+  if ((buffs.foodRegen ?? 0) > 0) active.push(`Food heal ${Math.ceil(buffs.foodRegen / 1000)}s`);
+  dom.buffTracker.textContent = active.join(" | ");
+  dom.buffTracker.classList.toggle("hidden", !active.length);
+}
+
 function renderSkillTracker(skills = []) {
   dom.skillTracker.innerHTML = skills
     .map((skill) => {
@@ -665,12 +753,32 @@ function renderSkillTracker(skills = []) {
 function renderInventory(inventory = []) {
   const slots = Array.from({ length: 30 }, (_, index) => inventory[index] ?? null);
   dom.inventoryGrid.innerHTML = slots
-    .map((item) => {
-      if (!item) return `<div class="inventory-slot empty">.</div>`;
+    .map((item, index) => {
+      if (!item) return `<button class="inventory-slot empty" type="button" data-slot="${index}">.</button>`;
       const qty = item.qty > 1 ? `<span>${item.qty}</span>` : "";
-      return `<div class="inventory-slot" title="${escapeHtml(item.label)}">${iconMarkup(item.iconUrl, item.icon, "item-icon")}${qty}</div>`;
+      const selected = selectedInventoryItem === item.id ? " selected" : "";
+      return `<button class="inventory-slot${selected}" type="button" data-slot="${index}" data-item="${escapeHtml(item.id)}" title="${escapeHtml(item.label)}">${iconMarkup(item.iconUrl, item.icon, "item-icon")}${qty}</button>`;
     })
     .join("");
+  dom.inventoryGrid.querySelectorAll("[data-item]").forEach((slot) => {
+    slot.addEventListener("click", () => handleInventoryClick(slot.dataset.item));
+    slot.addEventListener("dblclick", () => {
+      if (slot.dataset.item === "cooked_fish") send({ type: "eatItem", item: "cooked_fish" });
+    });
+  });
+}
+
+function handleInventoryClick(itemId) {
+  if (selectedInventoryItem === "flint_steel" && (itemId === "logs" || itemId === "pine_logs")) {
+    send({ type: "makeFire", logItem: itemId });
+    selectedInventoryItem = null;
+    return;
+  }
+  if (["flint_steel", "raw_fish"].includes(itemId)) {
+    selectedInventoryItem = selectedInventoryItem === itemId ? null : itemId;
+    renderInventory(self()?.inventory ?? []);
+    return;
+  }
 }
 
 function iconMarkup(url, fallback, className) {
@@ -793,6 +901,34 @@ function inputTowardDestination(me) {
       return null;
     }
   }
+  if (pendingFishingNode) {
+    const node = latestState?.fishingNodes?.find((item) => item.id === pendingFishingNode);
+    if (!node || node.floor !== me.floor) {
+      clearClickDestination();
+      return null;
+    }
+    if (Phaser.Math.Distance.Between(me.x, me.y, node.x, node.y) <= 1.85) {
+      const nodeId = pendingFishingNode;
+      clearClickDestination();
+      sendStopInput();
+      send({ type: "fishNode", id: nodeId });
+      return null;
+    }
+  }
+  if (pendingCookingFire) {
+    const fire = latestState?.fires?.find((item) => item.id === pendingCookingFire);
+    if (!fire || fire.floor !== me.floor) {
+      clearClickDestination();
+      return null;
+    }
+    if (Phaser.Math.Distance.Between(me.x, me.y, fire.x, fire.y) <= 1.8) {
+      const fireId = pendingCookingFire;
+      clearClickDestination();
+      sendStopInput();
+      send({ type: "cookFish", id: fireId });
+      return null;
+    }
+  }
   const dx = clickDestination.x - me.x;
   const dy = clickDestination.y - me.y;
   const distance = Math.hypot(dx, dy);
@@ -804,6 +940,10 @@ function inputTowardDestination(me) {
     } else if (pendingLootTarget && refreshLootPath(me)) {
       return null;
     } else if (pendingNpcTalk && refreshNpcTalkPath(me)) {
+      return null;
+    } else if (pendingFishingNode && refreshFishingPath(me)) {
+      return null;
+    } else if (pendingCookingFire && refreshCookingPath(me)) {
       return null;
     } else {
       clearClickDestination();
@@ -912,6 +1052,48 @@ function startNpcTalkPath(npcOrId) {
   }
 }
 
+function startFishingPath(node) {
+  const me = self();
+  if (!me || !node || node.floor !== me.floor) return;
+  clearClickDestination();
+  pendingFishingNode = node.id;
+  if (Phaser.Math.Distance.Between(me.x, me.y, node.x, node.y) <= 1.85) {
+    pendingFishingNode = null;
+    send({ type: "fishNode", id: node.id });
+    return;
+  }
+  if (!refreshFishingPath(me, node)) pendingFishingNode = null;
+}
+
+function refreshFishingPath(me, node = null) {
+  const target = node ?? latestState?.fishingNodes?.find((item) => item.id === pendingFishingNode);
+  if (!target || target.floor !== me.floor) return false;
+  if (Phaser.Math.Distance.Between(me.x, me.y, target.x, target.y) <= 1.85) return true;
+  const destination = nearestEntityApproachTile(me, target, 1.75);
+  return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, null, null, target.id));
+}
+
+function startCookingPath(fire) {
+  const me = self();
+  if (!me || !fire || fire.floor !== me.floor || selectedInventoryItem !== "raw_fish") return;
+  clearClickDestination();
+  pendingCookingFire = fire.id;
+  if (Phaser.Math.Distance.Between(me.x, me.y, fire.x, fire.y) <= 1.8) {
+    pendingCookingFire = null;
+    send({ type: "cookFish", id: fire.id });
+    return;
+  }
+  if (!refreshCookingPath(me, fire)) pendingCookingFire = null;
+}
+
+function refreshCookingPath(me, fire = null) {
+  const target = fire ?? latestState?.fires?.find((item) => item.id === pendingCookingFire);
+  if (!target || target.floor !== me.floor) return false;
+  if (Phaser.Math.Distance.Between(me.x, me.y, target.x, target.y) <= 1.8) return true;
+  const destination = nearestEntityApproachTile(me, target, 1.7);
+  return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, null, null, null, target.id));
+}
+
 function refreshNpcTalkPath(me, npc = null) {
   const target = npc ?? latestState?.npcs?.find((item) => item.id === pendingNpcTalk);
   if (!target || target.floor !== me.floor) return false;
@@ -990,7 +1172,7 @@ function nearestEntityApproachTile(me, entity, maxRange) {
   return candidates[0] ?? null;
 }
 
-function startPathToTile(floor, tx, ty, treeId = null, attackId = null, lootId = null, npcId = null) {
+function startPathToTile(floor, tx, ty, treeId = null, attackId = null, lootId = null, npcId = null, fishingId = null, fireId = null) {
   const me = self();
   if (!me || floor !== me.floor) return false;
   const destination = findReachableClickTile(floor, Math.floor(me.x), Math.floor(me.y), tx, ty);
@@ -1003,6 +1185,8 @@ function startPathToTile(floor, tx, ty, treeId = null, attackId = null, lootId =
   pendingAttackTarget = attackId;
   pendingLootTarget = lootId;
   pendingNpcTalk = npcId;
+  pendingFishingNode = fishingId;
+  pendingCookingFire = fireId;
   if (!attackId && !npcId) dynamicPathTarget = null;
   drawClickMarker({ floor, x: destination.x + 0.5, y: destination.y + 0.5 });
   return true;
@@ -1186,6 +1370,8 @@ function clearClickDestination() {
   pendingAttackTarget = null;
   pendingLootTarget = null;
   pendingNpcTalk = null;
+  pendingFishingNode = null;
+  pendingCookingFire = null;
   dynamicPathTarget = null;
   if (clickMarker) clickMarker.setVisible(false);
 }
@@ -1302,6 +1488,20 @@ function playCombatEffect(event) {
   const fromX = (event.fromX ?? event.x) * TILE_SIZE;
   const fromY = (event.fromY ?? event.y) * TILE_SIZE - 10;
   const angle = Phaser.Math.Angle.Between(fromX, fromY, targetX, targetY);
+
+  if (event.text === "fish") {
+    const splash = scene.add.ellipse(targetX, targetY + 12, 38, 16, 0x8fd8ff, 0.48).setStrokeStyle(2, 0xbbeeff);
+    fxLayer.add(splash);
+    scene.tweens.add({ targets: splash, alpha: 0, scale: 1.7, duration: 520, onComplete: () => splash.destroy() });
+    return;
+  }
+
+  if (event.text === "fire") {
+    const spark = scene.add.circle(targetX, targetY, 12, 0xffb23d, 0.72);
+    fxLayer.add(spark);
+    scene.tweens.add({ targets: spark, alpha: 0, scale: 2.2, duration: 420, onComplete: () => spark.destroy() });
+    return;
+  }
 
   if (event.text === "bolt" || event.text === "flare") {
     const family = event.text === "flare" ? "fireMissile" : "iceMissile";

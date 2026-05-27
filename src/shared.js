@@ -38,7 +38,10 @@ export const SKILLS = {
   attack: { label: "Attack", iconUrl: "/icons/skill-attack.png" },
   defense: { label: "Defense", iconUrl: "/icons/skill-defense.png" },
   magic: { label: "Magic", iconUrl: "/icons/skill-magic.png" },
-  woodcutting: { label: "Woodcutting", iconUrl: "/icons/skill-woodcutting.png" }
+  woodcutting: { label: "Woodcutting", iconUrl: "/icons/skill-woodcutting.png" },
+  fishing: { label: "Fishing", iconUrl: "/icons/skill-fishing.png" },
+  firemaking: { label: "Firemaking", iconUrl: "/icons/skill-firemaking.png" },
+  cooking: { label: "Cooking", iconUrl: "/icons/skill-cooking.png" }
 };
 
 export const TREE_TYPES = {
@@ -89,6 +92,8 @@ export const SHOP = {
   weapon: { cost: 90, knightName: "Iron Sabre", casterName: "Amber Wand", damageBonus: 7 },
   armor: { cost: 75, name: "Padded Mail", armorBonus: 4 },
   axe: { cost: 25, name: "Bronze Axe" },
+  fishing_rod: { cost: 18, name: "Fishing Rod" },
+  flint_steel: { cost: 16, name: "Flint and Steel" },
   potion: { cost: 12, name: "Health Potion", heal: 58 }
 };
 
