@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tib MVP</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="game"></div>
+
+      <section id="join" class="join-panel">
+        <div class="brand">Waystone</div>
+        <p class="subcopy">A tiny shared dungeon for five brave friends.</p>
+        <label>
+          Name
+          <input id="nameInput" maxlength="18" autocomplete="off" value="wanderer" />
+        </label>
+        <div class="class-row" role="group" aria-label="Class">
+          <button class="class-card selected" data-class="knight">
+            <strong>Knight</strong>
+            <span>High health, close-range strike</span>
+          </button>
+          <button class="class-card" data-class="caster">
+            <strong>Caster</strong>
+            <span>Ranged bolts, more mana</span>
+          </button>
+        </div>
+        <button id="joinButton" class="primary">Enter world</button>
+      </section>
+
+      <div id="hud" class="hud hidden">
+        <div class="top-left panel">
+          <div class="identity">
+            <strong id="charName">-</strong>
+            <span id="classLabel">-</span>
+          </div>
+          <div class="bar hp"><span id="hpBar"></span><b id="hpText"></b></div>
+          <div class="bar mana"><span id="manaBar"></span><b id="manaText"></b></div>
+          <div class="bar xp"><span id="xpBar"></span><b id="xpText"></b></div>
+        </div>
+
+        <div class="top-right panel">
+          <div class="stat-grid">
+            <span>Level</span><b id="levelText">1</b>
+            <span>Gold</span><b id="goldText">0</b>
+            <span>Potions</span><b id="potionText">0</b>
+            <span>Weapon</span><b id="weaponText">Basic</b>
+            <span>Armor</span><b id="armorText">Cloth</b>
+          </div>
+          <div id="netStats" class="net-stats">net -</div>
+          <div id="vendor" class="vendor hidden">
+            <div class="vendor-title">Wayfarer Trader</div>
+            <button data-buy="weapon">Buy weapon</button>
+            <button data-buy="armor">Buy armor</button>
+            <button data-buy="potion">Buy potion</button>
+          </div>
+        </div>
+
+        <div class="bottom-left panel chat">
+          <div id="chatLog"></div>
+          <form id="chatForm">
+            <input id="chatInput" maxlength="120" autocomplete="off" placeholder="party chat..." />
+          </form>
+        </div>
+
+        <div class="actionbar panel">
+          <button id="abilityOne"><b>1</b><span>Strike</span></button>
+          <button id="potionButton"><b>2</b><span>Potion</span></button>
+          <button id="lootButton"><b>F</b><span>Loot</span></button>
+          <button id="vendorButton"><b>B</b><span>Buy</span></button>
+        </div>
+
+        <div id="death" class="death hidden panel">
+          <strong>You fell.</strong>
+          <button id="respawnButton">Respawn at temple</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

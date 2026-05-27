@@ -1,0 +1,18 @@
+{
+  "name": "tib-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"vite --host 0.0.0.0\" \"node server/index.js\"",
+    "client": "vite --host 0.0.0.0",
+    "server": "node server/index.js",
+    "check": "node --check server/index.js && node --check src/shared.js && node --check src/main.js"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2",
+    "phaser": "^3.90.0",
+    "vite": "^6.3.5",
+    "ws": "^8.18.2"
+  }
+}
