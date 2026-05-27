@@ -697,7 +697,7 @@ function handleWorldClick(pointer) {
   const tx = Math.floor(pointer.worldX / TILE_SIZE);
   const ty = Math.floor(pointer.worldY / TILE_SIZE);
   const me = self();
-  startPathToTile(me.floor, tx, ty);
+  if (!startPathToTile(me.floor, tx, ty)) clearClickDestination();
 }
 
 function inputTowardDestination(me) {
@@ -923,17 +923,49 @@ function nearestEntityApproachTile(me, entity, maxRange) {
 
 function startPathToTile(floor, tx, ty, treeId = null, attackId = null, lootId = null, npcId = null) {
   const me = self();
-  if (!me || floor !== me.floor || !canStandAtTile(floor, tx, ty)) return false;
-  const path = findTilePath(floor, Math.floor(me.x), Math.floor(me.y), tx, ty);
+  if (!me || floor !== me.floor) return false;
+  const destination = findReachableClickTile(floor, Math.floor(me.x), Math.floor(me.y), tx, ty);
+  if (!destination) return false;
+  const path = findTilePath(floor, Math.floor(me.x), Math.floor(me.y), destination.x, destination.y);
   if (!path.length) return false;
   clickPath = simplifyTilePath(path).slice(1).map((node) => ({ floor, x: node.x + 0.5, y: node.y + 0.5 }));
-  clickDestination = clickPath.shift() ?? { floor, x: tx + 0.5, y: ty + 0.5 };
+  clickDestination = clickPath.shift() ?? { floor, x: destination.x + 0.5, y: destination.y + 0.5 };
   pendingTreeCut = treeId;
   pendingAttackTarget = attackId;
   pendingLootTarget = lootId;
   pendingNpcTalk = npcId;
-  drawClickMarker({ floor, x: tx + 0.5, y: ty + 0.5 });
+  drawClickMarker({ floor, x: destination.x + 0.5, y: destination.y + 0.5 });
   return true;
+}
+
+function findReachableClickTile(floor, startX, startY, tx, ty) {
+  if (!isInMap(tx, ty)) return null;
+  if (canStandAtTile(floor, tx, ty)) return { x: tx, y: ty };
+
+  const maxRadius = 4;
+  const candidates = [];
+  for (let radius = 1; radius <= maxRadius; radius += 1) {
+    for (let y = ty - radius; y <= ty + radius; y += 1) {
+      for (let x = tx - radius; x <= tx + radius; x += 1) {
+        if (Math.max(Math.abs(x - tx), Math.abs(y - ty)) !== radius) continue;
+        if (!canStandAtTile(floor, x, y)) continue;
+        candidates.push({
+          x,
+          y,
+          score: tileHeuristic(startX, startY, x, y) + tileHeuristic(tx, ty, x, y) * 0.4
+        });
+      }
+    }
+    if (candidates.length) break;
+  }
+
+  candidates.sort((a, b) => a.score - b.score);
+  for (const candidate of candidates) {
+    if (findTilePath(floor, startX, startY, candidate.x, candidate.y).length) {
+      return { x: candidate.x, y: candidate.y };
+    }
+  }
+  return null;
 }
 
 function simplifyTilePath(path) {
@@ -1006,7 +1038,11 @@ function pathNeighbors(floor, x, y) {
 }
 
 function canStandAtTile(floor, tx, ty) {
-  return tx >= 0 && ty >= 0 && tx < MAP_COLS && ty < MAP_ROWS && !isBlockedTile(tileAt(floor, tx, ty));
+  return isInMap(tx, ty) && !isBlockedTile(tileAt(floor, tx, ty));
+}
+
+function isInMap(tx, ty) {
+  return tx >= 0 && ty >= 0 && tx < MAP_COLS && ty < MAP_ROWS;
 }
 
 function tileHeuristic(x, y, goalX, goalY) {
