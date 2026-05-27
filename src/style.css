@@ -80,6 +80,59 @@ canvas {
   color: #cbd5cb;
 }
 
+.roster {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.roster-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.roster-head button {
+  padding: 6px 9px;
+  font-size: 12px;
+}
+
+.roster-list {
+  display: grid;
+  gap: 7px;
+  max-height: 178px;
+  overflow: auto;
+  color: #aeb9af;
+  font-size: 13px;
+}
+
+.roster-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.roster-row strong {
+  color: #eef3ed;
+}
+
+.roster-row small {
+  display: block;
+  color: #9dad9f;
+}
+
+.roster-row button {
+  padding: 7px 9px;
+  font-size: 12px;
+}
+
 .primary {
   border-color: rgba(255, 209, 102, 0.78);
   background: #d6a84f;
@@ -204,6 +257,52 @@ canvas {
 
 .skill-tracker span {
   color: #aeb9af;
+}
+
+.inventory-wrap {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.inventory-title {
+  margin-bottom: 7px;
+  color: #f7d486;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+
+.inventory-slot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 5px;
+  background: rgba(7, 10, 8, 0.5);
+  color: #dbe7dc;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.inventory-slot.empty {
+  color: transparent;
+}
+
+.inventory-slot span {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  color: #f7d486;
+  font-size: 10px;
+  font-weight: 800;
 }
 
 .net-stats {

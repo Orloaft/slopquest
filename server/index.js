@@ -28,9 +28,18 @@ const SAVE_FILE = join(DATA_DIR, "players.json");
 const PORT = Number(process.env.PORT ?? 8787);
 const SNAPSHOT_RADIUS = 18;
 const SNAPSHOT_RADIUS_SQ = SNAPSHOT_RADIUS ** 2;
+const TREE_SNAPSHOT_RADIUS = 32;
+const TREE_SNAPSHOT_RADIUS_SQ = TREE_SNAPSHOT_RADIUS ** 2;
 const METRIC_WINDOW = 60;
 const SPATIAL_CELL_SIZE = 8;
 const TREE_RESPAWN_MS = 30000;
+const WOODCUT_SWING_MS = 760;
+const INVENTORY_SIZE = 30;
+const ITEMS = {
+  axe: { id: "axe", label: "Bronze Axe", icon: "A" },
+  logs: { id: "logs", label: "Logs", icon: "L" },
+  potion: { id: "potion", label: "Health Potion", icon: "P" }
+};
 const QUESTS = {
   southgate: {
     id: "southgate",
@@ -89,6 +98,8 @@ wss.on("connection", (socket) => {
       return;
     }
     const session = clients.get(socket);
+    if (message.type === "characters") return sendCharacterRoster(socket);
+    if (message.type === "deleteCharacter") return deleteCharacter(socket, String(message.name ?? ""));
     if (message.type === "join") return joinWorld(socket, message);
     if (!session) return;
 
@@ -160,18 +171,45 @@ setInterval(() => {
 function joinWorld(socket, message) {
   const name = cleanName(message.name);
   const saved = db.players[name.toLowerCase()];
-  const player = saved ? hydratePlayer(saved) : createPlayer(name);
+  const player = saved && !message.fresh ? hydratePlayer(saved) : createPlayer(name);
   player.id = crypto.randomUUID();
   player.online = true;
   player.targetId = null;
   player.lastAttack = 0;
   player.cooldowns = { ability: 0 };
+  player.action = null;
   player.portalReadyAt = 0;
   player.dead = player.hp <= 0;
 
   clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now() });
   socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4] }));
   event("system", `${player.name} entered the world.`);
+}
+
+function sendCharacterRoster(socket) {
+  const characters = Object.values(db.players)
+    .map((player) => ({
+      name: player.name,
+      level: Number(player.level ?? 1),
+      gold: Number(player.gold ?? 0),
+      updatedAt: player.updatedAt ?? null
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  socket.send(JSON.stringify({ type: "characters", characters }));
+}
+
+function deleteCharacter(socket, rawName) {
+  const name = cleanName(rawName);
+  const key = name.toLowerCase();
+  const online = [...clients.values()].some((session) => session.player.name.toLowerCase() === key);
+  if (!db.players[key] || online) {
+    socket.send(JSON.stringify({ type: "characterDeleted", ok: false, name }));
+    return;
+  }
+  delete db.players[key];
+  queueSave();
+  socket.send(JSON.stringify({ type: "characterDeleted", ok: true, name }));
+  sendCharacterRoster(socket);
 }
 
 function createPlayer(name) {
@@ -195,6 +233,7 @@ function createPlayer(name) {
     potions: 2,
     weaponTier: 0,
     armorTier: 0,
+    inventory: createInventory(),
     quests: createQuestState(),
     skills: createSkillState()
   };
@@ -207,6 +246,7 @@ function hydratePlayer(saved) {
   player.hp = clamp(player.hp, 1, player.maxHp);
   player.mana = clamp(player.mana, 0, player.maxMana);
   player.quests = normalizeQuestState(player.quests);
+  player.inventory = normalizeInventory(player.inventory);
   return player;
 }
 
@@ -221,6 +261,7 @@ function updatePlayers(dt, now) {
     let dx = Number(input.right) - Number(input.left);
     let dy = Number(input.down) - Number(input.up);
     if (dx || dy) {
+      player.action = null;
       const length = Math.hypot(dx, dy);
       dx /= length;
       dy /= length;
@@ -240,6 +281,7 @@ function updatePlayers(dt, now) {
 
     player.mana = clamp(player.mana + dt * 2.5, 0, player.maxMana);
     autoAttack(player, now);
+    updatePlayerAction(player, now);
   }
 }
 
@@ -328,7 +370,9 @@ function damageMonster(player, monster, damage, kind) {
     y: monster.y,
     gold: roll(catalog.gold),
     potions: Math.random() < 0.18 || monster.type === "boss" ? 1 : 0,
-    label: catalog.name
+    label: catalog.name,
+    kind: "corpse",
+    items: []
   };
   corpses.set(corpse.id, corpse);
   event("system", `${player.name} defeated ${catalog.name}.`);
@@ -364,6 +408,12 @@ function lootCorpse(player, id) {
 }
 
 function collectCorpse(player, corpse) {
+  for (const item of corpse.items ?? []) {
+    if (!addInventoryItem(player, item.id, item.qty)) {
+      event("system", "Your inventory is full.");
+      return;
+    }
+  }
   player.gold += corpse.gold;
   player.potions += corpse.potions;
   corpses.delete(corpse.id);
@@ -385,6 +435,15 @@ function buyItem(player, item) {
   if (item === "potion" && player.gold >= SHOP.potion.cost) {
     player.gold -= SHOP.potion.cost;
     player.potions += 1;
+    addInventoryItem(player, "potion", 1);
+  }
+  if (item === "axe" && !hasInventoryItem(player, "axe") && player.gold >= SHOP.axe.cost) {
+    if (!addInventoryItem(player, "axe", 1)) {
+      event("system", "Your inventory is full.");
+      return;
+    }
+    player.gold -= SHOP.axe.cost;
+    event("system", `${player.name} bought a bronze axe.`);
   }
 }
 
@@ -438,18 +497,57 @@ function talkNpc(player, id) {
 function cutTree(player, id) {
   const tree = treeNodes.get(id);
   if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distance(player, tree) > 1.8) return;
+  if (!hasInventoryItem(player, "axe")) {
+    event("float", "You need an axe.", player.x, player.y, player.floor, "#f7d486");
+    return;
+  }
+  player.targetId = null;
+  player.action = { type: "woodcutting", treeId: tree.id, nextAt: performance.now(), swings: 0 };
+  event("float", "You start chopping.", tree.x, tree.y, tree.floor, "#d8c68a");
+}
+
+function updatePlayerAction(player, now) {
+  if (!player.action || player.action.type !== "woodcutting") return;
+  const tree = treeNodes.get(player.action.treeId);
+  if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distance(player, tree) > 1.9) {
+    player.action = null;
+    return;
+  }
+  if (now < player.action.nextAt) return;
+
+  player.action.swings += 1;
+  player.action.nextAt = now + WOODCUT_SWING_MS;
+  const angle = Math.atan2(tree.y - player.y, tree.x - player.x);
+  event("effect", "chop", tree.x, tree.y - 0.35, tree.floor, null, player.id, tree.id, { fromX: player.x, fromY: player.y, angle });
   const level = skillLevel(player, "woodcutting");
-  const successChance = clamp(0.55 + level * 0.025, 0.55, 0.9);
+  const successChance = clamp(0.25 + player.action.swings * 0.16 + level * 0.025, 0.35, 0.95);
   if (Math.random() > successChance) {
-    event("float", "The bark resists.", tree.x, tree.y, tree.floor, "#d8c68a");
+    if (player.action.swings % 2 === 0) event("float", "Chop", tree.x, tree.y, tree.floor, "#d8c68a");
     return;
   }
 
   tree.active = false;
   tree.respawnAt = performance.now() + TREE_RESPAWN_MS;
-  player.gold += 1;
+  player.action = null;
   addSkillXp(player, "woodcutting", 18);
+  dropItem(tree.floor, tree.x + 0.12, tree.y, [{ id: "logs", qty: 1 }], "Logs");
   event("float", "+18 Woodcutting", tree.x, tree.y, tree.floor, "#9ee6b1");
+}
+
+function dropItem(floor, x, y, items, label) {
+  const drop = {
+    id: `c${nextCorpseId++}`,
+    floor,
+    x,
+    y,
+    gold: 0,
+    potions: 0,
+    label,
+    kind: "drop",
+    items
+  };
+  corpses.set(drop.id, drop);
+  addToSpatial(spatial.corpses, drop);
 }
 
 function spawnNpcs() {
@@ -683,8 +781,8 @@ function buildSnapshotFor(viewer) {
   }
 
   const visibleTrees = [];
-  for (const tree of querySpatial(spatial.trees, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
-    if (!inInterestRange(viewer, tree)) continue;
+  for (const tree of querySpatial(spatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS)) {
+    if (!inTreeInterestRange(viewer, tree)) continue;
     visibleTrees.push(serializeTree(tree));
   }
 
@@ -734,6 +832,8 @@ function serializePlayer(player) {
     armorTier: player.armorTier,
     targetId: player.targetId,
     dead: player.dead,
+    action: player.action ? { type: player.action.type, treeId: player.action.treeId } : null,
+    inventory: serializeInventory(player.inventory),
     quests: serializeQuests(player),
     skills: serializeSkills(player)
   };
@@ -784,6 +884,11 @@ function inInterestRange(viewer, entity) {
   return distanceSq(viewer, entity) <= SNAPSHOT_RADIUS_SQ;
 }
 
+function inTreeInterestRange(viewer, entity) {
+  if (viewer.floor !== entity.floor) return false;
+  return distanceSq(viewer, entity) <= TREE_SNAPSHOT_RADIUS_SQ;
+}
+
 function eventVisibleTo(viewer, item) {
   if (item.type === "chat" || item.type === "system") return true;
   if (item.floor === null || item.x === null || item.y === null) return true;
@@ -805,8 +910,10 @@ function persistPlayerToDb(player) {
     potions: player.potions,
     weaponTier: player.weaponTier,
     armorTier: player.armorTier,
+    inventory: serializeInventory(player.inventory),
     quests: normalizeQuestState(player.quests),
-    skills: normalizeSkillState(player.skills)
+    skills: normalizeSkillState(player.skills),
+    updatedAt: new Date().toISOString()
   };
 }
 
@@ -915,6 +1022,52 @@ function serializeQuests(player) {
 
 function createSkillState() {
   return Object.fromEntries(Object.keys(SKILLS).map((id) => [id, { xp: 0 }]));
+}
+
+function createInventory() {
+  return Array.from({ length: INVENTORY_SIZE }, () => null);
+}
+
+function normalizeInventory(saved = []) {
+  const inventory = createInventory();
+  if (!Array.isArray(saved)) return inventory;
+  saved.slice(0, INVENTORY_SIZE).forEach((item, index) => {
+    const id = String(item?.id ?? "");
+    if (!ITEMS[id]) return;
+    inventory[index] = { id, qty: Math.max(1, Math.floor(Number(item.qty ?? 1))) };
+  });
+  return inventory;
+}
+
+function serializeInventory(inventory = []) {
+  return normalizeInventory(inventory).map((item) => {
+    if (!item) return null;
+    const spec = ITEMS[item.id];
+    return { id: item.id, label: spec.label, icon: spec.icon, qty: item.qty };
+  });
+}
+
+function hasInventoryItem(player, id) {
+  return player.inventory.some((item) => item?.id === id && item.qty > 0);
+}
+
+function addInventoryItem(player, id, qty = 1) {
+  if (!ITEMS[id]) return false;
+  let remaining = Math.max(1, Math.floor(qty));
+  const stackable = id !== "axe";
+  if (stackable) {
+    const existing = player.inventory.find((item) => item?.id === id);
+    if (existing) {
+      existing.qty += remaining;
+      return true;
+    }
+  }
+  for (let i = 0; i < player.inventory.length && remaining > 0; i += 1) {
+    if (player.inventory[i]) continue;
+    player.inventory[i] = { id, qty: stackable ? remaining : 1 };
+    remaining -= stackable ? remaining : 1;
+  }
+  return remaining === 0;
 }
 
 function normalizeSkillState(saved = {}) {

@@ -12,12 +12,19 @@
       <section id="join" class="join-panel">
         <div class="brand">Waystone</div>
         <p class="subcopy">A tiny shared dungeon for five brave friends.</p>
+        <div class="roster">
+          <div class="roster-head">
+            <strong>Characters</strong>
+            <button id="refreshRosterButton" type="button">Refresh</button>
+          </div>
+          <div id="rosterList" class="roster-list">Connecting...</div>
+        </div>
         <label>
-          Name
+          New character
           <input id="nameInput" maxlength="18" autocomplete="off" value="wanderer" />
         </label>
         <p class="subcopy">Everyone starts as an Adventurer and grows through skills.</p>
-        <button id="joinButton" class="primary">Enter world</button>
+        <button id="joinButton" class="primary">Create and enter world</button>
       </section>
 
       <div id="hud" class="hud hidden">
@@ -41,11 +48,16 @@
           </div>
           <div id="questTracker" class="quest-tracker"></div>
           <div id="skillTracker" class="skill-tracker"></div>
+          <div class="inventory-wrap">
+            <div class="inventory-title">Inventory</div>
+            <div id="inventoryGrid" class="inventory-grid"></div>
+          </div>
           <div id="netStats" class="net-stats">net -</div>
           <div id="vendor" class="vendor hidden">
             <div class="vendor-title">Wayfarer Trader</div>
             <button data-buy="weapon">Buy weapon</button>
             <button data-buy="armor">Buy armor</button>
+            <button data-buy="axe">Buy axe</button>
             <button data-buy="potion">Buy potion</button>
           </div>
         </div>

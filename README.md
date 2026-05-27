@@ -20,8 +20,10 @@ Open `http://localhost:5173/`. Friends on the same network can use the Vite netw
 - `Tab` cycles through nearby attack targets.
 - `1` uses the class active ability.
 - `2` uses a potion.
-- `F` loots adjacent corpses.
+- `F` loots adjacent corpses and item drops.
 - Click a dropped corpse/item bundle to loot that specific drop.
+- Use the startup roster to play or delete saved characters, or create a fresh character.
+- Buy an axe from the starting-town trader before chopping trees for logs.
 - `B` opens the vendor panel near the trader in town.
 - Chat supports lightweight party/system messages.
 - Characters persist to `data/players.json`.

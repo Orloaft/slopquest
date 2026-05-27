@@ -55,6 +55,7 @@ export const MONSTERS = {
 export const SHOP = {
   weapon: { cost: 90, knightName: "Iron Sabre", casterName: "Amber Wand", damageBonus: 7 },
   armor: { cost: 75, name: "Padded Mail", armorBonus: 4 },
+  axe: { cost: 25, name: "Bronze Axe" },
   potion: { cost: 12, name: "Health Potion", heal: 58 }
 };
 

@@ -27,6 +27,8 @@ const dom = {
   hud: document.querySelector("#hud"),
   nameInput: document.querySelector("#nameInput"),
   joinButton: document.querySelector("#joinButton"),
+  refreshRosterButton: document.querySelector("#refreshRosterButton"),
+  rosterList: document.querySelector("#rosterList"),
   charName: document.querySelector("#charName"),
   classLabel: document.querySelector("#classLabel"),
   hpBar: document.querySelector("#hpBar"),
@@ -42,6 +44,7 @@ const dom = {
   armorText: document.querySelector("#armorText"),
   questTracker: document.querySelector("#questTracker"),
   skillTracker: document.querySelector("#skillTracker"),
+  inventoryGrid: document.querySelector("#inventoryGrid"),
   netStats: document.querySelector("#netStats"),
   vendor: document.querySelector("#vendor"),
   death: document.querySelector("#death"),
@@ -55,7 +58,8 @@ const dom = {
   respawnButton: document.querySelector("#respawnButton")
 };
 
-dom.joinButton.addEventListener("click", connect);
+dom.joinButton.addEventListener("click", () => joinCharacter(dom.nameInput.value, true));
+dom.refreshRosterButton.addEventListener("click", () => send({ type: "characters" }));
 dom.abilityOne.addEventListener("click", () => send({ type: "ability", slot: "1" }));
 dom.potionButton.addEventListener("click", () => send({ type: "ability", slot: "2" }));
 dom.lootButton.addEventListener("click", () => send({ type: "loot" }));
@@ -75,6 +79,7 @@ window.addEventListener("blur", () => sendStopInput());
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) sendStopInput();
 });
+ensureSocket();
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -200,17 +205,18 @@ function update(time) {
   if (ownView) scene.cameras.main.centerOn(ownView.x, ownView.y);
 }
 
-function connect() {
+function ensureSocket() {
+  if (socket && [WebSocket.CONNECTING, WebSocket.OPEN].includes(socket.readyState)) return;
   const protocol = location.protocol === "https:" ? "wss" : "ws";
   socket = new WebSocket(`${protocol}://${location.hostname}:8787`);
   socket.addEventListener("open", () => {
-    send({ type: "join", name: dom.nameInput.value });
-    dom.join.classList.add("hidden");
-    dom.hud.classList.remove("hidden");
-    addChat("Connected to Waystone.");
+    send({ type: "characters" });
+    dom.rosterList.textContent = "Choose a character or create a new one.";
   });
   socket.addEventListener("message", (event) => {
     const message = JSON.parse(event.data);
+    if (message.type === "characters") renderRoster(message.characters ?? []);
+    if (message.type === "characterDeleted" && !message.ok) dom.rosterList.textContent = "That character is online or no longer exists.";
     if (message.type === "welcome") selfId = message.id;
     if (message.type === "state") {
       latestState = message;
@@ -218,8 +224,48 @@ function connect() {
       consumeEvents(message.events ?? []);
     }
   });
-  socket.addEventListener("close", () => addChat("Disconnected from server."));
+  socket.addEventListener("close", () => {
+    addChat("Disconnected from server.");
+    if (!selfId) dom.rosterList.textContent = "Disconnected. Refresh to retry.";
+  });
   socket.addEventListener("error", () => addChat("Connection error. Refresh if the world stops updating."));
+}
+
+function joinCharacter(name, fresh = false) {
+  ensureSocket();
+  const clean = String(name ?? "").trim();
+  if (!clean) return;
+  if (socket.readyState === WebSocket.OPEN) {
+    send({ type: "join", name: clean, fresh });
+    dom.join.classList.add("hidden");
+    dom.hud.classList.remove("hidden");
+    addChat("Connected to Waystone.");
+    return;
+  }
+  dom.rosterList.textContent = "Connecting...";
+  socket.addEventListener("open", () => joinCharacter(clean, fresh), { once: true });
+}
+
+function renderRoster(characters) {
+  if (!characters.length) {
+    dom.rosterList.textContent = "No saved characters yet.";
+    return;
+  }
+  dom.rosterList.innerHTML = characters
+    .map((character) => `
+      <div class="roster-row">
+        <div><strong>${escapeHtml(character.name)}</strong><small>Level ${character.level} · ${character.gold}g</small></div>
+        <button data-play="${escapeHtml(character.name)}">Play</button>
+        <button data-delete="${escapeHtml(character.name)}">Delete</button>
+      </div>
+    `)
+    .join("");
+  dom.rosterList.querySelectorAll("[data-play]").forEach((button) => {
+    button.addEventListener("click", () => joinCharacter(button.dataset.play, false));
+  });
+  dom.rosterList.querySelectorAll("[data-delete]").forEach((button) => {
+    button.addEventListener("click", () => send({ type: "deleteCharacter", name: button.dataset.delete }));
+  });
 }
 
 function drawMap(floor) {
@@ -256,7 +302,7 @@ function syncEntities() {
       entityLayer.add(view);
     }
     setEntityTarget(view, player.x * TILE_SIZE, player.y * TILE_SIZE);
-    setActorAnimation(view, "knight", player.dir, player.moving, 40, 48);
+    setActorAnimation(view, "knight", player.dir, player.moving || player.action?.type === "woodcutting", 40, 48);
     view.setAlpha(player.dead ? 0.45 : 1);
     view.nameText.setText(player.name);
     view.hp.width = 34 * (player.hp / player.maxHp);
@@ -302,8 +348,10 @@ function syncEntities() {
     if (!view) {
       view = scene.add.container(corpse.x * TILE_SIZE, corpse.y * TILE_SIZE);
       view.add(scene.add.ellipse(0, 6, 24, 12, 0x3b2017, 0.9));
-      view.add(scene.add.rectangle(0, -5, 18, 12, 0x8a5d32).setStrokeStyle(2, 0x2c1b10));
-      view.add(scene.add.text(0, -20, `${corpse.gold}g`, textStyle(10, "#ffd166")).setOrigin(0.5));
+      const isDrop = corpse.kind === "drop";
+      if (isDrop) view.add(scene.add.rectangle(0, -4, 22, 10, 0x7b5434).setStrokeStyle(2, 0x2c1b10));
+      else view.add(scene.add.rectangle(0, -5, 18, 12, 0x8a5d32).setStrokeStyle(2, 0x2c1b10));
+      view.add(scene.add.text(0, -20, lootLabel(corpse), textStyle(10, isDrop ? "#9ee6b1" : "#ffd166")).setOrigin(0.5));
       const zone = scene.add.zone(0, -4, 44, 34).setInteractive({ cursor: "pointer" });
       zone.on("pointerdown", (pointer, localX, localY, event) => {
         event.stopPropagation();
@@ -521,6 +569,7 @@ function renderHud(me) {
   dom.armorText.textContent = me.armorTier ? SHOP.armor.name : "Cloth";
   renderQuestTracker(me.quests);
   renderSkillTracker(me.skills);
+  renderInventory(me.inventory);
   dom.abilityOne.querySelector("span").textContent = "Magic";
   dom.death.classList.toggle("hidden", !me.dead);
   const nearVendor = me.floor === NPCS[0].floor && Phaser.Math.Distance.Between(me.x, me.y, NPCS[0].x, NPCS[0].y) < 2.2;
@@ -550,6 +599,22 @@ function renderSkillTracker(skills = []) {
   dom.skillTracker.innerHTML = skills
     .map((skill) => `<span>${escapeHtml(skill.label)}</span><b>${skill.level}</b>`)
     .join("");
+}
+
+function renderInventory(inventory = []) {
+  const slots = Array.from({ length: 30 }, (_, index) => inventory[index] ?? null);
+  dom.inventoryGrid.innerHTML = slots
+    .map((item) => {
+      if (!item) return `<div class="inventory-slot empty">.</div>`;
+      const qty = item.qty > 1 ? `<span>${item.qty}</span>` : "";
+      return `<div class="inventory-slot" title="${escapeHtml(item.label)}">${escapeHtml(item.icon)}${qty}</div>`;
+    })
+    .join("");
+}
+
+function lootLabel(corpse) {
+  if (corpse.kind === "drop") return corpse.label ?? "Drop";
+  return `${corpse.gold}g`;
 }
 
 function sendInput(time) {
