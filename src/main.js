@@ -106,6 +106,8 @@ let lastInputAt = 0;
 let lastInputSignature = "";
 let currentFloor = null;
 let clickDestination = null;
+let clickPath = [];
+let pendingTreeCut = null;
 let clickMarker = null;
 let mapLayer;
 let entityLayer;
@@ -482,8 +484,7 @@ function createTreeView(tree) {
   const zone = scene.add.zone(0, -18, 54, 80).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (pointer, localX, localY, event) => {
     event.stopPropagation();
-    clearClickDestination();
-    send({ type: "cutTree", id: tree.id });
+    startTreeCutPath(tree);
   });
   view.add([treeSprite, stump, zone]);
   view.treeSprite = treeSprite;
@@ -676,14 +677,7 @@ function handleWorldClick(pointer) {
   const tx = Math.floor(pointer.worldX / TILE_SIZE);
   const ty = Math.floor(pointer.worldY / TILE_SIZE);
   const me = self();
-  if (isBlockedTile(tileAt(me.floor, tx, ty))) return;
-
-  clickDestination = {
-    floor: me.floor,
-    x: tx + 0.5,
-    y: ty + 0.5
-  };
-  drawClickMarker(clickDestination);
+  startPathToTile(me.floor, tx, ty);
 }
 
 function inputTowardDestination(me) {
@@ -691,11 +685,29 @@ function inputTowardDestination(me) {
     clearClickDestination();
     return null;
   }
+  if (pendingTreeCut) {
+    const tree = latestState?.trees?.find((item) => item.id === pendingTreeCut && item.active);
+    if (!tree || tree.floor !== me.floor) {
+      clearClickDestination();
+      return null;
+    }
+    if (Phaser.Math.Distance.Between(me.x, me.y, tree.x, tree.y) <= 1.78) {
+      const treeId = pendingTreeCut;
+      clearClickDestination();
+      sendStopInput();
+      send({ type: "cutTree", id: treeId });
+      return null;
+    }
+  }
   const dx = clickDestination.x - me.x;
   const dy = clickDestination.y - me.y;
   const distance = Math.hypot(dx, dy);
   if (distance < 0.22) {
-    clearClickDestination();
+    if (clickPath.length) {
+      clickDestination = clickPath.shift();
+    } else {
+      clearClickDestination();
+    }
     return null;
   }
 
@@ -705,6 +717,127 @@ function inputTowardDestination(me) {
     up: dy < -0.12,
     down: dy > 0.12
   };
+}
+
+function startTreeCutPath(tree) {
+  const me = self();
+  if (!me || !tree.active || tree.floor !== me.floor) return;
+  clearClickDestination();
+  pendingTreeCut = tree.id;
+  if (Phaser.Math.Distance.Between(me.x, me.y, tree.x, tree.y) <= 1.78) {
+    pendingTreeCut = null;
+    send({ type: "cutTree", id: tree.id });
+    return;
+  }
+
+  const destination = nearestTreeApproachTile(me, tree);
+  if (!destination || !startPathToTile(me.floor, destination.x, destination.y, tree.id)) {
+    pendingTreeCut = null;
+  }
+}
+
+function nearestTreeApproachTile(me, tree) {
+  const treeTileX = Math.floor(tree.x);
+  const treeTileY = Math.floor(tree.y);
+  const candidates = [];
+  for (let y = treeTileY - 2; y <= treeTileY + 2; y += 1) {
+    for (let x = treeTileX - 2; x <= treeTileX + 2; x += 1) {
+      if (!canStandAtTile(tree.floor, x, y)) continue;
+      const center = { x: x + 0.5, y: y + 0.5 };
+      const treeDistance = Phaser.Math.Distance.Between(center.x, center.y, tree.x, tree.y);
+      if (treeDistance > 1.72) continue;
+      candidates.push({
+        x,
+        y,
+        score: Phaser.Math.Distance.Between(me.x, me.y, center.x, center.y) + treeDistance * 0.2
+      });
+    }
+  }
+  candidates.sort((a, b) => a.score - b.score);
+  return candidates[0] ?? null;
+}
+
+function startPathToTile(floor, tx, ty, treeId = null) {
+  const me = self();
+  if (!me || floor !== me.floor || !canStandAtTile(floor, tx, ty)) return false;
+  const path = findTilePath(floor, Math.floor(me.x), Math.floor(me.y), tx, ty);
+  if (!path.length) return false;
+  clickPath = path.slice(1).map((node) => ({ floor, x: node.x + 0.5, y: node.y + 0.5 }));
+  clickDestination = clickPath.shift() ?? { floor, x: tx + 0.5, y: ty + 0.5 };
+  pendingTreeCut = treeId;
+  drawClickMarker({ floor, x: tx + 0.5, y: ty + 0.5 });
+  return true;
+}
+
+function findTilePath(floor, startX, startY, goalX, goalY) {
+  if (startX === goalX && startY === goalY) return [{ x: startX, y: startY }];
+  const open = [{ x: startX, y: startY, g: 0, f: tileHeuristic(startX, startY, goalX, goalY), parent: null }];
+  const bestByKey = new Map([[tileKey(startX, startY), open[0]]]);
+  const closed = new Set();
+  const maxVisited = MAP_COLS * MAP_ROWS;
+
+  while (open.length && closed.size < maxVisited) {
+    open.sort((a, b) => a.f - b.f);
+    const current = open.shift();
+    const currentKey = tileKey(current.x, current.y);
+    if (closed.has(currentKey)) continue;
+    if (current.x === goalX && current.y === goalY) return unwindPath(current);
+    closed.add(currentKey);
+
+    for (const neighbor of pathNeighbors(floor, current.x, current.y)) {
+      const key = tileKey(neighbor.x, neighbor.y);
+      if (closed.has(key)) continue;
+      const g = current.g + neighbor.cost;
+      const existing = bestByKey.get(key);
+      if (existing && existing.g <= g) continue;
+      const next = {
+        x: neighbor.x,
+        y: neighbor.y,
+        g,
+        f: g + tileHeuristic(neighbor.x, neighbor.y, goalX, goalY),
+        parent: current
+      };
+      bestByKey.set(key, next);
+      open.push(next);
+    }
+  }
+
+  return [];
+}
+
+function pathNeighbors(floor, x, y) {
+  const neighbors = [];
+  for (let dy = -1; dy <= 1; dy += 1) {
+    for (let dx = -1; dx <= 1; dx += 1) {
+      if (!dx && !dy) continue;
+      const nx = x + dx;
+      const ny = y + dy;
+      if (!canStandAtTile(floor, nx, ny)) continue;
+      if (dx && dy && (!canStandAtTile(floor, x + dx, y) || !canStandAtTile(floor, x, y + dy))) continue;
+      neighbors.push({ x: nx, y: ny, cost: dx && dy ? Math.SQRT2 : 1 });
+    }
+  }
+  return neighbors;
+}
+
+function canStandAtTile(floor, tx, ty) {
+  return tx >= 0 && ty >= 0 && tx < MAP_COLS && ty < MAP_ROWS && !isBlockedTile(tileAt(floor, tx, ty));
+}
+
+function tileHeuristic(x, y, goalX, goalY) {
+  const dx = Math.abs(goalX - x);
+  const dy = Math.abs(goalY - y);
+  return Math.max(dx, dy) + (Math.SQRT2 - 1) * Math.min(dx, dy);
+}
+
+function tileKey(x, y) {
+  return `${x},${y}`;
+}
+
+function unwindPath(node) {
+  const path = [];
+  for (let current = node; current; current = current.parent) path.push({ x: current.x, y: current.y });
+  return path.reverse();
 }
 
 function cycleTarget() {
@@ -757,6 +890,8 @@ function drawClickMarker(destination) {
 
 function clearClickDestination() {
   clickDestination = null;
+  clickPath = [];
+  pendingTreeCut = null;
   if (clickMarker) clickMarker.setVisible(false);
 }
 
