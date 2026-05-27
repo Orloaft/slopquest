@@ -36,10 +36,10 @@ const SPATIAL_CELL_SIZE = 8;
 const TREE_RESPAWN_MS = 30000;
 const INVENTORY_SIZE = 30;
 const ITEMS = {
-  axe: { id: "axe", label: "Bronze Axe", icon: "A" },
-  logs: { id: "logs", label: "Oak Logs", icon: "L" },
-  pine_logs: { id: "pine_logs", label: "Pine Logs", icon: "P" },
-  potion: { id: "potion", label: "Health Potion", icon: "P" }
+  axe: { id: "axe", label: "Bronze Axe", icon: "A", iconUrl: "/icons/item-axe.png" },
+  logs: { id: "logs", label: "Oak Logs", icon: "L", iconUrl: "/icons/item-logs.png" },
+  pine_logs: { id: "pine_logs", label: "Pine Logs", icon: "P", iconUrl: "/icons/item-pine-logs.png" },
+  potion: { id: "potion", label: "Health Potion", icon: "P", iconUrl: "/icons/item-potion.png" }
 };
 const COMPOSED_TREE_NODES = [
   { floor: 0, x: 12.8, y: 10.7, type: "oak" },
@@ -1101,7 +1101,7 @@ function serializeInventory(inventory = []) {
   return normalizeInventory(inventory).map((item) => {
     if (!item) return null;
     const spec = ITEMS[item.id];
-    return { id: item.id, label: spec.label, icon: spec.icon, qty: item.qty };
+    return { id: item.id, label: spec.label, icon: spec.icon, iconUrl: spec.iconUrl, qty: item.qty };
   });
 }
 
@@ -1140,6 +1140,7 @@ function serializeSkills(player) {
   return Object.entries(player.skills).map(([id, state]) => ({
     id,
     label: SKILLS[id]?.label ?? id,
+    iconUrl: SKILLS[id]?.iconUrl ?? null,
     xp: Math.floor(state.xp),
     level: skillLevel(player, id),
     nextXp: xpForLevel(skillLevel(player, id) + 1)

@@ -112,6 +112,8 @@ let pendingTreeCut = null;
 let pendingAttackTarget = null;
 let pendingLootTarget = null;
 let pendingNpcTalk = null;
+let dynamicPathTarget = null;
+let lastDynamicPathRefreshAt = 0;
 let clickMarker = null;
 let mapLayer;
 let entityLayer;
@@ -124,6 +126,8 @@ const treeViews = new Map();
 const floaters = [];
 const DIRECTIONS = ["up", "right", "down", "left"];
 const WALK_FRAME_MS = 125;
+const DYNAMIC_PATH_REFRESH_MS = 350;
+const DYNAMIC_PATH_REFRESH_DISTANCE = 0.65;
 
 function preload() {
   scene = this;
@@ -473,7 +477,7 @@ function createNpcView(npc) {
   const zone = scene.add.zone(0, 0, 50, 58).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (pointer, localX, localY, event) => {
     event.stopPropagation();
-    startNpcTalkPath(npc);
+    startNpcTalkPath(npc.id);
   });
   view.add([shadow, sprite, nameText, zone]);
   view.nameText = nameText;
@@ -527,7 +531,7 @@ function createMonsterView(monster) {
   const zone = scene.add.zone(0, 0, 54, 56).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (pointer, localX, localY, event) => {
     event.stopPropagation();
-    startAttackPath(monster);
+    startAttackPath(monster.id);
   });
   view.add([targetRing, shadow, sprite, nameText, hpBack, hp, zone]);
   view.nameText = nameText;
@@ -640,7 +644,21 @@ function renderQuestTracker(quests = []) {
 
 function renderSkillTracker(skills = []) {
   dom.skillTracker.innerHTML = skills
-    .map((skill) => `<span>${escapeHtml(skill.label)}</span><b>${skill.level}</b>`)
+    .map((skill) => {
+      const previousXp = xpForLevel(skill.level);
+      const nextXp = Math.max(skill.nextXp, previousXp + 1);
+      const progress = Math.max(0, Math.min(1, (skill.xp - previousXp) / (nextXp - previousXp)));
+      return `
+        <div class="skill-row" title="${escapeHtml(skill.label)} level ${skill.level}">
+          ${iconMarkup(skill.iconUrl, skill.label, "skill-icon")}
+          <div class="skill-meta">
+            <span class="skill-name">${escapeHtml(skill.label)}</span>
+            <div class="skill-progress"><span style="width: ${Math.round(progress * 100)}%"></span></div>
+          </div>
+          <b class="skill-level">${skill.level}</b>
+        </div>
+      `;
+    })
     .join("");
 }
 
@@ -650,9 +668,14 @@ function renderInventory(inventory = []) {
     .map((item) => {
       if (!item) return `<div class="inventory-slot empty">.</div>`;
       const qty = item.qty > 1 ? `<span>${item.qty}</span>` : "";
-      return `<div class="inventory-slot" title="${escapeHtml(item.label)}">${escapeHtml(item.icon)}${qty}</div>`;
+      return `<div class="inventory-slot" title="${escapeHtml(item.label)}">${iconMarkup(item.iconUrl, item.icon, "item-icon")}${qty}</div>`;
     })
     .join("");
+}
+
+function iconMarkup(url, fallback, className) {
+  if (!url) return escapeHtml(fallback ?? "");
+  return `<img class="${className}" src="${escapeHtml(url)}" alt="${escapeHtml(fallback ?? "")}" loading="lazy" />`;
 }
 
 function lootLabel(corpse) {
@@ -718,6 +741,10 @@ function inputTowardDestination(me) {
       send({ type: "target", id: monsterId });
       return null;
     }
+    if (shouldRefreshDynamicPath("attack", monster)) {
+      if (!refreshAttackPath(me, monster)) clearClickDestination();
+      return null;
+    }
   }
   if (pendingTreeCut) {
     const tree = latestState?.trees?.find((item) => item.id === pendingTreeCut && item.active);
@@ -757,7 +784,12 @@ function inputTowardDestination(me) {
       const npcId = pendingNpcTalk;
       clearClickDestination();
       sendStopInput();
+      if (npc.role === "vendor") openVendor();
       send({ type: "talkNpc", id: npcId });
+      return null;
+    }
+    if (shouldRefreshDynamicPath("npc", npc)) {
+      if (!refreshNpcTalkPath(me, npc)) clearClickDestination();
       return null;
     }
   }
@@ -789,9 +821,10 @@ function inputTowardDestination(me) {
   };
 }
 
-function startAttackPath(monster) {
+function startAttackPath(monsterOrId) {
+  const monster = resolveMonster(monsterOrId);
   const me = self();
-  if (!me || monster.floor !== me.floor) return;
+  if (!me || !monster || monster.floor !== me.floor) return;
   clearClickDestination();
   send({ type: "target", id: monster.id });
   if (isInAttackRange(me, monster)) return;
@@ -807,7 +840,9 @@ function refreshAttackPath(me, monster = null) {
   if (!target || target.floor !== me.floor) return false;
   if (isInAttackRange(me, target)) return true;
   const destination = nearestEntityApproachTile(me, target, attackRange(me) - 0.08);
-  return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, target.id));
+  const started = Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, target.id));
+  if (started) rememberDynamicPathTarget("attack", target);
+  return started;
 }
 
 function isInAttackRange(me, monster) {
@@ -859,13 +894,15 @@ function refreshLootPath(me, corpse = null) {
   return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, target.id));
 }
 
-function startNpcTalkPath(npc) {
+function startNpcTalkPath(npcOrId) {
+  const npc = resolveNpc(npcOrId);
   const me = self();
-  if (!me || npc.floor !== me.floor) return;
+  if (!me || !npc || npc.floor !== me.floor) return;
   clearClickDestination();
   pendingNpcTalk = npc.id;
   if (Phaser.Math.Distance.Between(me.x, me.y, npc.x, npc.y) <= 2.25) {
     pendingNpcTalk = null;
+    if (npc.role === "vendor") openVendor();
     send({ type: "talkNpc", id: npc.id });
     return;
   }
@@ -880,7 +917,35 @@ function refreshNpcTalkPath(me, npc = null) {
   if (!target || target.floor !== me.floor) return false;
   if (Phaser.Math.Distance.Between(me.x, me.y, target.x, target.y) <= 2.25) return true;
   const destination = nearestEntityApproachTile(me, target, 2.15);
-  return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, null, target.id));
+  const started = Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, null, target.id));
+  if (started) rememberDynamicPathTarget("npc", target);
+  return started;
+}
+
+function shouldRefreshDynamicPath(kind, entity) {
+  const now = performance.now();
+  if (now - lastDynamicPathRefreshAt < DYNAMIC_PATH_REFRESH_MS) return false;
+  if (!dynamicPathTarget || dynamicPathTarget.kind !== kind || dynamicPathTarget.id !== entity.id) return true;
+  return Phaser.Math.Distance.Between(dynamicPathTarget.x, dynamicPathTarget.y, entity.x, entity.y) >= DYNAMIC_PATH_REFRESH_DISTANCE;
+}
+
+function rememberDynamicPathTarget(kind, entity) {
+  dynamicPathTarget = { kind, id: entity.id, x: entity.x, y: entity.y };
+  lastDynamicPathRefreshAt = performance.now();
+}
+
+function resolveMonster(monsterOrId) {
+  const id = typeof monsterOrId === "string" ? monsterOrId : monsterOrId?.id;
+  return latestState?.monsters?.find((monster) => monster.id === id) ?? null;
+}
+
+function resolveNpc(npcOrId) {
+  const id = typeof npcOrId === "string" ? npcOrId : npcOrId?.id;
+  return latestState?.npcs?.find((npc) => npc.id === id) ?? null;
+}
+
+function openVendor() {
+  dom.vendor.classList.remove("hidden");
 }
 
 function nearestTreeApproachTile(me, tree) {
@@ -938,6 +1003,7 @@ function startPathToTile(floor, tx, ty, treeId = null, attackId = null, lootId =
   pendingAttackTarget = attackId;
   pendingLootTarget = lootId;
   pendingNpcTalk = npcId;
+  if (!attackId && !npcId) dynamicPathTarget = null;
   drawClickMarker({ floor, x: destination.x + 0.5, y: destination.y + 0.5 });
   return true;
 }
@@ -1120,6 +1186,7 @@ function clearClickDestination() {
   pendingAttackTarget = null;
   pendingLootTarget = null;
   pendingNpcTalk = null;
+  dynamicPathTarget = null;
   if (clickMarker) clickMarker.setVisible(false);
 }
 

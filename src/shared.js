@@ -35,10 +35,10 @@ export const CLASSES = {
 };
 
 export const SKILLS = {
-  attack: { label: "Attack" },
-  defense: { label: "Defense" },
-  magic: { label: "Magic" },
-  woodcutting: { label: "Woodcutting" }
+  attack: { label: "Attack", iconUrl: "/icons/skill-attack.png" },
+  defense: { label: "Defense", iconUrl: "/icons/skill-defense.png" },
+  magic: { label: "Magic", iconUrl: "/icons/skill-magic.png" },
+  woodcutting: { label: "Woodcutting", iconUrl: "/icons/skill-woodcutting.png" }
 };
 
 export const TREE_TYPES = {

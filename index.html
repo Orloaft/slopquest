@@ -47,18 +47,21 @@
             <span>Armor</span><b id="armorText">Cloth</b>
           </div>
           <div id="questTracker" class="quest-tracker"></div>
-          <div id="skillTracker" class="skill-tracker"></div>
-          <div class="inventory-wrap">
-            <div class="inventory-title">Inventory</div>
+          <details class="hud-section" open>
+            <summary>Skills</summary>
+            <div id="skillTracker" class="skill-tracker"></div>
+          </details>
+          <details class="hud-section inventory-wrap" open>
+            <summary>Inventory</summary>
             <div id="inventoryGrid" class="inventory-grid"></div>
-          </div>
+          </details>
           <div id="netStats" class="net-stats">net -</div>
           <div id="vendor" class="vendor hidden">
             <div class="vendor-title">Wayfarer Trader</div>
-            <button data-buy="weapon">Buy weapon</button>
-            <button data-buy="armor">Buy armor</button>
-            <button data-buy="axe">Buy axe</button>
-            <button data-buy="potion">Buy potion</button>
+            <button data-buy="weapon"><img src="/icons/shop-weapon.png" alt="" />Buy weapon</button>
+            <button data-buy="armor"><img src="/icons/shop-armor.png" alt="" />Buy armor</button>
+            <button data-buy="axe"><img src="/icons/item-axe.png" alt="" />Buy axe</button>
+            <button data-buy="potion"><img src="/icons/item-potion.png" alt="" />Buy potion</button>
           </div>
         </div>
 

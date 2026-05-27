@@ -149,7 +149,8 @@ canvas {
 }
 
 .hud button,
-.hud input {
+.hud input,
+.hud summary {
   pointer-events: auto;
 }
 
@@ -246,23 +247,98 @@ canvas {
   line-height: 1.35;
 }
 
+.hud-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hud-section summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+  list-style: none;
+  cursor: pointer;
+  color: #f7d486;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.hud-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.hud-section summary::after {
+  content: "v";
+  color: #aeb9af;
+  font-size: 11px;
+}
+
+.hud-section:not([open]) summary {
+  margin-bottom: 0;
+}
+
+.hud-section:not([open]) summary::after {
+  content: ">";
+}
+
 .skill-tracker {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 5px 10px;
-  margin-top: 10px;
+  gap: 6px;
+}
+
+.skill-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
   color: #d9e4da;
   font-size: 12px;
 }
 
-.skill-tracker span {
-  color: #aeb9af;
+.skill-icon,
+.item-icon {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
+.skill-meta {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.skill-name {
+  overflow: hidden;
+  color: #c8d3c9;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skill-progress {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.skill-progress span {
+  display: block;
+  height: 100%;
+  background: #d0a64d;
+}
+
+.skill-level {
+  color: #eef3ed;
+  font-size: 12px;
 }
 
 .inventory-wrap {
   margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .inventory-title {
@@ -288,7 +364,7 @@ canvas {
   border-radius: 5px;
   background: rgba(7, 10, 8, 0.5);
   color: #dbe7dc;
-  font-size: 15px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -325,6 +401,20 @@ canvas {
 .vendor-title {
   color: #f7d486;
   font-weight: 800;
+}
+
+.vendor button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.vendor img {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+  object-fit: contain;
 }
 
 .chat {
