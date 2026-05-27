@@ -209,6 +209,15 @@ canvas {
   color: #aeb9af;
 }
 
+.quest-tracker {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f7d486;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 .net-stats {
   margin-top: 12px;
   padding-top: 10px;

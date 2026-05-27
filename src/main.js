@@ -41,6 +41,7 @@ const dom = {
   potionText: document.querySelector("#potionText"),
   weaponText: document.querySelector("#weaponText"),
   armorText: document.querySelector("#armorText"),
+  questTracker: document.querySelector("#questTracker"),
   netStats: document.querySelector("#netStats"),
   vendor: document.querySelector("#vendor"),
   death: document.querySelector("#death"),
@@ -449,6 +450,7 @@ function renderHud(me) {
   dom.potionText.textContent = me.potions;
   dom.weaponText.textContent = me.weaponTier ? (me.classKey === "knight" ? SHOP.weapon.knightName : SHOP.weapon.casterName) : "Basic";
   dom.armorText.textContent = me.armorTier ? SHOP.armor.name : "Cloth";
+  renderQuestTracker(me.quests);
   dom.abilityOne.querySelector("span").textContent = me.classKey === "knight" ? "Cleave" : "Flare";
   dom.death.classList.toggle("hidden", !me.dead);
   const nearVendor = me.floor === NPCS[0].floor && Phaser.Math.Distance.Between(me.x, me.y, NPCS[0].x, NPCS[0].y) < 2.2;
@@ -461,7 +463,17 @@ function renderMetrics(metrics) {
     dom.netStats.textContent = "net -";
     return;
   }
-  dom.netStats.textContent = `zone ${metrics.zone} | net ${formatBytes(metrics.bytesOutPerSecond)}/s | tick ${metrics.tickMs}ms | snap ${metrics.snapshotMs}ms | seen ${metrics.visiblePlayers}p/${metrics.visibleMonsters}m`;
+  dom.netStats.textContent = `zone ${metrics.zone} | net ${formatBytes(metrics.bytesOutPerSecond)}/s | tick ${metrics.tickMs}ms | snap ${metrics.snapshotMs}ms | seen ${metrics.visiblePlayers}p/${metrics.visibleMonsters}m | cells ${metrics.spatialCells}`;
+}
+
+function renderQuestTracker(quests = []) {
+  const quest = quests.find((item) => !item.claimed) ?? quests[0];
+  if (!quest) {
+    dom.questTracker.textContent = "";
+    return;
+  }
+  const status = quest.claimed ? "Complete" : `${quest.progress}/${quest.target}`;
+  dom.questTracker.textContent = `${quest.title}: ${status}`;
 }
 
 function sendInput(time) {

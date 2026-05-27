@@ -27,6 +27,18 @@ const PORT = Number(process.env.PORT ?? 8787);
 const SNAPSHOT_RADIUS = 18;
 const SNAPSHOT_RADIUS_SQ = SNAPSHOT_RADIUS ** 2;
 const METRIC_WINDOW = 60;
+const SPATIAL_CELL_SIZE = 8;
+const QUESTS = {
+  southgate: {
+    id: "southgate",
+    title: "Thin the Cemetery",
+    zone: "cemetery",
+    targetTypes: new Set(["skeleton", "ghoul"]),
+    targetCount: 3,
+    rewardGold: 45,
+    rewardXp: 60
+  }
+};
 
 mkdirSync(DATA_DIR, { recursive: true });
 
@@ -34,6 +46,7 @@ const db = loadDb();
 const clients = new Map();
 const monsters = new Map();
 const corpses = new Map();
+let spatial = createSpatialIndex();
 let nextMonsterId = 1;
 let nextCorpseId = 1;
 const events = [];
@@ -105,6 +118,7 @@ setInterval(() => {
   last = now;
   const started = performance.now();
   updatePlayers(dt, now);
+  rebuildSpatialIndex();
   updateMonsters(dt, now);
   recordSample(metrics.tickSamples, performance.now() - started);
 }, 50);
@@ -169,7 +183,8 @@ function createPlayer(name, classKey) {
     gold: 30,
     potions: 2,
     weaponTier: 0,
-    armorTier: 0
+    armorTier: 0,
+    quests: createQuestState()
   };
 }
 
@@ -180,6 +195,7 @@ function hydratePlayer(saved) {
   player.maxMana = spec.maxMana + (player.level - 1) * spec.manaPerLevel;
   player.hp = clamp(player.hp, 1, player.maxHp);
   player.mana = clamp(player.mana, 0, player.maxMana);
+  player.quests = normalizeQuestState(player.quests);
   return player;
 }
 
@@ -289,6 +305,7 @@ function damageMonster(player, monster, damage, kind) {
   const catalog = MONSTERS[monster.type];
   monster.deadUntil = performance.now() + (monster.type === "boss" ? 45000 : 18000);
   player.xp += catalog.xp;
+  updateQuestProgress(player, monster);
   awardLevels(player);
 
   const corpse = {
@@ -336,6 +353,7 @@ function collectCorpse(player, corpse) {
   player.gold += corpse.gold;
   player.potions += corpse.potions;
   corpses.delete(corpse.id);
+  removeFromSpatial(spatial.corpses, corpse);
 }
 
 function buyItem(player, item) {
@@ -472,7 +490,7 @@ function canStand(floor, x, y) {
 function nearestPlayer(monster, maxDistance) {
   let best = null;
   let bestDist = maxDistance;
-  for (const { player } of clients.values()) {
+  for (const player of querySpatial(spatial.players, monster.floor, monster.x, monster.y, maxDistance)) {
     if (player.dead || player.floor !== monster.floor) continue;
     const dist = distance(monster, player);
     if (dist < bestDist) {
@@ -501,6 +519,7 @@ function armorReduction(player) {
 
 function broadcastState() {
   updateByteMetric();
+  rebuildSpatialIndex();
   for (const session of clients.values()) {
     const { socket, player } = session;
     if (socket.readyState !== socket.OPEN) continue;
@@ -514,19 +533,19 @@ function broadcastState() {
 
 function buildSnapshotFor(viewer) {
   const players = [];
-  for (const { player } of clients.values()) {
+  for (const player of querySpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
     if (player.id !== viewer.id && !inInterestRange(viewer, player)) continue;
     players.push(serializePlayer(player));
   }
 
   const visibleMonsters = [];
-  for (const monster of monsters.values()) {
+  for (const monster of querySpatial(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
     if (monster.deadUntil || !inInterestRange(viewer, monster)) continue;
     visibleMonsters.push(serializeMonster(monster));
   }
 
   const visibleCorpses = [];
-  for (const corpse of corpses.values()) {
+  for (const corpse of querySpatial(spatial.corpses, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
     if (!inInterestRange(viewer, corpse)) continue;
     visibleCorpses.push(corpse);
   }
@@ -544,6 +563,7 @@ function buildSnapshotFor(viewer) {
       visiblePlayers: players.length,
       visibleMonsters: visibleMonsters.length,
       visibleCorpses: visibleCorpses.length,
+      spatialCells: spatial.cellCount,
       tickMs: round(avg(metrics.tickSamples)),
       snapshotMs: round(avg(metrics.snapshotSamples)),
       bytesOutPerSecond: metrics.bytesOutPerSecond
@@ -572,7 +592,8 @@ function serializePlayer(player) {
     weaponTier: player.weaponTier,
     armorTier: player.armorTier,
     targetId: player.targetId,
-    dead: player.dead
+    dead: player.dead,
+    quests: serializeQuests(player)
   };
 }
 
@@ -617,7 +638,8 @@ function persistPlayerToDb(player) {
     gold: player.gold,
     potions: player.potions,
     weaponTier: player.weaponTier,
-    armorTier: player.armorTier
+    armorTier: player.armorTier,
+    quests: normalizeQuestState(player.quests)
   };
 }
 
@@ -670,6 +692,105 @@ function sanitizeInput(input) {
 
 function cleanName(name) {
   return String(name ?? "wanderer").trim().replace(/[^\w -]/g, "").slice(0, 18) || "wanderer";
+}
+
+function createQuestState() {
+  return Object.fromEntries(
+    Object.values(QUESTS).map((quest) => [quest.id, { progress: 0, complete: false, claimed: false }])
+  );
+}
+
+function normalizeQuestState(saved = {}) {
+  const quests = createQuestState();
+  for (const [id, state] of Object.entries(saved)) {
+    if (!quests[id]) continue;
+    quests[id] = {
+      progress: clamp(Number(state.progress ?? 0), 0, QUESTS[id].targetCount),
+      complete: Boolean(state.complete),
+      claimed: Boolean(state.claimed)
+    };
+  }
+  return quests;
+}
+
+function updateQuestProgress(player, monster) {
+  const quest = QUESTS.southgate;
+  const state = player.quests[quest.id];
+  if (!state || state.claimed || monster.zone !== quest.zone || !quest.targetTypes.has(monster.type)) return;
+
+  state.progress = clamp(state.progress + 1, 0, quest.targetCount);
+  if (state.progress < quest.targetCount) return;
+
+  state.complete = true;
+  state.claimed = true;
+  player.gold += quest.rewardGold;
+  player.xp += quest.rewardXp;
+  event("system", `${player.name} completed ${quest.title} and earned ${quest.rewardGold} gold.`);
+}
+
+function serializeQuests(player) {
+  return Object.values(QUESTS).map((quest) => {
+    const state = player.quests[quest.id] ?? { progress: 0, complete: false, claimed: false };
+    return {
+      id: quest.id,
+      title: quest.title,
+      progress: state.progress,
+      target: quest.targetCount,
+      complete: state.complete,
+      claimed: state.claimed,
+      rewardGold: quest.rewardGold,
+      rewardXp: quest.rewardXp
+    };
+  });
+}
+
+function createSpatialIndex() {
+  return { players: new Map(), monsters: new Map(), corpses: new Map(), cellCount: 0 };
+}
+
+function rebuildSpatialIndex() {
+  spatial = createSpatialIndex();
+  for (const { player } of clients.values()) addToSpatial(spatial.players, player);
+  for (const monster of monsters.values()) {
+    if (!monster.deadUntil) addToSpatial(spatial.monsters, monster);
+  }
+  for (const corpse of corpses.values()) addToSpatial(spatial.corpses, corpse);
+  spatial.cellCount = spatial.players.size + spatial.monsters.size + spatial.corpses.size;
+}
+
+function addToSpatial(index, entity) {
+  const key = spatialKey(entity.floor, entity.x, entity.y);
+  const bucket = index.get(key) ?? [];
+  bucket.push(entity);
+  index.set(key, bucket);
+}
+
+function removeFromSpatial(index, entity) {
+  const key = spatialKey(entity.floor, entity.x, entity.y);
+  const bucket = index.get(key);
+  if (!bucket) return;
+  const next = bucket.filter((item) => item !== entity);
+  if (next.length) index.set(key, next);
+  else index.delete(key);
+}
+
+function querySpatial(index, floor, x, y, radius) {
+  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
+  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
+  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
+  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
+  const results = [];
+  for (let cy = minCy; cy <= maxCy; cy += 1) {
+    for (let cx = minCx; cx <= maxCx; cx += 1) {
+      const bucket = index.get(`${floor}:${cx}:${cy}`);
+      if (bucket) results.push(...bucket);
+    }
+  }
+  return results;
+}
+
+function spatialKey(floor, x, y) {
+  return `${floor}:${Math.floor(x / SPATIAL_CELL_SIZE)}:${Math.floor(y / SPATIAL_CELL_SIZE)}`;
 }
 
 function event(type, text, x = null, y = null, floor = null, color = null, from = null, target = null, extra = {}) {
