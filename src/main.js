@@ -772,6 +772,9 @@ function renderSkillTracker(skills = []) {
 
 function renderInventory(inventory = []) {
   const slots = Array.from({ length: 30 }, (_, index) => inventory[index] ?? null);
+  if (selectedInventoryItem && !slots.some((item) => item?.id === selectedInventoryItem)) {
+    selectedInventoryItem = null;
+  }
   dom.inventoryGrid.innerHTML = slots
     .map((item, index) => {
       if (!item) return `<button class="inventory-slot empty" type="button" data-slot="${index}">.</button>`;
@@ -787,6 +790,12 @@ function renderInventory(inventory = []) {
     slot.addEventListener("mouseleave", hideItemPopover);
     slot.addEventListener("dblclick", () => {
       if (slot.dataset.item === "cooked_fish") send({ type: "eatItem", item: "cooked_fish" });
+    });
+  });
+  dom.inventoryGrid.querySelectorAll(".inventory-slot.empty").forEach((slot) => {
+    slot.addEventListener("click", () => {
+      selectedInventoryItem = null;
+      renderInventory(self()?.inventory ?? []);
     });
   });
 }
@@ -812,16 +821,21 @@ function hideItemPopover() {
 }
 
 function handleInventoryClick(itemId) {
-  if (selectedInventoryItem === "flint_steel" && (itemId === "logs" || itemId === "pine_logs")) {
-    send({ type: "makeFire", logItem: itemId });
+  const fireLog = firemakingLogItem(selectedInventoryItem, itemId);
+  if (fireLog) {
+    send({ type: "makeFire", logItem: fireLog });
     selectedInventoryItem = null;
-    return;
-  }
-  if (["flint_steel", "raw_fish"].includes(itemId)) {
-    selectedInventoryItem = selectedInventoryItem === itemId ? null : itemId;
     renderInventory(self()?.inventory ?? []);
     return;
   }
+  selectedInventoryItem = selectedInventoryItem === itemId ? null : itemId;
+  renderInventory(self()?.inventory ?? []);
+}
+
+function firemakingLogItem(firstItemId, secondItemId) {
+  const items = [firstItemId, secondItemId];
+  if (!items.includes("flint_steel")) return null;
+  return items.find((item) => item === "logs" || item === "pine_logs") ?? null;
 }
 
 function iconMarkup(url, fallback, className) {
