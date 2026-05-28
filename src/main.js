@@ -775,13 +775,19 @@ function renderMetrics(metrics) {
 }
 
 function renderQuestTracker(quests = []) {
-  const quest = quests.find((item) => item.accepted && !item.claimed) ?? quests.find((item) => !item.claimed) ?? quests[0];
-  if (!quest) {
+  const active = quests.filter((quest) => quest.accepted && !quest.claimed);
+  if (!active.length) {
     dom.questTracker.textContent = "";
     return;
   }
-  const status = quest.claimed ? "Complete" : quest.accepted ? `${quest.progress}/${quest.target}` : "Talk to Mira";
-  dom.questTracker.textContent = `${quest.title}: ${status}`;
+  dom.questTracker.innerHTML = active
+    .map((quest) => {
+      const ready = quest.progress >= quest.target;
+      const status = ready ? "Ready to turn in" : `${quest.progress}/${quest.target}`;
+      const color = ready ? "#9ee6b1" : "#f7d486";
+      return `<div style="color:${color}">${escapeHtml(quest.title)}: ${escapeHtml(status)}</div>`;
+    })
+    .join("");
 }
 
 function renderBuffTracker(buffs = {}) {

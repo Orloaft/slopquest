@@ -46,7 +46,8 @@ const ITEMS = {
   raw_fish: { id: "raw_fish", label: "Raw Fish", icon: "rF", iconUrl: "/icons/item-raw-fish.png" },
   cooked_fish: { id: "cooked_fish", label: "Cooked Fish", icon: "cF", iconUrl: "/icons/item-cooked-fish.png" },
   burnt_fish: { id: "burnt_fish", label: "Burnt Fish", icon: "bF", iconUrl: "/icons/item-burnt-fish.png" },
-  potion: { id: "potion", label: "Health Potion", icon: "P", iconUrl: "/icons/item-potion.png" }
+  potion: { id: "potion", label: "Health Potion", icon: "P", iconUrl: "/icons/item-potion.png" },
+  stolen_goods: { id: "stolen_goods", label: "Stolen Cargo", icon: "S", iconUrl: null }
 };
 const FISHING_NODES = [
   { id: "fish-0-5-9", floor: 0, x: 5.35, y: 9.5, approachX: 7.5, approachY: 9.5 },
@@ -76,13 +77,48 @@ const QUESTS = {
   southgate: {
     id: "southgate",
     title: "Thin the Cemetery",
+    kind: "kill",
     giverId: "cemetery-warden",
     zone: "cemetery",
     targetTypes: new Set(["skeleton", "ghoul"]),
     targetCount: 3,
     rewardGold: 45,
     rewardXp: 60
+  },
+  pine_logs: {
+    id: "pine_logs",
+    title: "Pine for the Yards",
+    kind: "gather",
+    giverId: "lumberjack",
+    itemId: "pine_logs",
+    targetCount: 5,
+    rewardGold: 60,
+    rewardXp: 80
+  },
+  goblin_shaman: {
+    id: "goblin_shaman",
+    title: "Silence the Shamans",
+    kind: "kill",
+    giverId: "hunter",
+    zone: "woods",
+    targetTypes: new Set(["goblin_shaman"]),
+    targetCount: 2,
+    rewardGold: 90,
+    rewardXp: 110
+  },
+  stolen_goods: {
+    id: "stolen_goods",
+    title: "Stolen Cargo",
+    kind: "fetch",
+    giverId: "merchant",
+    itemId: "stolen_goods",
+    targetCount: 1,
+    rewardGold: 75,
+    rewardXp: 90
   }
+};
+const QUEST_DROPS = {
+  orc: { itemId: "stolen_goods", chance: 0.1 }
 };
 
 mkdirSync(DATA_DIR, { recursive: true });
@@ -423,10 +459,16 @@ function damageMonster(player, monster, damage, kind) {
     potions: Math.random() < 0.18 || monster.type === "boss" ? 1 : 0,
     label: catalog.name,
     kind: "corpse",
-    items: []
+    items: rollQuestDrops(monster.type)
   };
   corpses.set(corpse.id, corpse);
   event("system", `${player.name} defeated ${catalog.name}.`);
+}
+
+function rollQuestDrops(monsterType) {
+  const drop = QUEST_DROPS[monsterType];
+  if (!drop || Math.random() >= drop.chance) return [];
+  return [{ id: drop.itemId, qty: 1 }];
 }
 
 function damagePlayer(player, damage, source) {
@@ -542,34 +584,157 @@ function talkNpc(player, id) {
   const npc = npcs.get(id);
   if (!npc || player.dead || npc.floor !== player.floor || distance(player, npc) > 2.4) return;
 
-  if (npc.id === QUESTS.southgate.giverId) {
-    const state = player.quests.southgate;
-    if (!state.accepted) {
-      state.accepted = true;
-      eventDialogue(player, [
-        { speaker: npc.name, text: "Southgate Cemetery is restless again. The dead are testing the gate." },
-        { speaker: player.name, text: "What do you need from me?" },
-        { speaker: npc.name, text: `Defeat ${QUESTS.southgate.targetCount} undead beyond the south gate, then return stronger.` }
-      ]);
-      event("float", "Quest accepted", player.x, player.y, player.floor, "#f7d486");
-      return;
-    }
-    if (state.claimed) {
-      eventDialogue(player, [
-        { speaker: npc.name, text: "The cemetery is quieter because of you." },
-        { speaker: player.name, text: "I will keep an eye on the road south." }
-      ]);
-      return;
-    }
-    eventDialogue(player, [
-      { speaker: npc.name, text: "Keep thinning the undead beyond the south gate." },
-      { speaker: player.name, text: `${state.progress}/${QUESTS.southgate.targetCount} so far. I will return when it is done.` }
-    ]);
+  const quest = questForGiver(npc.id);
+  if (quest) {
+    handleQuestDialogue(player, npc, quest);
     return;
   }
 
   const dialogue = npcDialogueLines(player, npc);
   if (dialogue) eventDialogue(player, dialogue, npc.role === "vendor" ? { opensShop: true } : {});
+}
+
+function questForGiver(giverId) {
+  return Object.values(QUESTS).find((quest) => quest.giverId === giverId) ?? null;
+}
+
+function handleQuestDialogue(player, npc, quest) {
+  const state = player.quests[quest.id];
+  if (!state) return;
+
+  if (state.claimed) {
+    eventDialogue(player, questDialogue(npc, player, quest, "claimed"));
+    return;
+  }
+
+  if (!state.accepted) {
+    state.accepted = true;
+    eventDialogue(player, questDialogue(npc, player, quest, "intro"));
+    event("float", "Quest accepted", player.x, player.y, player.floor, "#f7d486");
+    return;
+  }
+
+  const progress = currentQuestProgress(player, quest, state);
+  if (progress >= quest.targetCount) {
+    if (!consumeQuestTurnIn(player, quest)) {
+      eventDialogue(player, questDialogue(npc, player, quest, "missingItems"));
+      return;
+    }
+    state.progress = quest.targetCount;
+    state.complete = true;
+    state.claimed = true;
+    player.gold += quest.rewardGold;
+    player.xp += quest.rewardXp;
+    awardLevels(player);
+    event("system", `${player.name} completed ${quest.title} and earned ${quest.rewardGold} gold.`);
+    event("float", `+${quest.rewardGold}g`, player.x, player.y, player.floor, "#ffd166");
+    eventDialogue(player, questDialogue(npc, player, quest, "turnIn"));
+    return;
+  }
+
+  eventDialogue(player, questDialogue(npc, player, quest, "progress", progress));
+}
+
+function consumeQuestTurnIn(player, quest) {
+  if (quest.kind === "gather" || quest.kind === "fetch") {
+    return removeInventoryItem(player, quest.itemId, quest.targetCount);
+  }
+  return true;
+}
+
+function currentQuestProgress(player, quest, state) {
+  if (quest.kind === "gather" || quest.kind === "fetch") {
+    return clamp(inventoryCount(player, quest.itemId), 0, quest.targetCount);
+  }
+  return clamp(state.progress, 0, quest.targetCount);
+}
+
+function inventoryCount(player, id) {
+  return player.inventory.reduce((sum, item) => sum + (item?.id === id ? item.qty : 0), 0);
+}
+
+function questDialogue(npc, player, quest, phase, progress = 0) {
+  const itemLabel = quest.itemId ? ITEMS[quest.itemId]?.label ?? quest.itemId : "";
+  const lines = {
+    southgate: {
+      intro: [
+        { speaker: npc.name, text: "Southgate Cemetery is restless again. The dead are testing the gate." },
+        { speaker: player.name, text: "What do you need from me?" },
+        { speaker: npc.name, text: `Defeat ${quest.targetCount} undead beyond the south gate, then return to me.` }
+      ],
+      progress: [
+        { speaker: npc.name, text: "Keep thinning the undead beyond the south gate." },
+        { speaker: player.name, text: `${progress}/${quest.targetCount} so far. I will return when it is done.` }
+      ],
+      turnIn: [
+        { speaker: npc.name, text: "Good. The gate breathes easier tonight." },
+        { speaker: player.name, text: "I will keep an eye on the road south." }
+      ],
+      claimed: [
+        { speaker: npc.name, text: "The cemetery is quieter because of you." }
+      ]
+    },
+    pine_logs: {
+      intro: [
+        { speaker: npc.name, text: "The pine yards are stripped and the carpenters are pacing." },
+        { speaker: player.name, text: "How many do you need?" },
+        { speaker: npc.name, text: `Bring me ${quest.targetCount} ${itemLabel}. Pines grow north past the south road.` }
+      ],
+      progress: [
+        { speaker: npc.name, text: `Still need ${quest.targetCount - progress} more ${itemLabel}.` },
+        { speaker: player.name, text: "I am still chopping." }
+      ],
+      missingItems: [
+        { speaker: npc.name, text: `Bring the ${itemLabel} to my hands, not your pack alone.` }
+      ],
+      turnIn: [
+        { speaker: npc.name, text: "Hah, fine timber. The yards will sing tonight." },
+        { speaker: player.name, text: "Glad to help." }
+      ],
+      claimed: [
+        { speaker: npc.name, text: "The yards are stocked. I owe you a drink." }
+      ]
+    },
+    goblin_shaman: {
+      intro: [
+        { speaker: npc.name, text: "Goblin shamans have been chanting at the woodline. Bad omens." },
+        { speaker: player.name, text: "Want them silenced?" },
+        { speaker: npc.name, text: `Drop ${quest.targetCount} of them in Northwood and come back to me.` }
+      ],
+      progress: [
+        { speaker: npc.name, text: `${progress}/${quest.targetCount} silenced. The woods are still murmuring.` }
+      ],
+      turnIn: [
+        { speaker: npc.name, text: "Quiet at last. Sleep comes easier in town tonight." },
+        { speaker: player.name, text: "Call me again if they start up." }
+      ],
+      claimed: [
+        { speaker: npc.name, text: "The woodline is quiet thanks to you." }
+      ]
+    },
+    stolen_goods: {
+      intro: [
+        { speaker: npc.name, text: "Orcs took my caravan crate north of here. I would pay well to see it back." },
+        { speaker: player.name, text: "I will look for it." },
+        { speaker: npc.name, text: `Search any orc you find for ${itemLabel}. They hoard such things.` }
+      ],
+      progress: [
+        { speaker: npc.name, text: `Any luck finding the ${itemLabel}?` },
+        { speaker: player.name, text: "Not yet. Still hunting." }
+      ],
+      missingItems: [
+        { speaker: npc.name, text: `Find the ${itemLabel} on the orcs first, then come see me.` }
+      ],
+      turnIn: [
+        { speaker: npc.name, text: "My cargo! Bless you, traveler." },
+        { speaker: player.name, text: "Safer in your hands than theirs." }
+      ],
+      claimed: [
+        { speaker: npc.name, text: "Trade is moving again thanks to you." }
+      ]
+    }
+  };
+  return lines[quest.id]?.[phase] ?? [{ speaker: npc.name, text: npc.dialogue }];
 }
 
 function cutTree(player, id) {
@@ -797,20 +962,27 @@ function spawnNpcs() {
       dialogue: npc.id === "trader" ? "Need supplies? Stand close and open the shop." : "Northwatch is quiet for now."
     });
   }
-  npcs.set("cemetery-warden", {
-    id: "cemetery-warden",
-    name: "Mira Gravewatch",
+  spawnQuestNpc({ id: "cemetery-warden", name: "Mira Gravewatch", x: 18.5, y: 18.5, dialogue: "Southgate Cemetery is restless." });
+  spawnQuestNpc({ id: "lumberjack", name: "Brann Splitlog", x: 22.5, y: 16.5, dialogue: "Pine yards are short on stock." });
+  spawnQuestNpc({ id: "hunter", name: "Kael Brookfoot", x: 15.5, y: 19.5, dialogue: "The shamans in Northwood worry me." });
+  spawnQuestNpc({ id: "merchant", name: "Marda Vell", x: 20.5, y: 19.5, dialogue: "Orcs raided my cart on the north road." });
+}
+
+function spawnQuestNpc({ id, name, x, y, dialogue, floor = 0 }) {
+  npcs.set(id, {
+    id,
+    name,
     role: "quest",
-    floor: 0,
-    x: 18.5,
-    y: 18.5,
-    homeX: 18.5,
-    homeY: 18.5,
+    floor,
+    x,
+    y,
+    homeX: x,
+    homeY: y,
     dir: "down",
     moving: false,
     wanderTarget: null,
     wanderNextAt: performance.now() + 1400,
-    dialogue: "Southgate Cemetery is restless."
+    dialogue
   });
 }
 
@@ -839,20 +1011,21 @@ function treeTypeForTile(floor, x, y) {
 }
 
 function updateNpcs(dt, now) {
-  const npc = npcs.get("cemetery-warden");
-  if (!npc) return;
-  npc.moving = false;
-  if (now >= npc.wanderNextAt && !npc.wanderTarget) {
-    npc.wanderTarget = pickNpcWanderTarget(npc);
-    npc.wanderNextAt = now + roll([1800, 4200]);
+  for (const npc of npcs.values()) {
+    if (npc.homeX == null) continue;
+    npc.moving = false;
+    if (now >= npc.wanderNextAt && !npc.wanderTarget) {
+      npc.wanderTarget = pickNpcWanderTarget(npc);
+      npc.wanderNextAt = now + roll([1800, 4200]);
+    }
+    if (!npc.wanderTarget) continue;
+    const dist = distance(npc, npc.wanderTarget);
+    if (dist < 0.18) {
+      npc.wanderTarget = null;
+      continue;
+    }
+    moveEntity(npc, ((npc.wanderTarget.x - npc.x) / dist) * 1.35 * dt, ((npc.wanderTarget.y - npc.y) / dist) * 1.35 * dt);
   }
-  if (!npc.wanderTarget) return;
-  const dist = distance(npc, npc.wanderTarget);
-  if (dist < 0.18) {
-    npc.wanderTarget = null;
-    return;
-  }
-  moveEntity(npc, ((npc.wanderTarget.x - npc.x) / dist) * 1.35 * dt, ((npc.wanderTarget.y - npc.y) / dist) * 1.35 * dt);
 }
 
 function pickNpcWanderTarget(npc) {
@@ -1298,30 +1471,36 @@ function normalizeQuestState(saved = {}) {
 }
 
 function updateQuestProgress(player, monster) {
-  const quest = QUESTS.southgate;
-  const state = player.quests[quest.id];
-  if (!state || !state.accepted || state.claimed || monster.zone !== quest.zone || !quest.targetTypes.has(monster.type)) return;
-
-  state.progress = clamp(state.progress + 1, 0, quest.targetCount);
-  if (state.progress < quest.targetCount) return;
-
-  state.complete = true;
-  state.claimed = true;
-  player.gold += quest.rewardGold;
-  player.xp += quest.rewardXp;
-  event("system", `${player.name} completed ${quest.title} and earned ${quest.rewardGold} gold.`);
+  for (const quest of Object.values(QUESTS)) {
+    if (quest.kind !== "kill") continue;
+    const state = player.quests[quest.id];
+    if (!state || !state.accepted || state.claimed || state.complete) continue;
+    if (monster.zone !== quest.zone || !quest.targetTypes.has(monster.type)) continue;
+    state.progress = clamp(state.progress + 1, 0, quest.targetCount);
+    if (state.progress >= quest.targetCount) {
+      state.complete = true;
+      event("float", `${quest.title} ready to turn in`, player.x, player.y, player.floor, "#f7d486");
+    }
+  }
 }
 
 function serializeQuests(player) {
   return Object.values(QUESTS).map((quest) => {
-    const state = player.quests[quest.id] ?? { progress: 0, complete: false, claimed: false };
+    const state = player.quests[quest.id] ?? { accepted: false, progress: 0, complete: false, claimed: false };
+    const progress = state.claimed
+      ? quest.targetCount
+      : (quest.kind === "gather" || quest.kind === "fetch")
+        ? clamp(inventoryCount(player, quest.itemId), 0, quest.targetCount)
+        : clamp(state.progress, 0, quest.targetCount);
     return {
       id: quest.id,
       title: quest.title,
+      kind: quest.kind,
+      giverId: quest.giverId,
       accepted: state.accepted,
-      progress: state.progress,
+      progress,
       target: quest.targetCount,
-      complete: state.complete,
+      complete: state.claimed || progress >= quest.targetCount,
       claimed: state.claimed,
       rewardGold: quest.rewardGold,
       rewardXp: quest.rewardXp
