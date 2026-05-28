@@ -153,6 +153,7 @@ wss.on("connection", (socket) => {
     if (message.type === "cookFish") cookFish(session.player, String(message.id ?? ""));
     if (E2E_TEST && message.type === "e2eGrantItems") grantE2EItems(session.player, message);
     if (message.type === "eatItem") eatItem(session.player, String(message.item ?? ""));
+    if (message.type === "useItem") useItem(session.player, String(message.item ?? ""), message.ctx ?? {});
     if (message.type === "chat") chat(session.player, String(message.text ?? ""));
     if (message.type === "respawn") respawn(session.player);
   });
@@ -704,7 +705,7 @@ function questDialogue(npc, player, quest, phase, progress = 0) {
 function cutTree(player, id) {
   const tree = treeNodes.get(id);
   if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distance(player, tree) > 1.8) return;
-  if (!hasInventoryItem(player, "axe")) {
+  if (!playerHasCapability(player, "chop_tree")) {
     event("float", "You need an axe.", player.x, player.y, player.floor, "#f7d486");
     return;
   }
@@ -722,7 +723,7 @@ function cutTree(player, id) {
 function fishNode(player, id) {
   const node = FISHING_NODES.find((item) => item.id === id);
   if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.45) return;
-  if (!hasInventoryItem(player, "fishing_rod")) {
+  if (!playerHasCapability(player, "fish")) {
     event("float", "You need a fishing rod.", player.x, player.y, player.floor, "#f7d486");
     return;
   }
@@ -732,13 +733,61 @@ function fishNode(player, id) {
   event("float", "You cast your line.", node.x, node.y, node.floor, "#8fd8ff");
 }
 
-function makeFire(player, logItem = "logs") {
-  if (player.dead || !hasInventoryItem(player, "flint_steel")) return;
-  const itemId = logItem === "pine_logs" ? "pine_logs" : "logs";
-  if (!removeInventoryItem(player, itemId, 1)) return;
+// --- Item use dispatcher (Phase 2) ----------------------------------------
+// useItem looks up `ITEMS[itemId].use.kind` and dispatches to a verb handler.
+// Each verb owns its own validation, consumption, and effects. Authors compose
+// items in content/items.yaml; adding a new verb still requires engine work.
+
+const USE_VERBS = {
+  eat: useVerbEat,
+  drink_potion: useVerbDrinkPotion,
+  light_fire: useVerbLightFire,
+  cook_on_fire: useVerbCookOnFire
+};
+
+function useItem(player, itemId, ctx = {}) {
+  if (player.dead) return;
+  const item = ITEMS[itemId];
+  if (!item?.use) return;
+  const verb = USE_VERBS[item.use.kind];
+  if (!verb) return;
+  verb(player, item, ctx);
+}
+
+function applyBuffs(player, buffs, now) {
+  for (const buff of buffs ?? []) {
+    if (buff.id === "well_fed") player.wellFedUntil = Math.max(player.wellFedUntil ?? 0, now + buff.durationMs);
+    if (buff.id === "food_regen") player.foodRegenUntil = Math.max(player.foodRegenUntil ?? 0, now + buff.durationMs);
+  }
+}
+
+function useVerbEat(player, item) {
+  if (!removeInventoryItem(player, item.id, 1)) return;
+  const u = item.use;
+  if (u.restoreHp) player.hp = clamp(player.hp + u.restoreHp, 0, player.maxHp);
+  applyBuffs(player, u.buffs, performance.now());
+  if (u.float) event("float", u.float, player.x, player.y, player.floor, "#9ee6b1");
+}
+
+function useVerbDrinkPotion(player, item) {
+  if (!removeInventoryItem(player, item.id, 1)) return;
+  const u = item.use;
+  if (u.restoreHp) player.hp = clamp(player.hp + u.restoreHp, 0, player.maxHp);
+  event("float", u.float ?? `${player.name} drinks a potion.`, player.x, player.y, player.floor, "#77e0a0");
+}
+
+function useVerbLightFire(player, item, ctx) {
+  if (!hasInventoryItem(player, item.id)) return;
+  const u = item.use;
+  const options = u.consumesAny ?? [];
+  const preferred = ctx.logItem ? options.find((o) => o.item === ctx.logItem && hasInventoryItem(player, o.item)) : null;
+  const choice = preferred ?? options.find((o) => hasInventoryItem(player, o.item));
+  if (!choice) return;
+  const qty = choice.qty ?? 1;
+  if (!removeInventoryItem(player, choice.item, qty)) return;
   const placement = firePlacementAtPlayer(player);
   if (!placement) {
-    addInventoryItem(player, itemId, 1);
+    addInventoryItem(player, choice.item, qty);
     event("float", "No room for a fire.", player.x, player.y, player.floor, "#f7d486");
     return;
   }
@@ -747,31 +796,41 @@ function makeFire(player, logItem = "logs") {
     floor: player.floor,
     x: placement.x,
     y: placement.y,
-    expiresAt: performance.now() + FIRE_DURATION_MS,
+    expiresAt: performance.now() + (u.durationMs ?? FIRE_DURATION_MS),
     owner: player.name
   };
   fires.set(fire.id, fire);
-  addSkillXp(player, "firemaking", itemId === "pine_logs" ? 18 : 10);
+  if (u.skill && choice.xp) addSkillXp(player, u.skill, choice.xp);
   event("effect", "fire", fire.x, fire.y, fire.floor, null, player.id, fire.id);
   event("float", "Fire lit", fire.x, fire.y, fire.floor, "#ffb35c");
 }
 
-function cookFish(player, id) {
-  const fire = fires.get(id);
-  if (!fire || player.dead || fire.floor !== player.floor || distance(player, fire) > 1.9) return;
-  if (!hasInventoryItem(player, "raw_fish")) return;
+function useVerbCookOnFire(player, item, ctx) {
+  const fire = fires.get(ctx.fireId);
+  if (!fire || fire.floor !== player.floor || distance(player, fire) > 1.9) return;
+  if (!hasInventoryItem(player, item.id)) return;
+  const skill = item.use.skill ?? "cooking";
   player.targetId = null;
-  player.action = { type: "cooking", fireId: fire.id, nextAt: performance.now() + cookingMs(skillLevel(player, "cooking")) };
+  player.action = {
+    type: "cooking",
+    itemId: item.id,
+    fireId: fire.id,
+    nextAt: performance.now() + cookingMs(skillLevel(player, skill))
+  };
   event("float", "Cooking...", fire.x, fire.y, fire.floor, "#ffcf7a");
 }
 
+function makeFire(player, logItem = "logs") {
+  useItem(player, "flint_steel", { logItem });
+}
+
+function cookFish(player, fireId) {
+  useItem(player, "raw_fish", { fireId });
+}
+
 function eatItem(player, itemId) {
-  if (player.dead || itemId !== "cooked_fish" || !removeInventoryItem(player, "cooked_fish", 1)) return;
-  const now = performance.now();
-  player.foodRegenUntil = Math.max(player.foodRegenUntil ?? 0, now + 18000);
-  player.wellFedUntil = Math.max(player.wellFedUntil ?? 0, now + 90000);
-  player.hp = clamp(player.hp + 6, 0, player.maxHp);
-  event("float", "Well fed", player.x, player.y, player.floor, "#9ee6b1");
+  if (ITEMS[itemId]?.use?.kind !== "eat") return;
+  useItem(player, itemId);
 }
 
 function updatePlayerAction(player, now) {
@@ -808,7 +867,7 @@ function updatePlayerAction(player, now) {
 
 function updateFishingAction(player, now) {
   const node = FISHING_NODES.find((item) => item.id === player.action.nodeId);
-  if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.65 || !hasInventoryItem(player, "fishing_rod")) {
+  if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.65 || !playerHasCapability(player, "fish")) {
     player.action = null;
     return;
   }
@@ -831,19 +890,25 @@ function updateCookingAction(player, now) {
     return;
   }
   if (now < player.action.nextAt) return;
+  const inputId = player.action.itemId ?? "raw_fish";
+  const recipe = ITEMS[inputId]?.use ?? {};
+  const produces = recipe.produces ?? "cooked_fish";
+  const burns = recipe.burns ?? "burnt_fish";
+  const skill = recipe.skill ?? "cooking";
+  const xp = recipe.xp ?? 22;
   player.action = null;
-  if (!removeInventoryItem(player, "raw_fish", 1)) return;
-  const level = skillLevel(player, "cooking");
+  if (!removeInventoryItem(player, inputId, 1)) return;
+  const level = skillLevel(player, skill);
   const successChance = clamp(0.45 + level * 0.035, 0.45, 0.92);
   const cooked = E2E_TEST || Math.random() < successChance;
-  const result = cooked ? "cooked_fish" : "burnt_fish";
+  const result = cooked ? produces : burns;
   if (!addInventoryItem(player, result, 1)) {
-    addInventoryItem(player, "raw_fish", 1);
+    addInventoryItem(player, inputId, 1);
     event("system", "Your inventory is full.");
     return;
   }
-  if (cooked) addSkillXp(player, "cooking", 22);
-  event("float", cooked ? "+22 Cooking" : "Burnt", fire.x, fire.y, fire.floor, cooked ? "#9ee6b1" : "#a8a29e");
+  if (cooked) addSkillXp(player, skill, xp);
+  event("float", cooked ? `+${xp} ${SKILLS[skill]?.label ?? skill}` : "Burnt", fire.x, fire.y, fire.floor, cooked ? "#9ee6b1" : "#a8a29e");
 }
 
 function grantE2EItems(player, message) {
@@ -1503,10 +1568,19 @@ function hasInventoryItem(player, id) {
   return player.inventory.some((item) => item?.id === id && item.qty > 0);
 }
 
+function playerHasCapability(player, capability) {
+  for (const slot of player.inventory) {
+    if (!slot || slot.qty <= 0) continue;
+    const spec = ITEMS[slot.id];
+    if (spec?.capabilities?.includes(capability)) return true;
+  }
+  return false;
+}
+
 function addInventoryItem(player, id, qty = 1) {
   if (!ITEMS[id]) return false;
   let remaining = Math.max(1, Math.floor(qty));
-  const stackable = !["axe", "fishing_rod", "flint_steel"].includes(id);
+  const stackable = ITEMS[id].stackable !== false;
   if (stackable) {
     const existing = player.inventory.find((item) => item?.id === id);
     if (existing) {

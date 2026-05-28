@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import "./style.css";
 import {
   CLASSES,
+  ITEMS,
   MAP_COLS,
   MAP_ROWS,
   MONSTERS,
@@ -188,7 +189,9 @@ const DIRECTIONS = ["up", "right", "down", "left"];
 const WALK_FRAME_MS = 125;
 const DYNAMIC_PATH_REFRESH_MS = 350;
 const DYNAMIC_PATH_REFRESH_DISTANCE = 0.65;
-const COOKABLE_ITEMS = new Set(["raw_fish"]);
+function itemUseKind(itemId) {
+  return ITEMS[itemId]?.use?.kind ?? null;
+}
 
 function preload() {
   scene = this;
@@ -850,7 +853,8 @@ function renderInventory(inventory = []) {
     slot.addEventListener("mousemove", () => positionItemPopover(slot));
     slot.addEventListener("mouseleave", hideItemPopover);
     slot.addEventListener("dblclick", () => {
-      if (slot.dataset.item === "cooked_fish") send({ type: "eatItem", item: "cooked_fish" });
+      const id = slot.dataset.item;
+      if (itemUseKind(id) === "eat") send({ type: "eatItem", item: id });
     });
   });
   dom.inventoryGrid.querySelectorAll(".inventory-slot.empty").forEach((slot) => {
@@ -917,13 +921,15 @@ function clearInventorySelection() {
 }
 
 function firemakingLogItem(firstItemId, secondItemId) {
-  const items = [firstItemId, secondItemId];
-  if (!items.includes("flint_steel")) return null;
-  return items.find((item) => item === "logs" || item === "pine_logs") ?? null;
+  const pair = [firstItemId, secondItemId];
+  const lighter = pair.find((id) => itemUseKind(id) === "light_fire");
+  if (!lighter) return null;
+  const consumables = new Set((ITEMS[lighter].use.consumesAny ?? []).map((c) => c.item));
+  return pair.find((id) => consumables.has(id)) ?? null;
 }
 
 function isCookableItem(itemId) {
-  return COOKABLE_ITEMS.has(itemId);
+  return itemUseKind(itemId) === "cook_on_fire";
 }
 
 function iconMarkup(url, fallback, className) {

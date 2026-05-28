@@ -1,14 +1,41 @@
 # Items players can hold in inventory.
 #
 # Required fields: id, label
-# Optional fields: icon, iconUrl, stackable, tags, use (Phase 2)
+# Optional fields: icon, iconUrl, stackable, tags, capabilities, use
 #
-# id          — unique snake_case identifier. Used everywhere else (drops, vendor, quests).
-# label       — display name shown to the player.
-# icon        — short character code used as the fallback inventory glyph.
-# iconUrl     — path under public/ to the inventory icon image (or null).
-# stackable   — true if the item stacks in one inventory slot.
-# tags        — free-form labels (food, tool, consumable, quest, …) for future filtering.
+# id            — unique snake_case identifier. Used everywhere else (drops, vendor, quests).
+# label         — display name shown to the player.
+# icon          — short character code used as the fallback inventory glyph.
+# iconUrl       — path under public/ to the inventory icon image (or null).
+# stackable     — true if the item stacks in one inventory slot.
+# tags          — free-form labels (food, tool, consumable, quest, …) for future filtering.
+# capabilities  — list of capability ids this item grants while carried. Used by tool
+#                 checks (e.g. `chop_tree`, `fish`). Authors compose from the known set.
+# use           — what happens when the player uses the item. See "Use verbs" below.
+#
+# === Use verbs (Phase 2) ===
+#
+# Each `use` block must have a `kind` matching one of the engine verbs:
+#
+#   eat            — consume one of the item and apply effects.
+#                    fields: restoreHp (number, optional)
+#                            buffs (list, optional): each entry { id, durationMs }
+#                            float (string, optional): float text shown on the player
+#
+#   light_fire     — consume one of `consumesAny` items at the player's feet to start a fire.
+#                    fields: consumesAny (list): each { item, qty, xp }
+#                            skill (string, optional): xp goes to this skill
+#                            durationMs (number, optional): how long the fire burns
+#
+#   cook_on_fire   — start a cooking action on the targeted fire.
+#                    fields: produces (item id): result on success
+#                            burns (item id): result on failure
+#                            skill (string, optional): xp goes to this skill
+#                            xp (number): xp awarded on success
+#
+#   drink_potion   — consume one of the item, heal restoreHp.
+#                    fields: restoreHp (number)
+#                            float (string, optional)
 
 - id: axe
   label: Bronze Axe
@@ -16,6 +43,7 @@
   iconUrl: /icons/item-axe.png
   stackable: false
   tags: [tool]
+  capabilities: [chop_tree]
 
 - id: fishing_rod
   label: Fishing Rod
@@ -23,6 +51,7 @@
   iconUrl: /icons/item-fishing-rod.png
   stackable: false
   tags: [tool]
+  capabilities: [fish]
 
 - id: flint_steel
   label: Flint and Steel
@@ -30,6 +59,13 @@
   iconUrl: /icons/item-flint-steel.png
   stackable: false
   tags: [tool]
+  use:
+    kind: light_fire
+    consumesAny:
+      - { item: logs, qty: 1, xp: 10 }
+      - { item: pine_logs, qty: 1, xp: 18 }
+    skill: firemaking
+    durationMs: 120000
 
 - id: logs
   label: Oak Logs
@@ -51,6 +87,12 @@
   iconUrl: /icons/item-raw-fish.png
   stackable: true
   tags: [food, raw]
+  use:
+    kind: cook_on_fire
+    produces: cooked_fish
+    burns: burnt_fish
+    skill: cooking
+    xp: 22
 
 - id: cooked_fish
   label: Cooked Fish
@@ -58,6 +100,15 @@
   iconUrl: /icons/item-cooked-fish.png
   stackable: true
   tags: [food, consumable]
+  use:
+    kind: eat
+    restoreHp: 6
+    buffs:
+      - id: food_regen
+        durationMs: 18000
+      - id: well_fed
+        durationMs: 90000
+    float: Well fed
 
 - id: burnt_fish
   label: Burnt Fish
@@ -72,6 +123,9 @@
   iconUrl: /icons/item-potion.png
   stackable: true
   tags: [consumable]
+  use:
+    kind: drink_potion
+    restoreHp: 58
 
 - id: stolen_goods
   label: Stolen Cargo

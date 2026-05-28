@@ -36,10 +36,37 @@ const itemIds = new Set(items.map((i) => i.id));
 const monsterIds = new Set(monsters.map((m) => m.id));
 const treeTypeIds = new Set(treeTypes.map((t) => t.id));
 const zoneIds = new Set(["southTown", "cemetery", "crypt", "woods", "northTown"]);
+const useKinds = new Set(["eat", "light_fire", "cook_on_fire", "drink_potion"]);
+const capabilityIds = new Set(["chop_tree", "fish"]);
 
 for (const item of items) {
   if (!item.id) fail("items.yaml", "item missing id");
   if (!item.label) fail(`items.yaml:${item.id}`, "missing label");
+  for (const cap of item.capabilities ?? []) {
+    if (!capabilityIds.has(cap)) fail(`items.yaml:${item.id}`, `unknown capability "${cap}"`);
+  }
+  if (item.use) validateItemUse(item);
+}
+
+function validateItemUse(item) {
+  const where = `items.yaml:${item.id}.use`;
+  const u = item.use;
+  if (!useKinds.has(u.kind)) {
+    fail(where, `unknown use.kind "${u.kind}" (known: ${[...useKinds].join(", ")})`);
+    return;
+  }
+  if (u.kind === "light_fire") {
+    if (!Array.isArray(u.consumesAny) || u.consumesAny.length === 0) {
+      fail(where, "light_fire requires consumesAny: [...]");
+    }
+    for (const c of u.consumesAny ?? []) {
+      if (!itemIds.has(c.item)) fail(where, `consumesAny refs unknown item "${c.item}"`);
+    }
+  }
+  if (u.kind === "cook_on_fire") {
+    if (!itemIds.has(u.produces)) fail(where, `produces refs unknown item "${u.produces}"`);
+    if (!itemIds.has(u.burns)) fail(where, `burns refs unknown item "${u.burns}"`);
+  }
 }
 for (const m of monsters) {
   if (!m.id || !m.name) fail("monsters.yaml", `monster ${m.id ?? "?"} missing id/name`);
@@ -67,7 +94,16 @@ if (errors.length) {
   process.exit(1);
 }
 
-const ITEMS = Object.fromEntries(items.map((i) => [i.id, i]));
+const ITEMS = Object.fromEntries(
+  items.map((i) => {
+    const entry = { id: i.id, label: i.label, icon: i.icon ?? null, iconUrl: i.iconUrl ?? null };
+    if (i.stackable != null) entry.stackable = i.stackable;
+    if (i.tags) entry.tags = i.tags;
+    if (i.capabilities) entry.capabilities = i.capabilities;
+    if (i.use) entry.use = i.use;
+    return [i.id, entry];
+  })
+);
 const MONSTERS = Object.fromEntries(
   monsters.map((m) => [
     m.id,
