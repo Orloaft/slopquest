@@ -39,7 +39,27 @@ export const CLASSES = {
     attackMs: 820,
     abilityMs: 2800,
     hpPerDefense: 10,
-    manaPerMagic: 8
+    manaPerMagic: 8,
+    abilities: ["sprint", "second_wind"]
+  }
+};
+
+export const ABILITIES = {
+  sprint: {
+    id: "sprint",
+    label: "Sprint",
+    description: "Move 50% faster for 10s.",
+    cooldownMs: 30000,
+    durationMs: 10000,
+    speedMultiplier: 1.5
+  },
+  second_wind: {
+    id: "second_wind",
+    label: "Second Wind",
+    description: "Regenerate 50% of max HP over 5s.",
+    cooldownMs: 90000,
+    durationMs: 5000,
+    healFraction: 0.5
   }
 };
 

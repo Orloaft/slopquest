@@ -51,6 +51,7 @@
           <div class="menu-buttons">
             <button id="skillsButton" type="button">Skills</button>
             <button id="inventoryButton" type="button">Inventory</button>
+            <button id="abilitiesButton" type="button">Abilities</button>
           </div>
           <div id="netStats" class="net-stats">net -</div>
         </div>
@@ -69,6 +70,13 @@
             <button id="inventoryCloseButton" type="button">Close</button>
           </div>
           <div id="inventoryGrid" class="inventory-grid"></div>
+        </div>
+        <div id="abilitiesPanel" class="center-panel menu-panel hidden">
+          <div class="panel-head">
+            <strong>Abilities</strong>
+            <button id="abilitiesCloseButton" type="button">Close</button>
+          </div>
+          <div id="abilitiesList" class="abilities-list"></div>
         </div>
         <div id="vendor" class="center-panel vendor hidden">
           <div class="panel-head">
@@ -97,12 +105,7 @@
           </form>
         </div>
 
-        <div class="actionbar panel">
-          <button id="abilityOne"><b>1</b><span>Strike</span></button>
-          <button id="potionButton"><b>2</b><span>Potion</span></button>
-          <button id="lootButton"><b>F</b><span>Loot</span></button>
-          <button id="vendorButton"><b>B</b><span>Buy</span></button>
-        </div>
+        <div id="hotbar" class="hotbar panel"></div>
 
         <div id="itemPopover" class="item-popover hidden"></div>
 

@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer } from "ws";
 import {
+  ABILITIES,
   CLASSES,
   COMPOSED_TREE_NODES,
   FISHING_NODES,
@@ -100,6 +101,7 @@ wss.on("connection", (socket) => {
     }
     if (message.type === "target") setTarget(session.player, message.id);
     if (message.type === "ability") useAbility(session.player, String(message.slot ?? "1"));
+    if (message.type === "useClassAbility") useClassAbility(session.player, String(message.id ?? ""));
     if (message.type === "loot") lootAdjacent(session.player);
     if (message.type === "lootCorpse") lootCorpse(session.player, String(message.id ?? ""));
     if (message.type === "buy") buyItem(session.player, String(message.item ?? ""));
@@ -175,6 +177,8 @@ function joinWorld(socket, message) {
   player.targetId = null;
   player.lastAttack = 0;
   player.cooldowns = { ability: 0 };
+  player.abilityCooldowns = {};
+  player.abilityBuffs = {};
   player.action = null;
   player.portalReadyAt = 0;
   player.dead = player.hp <= 0;
@@ -261,7 +265,12 @@ function updatePlayers(dt, now) {
     player.moving = false;
     if (player.dead) continue;
     const spec = CLASSES.adventurer;
-    const speed = spec.speed + (isWellFed(player, now) ? 0.25 : 0);
+    let speed = spec.speed + (isWellFed(player, now) ? 0.25 : 0);
+    if (now < (player.abilityBuffs?.sprint?.until ?? 0)) {
+      speed *= ABILITIES.sprint.speedMultiplier;
+    } else if (player.abilityBuffs?.sprint) {
+      delete player.abilityBuffs.sprint;
+    }
 
     const hasMoveVector = Math.hypot(Number(input.moveX), Number(input.moveY)) > 0.01;
     let dx = hasMoveVector ? Number(input.moveX) : Number(input.right) - Number(input.left);
@@ -287,6 +296,12 @@ function updatePlayers(dt, now) {
 
     if (now < player.foodRegenUntil && player.hp < player.maxHp) {
       player.hp = clamp(player.hp + dt * 2.8, 0, player.maxHp);
+    }
+    const secondWind = player.abilityBuffs?.second_wind;
+    if (secondWind && now < secondWind.until) {
+      player.hp = clamp(player.hp + secondWind.healPerMs * dt * 1000, 0, player.maxHp);
+    } else if (secondWind) {
+      delete player.abilityBuffs.second_wind;
     }
     player.mana = clamp(player.mana + dt * 2.5, 0, player.maxMana);
     autoAttack(player, now);
@@ -358,6 +373,35 @@ function useAbility(player, slot) {
   const damage = roll(spec.abilityDamage) + skillLevel(player, "magic") + wellFedPower(player);
   addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.8)));
   damageMonster(player, monster, damage, "flare");
+}
+
+function useClassAbility(player, id) {
+  if (player.dead) return;
+  const spec = ABILITIES[id];
+  if (!spec) return;
+  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES.adventurer;
+  if (!classSpec.abilities?.includes(id)) return;
+  const now = performance.now();
+  if (!player.abilityCooldowns) player.abilityCooldowns = {};
+  if (!player.abilityBuffs) player.abilityBuffs = {};
+  if (now < (player.abilityCooldowns[id] ?? 0)) return;
+
+  if (id === "sprint") {
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.abilityBuffs.sprint = { until: now + spec.durationMs };
+    event("float", `${player.name} sprints.`, player.x, player.y, player.floor, "#9ae6b4");
+    return;
+  }
+  if (id === "second_wind") {
+    if (player.hp >= player.maxHp) return;
+    const totalHeal = Math.max(1, Math.round(player.maxHp * spec.healFraction));
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.abilityBuffs.second_wind = {
+      until: now + spec.durationMs,
+      healPerMs: totalHeal / spec.durationMs
+    };
+    event("float", `${player.name} catches a second wind.`, player.x, player.y, player.floor, "#f7d486");
+  }
 }
 
 function damageMonster(player, monster, damage, kind) {
@@ -1234,8 +1278,28 @@ function serializePlayer(player) {
     buffs: serializeBuffs(player),
     inventory: serializeInventory(player.inventory),
     quests: serializeQuests(player),
-    skills: serializeSkills(player)
+    skills: serializeSkills(player),
+    abilities: serializeAbilities(player)
   };
+}
+
+function serializeAbilities(player) {
+  const now = performance.now();
+  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES.adventurer;
+  const ids = classSpec.abilities ?? [];
+  return ids.map((id) => {
+    const spec = ABILITIES[id];
+    if (!spec) return null;
+    return {
+      id,
+      label: spec.label,
+      description: spec.description,
+      cooldownMs: spec.cooldownMs,
+      durationMs: spec.durationMs,
+      cooldownRemainingMs: Math.max(0, Math.round((player.abilityCooldowns?.[id] ?? 0) - now)),
+      activeRemainingMs: Math.max(0, Math.round((player.abilityBuffs?.[id]?.until ?? 0) - now))
+    };
+  }).filter(Boolean);
 }
 
 function serializeMonster(monster) {
@@ -1308,7 +1372,9 @@ function serializeBuffs(player) {
   const now = performance.now();
   return {
     wellFed: Math.max(0, Math.round((player.wellFedUntil ?? 0) - now)),
-    foodRegen: Math.max(0, Math.round((player.foodRegenUntil ?? 0) - now))
+    foodRegen: Math.max(0, Math.round((player.foodRegenUntil ?? 0) - now)),
+    sprint: Math.max(0, Math.round((player.abilityBuffs?.sprint?.until ?? 0) - now)),
+    secondWind: Math.max(0, Math.round((player.abilityBuffs?.second_wind?.until ?? 0) - now))
   };
 }
 

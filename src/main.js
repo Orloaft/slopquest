@@ -56,8 +56,13 @@ const dom = {
   inventoryPanel: document.querySelector("#inventoryPanel"),
   skillsCloseButton: document.querySelector("#skillsCloseButton"),
   inventoryCloseButton: document.querySelector("#inventoryCloseButton"),
+  abilitiesButton: document.querySelector("#abilitiesButton"),
+  abilitiesPanel: document.querySelector("#abilitiesPanel"),
+  abilitiesCloseButton: document.querySelector("#abilitiesCloseButton"),
+  abilitiesList: document.querySelector("#abilitiesList"),
   skillTracker: document.querySelector("#skillTracker"),
   inventoryGrid: document.querySelector("#inventoryGrid"),
+  hotbar: document.querySelector("#hotbar"),
   netStats: document.querySelector("#netStats"),
   vendor: document.querySelector("#vendor"),
   vendorCloseButton: document.querySelector("#vendorCloseButton"),
@@ -70,24 +75,18 @@ const dom = {
   chatLog: document.querySelector("#chatLog"),
   chatForm: document.querySelector("#chatForm"),
   chatInput: document.querySelector("#chatInput"),
-  abilityOne: document.querySelector("#abilityOne"),
-  potionButton: document.querySelector("#potionButton"),
-  lootButton: document.querySelector("#lootButton"),
-  vendorButton: document.querySelector("#vendorButton"),
   respawnButton: document.querySelector("#respawnButton")
 };
 
 dom.joinButton.addEventListener("click", () => joinCharacter(dom.nameInput.value, true));
 dom.refreshRosterButton.addEventListener("click", () => send({ type: "characters" }));
-dom.abilityOne.addEventListener("click", () => send({ type: "ability", slot: "1" }));
-dom.potionButton.addEventListener("click", () => send({ type: "ability", slot: "2" }));
-dom.lootButton.addEventListener("click", () => send({ type: "loot" }));
-dom.vendorButton.addEventListener("click", () => toggleCenterPanel(dom.vendor));
 dom.respawnButton.addEventListener("click", () => send({ type: "respawn" }));
 dom.skillsButton.addEventListener("click", () => toggleCenterPanel(dom.skillsPanel));
 dom.inventoryButton.addEventListener("click", () => toggleCenterPanel(dom.inventoryPanel));
+dom.abilitiesButton.addEventListener("click", () => toggleCenterPanel(dom.abilitiesPanel));
 dom.skillsCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.inventoryCloseButton.addEventListener("click", () => hideCenterPanels());
+dom.abilitiesCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.vendorCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.menuBackdrop.addEventListener("click", () => hideCenterPanels());
 dom.dialogueNextButton.addEventListener("click", advanceDialogue);
@@ -261,12 +260,15 @@ function create() {
     right: Phaser.Input.Keyboard.KeyCodes.RIGHT
   }, false);
   this.input.keyboard.addCapture([Phaser.Input.Keyboard.KeyCodes.TAB]);
-  keys = this.input.keyboard.addKeys("W,A,S,D,ONE,TWO,F,B,ENTER,TAB", false);
-  keys.ONE.on("down", () => {
-    if (!isTextEntryFocused()) send({ type: "ability", slot: "1" });
-  });
-  keys.TWO.on("down", () => {
-    if (!isTextEntryFocused()) send({ type: "ability", slot: "2" });
+  keys = this.input.keyboard.addKeys("W,A,S,D,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,F,B,ENTER,TAB", false);
+  const hotbarKeys = [keys.ONE, keys.TWO, keys.THREE, keys.FOUR, keys.FIVE, keys.SIX, keys.SEVEN, keys.EIGHT];
+  hotbarKeys.forEach((key, index) => {
+    key.on("down", () => {
+      if (isTextEntryFocused()) return;
+      if (activateHotbarSlot(index)) return;
+      // Until abilities live in the hotbar, key "1" still fires the Magic strike.
+      if (index === 0) send({ type: "ability", slot: "1" });
+    });
   });
   keys.F.on("down", () => {
     if (!isTextEntryFocused()) send({ type: "loot" });
@@ -762,10 +764,11 @@ function renderHud(me) {
   renderQuestTracker(me.quests);
   renderSkillTracker(me.skills);
   renderInventory(me.inventory);
-  dom.abilityOne.querySelector("span").textContent = "Magic";
+  renderAbilities(me.abilities);
+  loadHotbarFor(me.name);
+  renderHotbar(me.inventory);
   dom.death.classList.toggle("hidden", !me.dead);
   const nearVendor = me.floor === NPCS[0].floor && Phaser.Math.Distance.Between(me.x, me.y, NPCS[0].x, NPCS[0].y) < 2.2;
-  dom.vendorButton.classList.toggle("lit", nearVendor);
   if (!nearVendor && !dom.vendor.classList.contains("hidden")) hideCenterPanels();
 }
 
@@ -797,6 +800,8 @@ function renderBuffTracker(buffs = {}) {
   const active = [];
   if ((buffs.wellFed ?? 0) > 0) active.push(`Well fed ${Math.ceil(buffs.wellFed / 1000)}s`);
   if ((buffs.foodRegen ?? 0) > 0) active.push(`Food heal ${Math.ceil(buffs.foodRegen / 1000)}s`);
+  if ((buffs.sprint ?? 0) > 0) active.push(`Sprint ${Math.ceil(buffs.sprint / 1000)}s`);
+  if ((buffs.secondWind ?? 0) > 0) active.push(`Second wind ${Math.ceil(buffs.secondWind / 1000)}s`);
   dom.buffTracker.textContent = active.join(" | ");
   dom.buffTracker.classList.toggle("hidden", !active.length);
 }
@@ -856,6 +861,18 @@ function renderInventory(inventory = []) {
       const id = slot.dataset.item;
       if (itemUseKind(id) === "eat") send({ type: "eatItem", item: id });
     });
+    if (isHotbarUsable(slot.dataset.item)) {
+      slot.setAttribute("draggable", "true");
+      slot.addEventListener("dragstart", (event) => {
+        activeHotbarDrag = { source: "inventory", itemId: slot.dataset.item };
+        hotbarDragLandedInHotbar = false;
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = "copyMove";
+          event.dataTransfer.setData("text/plain", `inventory:${slot.dataset.item}`);
+        }
+      });
+      slot.addEventListener("dragend", finishHotbarDrag);
+    }
   });
   dom.inventoryGrid.querySelectorAll(".inventory-slot.empty").forEach((slot) => {
     slot.addEventListener("pointerdown", (event) => {
@@ -864,6 +881,57 @@ function renderInventory(inventory = []) {
       renderInventory(self()?.inventory ?? []);
     });
   });
+}
+
+let abilitiesClickBound = false;
+
+function renderAbilities(abilities = []) {
+  if (!abilitiesClickBound) {
+    dom.abilitiesList.addEventListener("click", (event) => {
+      const target = event.target.closest(".ability-activate");
+      if (!target || target.disabled) return;
+      send({ type: "useClassAbility", id: target.dataset.ability });
+    });
+    abilitiesClickBound = true;
+  }
+  if (!abilities.length) {
+    dom.abilitiesList.innerHTML = `<div class="ability-empty">No abilities yet.</div>`;
+    return;
+  }
+  dom.abilitiesList.innerHTML = abilities
+    .map((ability) => {
+      const onCooldown = ability.cooldownRemainingMs > 0;
+      const isActive = ability.activeRemainingMs > 0;
+      let status = "Ready";
+      let statusClass = "ready";
+      if (isActive) {
+        status = `Active ${Math.ceil(ability.activeRemainingMs / 1000)}s`;
+        statusClass = "active";
+      } else if (onCooldown) {
+        status = `Cooldown ${Math.ceil(ability.cooldownRemainingMs / 1000)}s`;
+        statusClass = "cooldown";
+      }
+      const disabled = onCooldown || isActive ? "disabled" : "";
+      const progressDenom = isActive
+        ? Math.max(1, ability.durationMs)
+        : Math.max(1, ability.cooldownMs);
+      const progressNum = isActive ? ability.activeRemainingMs : ability.cooldownRemainingMs;
+      const progress = Math.max(0, Math.min(1, progressNum / progressDenom));
+      return `
+        <div class="ability-row">
+          <div class="ability-meta">
+            <span class="ability-name">${escapeHtml(ability.label)}</span>
+            <span class="ability-desc">${escapeHtml(ability.description)}</span>
+            <div class="ability-progress"><span class="${statusClass}" style="width: ${Math.round(progress * 100)}%"></span></div>
+          </div>
+          <div class="ability-actions">
+            <span class="ability-status ${statusClass}">${escapeHtml(status)}</span>
+            <button class="ability-activate" type="button" data-ability="${escapeHtml(ability.id)}" ${disabled}>Use</button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
 }
 
 function showItemPopover(slot, label) {
@@ -930,6 +998,176 @@ function firemakingLogItem(firstItemId, secondItemId) {
 
 function isCookableItem(itemId) {
   return itemUseKind(itemId) === "cook_on_fire";
+}
+
+// --- Hotbar ---------------------------------------------------------------
+// Bottom-center bar holding consumables for fast use. Layout is per-character
+// in localStorage. Slot model is { kind: "item", itemId } today; "ability" is
+// reserved for future ability bindings.
+
+const HOTBAR_SLOTS = 8;
+let hotbarLayout = Array(HOTBAR_SLOTS).fill(null);
+let hotbarBoundCharacter = null;
+let hotbarRenderedSig = "";
+let activeHotbarDrag = null;
+let hotbarDragLandedInHotbar = false;
+
+function hotbarStorageKey(name) {
+  return `tib.hotbar.${name}`;
+}
+
+function loadHotbarFor(name) {
+  if (!name || hotbarBoundCharacter === name) return;
+  hotbarBoundCharacter = name;
+  hotbarLayout = Array(HOTBAR_SLOTS).fill(null);
+  try {
+    const raw = localStorage.getItem(hotbarStorageKey(name));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        for (let i = 0; i < Math.min(parsed.length, HOTBAR_SLOTS); i++) {
+          const slot = parsed[i];
+          if (slot?.kind === "item" && typeof slot.itemId === "string" && ITEMS[slot.itemId]?.use) {
+            hotbarLayout[i] = { kind: "item", itemId: slot.itemId };
+          }
+        }
+      }
+    }
+  } catch {
+    // ignore corrupt storage
+  }
+  hotbarRenderedSig = "";
+}
+
+function saveHotbar() {
+  if (!hotbarBoundCharacter) return;
+  try {
+    localStorage.setItem(hotbarStorageKey(hotbarBoundCharacter), JSON.stringify(hotbarLayout));
+  } catch {
+    // storage quota / private mode — keep going, layout is non-essential
+  }
+}
+
+function inventoryQty(inventory, itemId) {
+  let total = 0;
+  for (const item of inventory ?? []) if (item?.id === itemId) total += item.qty ?? 1;
+  return total;
+}
+
+function isHotbarUsable(itemId) {
+  return Boolean(ITEMS[itemId]?.use);
+}
+
+function renderHotbar(inventory = []) {
+  const sig = hotbarLayout
+    .map((slot, i) => {
+      if (!slot) return `${i}:-`;
+      if (slot.kind === "item") return `${i}:i:${slot.itemId}:${inventoryQty(inventory, slot.itemId)}`;
+      return `${i}:?`;
+    })
+    .join("|");
+  if (sig === hotbarRenderedSig) return;
+  hotbarRenderedSig = sig;
+
+  dom.hotbar.innerHTML = hotbarLayout
+    .map((slot, i) => {
+      const key = i < 9 ? `${i + 1}` : "";
+      if (!slot) {
+        return `<button class="hotbar-slot empty" type="button" data-slot="${i}"><b class="hotbar-key">${key}</b></button>`;
+      }
+      if (slot.kind === "item") {
+        const item = ITEMS[slot.itemId];
+        const qty = inventoryQty(inventory, slot.itemId);
+        const depleted = qty === 0 ? " depleted" : "";
+        const icon = item ? iconMarkup(item.iconUrl, item.icon, "item-icon") : "?";
+        const label = item?.label ?? slot.itemId;
+        return `<button class="hotbar-slot${depleted}" type="button" draggable="true" data-slot="${i}" data-item="${escapeHtml(slot.itemId)}" data-label="${escapeHtml(label)}"><b class="hotbar-key">${key}</b>${icon}<span class="hotbar-qty">${qty}</span></button>`;
+      }
+      return `<button class="hotbar-slot empty" type="button" data-slot="${i}"><b class="hotbar-key">${key}</b></button>`;
+    })
+    .join("");
+
+  dom.hotbar.querySelectorAll(".hotbar-slot").forEach((el) => {
+    const slotIndex = Number(el.dataset.slot);
+    el.addEventListener("click", () => activateHotbarSlot(slotIndex));
+    el.addEventListener("dragover", (event) => {
+      if (!activeHotbarDrag) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+      el.classList.add("drag-over");
+    });
+    el.addEventListener("dragleave", () => el.classList.remove("drag-over"));
+    el.addEventListener("drop", (event) => {
+      event.preventDefault();
+      el.classList.remove("drag-over");
+      hotbarDragLandedInHotbar = true;
+      handleHotbarDrop(slotIndex);
+    });
+    if (el.dataset.item) {
+      const itemId = el.dataset.item;
+      el.addEventListener("dragstart", (event) => {
+        activeHotbarDrag = { source: "hotbar", slotIndex, itemId };
+        hotbarDragLandedInHotbar = false;
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", `hotbar:${slotIndex}`);
+        }
+      });
+      el.addEventListener("dragend", finishHotbarDrag);
+      el.addEventListener("mouseenter", () => showItemPopover(el, el.dataset.label));
+      el.addEventListener("mousemove", () => positionItemPopover(el));
+      el.addEventListener("mouseleave", hideItemPopover);
+    }
+  });
+}
+
+function handleHotbarDrop(targetSlot) {
+  const drag = activeHotbarDrag;
+  if (!drag) return;
+  if (drag.source === "inventory") {
+    if (!isHotbarUsable(drag.itemId)) return;
+    for (let i = 0; i < HOTBAR_SLOTS; i++) {
+      if (i !== targetSlot && hotbarLayout[i]?.kind === "item" && hotbarLayout[i].itemId === drag.itemId) {
+        hotbarLayout[i] = null;
+      }
+    }
+    hotbarLayout[targetSlot] = { kind: "item", itemId: drag.itemId };
+  } else if (drag.source === "hotbar") {
+    if (drag.slotIndex === targetSlot) return;
+    const moved = hotbarLayout[drag.slotIndex];
+    hotbarLayout[drag.slotIndex] = hotbarLayout[targetSlot];
+    hotbarLayout[targetSlot] = moved;
+  }
+  saveHotbar();
+  hotbarRenderedSig = "";
+  renderHotbar(self()?.inventory ?? []);
+}
+
+function finishHotbarDrag() {
+  const drag = activeHotbarDrag;
+  activeHotbarDrag = null;
+  document.querySelectorAll(".hotbar-slot.drag-over").forEach((el) => el.classList.remove("drag-over"));
+  if (!drag) return;
+  if (drag.source === "hotbar" && !hotbarDragLandedInHotbar) {
+    hotbarLayout[drag.slotIndex] = null;
+    saveHotbar();
+    hotbarRenderedSig = "";
+    renderHotbar(self()?.inventory ?? []);
+  }
+  hotbarDragLandedInHotbar = false;
+}
+
+function activateHotbarSlot(slotIndex) {
+  const slot = hotbarLayout[slotIndex];
+  if (!slot) return false;
+  if (slot.kind === "item") {
+    const me = self();
+    if (!me || me.dead) return false;
+    if (inventoryQty(me.inventory, slot.itemId) <= 0) return false;
+    send({ type: "useItem", item: slot.itemId });
+    return true;
+  }
+  return false;
 }
 
 function iconMarkup(url, fallback, className) {
@@ -1322,6 +1560,7 @@ function hideCenterPanels() {
   dom.menuBackdrop.classList.add("hidden");
   dom.skillsPanel.classList.add("hidden");
   dom.inventoryPanel.classList.add("hidden");
+  dom.abilitiesPanel.classList.add("hidden");
   dom.vendor.classList.add("hidden");
   closeDialogue(false);
 }
@@ -1715,7 +1954,7 @@ function closeDialogue(openFollowup = true) {
     dom.vendor.classList.remove("hidden");
     return;
   }
-  if ([dom.skillsPanel, dom.inventoryPanel, dom.vendor].every((panel) => panel.classList.contains("hidden"))) {
+  if ([dom.skillsPanel, dom.inventoryPanel, dom.abilitiesPanel, dom.vendor].every((panel) => panel.classList.contains("hidden"))) {
     dom.menuBackdrop.classList.add("hidden");
   }
 }
