@@ -874,6 +874,7 @@ function grantE2EItems(player, message) {
     if (ITEMS[id]) addInventoryItem(player, id, qty);
   }
   if (Number.isFinite(message.gold)) player.gold = Math.max(0, Math.floor(message.gold));
+  if (Number.isFinite(message.hp)) player.hp = clamp(Number(message.hp), 0, player.maxHp);
   if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y)) {
     const spot = findStandableNear(Math.floor(message.floor), Number(message.x), Number(message.y));
     if (spot) {
