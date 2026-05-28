@@ -4,6 +4,23 @@ const options = parseArgs(process.argv.slice(2));
 const url = options.url ?? `ws://127.0.0.1:${options.port ?? process.env.PORT ?? 8787}`;
 const clients = Number(options.clients ?? 12);
 const durationMs = Number(options.duration ?? 10000);
+const combatRatio = clampUnit(Number(options.combat ?? 0));
+const combatZones = String(options.zones ?? "cemetery,crypt,woods")
+  .split(",")
+  .map((z) => z.trim())
+  .filter(Boolean);
+const COMBAT_ZONE_TARGETS = {
+  cemetery: { floor: 1, x: 18.5, y: 12.5 },
+  crypt: { floor: 2, x: 22.5, y: 23.5 },
+  woods: { floor: 3, x: 16.5, y: 20.5 }
+};
+const combatCount = Math.floor(clients * combatRatio);
+const combatAssignments = new Map();
+for (let i = 0; i < combatCount; i += 1) {
+  const zone = combatZones[i % combatZones.length];
+  const target = COMBAT_ZONE_TARGETS[zone];
+  if (target) combatAssignments.set(i, { zone, ...target });
+}
 const sockets = new Set();
 const stats = {
   opened: 0,
@@ -58,7 +75,24 @@ function openClient(index) {
     } catch {
       return;
     }
-    if (message.type === "welcome") stats.welcomed += 1;
+    if (message.type === "welcome") {
+      stats.welcomed += 1;
+      const target = combatAssignments.get(index);
+      if (target) {
+        setTimeout(() => {
+          if (socket.readyState !== WebSocket.OPEN) return;
+          socket.send(
+            JSON.stringify({
+              type: "e2eGrantItems",
+              items: [],
+              floor: target.floor,
+              x: target.x,
+              y: target.y
+            })
+          );
+        }, 100);
+      }
+    }
     if (message.type === "state") {
       stats.states += 1;
       if (message.metrics) recordMetrics(message.metrics);
@@ -83,6 +117,13 @@ function randomInput() {
     left: roll === 2,
     right: roll === 3
   };
+}
+
+function clampUnit(value) {
+  if (!Number.isFinite(value)) return 0;
+  if (value < 0) return 0;
+  if (value > 1) return 1;
+  return value;
 }
 
 function parseArgs(args) {
@@ -131,10 +172,19 @@ function summarize(values) {
 }
 
 function reportAndExit() {
+  const combatZoneCounts = {};
+  for (const target of combatAssignments.values()) {
+    combatZoneCounts[target.zone] = (combatZoneCounts[target.zone] ?? 0) + 1;
+  }
   const report = {
     url,
     clients,
     durationMs,
+    combat: {
+      ratio: combatRatio,
+      assigned: combatAssignments.size,
+      zones: combatZoneCounts
+    },
     ...stats,
     server: {
       clientsPeak: observed.serverClientsPeak,
