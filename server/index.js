@@ -830,11 +830,31 @@ function grantE2EItems(player, message) {
     if (ITEMS[id]) addInventoryItem(player, id, qty);
   }
   if (Number.isFinite(message.gold)) player.gold = Math.max(0, Math.floor(message.gold));
-  if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y) && canStand(message.floor, message.x, message.y)) {
-    player.floor = Math.floor(message.floor);
-    player.x = Number(message.x);
-    player.y = Number(message.y);
+  if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y)) {
+    const spot = findStandableNear(Math.floor(message.floor), Number(message.x), Number(message.y));
+    if (spot) {
+      player.floor = spot.floor;
+      player.x = spot.x;
+      player.y = spot.y;
+    }
   }
+}
+
+function findStandableNear(floor, x, y) {
+  if (canStand(floor, x, y)) return { floor, x, y };
+  const baseX = Math.floor(x);
+  const baseY = Math.floor(y);
+  for (let radius = 1; radius <= 2; radius += 1) {
+    for (let dy = -radius; dy <= radius; dy += 1) {
+      for (let dx = -radius; dx <= radius; dx += 1) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) continue;
+        const cx = baseX + dx + 0.5;
+        const cy = baseY + dy + 0.5;
+        if (canStand(floor, cx, cy)) return { floor, x: cx, y: cy };
+      }
+    }
+  }
+  return null;
 }
 
 function treeTypeSpec(tree) {
