@@ -12,6 +12,18 @@ const stats = {
   errors: 0,
   closed: 0
 };
+const observed = {
+  tickMs: [],
+  snapshotMs: [],
+  bytesOutPerSecond: [],
+  visiblePlayers: [],
+  visibleMonsters: [],
+  visibleTrees: [],
+  visibleFires: [],
+  serverClientsPeak: 0,
+  serverMonsters: 0,
+  spatialCells: 0
+};
 
 for (let i = 0; i < clients; i += 1) {
   setTimeout(() => openClient(i), i * 25);
@@ -47,7 +59,10 @@ function openClient(index) {
       return;
     }
     if (message.type === "welcome") stats.welcomed += 1;
-    if (message.type === "state") stats.states += 1;
+    if (message.type === "state") {
+      stats.states += 1;
+      if (message.metrics) recordMetrics(message.metrics);
+    }
   });
 
   socket.on("error", () => {
@@ -83,7 +98,61 @@ function parseArgs(args) {
   return parsed;
 }
 
+function recordMetrics(m) {
+  if (typeof m.tickMs === "number") observed.tickMs.push(m.tickMs);
+  if (typeof m.snapshotMs === "number") observed.snapshotMs.push(m.snapshotMs);
+  if (typeof m.bytesOutPerSecond === "number") observed.bytesOutPerSecond.push(m.bytesOutPerSecond);
+  if (typeof m.visiblePlayers === "number") observed.visiblePlayers.push(m.visiblePlayers);
+  if (typeof m.visibleMonsters === "number") observed.visibleMonsters.push(m.visibleMonsters);
+  if (typeof m.visibleTrees === "number") observed.visibleTrees.push(m.visibleTrees);
+  if (typeof m.visibleFires === "number") observed.visibleFires.push(m.visibleFires);
+  if (typeof m.clients === "number" && m.clients > observed.serverClientsPeak) observed.serverClientsPeak = m.clients;
+  if (typeof m.monsters === "number") observed.serverMonsters = m.monsters;
+  if (typeof m.spatialCells === "number") observed.spatialCells = m.spatialCells;
+}
+
+function summarize(values) {
+  if (values.length === 0) return null;
+  let min = values[0];
+  let max = values[0];
+  let sum = 0;
+  for (const v of values) {
+    if (v < min) min = v;
+    if (v > max) max = v;
+    sum += v;
+  }
+  const avg = sum / values.length;
+  return {
+    samples: values.length,
+    min,
+    max,
+    avg: Math.round(avg * 100) / 100
+  };
+}
+
 function reportAndExit() {
-  console.log(JSON.stringify({ url, clients, durationMs, ...stats }, null, 2));
+  const report = {
+    url,
+    clients,
+    durationMs,
+    ...stats,
+    server: {
+      clientsPeak: observed.serverClientsPeak,
+      monsters: observed.serverMonsters,
+      spatialCells: observed.spatialCells
+    },
+    perTick: {
+      tickMs: summarize(observed.tickMs),
+      snapshotMs: summarize(observed.snapshotMs),
+      bytesOutPerSecond: summarize(observed.bytesOutPerSecond)
+    },
+    perClient: {
+      visiblePlayers: summarize(observed.visiblePlayers),
+      visibleMonsters: summarize(observed.visibleMonsters),
+      visibleTrees: summarize(observed.visibleTrees),
+      visibleFires: summarize(observed.visibleFires)
+    }
+  };
+  console.log(JSON.stringify(report, null, 2));
   process.exit(stats.errors ? 1 : 0);
 }
