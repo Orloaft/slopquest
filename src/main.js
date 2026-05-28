@@ -185,6 +185,11 @@ function preload() {
   this.load.image("goblinSheet", "/goblin.png");
   this.load.image("skeletonSheet", "/skeleton.png");
   this.load.image("ratSpiderSheet", "/ratandspiders.png");
+  this.load.image("goblinScoutSheet", "/goblin-scout-sheet.png");
+  this.load.image("goblinShamanSheet", "/goblin-shaman-sheet.png");
+  this.load.image("goblinRaiderSheet", "/goblin-raider-sheet.png");
+  this.load.image("greyWolfSheet", "/grey-wolf-sheet.png");
+  this.load.image("wispSheet", "/wisp-sheet.png");
   this.load.image("uiSheet", "/ui-sheet.png");
   this.load.image("townTiles", "/towntiles.png");
   this.load.image("forestTiles", "/foresttiles.png");
@@ -666,8 +671,11 @@ function monsterActorSpec(monster) {
   if (monster.type === "skeleton") return { family: "skeleton", width: 42, height: 48, yOffset: -10 };
   if (monster.type === "ghoul") return { family: "skeleton", width: 44, height: 50, yOffset: -11, tint: 0x9ec39c };
   if (monster.type === "boss") return { family: "skeleton", width: 62, height: 66, yOffset: -18, tint: 0xff8a5c };
-  if (monster.type === "orc") return { family: "goblin", width: 48, height: 50, yOffset: -12, tint: 0xb7d17a };
-  if (monster.type === "wolf") return { family: "rat", width: 54, height: 34, yOffset: -2, tint: 0x9ca3af };
+  if (monster.type === "orc") return { family: "goblinRaider", width: 54, height: 58, yOffset: -16 };
+  if (monster.type === "goblin_scout") return { family: "goblinScout", width: 42, height: 52, yOffset: -14 };
+  if (monster.type === "goblin_shaman") return { family: "goblinShaman", width: 46, height: 56, yOffset: -16 };
+  if (monster.type === "wolf") return { family: "greyWolf", width: 58, height: 44, yOffset: -8 };
+  if (monster.type === "wisp") return { family: "wisp", width: 40, height: 56, yOffset: -18 };
   return { family: "goblin", width: 42, height: 46, yOffset: -10 };
 }
 
@@ -1865,6 +1873,27 @@ function createActorFrames(scene) {
     down: spriteFrames([616, 668, 616, 668], 686, 58, 54),
     left: spriteFrames([128, 256, 384, 512], 678, 118, 58)
   });
+  createExplicitFrameSet(scene, "goblinScoutSheet", "goblinScout", uniformDirectionFrames(281, 293, 4));
+  createExplicitFrameSet(scene, "goblinShamanSheet", "goblinShaman", uniformDirectionFrames(313, 313, 4));
+  createExplicitFrameSet(scene, "goblinRaiderSheet", "goblinRaider", uniformDirectionFrames(320, 320, 4));
+  createExplicitFrameSet(scene, "greyWolfSheet", "greyWolf", uniformDirectionFrames(320, 320, 4));
+  const wispRow = spriteFrames([0, 221, 442, 663], 0, 221, 443);
+  createExplicitFrameSet(scene, "wispSheet", "wisp", {
+    up: wispRow,
+    right: wispRow,
+    down: wispRow,
+    left: wispRow
+  });
+}
+
+function uniformDirectionFrames(cellW, cellH, frames) {
+  const xs = Array.from({ length: frames }, (_, i) => i * cellW);
+  return {
+    up: spriteFrames(xs, 0, cellW, cellH),
+    right: spriteFrames(xs, cellH, cellW, cellH),
+    down: spriteFrames(xs, cellH * 2, cellW, cellH),
+    left: spriteFrames(xs, cellH * 3, cellW, cellH)
+  };
 }
 
 function createEffectFrames(scene) {
@@ -1935,7 +1964,19 @@ function actorFlipX(family, dir) {
 
 function actorFrameAnchorDrift() {
   if (!scene) return [];
-  const families = ["knight", "caster", "goblin", "skeleton", "rat", "spider"];
+  const families = [
+    "knight",
+    "caster",
+    "goblin",
+    "skeleton",
+    "rat",
+    "spider",
+    "goblinScout",
+    "goblinShaman",
+    "goblinRaider",
+    "greyWolf",
+    "wisp"
+  ];
   return families.flatMap((family) =>
     DIRECTIONS.map((dir) => {
       const anchors = [0, 1, 2, 3].map((frame) => {

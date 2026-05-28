@@ -80,9 +80,12 @@ export const TREE_TYPES = {
 export const MONSTERS = {
   rat: { name: "Rat", maxHp: 28, speed: 2.4, damage: [3, 7], attackMs: 1000, xp: 16, gold: [3, 8], aggro: 5.5, range: 1 },
   spider: { name: "Spider", maxHp: 36, speed: 2.7, damage: [4, 9], attackMs: 950, xp: 22, gold: [4, 10], aggro: 5.5, range: 1 },
-  wolf: { name: "Wolf", maxHp: 52, speed: 3.1, damage: [6, 12], attackMs: 900, xp: 34, gold: [6, 14], aggro: 6.5, range: 1 },
+  wisp: { name: "Forest Wisp", maxHp: 32, speed: 2.9, damage: [4, 9], attackMs: 1050, xp: 24, gold: [4, 11], aggro: 6, range: 1.1 },
+  wolf: { name: "Grey Wolf", maxHp: 58, speed: 3.2, damage: [7, 13], attackMs: 880, xp: 38, gold: [6, 15], aggro: 6.8, range: 1 },
   goblin: { name: "Goblin", maxHp: 46, speed: 2.7, damage: [6, 12], attackMs: 980, xp: 34, gold: [7, 16], aggro: 6, range: 1 },
-  orc: { name: "Orc", maxHp: 76, speed: 2.2, damage: [9, 16], attackMs: 1150, xp: 48, gold: [10, 22], aggro: 6, range: 1.05 },
+  goblin_scout: { name: "Goblin Scout", maxHp: 42, speed: 3.05, damage: [6, 11], attackMs: 880, xp: 36, gold: [7, 15], aggro: 7, range: 1 },
+  goblin_shaman: { name: "Goblin Shaman", maxHp: 54, speed: 2.35, damage: [9, 17], attackMs: 1180, xp: 56, gold: [12, 24], aggro: 6.5, range: 1.1 },
+  orc: { name: "Orc", maxHp: 84, speed: 2.25, damage: [10, 18], attackMs: 1150, xp: 54, gold: [11, 24], aggro: 6, range: 1.1 },
   skeleton: { name: "Skeleton", maxHp: 68, speed: 2.05, damage: [11, 18], attackMs: 1250, xp: 52, gold: [9, 20], aggro: 6, range: 1.05 },
   ghoul: { name: "Ghoul", maxHp: 92, speed: 1.9, damage: [12, 21], attackMs: 1200, xp: 70, gold: [14, 28], aggro: 6.5, range: 1.05 },
   boss: { name: "Ashen Warden", maxHp: 420, speed: 1.85, damage: [18, 30], attackMs: 1100, xp: 180, gold: [80, 135], aggro: 9, range: 1.15 }
@@ -109,10 +112,25 @@ export const MONSTER_SPAWNS = [
   { type: "boss", floor: 2, x: 43, y: 17, zone: "crypt" },
   { type: "rat", floor: 3, x: 10, y: 26, zone: "woods" },
   { type: "spider", floor: 3, x: 16, y: 20, zone: "woods" },
-  { type: "wolf", floor: 3, x: 24, y: 16, zone: "woods" },
+  { type: "goblin_scout", floor: 3, x: 14, y: 8, zone: "woods" },
+  { type: "goblin_scout", floor: 3, x: 7, y: 12, zone: "woods" },
+  { type: "goblin_scout", floor: 3, x: 19, y: 27, zone: "woods" },
+  { type: "wolf", floor: 3, x: 12, y: 21, zone: "woods" },
+  { type: "wolf", floor: 3, x: 8, y: 28, zone: "woods" },
+  { type: "wolf", floor: 3, x: 21, y: 5, zone: "woods" },
+  { type: "wisp", floor: 3, x: 6, y: 4, zone: "woods" },
+  { type: "wisp", floor: 3, x: 17, y: 13, zone: "woods" },
+  { type: "wisp", floor: 3, x: 11, y: 19, zone: "woods" },
   { type: "goblin", floor: 3, x: 32, y: 11, zone: "woods" },
-  { type: "orc", floor: 3, x: 39, y: 8, zone: "woods" },
-  { type: "goblin", floor: 3, x: 44, y: 18, zone: "woods" }
+  { type: "goblin", floor: 3, x: 44, y: 18, zone: "woods" },
+  { type: "goblin_shaman", floor: 3, x: 31, y: 21, zone: "woods" },
+  { type: "goblin_shaman", floor: 3, x: 45, y: 26, zone: "woods" },
+  { type: "orc", floor: 3, x: 37, y: 11, zone: "woods" },
+  { type: "orc", floor: 3, x: 47, y: 13, zone: "woods" },
+  { type: "orc", floor: 3, x: 33, y: 29, zone: "woods" },
+  { type: "wolf", floor: 3, x: 41, y: 21, zone: "woods" },
+  { type: "wisp", floor: 3, x: 33, y: 6, zone: "woods" },
+  { type: "wisp", floor: 3, x: 49, y: 5, zone: "woods" }
 ];
 
 export function xpForLevel(level) {
@@ -187,13 +205,22 @@ export function makeFloorTiles(floor) {
   if (floor === 3) {
     fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "F");
     fillRect(rows, 24, 1, 4, MAP_ROWS - 2, "t");
+    fillRect(rows, 4, 16, 44, 2, "t");
     fillRect(rows, 7, 23, 36, 3, "t");
+    fillRect(rows, 9, 7, 3, 8, "t");
+    fillRect(rows, 40, 18, 8, 3, "t");
     fillRect(rows, 34, 5, 8, 7, "d");
     fillRect(rows, 35, 6, 6, 5, "~");
+    fillRect(rows, 5, 4, 6, 4, "d");
+    fillRect(rows, 6, 5, 4, 2, "~");
+    fillRect(rows, 6, 25, 5, 5, "d");
+    fillRect(rows, 38, 25, 8, 5, "d");
+    fillRect(rows, 14, 11, 6, 5, "d");
+    fillRect(rows, 30, 19, 6, 4, "d");
     rows[31][25] = "S";
     rows[2][25] = "N";
-    scatter(rows, "F", "f", 120, 31);
-    scatter(rows, "F", "r", 32, 32);
+    scatter(rows, "F", "f", 220, 31);
+    scatter(rows, "F", "r", 48, 32);
   }
 
   if (floor === 4) {
