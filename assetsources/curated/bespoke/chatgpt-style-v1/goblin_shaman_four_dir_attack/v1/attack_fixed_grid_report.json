@@ -1,0 +1,192 @@
+{
+  "source_size": [
+    1254,
+    1254
+  ],
+  "alpha_corners": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rows": [
+    {
+      "name": "attack_up",
+      "frames": 4,
+      "union_crop": [
+        51,
+        4,
+        257,
+        314
+      ],
+      "source_boxes": [
+        [
+          87,
+          104,
+          233,
+          293
+        ],
+        [
+          75,
+          77,
+          209,
+          294
+        ],
+        [
+          79,
+          28,
+          229,
+          293
+        ],
+        [
+          83,
+          121,
+          230,
+          294
+        ]
+      ],
+      "motion": {
+        "pair_changed_fraction": [
+          0.3395,
+          0.3531,
+          0.3676
+        ],
+        "average_changed_fraction": 0.3534
+      }
+    },
+    {
+      "name": "attack_right",
+      "frames": 4,
+      "union_crop": [
+        29,
+        55,
+        314,
+        291
+      ],
+      "source_boxes": [
+        [
+          101,
+          92,
+          231,
+          266
+        ],
+        [
+          58,
+          79,
+          190,
+          267
+        ],
+        [
+          53,
+          90,
+          297,
+          266
+        ],
+        [
+          85,
+          92,
+          221,
+          267
+        ]
+      ],
+      "motion": {
+        "pair_changed_fraction": [
+          0.2819,
+          0.3681,
+          0.3749
+        ],
+        "average_changed_fraction": 0.3416
+      }
+    },
+    {
+      "name": "attack_down",
+      "frames": 4,
+      "union_crop": [
+        23,
+        26,
+        232,
+        309
+      ],
+      "source_boxes": [
+        [
+          65,
+          73,
+          208,
+          259
+        ],
+        [
+          47,
+          50,
+          198,
+          259
+        ],
+        [
+          78,
+          73,
+          186,
+          285
+        ],
+        [
+          64,
+          73,
+          205,
+          260
+        ]
+      ],
+      "motion": {
+        "pair_changed_fraction": [
+          0.35,
+          0.3558,
+          0.3561
+        ],
+        "average_changed_fraction": 0.354
+      }
+    },
+    {
+      "name": "attack_left",
+      "frames": 4,
+      "union_crop": [
+        0,
+        3,
+        280,
+        249
+      ],
+      "source_boxes": [
+        [
+          79,
+          48,
+          210,
+          221
+        ],
+        [
+          97,
+          27,
+          219,
+          222
+        ],
+        [
+          11,
+          51,
+          256,
+          225
+        ],
+        [
+          79,
+          49,
+          210,
+          224
+        ]
+      ],
+      "motion": {
+        "pair_changed_fraction": [
+          0.2648,
+          0.3941,
+          0.3838
+        ],
+        "average_changed_fraction": 0.3476
+      }
+    }
+  ],
+  "contact_sheet": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir_attack/v1/goblin_shaman_four_direction_attack_contact_clean.png",
+  "preview_gif": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir_attack/v1/goblin_shaman_four_direction_attack_preview_clean.gif"
+}

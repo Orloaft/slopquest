@@ -1,0 +1,247 @@
+{
+  "source_size": [
+    1254,
+    1254
+  ],
+  "alpha_corners": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rows": [
+    {
+      "name": "attack_up",
+      "frames": 4,
+      "source_boxes": [
+        [
+          74,
+          98,
+          285,
+          292
+        ],
+        [
+          85,
+          18,
+          235,
+          292
+        ],
+        [
+          94,
+          38,
+          232,
+          292
+        ],
+        [
+          95,
+          98,
+          288,
+          292
+        ]
+      ],
+      "anchored_bottoms": [
+        306,
+        306,
+        306,
+        306
+      ],
+      "bottom_drift_px": 0,
+      "component_sizes_top6": [
+        [
+          23642
+        ],
+        [
+          22508
+        ],
+        [
+          22081
+        ],
+        [
+          22830
+        ]
+      ],
+      "removed_disconnected_pixels": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "attack_right",
+      "frames": 4,
+      "source_boxes": [
+        [
+          75,
+          78,
+          242,
+          267
+        ],
+        [
+          42,
+          68,
+          209,
+          267
+        ],
+        [
+          52,
+          91,
+          294,
+          269
+        ],
+        [
+          91,
+          79,
+          265,
+          269
+        ]
+      ],
+      "anchored_bottoms": [
+        304,
+        304,
+        306,
+        306
+      ],
+      "bottom_drift_px": 2,
+      "component_sizes_top6": [
+        [
+          18311
+        ],
+        [
+          19693
+        ],
+        [
+          19535
+        ],
+        [
+          18649
+        ]
+      ],
+      "removed_disconnected_pixels": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "attack_down",
+      "frames": 4,
+      "source_boxes": [
+        [
+          26,
+          72,
+          232,
+          268
+        ],
+        [
+          74,
+          1,
+          204,
+          272
+        ],
+        [
+          36,
+          75,
+          218,
+          273
+        ],
+        [
+          45,
+          74,
+          240,
+          270
+        ]
+      ],
+      "anchored_bottoms": [
+        301,
+        305,
+        306,
+        303
+      ],
+      "bottom_drift_px": 5,
+      "component_sizes_top6": [
+        [
+          23700
+        ],
+        [
+          21599
+        ],
+        [
+          22938
+        ],
+        [
+          23056
+        ]
+      ],
+      "removed_disconnected_pixels": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "attack_left",
+      "frames": 4,
+      "source_boxes": [
+        [
+          44,
+          44,
+          214,
+          242
+        ],
+        [
+          68,
+          34,
+          224,
+          247
+        ],
+        [
+          0,
+          59,
+          234,
+          247
+        ],
+        [
+          62,
+          52,
+          237,
+          247
+        ]
+      ],
+      "anchored_bottoms": [
+        301,
+        306,
+        306,
+        306
+      ],
+      "bottom_drift_px": 5,
+      "component_sizes_top6": [
+        [
+          18743
+        ],
+        [
+          19199,
+          200,
+          5
+        ],
+        [
+          20150
+        ],
+        [
+          18968
+        ]
+      ],
+      "removed_disconnected_pixels": [
+        0,
+        205,
+        0,
+        0
+      ]
+    }
+  ],
+  "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_raider_four_dir_attack/v2/goblin_raider_four_direction_attack_preview_clean.gif",
+  "contact_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_raider_four_dir_attack/v2/goblin_raider_four_direction_attack_contact_clean.png",
+  "opaque_magenta_like_remnants": 0
+}

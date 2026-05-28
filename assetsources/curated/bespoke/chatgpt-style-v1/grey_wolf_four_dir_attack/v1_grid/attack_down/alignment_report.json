@@ -1,0 +1,189 @@
+{
+  "anchor_mode": "bottom_center",
+  "canvas": {
+    "width": 97,
+    "height": 198
+  },
+  "pre_alignment_drift": {
+    "x": 14.0,
+    "y": 31,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/frame_000.png",
+        "x": 34.5,
+        "y": 197,
+        "bbox": [
+          0,
+          0,
+          69,
+          197
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/frame_001.png",
+        "x": 48.5,
+        "y": 167,
+        "bbox": [
+          0,
+          0,
+          97,
+          167
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/frame_002.png",
+        "x": 35.0,
+        "y": 198,
+        "bbox": [
+          0,
+          0,
+          70,
+          198
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/frame_003.png",
+        "x": 34.5,
+        "y": 191,
+        "bbox": [
+          0,
+          0,
+          69,
+          191
+        ]
+      }
+    ]
+  },
+  "post_alignment_drift": {
+    "x": 0.5,
+    "y": 0,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/aligned/000_frame_000.png",
+        "x": 48.5,
+        "y": 198,
+        "bbox": [
+          14,
+          1,
+          83,
+          198
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/aligned/001_frame_001.png",
+        "x": 48.5,
+        "y": 198,
+        "bbox": [
+          0,
+          31,
+          97,
+          198
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/aligned/002_frame_002.png",
+        "x": 49.0,
+        "y": 198,
+        "bbox": [
+          14,
+          0,
+          84,
+          198
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/aligned/003_frame_003.png",
+        "x": 48.5,
+        "y": 198,
+        "bbox": [
+          14,
+          7,
+          83,
+          198
+        ]
+      }
+    ]
+  },
+  "motion": {
+    "pair_changed_fraction": [
+      0.6251,
+      0.6404,
+      0.5344
+    ],
+    "average_changed_fraction": 0.6
+  },
+  "preview_background": [
+    28,
+    32,
+    38
+  ],
+  "aligned_frames": [
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/aligned/000_frame_000.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/aligned/001_frame_001.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/aligned/002_frame_002.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/aligned/003_frame_003.png"
+  ],
+  "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/attack_down_preview.gif",
+  "offsets": [
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/frame_000.png",
+      "source_bbox": [
+        0,
+        0,
+        69,
+        197
+      ],
+      "anchor": [
+        34.5,
+        197
+      ],
+      "dx": 14,
+      "dy": 1
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/frame_001.png",
+      "source_bbox": [
+        0,
+        0,
+        97,
+        167
+      ],
+      "anchor": [
+        48.5,
+        167
+      ],
+      "dx": 0,
+      "dy": 31
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/frame_002.png",
+      "source_bbox": [
+        0,
+        0,
+        70,
+        198
+      ],
+      "anchor": [
+        35.0,
+        198
+      ],
+      "dx": 14,
+      "dy": 0
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/grey_wolf_four_dir_attack/v1_grid/attack_down/frame_003.png",
+      "source_bbox": [
+        0,
+        0,
+        69,
+        191
+      ],
+      "anchor": [
+        34.5,
+        191
+      ],
+      "dx": 14,
+      "dy": 7
+    }
+  ]
+}

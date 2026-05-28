@@ -1,0 +1,213 @@
+{
+  "name": "attack",
+  "anchor_mode": "lower_body_foot_median_cleaned_chroma",
+  "canvas": [
+    489,
+    288
+  ],
+  "scaled_preview": [
+    978,
+    576
+  ],
+  "anchor_target": [
+    160,
+    270
+  ],
+  "frames": [
+    {
+      "frame": 0,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_000.png",
+      "trimmed_size": [
+        224,
+        236
+      ],
+      "anchor": [
+        81.0,
+        236.0
+      ],
+      "paste_offset": [
+        79,
+        34
+      ],
+      "output_bbox": [
+        79,
+        34,
+        302,
+        270
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 26571
+    },
+    {
+      "frame": 1,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_001.png",
+      "trimmed_size": [
+        242,
+        252
+      ],
+      "anchor": [
+        142.5,
+        252.0
+      ],
+      "paste_offset": [
+        18,
+        18
+      ],
+      "output_bbox": [
+        18,
+        18,
+        259,
+        270
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 28662
+    },
+    {
+      "frame": 2,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_002.png",
+      "trimmed_size": [
+        194,
+        221
+      ],
+      "anchor": [
+        56.0,
+        221.0
+      ],
+      "paste_offset": [
+        104,
+        49
+      ],
+      "output_bbox": [
+        105,
+        49,
+        298,
+        270
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 26296
+    },
+    {
+      "frame": 3,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_003.png",
+      "trimmed_size": [
+        272,
+        216
+      ],
+      "anchor": [
+        81.0,
+        216.0
+      ],
+      "paste_offset": [
+        79,
+        54
+      ],
+      "output_bbox": [
+        80,
+        54,
+        351,
+        270
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 25445
+    },
+    {
+      "frame": 4,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_004.png",
+      "trimmed_size": [
+        289,
+        216
+      ],
+      "anchor": [
+        88.0,
+        216.0
+      ],
+      "paste_offset": [
+        72,
+        54
+      ],
+      "output_bbox": [
+        72,
+        54,
+        361,
+        270
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 25556
+    },
+    {
+      "frame": 5,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_005.png",
+      "trimmed_size": [
+        191,
+        229
+      ],
+      "anchor": [
+        71.0,
+        228.0
+      ],
+      "paste_offset": [
+        89,
+        42
+      ],
+      "output_bbox": [
+        89,
+        42,
+        280,
+        270
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 24495
+    },
+    {
+      "frame": 6,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_006.png",
+      "trimmed_size": [
+        169,
+        225
+      ],
+      "anchor": [
+        73.0,
+        225.0
+      ],
+      "paste_offset": [
+        87,
+        45
+      ],
+      "output_bbox": [
+        88,
+        45,
+        256,
+        270
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 23199
+    },
+    {
+      "frame": 7,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_007.png",
+      "trimmed_size": [
+        223,
+        232
+      ],
+      "anchor": [
+        84.0,
+        232.0
+      ],
+      "paste_offset": [
+        76,
+        38
+      ],
+      "output_bbox": [
+        76,
+        38,
+        298,
+        270
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 26013
+    }
+  ],
+  "gif": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/stable_anchor_previews/goblin_scout_attack_stable_anchor_clean.gif",
+  "contact": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/stable_anchor_previews/goblin_scout_attack_stable_anchor_clean_contact.png",
+  "near_key_opaque_remnants_total": 0
+}

@@ -1,0 +1,213 @@
+{
+  "name": "walk",
+  "anchor_mode": "lower_body_foot_median_cleaned_chroma",
+  "canvas": [
+    238,
+    242
+  ],
+  "scaled_preview": [
+    476,
+    484
+  ],
+  "anchor_target": [
+    107,
+    224
+  ],
+  "frames": [
+    {
+      "frame": 0,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout/grid/walk/frame_000.png",
+      "trimmed_size": [
+        152,
+        207
+      ],
+      "anchor": [
+        67.0,
+        206.0
+      ],
+      "paste_offset": [
+        40,
+        18
+      ],
+      "output_bbox": [
+        40,
+        18,
+        192,
+        224
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 19463
+    },
+    {
+      "frame": 1,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout/grid/walk/frame_001.png",
+      "trimmed_size": [
+        151,
+        207
+      ],
+      "anchor": [
+        83.0,
+        206.0
+      ],
+      "paste_offset": [
+        24,
+        18
+      ],
+      "output_bbox": [
+        25,
+        18,
+        175,
+        224
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 18969
+    },
+    {
+      "frame": 2,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout/grid/walk/frame_002.png",
+      "trimmed_size": [
+        154,
+        205
+      ],
+      "anchor": [
+        65.0,
+        205.0
+      ],
+      "paste_offset": [
+        42,
+        19
+      ],
+      "output_bbox": [
+        42,
+        20,
+        196,
+        224
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 18928
+    },
+    {
+      "frame": 3,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout/grid/walk/frame_003.png",
+      "trimmed_size": [
+        143,
+        207
+      ],
+      "anchor": [
+        57.0,
+        207.0
+      ],
+      "paste_offset": [
+        50,
+        17
+      ],
+      "output_bbox": [
+        50,
+        18,
+        192,
+        224
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 18709
+    },
+    {
+      "frame": 4,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout/grid/walk/frame_004.png",
+      "trimmed_size": [
+        140,
+        207
+      ],
+      "anchor": [
+        68.0,
+        206.0
+      ],
+      "paste_offset": [
+        39,
+        18
+      ],
+      "output_bbox": [
+        39,
+        18,
+        178,
+        224
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 18556
+    },
+    {
+      "frame": 5,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout/grid/walk/frame_005.png",
+      "trimmed_size": [
+        144,
+        203
+      ],
+      "anchor": [
+        82.0,
+        202.0
+      ],
+      "paste_offset": [
+        25,
+        22
+      ],
+      "output_bbox": [
+        25,
+        23,
+        168,
+        224
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 17910
+    },
+    {
+      "frame": 6,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout/grid/walk/frame_006.png",
+      "trimmed_size": [
+        141,
+        197
+      ],
+      "anchor": [
+        80.0,
+        197.0
+      ],
+      "paste_offset": [
+        27,
+        27
+      ],
+      "output_bbox": [
+        27,
+        28,
+        168,
+        224
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 17440
+    },
+    {
+      "frame": 7,
+      "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout/grid/walk/frame_007.png",
+      "trimmed_size": [
+        141,
+        197
+      ],
+      "anchor": [
+        89.0,
+        196.0
+      ],
+      "paste_offset": [
+        18,
+        28
+      ],
+      "output_bbox": [
+        18,
+        29,
+        159,
+        224
+      ],
+      "near_key_opaque_remnants": 0,
+      "opaque_pixels": 17319
+    }
+  ],
+  "gif": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/stable_anchor_previews/goblin_scout_walk_stable_anchor_clean.gif",
+  "contact": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/stable_anchor_previews/goblin_scout_walk_stable_anchor_clean_contact.png",
+  "near_key_opaque_remnants_total": 0
+}

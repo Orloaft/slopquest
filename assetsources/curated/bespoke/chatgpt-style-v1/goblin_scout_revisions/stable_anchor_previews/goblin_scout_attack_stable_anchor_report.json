@@ -1,0 +1,246 @@
+{
+  "name": "attack",
+  "source_frames": [
+    "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_000.png",
+    "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_001.png",
+    "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_002.png",
+    "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_003.png",
+    "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_004.png",
+    "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_005.png",
+    "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_006.png",
+    "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/attack_same_direction_manual/frames/frame_007.png"
+  ],
+  "anchor_mode": "lower_body_foot_median",
+  "canvas": [
+    490,
+    288
+  ],
+  "scaled_preview": [
+    980,
+    576
+  ],
+  "anchor_target": [
+    161,
+    270
+  ],
+  "frames": [
+    {
+      "frame": 0,
+      "source_size": [
+        224,
+        236
+      ],
+      "source_bbox": [
+        0,
+        0,
+        224,
+        236
+      ],
+      "anchor": [
+        82.0,
+        236.0
+      ],
+      "paste_offset": [
+        79,
+        34
+      ],
+      "output_bbox": [
+        79,
+        34,
+        303,
+        270
+      ]
+    },
+    {
+      "frame": 1,
+      "source_size": [
+        242,
+        252
+      ],
+      "source_bbox": [
+        0,
+        0,
+        242,
+        252
+      ],
+      "anchor": [
+        143.0,
+        252.0
+      ],
+      "paste_offset": [
+        18,
+        18
+      ],
+      "output_bbox": [
+        18,
+        18,
+        260,
+        270
+      ]
+    },
+    {
+      "frame": 2,
+      "source_size": [
+        194,
+        221
+      ],
+      "source_bbox": [
+        0,
+        0,
+        194,
+        221
+      ],
+      "anchor": [
+        55.5,
+        221.0
+      ],
+      "paste_offset": [
+        106,
+        49
+      ],
+      "output_bbox": [
+        106,
+        49,
+        300,
+        270
+      ]
+    },
+    {
+      "frame": 3,
+      "source_size": [
+        272,
+        216
+      ],
+      "source_bbox": [
+        0,
+        0,
+        272,
+        216
+      ],
+      "anchor": [
+        82.0,
+        216.0
+      ],
+      "paste_offset": [
+        79,
+        54
+      ],
+      "output_bbox": [
+        79,
+        54,
+        351,
+        270
+      ]
+    },
+    {
+      "frame": 4,
+      "source_size": [
+        289,
+        216
+      ],
+      "source_bbox": [
+        0,
+        0,
+        289,
+        216
+      ],
+      "anchor": [
+        88.0,
+        216.0
+      ],
+      "paste_offset": [
+        73,
+        54
+      ],
+      "output_bbox": [
+        73,
+        54,
+        362,
+        270
+      ]
+    },
+    {
+      "frame": 5,
+      "source_size": [
+        191,
+        229
+      ],
+      "source_bbox": [
+        0,
+        0,
+        191,
+        229
+      ],
+      "anchor": [
+        71.5,
+        229.0
+      ],
+      "paste_offset": [
+        90,
+        41
+      ],
+      "output_bbox": [
+        90,
+        41,
+        281,
+        270
+      ]
+    },
+    {
+      "frame": 6,
+      "source_size": [
+        169,
+        225
+      ],
+      "source_bbox": [
+        0,
+        0,
+        169,
+        225
+      ],
+      "anchor": [
+        73.0,
+        225.0
+      ],
+      "paste_offset": [
+        88,
+        45
+      ],
+      "output_bbox": [
+        88,
+        45,
+        257,
+        270
+      ]
+    },
+    {
+      "frame": 7,
+      "source_size": [
+        223,
+        232
+      ],
+      "source_bbox": [
+        0,
+        0,
+        223,
+        232
+      ],
+      "anchor": [
+        84.0,
+        232.0
+      ],
+      "paste_offset": [
+        77,
+        38
+      ],
+      "output_bbox": [
+        77,
+        38,
+        300,
+        270
+      ]
+    }
+  ],
+  "gif": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/stable_anchor_previews/goblin_scout_attack_stable_anchor.gif",
+  "contact": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_revisions/stable_anchor_previews/goblin_scout_attack_stable_anchor_contact.png"
+}

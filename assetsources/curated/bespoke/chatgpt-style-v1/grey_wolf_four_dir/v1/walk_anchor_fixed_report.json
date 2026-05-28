@@ -1,0 +1,412 @@
+{
+  "source": "/home/orlovboros/.openclaw/media/tool-image-generation/grey_wolf_four_direction_walk_generated---312d42fd-a05b-49c8-a029-dae283d8c6c0.png",
+  "source_size": [
+    1024,
+    1024
+  ],
+  "cell_size": [
+    256,
+    256
+  ],
+  "generated_row_order": [
+    "up",
+    "right",
+    "down",
+    "left"
+  ],
+  "canvas": [
+    320,
+    320
+  ],
+  "anchor_x": 160,
+  "anchor_bottom": 286,
+  "rows": [
+    {
+      "name": "walk_up",
+      "frames": [
+        {
+          "index": 1,
+          "source_bbox": [
+            98,
+            45,
+            167,
+            233
+          ],
+          "source_center_x": 132.5,
+          "source_bottom_y": 233,
+          "applied_offset": [
+            28,
+            53
+          ],
+          "output_bbox": [
+            126,
+            98,
+            195,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 2,
+          "source_bbox": [
+            98,
+            47,
+            166,
+            234
+          ],
+          "source_center_x": 132.0,
+          "source_bottom_y": 234,
+          "applied_offset": [
+            28,
+            52
+          ],
+          "output_bbox": [
+            126,
+            99,
+            194,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 3,
+          "source_bbox": [
+            97,
+            47,
+            163,
+            227
+          ],
+          "source_center_x": 130.0,
+          "source_bottom_y": 227,
+          "applied_offset": [
+            30,
+            59
+          ],
+          "output_bbox": [
+            127,
+            106,
+            193,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 4,
+          "source_bbox": [
+            95,
+            47,
+            163,
+            233
+          ],
+          "source_center_x": 129.0,
+          "source_bottom_y": 233,
+          "applied_offset": [
+            31,
+            53
+          ],
+          "output_bbox": [
+            126,
+            100,
+            194,
+            286
+          ],
+          "removed_components_px": []
+        }
+      ],
+      "source_center_drift_px": 3.5,
+      "source_bottom_drift_px": 7
+    },
+    {
+      "name": "walk_right",
+      "frames": [
+        {
+          "index": 1,
+          "source_bbox": [
+            31,
+            61,
+            230,
+            180
+          ],
+          "source_center_x": 130.5,
+          "source_bottom_y": 180,
+          "applied_offset": [
+            30,
+            106
+          ],
+          "output_bbox": [
+            61,
+            167,
+            260,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 2,
+          "source_bbox": [
+            24,
+            61,
+            225,
+            180
+          ],
+          "source_center_x": 124.5,
+          "source_bottom_y": 180,
+          "applied_offset": [
+            36,
+            106
+          ],
+          "output_bbox": [
+            60,
+            167,
+            261,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 3,
+          "source_bbox": [
+            19,
+            61,
+            219,
+            181
+          ],
+          "source_center_x": 119.0,
+          "source_bottom_y": 181,
+          "applied_offset": [
+            41,
+            105
+          ],
+          "output_bbox": [
+            60,
+            166,
+            260,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 4,
+          "source_bbox": [
+            20,
+            61,
+            220,
+            180
+          ],
+          "source_center_x": 120.0,
+          "source_bottom_y": 180,
+          "applied_offset": [
+            40,
+            106
+          ],
+          "output_bbox": [
+            60,
+            167,
+            260,
+            286
+          ],
+          "removed_components_px": []
+        }
+      ],
+      "source_center_drift_px": 11.5,
+      "source_bottom_drift_px": 1
+    },
+    {
+      "name": "walk_down",
+      "frames": [
+        {
+          "index": 1,
+          "source_bbox": [
+            96,
+            21,
+            164,
+            217
+          ],
+          "source_center_x": 130.0,
+          "source_bottom_y": 217,
+          "applied_offset": [
+            30,
+            69
+          ],
+          "output_bbox": [
+            126,
+            90,
+            194,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 2,
+          "source_bbox": [
+            97,
+            21,
+            167,
+            217
+          ],
+          "source_center_x": 132.0,
+          "source_bottom_y": 217,
+          "applied_offset": [
+            28,
+            69
+          ],
+          "output_bbox": [
+            125,
+            90,
+            195,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 3,
+          "source_bbox": [
+            94,
+            22,
+            162,
+            201
+          ],
+          "source_center_x": 128.0,
+          "source_bottom_y": 201,
+          "applied_offset": [
+            32,
+            85
+          ],
+          "output_bbox": [
+            126,
+            107,
+            194,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 4,
+          "source_bbox": [
+            92,
+            21,
+            161,
+            212
+          ],
+          "source_center_x": 126.5,
+          "source_bottom_y": 212,
+          "applied_offset": [
+            34,
+            74
+          ],
+          "output_bbox": [
+            126,
+            95,
+            195,
+            286
+          ],
+          "removed_components_px": []
+        }
+      ],
+      "source_center_drift_px": 5.5,
+      "source_bottom_drift_px": 16
+    },
+    {
+      "name": "walk_left",
+      "frames": [
+        {
+          "index": 1,
+          "source_bbox": [
+            31,
+            38,
+            230,
+            157
+          ],
+          "source_center_x": 130.5,
+          "source_bottom_y": 157,
+          "applied_offset": [
+            30,
+            129
+          ],
+          "output_bbox": [
+            61,
+            167,
+            260,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 2,
+          "source_bbox": [
+            25,
+            39,
+            225,
+            157
+          ],
+          "source_center_x": 125.0,
+          "source_bottom_y": 157,
+          "applied_offset": [
+            35,
+            129
+          ],
+          "output_bbox": [
+            60,
+            168,
+            260,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 3,
+          "source_bbox": [
+            22,
+            39,
+            222,
+            158
+          ],
+          "source_center_x": 122.0,
+          "source_bottom_y": 158,
+          "applied_offset": [
+            38,
+            128
+          ],
+          "output_bbox": [
+            60,
+            167,
+            260,
+            286
+          ],
+          "removed_components_px": []
+        },
+        {
+          "index": 4,
+          "source_bbox": [
+            20,
+            39,
+            220,
+            157
+          ],
+          "source_center_x": 120.0,
+          "source_bottom_y": 157,
+          "applied_offset": [
+            40,
+            129
+          ],
+          "output_bbox": [
+            60,
+            168,
+            260,
+            286
+          ],
+          "removed_components_px": []
+        }
+      ],
+      "source_center_drift_px": 10.5,
+      "source_bottom_drift_px": 1
+    }
+  ],
+  "alpha_corners": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "opaque_chroma_green_remnants": 0
+}

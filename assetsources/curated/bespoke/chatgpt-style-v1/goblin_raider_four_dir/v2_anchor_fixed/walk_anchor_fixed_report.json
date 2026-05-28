@@ -1,0 +1,511 @@
+{
+  "source": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_raider_four_dir/v1/goblin_raider_four_direction_walk_alpha_despill.png",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "frame_size": [
+    320,
+    320
+  ],
+  "anchor_x": 160,
+  "anchor_bottom": 288,
+  "rows": [
+    {
+      "name": "walk_up",
+      "frames": [
+        {
+          "index": 1,
+          "cell": [
+            0,
+            0,
+            314,
+            314
+          ],
+          "source_bbox": [
+            92,
+            51,
+            304,
+            296
+          ],
+          "source_center_x": 198.0,
+          "source_bottom_y": 296,
+          "applied_offset": [
+            -38,
+            -8
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            54,
+            43,
+            266,
+            288
+          ]
+        },
+        {
+          "index": 2,
+          "cell": [
+            314,
+            0,
+            627,
+            314
+          ],
+          "source_bbox": [
+            65,
+            52,
+            280,
+            296
+          ],
+          "source_center_x": 172.5,
+          "source_bottom_y": 296,
+          "applied_offset": [
+            -13,
+            -8
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            52,
+            44,
+            267,
+            288
+          ]
+        },
+        {
+          "index": 3,
+          "cell": [
+            627,
+            0,
+            940,
+            314
+          ],
+          "source_bbox": [
+            45,
+            51,
+            256,
+            297
+          ],
+          "source_center_x": 150.5,
+          "source_bottom_y": 297,
+          "applied_offset": [
+            9,
+            -9
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            54,
+            42,
+            265,
+            288
+          ]
+        },
+        {
+          "index": 4,
+          "cell": [
+            940,
+            0,
+            1254,
+            314
+          ],
+          "source_bbox": [
+            25,
+            52,
+            237,
+            297
+          ],
+          "source_center_x": 131.0,
+          "source_bottom_y": 297,
+          "applied_offset": [
+            29,
+            -9
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            54,
+            43,
+            266,
+            288
+          ]
+        }
+      ],
+      "source_center_drift_px": 67.0,
+      "source_bottom_drift_px": 1,
+      "fixed_center_drift_px": 0,
+      "fixed_bottom_drift_px": 0
+    },
+    {
+      "name": "walk_right",
+      "frames": [
+        {
+          "index": 1,
+          "cell": [
+            0,
+            314,
+            314,
+            627
+          ],
+          "source_bbox": [
+            85,
+            35,
+            283,
+            270
+          ],
+          "source_center_x": 184.0,
+          "source_bottom_y": 270,
+          "applied_offset": [
+            -24,
+            18
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            61,
+            53,
+            259,
+            288
+          ]
+        },
+        {
+          "index": 2,
+          "cell": [
+            314,
+            314,
+            627,
+            627
+          ],
+          "source_bbox": [
+            63,
+            36,
+            269,
+            269
+          ],
+          "source_center_x": 166.0,
+          "source_bottom_y": 269,
+          "applied_offset": [
+            -6,
+            19
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            57,
+            55,
+            263,
+            288
+          ]
+        },
+        {
+          "index": 3,
+          "cell": [
+            627,
+            314,
+            940,
+            627
+          ],
+          "source_bbox": [
+            30,
+            36,
+            253,
+            269
+          ],
+          "source_center_x": 141.5,
+          "source_bottom_y": 269,
+          "applied_offset": [
+            18,
+            19
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            48,
+            55,
+            271,
+            288
+          ]
+        },
+        {
+          "index": 4,
+          "cell": [
+            940,
+            314,
+            1254,
+            627
+          ],
+          "source_bbox": [
+            19,
+            35,
+            227,
+            269
+          ],
+          "source_center_x": 123.0,
+          "source_bottom_y": 269,
+          "applied_offset": [
+            37,
+            19
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            56,
+            54,
+            264,
+            288
+          ]
+        }
+      ],
+      "source_center_drift_px": 61.0,
+      "source_bottom_drift_px": 1,
+      "fixed_center_drift_px": 0,
+      "fixed_bottom_drift_px": 0
+    },
+    {
+      "name": "walk_down",
+      "frames": [
+        {
+          "index": 1,
+          "cell": [
+            0,
+            627,
+            314,
+            940
+          ],
+          "source_bbox": [
+            52,
+            17,
+            259,
+            255
+          ],
+          "source_center_x": 155.5,
+          "source_bottom_y": 255,
+          "applied_offset": [
+            4,
+            33
+          ],
+          "removed_components_px": [
+            327
+          ],
+          "output_bbox": [
+            56,
+            50,
+            263,
+            288
+          ]
+        },
+        {
+          "index": 2,
+          "cell": [
+            314,
+            627,
+            627,
+            940
+          ],
+          "source_bbox": [
+            29,
+            18,
+            237,
+            254
+          ],
+          "source_center_x": 133.0,
+          "source_bottom_y": 254,
+          "applied_offset": [
+            27,
+            34
+          ],
+          "removed_components_px": [
+            194
+          ],
+          "output_bbox": [
+            56,
+            52,
+            264,
+            288
+          ]
+        },
+        {
+          "index": 3,
+          "cell": [
+            627,
+            627,
+            940,
+            940
+          ],
+          "source_bbox": [
+            3,
+            17,
+            212,
+            255
+          ],
+          "source_center_x": 107.5,
+          "source_bottom_y": 255,
+          "applied_offset": [
+            53,
+            33
+          ],
+          "removed_components_px": [
+            9,
+            250,
+            188
+          ],
+          "output_bbox": [
+            56,
+            50,
+            265,
+            288
+          ]
+        },
+        {
+          "index": 4,
+          "cell": [
+            940,
+            627,
+            1254,
+            940
+          ],
+          "source_bbox": [
+            0,
+            18,
+            196,
+            255
+          ],
+          "source_center_x": 98.0,
+          "source_bottom_y": 255,
+          "applied_offset": [
+            62,
+            33
+          ],
+          "removed_components_px": [
+            237
+          ],
+          "output_bbox": [
+            62,
+            51,
+            258,
+            288
+          ]
+        }
+      ],
+      "source_center_drift_px": 57.5,
+      "source_bottom_drift_px": 1,
+      "fixed_center_drift_px": 0,
+      "fixed_bottom_drift_px": 0
+    },
+    {
+      "name": "walk_left",
+      "frames": [
+        {
+          "index": 1,
+          "cell": [
+            0,
+            940,
+            314,
+            1254
+          ],
+          "source_bbox": [
+            46,
+            0,
+            253,
+            229
+          ],
+          "source_center_x": 149.5,
+          "source_bottom_y": 229,
+          "applied_offset": [
+            10,
+            59
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            56,
+            59,
+            263,
+            288
+          ]
+        },
+        {
+          "index": 2,
+          "cell": [
+            314,
+            940,
+            627,
+            1254
+          ],
+          "source_bbox": [
+            21,
+            0,
+            227,
+            230
+          ],
+          "source_center_x": 124.0,
+          "source_bottom_y": 230,
+          "applied_offset": [
+            36,
+            58
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            57,
+            58,
+            263,
+            288
+          ]
+        },
+        {
+          "index": 3,
+          "cell": [
+            627,
+            940,
+            940,
+            1254
+          ],
+          "source_bbox": [
+            6,
+            0,
+            213,
+            223
+          ],
+          "source_center_x": 109.5,
+          "source_bottom_y": 223,
+          "applied_offset": [
+            50,
+            65
+          ],
+          "removed_components_px": [
+            160
+          ],
+          "output_bbox": [
+            56,
+            65,
+            263,
+            288
+          ]
+        },
+        {
+          "index": 4,
+          "cell": [
+            940,
+            940,
+            1254,
+            1254
+          ],
+          "source_bbox": [
+            0,
+            0,
+            192,
+            228
+          ],
+          "source_center_x": 96.0,
+          "source_bottom_y": 228,
+          "applied_offset": [
+            64,
+            60
+          ],
+          "removed_components_px": [],
+          "output_bbox": [
+            64,
+            60,
+            256,
+            288
+          ]
+        }
+      ],
+      "source_center_drift_px": 53.5,
+      "source_bottom_drift_px": 7,
+      "fixed_center_drift_px": 0,
+      "fixed_bottom_drift_px": 0
+    }
+  ]
+}

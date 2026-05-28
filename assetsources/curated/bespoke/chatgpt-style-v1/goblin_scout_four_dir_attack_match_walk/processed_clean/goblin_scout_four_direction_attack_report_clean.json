@@ -1,0 +1,395 @@
+{
+  "source": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_four_dir_attack_match_walk/goblin_scout_four_direction_attack_generated.png",
+  "row_order": [
+    "UP",
+    "RIGHT",
+    "DOWN",
+    "LEFT"
+  ],
+  "tile_size": [
+    281,
+    293
+  ],
+  "directions": {
+    "UP": {
+      "frames": [
+        {
+          "frame": 0,
+          "trimmed_size": [
+            167,
+            226
+          ],
+          "anchor": [
+            91.0,
+            221.0
+          ],
+          "paste_offset": [
+            34,
+            36
+          ],
+          "output_bbox": [
+            38,
+            40,
+            197,
+            258
+          ]
+        },
+        {
+          "frame": 1,
+          "trimmed_size": [
+            202,
+            256
+          ],
+          "anchor": [
+            81.0,
+            251.0
+          ],
+          "paste_offset": [
+            44,
+            6
+          ],
+          "output_bbox": [
+            48,
+            10,
+            242,
+            258
+          ]
+        },
+        {
+          "frame": 2,
+          "trimmed_size": [
+            268,
+            226
+          ],
+          "anchor": [
+            84.0,
+            221.0
+          ],
+          "paste_offset": [
+            40,
+            36
+          ],
+          "output_bbox": [
+            44,
+            40,
+            281,
+            258
+          ]
+        },
+        {
+          "frame": 3,
+          "trimmed_size": [
+            164,
+            226
+          ],
+          "anchor": [
+            90.0,
+            221.0
+          ],
+          "paste_offset": [
+            34,
+            36
+          ],
+          "output_bbox": [
+            38,
+            40,
+            194,
+            258
+          ]
+        }
+      ]
+    },
+    "RIGHT": {
+      "frames": [
+        {
+          "frame": 0,
+          "trimmed_size": [
+            149,
+            222
+          ],
+          "anchor": [
+            72.0,
+            217.0
+          ],
+          "paste_offset": [
+            48,
+            43
+          ],
+          "output_bbox": [
+            52,
+            47,
+            193,
+            261
+          ]
+        },
+        {
+          "frame": 1,
+          "trimmed_size": [
+            164,
+            221
+          ],
+          "anchor": [
+            86.0,
+            216.0
+          ],
+          "paste_offset": [
+            34,
+            44
+          ],
+          "output_bbox": [
+            38,
+            48,
+            194,
+            261
+          ]
+        },
+        {
+          "frame": 2,
+          "trimmed_size": [
+            257,
+            219
+          ],
+          "anchor": [
+            58.0,
+            214.0
+          ],
+          "paste_offset": [
+            62,
+            46
+          ],
+          "output_bbox": [
+            66,
+            50,
+            281,
+            261
+          ]
+        },
+        {
+          "frame": 3,
+          "trimmed_size": [
+            206,
+            222
+          ],
+          "anchor": [
+            131.0,
+            217.0
+          ],
+          "paste_offset": [
+            -11,
+            43
+          ],
+          "output_bbox": [
+            0,
+            47,
+            191,
+            261
+          ]
+        }
+      ]
+    },
+    "DOWN": {
+      "frames": [
+        {
+          "frame": 0,
+          "trimmed_size": [
+            168,
+            283
+          ],
+          "anchor": [
+            79.0,
+            282.0
+          ],
+          "paste_offset": [
+            66,
+            -26
+          ],
+          "output_bbox": [
+            69,
+            0,
+            231,
+            257
+          ]
+        },
+        {
+          "frame": 1,
+          "trimmed_size": [
+            165,
+            243
+          ],
+          "anchor": [
+            88.0,
+            238.0
+          ],
+          "paste_offset": [
+            56,
+            18
+          ],
+          "output_bbox": [
+            60,
+            18,
+            217,
+            257
+          ]
+        },
+        {
+          "frame": 2,
+          "trimmed_size": [
+            153,
+            283
+          ],
+          "anchor": [
+            61.0,
+            282.0
+          ],
+          "paste_offset": [
+            84,
+            -26
+          ],
+          "output_bbox": [
+            87,
+            0,
+            234,
+            257
+          ]
+        },
+        {
+          "frame": 3,
+          "trimmed_size": [
+            167,
+            283
+          ],
+          "anchor": [
+            78.0,
+            282.0
+          ],
+          "paste_offset": [
+            66,
+            -26
+          ],
+          "output_bbox": [
+            69,
+            0,
+            229,
+            257
+          ]
+        }
+      ]
+    },
+    "LEFT": {
+      "frames": [
+        {
+          "frame": 0,
+          "trimmed_size": [
+            141,
+            213
+          ],
+          "anchor": [
+            72.0,
+            208.0
+          ],
+          "paste_offset": [
+            98,
+            51
+          ],
+          "output_bbox": [
+            102,
+            51,
+            235,
+            260
+          ]
+        },
+        {
+          "frame": 1,
+          "trimmed_size": [
+            217,
+            213
+          ],
+          "anchor": [
+            73.0,
+            208.0
+          ],
+          "paste_offset": [
+            98,
+            51
+          ],
+          "output_bbox": [
+            102,
+            51,
+            281,
+            260
+          ]
+        },
+        {
+          "frame": 2,
+          "trimmed_size": [
+            226,
+            210
+          ],
+          "anchor": [
+            169.0,
+            205.0
+          ],
+          "paste_offset": [
+            2,
+            54
+          ],
+          "output_bbox": [
+            2,
+            54,
+            224,
+            260
+          ]
+        },
+        {
+          "frame": 3,
+          "trimmed_size": [
+            141,
+            213
+          ],
+          "anchor": [
+            72.0,
+            208.0
+          ],
+          "paste_offset": [
+            98,
+            51
+          ],
+          "output_bbox": [
+            102,
+            51,
+            235,
+            260
+          ]
+        }
+      ]
+    }
+  },
+  "walk_anchor_targets": {
+    "up": [
+      124.5,
+      257.0
+    ],
+    "right": [
+      120.0,
+      260.0
+    ],
+    "down": [
+      144.5,
+      256.0
+    ],
+    "left": [
+      170.5,
+      259.0
+    ]
+  },
+  "normalized_alpha_sheet": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_four_dir_attack_match_walk/processed_clean/goblin_scout_four_direction_attack_normalized_alpha_clean.png",
+  "contact": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_four_dir_attack_match_walk/processed_clean/goblin_scout_four_direction_attack_contact_clean.png",
+  "preview_gif": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_four_dir_attack_match_walk/processed_clean/goblin_scout_four_direction_attack_preview_clean.gif",
+  "comparison_gif": "assetsources/curated/bespoke/chatgpt-style-v1/goblin_scout_four_dir_attack_match_walk/processed_clean/goblin_scout_walk_attack_identity_compare.gif",
+  "validation": {
+    "transparent_corners": true,
+    "opaque_pixels": 340285,
+    "opaque_magenta_like_pixels": 0,
+    "small_components_removed": "kept largest alpha component per frame"
+  }
+}

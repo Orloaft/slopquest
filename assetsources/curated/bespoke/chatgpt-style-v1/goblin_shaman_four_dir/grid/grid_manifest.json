@@ -1,0 +1,605 @@
+{
+  "source": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/goblin_shaman_four_direction_walk_generated.png",
+  "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid",
+  "cleaned_image": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/goblin_shaman_four_direction_walk_generated_alpha.png",
+  "chroma": [
+    17,
+    243,
+    12
+  ],
+  "tolerance": 70,
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cell_width": 313,
+    "cell_height": 313
+  },
+  "chroma_remnant_pixels": 0,
+  "alpha_corners": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "preview_background": [
+    28,
+    32,
+    38
+  ],
+  "rows": [
+    {
+      "row": 0,
+      "name": "up",
+      "frames": 4,
+      "source_boxes": [
+        [
+          76,
+          42,
+          286,
+          284
+        ],
+        [
+          380,
+          40,
+          597,
+          284
+        ],
+        [
+          684,
+          44,
+          896,
+          288
+        ],
+        [
+          980,
+          40,
+          1197,
+          284
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 3.5,
+        "y": 2,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/frame_000.png",
+            "x": 105.0,
+            "y": 242,
+            "bbox": [
+              0,
+              0,
+              210,
+              242
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/frame_001.png",
+            "x": 108.5,
+            "y": 244,
+            "bbox": [
+              0,
+              0,
+              217,
+              244
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/frame_002.png",
+            "x": 106.0,
+            "y": 244,
+            "bbox": [
+              0,
+              0,
+              212,
+              244
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/frame_003.png",
+            "x": 108.5,
+            "y": 244,
+            "bbox": [
+              0,
+              0,
+              217,
+              244
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.5,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/aligned/000_frame_000.png",
+            "x": 109.0,
+            "y": 244,
+            "bbox": [
+              4,
+              2,
+              214,
+              244
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/aligned/001_frame_001.png",
+            "x": 108.5,
+            "y": 244,
+            "bbox": [
+              0,
+              0,
+              217,
+              244
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/aligned/002_frame_002.png",
+            "x": 109.0,
+            "y": 244,
+            "bbox": [
+              3,
+              0,
+              215,
+              244
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/aligned/003_frame_003.png",
+            "x": 108.5,
+            "y": 244,
+            "bbox": [
+              0,
+              0,
+              217,
+              244
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.6351,
+          0.6155,
+          0.6174
+        ],
+        "average_changed_fraction": 0.6227
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/up_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/alignment_report.json"
+    },
+    {
+      "row": 1,
+      "name": "right",
+      "frames": 4,
+      "source_boxes": [
+        [
+          87,
+          336,
+          273,
+          626
+        ],
+        [
+          397,
+          337,
+          582,
+          626
+        ],
+        [
+          700,
+          340,
+          879,
+          626
+        ],
+        [
+          984,
+          337,
+          1169,
+          626
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 3.5,
+        "y": 4,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/frame_000.png",
+            "x": 93.0,
+            "y": 290,
+            "bbox": [
+              0,
+              0,
+              186,
+              290
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/frame_001.png",
+            "x": 92.5,
+            "y": 289,
+            "bbox": [
+              0,
+              0,
+              185,
+              289
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/frame_002.png",
+            "x": 89.5,
+            "y": 286,
+            "bbox": [
+              0,
+              0,
+              179,
+              286
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/frame_003.png",
+            "x": 92.5,
+            "y": 289,
+            "bbox": [
+              0,
+              0,
+              185,
+              289
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 1.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/aligned/000_frame_000.png",
+            "x": 93.0,
+            "y": 290,
+            "bbox": [
+              0,
+              0,
+              186,
+              290
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/aligned/001_frame_001.png",
+            "x": 92.5,
+            "y": 290,
+            "bbox": [
+              0,
+              1,
+              185,
+              290
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/aligned/002_frame_002.png",
+            "x": 93.5,
+            "y": 290,
+            "bbox": [
+              4,
+              4,
+              183,
+              290
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/aligned/003_frame_003.png",
+            "x": 92.5,
+            "y": 290,
+            "bbox": [
+              0,
+              1,
+              185,
+              290
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.5248,
+          0.5474,
+          0.5557
+        ],
+        "average_changed_fraction": 0.5426
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/right_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/alignment_report.json"
+    },
+    {
+      "row": 2,
+      "name": "down",
+      "frames": 4,
+      "source_boxes": [
+        [
+          58,
+          626,
+          246,
+          939
+        ],
+        [
+          355,
+          626,
+          560,
+          939
+        ],
+        [
+          661,
+          626,
+          862,
+          939
+        ],
+        [
+          957,
+          626,
+          1159,
+          939
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 8.5,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/frame_000.png",
+            "x": 94.0,
+            "y": 313,
+            "bbox": [
+              0,
+              0,
+              188,
+              313
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/frame_001.png",
+            "x": 102.5,
+            "y": 313,
+            "bbox": [
+              0,
+              0,
+              205,
+              313
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/frame_002.png",
+            "x": 100.5,
+            "y": 313,
+            "bbox": [
+              0,
+              0,
+              201,
+              313
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/frame_003.png",
+            "x": 101.0,
+            "y": 313,
+            "bbox": [
+              0,
+              0,
+              202,
+              313
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.5,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/aligned/000_frame_000.png",
+            "x": 103.0,
+            "y": 313,
+            "bbox": [
+              9,
+              0,
+              197,
+              313
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/aligned/001_frame_001.png",
+            "x": 102.5,
+            "y": 313,
+            "bbox": [
+              0,
+              0,
+              205,
+              313
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/aligned/002_frame_002.png",
+            "x": 102.5,
+            "y": 313,
+            "bbox": [
+              2,
+              0,
+              203,
+              313
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/aligned/003_frame_003.png",
+            "x": 103.0,
+            "y": 313,
+            "bbox": [
+              2,
+              0,
+              204,
+              313
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.5453,
+          0.528,
+          0.5263
+        ],
+        "average_changed_fraction": 0.5332
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/down_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/alignment_report.json"
+    },
+    {
+      "row": 3,
+      "name": "left",
+      "frames": 4,
+      "source_boxes": [
+        [
+          64,
+          939,
+          248,
+          1148
+        ],
+        [
+          368,
+          939,
+          547,
+          1150
+        ],
+        [
+          676,
+          939,
+          853,
+          1150
+        ],
+        [
+          983,
+          939,
+          1160,
+          1150
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 3.5,
+        "y": 2,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/frame_000.png",
+            "x": 92.0,
+            "y": 209,
+            "bbox": [
+              0,
+              0,
+              184,
+              209
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/frame_001.png",
+            "x": 89.5,
+            "y": 211,
+            "bbox": [
+              0,
+              0,
+              179,
+              211
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/frame_002.png",
+            "x": 88.5,
+            "y": 211,
+            "bbox": [
+              0,
+              0,
+              177,
+              211
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/frame_003.png",
+            "x": 88.5,
+            "y": 211,
+            "bbox": [
+              0,
+              0,
+              177,
+              211
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 1.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/aligned/000_frame_000.png",
+            "x": 92.0,
+            "y": 211,
+            "bbox": [
+              0,
+              2,
+              184,
+              211
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/aligned/001_frame_001.png",
+            "x": 91.5,
+            "y": 211,
+            "bbox": [
+              2,
+              0,
+              181,
+              211
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/aligned/002_frame_002.png",
+            "x": 92.5,
+            "y": 211,
+            "bbox": [
+              4,
+              0,
+              181,
+              211
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/aligned/003_frame_003.png",
+            "x": 92.5,
+            "y": 211,
+            "bbox": [
+              4,
+              0,
+              181,
+              211
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.699,
+          0.6656,
+          0.6804
+        ],
+        "average_changed_fraction": 0.6817
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/left_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/alignment_report.json"
+    }
+  ],
+  "preview_gifs": [
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/up/up_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/right/right_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/down/down_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/chatgpt-style-v1/goblin_shaman_four_dir/grid/left/left_preview.gif"
+  ]
+}
