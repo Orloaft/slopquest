@@ -1,5 +1,23 @@
 import { expect, test } from "@playwright/test";
 import { PNG } from "pngjs";
+import { MONSTER_SPAWNS } from "../../src/shared.js";
+
+const NORTHWOOD_EXPECTED_TYPES = [
+  "rat",
+  "spider",
+  "goblin_scout",
+  "wolf",
+  "wisp",
+  "goblin",
+  "goblin_shaman",
+  "orc"
+];
+
+const NORTHWOOD_SUBZONE_PROBES = [
+  { label: "central NW dirt", x: 16.5, y: 13.5 },
+  { label: "central E dirt", x: 32.5, y: 20.5 },
+  { label: "NE goblin camp margin", x: 41.5, y: 5.5 }
+];
 
 test("skills, firemaking, and cooking are usable and visually present", async ({ page }) => {
   page.on("pageerror", (error) => console.error(error));
@@ -56,6 +74,55 @@ test("actor animation frames keep a stable bottom-center anchor", async ({ page 
   const unstable = rows.filter((row) => row.driftX > 0.5 || row.driftY > 0);
   expect(unstable).toEqual([]);
 });
+
+test("Northwood spawn table covers every enemy type and renders 4-direction frames", async ({ page }) => {
+  page.on("pageerror", (error) => console.error(error));
+  page.on("console", (message) => {
+    if (message.type() === "error") console.error(message.text());
+  });
+
+  const spawnTypes = new Set(MONSTER_SPAWNS.filter((spawn) => spawn.floor === 3).map((spawn) => spawn.type));
+  expect([...spawnTypes].sort()).toEqual([...NORTHWOOD_EXPECTED_TYPES].sort());
+
+  await page.goto("/?e2e");
+  await joinFreshCharacter(page);
+
+  const observed = new Set();
+  for (const probe of NORTHWOOD_SUBZONE_PROBES) {
+    await teleportTo(page, 3, probe.x, probe.y);
+    const monsters = await page.waitForFunction(
+      ({ x, y }) => {
+        const me = window.__TIB_E2E__?.self();
+        if (!me || me.floor !== 3 || Math.hypot(me.x - x, me.y - y) > 0.5) return null;
+        const list = window.__TIB_E2E__?.getState()?.monsters ?? [];
+        return list.length ? list : null;
+      },
+      { x: probe.x, y: probe.y }
+    );
+    for (const monster of await monsters.jsonValue()) observed.add(monster.type);
+  }
+  expect([...observed].sort()).toEqual([...NORTHWOOD_EXPECTED_TYPES].sort());
+
+  const coverage = await page.evaluate(
+    (types) => window.__TIB_E2E__?.monsterTextureCoverage?.(types) ?? [],
+    NORTHWOOD_EXPECTED_TYPES
+  );
+  expect(coverage).toHaveLength(NORTHWOOD_EXPECTED_TYPES.length);
+  for (const entry of coverage) {
+    expect(entry.frames).toHaveLength(16);
+    const missing = entry.frames.filter((frame) => !frame.exists);
+    expect(missing, `${entry.type} (${entry.family}) missing frames`).toEqual([]);
+  }
+});
+
+async function teleportTo(page, floor, x, y) {
+  await page.evaluate(
+    ({ floor, x, y }) => {
+      window.__TIB_E2E__.send({ type: "e2eGrantItems", items: [], floor, x, y });
+    },
+    { floor, x, y }
+  );
+}
 
 async function joinFreshCharacter(page) {
   const name = `e2e_${Date.now().toString(36)}`;

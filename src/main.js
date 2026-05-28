@@ -127,7 +127,18 @@ if (E2E_MODE) {
     },
     send,
     stateVersion: () => stateVersion,
-    actorFrameAnchorDrift: () => actorFrameAnchorDrift()
+    actorFrameAnchorDrift: () => actorFrameAnchorDrift(),
+    monsterTextureCoverage: (types) =>
+      (types ?? []).map((type) => {
+        const spec = monsterActorSpec({ type });
+        const frames = DIRECTIONS.flatMap((dir) =>
+          [0, 1, 2, 3].map((frame) => {
+            const key = actorTextureKey(spec.family, dir, frame);
+            return { dir, frame, key, exists: Boolean(scene?.textures?.exists?.(key)) };
+          })
+        );
+        return { type, family: spec.family, frames };
+      })
   };
 }
 
