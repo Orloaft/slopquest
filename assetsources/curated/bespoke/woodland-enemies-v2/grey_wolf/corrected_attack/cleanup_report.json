@@ -1,0 +1,353 @@
+{
+  "source": "/home/orlovboros/.openclaw/media/tool-image-generation/grey_wolf_four_direction_attack_generated---e7384442-c2ee-4488-bc09-9b60b49b507f.png",
+  "canvas": [
+    250,
+    222
+  ],
+  "frames": [
+    {
+      "idx": 0,
+      "direction": "up",
+      "frame": 0,
+      "sprite_size": [
+        79,
+        188
+      ],
+      "placed_xy": [
+        85,
+        26
+      ],
+      "bbox": [
+        85,
+        26,
+        164,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 1,
+      "direction": "up",
+      "frame": 1,
+      "sprite_size": [
+        103,
+        176
+      ],
+      "placed_xy": [
+        73,
+        38
+      ],
+      "bbox": [
+        73,
+        38,
+        176,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 2,
+      "direction": "up",
+      "frame": 2,
+      "sprite_size": [
+        93,
+        192
+      ],
+      "placed_xy": [
+        78,
+        22
+      ],
+      "bbox": [
+        78,
+        22,
+        171,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 3,
+      "direction": "up",
+      "frame": 3,
+      "sprite_size": [
+        79,
+        186
+      ],
+      "placed_xy": [
+        85,
+        28
+      ],
+      "bbox": [
+        85,
+        28,
+        164,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 4,
+      "direction": "right",
+      "frame": 0,
+      "sprite_size": [
+        198,
+        119
+      ],
+      "placed_xy": [
+        26,
+        95
+      ],
+      "bbox": [
+        26,
+        95,
+        224,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 5,
+      "direction": "right",
+      "frame": 1,
+      "sprite_size": [
+        198,
+        106
+      ],
+      "placed_xy": [
+        26,
+        108
+      ],
+      "bbox": [
+        26,
+        108,
+        224,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 6,
+      "direction": "right",
+      "frame": 2,
+      "sprite_size": [
+        225,
+        98
+      ],
+      "placed_xy": [
+        12,
+        116
+      ],
+      "bbox": [
+        12,
+        116,
+        237,
+        214
+      ],
+      "greenish_opaque": 1,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 7,
+      "direction": "right",
+      "frame": 3,
+      "sprite_size": [
+        199,
+        119
+      ],
+      "placed_xy": [
+        25,
+        95
+      ],
+      "bbox": [
+        25,
+        95,
+        224,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 8,
+      "direction": "down",
+      "frame": 0,
+      "sprite_size": [
+        68,
+        196
+      ],
+      "placed_xy": [
+        91,
+        18
+      ],
+      "bbox": [
+        91,
+        18,
+        159,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 9,
+      "direction": "down",
+      "frame": 1,
+      "sprite_size": [
+        97,
+        167
+      ],
+      "placed_xy": [
+        76,
+        47
+      ],
+      "bbox": [
+        76,
+        47,
+        173,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 10,
+      "direction": "down",
+      "frame": 2,
+      "sprite_size": [
+        69,
+        198
+      ],
+      "placed_xy": [
+        90,
+        16
+      ],
+      "bbox": [
+        90,
+        16,
+        159,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 11,
+      "direction": "down",
+      "frame": 3,
+      "sprite_size": [
+        69,
+        191
+      ],
+      "placed_xy": [
+        90,
+        23
+      ],
+      "bbox": [
+        90,
+        23,
+        159,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 12,
+      "direction": "left",
+      "frame": 0,
+      "sprite_size": [
+        198,
+        119
+      ],
+      "placed_xy": [
+        26,
+        95
+      ],
+      "bbox": [
+        26,
+        95,
+        224,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 13,
+      "direction": "left",
+      "frame": 1,
+      "sprite_size": [
+        196,
+        112
+      ],
+      "placed_xy": [
+        27,
+        102
+      ],
+      "bbox": [
+        27,
+        102,
+        223,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 14,
+      "direction": "left",
+      "frame": 2,
+      "sprite_size": [
+        224,
+        99
+      ],
+      "placed_xy": [
+        13,
+        115
+      ],
+      "bbox": [
+        13,
+        115,
+        237,
+        214
+      ],
+      "greenish_opaque": 1,
+      "exact_chroma_opaque": 0
+    },
+    {
+      "idx": 15,
+      "direction": "left",
+      "frame": 3,
+      "sprite_size": [
+        201,
+        118
+      ],
+      "placed_xy": [
+        24,
+        96
+      ],
+      "bbox": [
+        24,
+        96,
+        225,
+        214
+      ],
+      "greenish_opaque": 0,
+      "exact_chroma_opaque": 0
+    }
+  ],
+  "outputs": [
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/corrected_attack/grey_wolf_attack_all_directions_preview_clean.gif",
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/corrected_attack/grey_wolf_attack_up_preview_clean.gif",
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/corrected_attack/grey_wolf_attack_right_preview_clean.gif",
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/corrected_attack/grey_wolf_attack_down_preview_clean.gif",
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/corrected_attack/grey_wolf_attack_left_preview_clean.gif",
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/corrected_attack/grey_wolf_attack_clean_transparent_4x4.png"
+  ]
+}

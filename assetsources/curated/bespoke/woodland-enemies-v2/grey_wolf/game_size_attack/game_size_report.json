@@ -1,0 +1,486 @@
+{
+  "source": "/home/orlovboros/.openclaw/media/tool-image-generation/grey_wolf_four_direction_attack_generated---e7384442-c2ee-4488-bc09-9b60b49b507f.png",
+  "report": [
+    {
+      "direction": "up",
+      "frame": 0,
+      "source_bbox": [
+        95,
+        46,
+        174,
+        234
+      ],
+      "scaled_size": [
+        35,
+        84
+      ],
+      "placed": [
+        30,
+        6
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "up",
+      "frame": 1,
+      "source_bbox": [
+        75,
+        62,
+        178,
+        238
+      ],
+      "scaled_size": [
+        49,
+        84
+      ],
+      "placed": [
+        23,
+        6
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "up",
+      "frame": 2,
+      "source_bbox": [
+        79,
+        44,
+        171,
+        236
+      ],
+      "scaled_size": [
+        40,
+        84
+      ],
+      "placed": [
+        28,
+        6
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "up",
+      "frame": 3,
+      "source_bbox": [
+        90,
+        48,
+        169,
+        234
+      ],
+      "scaled_size": [
+        36,
+        84
+      ],
+      "placed": [
+        30,
+        6
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "right",
+      "frame": 0,
+      "source_bbox": [
+        33,
+        62,
+        231,
+        181
+      ],
+      "scaled_size": [
+        84,
+        50
+      ],
+      "placed": [
+        6,
+        40
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "right",
+      "frame": 1,
+      "source_bbox": [
+        21,
+        75,
+        219,
+        181
+      ],
+      "scaled_size": [
+        84,
+        45
+      ],
+      "placed": [
+        6,
+        45
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "right",
+      "frame": 2,
+      "source_bbox": [
+        11,
+        69,
+        236,
+        167
+      ],
+      "scaled_size": [
+        84,
+        37
+      ],
+      "placed": [
+        6,
+        53
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "right",
+      "frame": 3,
+      "source_bbox": [
+        21,
+        62,
+        220,
+        181
+      ],
+      "scaled_size": [
+        84,
+        50
+      ],
+      "placed": [
+        6,
+        40
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "down",
+      "frame": 0,
+      "source_bbox": [
+        97,
+        21,
+        165,
+        217
+      ],
+      "scaled_size": [
+        29,
+        84
+      ],
+      "placed": [
+        33,
+        6
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "down",
+      "frame": 1,
+      "source_bbox": [
+        77,
+        28,
+        174,
+        195
+      ],
+      "scaled_size": [
+        49,
+        84
+      ],
+      "placed": [
+        23,
+        6
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "down",
+      "frame": 2,
+      "source_bbox": [
+        88,
+        22,
+        157,
+        220
+      ],
+      "scaled_size": [
+        29,
+        84
+      ],
+      "placed": [
+        33,
+        6
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "down",
+      "frame": 3,
+      "source_bbox": [
+        92,
+        21,
+        161,
+        212
+      ],
+      "scaled_size": [
+        30,
+        84
+      ],
+      "placed": [
+        33,
+        6
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "left",
+      "frame": 0,
+      "source_bbox": [
+        32,
+        38,
+        230,
+        157
+      ],
+      "scaled_size": [
+        84,
+        50
+      ],
+      "placed": [
+        6,
+        40
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "left",
+      "frame": 1,
+      "source_bbox": [
+        18,
+        42,
+        214,
+        154
+      ],
+      "scaled_size": [
+        84,
+        48
+      ],
+      "placed": [
+        6,
+        42
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "left",
+      "frame": 2,
+      "source_bbox": [
+        2,
+        42,
+        226,
+        141
+      ],
+      "scaled_size": [
+        84,
+        37
+      ],
+      "placed": [
+        6,
+        53
+      ],
+      "greenish": 0
+    },
+    {
+      "direction": "left",
+      "frame": 3,
+      "source_bbox": [
+        20,
+        39,
+        221,
+        157
+      ],
+      "scaled_size": [
+        84,
+        49
+      ],
+      "placed": [
+        6,
+        41
+      ],
+      "greenish": 0
+    }
+  ],
+  "outputs": [
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_sequential_game_size_8f.gif",
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_up_game_size_8f.gif",
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_right_game_size_8f.gif",
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_down_game_size_8f.gif",
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_left_game_size_8f.gif",
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_game_size_transparent_4x4.png"
+  ],
+  "validation": {
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_sequential_game_size_8f.gif": {
+      "size": [
+        96,
+        96
+      ],
+      "frames": 28,
+      "durations": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        240,
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        240,
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        240,
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        240
+      ],
+      "diffs": [
+        2753,
+        2795,
+        2464,
+        2464,
+        2795,
+        2753,
+        3384,
+        2463,
+        2653,
+        2872,
+        2872,
+        2653,
+        2463,
+        3143,
+        2663,
+        2696,
+        1886,
+        1886,
+        2696,
+        2663,
+        3135,
+        2486,
+        2813,
+        2792,
+        2792,
+        2813,
+        2486,
+        3367
+      ]
+    },
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_up_game_size_8f.gif": {
+      "size": [
+        96,
+        96
+      ],
+      "frames": 7,
+      "durations": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        240
+      ],
+      "diffs": [
+        2753,
+        2795,
+        2464,
+        2464,
+        2795,
+        2753,
+        0
+      ]
+    },
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_right_game_size_8f.gif": {
+      "size": [
+        96,
+        96
+      ],
+      "frames": 7,
+      "durations": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        240
+      ],
+      "diffs": [
+        2463,
+        2653,
+        2872,
+        2872,
+        2653,
+        2463,
+        0
+      ]
+    },
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_down_game_size_8f.gif": {
+      "size": [
+        96,
+        96
+      ],
+      "frames": 7,
+      "durations": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        240
+      ],
+      "diffs": [
+        2663,
+        2696,
+        1886,
+        1886,
+        2696,
+        2663,
+        0
+      ]
+    },
+    "tib/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/game_size_attack/grey_wolf_attack_left_game_size_8f.gif": {
+      "size": [
+        96,
+        96
+      ],
+      "frames": 7,
+      "durations": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        240
+      ],
+      "diffs": [
+        2486,
+        2813,
+        2792,
+        2792,
+        2813,
+        2486,
+        0
+      ]
+    }
+  }
+}
