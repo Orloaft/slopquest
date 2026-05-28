@@ -27,8 +27,8 @@ test("Adventurer class abilities: Sprint and Second Wind activate, run cooldowns
   await expect(page.locator("#buffTracker")).toContainText("Sprint");
   await expect(page.locator(".ability-activate[data-ability='sprint']")).toBeDisabled();
 
-  // Second Wind: blocked at full HP. (Use WS directly — abilities list re-renders each snapshot.)
-  await sendAbility(page, "second_wind");
+  // Second Wind: blocked at full HP.
+  await page.locator(".ability-activate[data-ability='second_wind']").click();
   await page.waitForTimeout(300);
   const fullHpState = await page.evaluate(() => {
     const me = window.__TIB_E2E__?.self();
@@ -42,7 +42,7 @@ test("Adventurer class abilities: Sprint and Second Wind activate, run cooldowns
   // Drop HP, activate Second Wind, and verify it ticks healing.
   await setPlayerHp(page, 10);
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.hp ?? 999) <= 12);
-  await sendAbility(page, "second_wind");
+  await page.locator(".ability-activate[data-ability='second_wind']").click();
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.secondWind ?? 0) > 0);
   const startHp = await page.evaluate(() => window.__TIB_E2E__?.self()?.hp);
   await expect(page.locator("#buffTracker")).toContainText("Second wind");
@@ -74,8 +74,3 @@ async function setPlayerHp(page, hp) {
   }, hp);
 }
 
-async function sendAbility(page, id) {
-  await page.evaluate((abilityId) => {
-    window.__TIB_E2E__.send({ type: "useClassAbility", id: abilityId });
-  }, id);
-}

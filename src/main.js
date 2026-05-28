@@ -884,6 +884,8 @@ function renderInventory(inventory = []) {
 }
 
 let abilitiesClickBound = false;
+const abilityRows = new Map();
+let abilityEmptyEl = null;
 
 function renderAbilities(abilities = []) {
   if (!abilitiesClickBound) {
@@ -894,44 +896,111 @@ function renderAbilities(abilities = []) {
     });
     abilitiesClickBound = true;
   }
+
   if (!abilities.length) {
-    dom.abilitiesList.innerHTML = `<div class="ability-empty">No abilities yet.</div>`;
+    for (const { row } of abilityRows.values()) row.remove();
+    abilityRows.clear();
+    if (!abilityEmptyEl) {
+      abilityEmptyEl = document.createElement("div");
+      abilityEmptyEl.className = "ability-empty";
+      abilityEmptyEl.textContent = "No abilities yet.";
+      dom.abilitiesList.appendChild(abilityEmptyEl);
+    }
     return;
   }
-  dom.abilitiesList.innerHTML = abilities
-    .map((ability) => {
-      const onCooldown = ability.cooldownRemainingMs > 0;
-      const isActive = ability.activeRemainingMs > 0;
-      let status = "Ready";
-      let statusClass = "ready";
-      if (isActive) {
-        status = `Active ${Math.ceil(ability.activeRemainingMs / 1000)}s`;
-        statusClass = "active";
-      } else if (onCooldown) {
-        status = `Cooldown ${Math.ceil(ability.cooldownRemainingMs / 1000)}s`;
-        statusClass = "cooldown";
-      }
-      const disabled = onCooldown || isActive ? "disabled" : "";
-      const progressDenom = isActive
-        ? Math.max(1, ability.durationMs)
-        : Math.max(1, ability.cooldownMs);
-      const progressNum = isActive ? ability.activeRemainingMs : ability.cooldownRemainingMs;
-      const progress = Math.max(0, Math.min(1, progressNum / progressDenom));
-      return `
-        <div class="ability-row">
-          <div class="ability-meta">
-            <span class="ability-name">${escapeHtml(ability.label)}</span>
-            <span class="ability-desc">${escapeHtml(ability.description)}</span>
-            <div class="ability-progress"><span class="${statusClass}" style="width: ${Math.round(progress * 100)}%"></span></div>
-          </div>
-          <div class="ability-actions">
-            <span class="ability-status ${statusClass}">${escapeHtml(status)}</span>
-            <button class="ability-activate" type="button" data-ability="${escapeHtml(ability.id)}" ${disabled}>Use</button>
-          </div>
-        </div>
-      `;
-    })
-    .join("");
+
+  if (abilityEmptyEl) {
+    abilityEmptyEl.remove();
+    abilityEmptyEl = null;
+  }
+
+  const seen = new Set();
+  abilities.forEach((ability, index) => {
+    seen.add(ability.id);
+    let entry = abilityRows.get(ability.id);
+    if (!entry) {
+      entry = createAbilityRow(ability);
+      abilityRows.set(ability.id, entry);
+    }
+    const expected = dom.abilitiesList.children[index];
+    if (expected !== entry.row) {
+      dom.abilitiesList.insertBefore(entry.row, expected ?? null);
+    }
+    updateAbilityRow(entry, ability);
+  });
+
+  for (const [id, entry] of abilityRows) {
+    if (!seen.has(id)) {
+      entry.row.remove();
+      abilityRows.delete(id);
+    }
+  }
+}
+
+function createAbilityRow(ability) {
+  const row = document.createElement("div");
+  row.className = "ability-row";
+
+  const meta = document.createElement("div");
+  meta.className = "ability-meta";
+
+  const nameEl = document.createElement("span");
+  nameEl.className = "ability-name";
+
+  const descEl = document.createElement("span");
+  descEl.className = "ability-desc";
+
+  const progressWrap = document.createElement("div");
+  progressWrap.className = "ability-progress";
+  const progressEl = document.createElement("span");
+  progressWrap.appendChild(progressEl);
+
+  meta.append(nameEl, descEl, progressWrap);
+
+  const actions = document.createElement("div");
+  actions.className = "ability-actions";
+
+  const statusEl = document.createElement("span");
+
+  const button = document.createElement("button");
+  button.className = "ability-activate";
+  button.type = "button";
+  button.dataset.ability = ability.id;
+  button.textContent = "Use";
+
+  actions.append(statusEl, button);
+  row.append(meta, actions);
+
+  return { row, nameEl, descEl, statusEl, progressEl, button };
+}
+
+function updateAbilityRow(entry, ability) {
+  entry.nameEl.textContent = ability.label;
+  entry.descEl.textContent = ability.description;
+
+  const onCooldown = ability.cooldownRemainingMs > 0;
+  const isActive = ability.activeRemainingMs > 0;
+  let status = "Ready";
+  let statusClass = "ready";
+  if (isActive) {
+    status = `Active ${Math.ceil(ability.activeRemainingMs / 1000)}s`;
+    statusClass = "active";
+  } else if (onCooldown) {
+    status = `Cooldown ${Math.ceil(ability.cooldownRemainingMs / 1000)}s`;
+    statusClass = "cooldown";
+  }
+  entry.statusEl.textContent = status;
+  entry.statusEl.className = `ability-status ${statusClass}`;
+
+  const progressDenom = isActive
+    ? Math.max(1, ability.durationMs)
+    : Math.max(1, ability.cooldownMs);
+  const progressNum = isActive ? ability.activeRemainingMs : ability.cooldownRemainingMs;
+  const progress = Math.max(0, Math.min(1, progressNum / progressDenom));
+  entry.progressEl.style.width = `${Math.round(progress * 100)}%`;
+  entry.progressEl.className = statusClass;
+
+  entry.button.disabled = onCooldown || isActive;
 }
 
 function showItemPopover(slot, label) {
