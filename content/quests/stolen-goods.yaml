@@ -1,0 +1,26 @@
+id: stolen_goods
+title: Stolen Cargo
+giver: merchant
+objective:
+  kind: fetch
+  item: stolen_goods
+  count: 1
+reward:
+  gold: 75
+  xp: 90
+
+dialogue:
+  intro:
+    - npc: "Orcs took my caravan crate north of here. I would pay well to see it back."
+    - player: "I will look for it."
+    - npc: "Search any orc you find for {target.item.label}. They hoard such things."
+  progress:
+    - npc: "Any luck finding the {target.item.label}?"
+    - player: "Not yet. Still hunting."
+  missingItems:
+    - npc: "Find the {target.item.label} on the orcs first, then come see me."
+  turnIn:
+    - npc: "My cargo! Bless you, traveler."
+    - player: "Safer in your hands than theirs."
+  claimed:
+    - npc: "Trade is moving again thanks to you."

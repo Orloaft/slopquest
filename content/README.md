@@ -1,8 +1,6 @@
 # Authoring TIB content
 
-This folder is where game content lives. You can add or change items, monsters, NPCs, shop entries, fishing spots, trees, and monster spawns by editing the YAML files here. **No JavaScript required.**
-
-> Quests still live in code as of Phase 1. They move into `content/quests/` in Phase 3.
+This folder is where game content lives. You can add or change items, monsters, NPCs, shop entries, fishing spots, trees, monster spawns, **and quests** by editing the YAML files here. **No JavaScript required.**
 
 ## How it works
 
@@ -27,6 +25,7 @@ npm run content:build
 | `fishing-nodes.yaml`  | Where in the world fishing is possible                     |
 | `shop.yaml`           | What the trader sells and at what prices                   |
 | `spawns.yaml`         | Monster placements + manually placed trees                 |
+| `quests/*.yaml`       | One file per quest — objective, reward, and dialogue       |
 
 ## Adding a new item
 
@@ -90,6 +89,72 @@ monsters:
 - `quest` is a quest giver. The `id` must match a quest's `giver` field once quests move to YAML.
 - `guide` just speaks `idleDialogue` and nothing else.
 
+## Adding a quest
+
+Each quest is a single file under `content/quests/`. Use a descriptive filename — it doesn't drive anything, just makes the file easy to find.
+
+```yaml
+id: bog_mystic            # snake_case. Never rename once shipped — saves reference this.
+title: Whispers in the Marsh
+giver: bog-mystic         # must match an npc id whose role is "quest"
+
+objective:
+  kind: kill              # kill | gather | fetch
+  monsters: [bog_lurker]  # kill only — list of monster ids in zone "in"
+  in: woods               # kill only — zone name (see Adding a new monster)
+  count: 4
+reward:
+  gold: 80
+  xp: 110
+
+dialogue:
+  intro:
+    - npc: "Something stirs in the marsh."
+    - player: "I will look."
+    - npc: "Cull {target.count} lurkers and come back to me."
+  progress:
+    - npc: "{progress}/{target.count} so far. Keep going."
+  turnIn:
+    - npc: "Good work."
+    - player: "Anytime."
+  claimed:
+    - npc: "The marsh is quieter now."
+```
+
+For `gather` or `fetch` quests, replace the objective with `item:` + `count:` and add a `missingItems:` phase that fires if the player tries to turn in without the items:
+
+```yaml
+objective:
+  kind: gather            # gather = player chops/picks it up; fetch = monster drop
+  item: pine_logs
+  count: 5
+
+dialogue:
+  # ...intro, progress, turnIn, claimed as above...
+  missingItems:
+    - npc: "Bring the {target.item.label} to my hands, not your pack alone."
+```
+
+### Template variables you can use in dialogue text
+
+| `{key}`                | What it becomes                                                |
+| ---------------------- | -------------------------------------------------------------- |
+| `{progress}`           | How many the player has killed / picked up so far              |
+| `{target.count}`       | The full quest count (e.g. 5)                                  |
+| `{target.remaining}`   | `count - progress`, never below 0                              |
+| `{target.item.label}`  | The item's display label — only for gather/fetch quests        |
+| `{reward.gold}`        | Gold reward                                                    |
+| `{reward.xp}`          | XP reward                                                      |
+| `{player.name}`        | Whatever the player named their character                      |
+| `{npc.name}`           | The giver's display name                                       |
+
+### Dialogue rules
+
+- Each line is a single-key object: either `- npc: "..."` or `- player: "..."`. Mix them freely.
+- `intro`, `progress`, `turnIn`, and `claimed` are required for every quest.
+- `missingItems` is required for gather/fetch quests, optional for kill quests.
+- If a template variable doesn't resolve (e.g. `{target.item.label}` on a kill quest), it stays as literal text — that's the validator's hint to remove or fix it.
+
 ## Common mistakes the validator catches
 
 - Monster drop points at an item that doesn't exist
@@ -97,6 +162,9 @@ monsters:
 - Tree spawn points at a tree type that doesn't exist
 - Monster spawn uses an unknown zone name
 - Missing `id`, `label`, or `name` field
+- Quest giver isn't an NPC, or is an NPC with `role` other than `quest`
+- Quest objective references an unknown monster, item, or zone
+- Quest dialogue is missing a required phase, or a line isn't `npc:` / `player:`
 
 ## Indentation
 

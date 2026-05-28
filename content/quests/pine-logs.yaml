@@ -1,0 +1,26 @@
+id: pine_logs
+title: Pine for the Yards
+giver: lumberjack
+objective:
+  kind: gather
+  item: pine_logs
+  count: 5
+reward:
+  gold: 60
+  xp: 80
+
+dialogue:
+  intro:
+    - npc: "The pine yards are stripped and the carpenters are pacing."
+    - player: "How many do you need?"
+    - npc: "Bring me {target.count} {target.item.label}. Pines grow north past the south road."
+  progress:
+    - npc: "Still need {target.remaining} more {target.item.label}."
+    - player: "I am still chopping."
+  missingItems:
+    - npc: "Bring the {target.item.label} to my hands, not your pack alone."
+  turnIn:
+    - npc: "Hah, fine timber. The yards will sing tonight."
+    - player: "Glad to help."
+  claimed:
+    - npc: "The yards are stocked. I owe you a drink."

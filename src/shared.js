@@ -2,6 +2,7 @@ export {
   ITEMS,
   MONSTERS,
   QUEST_DROPS,
+  QUESTS,
   TREE_TYPES,
   NPCS,
   SHOP,

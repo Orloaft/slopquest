@@ -1,0 +1,25 @@
+id: southgate
+title: Thin the Cemetery
+giver: cemetery-warden
+objective:
+  kind: kill
+  monsters: [skeleton, ghoul]
+  in: cemetery
+  count: 3
+reward:
+  gold: 45
+  xp: 60
+
+dialogue:
+  intro:
+    - npc: "Southgate Cemetery is restless again. The dead are testing the gate."
+    - player: "What do you need from me?"
+    - npc: "Defeat {target.count} undead beyond the south gate, then return to me."
+  progress:
+    - npc: "Keep thinning the undead beyond the south gate."
+    - player: "{progress}/{target.count} so far. I will return when it is done."
+  turnIn:
+    - npc: "Good. The gate breathes easier tonight."
+    - player: "I will keep an eye on the road south."
+  claimed:
+    - npc: "The cemetery is quieter because of you."

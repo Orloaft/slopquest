@@ -14,6 +14,7 @@ import {
   MONSTER_SPAWNS,
   NPCS,
   QUEST_DROPS,
+  QUESTS,
   SKILLS,
   SHOP,
   START,
@@ -41,50 +42,6 @@ const SPATIAL_CELL_SIZE = 8;
 const TREE_RESPAWN_MS = 30000;
 const FIRE_DURATION_MS = 120000;
 const INVENTORY_SIZE = 30;
-const QUESTS = {
-  southgate: {
-    id: "southgate",
-    title: "Thin the Cemetery",
-    kind: "kill",
-    giverId: "cemetery-warden",
-    zone: "cemetery",
-    targetTypes: new Set(["skeleton", "ghoul"]),
-    targetCount: 3,
-    rewardGold: 45,
-    rewardXp: 60
-  },
-  pine_logs: {
-    id: "pine_logs",
-    title: "Pine for the Yards",
-    kind: "gather",
-    giverId: "lumberjack",
-    itemId: "pine_logs",
-    targetCount: 5,
-    rewardGold: 60,
-    rewardXp: 80
-  },
-  goblin_shaman: {
-    id: "goblin_shaman",
-    title: "Silence the Shamans",
-    kind: "kill",
-    giverId: "hunter",
-    zone: "woods",
-    targetTypes: new Set(["goblin_shaman"]),
-    targetCount: 2,
-    rewardGold: 90,
-    rewardXp: 110
-  },
-  stolen_goods: {
-    id: "stolen_goods",
-    title: "Stolen Cargo",
-    kind: "fetch",
-    giverId: "merchant",
-    itemId: "stolen_goods",
-    targetCount: 1,
-    rewardGold: 75,
-    rewardXp: 90
-  }
-};
 mkdirSync(DATA_DIR, { recursive: true });
 
 const db = loadDb();
@@ -619,87 +576,41 @@ function inventoryCount(player, id) {
 }
 
 function questDialogue(npc, player, quest, phase, progress = 0) {
-  const itemLabel = quest.itemId ? ITEMS[quest.itemId]?.label ?? quest.itemId : "";
-  const lines = {
-    southgate: {
-      intro: [
-        { speaker: npc.name, text: "Southgate Cemetery is restless again. The dead are testing the gate." },
-        { speaker: player.name, text: "What do you need from me?" },
-        { speaker: npc.name, text: `Defeat ${quest.targetCount} undead beyond the south gate, then return to me.` }
-      ],
-      progress: [
-        { speaker: npc.name, text: "Keep thinning the undead beyond the south gate." },
-        { speaker: player.name, text: `${progress}/${quest.targetCount} so far. I will return when it is done.` }
-      ],
-      turnIn: [
-        { speaker: npc.name, text: "Good. The gate breathes easier tonight." },
-        { speaker: player.name, text: "I will keep an eye on the road south." }
-      ],
-      claimed: [
-        { speaker: npc.name, text: "The cemetery is quieter because of you." }
-      ]
+  const phaseLines = quest.dialogue?.[phase];
+  if (!Array.isArray(phaseLines) || phaseLines.length === 0) {
+    return [{ speaker: npc.name, text: npc.dialogue }];
+  }
+  const item = quest.itemId ? ITEMS[quest.itemId] ?? null : null;
+  const ctx = {
+    progress,
+    target: {
+      count: quest.targetCount,
+      remaining: Math.max(0, quest.targetCount - progress),
+      item: item ? { id: item.id, label: item.label } : null
     },
-    pine_logs: {
-      intro: [
-        { speaker: npc.name, text: "The pine yards are stripped and the carpenters are pacing." },
-        { speaker: player.name, text: "How many do you need?" },
-        { speaker: npc.name, text: `Bring me ${quest.targetCount} ${itemLabel}. Pines grow north past the south road.` }
-      ],
-      progress: [
-        { speaker: npc.name, text: `Still need ${quest.targetCount - progress} more ${itemLabel}.` },
-        { speaker: player.name, text: "I am still chopping." }
-      ],
-      missingItems: [
-        { speaker: npc.name, text: `Bring the ${itemLabel} to my hands, not your pack alone.` }
-      ],
-      turnIn: [
-        { speaker: npc.name, text: "Hah, fine timber. The yards will sing tonight." },
-        { speaker: player.name, text: "Glad to help." }
-      ],
-      claimed: [
-        { speaker: npc.name, text: "The yards are stocked. I owe you a drink." }
-      ]
-    },
-    goblin_shaman: {
-      intro: [
-        { speaker: npc.name, text: "Goblin shamans have been chanting at the woodline. Bad omens." },
-        { speaker: player.name, text: "Want them silenced?" },
-        { speaker: npc.name, text: `Drop ${quest.targetCount} of them in Northwood and come back to me.` }
-      ],
-      progress: [
-        { speaker: npc.name, text: `${progress}/${quest.targetCount} silenced. The woods are still murmuring.` }
-      ],
-      turnIn: [
-        { speaker: npc.name, text: "Quiet at last. Sleep comes easier in town tonight." },
-        { speaker: player.name, text: "Call me again if they start up." }
-      ],
-      claimed: [
-        { speaker: npc.name, text: "The woodline is quiet thanks to you." }
-      ]
-    },
-    stolen_goods: {
-      intro: [
-        { speaker: npc.name, text: "Orcs took my caravan crate north of here. I would pay well to see it back." },
-        { speaker: player.name, text: "I will look for it." },
-        { speaker: npc.name, text: `Search any orc you find for ${itemLabel}. They hoard such things.` }
-      ],
-      progress: [
-        { speaker: npc.name, text: `Any luck finding the ${itemLabel}?` },
-        { speaker: player.name, text: "Not yet. Still hunting." }
-      ],
-      missingItems: [
-        { speaker: npc.name, text: `Find the ${itemLabel} on the orcs first, then come see me.` }
-      ],
-      turnIn: [
-        { speaker: npc.name, text: "My cargo! Bless you, traveler." },
-        { speaker: player.name, text: "Safer in your hands than theirs." }
-      ],
-      claimed: [
-        { speaker: npc.name, text: "Trade is moving again thanks to you." }
-      ]
-    }
+    reward: { gold: quest.rewardGold, xp: quest.rewardXp },
+    player: { name: player.name },
+    npc: { name: npc.name }
   };
-  return lines[quest.id]?.[phase] ?? [{ speaker: npc.name, text: npc.dialogue }];
+  return phaseLines.map((line) => {
+    const speakerKey = line.npc != null ? "npc" : "player";
+    return {
+      speaker: speakerKey === "npc" ? npc.name : player.name,
+      text: renderQuestLine(line[speakerKey] ?? "", ctx)
+    };
+  });
+}
+
+function renderQuestLine(text, ctx) {
+  return text.replace(/\{([^}]+)\}/g, (_, key) => {
+    const parts = key.split(".");
+    let value = ctx;
+    for (const part of parts) {
+      if (value == null) return `{${key}}`;
+      value = value[part];
+    }
+    return value == null ? `{${key}}` : String(value);
+  });
 }
 
 function cutTree(player, id) {
@@ -1504,7 +1415,7 @@ function updateQuestProgress(player, monster) {
     if (quest.kind !== "kill") continue;
     const state = player.quests[quest.id];
     if (!state || !state.accepted || state.claimed || state.complete) continue;
-    if (monster.zone !== quest.zone || !quest.targetTypes.has(monster.type)) continue;
+    if (monster.zone !== quest.zone || !quest.targetTypes.includes(monster.type)) continue;
     state.progress = clamp(state.progress + 1, 0, quest.targetCount);
     if (state.progress >= quest.targetCount) {
       state.complete = true;

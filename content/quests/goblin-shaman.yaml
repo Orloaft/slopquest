@@ -1,0 +1,24 @@
+id: goblin_shaman
+title: Silence the Shamans
+giver: hunter
+objective:
+  kind: kill
+  monsters: [goblin_shaman]
+  in: woods
+  count: 2
+reward:
+  gold: 90
+  xp: 110
+
+dialogue:
+  intro:
+    - npc: "Goblin shamans have been chanting at the woodline. Bad omens."
+    - player: "Want them silenced?"
+    - npc: "Drop {target.count} of them in Northwood and come back to me."
+  progress:
+    - npc: "{progress}/{target.count} silenced. The woods are still murmuring."
+  turnIn:
+    - npc: "Quiet at last. Sleep comes easier in town tonight."
+    - player: "Call me again if they start up."
+  claimed:
+    - npc: "The woodline is quiet thanks to you."
