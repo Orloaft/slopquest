@@ -1,12 +1,20 @@
+export {
+  ITEMS,
+  MONSTERS,
+  QUEST_DROPS,
+  TREE_TYPES,
+  NPCS,
+  SHOP,
+  MONSTER_SPAWNS,
+  COMPOSED_TREE_NODES,
+  FISHING_NODES
+} from "./generated/catalog.js";
+
 export const TILE_SIZE = 32;
 export const MAP_COLS = 52;
 export const MAP_ROWS = 34;
 
 export const START = { floor: 0, x: 16.5, y: 17.5 };
-export const NPCS = [
-  { id: "trader", name: "Wayfarer Trader", floor: 0, x: 17.5, y: 15.5 },
-  { id: "northwatch", name: "Northwatch Guide", floor: 4, x: 25.5, y: 16.5 }
-];
 export const ZONES = {
   southTown: { id: "southTown", label: "Waystone", floor: 0, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   cemetery: { id: "cemetery", label: "Southgate Cemetery", floor: 1, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
@@ -43,95 +51,6 @@ export const SKILLS = {
   firemaking: { label: "Firemaking", iconUrl: "/icons/skill-firemaking.png" },
   cooking: { label: "Cooking", iconUrl: "/icons/skill-cooking.png" }
 };
-
-export const TREE_TYPES = {
-  oak: {
-    label: "Oak",
-    requiredLevel: 1,
-    chopsRequired: 7,
-    baseSwingMs: 1700,
-    minSwingMs: 850,
-    xp: 28,
-    itemId: "logs",
-    dropLabel: "Oak Logs",
-    textureKey: "spriteTree",
-    width: 58,
-    height: 76,
-    zoneWidth: 54,
-    zoneHeight: 80
-  },
-  pine: {
-    label: "Pine",
-    requiredLevel: 10,
-    chopsRequired: 10,
-    baseSwingMs: 2200,
-    minSwingMs: 1000,
-    xp: 55,
-    itemId: "pine_logs",
-    dropLabel: "Pine Logs",
-    textureKey: "spritePine",
-    width: 54,
-    height: 84,
-    zoneWidth: 50,
-    zoneHeight: 86
-  }
-};
-
-export const MONSTERS = {
-  rat: { name: "Rat", maxHp: 28, speed: 2.4, damage: [3, 7], attackMs: 1000, xp: 16, gold: [3, 8], aggro: 5.5, range: 1 },
-  spider: { name: "Spider", maxHp: 36, speed: 2.7, damage: [4, 9], attackMs: 950, xp: 22, gold: [4, 10], aggro: 5.5, range: 1 },
-  wisp: { name: "Forest Wisp", maxHp: 32, speed: 2.9, damage: [4, 9], attackMs: 1050, xp: 24, gold: [4, 11], aggro: 6, range: 1.1 },
-  wolf: { name: "Grey Wolf", maxHp: 58, speed: 3.2, damage: [7, 13], attackMs: 880, xp: 38, gold: [6, 15], aggro: 6.8, range: 1 },
-  goblin: { name: "Goblin", maxHp: 46, speed: 2.7, damage: [6, 12], attackMs: 980, xp: 34, gold: [7, 16], aggro: 6, range: 1 },
-  goblin_scout: { name: "Goblin Scout", maxHp: 42, speed: 3.05, damage: [6, 11], attackMs: 880, xp: 36, gold: [7, 15], aggro: 7, range: 1 },
-  goblin_shaman: { name: "Goblin Shaman", maxHp: 54, speed: 2.35, damage: [9, 17], attackMs: 1180, xp: 56, gold: [12, 24], aggro: 6.5, range: 1.1 },
-  orc: { name: "Orc", maxHp: 84, speed: 2.25, damage: [10, 18], attackMs: 1150, xp: 54, gold: [11, 24], aggro: 6, range: 1.1 },
-  skeleton: { name: "Skeleton", maxHp: 68, speed: 2.05, damage: [11, 18], attackMs: 1250, xp: 52, gold: [9, 20], aggro: 6, range: 1.05 },
-  ghoul: { name: "Ghoul", maxHp: 92, speed: 1.9, damage: [12, 21], attackMs: 1200, xp: 70, gold: [14, 28], aggro: 6.5, range: 1.05 },
-  boss: { name: "Ashen Warden", maxHp: 420, speed: 1.85, damage: [18, 30], attackMs: 1100, xp: 180, gold: [80, 135], aggro: 9, range: 1.15 }
-};
-
-export const SHOP = {
-  weapon: { cost: 90, knightName: "Iron Sabre", casterName: "Amber Wand", damageBonus: 7 },
-  armor: { cost: 75, name: "Padded Mail", armorBonus: 4 },
-  axe: { cost: 25, name: "Bronze Axe" },
-  fishing_rod: { cost: 18, name: "Fishing Rod" },
-  flint_steel: { cost: 16, name: "Flint and Steel" },
-  potion: { cost: 12, name: "Health Potion", heal: 58 }
-};
-
-export const MONSTER_SPAWNS = [
-  { type: "skeleton", floor: 1, x: 13, y: 12, zone: "cemetery" },
-  { type: "ghoul", floor: 1, x: 31, y: 13, zone: "cemetery" },
-  { type: "skeleton", floor: 1, x: 18, y: 25, zone: "cemetery" },
-  { type: "ghoul", floor: 1, x: 38, y: 25, zone: "cemetery" },
-  { type: "skeleton", floor: 2, x: 13, y: 9, zone: "crypt" },
-  { type: "ghoul", floor: 2, x: 22, y: 23, zone: "crypt" },
-  { type: "skeleton", floor: 2, x: 33, y: 12, zone: "crypt" },
-  { type: "ghoul", floor: 2, x: 39, y: 24, zone: "crypt" },
-  { type: "boss", floor: 2, x: 43, y: 17, zone: "crypt" },
-  { type: "rat", floor: 3, x: 10, y: 26, zone: "woods" },
-  { type: "spider", floor: 3, x: 16, y: 20, zone: "woods" },
-  { type: "goblin_scout", floor: 3, x: 14, y: 8, zone: "woods" },
-  { type: "goblin_scout", floor: 3, x: 7, y: 12, zone: "woods" },
-  { type: "goblin_scout", floor: 3, x: 19, y: 27, zone: "woods" },
-  { type: "wolf", floor: 3, x: 12, y: 21, zone: "woods" },
-  { type: "wolf", floor: 3, x: 8, y: 28, zone: "woods" },
-  { type: "wolf", floor: 3, x: 21, y: 5, zone: "woods" },
-  { type: "wisp", floor: 3, x: 6, y: 4, zone: "woods" },
-  { type: "wisp", floor: 3, x: 17, y: 13, zone: "woods" },
-  { type: "wisp", floor: 3, x: 11, y: 19, zone: "woods" },
-  { type: "goblin", floor: 3, x: 32, y: 11, zone: "woods" },
-  { type: "goblin", floor: 3, x: 44, y: 18, zone: "woods" },
-  { type: "goblin_shaman", floor: 3, x: 31, y: 21, zone: "woods" },
-  { type: "goblin_shaman", floor: 3, x: 45, y: 26, zone: "woods" },
-  { type: "orc", floor: 3, x: 37, y: 11, zone: "woods" },
-  { type: "orc", floor: 3, x: 47, y: 13, zone: "woods" },
-  { type: "orc", floor: 3, x: 33, y: 29, zone: "woods" },
-  { type: "wolf", floor: 3, x: 41, y: 21, zone: "woods" },
-  { type: "wisp", floor: 3, x: 33, y: 6, zone: "woods" },
-  { type: "wisp", floor: 3, x: 49, y: 5, zone: "woods" }
-];
 
 export function xpForLevel(level) {
   return level <= 1 ? 0 : Math.round(70 * (level - 1) ** 1.55);

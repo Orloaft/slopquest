@@ -1,0 +1,40 @@
+# Tree species the woodcutting skill can chop.
+#
+# requiredLevel — minimum woodcutting level to chop this tree.
+# chopsRequired — number of swings before the tree falls.
+# baseSwingMs   — slowest swing (level 1).
+# minSwingMs    — fastest swing (high level).
+# xp            — woodcutting xp granted per tree felled.
+# itemId        — what item drops. Must exist in items.yaml.
+# textureKey    — Phaser sprite key (rendered client-side).
+# width/height + zoneWidth/zoneHeight — collision/render dimensions in pixels.
+
+- id: oak
+  label: Oak
+  requiredLevel: 1
+  chopsRequired: 7
+  baseSwingMs: 1700
+  minSwingMs: 850
+  xp: 28
+  itemId: logs
+  dropLabel: Oak Logs
+  textureKey: spriteTree
+  width: 58
+  height: 76
+  zoneWidth: 54
+  zoneHeight: 80
+
+- id: pine
+  label: Pine
+  requiredLevel: 10
+  chopsRequired: 10
+  baseSwingMs: 2200
+  minSwingMs: 1000
+  xp: 55
+  itemId: pine_logs
+  dropLabel: Pine Logs
+  textureKey: spritePine
+  width: 54
+  height: 84
+  zoneWidth: 50
+  zoneHeight: 86

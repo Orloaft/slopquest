@@ -5,11 +5,15 @@ import { fileURLToPath } from "node:url";
 import { WebSocketServer } from "ws";
 import {
   CLASSES,
+  COMPOSED_TREE_NODES,
+  FISHING_NODES,
+  ITEMS,
   MAP_COLS,
   MAP_ROWS,
   MONSTERS,
   MONSTER_SPAWNS,
   NPCS,
+  QUEST_DROPS,
   SKILLS,
   SHOP,
   START,
@@ -37,42 +41,6 @@ const SPATIAL_CELL_SIZE = 8;
 const TREE_RESPAWN_MS = 30000;
 const FIRE_DURATION_MS = 120000;
 const INVENTORY_SIZE = 30;
-const ITEMS = {
-  axe: { id: "axe", label: "Bronze Axe", icon: "A", iconUrl: "/icons/item-axe.png" },
-  fishing_rod: { id: "fishing_rod", label: "Fishing Rod", icon: "R", iconUrl: "/icons/item-fishing-rod.png" },
-  flint_steel: { id: "flint_steel", label: "Flint and Steel", icon: "F", iconUrl: "/icons/item-flint-steel.png" },
-  logs: { id: "logs", label: "Oak Logs", icon: "L", iconUrl: "/icons/item-logs.png" },
-  pine_logs: { id: "pine_logs", label: "Pine Logs", icon: "P", iconUrl: "/icons/item-pine-logs.png" },
-  raw_fish: { id: "raw_fish", label: "Raw Fish", icon: "rF", iconUrl: "/icons/item-raw-fish.png" },
-  cooked_fish: { id: "cooked_fish", label: "Cooked Fish", icon: "cF", iconUrl: "/icons/item-cooked-fish.png" },
-  burnt_fish: { id: "burnt_fish", label: "Burnt Fish", icon: "bF", iconUrl: "/icons/item-burnt-fish.png" },
-  potion: { id: "potion", label: "Health Potion", icon: "P", iconUrl: "/icons/item-potion.png" },
-  stolen_goods: { id: "stolen_goods", label: "Stolen Cargo", icon: "S", iconUrl: null }
-};
-const FISHING_NODES = [
-  { id: "fish-0-5-9", floor: 0, x: 5.35, y: 9.5, approachX: 7.5, approachY: 9.5 },
-  { id: "fish-0-5-15", floor: 0, x: 5.35, y: 15.5, approachX: 7.5, approachY: 15.5 },
-  { id: "fish-0-5-21", floor: 0, x: 5.35, y: 21.5, approachX: 7.5, approachY: 21.5 },
-  { id: "fish-3-36-7", floor: 3, x: 36.5, y: 7.5, approachX: 34.5, approachY: 7.5 },
-  { id: "fish-3-40-9", floor: 3, x: 40.5, y: 9.5, approachX: 42.5, approachY: 9.5 },
-  { id: "fish-3-37-11", floor: 3, x: 37.5, y: 10.5, approachX: 37.5, approachY: 12.5 }
-];
-const COMPOSED_TREE_NODES = [
-  { floor: 0, x: 12.8, y: 10.7, type: "oak" },
-  { floor: 0, x: 36.2, y: 17.4, type: "oak" },
-  { floor: 0, x: 20.2, y: 31.6, type: "pine" },
-  { floor: 3, x: 8.5, y: 10.4, type: "oak" },
-  { floor: 3, x: 11.5, y: 18.8, type: "pine" },
-  { floor: 3, x: 14.2, y: 29.8, type: "pine" },
-  { floor: 3, x: 19.5, y: 7.4, type: "oak" },
-  { floor: 3, x: 23.4, y: 27.2, type: "pine" },
-  { floor: 3, x: 28.8, y: 9.6, type: "pine" },
-  { floor: 3, x: 31.3, y: 23.8, type: "pine" },
-  { floor: 3, x: 38.6, y: 17.8, type: "pine" },
-  { floor: 3, x: 45.2, y: 15.3, type: "oak" },
-  { floor: 4, x: 9, y: 9.5, type: "oak" },
-  { floor: 4, x: 44, y: 30.2, type: "pine" }
-];
 const QUESTS = {
   southgate: {
     id: "southgate",
@@ -117,10 +85,6 @@ const QUESTS = {
     rewardXp: 90
   }
 };
-const QUEST_DROPS = {
-  orc: { itemId: "stolen_goods", chance: 0.1 }
-};
-
 mkdirSync(DATA_DIR, { recursive: true });
 
 const db = loadDb();
@@ -954,36 +918,36 @@ function dropItem(floor, x, y, items, label) {
 
 function spawnNpcs() {
   for (const npc of NPCS) {
-    npcs.set(npc.id, {
-      ...npc,
-      role: npc.id === "trader" ? "vendor" : "guide",
-      dir: "down",
-      moving: false,
-      dialogue: npc.id === "trader" ? "Need supplies? Stand close and open the shop." : "Northwatch is quiet for now."
-    });
+    if (npc.role === "quest") {
+      npcs.set(npc.id, {
+        id: npc.id,
+        name: npc.name,
+        role: "quest",
+        floor: npc.floor,
+        x: npc.x,
+        y: npc.y,
+        homeX: npc.x,
+        homeY: npc.y,
+        dir: "down",
+        moving: false,
+        wanderTarget: null,
+        wanderNextAt: performance.now() + 1400,
+        dialogue: npc.dialogue
+      });
+    } else {
+      npcs.set(npc.id, {
+        id: npc.id,
+        name: npc.name,
+        role: npc.role,
+        floor: npc.floor,
+        x: npc.x,
+        y: npc.y,
+        dir: "down",
+        moving: false,
+        dialogue: npc.dialogue
+      });
+    }
   }
-  spawnQuestNpc({ id: "cemetery-warden", name: "Mira Gravewatch", x: 18.5, y: 18.5, dialogue: "Southgate Cemetery is restless." });
-  spawnQuestNpc({ id: "lumberjack", name: "Brann Splitlog", x: 22.5, y: 16.5, dialogue: "Pine yards are short on stock." });
-  spawnQuestNpc({ id: "hunter", name: "Kael Brookfoot", x: 15.5, y: 19.5, dialogue: "The shamans in Northwood worry me." });
-  spawnQuestNpc({ id: "merchant", name: "Marda Vell", x: 20.5, y: 19.5, dialogue: "Orcs raided my cart on the north road." });
-}
-
-function spawnQuestNpc({ id, name, x, y, dialogue, floor = 0 }) {
-  npcs.set(id, {
-    id,
-    name,
-    role: "quest",
-    floor,
-    x,
-    y,
-    homeX: x,
-    homeY: y,
-    dir: "down",
-    moving: false,
-    wanderTarget: null,
-    wanderNextAt: performance.now() + 1400,
-    dialogue
-  });
 }
 
 function spawnTreeNodes() {

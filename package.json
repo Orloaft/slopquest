@@ -4,6 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "content:build": "node scripts/build-content.js",
+    "predev": "npm run content:build",
+    "predev:e2e": "npm run content:build",
+    "preserver": "npm run content:build",
+    "preclient": "npm run content:build",
+    "precheck": "npm run content:build",
     "dev": "concurrently \"vite --host 0.0.0.0\" \"node server/index.js\"",
     "dev:e2e": "E2E_TEST=1 concurrently \"vite --host 127.0.0.1 --port 5173\" \"node server/index.js\"",
     "client": "vite --host 0.0.0.0",
@@ -11,7 +17,7 @@
     "load:test": "node scripts/load-test.js",
     "test:e2e": "playwright test",
     "test:visual": "playwright test tests/e2e/tib-features.spec.js --project=chromium",
-    "check": "node --check server/index.js && node --check src/shared.js && node --check src/main.js && node --check scripts/load-test.js && node --check tests/e2e/tib-features.spec.js"
+    "check": "node --check server/index.js && node --check src/shared.js && node --check src/main.js && node --check scripts/load-test.js && node --check tests/e2e/tib-features.spec.js && node --check src/generated/catalog.js"
   },
   "dependencies": {
     "concurrently": "^9.1.2",
@@ -21,6 +27,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
+    "js-yaml": "^4.1.1",
     "pngjs": "^7.0.0"
   }
 }

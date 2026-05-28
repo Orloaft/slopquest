@@ -1,0 +1,33 @@
+# Vendor stock. The trader NPC (see npcs.yaml) sells exactly this list.
+#
+# Each entry has a cost in gold and a display name. Some entries have stat fields
+# (damageBonus, armorBonus, heal) that the engine wires into character equipment
+# or item effects.
+
+weapon:
+  cost: 90
+  knightName: Iron Sabre
+  casterName: Amber Wand
+  damageBonus: 7
+
+armor:
+  cost: 75
+  name: Padded Mail
+  armorBonus: 4
+
+axe:
+  cost: 25
+  name: Bronze Axe
+
+fishing_rod:
+  cost: 18
+  name: Fishing Rod
+
+flint_steel:
+  cost: 16
+  name: Flint and Steel
+
+potion:
+  cost: 12
+  name: Health Potion
+  heal: 58

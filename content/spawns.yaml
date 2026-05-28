@@ -1,0 +1,53 @@
+# World placements.
+#
+# monsters — every monster spawn point. type must match a monster id from monsters.yaml.
+#            zone must be one of: southTown, cemetery, crypt, woods, northTown.
+# trees    — manually placed composed trees (in addition to procedurally generated tile trees).
+
+monsters:
+  - { type: skeleton,      at: { floor: 1, x: 13, y: 12 }, zone: cemetery }
+  - { type: ghoul,         at: { floor: 1, x: 31, y: 13 }, zone: cemetery }
+  - { type: skeleton,      at: { floor: 1, x: 18, y: 25 }, zone: cemetery }
+  - { type: ghoul,         at: { floor: 1, x: 38, y: 25 }, zone: cemetery }
+  - { type: skeleton,      at: { floor: 2, x: 13, y: 9  }, zone: crypt }
+  - { type: ghoul,         at: { floor: 2, x: 22, y: 23 }, zone: crypt }
+  - { type: skeleton,      at: { floor: 2, x: 33, y: 12 }, zone: crypt }
+  - { type: ghoul,         at: { floor: 2, x: 39, y: 24 }, zone: crypt }
+  - { type: boss,          at: { floor: 2, x: 43, y: 17 }, zone: crypt }
+  - { type: rat,           at: { floor: 3, x: 10, y: 26 }, zone: woods }
+  - { type: spider,        at: { floor: 3, x: 16, y: 20 }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 14, y: 8  }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 7,  y: 12 }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 19, y: 27 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 12, y: 21 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 8,  y: 28 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 21, y: 5  }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 6,  y: 4  }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 17, y: 13 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 11, y: 19 }, zone: woods }
+  - { type: goblin,        at: { floor: 3, x: 32, y: 11 }, zone: woods }
+  - { type: goblin,        at: { floor: 3, x: 44, y: 18 }, zone: woods }
+  - { type: goblin_shaman, at: { floor: 3, x: 31, y: 21 }, zone: woods }
+  - { type: goblin_shaman, at: { floor: 3, x: 45, y: 26 }, zone: woods }
+  - { type: orc,           at: { floor: 3, x: 37, y: 11 }, zone: woods }
+  - { type: orc,           at: { floor: 3, x: 47, y: 13 }, zone: woods }
+  - { type: orc,           at: { floor: 3, x: 33, y: 29 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 41, y: 21 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 33, y: 6  }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 49, y: 5  }, zone: woods }
+
+trees:
+  - { type: oak,  at: { floor: 0, x: 12.8, y: 10.7 } }
+  - { type: oak,  at: { floor: 0, x: 36.2, y: 17.4 } }
+  - { type: pine, at: { floor: 0, x: 20.2, y: 31.6 } }
+  - { type: oak,  at: { floor: 3, x: 8.5,  y: 10.4 } }
+  - { type: pine, at: { floor: 3, x: 11.5, y: 18.8 } }
+  - { type: pine, at: { floor: 3, x: 14.2, y: 29.8 } }
+  - { type: oak,  at: { floor: 3, x: 19.5, y: 7.4  } }
+  - { type: pine, at: { floor: 3, x: 23.4, y: 27.2 } }
+  - { type: pine, at: { floor: 3, x: 28.8, y: 9.6  } }
+  - { type: pine, at: { floor: 3, x: 31.3, y: 23.8 } }
+  - { type: pine, at: { floor: 3, x: 38.6, y: 17.8 } }
+  - { type: oak,  at: { floor: 3, x: 45.2, y: 15.3 } }
+  - { type: oak,  at: { floor: 4, x: 9,    y: 9.5  } }
+  - { type: pine, at: { floor: 4, x: 44,   y: 30.2 } }

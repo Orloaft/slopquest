@@ -1,0 +1,132 @@
+# Monster catalog. Spawn placements live in spawns.yaml.
+#
+# Required: id, name, maxHp, speed, damage, attackMs, xp, gold, aggro, range
+# Optional: drops
+#
+# damage / gold are [min, max] pairs.
+# aggro is the detection range in tiles. range is melee/magic reach in tiles.
+# drops fire whenever the monster dies (always rolled, not quest-gated).
+
+- id: rat
+  name: Rat
+  maxHp: 28
+  speed: 2.4
+  damage: [3, 7]
+  attackMs: 1000
+  xp: 16
+  gold: [3, 8]
+  aggro: 5.5
+  range: 1
+
+- id: spider
+  name: Spider
+  maxHp: 36
+  speed: 2.7
+  damage: [4, 9]
+  attackMs: 950
+  xp: 22
+  gold: [4, 10]
+  aggro: 5.5
+  range: 1
+
+- id: wisp
+  name: Forest Wisp
+  maxHp: 32
+  speed: 2.9
+  damage: [4, 9]
+  attackMs: 1050
+  xp: 24
+  gold: [4, 11]
+  aggro: 6
+  range: 1.1
+
+- id: wolf
+  name: Grey Wolf
+  maxHp: 58
+  speed: 3.2
+  damage: [7, 13]
+  attackMs: 880
+  xp: 38
+  gold: [6, 15]
+  aggro: 6.8
+  range: 1
+
+- id: goblin
+  name: Goblin
+  maxHp: 46
+  speed: 2.7
+  damage: [6, 12]
+  attackMs: 980
+  xp: 34
+  gold: [7, 16]
+  aggro: 6
+  range: 1
+
+- id: goblin_scout
+  name: Goblin Scout
+  maxHp: 42
+  speed: 3.05
+  damage: [6, 11]
+  attackMs: 880
+  xp: 36
+  gold: [7, 15]
+  aggro: 7
+  range: 1
+
+- id: goblin_shaman
+  name: Goblin Shaman
+  maxHp: 54
+  speed: 2.35
+  damage: [9, 17]
+  attackMs: 1180
+  xp: 56
+  gold: [12, 24]
+  aggro: 6.5
+  range: 1.1
+
+- id: orc
+  name: Orc
+  maxHp: 84
+  speed: 2.25
+  damage: [10, 18]
+  attackMs: 1150
+  xp: 54
+  gold: [11, 24]
+  aggro: 6
+  range: 1.1
+  drops:
+    - item: stolen_goods
+      chance: 0.10
+
+- id: skeleton
+  name: Skeleton
+  maxHp: 68
+  speed: 2.05
+  damage: [11, 18]
+  attackMs: 1250
+  xp: 52
+  gold: [9, 20]
+  aggro: 6
+  range: 1.05
+
+- id: ghoul
+  name: Ghoul
+  maxHp: 92
+  speed: 1.9
+  damage: [12, 21]
+  attackMs: 1200
+  xp: 70
+  gold: [14, 28]
+  aggro: 6.5
+  range: 1.05
+
+- id: boss
+  name: Ashen Warden
+  maxHp: 420
+  speed: 1.85
+  damage: [18, 30]
+  attackMs: 1100
+  xp: 180
+  gold: [80, 135]
+  aggro: 9
+  range: 1.15

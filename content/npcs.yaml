@@ -1,0 +1,45 @@
+# All non-player characters. Vendors, quest givers, guides — all in one place.
+#
+# role: vendor | quest | guide
+#   vendor — opens the shop UI when interacted with.
+#   quest  — drives a quest dialogue. The id must match a quest's `giver` field.
+#   guide  — speaks idleDialogue. Currently used for flavor NPCs.
+#
+# at: { floor, x, y }  — tile-coordinate placement.
+# idleDialogue          — what they say when they have nothing quest-specific to share.
+
+- id: trader
+  name: Wayfarer Trader
+  role: vendor
+  at: { floor: 0, x: 17.5, y: 15.5 }
+  idleDialogue: "Need supplies? Stand close and open the shop."
+
+- id: northwatch
+  name: Northwatch Guide
+  role: guide
+  at: { floor: 4, x: 25.5, y: 16.5 }
+  idleDialogue: "Northwatch is quiet for now."
+
+- id: cemetery-warden
+  name: Mira Gravewatch
+  role: quest
+  at: { floor: 0, x: 18.5, y: 18.5 }
+  idleDialogue: "Southgate Cemetery is restless."
+
+- id: lumberjack
+  name: Brann Splitlog
+  role: quest
+  at: { floor: 0, x: 22.5, y: 16.5 }
+  idleDialogue: "Pine yards are short on stock."
+
+- id: hunter
+  name: Kael Brookfoot
+  role: quest
+  at: { floor: 0, x: 15.5, y: 19.5 }
+  idleDialogue: "The shamans in Northwood worry me."
+
+- id: merchant
+  name: Marda Vell
+  role: quest
+  at: { floor: 0, x: 20.5, y: 19.5 }
+  idleDialogue: "Orcs raided my cart on the north road."

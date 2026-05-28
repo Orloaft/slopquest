@@ -1,0 +1,81 @@
+# Items players can hold in inventory.
+#
+# Required fields: id, label
+# Optional fields: icon, iconUrl, stackable, tags, use (Phase 2)
+#
+# id          — unique snake_case identifier. Used everywhere else (drops, vendor, quests).
+# label       — display name shown to the player.
+# icon        — short character code used as the fallback inventory glyph.
+# iconUrl     — path under public/ to the inventory icon image (or null).
+# stackable   — true if the item stacks in one inventory slot.
+# tags        — free-form labels (food, tool, consumable, quest, …) for future filtering.
+
+- id: axe
+  label: Bronze Axe
+  icon: A
+  iconUrl: /icons/item-axe.png
+  stackable: false
+  tags: [tool]
+
+- id: fishing_rod
+  label: Fishing Rod
+  icon: R
+  iconUrl: /icons/item-fishing-rod.png
+  stackable: false
+  tags: [tool]
+
+- id: flint_steel
+  label: Flint and Steel
+  icon: F
+  iconUrl: /icons/item-flint-steel.png
+  stackable: false
+  tags: [tool]
+
+- id: logs
+  label: Oak Logs
+  icon: L
+  iconUrl: /icons/item-logs.png
+  stackable: true
+  tags: [material]
+
+- id: pine_logs
+  label: Pine Logs
+  icon: P
+  iconUrl: /icons/item-pine-logs.png
+  stackable: true
+  tags: [material]
+
+- id: raw_fish
+  label: Raw Fish
+  icon: rF
+  iconUrl: /icons/item-raw-fish.png
+  stackable: true
+  tags: [food, raw]
+
+- id: cooked_fish
+  label: Cooked Fish
+  icon: cF
+  iconUrl: /icons/item-cooked-fish.png
+  stackable: true
+  tags: [food, consumable]
+
+- id: burnt_fish
+  label: Burnt Fish
+  icon: bF
+  iconUrl: /icons/item-burnt-fish.png
+  stackable: true
+  tags: [food, ruined]
+
+- id: potion
+  label: Health Potion
+  icon: P
+  iconUrl: /icons/item-potion.png
+  stackable: true
+  tags: [consumable]
+
+- id: stolen_goods
+  label: Stolen Cargo
+  icon: S
+  iconUrl: null
+  stackable: true
+  tags: [quest]
