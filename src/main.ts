@@ -288,7 +288,6 @@ const dom = {
   xpText: el<HTMLElement>("#xpText"),
   levelText: el<HTMLElement>("#levelText"),
   goldText: el<HTMLElement>("#goldText"),
-  potionText: el<HTMLElement>("#potionText"),
   weaponText: el<HTMLElement>("#weaponText"),
   armorText: el<HTMLElement>("#armorText"),
   buffTracker: el<HTMLElement>("#buffTracker"),
@@ -1025,7 +1024,6 @@ function renderHud(me: PlayerView): void {
   setBar(dom.xpBar, dom.xpText, me.xp - levelStart, levelEnd - levelStart, "XP");
   dom.levelText.textContent = String(me.level);
   dom.goldText.textContent = String(me.gold);
-  dom.potionText.textContent = String(me.potions);
   dom.weaponText.textContent = me.weaponTier ? (SHOP.weapon?.knightName ?? "Basic") : "Basic";
   dom.armorText.textContent = me.armorTier ? (SHOP.armor?.name ?? "Cloth") : "Cloth";
   renderBuffTracker(me.buffs);

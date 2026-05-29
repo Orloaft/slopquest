@@ -82,6 +82,37 @@ test("a usable item drags from the inventory into the hotbar and is consumed on 
   await expect(foodSlot.locator(".hotbar-qty")).toHaveText("2");
 });
 
+test("a health potion drags from the inventory into the hotbar and heals on use", async ({ page }) => {
+  page.on("pageerror", (error) => console.error(error));
+  page.on("console", (message) => {
+    if (message.type() === "error") console.error(message.text());
+  });
+
+  await page.goto("/?e2e");
+  await joinFreshCharacter(page);
+  await grantItems(page, [{ id: "potion", qty: 2 }]);
+  // Potions heal only below full HP, so drop HP before testing the drink.
+  await setPlayerHp(page, 10);
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.hp ?? 999) <= 12);
+
+  await page.getByRole("button", { name: "Inventory" }).click();
+  await expect(page.locator("#inventoryPanel")).toBeVisible();
+  const invSlot = page.locator("#inventoryGrid [data-item='potion']");
+  await expect(invSlot).toBeVisible();
+
+  await dragHtml5(page, invSlot, hotbarSlot(page, 0));
+  const potionSlot = page.locator(".hotbar-slot[data-slot='0'][data-item='potion']");
+  await expect(potionSlot).toBeVisible();
+  await expect(potionSlot.locator(".hotbar-qty")).toHaveText("2");
+
+  // Activating the slot via the "1" hotkey drinks one potion: HP climbs and the
+  // stack drops to one. No legacy potion counter is involved.
+  const hpBefore = await page.evaluate(() => window.__TIB_E2E__?.self()?.hp ?? 0);
+  await page.keyboard.press("1");
+  await page.waitForFunction((hp) => (window.__TIB_E2E__?.self()?.hp ?? 0) > hp, hpBefore);
+  await expect(potionSlot.locator(".hotbar-qty")).toHaveText("1");
+});
+
 function hotbarSlot(page: Page, index: number): Locator {
   return page.locator(`.hotbar-slot[data-slot='${index}']`);
 }

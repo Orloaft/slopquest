@@ -89,7 +89,6 @@ export interface PlayerView {
   level: number;
   xp: number;
   gold: number;
-  potions: number;
   weaponTier: number;
   armorTier: number;
   targetId: string | null;
@@ -163,7 +162,6 @@ export interface CorpseView {
   x: number;
   y: number;
   gold: number;
-  potions: number;
   label: string;
   kind: "corpse" | "drop";
   items: Array<{ id: string; qty: number }>;

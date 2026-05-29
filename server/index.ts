@@ -156,7 +156,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
       session.lastInputAt = performance.now();
     }
     if (message.type === "target") setTarget(session.player, message.id);
-    if (message.type === "ability") useAbility(session.player, String(message.slot ?? "1"));
+    if (message.type === "ability") useAbility(session.player);
     if (message.type === "useClassAbility") useClassAbility(session.player, String(message.id ?? ""));
     if (message.type === "loot") lootAdjacent(session.player);
     if (message.type === "lootCorpse") lootCorpse(session.player, String(message.id ?? ""));
@@ -290,7 +290,6 @@ function createPlayer(name: string): ServerPlayer {
     maxHp: spec.maxHp,
     maxMana: spec.maxMana,
     gold: 30,
-    potions: 2,
     weaponTier: 0,
     armorTier: 0,
     wellFedUntil: 0,
@@ -416,16 +415,8 @@ function autoAttack(player: ServerPlayer, now: number): void {
   damageMonster(player, monster, damage, "hit");
 }
 
-function useAbility(player: ServerPlayer, slot: string): void {
+function useAbility(player: ServerPlayer): void {
   if (player.dead) return;
-  if (slot === "2") {
-    if (player.potions <= 0 || player.hp >= player.maxHp) return;
-    player.potions -= 1;
-    player.hp = clamp(player.hp + (SHOP["potion"]!.heal ?? 0), 0, player.maxHp);
-    event("float", `${player.name} drinks a potion.`, player.x, player.y, player.floor, "#77e0a0");
-    return;
-  }
-
   const now = performance.now();
   const spec = ADVENTURER;
   const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
@@ -489,10 +480,9 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
     x: monster.x,
     y: monster.y,
     gold: roll(catalog.gold),
-    potions: Math.random() < 0.18 || monster.type === "boss" ? 1 : 0,
     label: catalog.name,
     kind: "corpse",
-    items: rollQuestDrops(monster.type)
+    items: [...rollQuestDrops(monster.type), ...rollPotionDrop(monster.type)]
   };
   corpses.set(corpse.id, corpse);
   event("system", `${player.name} defeated ${catalog.name}.`);
@@ -502,6 +492,11 @@ function rollQuestDrops(monsterType: string): Array<{ id: string; qty: number }>
   const drop = QUEST_DROPS[monsterType];
   if (!drop || Math.random() >= drop.chance) return [];
   return [{ id: drop.itemId, qty: 1 }];
+}
+
+function rollPotionDrop(monsterType: string): Array<{ id: string; qty: number }> {
+  if (monsterType === "boss" || Math.random() < 0.18) return [{ id: "potion", qty: 1 }];
+  return [];
 }
 
 function damagePlayer(player: ServerPlayer, damage: number, source: string): void {
@@ -541,7 +536,6 @@ function collectCorpse(player: ServerPlayer, corpse: Corpse): void {
     }
   }
   player.gold += corpse.gold;
-  player.potions += corpse.potions;
   corpses.delete(corpse.id);
   removeFromSpatial(spatial.corpses, corpse);
 }
@@ -562,7 +556,6 @@ function buyItem(player: ServerPlayer, item: string): void {
   }
   if (item === "potion" && player.gold >= SHOP["potion"]!.cost) {
     player.gold -= SHOP["potion"]!.cost;
-    player.potions += 1;
     addInventoryItem(player, "potion", 1);
   }
   if (item === "axe" && !hasInventoryItem(player, "axe") && player.gold >= SHOP["axe"]!.cost) {
@@ -1044,7 +1037,6 @@ function dropItem(floor: number, x: number, y: number, items: Array<{ id: string
     x,
     y,
     gold: 0,
-    potions: 0,
     label,
     kind: "drop",
     items
@@ -1377,7 +1369,6 @@ function serializePlayer(player: ServerPlayer): PlayerView {
     level: player.level,
     xp: player.xp,
     gold: player.gold,
-    potions: player.potions,
     weaponTier: player.weaponTier,
     armorTier: player.armorTier,
     targetId: player.targetId,
@@ -1517,7 +1508,6 @@ function persistPlayerToDb(player: ServerPlayer): void {
     hp: player.hp,
     mana: player.mana,
     gold: player.gold,
-    potions: player.potions,
     weaponTier: player.weaponTier,
     armorTier: player.armorTier,
     wellFedUntil: player.wellFedUntil ?? 0,

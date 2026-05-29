@@ -28,8 +28,7 @@ npm run test:visual
 - Everyone starts as an Adventurer and grows through combat and profession skills.
 - Click a monster to auto-attack it.
 - `Tab` cycles through nearby attack targets.
-- `1` uses the class active ability.
-- `2` uses a potion.
+- `1`–`8` activate hotbar slots; drag consumables from the inventory or abilities from the Abilities panel onto the bar to bind them. An empty slot `1` still fires the Adventurer's magic strike.
 - `F` loots adjacent corpses and item drops.
 - Click a dropped corpse/item bundle to loot that specific drop.
 - Use the startup roster to play or delete saved characters, or create a fresh character.

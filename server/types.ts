@@ -61,7 +61,6 @@ export interface ServerPlayer {
   maxHp: number;
   maxMana: number;
   gold: number;
-  potions: number;
   weaponTier: number;
   armorTier: number;
   wellFedUntil: number;
@@ -107,7 +106,6 @@ export interface Corpse {
   x: number;
   y: number;
   gold: number;
-  potions: number;
   label: string;
   kind: "corpse" | "drop";
   items: InventoryItem[];
@@ -181,7 +179,6 @@ export interface SavedPlayer {
   hp?: number;
   mana?: number;
   gold?: number;
-  potions?: number;
   weaponTier?: number;
   armorTier?: number;
   wellFedUntil?: number;
