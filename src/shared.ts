@@ -1,3 +1,5 @@
+import type { Range, ZoneId } from "./content-types.ts";
+
 export {
   ITEMS,
   MONSTERS,
@@ -9,23 +11,72 @@ export {
   MONSTER_SPAWNS,
   COMPOSED_TREE_NODES,
   FISHING_NODES
-} from "./generated/catalog.js";
+} from "./generated/catalog.ts";
 
 export const TILE_SIZE = 32;
 export const MAP_COLS = 52;
 export const MAP_ROWS = 34;
 
-export const START = { floor: 0, x: 16.5, y: 17.5 };
-export const ZONES = {
+export interface Portal {
+  floor: number;
+  x: number;
+  y: number;
+}
+
+export interface Zone {
+  id: ZoneId;
+  label: string;
+  floor: number;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export interface ClassSpec {
+  label: string;
+  maxHp: number;
+  maxMana: number;
+  speed: number;
+  range: number;
+  magicRange: number;
+  attackDamage: Range;
+  abilityDamage: Range;
+  abilityCost: number;
+  attackMs: number;
+  abilityMs: number;
+  hpPerDefense: number;
+  manaPerMagic: number;
+  abilities: string[];
+}
+
+export interface AbilitySpec {
+  id: string;
+  label: string;
+  description: string;
+  cooldownMs: number;
+  durationMs: number;
+  speedMultiplier?: number;
+  healFraction?: number;
+}
+
+export interface SkillDef {
+  label: string;
+  iconUrl: string;
+}
+
+export const START: Portal = { floor: 0, x: 16.5, y: 17.5 };
+
+export const ZONES: Record<ZoneId, Zone> = {
   southTown: { id: "southTown", label: "Waystone", floor: 0, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   cemetery: { id: "cemetery", label: "Southgate Cemetery", floor: 1, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   crypt: { id: "crypt", label: "Ashen Crypt", floor: 2, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   woods: { id: "woods", label: "Northwood", floor: 3, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   northTown: { id: "northTown", label: "Northwatch", floor: 4, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 }
 };
-const FLOOR_TILE_CACHE = new Map();
+const FLOOR_TILE_CACHE = new Map<number, string[]>();
 
-export const CLASSES = {
+export const CLASSES: Record<string, ClassSpec> = {
   adventurer: {
     label: "Adventurer",
     maxHp: 120,
@@ -44,7 +95,7 @@ export const CLASSES = {
   }
 };
 
-export const ABILITIES = {
+export const ABILITIES: Record<string, AbilitySpec> = {
   sprint: {
     id: "sprint",
     label: "Sprint",
@@ -63,7 +114,7 @@ export const ABILITIES = {
   }
 };
 
-export const SKILLS = {
+export const SKILLS: Record<string, SkillDef> = {
   attack: { label: "Attack", iconUrl: "/icons/skill-attack.png" },
   defense: { label: "Defense", iconUrl: "/icons/skill-defense.png" },
   magic: { label: "Magic", iconUrl: "/icons/skill-magic.png" },
@@ -73,12 +124,13 @@ export const SKILLS = {
   cooking: { label: "Cooking", iconUrl: "/icons/skill-cooking.png" }
 };
 
-export function xpForLevel(level) {
+export function xpForLevel(level: number): number {
   return level <= 1 ? 0 : Math.round(70 * (level - 1) ** 1.55);
 }
 
-export function makeFloorTiles(floor) {
-  if (FLOOR_TILE_CACHE.has(floor)) return FLOOR_TILE_CACHE.get(floor);
+export function makeFloorTiles(floor: number): string[] {
+  const cached = FLOOR_TILE_CACHE.get(floor);
+  if (cached) return cached;
 
   const rows = Array.from({ length: MAP_ROWS }, () => Array.from({ length: MAP_COLS }, () => "#"));
 
@@ -105,9 +157,9 @@ export function makeFloorTiles(floor) {
     fillRect(rows, 23, 24, 5, 1, "c");
     fillRect(rows, 23, 29, 5, 1, "c");
     fillRect(rows, 20, 26, 8, 2, "c");
-    rows[2][25] = "N";
-    rows[31][25] = "S";
-    rows[15][17] = "n";
+    setTile(rows, 25, 2, "N");
+    setTile(rows, 25, 31, "S");
+    setTile(rows, 17, 15, "n");
     scatter(rows, ".", "f", 10, 15);
   }
 
@@ -120,12 +172,12 @@ export function makeFloorTiles(floor) {
     fillRect(rows, 44, 5, 1, 24, "q");
     fillRect(rows, 23, 5, 5, 1, "c");
     fillRect(rows, 23, 28, 5, 1, "c");
-    rows[16][5] = "g";
-    rows[16][44] = "g";
+    setTile(rows, 5, 16, "g");
+    setTile(rows, 44, 16, "g");
     fillRect(rows, 22, 18, 8, 5, "O");
     fillRect(rows, 25, 18, 1, 3, "c");
-    rows[2][25] = "T";
-    rows[20][25] = "C";
+    setTile(rows, 25, 2, "T");
+    setTile(rows, 25, 20, "C");
     scatter(rows, "g", "h", 72, 21);
     scatter(rows, "g", "r", 16, 22);
   }
@@ -137,7 +189,7 @@ export function makeFloorTiles(floor) {
     fillRect(rows, 25, 14, 7, 5, "c");
     fillRect(rows, 18, 5, 4, 17, "#");
     fillRect(rows, 12, 25, 21, 3, "#");
-    rows[6][6] = "T";
+    setTile(rows, 6, 6, "T");
     scatter(rows, "c", "r", 26, 4);
     scatter(rows, "b", "r", 12, 5);
   }
@@ -157,8 +209,8 @@ export function makeFloorTiles(floor) {
     fillRect(rows, 38, 25, 8, 5, "d");
     fillRect(rows, 14, 11, 6, 5, "d");
     fillRect(rows, 30, 19, 6, 4, "d");
-    rows[31][25] = "S";
-    rows[2][25] = "N";
+    setTile(rows, 25, 31, "S");
+    setTile(rows, 25, 2, "N");
     scatter(rows, "F", "f", 220, 31);
     scatter(rows, "F", "r", 48, 32);
   }
@@ -173,7 +225,7 @@ export function makeFloorTiles(floor) {
     fillRect(rows, 31, 7, 8, 5, "O");
     fillRect(rows, 17, 23, 9, 5, "O");
     fillRect(rows, 34, 23, 8, 5, "O");
-    rows[31][25] = "S";
+    setTile(rows, 25, 31, "S");
     scatter(rows, ".", "f", 28, 41);
     scatter(rows, ".", "r", 16, 42);
   }
@@ -183,21 +235,21 @@ export function makeFloorTiles(floor) {
   return tiles;
 }
 
-export function tileAt(floor, tx, ty) {
+export function tileAt(floor: number, tx: number, ty: number): string {
   const rows = makeFloorTiles(floor);
   if (tx < 0 || ty < 0 || tx >= MAP_COLS || ty >= MAP_ROWS) return "#";
-  return rows[ty][tx] ?? "#";
+  return rows[ty]?.[tx] ?? "#";
 }
 
-export function isBlockedTile(tile) {
+export function isBlockedTile(tile: string): boolean {
   return tile === "#" || tile === "~" || tile === "f" || tile === "q" || tile === "r" || tile === "O";
 }
 
-export function isSafeZone(floor, x, y) {
+export function isSafeZone(floor: number, _x: number, _y: number): boolean {
   return floor === 0 || floor === 4;
 }
 
-export function zoneAt(floor, x, y) {
+export function zoneAt(floor: number, x: number, y: number): string {
   for (const zone of Object.values(ZONES)) {
     if (zone.floor !== floor) continue;
     if (x >= zone.x1 && x <= zone.x2 && y >= zone.y1 && y <= zone.y2) return zone.id;
@@ -205,7 +257,7 @@ export function zoneAt(floor, x, y) {
   return `floor-${floor}`;
 }
 
-export function portalFor(floor, x, y) {
+export function portalFor(floor: number, x: number, y: number): Portal | null {
   const tx = Math.floor(x);
   const ty = Math.floor(y);
   const tile = tileAt(floor, tx, ty);
@@ -220,21 +272,29 @@ export function portalFor(floor, x, y) {
   return null;
 }
 
-function fillRect(rows, x, y, w, h, tile) {
+function fillRect(rows: string[][], x: number, y: number, w: number, h: number, tile: string): void {
   for (let yy = y; yy < y + h; yy += 1) {
+    const row = rows[yy];
+    if (!row) continue;
     for (let xx = x; xx < x + w; xx += 1) {
-      if (rows[yy]?.[xx] !== undefined) rows[yy][xx] = tile;
+      if (row[xx] !== undefined) row[xx] = tile;
     }
   }
 }
 
-function scatter(rows, onTile, newTile, count, seed) {
+function setTile(rows: string[][], x: number, y: number, tile: string): void {
+  const row = rows[y];
+  if (row && row[x] !== undefined) row[x] = tile;
+}
+
+function scatter(rows: string[][], onTile: string, newTile: string, count: number, seed: number): void {
   let value = seed * 9973;
   for (let i = 0; i < count; i += 1) {
     value = (value * 48271) % 2147483647;
     const x = 3 + (value % (MAP_COLS - 6));
     value = (value * 48271) % 2147483647;
     const y = 3 + (value % (MAP_ROWS - 6));
-    if (rows[y][x] === onTile) rows[y][x] = newTile;
+    const row = rows[y];
+    if (row && row[x] === onTile) row[x] = newTile;
   }
 }

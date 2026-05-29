@@ -1,7 +1,34 @@
-import { WebSocket } from "ws";
+import { WebSocket, type RawData } from "ws";
+import type { StateMetrics } from "../src/types.ts";
+
+interface ParsedArgs {
+  [key: string]: string | true;
+}
+
+interface CombatTarget {
+  floor: number;
+  x: number;
+  y: number;
+}
+
+interface CombatAssignment extends CombatTarget {
+  zone: string;
+}
+
+interface LoadMessage {
+  type?: string;
+  metrics?: Partial<StateMetrics>;
+}
+
+interface Summary {
+  samples: number;
+  min: number;
+  max: number;
+  avg: number;
+}
 
 const options = parseArgs(process.argv.slice(2));
-const url = options.url ?? `ws://127.0.0.1:${options.port ?? process.env.PORT ?? 8787}`;
+const url = stringOption(options.url) ?? `ws://127.0.0.1:${stringOption(options.port) ?? process.env.PORT ?? 8787}`;
 const clients = Number(options.clients ?? 12);
 const durationMs = Number(options.duration ?? 10000);
 const combatRatio = clampUnit(Number(options.combat ?? 0));
@@ -9,19 +36,20 @@ const combatZones = String(options.zones ?? "cemetery,crypt,woods")
   .split(",")
   .map((z) => z.trim())
   .filter(Boolean);
-const COMBAT_ZONE_TARGETS = {
+const COMBAT_ZONE_TARGETS: Record<string, CombatTarget> = {
   cemetery: { floor: 1, x: 18.5, y: 12.5 },
   crypt: { floor: 2, x: 22.5, y: 23.5 },
   woods: { floor: 3, x: 16.5, y: 20.5 }
 };
 const combatCount = Math.floor(clients * combatRatio);
-const combatAssignments = new Map();
+const combatAssignments = new Map<number, CombatAssignment>();
 for (let i = 0; i < combatCount; i += 1) {
   const zone = combatZones[i % combatZones.length];
+  if (!zone) continue;
   const target = COMBAT_ZONE_TARGETS[zone];
   if (target) combatAssignments.set(i, { zone, ...target });
 }
-const sockets = new Set();
+const sockets = new Set<WebSocket>();
 const stats = {
   opened: 0,
   welcomed: 0,
@@ -30,13 +58,13 @@ const stats = {
   closed: 0
 };
 const observed = {
-  tickMs: [],
-  snapshotMs: [],
-  bytesOutPerSecond: [],
-  visiblePlayers: [],
-  visibleMonsters: [],
-  visibleTrees: [],
-  visibleFires: [],
+  tickMs: [] as number[],
+  snapshotMs: [] as number[],
+  bytesOutPerSecond: [] as number[],
+  visiblePlayers: [] as number[],
+  visibleMonsters: [] as number[],
+  visibleTrees: [] as number[],
+  visibleFires: [] as number[],
   serverClientsPeak: 0,
   serverMonsters: 0,
   spatialCells: 0
@@ -59,7 +87,7 @@ setTimeout(() => {
   setTimeout(reportAndExit, 250);
 }, durationMs);
 
-function openClient(index) {
+function openClient(index: number): void {
   const socket = new WebSocket(url);
   sockets.add(socket);
 
@@ -68,10 +96,10 @@ function openClient(index) {
     socket.send(JSON.stringify({ type: "join", name: `load_${index}`, class: index % 3 === 0 ? "caster" : "knight" }));
   });
 
-  socket.on("message", (raw) => {
-    let message;
+  socket.on("message", (raw: RawData) => {
+    let message: LoadMessage;
     try {
-      message = JSON.parse(raw);
+      message = JSON.parse(raw.toString()) as LoadMessage;
     } catch {
       return;
     }
@@ -109,7 +137,7 @@ function openClient(index) {
   });
 }
 
-function randomInput() {
+function randomInput(): { up: boolean; down: boolean; left: boolean; right: boolean } {
   const roll = Math.floor(Math.random() * 5);
   return {
     up: roll === 0,
@@ -119,27 +147,32 @@ function randomInput() {
   };
 }
 
-function clampUnit(value) {
+function clampUnit(value: number): number {
   if (!Number.isFinite(value)) return 0;
   if (value < 0) return 0;
   if (value > 1) return 1;
   return value;
 }
 
-function parseArgs(args) {
-  const parsed = {};
+function stringOption(value: string | true | undefined): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function parseArgs(args: string[]): ParsedArgs {
+  const parsed: ParsedArgs = {};
   for (let i = 0; i < args.length; i += 1) {
     const item = args[i];
-    if (!item.startsWith("--")) continue;
+    if (!item || !item.startsWith("--")) continue;
     const key = item.slice(2);
-    const value = args[i + 1]?.startsWith("--") ? true : args[i + 1] ?? true;
+    const next = args[i + 1];
+    const value: string | true = next?.startsWith("--") ? true : next ?? true;
     parsed[key] = value;
     if (value !== true) i += 1;
   }
   return parsed;
 }
 
-function recordMetrics(m) {
+function recordMetrics(m: Partial<StateMetrics>): void {
   if (typeof m.tickMs === "number") observed.tickMs.push(m.tickMs);
   if (typeof m.snapshotMs === "number") observed.snapshotMs.push(m.snapshotMs);
   if (typeof m.bytesOutPerSecond === "number") observed.bytesOutPerSecond.push(m.bytesOutPerSecond);
@@ -152,10 +185,11 @@ function recordMetrics(m) {
   if (typeof m.spatialCells === "number") observed.spatialCells = m.spatialCells;
 }
 
-function summarize(values) {
-  if (values.length === 0) return null;
-  let min = values[0];
-  let max = values[0];
+function summarize(values: number[]): Summary | null {
+  const first = values[0];
+  if (first === undefined) return null;
+  let min = first;
+  let max = first;
   let sum = 0;
   for (const v of values) {
     if (v < min) min = v;
@@ -171,8 +205,8 @@ function summarize(values) {
   };
 }
 
-function reportAndExit() {
-  const combatZoneCounts = {};
+function reportAndExit(): void {
+  const combatZoneCounts: Record<string, number> = {};
   for (const target of combatAssignments.values()) {
     combatZoneCounts[target.zone] = (combatZoneCounts[target.zone] ?? 0) + 1;
   }

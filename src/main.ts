@@ -14,68 +14,307 @@ import {
   makeFloorTiles,
   tileAt,
   xpForLevel
-} from "./shared.js";
+} from "./shared.ts";
+import type { ClassSpec } from "./shared.ts";
+import type { ItemUse, TreeType } from "./content-types.ts";
+import type {
+  AbilityView,
+  BuffsView,
+  ClientMessage,
+  CorpseView,
+  Direction,
+  FireView,
+  FishingNodeView,
+  GameEvent,
+  InputPayload,
+  InventoryItemView,
+  MonsterView,
+  NpcView,
+  PlayerView,
+  QuestView,
+  ServerMessage,
+  SkillView,
+  StateMetrics,
+  StateSnapshot,
+  TreeView
+} from "./types.ts";
 
-let socket = null;
-let selfId = null;
-let latestState = null;
+void MONSTERS;
+
+// --- Local client-side structures -----------------------------------------
+
+type TilePoint = { x: number; y: number };
+
+interface PathNode {
+  x: number;
+  y: number;
+  g: number;
+  f: number;
+  parent: PathNode | null;
+}
+
+interface PathDestination {
+  floor: number;
+  x: number;
+  y: number;
+}
+
+interface ApproachCandidate {
+  x: number;
+  y: number;
+  score: number;
+}
+
+interface MovementInput {
+  up: boolean;
+  down: boolean;
+  left: boolean;
+  right: boolean;
+  moveX: number;
+  moveY: number;
+}
+
+interface MonsterActorSpec {
+  family: string;
+  width: number;
+  height: number;
+  yOffset: number;
+  tint?: number;
+}
+
+interface TreeSpec {
+  textureKey: string;
+  width: number;
+  height: number;
+  zoneWidth: number;
+  zoneHeight: number;
+}
+
+// A point-like target used for fishing approach math; floor + x/y is enough.
+interface ApproachPoint {
+  floor: number;
+  x: number;
+  y: number;
+}
+
+interface DynamicPathTarget {
+  kind: string;
+  id: string;
+  x: number;
+  y: number;
+}
+
+interface HoldMoveTile {
+  x: number;
+  y: number;
+}
+
+interface ActiveDialogue {
+  lines: DialogueLine[];
+  index: number;
+  opensShop: boolean;
+}
+
+interface DialogueLine {
+  speaker?: string;
+  text?: string;
+}
+
+// Per-entity Phaser containers the client tracks. Containers carry extra
+// fields (sub-objects, animation/interpolation state) bolted onto the base.
+interface EntityView extends Phaser.GameObjects.Container {
+  targetX?: number;
+  targetY?: number;
+  animFamily?: string;
+  animDir?: Direction;
+  animMoving?: boolean;
+  animWidth?: number;
+  animHeight?: number;
+  currentFrameKey?: string;
+  sprite?: Phaser.GameObjects.Sprite;
+}
+
+interface ActorView extends EntityView {
+  nameText: Phaser.GameObjects.Text;
+  sprite: Phaser.GameObjects.Sprite;
+}
+
+interface PlayerEntityView extends ActorView {
+  hp: Phaser.GameObjects.Rectangle;
+  targetRing: Phaser.GameObjects.Ellipse;
+}
+
+interface MonsterEntityView extends ActorView {
+  hp: Phaser.GameObjects.Rectangle;
+  targetRing: Phaser.GameObjects.Ellipse;
+}
+
+interface NpcEntityView extends ActorView {}
+
+interface TreeEntityView extends Phaser.GameObjects.Container {
+  treeSprite: Phaser.GameObjects.Image;
+  stump: Phaser.GameObjects.Rectangle;
+  zone: Phaser.GameObjects.Zone;
+  treeType: string;
+}
+
+interface FishingEntityView extends Phaser.GameObjects.Container {
+  sprite: Phaser.GameObjects.Image;
+}
+
+interface FireEntityView extends Phaser.GameObjects.Container {
+  sprite: Phaser.GameObjects.Image;
+  flame?: Phaser.GameObjects.GameObject & { setScale(x: number, y?: number): unknown };
+}
+
+interface Floater extends Phaser.GameObjects.Text {
+  life: number;
+}
+
+type HotbarSlot = { kind: "item"; itemId: string } | null;
+
+type HotbarDrag =
+  | { source: "inventory"; itemId: string }
+  | { source: "hotbar"; slotIndex: number; itemId: string };
+
+interface AbilityRowEntry {
+  row: HTMLDivElement;
+  nameEl: HTMLSpanElement;
+  descEl: HTMLSpanElement;
+  statusEl: HTMLSpanElement;
+  progressEl: HTMLSpanElement;
+  button: HTMLButtonElement;
+}
+
+interface SpriteFrameBox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+interface DirectionFrames {
+  up: SpriteFrameBox[];
+  right: SpriteFrameBox[];
+  down: SpriteFrameBox[];
+  left: SpriteFrameBox[];
+}
+
+interface DecorationSprite {
+  key: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+interface BoundingBox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+interface RgbColor {
+  r: number;
+  g: number;
+  b: number;
+}
+
+interface CharacterRosterEntry {
+  name: string;
+  level: number;
+  gold: number;
+}
+
+interface E2EHooks {
+  getState: () => StateSnapshot | null;
+  self: () => PlayerView | undefined;
+  fireScreenPoint: (id?: string | null) => { x: number; y: number } | null;
+  send: (msg: ClientMessage) => void;
+  stateVersion: () => number;
+  actorFrameAnchorDrift: () => Array<{ family: string; dir: Direction; driftX: number; driftY: number }>;
+  monsterTextureCoverage: (
+    types?: string[]
+  ) => Array<{
+    type: string;
+    family: string;
+    frames: Array<{ dir: Direction; frame: number; key: string; exists: boolean }>;
+  }>;
+}
+
+declare global {
+  interface Window {
+    __TIB_E2E__?: E2EHooks;
+  }
+}
+
+let socket: WebSocket | null = null;
+let selfId: string | null = null;
+let latestState: StateSnapshot | null = null;
 let stateVersion = 0;
 let syncedStateVersion = -1;
 let hudStateVersion = -1;
-const chatLines = [];
+const chatLines: string[] = [];
 const E2E_MODE = new URLSearchParams(location.search).has("e2e");
 let renderedSkillSignature = "";
 let renderedInventorySignature = "";
 
+function el<T extends HTMLElement>(selector: string): T {
+  const node = document.querySelector(selector);
+  if (!node) throw new Error(`Missing required element: ${selector}`);
+  return node as T;
+}
+
 const dom = {
-  join: document.querySelector("#join"),
-  hud: document.querySelector("#hud"),
-  nameInput: document.querySelector("#nameInput"),
-  joinButton: document.querySelector("#joinButton"),
-  refreshRosterButton: document.querySelector("#refreshRosterButton"),
-  rosterList: document.querySelector("#rosterList"),
-  charName: document.querySelector("#charName"),
-  classLabel: document.querySelector("#classLabel"),
-  hpBar: document.querySelector("#hpBar"),
-  manaBar: document.querySelector("#manaBar"),
-  xpBar: document.querySelector("#xpBar"),
-  hpText: document.querySelector("#hpText"),
-  manaText: document.querySelector("#manaText"),
-  xpText: document.querySelector("#xpText"),
-  levelText: document.querySelector("#levelText"),
-  goldText: document.querySelector("#goldText"),
-  potionText: document.querySelector("#potionText"),
-  weaponText: document.querySelector("#weaponText"),
-  armorText: document.querySelector("#armorText"),
-  buffTracker: document.querySelector("#buffTracker"),
-  questTracker: document.querySelector("#questTracker"),
-  menuBackdrop: document.querySelector("#menuBackdrop"),
-  skillsButton: document.querySelector("#skillsButton"),
-  inventoryButton: document.querySelector("#inventoryButton"),
-  skillsPanel: document.querySelector("#skillsPanel"),
-  inventoryPanel: document.querySelector("#inventoryPanel"),
-  skillsCloseButton: document.querySelector("#skillsCloseButton"),
-  inventoryCloseButton: document.querySelector("#inventoryCloseButton"),
-  abilitiesButton: document.querySelector("#abilitiesButton"),
-  abilitiesPanel: document.querySelector("#abilitiesPanel"),
-  abilitiesCloseButton: document.querySelector("#abilitiesCloseButton"),
-  abilitiesList: document.querySelector("#abilitiesList"),
-  skillTracker: document.querySelector("#skillTracker"),
-  inventoryGrid: document.querySelector("#inventoryGrid"),
-  hotbar: document.querySelector("#hotbar"),
-  netStats: document.querySelector("#netStats"),
-  vendor: document.querySelector("#vendor"),
-  vendorCloseButton: document.querySelector("#vendorCloseButton"),
-  dialogue: document.querySelector("#dialogue"),
-  dialogueSpeaker: document.querySelector("#dialogueSpeaker"),
-  dialogueLine: document.querySelector("#dialogueLine"),
-  dialogueNextButton: document.querySelector("#dialogueNextButton"),
-  itemPopover: document.querySelector("#itemPopover"),
-  death: document.querySelector("#death"),
-  chatLog: document.querySelector("#chatLog"),
-  chatForm: document.querySelector("#chatForm"),
-  chatInput: document.querySelector("#chatInput"),
-  respawnButton: document.querySelector("#respawnButton")
+  join: el<HTMLElement>("#join"),
+  hud: el<HTMLElement>("#hud"),
+  nameInput: el<HTMLInputElement>("#nameInput"),
+  joinButton: el<HTMLButtonElement>("#joinButton"),
+  refreshRosterButton: el<HTMLButtonElement>("#refreshRosterButton"),
+  rosterList: el<HTMLElement>("#rosterList"),
+  charName: el<HTMLElement>("#charName"),
+  classLabel: el<HTMLElement>("#classLabel"),
+  hpBar: el<HTMLElement>("#hpBar"),
+  manaBar: el<HTMLElement>("#manaBar"),
+  xpBar: el<HTMLElement>("#xpBar"),
+  hpText: el<HTMLElement>("#hpText"),
+  manaText: el<HTMLElement>("#manaText"),
+  xpText: el<HTMLElement>("#xpText"),
+  levelText: el<HTMLElement>("#levelText"),
+  goldText: el<HTMLElement>("#goldText"),
+  potionText: el<HTMLElement>("#potionText"),
+  weaponText: el<HTMLElement>("#weaponText"),
+  armorText: el<HTMLElement>("#armorText"),
+  buffTracker: el<HTMLElement>("#buffTracker"),
+  questTracker: el<HTMLElement>("#questTracker"),
+  menuBackdrop: el<HTMLElement>("#menuBackdrop"),
+  skillsButton: el<HTMLButtonElement>("#skillsButton"),
+  inventoryButton: el<HTMLButtonElement>("#inventoryButton"),
+  skillsPanel: el<HTMLElement>("#skillsPanel"),
+  inventoryPanel: el<HTMLElement>("#inventoryPanel"),
+  skillsCloseButton: el<HTMLButtonElement>("#skillsCloseButton"),
+  inventoryCloseButton: el<HTMLButtonElement>("#inventoryCloseButton"),
+  abilitiesButton: el<HTMLButtonElement>("#abilitiesButton"),
+  abilitiesPanel: el<HTMLElement>("#abilitiesPanel"),
+  abilitiesCloseButton: el<HTMLButtonElement>("#abilitiesCloseButton"),
+  abilitiesList: el<HTMLElement>("#abilitiesList"),
+  skillTracker: el<HTMLElement>("#skillTracker"),
+  inventoryGrid: el<HTMLElement>("#inventoryGrid"),
+  hotbar: el<HTMLElement>("#hotbar"),
+  netStats: el<HTMLElement>("#netStats"),
+  vendor: el<HTMLElement>("#vendor"),
+  vendorCloseButton: el<HTMLButtonElement>("#vendorCloseButton"),
+  dialogue: el<HTMLElement>("#dialogue"),
+  dialogueSpeaker: el<HTMLElement>("#dialogueSpeaker"),
+  dialogueLine: el<HTMLElement>("#dialogueLine"),
+  dialogueNextButton: el<HTMLButtonElement>("#dialogueNextButton"),
+  itemPopover: el<HTMLElement>("#itemPopover"),
+  death: el<HTMLElement>("#death"),
+  chatLog: el<HTMLElement>("#chatLog"),
+  chatForm: el<HTMLFormElement>("#chatForm"),
+  chatInput: el<HTMLInputElement>("#chatInput"),
+  respawnButton: el<HTMLButtonElement>("#respawnButton")
 };
 
 dom.joinButton.addEventListener("click", () => joinCharacter(dom.nameInput.value, true));
@@ -90,8 +329,11 @@ dom.abilitiesCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.vendorCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.menuBackdrop.addEventListener("click", () => hideCenterPanels());
 dom.dialogueNextButton.addEventListener("click", advanceDialogue);
-dom.vendor.querySelectorAll("[data-buy]").forEach((button) => {
-  button.addEventListener("click", () => send({ type: "buy", item: button.dataset.buy }));
+dom.vendor.querySelectorAll<HTMLElement>("[data-buy]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const item = button.dataset.buy;
+    if (item) send({ type: "buy", item });
+  });
 });
 dom.chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -116,7 +358,7 @@ if (E2E_MODE) {
   window.__TIB_E2E__ = {
     getState: () => latestState,
     self: () => self(),
-    fireScreenPoint: (id = null) => {
+    fireScreenPoint: (id: string | null = null) => {
       const fire = (latestState?.fires ?? []).find((item) => !id || item.id === id);
       const camera = scene?.cameras?.main;
       if (!fire || !camera) return null;
@@ -128,7 +370,7 @@ if (E2E_MODE) {
     send,
     stateVersion: () => stateVersion,
     actorFrameAnchorDrift: () => actorFrameAnchorDrift(),
-    monsterTextureCoverage: (types) =>
+    monsterTextureCoverage: (types?: string[]) =>
       (types ?? []).map((type) => {
         const spec = monsterActorSpec({ type });
         const frames = DIRECTIONS.flatMap((dir) =>
@@ -152,51 +394,53 @@ const game = new Phaser.Game({
   scene: { preload, create, update },
   scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH }
 });
+void game;
 
-let scene;
-let cursors;
-let keys;
+let scene: Phaser.Scene;
+let cursors: { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key };
+let keys: Record<string, Phaser.Input.Keyboard.Key>;
 let lastInputAt = 0;
 let lastInputSignature = "";
-let currentFloor = null;
-let clickDestination = null;
-let clickPath = [];
-let pendingTreeCut = null;
-let pendingAttackTarget = null;
-let pendingLootTarget = null;
-let pendingNpcTalk = null;
-let pendingFishingNode = null;
-let pendingCookingFire = null;
-let dynamicPathTarget = null;
+let currentFloor: number | null = null;
+let clickDestination: PathDestination | null = null;
+let clickPath: PathDestination[] = [];
+let pendingTreeCut: string | null = null;
+let pendingAttackTarget: string | null = null;
+let pendingLootTarget: string | null = null;
+let pendingNpcTalk: string | null = null;
+let pendingFishingNode: string | null = null;
+let pendingCookingFire: string | null = null;
+let dynamicPathTarget: DynamicPathTarget | null = null;
 let lastDynamicPathRefreshAt = 0;
-let clickMarker = null;
+let clickMarker: Phaser.GameObjects.Ellipse | null = null;
 let holdMoveActive = false;
-let holdMoveTile = null;
+let holdMoveTile: HoldMoveTile | null = null;
 let holdMoveLastRepathAt = 0;
 const HOLD_MOVE_REPATH_MS = 80;
-let mapLayer;
-let entityLayer;
-let fxLayer;
-const playerViews = new Map();
-const monsterViews = new Map();
-const corpseViews = new Map();
-const npcViews = new Map();
-const treeViews = new Map();
-const fishingViews = new Map();
-const fireViews = new Map();
-const floaters = [];
-let selectedInventorySlot = null;
-let selectedInventoryItem = null;
-let activeDialogue = null;
-const DIRECTIONS = ["up", "right", "down", "left"];
+let mapLayer: Phaser.GameObjects.Container;
+let entityLayer: Phaser.GameObjects.Container;
+let fxLayer: Phaser.GameObjects.Container;
+const playerViews = new Map<string, PlayerEntityView>();
+const monsterViews = new Map<string, MonsterEntityView>();
+const corpseViews = new Map<string, Phaser.GameObjects.Container>();
+const npcViews = new Map<string, NpcEntityView>();
+const treeViews = new Map<string, TreeEntityView>();
+const fishingViews = new Map<string, FishingEntityView>();
+const fireViews = new Map<string, FireEntityView>();
+const floaters: Floater[] = [];
+let selectedInventorySlot: number | null = null;
+let selectedInventoryItem: string | null = null;
+let activeDialogue: ActiveDialogue | null = null;
+const DIRECTIONS: Direction[] = ["up", "right", "down", "left"];
 const WALK_FRAME_MS = 125;
 const DYNAMIC_PATH_REFRESH_MS = 350;
 const DYNAMIC_PATH_REFRESH_DISTANCE = 0.65;
-function itemUseKind(itemId) {
+function itemUseKind(itemId: string | null): ItemUse["kind"] | null {
+  if (!itemId) return null;
   return ITEMS[itemId]?.use?.kind ?? null;
 }
 
-function preload() {
+function preload(this: Phaser.Scene): void {
   scene = this;
   this.load.image("playerSheet", "/player-sheet.png");
   this.load.image("goblinSheet", "/goblin.png");
@@ -216,7 +460,7 @@ function preload() {
   this.load.image("spriteCampfire", "/campfire.png");
 }
 
-function create() {
+function create(this: Phaser.Scene): void {
   createActorFrames(this);
   createEffectFrames(this);
   makeTileTexture(this, "townTiles", "tileGrass", 24, 24, 84, 84);
@@ -257,16 +501,19 @@ function create() {
   this.cameras.main.setBounds(0, 0, MAP_COLS * TILE_SIZE, MAP_ROWS * TILE_SIZE);
   this.cameras.main.setZoom(1.35);
 
-  cursors = this.input.keyboard.addKeys({
+  const keyboard = this.input.keyboard;
+  if (!keyboard) throw new Error("Keyboard input plugin unavailable");
+  cursors = keyboard.addKeys({
     up: Phaser.Input.Keyboard.KeyCodes.UP,
     down: Phaser.Input.Keyboard.KeyCodes.DOWN,
     left: Phaser.Input.Keyboard.KeyCodes.LEFT,
     right: Phaser.Input.Keyboard.KeyCodes.RIGHT
-  }, false);
-  this.input.keyboard.addCapture([Phaser.Input.Keyboard.KeyCodes.TAB]);
-  keys = this.input.keyboard.addKeys("W,A,S,D,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,F,B,ENTER,TAB", false);
+  }, false) as typeof cursors;
+  keyboard.addCapture([Phaser.Input.Keyboard.KeyCodes.TAB]);
+  keys = keyboard.addKeys("W,A,S,D,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,F,B,ENTER,TAB", false) as Record<string, Phaser.Input.Keyboard.Key>;
   const hotbarKeys = [keys.ONE, keys.TWO, keys.THREE, keys.FOUR, keys.FIVE, keys.SIX, keys.SEVEN, keys.EIGHT];
   hotbarKeys.forEach((key, index) => {
+    if (!key) return;
     key.on("down", () => {
       if (isTextEntryFocused()) return;
       if (activateHotbarSlot(index)) return;
@@ -274,16 +521,16 @@ function create() {
       if (index === 0) send({ type: "ability", slot: "1" });
     });
   });
-  keys.F.on("down", () => {
+  keys.F?.on("down", () => {
     if (!isTextEntryFocused()) send({ type: "loot" });
   });
-  keys.B.on("down", () => {
+  keys.B?.on("down", () => {
     if (!isTextEntryFocused()) toggleCenterPanel(dom.vendor);
   });
-  keys.ENTER.on("down", () => {
+  keys.ENTER?.on("down", () => {
     if (!isTextEntryFocused()) dom.chatInput.focus();
   });
-  this.input.keyboard.on("keydown-TAB", (event) => {
+  keyboard.on("keydown-TAB", (event: KeyboardEvent) => {
     if (isTextEntryFocused()) return;
     event.preventDefault();
     cycleTarget();
@@ -292,9 +539,10 @@ function create() {
   refreshKeyboardCapture();
 }
 
-function update(time) {
+function update(this: Phaser.Scene, time: number): void {
   if (!latestState || !self()) return;
   const me = self();
+  if (!me) return;
   if (currentFloor !== me.floor) {
     drawMap(me.floor);
     syncedStateVersion = -1;
@@ -314,12 +562,12 @@ function update(time) {
   sendInput(time);
   tickHoldMove(time);
   updateFloaters();
-  const ownView = playerViews.get(selfId);
+  const ownView = selfId ? playerViews.get(selfId) : undefined;
   if (ownView) scene.cameras.main.centerOn(ownView.x, ownView.y);
 }
 
-function ensureSocket() {
-  if (socket && [WebSocket.CONNECTING, WebSocket.OPEN].includes(socket.readyState)) return;
+function ensureSocket(): void {
+  if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) return;
   const protocol = location.protocol === "https:" ? "wss" : "ws";
   socket = new WebSocket(`${protocol}://${location.hostname}:8787`);
   socket.addEventListener("open", () => {
@@ -327,7 +575,7 @@ function ensureSocket() {
     dom.rosterList.textContent = "Choose a character or create a new one.";
   });
   socket.addEventListener("message", (event) => {
-    const message = JSON.parse(event.data);
+    const message = JSON.parse(event.data as string) as ServerMessage;
     if (message.type === "characters") renderRoster(message.characters ?? []);
     if (message.type === "characterDeleted" && !message.ok) dom.rosterList.textContent = "That character is online or no longer exists.";
     if (message.type === "welcome") selfId = message.id;
@@ -344,11 +592,11 @@ function ensureSocket() {
   socket.addEventListener("error", () => addChat("Connection error. Refresh if the world stops updating."));
 }
 
-function joinCharacter(name, fresh = false) {
+function joinCharacter(name: string, fresh = false): void {
   ensureSocket();
   const clean = String(name ?? "").trim();
   if (!clean) return;
-  if (socket.readyState === WebSocket.OPEN) {
+  if (socket && socket.readyState === WebSocket.OPEN) {
     send({ type: "join", name: clean, fresh });
     dom.join.classList.add("hidden");
     dom.hud.classList.remove("hidden");
@@ -356,10 +604,10 @@ function joinCharacter(name, fresh = false) {
     return;
   }
   dom.rosterList.textContent = "Connecting...";
-  socket.addEventListener("open", () => joinCharacter(clean, fresh), { once: true });
+  socket?.addEventListener("open", () => joinCharacter(clean, fresh), { once: true });
 }
 
-function renderRoster(characters) {
+function renderRoster(characters: CharacterRosterEntry[]): void {
   if (!characters.length) {
     dom.rosterList.textContent = "No saved characters yet.";
     return;
@@ -373,22 +621,30 @@ function renderRoster(characters) {
       </div>
     `)
     .join("");
-  dom.rosterList.querySelectorAll("[data-play]").forEach((button) => {
-    button.addEventListener("click", () => joinCharacter(button.dataset.play, false));
+  dom.rosterList.querySelectorAll<HTMLElement>("[data-play]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const name = button.dataset.play;
+      if (name) joinCharacter(name, false);
+    });
   });
-  dom.rosterList.querySelectorAll("[data-delete]").forEach((button) => {
-    button.addEventListener("click", () => send({ type: "deleteCharacter", name: button.dataset.delete }));
+  dom.rosterList.querySelectorAll<HTMLElement>("[data-delete]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const name = button.dataset.delete;
+      if (name) send({ type: "deleteCharacter", name });
+    });
   });
 }
 
-function drawMap(floor) {
+function drawMap(floor: number): void {
   currentFloor = floor;
   mapLayer.removeAll(true);
   const rows = makeFloorTiles(floor);
   const mapTexture = scene.add.renderTexture(0, 0, MAP_COLS * TILE_SIZE, MAP_ROWS * TILE_SIZE).setOrigin(0);
   for (let y = 0; y < rows.length; y += 1) {
-    for (let x = 0; x < rows[y].length; x += 1) {
-      const tile = rows[y][x];
+    const row = rows[y];
+    if (row === undefined) continue;
+    for (let x = 0; x < row.length; x += 1) {
+      const tile = row[x] ?? "";
       mapTexture.draw(tileBaseTexture(tile), x * TILE_SIZE, y * TILE_SIZE);
     }
   }
@@ -398,15 +654,16 @@ function drawMap(floor) {
 
 }
 
-function syncEntities() {
+function syncEntities(): void {
   const me = self();
-  const visiblePlayers = new Set();
-  const visibleMonsters = new Set();
-  const visibleCorpses = new Set();
-  const visibleNpcs = new Set();
-  const visibleTrees = new Set();
-  const visibleFishingNodes = new Set();
-  const visibleFires = new Set();
+  if (!me || !latestState) return;
+  const visiblePlayers = new Set<string>();
+  const visibleMonsters = new Set<string>();
+  const visibleCorpses = new Set<string>();
+  const visibleNpcs = new Set<string>();
+  const visibleTrees = new Set<string>();
+  const visibleFishingNodes = new Set<string>();
+  const visibleFires = new Set<string>();
 
   for (const player of latestState.players.filter((item) => item.floor === me.floor)) {
     visiblePlayers.add(player.id);
@@ -417,7 +674,7 @@ function syncEntities() {
       entityLayer.add(view);
     }
     setEntityTarget(view, player.x * TILE_SIZE, player.y * TILE_SIZE);
-    setActorAnimation(view, "knight", player.dir, player.moving || ["woodcutting", "fishing", "cooking"].includes(player.action?.type), 40, 48);
+    setActorAnimation(view, "knight", player.dir, player.moving || (player.action != null && ["woodcutting", "fishing", "cooking"].includes(player.action.type)), 40, 48);
     view.setAlpha(player.dead ? 0.45 : 1);
     view.nameText.setText(player.name);
     view.hp.width = 34 * (player.hp / player.maxHp);
@@ -468,7 +725,7 @@ function syncEntities() {
       else view.add(scene.add.rectangle(0, -5, 18, 12, 0x8a5d32).setStrokeStyle(2, 0x2c1b10));
       view.add(scene.add.text(0, -20, lootLabel(corpse), textStyle(10, isDrop ? "#9ee6b1" : "#ffd166")).setOrigin(0.5));
       const zone = scene.add.zone(0, -4, 44, 34).setInteractive({ cursor: "pointer" });
-      zone.on("pointerdown", (pointer, localX, localY, event) => {
+      zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
         event.stopPropagation();
         startLootPath(corpse);
       });
@@ -517,7 +774,7 @@ function syncEntities() {
     }
     view.treeSprite.setVisible(tree.active);
     view.stump.setVisible(false);
-    view.zone.input.enabled = tree.active;
+    if (view.zone.input) view.zone.input.enabled = tree.active;
   }
   for (const [id, view] of treeViews) {
     if (!visibleTrees.has(id)) {
@@ -562,8 +819,8 @@ function syncEntities() {
   }
 }
 
-function createPlayerView(player) {
-  const view = scene.add.container(player.x * TILE_SIZE, player.y * TILE_SIZE);
+function createPlayerView(player: PlayerView): PlayerEntityView {
+  const view = scene.add.container(player.x * TILE_SIZE, player.y * TILE_SIZE) as PlayerEntityView;
   view.targetX = view.x;
   view.targetY = view.y;
   const targetRing = scene.add.ellipse(0, 8, 34, 18).setStrokeStyle(2, 0x86efac, 0.8);
@@ -582,8 +839,8 @@ function createPlayerView(player) {
   return view;
 }
 
-function createNpcView(npc) {
-  const view = scene.add.container(npc.x * TILE_SIZE, npc.y * TILE_SIZE);
+function createNpcView(npc: NpcView): NpcEntityView {
+  const view = scene.add.container(npc.x * TILE_SIZE, npc.y * TILE_SIZE) as NpcEntityView;
   view.targetX = view.x;
   view.targetY = view.y;
   const shadow = scene.add.ellipse(0, 13, 26, 10, 0x000000, 0.26);
@@ -591,7 +848,7 @@ function createNpcView(npc) {
   const sprite = scene.add.sprite(0, -10, actorTextureKey(family, npc.dir, 0)).setDisplaySize(40, 48);
   const nameText = scene.add.text(0, -45, npc.name, textStyle(11, npc.role === "quest" ? "#f7d486" : "#f5ddb1")).setOrigin(0.5);
   const zone = scene.add.zone(0, 0, 50, 58).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (pointer, localX, localY, event) => {
+  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
     startNpcTalkPath(npc.id);
   });
@@ -602,13 +859,13 @@ function createNpcView(npc) {
   return view;
 }
 
-function createTreeView(tree) {
-  const view = scene.add.container(tree.x * TILE_SIZE, tree.y * TILE_SIZE);
+function createTreeView(tree: TreeView): TreeEntityView {
+  const view = scene.add.container(tree.x * TILE_SIZE, tree.y * TILE_SIZE) as TreeEntityView;
   const spec = treeTypeSpec(tree);
   const treeSprite = scene.add.image(0, 4, spec.textureKey).setOrigin(0.5, 1).setDisplaySize(spec.width, spec.height);
   const stump = scene.add.rectangle(0, 12, 20, 12, 0x705036).setStrokeStyle(2, 0x2d1f14).setVisible(false);
   const zone = scene.add.zone(0, -18, spec.zoneWidth, spec.zoneHeight).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (pointer, localX, localY, event) => {
+  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
     startTreeCutPath(tree);
   });
@@ -620,7 +877,7 @@ function createTreeView(tree) {
   return view;
 }
 
-function updateTreeViewTexture(view, tree) {
+function updateTreeViewTexture(view: TreeEntityView, tree: TreeView): void {
   const spec = treeTypeSpec(tree);
   view.treeSprite.setTexture(spec.textureKey);
   view.treeSprite.setDisplaySize(spec.width, spec.height);
@@ -628,16 +885,16 @@ function updateTreeViewTexture(view, tree) {
   view.treeType = tree.type;
 }
 
-function treeTypeSpec(tree) {
-  return TREE_TYPES[tree.type] ?? TREE_TYPES.oak;
+function treeTypeSpec(tree: TreeView): TreeType | TreeSpec {
+  return TREE_TYPES[tree.type] ?? TREE_TYPES.oak ?? { textureKey: "spriteTree", width: 70, height: 90, zoneWidth: 40, zoneHeight: 60 };
 }
 
-function createFishingNodeView(node) {
-  const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE);
+function createFishingNodeView(node: FishingNodeView): FishingEntityView {
+  const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE) as FishingEntityView;
   const ring = scene.add.ellipse(0, 2, 34, 14, 0x4db6d8, 0.16).setStrokeStyle(1, 0xbbeeff, 0.55);
   const sprite = scene.add.image(0, 0, "spriteFishingRipple").setDisplaySize(34, 34);
   const zone = scene.add.zone(0, 0, 48, 42).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (pointer, localX, localY, event) => {
+  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
     startFishingPath(node);
   });
@@ -646,12 +903,12 @@ function createFishingNodeView(node) {
   return view;
 }
 
-function createFireView(fire) {
-  const view = scene.add.container(fire.x * TILE_SIZE, fire.y * TILE_SIZE);
+function createFireView(fire: FireView): FireEntityView {
+  const view = scene.add.container(fire.x * TILE_SIZE, fire.y * TILE_SIZE) as FireEntityView;
   const glow = scene.add.ellipse(0, 7, 34, 16, 0xff7a2f, 0.28);
   const sprite = scene.add.image(0, 1, "spriteCampfire").setDisplaySize(58, 58);
   const zone = scene.add.zone(0, -2, 48, 48).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (pointer, localX, localY, event) => {
+  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
     startCookingPath(fire);
   });
@@ -660,8 +917,8 @@ function createFireView(fire) {
   return view;
 }
 
-function createMonsterView(monster) {
-  const view = scene.add.container(monster.x * TILE_SIZE, monster.y * TILE_SIZE);
+function createMonsterView(monster: MonsterView): MonsterEntityView {
+  const view = scene.add.container(monster.x * TILE_SIZE, monster.y * TILE_SIZE) as MonsterEntityView;
   view.targetX = view.x;
   view.targetY = view.y;
   const targetRing = scene.add.ellipse(0, 8, 38, 20).setStrokeStyle(2, 0xf97316, 0.9).setVisible(false);
@@ -673,7 +930,7 @@ function createMonsterView(monster) {
   const hpBack = scene.add.rectangle(-18, -32, 36, 4, 0x191d1a).setOrigin(0, 0.5);
   const hp = scene.add.rectangle(-18, -32, 36, 4, 0xef4444).setOrigin(0, 0.5);
   const zone = scene.add.zone(0, 0, 54, 56).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (pointer, localX, localY, event) => {
+  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
     startAttackPath(monster.id);
   });
@@ -686,7 +943,7 @@ function createMonsterView(monster) {
   return view;
 }
 
-function monsterActorSpec(monster) {
+function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "rat") return { family: "rat", width: 44, height: 28, yOffset: 2 };
   if (monster.type === "spider") return { family: "spider", width: 48, height: 34, yOffset: -1 };
   if (monster.type === "skeleton") return { family: "skeleton", width: 42, height: 48, yOffset: -10 };
@@ -700,7 +957,7 @@ function monsterActorSpec(monster) {
   return { family: "goblin", width: 42, height: 46, yOffset: -10 };
 }
 
-function setEntityTarget(view, x, y) {
+function setEntityTarget(view: EntityView, x: number, y: number): void {
   view.targetX = x;
   view.targetY = y;
   if (Math.hypot(view.x - x, view.y - y) > TILE_SIZE * 3) {
@@ -709,19 +966,19 @@ function setEntityTarget(view, x, y) {
   }
 }
 
-function interpolateEntities() {
+function interpolateEntities(): void {
   for (const view of playerViews.values()) easeToTarget(view);
   for (const view of monsterViews.values()) easeToTarget(view);
   for (const view of npcViews.values()) easeToTarget(view);
 }
 
-function easeToTarget(view) {
-  if (view.targetX === undefined) return;
+function easeToTarget(view: EntityView): void {
+  if (view.targetX === undefined || view.targetY === undefined) return;
   view.x += (view.targetX - view.x) * 0.32;
   view.y += (view.targetY - view.y) * 0.32;
 }
 
-function setActorAnimation(view, family, dir = "down", moving = false, width = 40, height = 48) {
+function setActorAnimation(view: EntityView, family: string, dir: Direction = "down", moving = false, width = 40, height = 48): void {
   view.animFamily = family;
   view.animDir = DIRECTIONS.includes(dir) ? dir : "down";
   view.animMoving = Boolean(moving);
@@ -729,7 +986,7 @@ function setActorAnimation(view, family, dir = "down", moving = false, width = 4
   view.animHeight = height;
 }
 
-function animateEntities() {
+function animateEntities(): void {
   for (const view of playerViews.values()) animateActor(view);
   for (const view of monsterViews.values()) animateActor(view);
   for (const view of npcViews.values()) animateActor(view);
@@ -739,20 +996,20 @@ function animateEntities() {
   }
 }
 
-function animateActor(view) {
-  if (!view.sprite || !view.animFamily) return;
+function animateActor(view: EntityView): void {
+  if (!view.sprite || !view.animFamily || !view.animDir) return;
   const frame = view.animMoving ? Math.floor(scene.time.now / WALK_FRAME_MS) % 4 : 0;
   const key = actorTextureKey(view.animFamily, view.animDir, frame);
   if (view.currentFrameKey !== key) {
     view.sprite.setTexture(key);
-    view.sprite.setDisplaySize(view.animWidth, view.animHeight);
+    view.sprite.setDisplaySize(view.animWidth ?? 40, view.animHeight ?? 48);
     view.currentFrameKey = key;
   }
   view.sprite.setFlipX(actorFlipX(view.animFamily, view.animDir));
 }
 
-function renderHud(me) {
-  const spec = CLASSES[me.classKey] ?? CLASSES.adventurer;
+function renderHud(me: PlayerView): void {
+  const spec: ClassSpec = CLASSES[me.classKey] ?? CLASSES.adventurer ?? fallbackClassSpec();
   dom.charName.textContent = me.name;
   dom.classLabel.textContent = spec.label;
   setBar(dom.hpBar, dom.hpText, me.hp, me.maxHp, "HP");
@@ -760,11 +1017,11 @@ function renderHud(me) {
   const levelStart = xpForLevel(me.level);
   const levelEnd = xpForLevel(me.level + 1);
   setBar(dom.xpBar, dom.xpText, me.xp - levelStart, levelEnd - levelStart, "XP");
-  dom.levelText.textContent = me.level;
-  dom.goldText.textContent = me.gold;
-  dom.potionText.textContent = me.potions;
-  dom.weaponText.textContent = me.weaponTier ? SHOP.weapon.knightName : "Basic";
-  dom.armorText.textContent = me.armorTier ? SHOP.armor.name : "Cloth";
+  dom.levelText.textContent = String(me.level);
+  dom.goldText.textContent = String(me.gold);
+  dom.potionText.textContent = String(me.potions);
+  dom.weaponText.textContent = me.weaponTier ? (SHOP.weapon?.knightName ?? "Basic") : "Basic";
+  dom.armorText.textContent = me.armorTier ? (SHOP.armor?.name ?? "Cloth") : "Cloth";
   renderBuffTracker(me.buffs);
   renderQuestTracker(me.quests);
   renderSkillTracker(me.skills);
@@ -773,11 +1030,31 @@ function renderHud(me) {
   loadHotbarFor(me.name);
   renderHotbar(me.inventory);
   dom.death.classList.toggle("hidden", !me.dead);
-  const nearVendor = me.floor === NPCS[0].floor && Phaser.Math.Distance.Between(me.x, me.y, NPCS[0].x, NPCS[0].y) < 2.2;
+  const vendorNpc = NPCS[0];
+  const nearVendor = vendorNpc != null && me.floor === vendorNpc.floor && Phaser.Math.Distance.Between(me.x, me.y, vendorNpc.x, vendorNpc.y) < 2.2;
   if (!nearVendor && !dom.vendor.classList.contains("hidden")) hideCenterPanels();
 }
 
-function renderMetrics(metrics) {
+function fallbackClassSpec(): ClassSpec {
+  return {
+    label: "Adventurer",
+    maxHp: 120,
+    maxMana: 60,
+    speed: 4.25,
+    range: 1.35,
+    magicRange: 6,
+    attackDamage: [8, 13],
+    abilityDamage: [18, 28],
+    abilityCost: 14,
+    attackMs: 820,
+    abilityMs: 2800,
+    hpPerDefense: 10,
+    manaPerMagic: 8,
+    abilities: ["sprint", "second_wind"]
+  };
+}
+
+function renderMetrics(metrics: StateMetrics | null | undefined): void {
   if (!metrics) {
     dom.netStats.textContent = "net -";
     return;
@@ -785,7 +1062,7 @@ function renderMetrics(metrics) {
   dom.netStats.textContent = `zone ${metrics.zone} | net ${formatBytes(metrics.bytesOutPerSecond)}/s | tick ${metrics.tickMs}ms | snap ${metrics.snapshotMs}ms | seen ${metrics.visiblePlayers}p/${metrics.visibleMonsters}m/${metrics.visibleTrees ?? 0}t | cells ${metrics.spatialCells}`;
 }
 
-function renderQuestTracker(quests = []) {
+function renderQuestTracker(quests: QuestView[] = []): void {
   const active = quests.filter((quest) => quest.accepted && !quest.claimed);
   if (!active.length) {
     dom.questTracker.textContent = "";
@@ -801,17 +1078,17 @@ function renderQuestTracker(quests = []) {
     .join("");
 }
 
-function renderBuffTracker(buffs = {}) {
-  const active = [];
-  if ((buffs.wellFed ?? 0) > 0) active.push(`Well fed ${Math.ceil(buffs.wellFed / 1000)}s`);
-  if ((buffs.foodRegen ?? 0) > 0) active.push(`Food heal ${Math.ceil(buffs.foodRegen / 1000)}s`);
-  if ((buffs.sprint ?? 0) > 0) active.push(`Sprint ${Math.ceil(buffs.sprint / 1000)}s`);
-  if ((buffs.secondWind ?? 0) > 0) active.push(`Second wind ${Math.ceil(buffs.secondWind / 1000)}s`);
+function renderBuffTracker(buffs: Partial<BuffsView> = {}): void {
+  const active: string[] = [];
+  if ((buffs.wellFed ?? 0) > 0) active.push(`Well fed ${Math.ceil((buffs.wellFed ?? 0) / 1000)}s`);
+  if ((buffs.foodRegen ?? 0) > 0) active.push(`Food heal ${Math.ceil((buffs.foodRegen ?? 0) / 1000)}s`);
+  if ((buffs.sprint ?? 0) > 0) active.push(`Sprint ${Math.ceil((buffs.sprint ?? 0) / 1000)}s`);
+  if ((buffs.secondWind ?? 0) > 0) active.push(`Second wind ${Math.ceil((buffs.secondWind ?? 0) / 1000)}s`);
   dom.buffTracker.textContent = active.join(" | ");
   dom.buffTracker.classList.toggle("hidden", !active.length);
 }
 
-function renderSkillTracker(skills = []) {
+function renderSkillTracker(skills: SkillView[] = []): void {
   const signature = skills.map((skill) => `${skill.id}:${skill.level}:${skill.xp}:${skill.nextXp}`).join("|");
   if (signature === renderedSkillSignature) return;
   renderedSkillSignature = signature;
@@ -834,9 +1111,9 @@ function renderSkillTracker(skills = []) {
     .join("");
 }
 
-function renderInventory(inventory = []) {
-  const slots = Array.from({ length: 30 }, (_, index) => inventory[index] ?? null);
-  const selectedSlotItem = selectedInventorySlot === null ? null : slots[selectedInventorySlot];
+function renderInventory(inventory: Array<InventoryItemView | null> = []): void {
+  const slots: Array<InventoryItemView | null> = Array.from({ length: 30 }, (_, index) => inventory[index] ?? null);
+  const selectedSlotItem = selectedInventorySlot === null ? null : (slots[selectedInventorySlot] ?? null);
   if (selectedInventorySlot !== null && selectedSlotItem?.id !== selectedInventoryItem) {
     selectedInventorySlot = null;
     selectedInventoryItem = null;
@@ -854,32 +1131,34 @@ function renderInventory(inventory = []) {
       return `<button class="inventory-slot${selected}" type="button" data-slot="${index}" data-item="${escapeHtml(item.id)}" data-label="${escapeHtml(item.label)}">${iconMarkup(item.iconUrl, item.icon, "item-icon")}${qty}</button>`;
     })
     .join("");
-  dom.inventoryGrid.querySelectorAll("[data-item]").forEach((slot) => {
+  dom.inventoryGrid.querySelectorAll<HTMLElement>("[data-item]").forEach((slot) => {
     slot.addEventListener("pointerdown", (event) => {
       event.preventDefault();
-      handleInventoryClick(Number(slot.dataset.slot), slot.dataset.item);
+      const itemId = slot.dataset.item;
+      if (itemId) handleInventoryClick(Number(slot.dataset.slot), itemId);
     });
-    slot.addEventListener("mouseenter", () => showItemPopover(slot, slot.dataset.label));
+    slot.addEventListener("mouseenter", () => showItemPopover(slot, slot.dataset.label ?? ""));
     slot.addEventListener("mousemove", () => positionItemPopover(slot));
     slot.addEventListener("mouseleave", hideItemPopover);
     slot.addEventListener("dblclick", () => {
       const id = slot.dataset.item;
-      if (itemUseKind(id) === "eat") send({ type: "eatItem", item: id });
+      if (id && itemUseKind(id) === "eat") send({ type: "eatItem", item: id });
     });
-    if (isHotbarUsable(slot.dataset.item)) {
+    if (isHotbarUsable(slot.dataset.item ?? null)) {
       slot.setAttribute("draggable", "true");
       slot.addEventListener("dragstart", (event) => {
-        activeHotbarDrag = { source: "inventory", itemId: slot.dataset.item };
+        const itemId = slot.dataset.item ?? "";
+        activeHotbarDrag = { source: "inventory", itemId };
         hotbarDragLandedInHotbar = false;
         if (event.dataTransfer) {
           event.dataTransfer.effectAllowed = "copyMove";
-          event.dataTransfer.setData("text/plain", `inventory:${slot.dataset.item}`);
+          event.dataTransfer.setData("text/plain", `inventory:${itemId}`);
         }
       });
       slot.addEventListener("dragend", finishHotbarDrag);
     }
   });
-  dom.inventoryGrid.querySelectorAll(".inventory-slot.empty").forEach((slot) => {
+  dom.inventoryGrid.querySelectorAll<HTMLElement>(".inventory-slot.empty").forEach((slot) => {
     slot.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       clearInventorySelection();
@@ -889,15 +1168,16 @@ function renderInventory(inventory = []) {
 }
 
 let abilitiesClickBound = false;
-const abilityRows = new Map();
-let abilityEmptyEl = null;
+const abilityRows = new Map<string, AbilityRowEntry>();
+let abilityEmptyEl: HTMLDivElement | null = null;
 
-function renderAbilities(abilities = []) {
+function renderAbilities(abilities: AbilityView[] = []): void {
   if (!abilitiesClickBound) {
     dom.abilitiesList.addEventListener("click", (event) => {
-      const target = event.target.closest(".ability-activate");
+      const target = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>(".ability-activate");
       if (!target || target.disabled) return;
-      send({ type: "useClassAbility", id: target.dataset.ability });
+      const id = target.dataset.ability;
+      if (id) send({ type: "useClassAbility", id });
     });
     abilitiesClickBound = true;
   }
@@ -919,7 +1199,7 @@ function renderAbilities(abilities = []) {
     abilityEmptyEl = null;
   }
 
-  const seen = new Set();
+  const seen = new Set<string>();
   abilities.forEach((ability, index) => {
     seen.add(ability.id);
     let entry = abilityRows.get(ability.id);
@@ -942,7 +1222,7 @@ function renderAbilities(abilities = []) {
   }
 }
 
-function createAbilityRow(ability) {
+function createAbilityRow(ability: AbilityView): AbilityRowEntry {
   const row = document.createElement("div");
   row.className = "ability-row";
 
@@ -979,7 +1259,7 @@ function createAbilityRow(ability) {
   return { row, nameEl, descEl, statusEl, progressEl, button };
 }
 
-function updateAbilityRow(entry, ability) {
+function updateAbilityRow(entry: AbilityRowEntry, ability: AbilityView): void {
   entry.nameEl.textContent = ability.label;
   entry.descEl.textContent = ability.description;
 
@@ -1008,13 +1288,13 @@ function updateAbilityRow(entry, ability) {
   entry.button.disabled = onCooldown || isActive;
 }
 
-function showItemPopover(slot, label) {
+function showItemPopover(slot: HTMLElement, label: string): void {
   dom.itemPopover.textContent = label;
   dom.itemPopover.classList.remove("hidden");
   positionItemPopover(slot);
 }
 
-function positionItemPopover(slot) {
+function positionItemPopover(slot: HTMLElement): void {
   if (dom.itemPopover.classList.contains("hidden")) return;
   const rect = slot.getBoundingClientRect();
   const popoverRect = dom.itemPopover.getBoundingClientRect();
@@ -1024,11 +1304,11 @@ function positionItemPopover(slot) {
   dom.itemPopover.style.top = `${Math.max(8, Math.min(window.innerHeight - popoverRect.height - 8, y))}px`;
 }
 
-function hideItemPopover() {
+function hideItemPopover(): void {
   dom.itemPopover.classList.add("hidden");
 }
 
-function handleInventoryClick(slotIndex, itemId) {
+function handleInventoryClick(slotIndex: number, itemId: string): void {
   const fireLog = firemakingLogItem(selectedInventoryItem, itemId);
   if (fireLog) {
     send({ type: "makeFire", logItem: fireLog });
@@ -1057,20 +1337,22 @@ function handleInventoryClick(slotIndex, itemId) {
   renderInventory(self()?.inventory ?? []);
 }
 
-function clearInventorySelection() {
+function clearInventorySelection(): void {
   selectedInventorySlot = null;
   selectedInventoryItem = null;
 }
 
-function firemakingLogItem(firstItemId, secondItemId) {
+function firemakingLogItem(firstItemId: string | null, secondItemId: string | null): string | null {
   const pair = [firstItemId, secondItemId];
   const lighter = pair.find((id) => itemUseKind(id) === "light_fire");
   if (!lighter) return null;
-  const consumables = new Set((ITEMS[lighter].use.consumesAny ?? []).map((c) => c.item));
-  return pair.find((id) => consumables.has(id)) ?? null;
+  const lighterUse = ITEMS[lighter]?.use;
+  const consumesAny = lighterUse && lighterUse.kind === "light_fire" ? lighterUse.consumesAny : [];
+  const consumables = new Set((consumesAny ?? []).map((c) => c.item));
+  return pair.find((id) => id != null && consumables.has(id)) ?? null;
 }
 
-function isCookableItem(itemId) {
+function isCookableItem(itemId: string | null): boolean {
   return itemUseKind(itemId) === "cook_on_fire";
 }
 
@@ -1080,27 +1362,27 @@ function isCookableItem(itemId) {
 // reserved for future ability bindings.
 
 const HOTBAR_SLOTS = 8;
-let hotbarLayout = Array(HOTBAR_SLOTS).fill(null);
-let hotbarBoundCharacter = null;
+let hotbarLayout: HotbarSlot[] = Array<HotbarSlot>(HOTBAR_SLOTS).fill(null);
+let hotbarBoundCharacter: string | null = null;
 let hotbarRenderedSig = "";
-let activeHotbarDrag = null;
+let activeHotbarDrag: HotbarDrag | null = null;
 let hotbarDragLandedInHotbar = false;
 
-function hotbarStorageKey(name) {
+function hotbarStorageKey(name: string): string {
   return `tib.hotbar.${name}`;
 }
 
-function loadHotbarFor(name) {
+function loadHotbarFor(name: string): void {
   if (!name || hotbarBoundCharacter === name) return;
   hotbarBoundCharacter = name;
-  hotbarLayout = Array(HOTBAR_SLOTS).fill(null);
+  hotbarLayout = Array<HotbarSlot>(HOTBAR_SLOTS).fill(null);
   try {
     const raw = localStorage.getItem(hotbarStorageKey(name));
     if (raw) {
-      const parsed = JSON.parse(raw);
+      const parsed: unknown = JSON.parse(raw);
       if (Array.isArray(parsed)) {
         for (let i = 0; i < Math.min(parsed.length, HOTBAR_SLOTS); i++) {
-          const slot = parsed[i];
+          const slot = parsed[i] as { kind?: unknown; itemId?: unknown } | null;
           if (slot?.kind === "item" && typeof slot.itemId === "string" && ITEMS[slot.itemId]?.use) {
             hotbarLayout[i] = { kind: "item", itemId: slot.itemId };
           }
@@ -1113,7 +1395,7 @@ function loadHotbarFor(name) {
   hotbarRenderedSig = "";
 }
 
-function saveHotbar() {
+function saveHotbar(): void {
   if (!hotbarBoundCharacter) return;
   try {
     localStorage.setItem(hotbarStorageKey(hotbarBoundCharacter), JSON.stringify(hotbarLayout));
@@ -1122,17 +1404,18 @@ function saveHotbar() {
   }
 }
 
-function inventoryQty(inventory, itemId) {
+function inventoryQty(inventory: Array<InventoryItemView | null> | undefined, itemId: string): number {
   let total = 0;
   for (const item of inventory ?? []) if (item?.id === itemId) total += item.qty ?? 1;
   return total;
 }
 
-function isHotbarUsable(itemId) {
+function isHotbarUsable(itemId: string | null): boolean {
+  if (!itemId) return false;
   return Boolean(ITEMS[itemId]?.use);
 }
 
-function renderHotbar(inventory = []) {
+function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
   const sig = hotbarLayout
     .map((slot, i) => {
       if (!slot) return `${i}:-`;
@@ -1161,25 +1444,25 @@ function renderHotbar(inventory = []) {
     })
     .join("");
 
-  dom.hotbar.querySelectorAll(".hotbar-slot").forEach((el) => {
-    const slotIndex = Number(el.dataset.slot);
-    el.addEventListener("click", () => activateHotbarSlot(slotIndex));
-    el.addEventListener("dragover", (event) => {
+  dom.hotbar.querySelectorAll<HTMLElement>(".hotbar-slot").forEach((elem) => {
+    const slotIndex = Number(elem.dataset.slot);
+    elem.addEventListener("click", () => activateHotbarSlot(slotIndex));
+    elem.addEventListener("dragover", (event) => {
       if (!activeHotbarDrag) return;
       event.preventDefault();
       if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
-      el.classList.add("drag-over");
+      elem.classList.add("drag-over");
     });
-    el.addEventListener("dragleave", () => el.classList.remove("drag-over"));
-    el.addEventListener("drop", (event) => {
+    elem.addEventListener("dragleave", () => elem.classList.remove("drag-over"));
+    elem.addEventListener("drop", (event) => {
       event.preventDefault();
-      el.classList.remove("drag-over");
+      elem.classList.remove("drag-over");
       hotbarDragLandedInHotbar = true;
       handleHotbarDrop(slotIndex);
     });
-    if (el.dataset.item) {
-      const itemId = el.dataset.item;
-      el.addEventListener("dragstart", (event) => {
+    if (elem.dataset.item) {
+      const itemId = elem.dataset.item;
+      elem.addEventListener("dragstart", (event) => {
         activeHotbarDrag = { source: "hotbar", slotIndex, itemId };
         hotbarDragLandedInHotbar = false;
         if (event.dataTransfer) {
@@ -1187,29 +1470,30 @@ function renderHotbar(inventory = []) {
           event.dataTransfer.setData("text/plain", `hotbar:${slotIndex}`);
         }
       });
-      el.addEventListener("dragend", finishHotbarDrag);
-      el.addEventListener("mouseenter", () => showItemPopover(el, el.dataset.label));
-      el.addEventListener("mousemove", () => positionItemPopover(el));
-      el.addEventListener("mouseleave", hideItemPopover);
+      elem.addEventListener("dragend", finishHotbarDrag);
+      elem.addEventListener("mouseenter", () => showItemPopover(elem, elem.dataset.label ?? ""));
+      elem.addEventListener("mousemove", () => positionItemPopover(elem));
+      elem.addEventListener("mouseleave", hideItemPopover);
     }
   });
 }
 
-function handleHotbarDrop(targetSlot) {
+function handleHotbarDrop(targetSlot: number): void {
   const drag = activeHotbarDrag;
   if (!drag) return;
   if (drag.source === "inventory") {
     if (!isHotbarUsable(drag.itemId)) return;
     for (let i = 0; i < HOTBAR_SLOTS; i++) {
-      if (i !== targetSlot && hotbarLayout[i]?.kind === "item" && hotbarLayout[i].itemId === drag.itemId) {
+      const slot = hotbarLayout[i];
+      if (i !== targetSlot && slot?.kind === "item" && slot.itemId === drag.itemId) {
         hotbarLayout[i] = null;
       }
     }
     hotbarLayout[targetSlot] = { kind: "item", itemId: drag.itemId };
   } else if (drag.source === "hotbar") {
     if (drag.slotIndex === targetSlot) return;
-    const moved = hotbarLayout[drag.slotIndex];
-    hotbarLayout[drag.slotIndex] = hotbarLayout[targetSlot];
+    const moved = hotbarLayout[drag.slotIndex] ?? null;
+    hotbarLayout[drag.slotIndex] = hotbarLayout[targetSlot] ?? null;
     hotbarLayout[targetSlot] = moved;
   }
   saveHotbar();
@@ -1217,10 +1501,10 @@ function handleHotbarDrop(targetSlot) {
   renderHotbar(self()?.inventory ?? []);
 }
 
-function finishHotbarDrag() {
+function finishHotbarDrag(): void {
   const drag = activeHotbarDrag;
   activeHotbarDrag = null;
-  document.querySelectorAll(".hotbar-slot.drag-over").forEach((el) => el.classList.remove("drag-over"));
+  document.querySelectorAll<HTMLElement>(".hotbar-slot.drag-over").forEach((elem) => elem.classList.remove("drag-over"));
   if (!drag) return;
   if (drag.source === "hotbar" && !hotbarDragLandedInHotbar) {
     hotbarLayout[drag.slotIndex] = null;
@@ -1231,7 +1515,7 @@ function finishHotbarDrag() {
   hotbarDragLandedInHotbar = false;
 }
 
-function activateHotbarSlot(slotIndex) {
+function activateHotbarSlot(slotIndex: number): boolean {
   const slot = hotbarLayout[slotIndex];
   if (!slot) return false;
   if (slot.kind === "item") {
@@ -1244,30 +1528,30 @@ function activateHotbarSlot(slotIndex) {
   return false;
 }
 
-function iconMarkup(url, fallback, className) {
+function iconMarkup(url: string | null, fallback: string | null, className: string): string {
   if (!url) return escapeHtml(fallback ?? "");
   return `<img class="${className}" src="${escapeHtml(url)}" alt="${escapeHtml(fallback ?? "")}" loading="lazy" />`;
 }
 
-function lootLabel(corpse) {
+function lootLabel(corpse: CorpseView): string {
   if (corpse.kind === "drop") return corpse.label ?? "Drop";
   return `${corpse.gold}g`;
 }
 
-function sendInput(time) {
+function sendInput(time: number): void {
   if (isTextEntryFocused()) {
     sendStopInput();
     return;
   }
   const me = self();
   const clickInput = clickDestination && me ? inputTowardDestination(me) : null;
-  const hasManualInput = keys.W.isDown || cursors.up.isDown || keys.S.isDown || cursors.down.isDown || keys.A.isDown || cursors.left.isDown || keys.D.isDown || cursors.right.isDown;
+  const hasManualInput = keys.W?.isDown || cursors.up.isDown || keys.S?.isDown || cursors.down.isDown || keys.A?.isDown || cursors.left.isDown || keys.D?.isDown || cursors.right.isDown;
   if (hasManualInput) clearClickDestination();
-  const input = {
-    up: keys.W.isDown || cursors.up.isDown || Boolean(clickInput?.up),
-    down: keys.S.isDown || cursors.down.isDown || Boolean(clickInput?.down),
-    left: keys.A.isDown || cursors.left.isDown || Boolean(clickInput?.left),
-    right: keys.D.isDown || cursors.right.isDown || Boolean(clickInput?.right),
+  const input: InputPayload = {
+    up: Boolean(keys.W?.isDown) || cursors.up.isDown || Boolean(clickInput?.up),
+    down: Boolean(keys.S?.isDown) || cursors.down.isDown || Boolean(clickInput?.down),
+    left: Boolean(keys.A?.isDown) || cursors.left.isDown || Boolean(clickInput?.left),
+    right: Boolean(keys.D?.isDown) || cursors.right.isDown || Boolean(clickInput?.right),
     moveX: clickInput?.moveX ?? 0,
     moveY: clickInput?.moveY ?? 0
   };
@@ -1278,19 +1562,20 @@ function sendInput(time) {
   send({ type: "input", input });
 }
 
-function sendStopInput() {
-  const input = { up: false, down: false, left: false, right: false, moveX: 0, moveY: 0 };
+function sendStopInput(): void {
+  const input: InputPayload = { up: false, down: false, left: false, right: false, moveX: 0, moveY: 0 };
   const signature = JSON.stringify(input);
   if (signature === lastInputSignature) return;
   lastInputSignature = signature;
   send({ type: "input", input });
 }
 
-function handleWorldClick(pointer) {
+function handleWorldClick(pointer: Phaser.Input.Pointer): void {
   if (!latestState || !self() || pointer.leftButtonDown() === false) return;
   const tx = Math.floor(pointer.worldX / TILE_SIZE);
   const ty = Math.floor(pointer.worldY / TILE_SIZE);
   const me = self();
+  if (!me) return;
   if (startPathToTile(me.floor, tx, ty)) {
     holdMoveActive = true;
     holdMoveTile = { x: tx, y: ty };
@@ -1300,7 +1585,7 @@ function handleWorldClick(pointer) {
   }
 }
 
-function tickHoldMove(time) {
+function tickHoldMove(time: number): void {
   if (!holdMoveActive) return;
   const pointer = scene?.input?.activePointer;
   if (!pointer || !pointer.leftButtonDown()) {
@@ -1328,7 +1613,7 @@ function tickHoldMove(time) {
   holdMoveLastRepathAt = time;
 }
 
-function inputTowardDestination(me) {
+function inputTowardDestination(me: PlayerView): MovementInput | null {
   if (!clickDestination || clickDestination.floor !== me.floor || me.dead) {
     clearClickDestination();
     return null;
@@ -1431,7 +1716,7 @@ function inputTowardDestination(me) {
   const distance = Math.hypot(dx, dy);
   if (distance < 0.16) {
     if (clickPath.length) {
-      clickDestination = clickPath.shift();
+      clickDestination = clickPath.shift() ?? null;
     } else if (pendingAttackTarget && refreshAttackPath(me)) {
       return null;
     } else if (pendingLootTarget && refreshLootPath(me)) {
@@ -1460,7 +1745,7 @@ function inputTowardDestination(me) {
   };
 }
 
-function startAttackPath(monsterOrId) {
+function startAttackPath(monsterOrId: string | MonsterView): void {
   const monster = resolveMonster(monsterOrId);
   const me = self();
   if (!me || !monster || monster.floor !== me.floor) return;
@@ -1474,7 +1759,7 @@ function startAttackPath(monsterOrId) {
   }
 }
 
-function refreshAttackPath(me, monster = null) {
+function refreshAttackPath(me: PlayerView, monster: MonsterView | null = null): boolean {
   const target = monster ?? latestState?.monsters?.find((item) => item.id === pendingAttackTarget);
   if (!target || target.floor !== me.floor) return false;
   if (isInAttackRange(me, target)) return true;
@@ -1484,15 +1769,15 @@ function refreshAttackPath(me, monster = null) {
   return started;
 }
 
-function isInAttackRange(me, monster) {
+function isInAttackRange(me: PlayerView, monster: MonsterView): boolean {
   return Phaser.Math.Distance.Between(me.x, me.y, monster.x, monster.y) <= attackRange(me) + 0.08;
 }
 
-function attackRange(me) {
-  return (CLASSES[me.classKey] ?? CLASSES.adventurer).range;
+function attackRange(me: PlayerView): number {
+  return (CLASSES[me.classKey] ?? CLASSES.adventurer ?? fallbackClassSpec()).range;
 }
 
-function startTreeCutPath(tree) {
+function startTreeCutPath(tree: TreeView): void {
   const me = self();
   if (!me || !tree.active || tree.floor !== me.floor) return;
   clearClickDestination();
@@ -1509,7 +1794,7 @@ function startTreeCutPath(tree) {
   }
 }
 
-function startLootPath(corpse) {
+function startLootPath(corpse: CorpseView): void {
   const me = self();
   if (!me || corpse.floor !== me.floor) return;
   clearClickDestination();
@@ -1525,7 +1810,7 @@ function startLootPath(corpse) {
   }
 }
 
-function refreshLootPath(me, corpse = null) {
+function refreshLootPath(me: PlayerView, corpse: CorpseView | null = null): boolean {
   const target = corpse ?? latestState?.corpses?.find((item) => item.id === pendingLootTarget);
   if (!target || target.floor !== me.floor) return false;
   if (Phaser.Math.Distance.Between(me.x, me.y, target.x, target.y) <= 1.85) return true;
@@ -1533,7 +1818,7 @@ function refreshLootPath(me, corpse = null) {
   return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, target.id));
 }
 
-function startNpcTalkPath(npcOrId) {
+function startNpcTalkPath(npcOrId: string | NpcView): void {
   const npc = resolveNpc(npcOrId);
   const me = self();
   if (!me || !npc || npc.floor !== me.floor) return;
@@ -1551,7 +1836,7 @@ function startNpcTalkPath(npcOrId) {
   }
 }
 
-function startFishingPath(node) {
+function startFishingPath(node: FishingNodeView): void {
   const me = self();
   if (!me || !node || node.floor !== me.floor) return;
   clearClickDestination();
@@ -1564,7 +1849,7 @@ function startFishingPath(node) {
   if (!refreshFishingPath(me, node)) pendingFishingNode = null;
 }
 
-function refreshFishingPath(me, node = null) {
+function refreshFishingPath(me: PlayerView, node: FishingNodeView | null = null): boolean {
   const target = node ?? latestState?.fishingNodes?.find((item) => item.id === pendingFishingNode);
   if (!target || target.floor !== me.floor) return false;
   if (isNearFishingSpot(me, target)) return true;
@@ -1572,12 +1857,12 @@ function refreshFishingPath(me, node = null) {
   return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, null, null, target.id));
 }
 
-function isNearFishingSpot(me, node) {
+function isNearFishingSpot(me: PlayerView, node: FishingNodeView): boolean {
   const approach = fishingApproachPoint(node);
   return Phaser.Math.Distance.Between(me.x, me.y, approach.x, approach.y) <= 1.35;
 }
 
-function fishingApproachPoint(node) {
+function fishingApproachPoint(node: FishingNodeView): ApproachPoint {
   return {
     floor: node.floor,
     x: node.approachX ?? node.x,
@@ -1585,7 +1870,7 @@ function fishingApproachPoint(node) {
   };
 }
 
-function fishingApproachTile(me, node) {
+function fishingApproachTile(me: PlayerView, node: FishingNodeView): ApproachCandidate | TilePoint | null {
   const approach = fishingApproachPoint(node);
   const tx = Math.floor(approach.x);
   const ty = Math.floor(approach.y);
@@ -1593,7 +1878,7 @@ function fishingApproachTile(me, node) {
   return nearestEntityApproachTile(me, approach, 1.2);
 }
 
-function startCookingPath(fire, itemId = selectedInventoryItem) {
+function startCookingPath(fire: FireView, itemId: string | null = selectedInventoryItem): void {
   const me = self();
   if (!me || !fire || fire.floor !== me.floor) return;
   clearClickDestination();
@@ -1611,7 +1896,7 @@ function startCookingPath(fire, itemId = selectedInventoryItem) {
   if (!refreshCookingPath(me, fire)) pendingCookingFire = null;
 }
 
-function refreshCookingPath(me, fire = null) {
+function refreshCookingPath(me: PlayerView, fire: FireView | null = null): boolean {
   const target = fire ?? latestState?.fires?.find((item) => item.id === pendingCookingFire);
   if (!target || target.floor !== me.floor) return false;
   if (Phaser.Math.Distance.Between(me.x, me.y, target.x, target.y) <= 1.8) return true;
@@ -1619,7 +1904,7 @@ function refreshCookingPath(me, fire = null) {
   return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, null, null, null, target.id));
 }
 
-function refreshNpcTalkPath(me, npc = null) {
+function refreshNpcTalkPath(me: PlayerView, npc: NpcView | null = null): boolean {
   const target = npc ?? latestState?.npcs?.find((item) => item.id === pendingNpcTalk);
   if (!target || target.floor !== me.floor) return false;
   if (Phaser.Math.Distance.Between(me.x, me.y, target.x, target.y) <= 2.25) return true;
@@ -1629,44 +1914,44 @@ function refreshNpcTalkPath(me, npc = null) {
   return started;
 }
 
-function shouldRefreshDynamicPath(kind, entity) {
+function shouldRefreshDynamicPath(kind: string, entity: { id: string; x: number; y: number }): boolean {
   const now = performance.now();
   if (now - lastDynamicPathRefreshAt < DYNAMIC_PATH_REFRESH_MS) return false;
   if (!dynamicPathTarget || dynamicPathTarget.kind !== kind || dynamicPathTarget.id !== entity.id) return true;
   return Phaser.Math.Distance.Between(dynamicPathTarget.x, dynamicPathTarget.y, entity.x, entity.y) >= DYNAMIC_PATH_REFRESH_DISTANCE;
 }
 
-function rememberDynamicPathTarget(kind, entity) {
+function rememberDynamicPathTarget(kind: string, entity: { id: string; x: number; y: number }): void {
   dynamicPathTarget = { kind, id: entity.id, x: entity.x, y: entity.y };
   lastDynamicPathRefreshAt = performance.now();
 }
 
-function resolveMonster(monsterOrId) {
+function resolveMonster(monsterOrId: string | MonsterView): MonsterView | null {
   const id = typeof monsterOrId === "string" ? monsterOrId : monsterOrId?.id;
   return latestState?.monsters?.find((monster) => monster.id === id) ?? null;
 }
 
-function resolveNpc(npcOrId) {
+function resolveNpc(npcOrId: string | NpcView): NpcView | null {
   const id = typeof npcOrId === "string" ? npcOrId : npcOrId?.id;
   return latestState?.npcs?.find((npc) => npc.id === id) ?? null;
 }
 
-function openVendor() {
+function openVendor(): void {
   showCenterPanel(dom.vendor);
 }
 
-function toggleCenterPanel(panel) {
+function toggleCenterPanel(panel: HTMLElement): void {
   if (panel.classList.contains("hidden")) showCenterPanel(panel);
   else hideCenterPanels();
 }
 
-function showCenterPanel(panel) {
+function showCenterPanel(panel: HTMLElement): void {
   hideCenterPanels();
   dom.menuBackdrop.classList.remove("hidden");
   panel.classList.remove("hidden");
 }
 
-function hideCenterPanels() {
+function hideCenterPanels(): void {
   dom.menuBackdrop.classList.add("hidden");
   dom.skillsPanel.classList.add("hidden");
   dom.inventoryPanel.classList.add("hidden");
@@ -1675,10 +1960,10 @@ function hideCenterPanels() {
   closeDialogue(false);
 }
 
-function nearestTreeApproachTile(me, tree) {
+function nearestTreeApproachTile(me: PlayerView, tree: TreeView): ApproachCandidate | null {
   const treeTileX = Math.floor(tree.x);
   const treeTileY = Math.floor(tree.y);
-  const candidates = [];
+  const candidates: ApproachCandidate[] = [];
   for (let y = treeTileY - 2; y <= treeTileY + 2; y += 1) {
     for (let x = treeTileX - 2; x <= treeTileX + 2; x += 1) {
       if (!canStandAtTile(tree.floor, x, y)) continue;
@@ -1696,10 +1981,10 @@ function nearestTreeApproachTile(me, tree) {
   return candidates[0] ?? null;
 }
 
-function nearestEntityApproachTile(me, entity, maxRange) {
+function nearestEntityApproachTile(me: PlayerView, entity: { floor: number; x: number; y: number }, maxRange: number): ApproachCandidate | null {
   const entityTileX = Math.floor(entity.x);
   const entityTileY = Math.floor(entity.y);
-  const candidates = [];
+  const candidates: ApproachCandidate[] = [];
   for (let y = entityTileY - 2; y <= entityTileY + 2; y += 1) {
     for (let x = entityTileX - 2; x <= entityTileX + 2; x += 1) {
       if (!canStandAtTile(entity.floor, x, y)) continue;
@@ -1717,7 +2002,17 @@ function nearestEntityApproachTile(me, entity, maxRange) {
   return candidates[0] ?? null;
 }
 
-function startPathToTile(floor, tx, ty, treeId = null, attackId = null, lootId = null, npcId = null, fishingId = null, fireId = null) {
+function startPathToTile(
+  floor: number,
+  tx: number,
+  ty: number,
+  treeId: string | null = null,
+  attackId: string | null = null,
+  lootId: string | null = null,
+  npcId: string | null = null,
+  fishingId: string | null = null,
+  fireId: string | null = null
+): boolean {
   const me = self();
   if (!me || floor !== me.floor) return false;
   const destination = findReachableClickTile(floor, Math.floor(me.x), Math.floor(me.y), tx, ty);
@@ -1737,12 +2032,12 @@ function startPathToTile(floor, tx, ty, treeId = null, attackId = null, lootId =
   return true;
 }
 
-function findReachableClickTile(floor, startX, startY, tx, ty) {
+function findReachableClickTile(floor: number, startX: number, startY: number, tx: number, ty: number): TilePoint | null {
   if (!isInMap(tx, ty)) return null;
   if (canStandAtTile(floor, tx, ty)) return { x: tx, y: ty };
 
   const maxRadius = 4;
-  const candidates = [];
+  const candidates: ApproachCandidate[] = [];
   for (let radius = 1; radius <= maxRadius; radius += 1) {
     for (let y = ty - radius; y <= ty + radius; y += 1) {
       for (let x = tx - radius; x <= tx + radius; x += 1) {
@@ -1767,13 +2062,16 @@ function findReachableClickTile(floor, startX, startY, tx, ty) {
   return null;
 }
 
-function simplifyTilePath(path) {
+function simplifyTilePath(path: TilePoint[]): TilePoint[] {
   if (path.length <= 2) return path;
-  const simplified = [path[0]];
+  const first = path[0];
+  if (!first) return path;
+  const simplified: TilePoint[] = [first];
   for (let i = 1; i < path.length - 1; i += 1) {
     const previous = simplified[simplified.length - 1];
     const current = path[i];
     const next = path[i + 1];
+    if (!previous || !current || !next) continue;
     const dx1 = Math.sign(current.x - previous.x);
     const dy1 = Math.sign(current.y - previous.y);
     const dx2 = Math.sign(next.x - current.x);
@@ -1781,20 +2079,23 @@ function simplifyTilePath(path) {
     if (dx1 === dx2 && dy1 === dy2) continue;
     simplified.push(current);
   }
-  simplified.push(path[path.length - 1]);
+  const last = path[path.length - 1];
+  if (last) simplified.push(last);
   return simplified;
 }
 
-function findTilePath(floor, startX, startY, goalX, goalY) {
+function findTilePath(floor: number, startX: number, startY: number, goalX: number, goalY: number): TilePoint[] {
   if (startX === goalX && startY === goalY) return [{ x: startX, y: startY }];
-  const open = [{ x: startX, y: startY, g: 0, f: tileHeuristic(startX, startY, goalX, goalY), parent: null }];
-  const bestByKey = new Map([[tileKey(startX, startY), open[0]]]);
-  const closed = new Set();
+  const startNode: PathNode = { x: startX, y: startY, g: 0, f: tileHeuristic(startX, startY, goalX, goalY), parent: null };
+  const open: PathNode[] = [startNode];
+  const bestByKey = new Map<string, PathNode>([[tileKey(startX, startY), startNode]]);
+  const closed = new Set<string>();
   const maxVisited = MAP_COLS * MAP_ROWS;
 
   while (open.length && closed.size < maxVisited) {
     open.sort((a, b) => a.f - b.f);
     const current = open.shift();
+    if (!current) break;
     const currentKey = tileKey(current.x, current.y);
     if (closed.has(currentKey)) continue;
     if (current.x === goalX && current.y === goalY) return unwindPath(current);
@@ -1806,7 +2107,7 @@ function findTilePath(floor, startX, startY, goalX, goalY) {
       const g = current.g + neighbor.cost;
       const existing = bestByKey.get(key);
       if (existing && existing.g <= g) continue;
-      const next = {
+      const next: PathNode = {
         x: neighbor.x,
         y: neighbor.y,
         g,
@@ -1821,8 +2122,8 @@ function findTilePath(floor, startX, startY, goalX, goalY) {
   return [];
 }
 
-function pathNeighbors(floor, x, y) {
-  const neighbors = [];
+function pathNeighbors(floor: number, x: number, y: number): Array<{ x: number; y: number; cost: number }> {
+  const neighbors: Array<{ x: number; y: number; cost: number }> = [];
   for (let dy = -1; dy <= 1; dy += 1) {
     for (let dx = -1; dx <= 1; dx += 1) {
       if (!dx && !dy) continue;
@@ -1836,33 +2137,33 @@ function pathNeighbors(floor, x, y) {
   return neighbors;
 }
 
-function canStandAtTile(floor, tx, ty) {
+function canStandAtTile(floor: number, tx: number, ty: number): boolean {
   return isInMap(tx, ty) && !isBlockedTile(tileAt(floor, tx, ty));
 }
 
-function isInMap(tx, ty) {
+function isInMap(tx: number, ty: number): boolean {
   return tx >= 0 && ty >= 0 && tx < MAP_COLS && ty < MAP_ROWS;
 }
 
-function tileHeuristic(x, y, goalX, goalY) {
+function tileHeuristic(x: number, y: number, goalX: number, goalY: number): number {
   const dx = Math.abs(goalX - x);
   const dy = Math.abs(goalY - y);
   return Math.max(dx, dy) + (Math.SQRT2 - 1) * Math.min(dx, dy);
 }
 
-function tileKey(x, y) {
+function tileKey(x: number, y: number): string {
   return `${x},${y}`;
 }
 
-function unwindPath(node) {
-  const path = [];
-  for (let current = node; current; current = current.parent) path.push({ x: current.x, y: current.y });
+function unwindPath(node: PathNode): TilePoint[] {
+  const path: TilePoint[] = [];
+  for (let current: PathNode | null = node; current; current = current.parent) path.push({ x: current.x, y: current.y });
   return path.reverse();
 }
 
-function cycleTarget() {
+function cycleTarget(): void {
   const me = self();
-  if (!me || isTextEntryFocused()) return;
+  if (!me || isTextEntryFocused() || !latestState) return;
   const candidates = latestState.monsters
     .filter((monster) => monster.floor === me.floor)
     .map((monster) => ({ ...monster, dist: Phaser.Math.Distance.Between(me.x, me.y, monster.x, monster.y) }))
@@ -1871,25 +2172,26 @@ function cycleTarget() {
 
   const currentIndex = candidates.findIndex((monster) => monster.id === me.targetId);
   const next = candidates[(currentIndex + 1) % candidates.length];
+  if (!next) return;
   clearClickDestination();
   send({ type: "target", id: next.id });
 }
 
-function isTextEntryFocused() {
+function isTextEntryFocused(): boolean {
   return isTextEntryElement(document.activeElement);
 }
 
-function isTextEntryElement(element) {
+function isTextEntryElement(element: Element | null): boolean {
   if (!element) return false;
-  if (element.isContentEditable) return true;
+  if ((element as HTMLElement).isContentEditable) return true;
   return ["INPUT", "TEXTAREA", "SELECT"].includes(element.tagName);
 }
 
-function stopTextEntryKeyPropagation(event) {
-  if (isTextEntryElement(event.target)) event.stopPropagation();
+function stopTextEntryKeyPropagation(event: KeyboardEvent): void {
+  if (isTextEntryElement(event.target as Element | null)) event.stopPropagation();
 }
 
-function refreshKeyboardCapture() {
+function refreshKeyboardCapture(): void {
   const keyboard = scene?.input?.keyboard;
   if (!keyboard) return;
   if (isTextEntryFocused()) {
@@ -1899,7 +2201,7 @@ function refreshKeyboardCapture() {
   }
 }
 
-function drawClickMarker(destination) {
+function drawClickMarker(destination: PathDestination): void {
   if (!clickMarker) {
     clickMarker = scene.add.ellipse(0, 0, 22, 12).setStrokeStyle(2, 0x9ee6b1, 0.95);
     fxLayer.add(clickMarker);
@@ -1908,7 +2210,7 @@ function drawClickMarker(destination) {
   clickMarker.setVisible(true);
 }
 
-function clearClickDestination({ keepHold = false } = {}) {
+function clearClickDestination({ keepHold = false }: { keepHold?: boolean } = {}): void {
   clickDestination = null;
   clickPath = [];
   pendingTreeCut = null;
@@ -1925,11 +2227,13 @@ function clearClickDestination({ keepHold = false } = {}) {
   if (clickMarker) clickMarker.setVisible(false);
 }
 
-function addTileDecorations(rows) {
-  const decorations = [];
+function addTileDecorations(rows: string[]): void {
+  const decorations: DecorationSprite[] = [];
   for (let y = 0; y < rows.length; y += 1) {
-    for (let x = 0; x < rows[y].length; x += 1) {
-      const tile = rows[y][x];
+    const row = rows[y];
+    if (row === undefined) continue;
+    for (let x = 0; x < row.length; x += 1) {
+      const tile = row[x] ?? "";
       if (tile === "r") decorations.push({ key: "spriteRock", x: x + 0.5, y: y + 0.78, w: 38, h: 28 });
       if (tile === "h") decorations.push({ key: "spriteGrave", x: x + 0.5, y: y + 0.95, w: 24, h: 34 });
       if (tile === "q") decorations.push({ key: "spriteFence", x: x + 0.5, y: y + 0.78, w: 46, h: 24 });
@@ -1939,8 +2243,8 @@ function addTileDecorations(rows) {
   decorations.sort((a, b) => a.y - b.y).forEach(placeMapSprite);
 }
 
-function addComposedMapObjects(floor) {
-  const southTownObjects = [
+function addComposedMapObjects(floor: number): void {
+  const southTownObjects: DecorationSprite[] = [
     { key: "spriteBridge", x: 7.2, y: 18.6, w: 108, h: 58 },
     { key: "spriteRedHouse", x: 25, y: 11.4, w: 288, h: 198 },
     { key: "spriteBlueHouse", x: 38, y: 11.3, w: 244, h: 176 },
@@ -1959,7 +2263,7 @@ function addComposedMapObjects(floor) {
     { key: "spriteTree", x: 36.2, y: 17.4, w: 62, h: 80 },
     { key: "spritePine", x: 20.2, y: 31.6, w: 54, h: 84 }
   ];
-  const northTownObjects = [
+  const northTownObjects: DecorationSprite[] = [
     { key: "spriteGreenHouse", x: 16.5, y: 12.6, w: 190, h: 176 },
     { key: "spriteBlueHouse", x: 35.3, y: 12.7, w: 220, h: 164 },
     { key: "spriteThatchHouse", x: 21.5, y: 28.4, w: 210, h: 170 },
@@ -1972,7 +2276,7 @@ function addComposedMapObjects(floor) {
     { key: "spriteTree", x: 9, y: 9.5, w: 66, h: 86 },
     { key: "spritePine", x: 44, y: 30.2, w: 54, h: 84 }
   ];
-  const cemeteryObjects = [
+  const cemeteryObjects: DecorationSprite[] = [
     { key: "spriteCrypt", x: 26, y: 23.1, w: 126, h: 206 },
     { key: "spriteStoneWall", x: 15, y: 6.1, w: 112, h: 54 },
     { key: "spriteStoneWall", x: 36, y: 28.8, w: 112, h: 54 },
@@ -1982,13 +2286,13 @@ function addComposedMapObjects(floor) {
     { key: "spriteObelisk", x: 15.8, y: 18.5, w: 38, h: 60 },
     { key: "spriteObelisk", x: 34.3, y: 23.4, w: 34, h: 54 }
   ];
-  const cryptObjects = [
+  const cryptObjects: DecorationSprite[] = [
     { key: "spriteStoneWall", x: 8, y: 11.1, w: 118, h: 58 },
     { key: "spriteStoneWall", x: 36, y: 9.8, w: 118, h: 58 },
     { key: "spriteObelisk", x: 16.4, y: 18.8, w: 36, h: 58 },
     { key: "spriteObelisk", x: 42.6, y: 23.8, w: 40, h: 64 }
   ];
-  const woodsObjects = [
+  const woodsObjects: DecorationSprite[] = [
     { key: "spriteTree", x: 8.5, y: 10.4, w: 80, h: 104 },
     { key: "spritePine", x: 14.2, y: 29.8, w: 58, h: 92 },
     { key: "spriteTree", x: 19.5, y: 7.4, w: 76, h: 98 },
@@ -1998,33 +2302,34 @@ function addComposedMapObjects(floor) {
     { key: "spriteRock", x: 38.5, y: 5.7, w: 48, h: 36 }
   ];
 
-  const objects = {
+  const objectsByFloor: Record<number, DecorationSprite[]> = {
     0: southTownObjects,
     1: cemeteryObjects,
     2: cryptObjects,
     3: woodsObjects,
     4: northTownObjects
-  }[floor] ?? [];
+  };
+  const objects = objectsByFloor[floor] ?? [];
   objects
     .filter((item) => item.key !== "spriteTree" && item.key !== "spritePine")
     .sort((a, b) => a.y - b.y)
     .forEach(placeMapSprite);
 }
 
-function placeMapSprite(item) {
+function placeMapSprite(item: DecorationSprite): Phaser.GameObjects.Image {
   const sprite = scene.add.image(item.x * TILE_SIZE, item.y * TILE_SIZE, item.key).setOrigin(0.5, 1);
   sprite.setDisplaySize(item.w, item.h);
   mapLayer.add(sprite);
   return sprite;
 }
 
-function consumeEvents(events) {
+function consumeEvents(events: GameEvent[]): void {
   for (const event of events) {
-    if (event.type === "system" || event.type === "chat") addChat(event.text);
+    if (event.type === "system" || event.type === "chat") addChat(String(event.text));
     if (event.type === "dialogue") openDialogue(event);
     if (event.type === "effect" && self()?.floor === event.floor) playCombatEffect(event);
     if ((event.type === "hit" || event.type === "float") && self()?.floor === event.floor) {
-      const floater = scene.add.text(event.x * TILE_SIZE, event.y * TILE_SIZE, String(event.text), textStyle(13, event.color ?? "#fff")).setOrigin(0.5);
+      const floater = scene.add.text((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, String(event.text), textStyle(13, event.color ?? "#fff")).setOrigin(0.5) as Floater;
       floater.life = 1000;
       floaters.push(floater);
       fxLayer.add(floater);
@@ -2032,8 +2337,8 @@ function consumeEvents(events) {
   }
 }
 
-function openDialogue(event) {
-  const lines = Array.isArray(event.lines) ? event.lines : [];
+function openDialogue(event: GameEvent): void {
+  const lines: DialogueLine[] = Array.isArray(event.lines) ? event.lines : [];
   if (!lines.length) return;
   hideCenterPanels();
   activeDialogue = { lines, index: 0, opensShop: Boolean(event.opensShop) };
@@ -2042,9 +2347,9 @@ function openDialogue(event) {
   renderDialogueLine();
 }
 
-function renderDialogueLine() {
+function renderDialogueLine(): void {
   const line = activeDialogue?.lines?.[activeDialogue.index];
-  if (!line) {
+  if (!line || !activeDialogue) {
     closeDialogue();
     return;
   }
@@ -2053,13 +2358,13 @@ function renderDialogueLine() {
   dom.dialogueNextButton.textContent = activeDialogue.index >= activeDialogue.lines.length - 1 ? "Done" : "Continue";
 }
 
-function advanceDialogue() {
+function advanceDialogue(): void {
   if (!activeDialogue) return;
   activeDialogue.index += 1;
   renderDialogueLine();
 }
 
-function closeDialogue(openFollowup = true) {
+function closeDialogue(openFollowup = true): void {
   const opensShop = Boolean(activeDialogue?.opensShop);
   activeDialogue = null;
   dom.dialogue.classList.add("hidden");
@@ -2073,11 +2378,11 @@ function closeDialogue(openFollowup = true) {
   }
 }
 
-function playCombatEffect(event) {
-  const targetX = event.x * TILE_SIZE;
-  const targetY = event.y * TILE_SIZE - 10;
-  const fromX = (event.fromX ?? event.x) * TILE_SIZE;
-  const fromY = (event.fromY ?? event.y) * TILE_SIZE - 10;
+function playCombatEffect(event: GameEvent): void {
+  const targetX = (event.x ?? 0) * TILE_SIZE;
+  const targetY = (event.y ?? 0) * TILE_SIZE - 10;
+  const fromX = (event.fromX ?? event.x ?? 0) * TILE_SIZE;
+  const fromY = (event.fromY ?? event.y ?? 0) * TILE_SIZE - 10;
   const angle = Phaser.Math.Angle.Between(fromX, fromY, targetX, targetY);
 
   if (event.text === "fish") {
@@ -2121,7 +2426,7 @@ function playCombatEffect(event) {
   playSlash(targetX, targetY, angle);
 }
 
-function playSlash(x, y, angle) {
+function playSlash(x: number, y: number, angle: number): void {
   const slash = scene.add.sprite(x, y, effectFrameKey("slash", 0)).setOrigin(0.5);
   slash.setDisplaySize(76, 44);
   slash.setRotation(angle);
@@ -2142,7 +2447,7 @@ function playSlash(x, y, angle) {
   });
 }
 
-function playBurst(family, x, y) {
+function playBurst(family: string, x: number, y: number): void {
   const burst = scene.add.sprite(x, y, effectFrameKey(`${family}Burst`, 0)).setOrigin(0.5);
   burst.setDisplaySize(58, 58);
   fxLayer.add(burst);
@@ -2162,9 +2467,10 @@ function playBurst(family, x, y) {
   });
 }
 
-function updateFloaters() {
+function updateFloaters(): void {
   for (let i = floaters.length - 1; i >= 0; i -= 1) {
     const floater = floaters[i];
+    if (!floater) continue;
     floater.y -= 0.45;
     floater.life -= scene.game.loop.delta;
     floater.setAlpha(Math.max(0, floater.life / 1000));
@@ -2175,12 +2481,12 @@ function updateFloaters() {
   }
 }
 
-function createActorFrames(scene) {
-  const knightRows = { up: 74, right: 202, down: 328, left: 456 };
-  const casterRows = { up: 692, right: 818, down: 948, left: 1078 };
+function createActorFrames(scene: Phaser.Scene): void {
+  const knightRows: Record<Direction, number> = { up: 74, right: 202, down: 328, left: 456 };
+  const casterRows: Record<Direction, number> = { up: 692, right: 818, down: 948, left: 1078 };
   const knightXs = [330, 456, 582, 708];
   const casterXs = [334, 460, 586, 712];
-  const goblinFrames = {
+  const goblinFrames: DirectionFrames = {
     up: paddedSpriteFrames([
       [305, 46, 100, 113],
       [496, 41, 100, 118],
@@ -2206,7 +2512,7 @@ function createActorFrames(scene) {
       [877, 490, 89, 114]
     ])
   };
-  const skeletonFrames = {
+  const skeletonFrames: DirectionFrames = {
     up: paddedSpriteFrames([
       [298, 54, 96, 116],
       [471, 54, 93, 116],
@@ -2262,7 +2568,7 @@ function createActorFrames(scene) {
   });
 }
 
-function uniformDirectionFrames(cellW, cellH, frames) {
+function uniformDirectionFrames(cellW: number, cellH: number, frames: number): DirectionFrames {
   const xs = Array.from({ length: frames }, (_, i) => i * cellW);
   return {
     up: spriteFrames(xs, 0, cellW, cellH),
@@ -2272,7 +2578,7 @@ function uniformDirectionFrames(cellW, cellH, frames) {
   };
 }
 
-function createEffectFrames(scene) {
+function createEffectFrames(scene: Phaser.Scene): void {
   const slashXs = [260, 360, 480, 620, 780, 960];
   slashXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("slash", index), x, 64, 160, 70));
 
@@ -2285,11 +2591,11 @@ function createEffectFrames(scene) {
   burstXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("iceMissileBurst", index), x, 698, 96, 82));
 }
 
-function effectFrameKey(family, frame) {
+function effectFrameKey(family: string, frame: number): string {
   return `${family}-${frame}`;
 }
 
-function createFrameSet(scene, sourceKey, family, rows, xs, width, height) {
+function createFrameSet(scene: Phaser.Scene, sourceKey: string, family: string, rows: Record<Direction, number>, xs: number[], width: number, height: number): void {
   for (const dir of DIRECTIONS) {
     createAlignedTransparentFrames(
       scene,
@@ -2299,7 +2605,7 @@ function createFrameSet(scene, sourceKey, family, rows, xs, width, height) {
   }
 }
 
-function createExplicitFrameSet(scene, sourceKey, family, framesByDir) {
+function createExplicitFrameSet(scene: Phaser.Scene, sourceKey: string, family: string, framesByDir: DirectionFrames): void {
   for (const dir of DIRECTIONS) {
     createAlignedTransparentFrames(
       scene,
@@ -2309,11 +2615,11 @@ function createExplicitFrameSet(scene, sourceKey, family, framesByDir) {
   }
 }
 
-function spriteFrames(xs, y, w, h) {
+function spriteFrames(xs: number[], y: number, w: number, h: number): SpriteFrameBox[] {
   return xs.map((x) => ({ x, y, w, h }));
 }
 
-function paddedSpriteFrames(boxes, padding = 8) {
+function paddedSpriteFrames(boxes: Array<[number, number, number, number]>, padding = 8): SpriteFrameBox[] {
   return boxes.map(([x, y, w, h]) => ({
     x: Math.max(0, x - padding),
     y: Math.max(0, y - padding),
@@ -2322,23 +2628,23 @@ function paddedSpriteFrames(boxes, padding = 8) {
   }));
 }
 
-function actorFrameKey(family, dir, frame) {
+function actorFrameKey(family: string, dir: Direction, frame: number): string {
   const safeDir = DIRECTIONS.includes(dir) ? dir : "down";
   return `${family}-${safeDir}-${frame}`;
 }
 
-function actorTextureKey(family, dir, frame) {
-  let textureDir = DIRECTIONS.includes(dir) ? dir : "down";
+function actorTextureKey(family: string, dir: Direction, frame: number): string {
+  let textureDir: Direction = DIRECTIONS.includes(dir) ? dir : "down";
   if (mirrorRightFromLeft(family) && textureDir === "right") textureDir = "left";
   if (mirrorLeftFromRight(family) && textureDir === "left") textureDir = "right";
   return actorFrameKey(family, textureDir, frame);
 }
 
-function actorFlipX(family, dir) {
+function actorFlipX(family: string, dir: Direction): boolean {
   return (mirrorRightFromLeft(family) && dir === "right") || (mirrorLeftFromRight(family) && dir === "left");
 }
 
-function actorFrameAnchorDrift() {
+function actorFrameAnchorDrift(): Array<{ family: string; dir: Direction; driftX: number; driftY: number }> {
   if (!scene) return [];
   const families = [
     "knight",
@@ -2357,7 +2663,7 @@ function actorFrameAnchorDrift() {
     DIRECTIONS.map((dir) => {
       const anchors = [0, 1, 2, 3].map((frame) => {
         const image = scene.textures.get(actorFrameKey(family, dir, frame)).getSourceImage();
-        const bbox = opaqueBoundingBox(image);
+        const bbox = opaqueBoundingBox(image as HTMLCanvasElement);
         return bbox ? { x: bbox.x + bbox.w / 2, y: bbox.y + bbox.h } : { x: 0, y: 0 };
       });
       return {
@@ -2370,32 +2676,23 @@ function actorFrameAnchorDrift() {
   );
 }
 
-function mirrorRightFromLeft(family) {
+function mirrorRightFromLeft(family: string): boolean {
   return family === "knight" || family === "caster" || family === "goblin" || family === "skeleton";
 }
 
-function mirrorLeftFromRight(family) {
+function mirrorLeftFromRight(family: string): boolean {
   return family === "rat" || family === "spider";
 }
 
-function makeTransparentCrop(scene, sourceKey, newKey, sx, sy, sw, sh) {
-  const canvas = createTransparentCropCanvas(scene, sourceKey, sx, sy, sw, sh);
-  addNearestCanvasTexture(scene, newKey, canvas);
+interface AlignedFrameSpec {
+  key: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
-function createTransparentCropCanvas(scene, sourceKey, sx, sy, sw, sh) {
-  const source = scene.textures.get(sourceKey).getSourceImage();
-  const canvas = document.createElement("canvas");
-  canvas.width = sw;
-  canvas.height = sh;
-  const ctx = canvas.getContext("2d");
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(source, sx, sy, sw, sh, 0, 0, sw, sh);
-  chromaKeyMagenta(ctx, sw, sh);
-  return canvas;
-}
-
-function createAlignedTransparentFrames(scene, sourceKey, frames) {
+function createAlignedTransparentFrames(scene: Phaser.Scene, sourceKey: string, frames: AlignedFrameSpec[]): void {
   const crops = frames.map((frame) => {
     const canvas = createTransparentCropCanvas(scene, sourceKey, frame.x, frame.y, frame.w, frame.h);
     const bbox = opaqueBoundingBox(canvas) ?? { x: 0, y: 0, w: frame.w, h: frame.h };
@@ -2417,14 +2714,29 @@ function createAlignedTransparentFrames(scene, sourceKey, frames) {
     canvas.width = canvasW;
     canvas.height = canvasH;
     const ctx = canvas.getContext("2d");
+    if (!ctx) continue;
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(crop.canvas, Math.round(targetAnchor.x - crop.anchor.x), Math.round(targetAnchor.y - crop.anchor.y));
     addNearestCanvasTexture(scene, crop.key, canvas);
   }
 }
 
-function opaqueBoundingBox(canvas) {
+function createTransparentCropCanvas(scene: Phaser.Scene, sourceKey: string, sx: number, sy: number, sw: number, sh: number): HTMLCanvasElement {
+  const source = scene.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
+  const canvas = document.createElement("canvas");
+  canvas.width = sw;
+  canvas.height = sh;
   const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(source, sx, sy, sw, sh, 0, 0, sw, sh);
+  chromaKeyMagenta(ctx, sw, sh);
+  return canvas;
+}
+
+function opaqueBoundingBox(canvas: HTMLCanvasElement): BoundingBox | null {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
   const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
   let minX = canvas.width;
   let minY = canvas.height;
@@ -2443,13 +2755,13 @@ function opaqueBoundingBox(canvas) {
   return { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
 }
 
-function addNearestCanvasTexture(scene, key, canvas) {
+function addNearestCanvasTexture(scene: Phaser.Scene, key: string, canvas: HTMLCanvasElement): void {
   scene.textures.addCanvas(key, canvas);
   scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
 
-function makeTileTexture(scene, sourceKey, newKey, sx, sy, sw, sh) {
-  const source = scene.textures.get(sourceKey).getSourceImage();
+function makeTileTexture(scene: Phaser.Scene, sourceKey: string, newKey: string, sx: number, sy: number, sw: number, sh: number): void {
+  const source = scene.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
   const sourceCanvas = document.createElement("canvas");
   const inset = Math.min(10, Math.floor(sw / 5), Math.floor(sh / 5));
   const cropW = sw - inset * 2;
@@ -2457,6 +2769,7 @@ function makeTileTexture(scene, sourceKey, newKey, sx, sy, sw, sh) {
   sourceCanvas.width = cropW;
   sourceCanvas.height = cropH;
   const sourceCtx = sourceCanvas.getContext("2d");
+  if (!sourceCtx) return;
   sourceCtx.imageSmoothingEnabled = false;
   sourceCtx.drawImage(source, sx + inset, sy + inset, cropW, cropH, 0, 0, cropW, cropH);
   chromaKeyMagenta(sourceCtx, cropW, cropH);
@@ -2465,6 +2778,7 @@ function makeTileTexture(scene, sourceKey, newKey, sx, sy, sw, sh) {
   canvas.width = TILE_SIZE;
   canvas.height = TILE_SIZE;
   const ctx = canvas.getContext("2d");
+  if (!ctx) return;
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(sourceCanvas, 0, 0, cropW, cropH, 0, 0, TILE_SIZE, TILE_SIZE);
   chromaKeyMagenta(ctx, TILE_SIZE, TILE_SIZE);
@@ -2473,12 +2787,13 @@ function makeTileTexture(scene, sourceKey, newKey, sx, sy, sw, sh) {
   scene.textures.get(newKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
 
-function makeSpriteTexture(scene, sourceKey, newKey, sx, sy, sw, sh) {
-  const source = scene.textures.get(sourceKey).getSourceImage();
+function makeSpriteTexture(scene: Phaser.Scene, sourceKey: string, newKey: string, sx: number, sy: number, sw: number, sh: number): void {
+  const source = scene.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
   const canvas = document.createElement("canvas");
   canvas.width = sw;
   canvas.height = sh;
   const ctx = canvas.getContext("2d");
+  if (!ctx) return;
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(source, sx, sy, sw, sh, 0, 0, sw, sh);
   chromaKeyMagenta(ctx, sw, sh);
@@ -2486,18 +2801,18 @@ function makeSpriteTexture(scene, sourceKey, newKey, sx, sy, sw, sh) {
   scene.textures.get(newKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
 
-function chromaKeyMagenta(ctx, width, height) {
+function chromaKeyMagenta(ctx: CanvasRenderingContext2D, width: number, height: number): void {
   const image = ctx.getImageData(0, 0, width, height);
   for (let i = 0; i < image.data.length; i += 4) {
-    const r = image.data[i];
-    const g = image.data[i + 1];
-    const b = image.data[i + 2];
+    const r = image.data[i] ?? 0;
+    const g = image.data[i + 1] ?? 0;
+    const b = image.data[i + 2] ?? 0;
     if (isMagentaKey(r, g, b)) image.data[i + 3] = 0;
   }
   ctx.putImageData(image, 0, 0);
 }
 
-function fillTransparentPixels(ctx, width, height) {
+function fillTransparentPixels(ctx: CanvasRenderingContext2D, width: number, height: number): void {
   const image = ctx.getImageData(0, 0, width, height);
   const fill = sampleOpaqueColor(image, width, height);
   for (let i = 0; i < image.data.length; i += 4) {
@@ -2510,7 +2825,7 @@ function fillTransparentPixels(ctx, width, height) {
   ctx.putImageData(image, 0, 0);
 }
 
-function sampleOpaqueColor(image, width, height) {
+function sampleOpaqueColor(image: ImageData, width: number, height: number): RgbColor {
   let r = 0;
   let g = 0;
   let b = 0;
@@ -2523,9 +2838,9 @@ function sampleOpaqueColor(image, width, height) {
     for (let x = startX; x < endX; x += 1) {
       const i = (y * width + x) * 4;
       if (image.data[i + 3] === 0) continue;
-      r += image.data[i];
-      g += image.data[i + 1];
-      b += image.data[i + 2];
+      r += image.data[i] ?? 0;
+      g += image.data[i + 1] ?? 0;
+      b += image.data[i + 2] ?? 0;
       count += 1;
     }
   }
@@ -2533,51 +2848,33 @@ function sampleOpaqueColor(image, width, height) {
   return { r: Math.round(r / count), g: Math.round(g / count), b: Math.round(b / count) };
 }
 
-function isMagentaKey(r, g, b) {
+function isMagentaKey(r: number, g: number, b: number): boolean {
   return r > 95 && b > 90 && g < 135 && Math.abs(r - b) < 95 && r > g * 1.35 && b > g * 1.25;
 }
 
-function addChat(line) {
+function addChat(line: string): void {
   chatLines.push(line);
   while (chatLines.length > 9) chatLines.shift();
   dom.chatLog.innerHTML = chatLines.map((item) => `<div>${escapeHtml(item)}</div>`).join("");
   dom.chatLog.scrollTop = dom.chatLog.scrollHeight;
 }
 
-function send(message) {
+function send(message: ClientMessage): void {
   if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
 }
 
-function self() {
+function self(): PlayerView | undefined {
   return latestState?.players.find((player) => player.id === selfId);
 }
 
-function setBar(bar, label, value, max, prefix) {
+function setBar(bar: HTMLElement, label: HTMLElement, value: number, max: number, prefix: string): void {
   const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
   bar.style.width = `${pct * 100}%`;
   label.textContent = `${prefix} ${Math.round(value)}/${Math.round(max)}`;
 }
 
-function tileColor(tile) {
-  return {
-    "#": 0x191f1b,
-    ".": 0x315f41,
-    s: 0x5e7164,
-    p: 0x7b7467,
-    d: 0x4a3c34,
-    c: 0x362f31,
-    b: 0x493339,
-    r: 0x252320,
-    f: 0x223727,
-    "~": 0x1f5a74,
-    ">": 0xc99a4e,
-    "<": 0xc99a4e,
-    n: 0xb08954
-  }[tile] ?? 0x315f41;
-}
-
-function tileBaseTexture(tile) {
-  return {
+function tileBaseTexture(tile: string): string {
+  const map: Record<string, string> = {
     "#": "tileRock",
     ".": "tileGrass",
     F: "tileForest",
@@ -2601,10 +2898,11 @@ function tileBaseTexture(tile) {
     T: "tileDirt",
     C: "tileGravePath",
     n: "tileTownFloor"
-  }[tile] ?? "tileGrass";
+  };
+  return map[tile] ?? "tileGrass";
 }
 
-function textStyle(size, color) {
+function textStyle(size: number, color: string): Phaser.Types.GameObjects.Text.TextStyle {
   return {
     fontFamily: "Inter, ui-sans-serif, system-ui",
     fontSize: `${size}px`,
@@ -2614,11 +2912,12 @@ function textStyle(size, color) {
   };
 }
 
-function escapeHtml(value) {
-  return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" })[char]);
+function escapeHtml(value: string): string {
+  const replacements: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" };
+  return value.replace(/[&<>"']/g, (char) => replacements[char] ?? char);
 }
 
-function formatBytes(value) {
+function formatBytes(value: number): string {
   if (value < 1024) return `${value}B`;
   if (value < 1024 * 1024) return `${Math.round(value / 102.4) / 10}KB`;
   return `${Math.round(value / 104857.6) / 10}MB`;

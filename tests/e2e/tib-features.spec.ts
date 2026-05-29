@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { PNG } from "pngjs";
-import { MONSTER_SPAWNS } from "../../src/shared.js";
+import { MONSTER_SPAWNS } from "../../src/shared.ts";
 
 const NORTHWOOD_EXPECTED_TYPES = [
   "rat",
@@ -42,12 +42,14 @@ test("skills, firemaking, and cooking are usable and visually present", async ({
   await expect(page.locator("[data-item='flint_steel']")).toHaveClass(/selected/);
   await page.locator("[data-item='logs']").click();
 
-  await page.waitForFunction(() => window.__TIB_E2E__?.getState()?.fires?.length > 0);
+  await page.waitForFunction(() => (window.__TIB_E2E__?.getState()?.fires?.length ?? 0) > 0);
   await expect(page.locator("#inventoryPanel")).toBeHidden();
   expect(visualStats(await page.locator("canvas").screenshot()).orangePixels).toBeGreaterThan(20);
 
-  const firePoint = await page.waitForFunction(() => window.__TIB_E2E__?.fireScreenPoint?.());
-  await page.locator("canvas").click({ position: await firePoint.jsonValue() });
+  const firePoint = await page.waitForFunction(() => window.__TIB_E2E__?.fireScreenPoint?.() ?? null);
+  const firePos = await firePoint.jsonValue();
+  if (!firePos) throw new Error("fireScreenPoint never resolved");
+  await page.locator("canvas").click({ position: firePos });
   await expect(page.locator("#inventoryPanel")).toBeVisible();
   await expect(page.locator("[data-item='raw_fish']")).toBeVisible();
   await page.locator("[data-item='raw_fish']").click();
@@ -68,9 +70,10 @@ test("actor animation frames keep a stable bottom-center anchor", async ({ page 
   await joinFreshCharacter(page);
   const drift = await page.waitForFunction(() => {
     const rows = window.__TIB_E2E__?.actorFrameAnchorDrift?.();
-    return rows?.length ? rows : false;
+    return rows?.length ? rows : null;
   });
   const rows = await drift.jsonValue();
+  if (!rows) throw new Error("actorFrameAnchorDrift never resolved");
   const unstable = rows.filter((row) => row.driftX > 0.5 || row.driftY > 0);
   expect(unstable).toEqual([]);
 });
@@ -87,7 +90,7 @@ test("Northwood spawn table covers every enemy type and renders 4-direction fram
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
 
-  const observed = new Set();
+  const observed = new Set<string>();
   for (const probe of NORTHWOOD_SUBZONE_PROBES) {
     await teleportTo(page, 3, probe.x, probe.y);
     const monsters = await page.waitForFunction(
@@ -99,7 +102,9 @@ test("Northwood spawn table covers every enemy type and renders 4-direction fram
       },
       { x: probe.x, y: probe.y }
     );
-    for (const monster of await monsters.jsonValue()) observed.add(monster.type);
+    const monsterList = await monsters.jsonValue();
+    if (!monsterList) throw new Error("monster list never resolved");
+    for (const monster of monsterList) observed.add(monster.type);
   }
   expect([...observed].sort()).toEqual([...NORTHWOOD_EXPECTED_TYPES].sort());
 
@@ -115,25 +120,25 @@ test("Northwood spawn table covers every enemy type and renders 4-direction fram
   }
 });
 
-async function teleportTo(page, floor, x, y) {
+async function teleportTo(page: Page, floor: number, x: number, y: number): Promise<void> {
   await page.evaluate(
     ({ floor, x, y }) => {
-      window.__TIB_E2E__.send({ type: "e2eGrantItems", items: [], floor, x, y });
+      window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [], floor, x, y });
     },
     { floor, x, y }
   );
 }
 
-async function joinFreshCharacter(page) {
+async function joinFreshCharacter(page: Page): Promise<void> {
   const name = `e2e_${Date.now().toString(36)}`;
   await page.locator("#nameInput").fill(name);
   await page.locator("#joinButton").click();
   await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.self()));
 }
 
-async function grantFeatureItems(page) {
+async function grantFeatureItems(page: Page): Promise<void> {
   await page.evaluate(() => {
-    window.__TIB_E2E__.send({
+    window.__TIB_E2E__?.send({
       type: "e2eGrantItems",
       items: [
         { id: "flint_steel", qty: 1 },
@@ -147,20 +152,20 @@ async function grantFeatureItems(page) {
     });
   });
   await page.waitForFunction(() => {
-    const ids = (window.__TIB_E2E__?.self()?.inventory ?? []).filter(Boolean).map((item) => item.id);
+    const ids = (window.__TIB_E2E__?.self()?.inventory ?? []).filter(Boolean).map((item) => item!.id);
     return ids.includes("flint_steel") && ids.includes("logs") && ids.includes("raw_fish");
   });
 }
 
-function visualStats(buffer) {
+function visualStats(buffer: Buffer): { meaningfulPixels: number; orangePixels: number } {
   const png = PNG.sync.read(buffer);
   let meaningfulPixels = 0;
   let orangePixels = 0;
   for (let i = 0; i < png.data.length; i += 4) {
-    const r = png.data[i];
-    const g = png.data[i + 1];
-    const b = png.data[i + 2];
-    const a = png.data[i + 3];
+    const r = png.data[i] ?? 0;
+    const g = png.data[i + 1] ?? 0;
+    const b = png.data[i + 2] ?? 0;
+    const a = png.data[i + 3] ?? 0;
     if (a > 0 && Math.max(r, g, b) - Math.min(r, g, b) > 16) meaningfulPixels += 1;
     if (a > 0 && r > 170 && g > 55 && g < 190 && b < 110) orangePixels += 1;
   }

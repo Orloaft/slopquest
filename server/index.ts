@@ -3,6 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer } from "ws";
+import type { WebSocket, RawData } from "ws";
 import {
   ABILITIES,
   CLASSES,
@@ -27,7 +28,59 @@ import {
   tileAt,
   xpForLevel,
   zoneAt
-} from "../src/shared.js";
+} from "../src/shared.ts";
+import type { ClassSpec } from "../src/shared.ts";
+import type {
+  Item,
+  MonsterSpawn,
+  Quest,
+  QuestDialogue,
+  Range,
+  TreeType
+} from "../src/content-types.ts";
+import type {
+  AbilityView,
+  ActionView,
+  BuffsView,
+  CharacterSummary,
+  ClientMessage,
+  CorpseView,
+  Direction,
+  DialogueLineView,
+  FireView,
+  FishingNodeView,
+  GameEvent,
+  InputPayload,
+  InventoryItemView,
+  MonsterView,
+  NpcView,
+  PlayerView,
+  QuestView,
+  SkillView,
+  StateSnapshot,
+  TreeView,
+  UseItemCtx
+} from "../src/types.ts";
+import type {
+  Corpse,
+  Database,
+  ExtWebSocket,
+  Fire,
+  InventorySlot,
+  Metrics,
+  NpcRuntime,
+  PlayerAction,
+  Positioned,
+  QuestState,
+  SavedPlayer,
+  ServerMonster,
+  ServerPlayer,
+  Session,
+  SkillStateEntry,
+  SpatialIndex,
+  TreeNodeRuntime,
+  Vec2
+} from "./types.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "..", "data");
@@ -45,19 +98,21 @@ const FIRE_DURATION_MS = 120000;
 const INVENTORY_SIZE = 30;
 mkdirSync(DATA_DIR, { recursive: true });
 
-const db = loadDb();
-const clients = new Map();
-const monsters = new Map();
-const corpses = new Map();
-const treeNodes = new Map();
-const fires = new Map();
-const npcs = new Map();
-let spatial = createSpatialIndex();
+const ADVENTURER: ClassSpec = CLASSES["adventurer"]!;
+
+const db: Database = loadDb();
+const clients = new Map<ExtWebSocket, Session>();
+const monsters = new Map<string, ServerMonster>();
+const corpses = new Map<string, Corpse>();
+const treeNodes = new Map<string, TreeNodeRuntime>();
+const fires = new Map<string, Fire>();
+const npcs = new Map<string, NpcRuntime>();
+let spatial: SpatialIndex = createSpatialIndex();
 let nextMonsterId = 1;
 let nextCorpseId = 1;
 let nextFireId = 1;
-const events = [];
-const metrics = {
+const events: GameEvent[] = [];
+const metrics: Metrics = {
   tickSamples: [],
   snapshotSamples: [],
   bytesOutThisSecond: 0,
@@ -76,16 +131,17 @@ spawnTreeNodes();
 const wss = new WebSocketServer({ port: PORT });
 console.log(`Waystone server listening on ws://0.0.0.0:${PORT}`);
 
-wss.on("connection", (socket) => {
+wss.on("connection", (rawSocket: WebSocket) => {
+  const socket = rawSocket as ExtWebSocket;
   socket.isAlive = true;
   socket.on("pong", () => {
     socket.isAlive = true;
   });
 
-  socket.on("message", (raw) => {
-    let message;
+  socket.on("message", (raw: RawData) => {
+    let message: ClientMessage;
     try {
-      message = JSON.parse(raw);
+      message = JSON.parse(raw.toString()) as ClientMessage;
     } catch {
       return;
     }
@@ -168,7 +224,7 @@ setInterval(() => {
   }
 }, 15000);
 
-function joinWorld(socket, message) {
+function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; fresh?: boolean }): void {
   const name = cleanName(message.name);
   const saved = db.players[name.toLowerCase()];
   const player = saved && !message.fresh ? hydratePlayer(saved) : createPlayer(name);
@@ -190,8 +246,8 @@ function joinWorld(socket, message) {
   event("system", `${player.name} entered the world.`);
 }
 
-function sendCharacterRoster(socket) {
-  const characters = Object.values(db.players)
+function sendCharacterRoster(socket: ExtWebSocket): void {
+  const characters: CharacterSummary[] = Object.values(db.players)
     .map((player) => ({
       name: player.name,
       level: Number(player.level ?? 1),
@@ -202,7 +258,7 @@ function sendCharacterRoster(socket) {
   socket.send(JSON.stringify({ type: "characters", characters }));
 }
 
-function deleteCharacter(socket, rawName) {
+function deleteCharacter(socket: ExtWebSocket, rawName: string): void {
   const name = cleanName(rawName);
   const key = name.toLowerCase();
   const online = [...clients.values()].some((session) => session.player.name.toLowerCase() === key);
@@ -216,8 +272,8 @@ function deleteCharacter(socket, rawName) {
   sendCharacterRoster(socket);
 }
 
-function createPlayer(name) {
-  const spec = CLASSES.adventurer;
+function createPlayer(name: string): ServerPlayer {
+  const spec = ADVENTURER;
   return {
     id: "",
     name,
@@ -241,12 +297,21 @@ function createPlayer(name) {
     foodRegenUntil: 0,
     inventory: createInventory(),
     quests: createQuestState(),
-    skills: createSkillState()
+    skills: createSkillState(),
+    online: false,
+    targetId: null,
+    lastAttack: 0,
+    cooldowns: { ability: 0 },
+    abilityCooldowns: {},
+    abilityBuffs: {},
+    action: null,
+    portalReadyAt: 0,
+    dead: false
   };
 }
 
-function hydratePlayer(saved) {
-  const player = { ...createPlayer(saved.name), ...saved, classKey: "adventurer" };
+function hydratePlayer(saved: SavedPlayer): ServerPlayer {
+  const player = { ...createPlayer(saved.name), ...saved, classKey: "adventurer" } as ServerPlayer;
   player.skills = normalizeSkillState(player.skills);
   recalculateVitals(player);
   player.hp = clamp(player.hp, 1, player.maxHp);
@@ -258,16 +323,16 @@ function hydratePlayer(saved) {
   return player;
 }
 
-function updatePlayers(dt, now) {
+function updatePlayers(dt: number, now: number): void {
   for (const session of clients.values()) {
     const { player } = session;
     const input = now - session.lastInputAt > 280 ? sanitizeInput({}) : session.input;
     player.moving = false;
     if (player.dead) continue;
-    const spec = CLASSES.adventurer;
+    const spec = ADVENTURER;
     let speed = spec.speed + (isWellFed(player, now) ? 0.25 : 0);
     if (now < (player.abilityBuffs?.sprint?.until ?? 0)) {
-      speed *= ABILITIES.sprint.speedMultiplier;
+      speed *= ABILITIES["sprint"]?.speedMultiplier ?? 1;
     } else if (player.abilityBuffs?.sprint) {
       delete player.abilityBuffs.sprint;
     }
@@ -309,7 +374,7 @@ function updatePlayers(dt, now) {
   }
 }
 
-function updateMonsters(dt, now) {
+function updateMonsters(dt: number, now: number): void {
   for (const monster of monsters.values()) {
     monster.moving = false;
     if (monster.deadUntil) {
@@ -317,6 +382,7 @@ function updateMonsters(dt, now) {
       continue;
     }
     const catalog = MONSTERS[monster.type];
+    if (!catalog) continue;
     const target = nearestPlayer(monster, catalog.aggro);
     if (!target || isSafeZone(target.floor, target.x, target.y)) {
       wanderMonster(monster, catalog, dt, now);
@@ -333,36 +399,36 @@ function updateMonsters(dt, now) {
     if (dist <= catalog.range + 0.15 && now - monster.lastAttack >= catalog.attackMs) {
       monster.lastAttack = now;
       const damage = roll(catalog.damage) - armorReduction(target);
-      damagePlayer(target, Math.max(1, damage), monster.name);
+      damagePlayer(target, Math.max(1, damage), catalog.name);
     }
   }
 }
 
-function autoAttack(player, now) {
-  const monster = monsters.get(player.targetId);
+function autoAttack(player: ServerPlayer, now: number): void {
+  const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
   if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
-  const spec = CLASSES.adventurer;
+  const spec = ADVENTURER;
   if (distance(player, monster) > spec.range) return;
   if (now - player.lastAttack < spec.attackMs) return;
   player.lastAttack = now;
-  const damage = roll(spec.attackDamage) + skillLevel(player, "attack") + player.weaponTier * SHOP.weapon.damageBonus + wellFedPower(player);
+  const damage = roll(spec.attackDamage) + skillLevel(player, "attack") + player.weaponTier * (SHOP["weapon"]!.damageBonus ?? 0) + wellFedPower(player);
   addSkillXp(player, "attack", Math.max(1, Math.floor(damage * 1.5)));
   damageMonster(player, monster, damage, "hit");
 }
 
-function useAbility(player, slot) {
+function useAbility(player: ServerPlayer, slot: string): void {
   if (player.dead) return;
   if (slot === "2") {
     if (player.potions <= 0 || player.hp >= player.maxHp) return;
     player.potions -= 1;
-    player.hp = clamp(player.hp + SHOP.potion.heal, 0, player.maxHp);
+    player.hp = clamp(player.hp + (SHOP["potion"]!.heal ?? 0), 0, player.maxHp);
     event("float", `${player.name} drinks a potion.`, player.x, player.y, player.floor, "#77e0a0");
     return;
   }
 
   const now = performance.now();
-  const spec = CLASSES.adventurer;
-  const monster = monsters.get(player.targetId);
+  const spec = ADVENTURER;
+  const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
   if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
   if (distance(player, monster) > spec.magicRange) return;
   if (now < player.cooldowns.ability) return;
@@ -375,11 +441,11 @@ function useAbility(player, slot) {
   damageMonster(player, monster, damage, "flare");
 }
 
-function useClassAbility(player, id) {
+function useClassAbility(player: ServerPlayer, id: string): void {
   if (player.dead) return;
   const spec = ABILITIES[id];
   if (!spec) return;
-  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES.adventurer;
+  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
   if (!classSpec.abilities?.includes(id)) return;
   const now = performance.now();
   if (!player.abilityCooldowns) player.abilityCooldowns = {};
@@ -394,7 +460,7 @@ function useClassAbility(player, id) {
   }
   if (id === "second_wind") {
     if (player.hp >= player.maxHp) return;
-    const totalHeal = Math.max(1, Math.round(player.maxHp * spec.healFraction));
+    const totalHeal = Math.max(1, Math.round(player.maxHp * (spec.healFraction ?? 0)));
     player.abilityCooldowns[id] = now + spec.cooldownMs;
     player.abilityBuffs.second_wind = {
       until: now + spec.durationMs,
@@ -404,19 +470,20 @@ function useClassAbility(player, id) {
   }
 }
 
-function damageMonster(player, monster, damage, kind) {
+function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: number, kind: string): void {
   monster.hp = clamp(monster.hp - damage, 0, monster.maxHp);
   event("effect", kind, monster.x, monster.y, monster.floor, null, player.id, monster.id, { fromX: player.x, fromY: player.y });
   event("hit", damage, monster.x, monster.y - 0.45, monster.floor, kind === "flare" ? "#8fd8ff" : "#ffd166", player.id, monster.id);
   if (monster.hp > 0) return;
 
   const catalog = MONSTERS[monster.type];
+  if (!catalog) return;
   monster.deadUntil = performance.now() + (monster.type === "boss" ? 45000 : 18000);
   player.xp += catalog.xp;
   updateQuestProgress(player, monster);
   awardLevels(player);
 
-  const corpse = {
+  const corpse: Corpse = {
     id: `c${nextCorpseId++}`,
     floor: monster.floor,
     x: monster.x,
@@ -431,13 +498,13 @@ function damageMonster(player, monster, damage, kind) {
   event("system", `${player.name} defeated ${catalog.name}.`);
 }
 
-function rollQuestDrops(monsterType) {
+function rollQuestDrops(monsterType: string): Array<{ id: string; qty: number }> {
   const drop = QUEST_DROPS[monsterType];
   if (!drop || Math.random() >= drop.chance) return [];
   return [{ id: drop.itemId, qty: 1 }];
 }
 
-function damagePlayer(player, damage, source) {
+function damagePlayer(player: ServerPlayer, damage: number, source: string): void {
   player.hp = clamp(player.hp - damage, 0, player.maxHp);
   addSkillXp(player, "defense", Math.max(1, damage));
   event("hit", damage, player.x, player.y - 0.55, player.floor, "#ff6b6b", source);
@@ -447,7 +514,7 @@ function damagePlayer(player, damage, source) {
   event("system", `${player.name} was brought down by ${source}.`);
 }
 
-function lootAdjacent(player) {
+function lootAdjacent(player: ServerPlayer): void {
   if (player.dead) return;
   let found = 0;
   for (const corpse of [...corpses.values()]) {
@@ -458,7 +525,7 @@ function lootAdjacent(player) {
   if (found) event("float", `Looted ${found} corpse${found > 1 ? "s" : ""}.`, player.x, player.y, player.floor, "#ffd166");
 }
 
-function lootCorpse(player, id) {
+function lootCorpse(player: ServerPlayer, id: string): void {
   if (player.dead) return;
   const corpse = corpses.get(id);
   if (!corpse || corpse.floor !== player.floor || distance(player, corpse) > 2) return;
@@ -466,7 +533,7 @@ function lootCorpse(player, id) {
   event("float", `Looted ${corpse.label}.`, player.x, player.y, player.floor, "#ffd166");
 }
 
-function collectCorpse(player, corpse) {
+function collectCorpse(player: ServerPlayer, corpse: Corpse): void {
   for (const item of corpse.items ?? []) {
     if (!addInventoryItem(player, item.id, item.qty)) {
       event("system", "Your inventory is full.");
@@ -479,50 +546,52 @@ function collectCorpse(player, corpse) {
   removeFromSpatial(spatial.corpses, corpse);
 }
 
-function buyItem(player, item) {
-  if (player.dead || distance(player, NPCS[0]) > 2 || player.floor !== NPCS[0].floor) return;
-  if (item === "weapon" && player.weaponTier === 0 && player.gold >= SHOP.weapon.cost) {
-    player.gold -= SHOP.weapon.cost;
+function buyItem(player: ServerPlayer, item: string): void {
+  const trader = NPCS[0];
+  if (!trader) return;
+  if (player.dead || distance(player, trader) > 2 || player.floor !== trader.floor) return;
+  if (item === "weapon" && player.weaponTier === 0 && player.gold >= SHOP["weapon"]!.cost) {
+    player.gold -= SHOP["weapon"]!.cost;
     player.weaponTier = 1;
     event("system", `${player.name} bought a better weapon.`);
   }
-  if (item === "armor" && player.armorTier === 0 && player.gold >= SHOP.armor.cost) {
-    player.gold -= SHOP.armor.cost;
+  if (item === "armor" && player.armorTier === 0 && player.gold >= SHOP["armor"]!.cost) {
+    player.gold -= SHOP["armor"]!.cost;
     player.armorTier = 1;
     event("system", `${player.name} bought padded mail.`);
   }
-  if (item === "potion" && player.gold >= SHOP.potion.cost) {
-    player.gold -= SHOP.potion.cost;
+  if (item === "potion" && player.gold >= SHOP["potion"]!.cost) {
+    player.gold -= SHOP["potion"]!.cost;
     player.potions += 1;
     addInventoryItem(player, "potion", 1);
   }
-  if (item === "axe" && !hasInventoryItem(player, "axe") && player.gold >= SHOP.axe.cost) {
+  if (item === "axe" && !hasInventoryItem(player, "axe") && player.gold >= SHOP["axe"]!.cost) {
     if (!addInventoryItem(player, "axe", 1)) {
       event("system", "Your inventory is full.");
       return;
     }
-    player.gold -= SHOP.axe.cost;
+    player.gold -= SHOP["axe"]!.cost;
     event("system", `${player.name} bought a bronze axe.`);
   }
-  if (item === "fishing_rod" && !hasInventoryItem(player, "fishing_rod") && player.gold >= SHOP.fishing_rod.cost) {
+  if (item === "fishing_rod" && !hasInventoryItem(player, "fishing_rod") && player.gold >= SHOP["fishing_rod"]!.cost) {
     if (!addInventoryItem(player, "fishing_rod", 1)) {
       event("system", "Your inventory is full.");
       return;
     }
-    player.gold -= SHOP.fishing_rod.cost;
+    player.gold -= SHOP["fishing_rod"]!.cost;
     event("system", `${player.name} bought a fishing rod.`);
   }
-  if (item === "flint_steel" && !hasInventoryItem(player, "flint_steel") && player.gold >= SHOP.flint_steel.cost) {
+  if (item === "flint_steel" && !hasInventoryItem(player, "flint_steel") && player.gold >= SHOP["flint_steel"]!.cost) {
     if (!addInventoryItem(player, "flint_steel", 1)) {
       event("system", "Your inventory is full.");
       return;
     }
-    player.gold -= SHOP.flint_steel.cost;
+    player.gold -= SHOP["flint_steel"]!.cost;
     event("system", `${player.name} bought flint and steel.`);
   }
 }
 
-function respawn(player) {
+function respawn(player: ServerPlayer): void {
   if (!player.dead) return;
   player.floor = START.floor;
   player.x = START.x;
@@ -534,19 +603,19 @@ function respawn(player) {
   event("system", `${player.name} returns to the temple.`);
 }
 
-function setTarget(player, id) {
+function setTarget(player: ServerPlayer, id: string): void {
   const monster = monsters.get(String(id));
   if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
   player.targetId = monster.id;
 }
 
-function chat(player, text) {
+function chat(player: ServerPlayer, text: string): void {
   const clean = text.trim().slice(0, 120);
   if (!clean) return;
   event("chat", `${player.name}: ${clean}`);
 }
 
-function talkNpc(player, id) {
+function talkNpc(player: ServerPlayer, id: string): void {
   const npc = npcs.get(id);
   if (!npc || player.dead || npc.floor !== player.floor || distance(player, npc) > 2.4) return;
 
@@ -560,11 +629,11 @@ function talkNpc(player, id) {
   if (dialogue) eventDialogue(player, dialogue, npc.role === "vendor" ? { opensShop: true } : {});
 }
 
-function questForGiver(giverId) {
+function questForGiver(giverId: string): Quest | null {
   return Object.values(QUESTS).find((quest) => quest.giverId === giverId) ?? null;
 }
 
-function handleQuestDialogue(player, npc, quest) {
+function handleQuestDialogue(player: ServerPlayer, npc: NpcRuntime, quest: Quest): void {
   const state = player.quests[quest.id];
   if (!state) return;
 
@@ -601,31 +670,37 @@ function handleQuestDialogue(player, npc, quest) {
   eventDialogue(player, questDialogue(npc, player, quest, "progress", progress));
 }
 
-function consumeQuestTurnIn(player, quest) {
+function consumeQuestTurnIn(player: ServerPlayer, quest: Quest): boolean {
   if (quest.kind === "gather" || quest.kind === "fetch") {
-    return removeInventoryItem(player, quest.itemId, quest.targetCount);
+    return removeInventoryItem(player, quest.itemId ?? "", quest.targetCount);
   }
   return true;
 }
 
-function currentQuestProgress(player, quest, state) {
+function currentQuestProgress(player: ServerPlayer, quest: Quest, state: QuestState): number {
   if (quest.kind === "gather" || quest.kind === "fetch") {
-    return clamp(inventoryCount(player, quest.itemId), 0, quest.targetCount);
+    return clamp(inventoryCount(player, quest.itemId ?? ""), 0, quest.targetCount);
   }
   return clamp(state.progress, 0, quest.targetCount);
 }
 
-function inventoryCount(player, id) {
+function inventoryCount(player: ServerPlayer, id: string): number {
   return player.inventory.reduce((sum, item) => sum + (item?.id === id ? item.qty : 0), 0);
 }
 
-function questDialogue(npc, player, quest, phase, progress = 0) {
+function questDialogue(
+  npc: NpcRuntime,
+  player: ServerPlayer,
+  quest: Quest,
+  phase: keyof QuestDialogue,
+  progress = 0
+): DialogueLineView[] {
   const phaseLines = quest.dialogue?.[phase];
   if (!Array.isArray(phaseLines) || phaseLines.length === 0) {
     return [{ speaker: npc.name, text: npc.dialogue }];
   }
   const item = quest.itemId ? ITEMS[quest.itemId] ?? null : null;
-  const ctx = {
+  const ctx: Record<string, unknown> = {
     progress,
     target: {
       count: quest.targetCount,
@@ -637,27 +712,27 @@ function questDialogue(npc, player, quest, phase, progress = 0) {
     npc: { name: npc.name }
   };
   return phaseLines.map((line) => {
-    const speakerKey = line.npc != null ? "npc" : "player";
+    const isNpc = "npc" in line;
     return {
-      speaker: speakerKey === "npc" ? npc.name : player.name,
-      text: renderQuestLine(line[speakerKey] ?? "", ctx)
+      speaker: isNpc ? npc.name : player.name,
+      text: renderQuestLine(isNpc ? line.npc : line.player, ctx)
     };
   });
 }
 
-function renderQuestLine(text, ctx) {
-  return text.replace(/\{([^}]+)\}/g, (_, key) => {
+function renderQuestLine(text: string, ctx: Record<string, unknown>): string {
+  return text.replace(/\{([^}]+)\}/g, (_match, key: string) => {
     const parts = key.split(".");
-    let value = ctx;
+    let value: unknown = ctx;
     for (const part of parts) {
       if (value == null) return `{${key}}`;
-      value = value[part];
+      value = (value as Record<string, unknown>)[part];
     }
     return value == null ? `{${key}}` : String(value);
   });
 }
 
-function cutTree(player, id) {
+function cutTree(player: ServerPlayer, id: string): void {
   const tree = treeNodes.get(id);
   if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distance(player, tree) > 1.8) return;
   if (!playerHasCapability(player, "chop_tree")) {
@@ -675,7 +750,7 @@ function cutTree(player, id) {
   event("float", `You start chopping ${treeSpec.label}.`, tree.x, tree.y, tree.floor, "#d8c68a");
 }
 
-function fishNode(player, id) {
+function fishNode(player: ServerPlayer, id: string): void {
   const node = FISHING_NODES.find((item) => item.id === id);
   if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.45) return;
   if (!playerHasCapability(player, "fish")) {
@@ -693,14 +768,14 @@ function fishNode(player, id) {
 // Each verb owns its own validation, consumption, and effects. Authors compose
 // items in content/items.yaml; adding a new verb still requires engine work.
 
-const USE_VERBS = {
+const USE_VERBS: Record<string, (player: ServerPlayer, item: Item, ctx: UseItemCtx) => void> = {
   eat: useVerbEat,
   drink_potion: useVerbDrinkPotion,
   light_fire: useVerbLightFire,
   cook_on_fire: useVerbCookOnFire
 };
 
-function useItem(player, itemId, ctx = {}) {
+function useItem(player: ServerPlayer, itemId: string, ctx: UseItemCtx = {}): void {
   if (player.dead) return;
   const item = ITEMS[itemId];
   if (!item?.use) return;
@@ -709,31 +784,34 @@ function useItem(player, itemId, ctx = {}) {
   verb(player, item, ctx);
 }
 
-function applyBuffs(player, buffs, now) {
+function applyBuffs(player: ServerPlayer, buffs: Array<{ id: string; durationMs: number }> | undefined, now: number): void {
   for (const buff of buffs ?? []) {
     if (buff.id === "well_fed") player.wellFedUntil = Math.max(player.wellFedUntil ?? 0, now + buff.durationMs);
     if (buff.id === "food_regen") player.foodRegenUntil = Math.max(player.foodRegenUntil ?? 0, now + buff.durationMs);
   }
 }
 
-function useVerbEat(player, item) {
+function useVerbEat(player: ServerPlayer, item: Item): void {
   if (!removeInventoryItem(player, item.id, 1)) return;
   const u = item.use;
+  if (u?.kind !== "eat") return;
   if (u.restoreHp) player.hp = clamp(player.hp + u.restoreHp, 0, player.maxHp);
   applyBuffs(player, u.buffs, performance.now());
   if (u.float) event("float", u.float, player.x, player.y, player.floor, "#9ee6b1");
 }
 
-function useVerbDrinkPotion(player, item) {
+function useVerbDrinkPotion(player: ServerPlayer, item: Item): void {
   if (!removeInventoryItem(player, item.id, 1)) return;
   const u = item.use;
+  if (u?.kind !== "drink_potion") return;
   if (u.restoreHp) player.hp = clamp(player.hp + u.restoreHp, 0, player.maxHp);
   event("float", u.float ?? `${player.name} drinks a potion.`, player.x, player.y, player.floor, "#77e0a0");
 }
 
-function useVerbLightFire(player, item, ctx) {
+function useVerbLightFire(player: ServerPlayer, item: Item, ctx: UseItemCtx): void {
   if (!hasInventoryItem(player, item.id)) return;
   const u = item.use;
+  if (u?.kind !== "light_fire") return;
   const options = u.consumesAny ?? [];
   const preferred = ctx.logItem ? options.find((o) => o.item === ctx.logItem && hasInventoryItem(player, o.item)) : null;
   const choice = preferred ?? options.find((o) => hasInventoryItem(player, o.item));
@@ -746,7 +824,7 @@ function useVerbLightFire(player, item, ctx) {
     event("float", "No room for a fire.", player.x, player.y, player.floor, "#f7d486");
     return;
   }
-  const fire = {
+  const fire: Fire = {
     id: `fire-${nextFireId++}`,
     floor: player.floor,
     x: placement.x,
@@ -760,11 +838,12 @@ function useVerbLightFire(player, item, ctx) {
   event("float", "Fire lit", fire.x, fire.y, fire.floor, "#ffb35c");
 }
 
-function useVerbCookOnFire(player, item, ctx) {
-  const fire = fires.get(ctx.fireId);
+function useVerbCookOnFire(player: ServerPlayer, item: Item, ctx: UseItemCtx): void {
+  const fire = ctx.fireId == null ? undefined : fires.get(ctx.fireId);
   if (!fire || fire.floor !== player.floor || distance(player, fire) > 1.9) return;
   if (!hasInventoryItem(player, item.id)) return;
-  const skill = item.use.skill ?? "cooking";
+  const u = item.use;
+  const skill = (u?.kind === "cook_on_fire" ? u.skill : undefined) ?? "cooking";
   player.targetId = null;
   player.action = {
     type: "cooking",
@@ -775,40 +854,41 @@ function useVerbCookOnFire(player, item, ctx) {
   event("float", "Cooking...", fire.x, fire.y, fire.floor, "#ffcf7a");
 }
 
-function makeFire(player, logItem = "logs") {
+function makeFire(player: ServerPlayer, logItem = "logs"): void {
   useItem(player, "flint_steel", { logItem });
 }
 
-function cookFish(player, fireId) {
+function cookFish(player: ServerPlayer, fireId: string): void {
   useItem(player, "raw_fish", { fireId });
 }
 
-function eatItem(player, itemId) {
+function eatItem(player: ServerPlayer, itemId: string): void {
   if (ITEMS[itemId]?.use?.kind !== "eat") return;
   useItem(player, itemId);
 }
 
-function updatePlayerAction(player, now) {
+function updatePlayerAction(player: ServerPlayer, now: number): void {
   if (!player.action) return;
   if (player.action.type === "fishing") return updateFishingAction(player, now);
   if (player.action.type === "cooking") return updateCookingAction(player, now);
   if (player.action.type !== "woodcutting") return;
-  const tree = treeNodes.get(player.action.treeId);
+  const action = player.action;
+  const tree = treeNodes.get(action.treeId);
   if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distance(player, tree) > 1.9) {
     player.action = null;
     return;
   }
-  if (now < player.action.nextAt) return;
+  if (now < action.nextAt) return;
 
-  player.action.swings += 1;
+  action.swings += 1;
   const treeSpec = treeTypeSpec(tree);
   const level = skillLevel(player, "woodcutting");
-  player.action.nextAt = now + woodcutSwingMs(level, treeSpec);
+  action.nextAt = now + woodcutSwingMs(level, treeSpec);
   const angle = Math.atan2(tree.y - player.y, tree.x - player.x);
   event("effect", "chop", tree.x, tree.y - 0.35, tree.floor, null, player.id, tree.id, { fromX: player.x, fromY: player.y, angle });
-  player.action.remaining -= woodcutPower(level, treeSpec);
-  if (player.action.remaining > 0) {
-    if (player.action.swings % 3 === 0) event("float", "Chop", tree.x, tree.y, tree.floor, "#d8c68a");
+  action.remaining -= woodcutPower(level, treeSpec);
+  if (action.remaining > 0) {
+    if (action.swings % 3 === 0) event("float", "Chop", tree.x, tree.y, tree.floor, "#d8c68a");
     return;
   }
 
@@ -820,13 +900,15 @@ function updatePlayerAction(player, now) {
   event("float", `+${treeSpec.xp} Woodcutting`, tree.x, tree.y, tree.floor, "#9ee6b1");
 }
 
-function updateFishingAction(player, now) {
-  const node = FISHING_NODES.find((item) => item.id === player.action.nodeId);
+function updateFishingAction(player: ServerPlayer, now: number): void {
+  const action = player.action;
+  if (action?.type !== "fishing") return;
+  const node = FISHING_NODES.find((item) => item.id === action.nodeId);
   if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.65 || !playerHasCapability(player, "fish")) {
     player.action = null;
     return;
   }
-  if (now < player.action.nextAt) return;
+  if (now < action.nextAt) return;
   player.action = null;
   if (!addInventoryItem(player, "raw_fish", 1)) {
     event("system", "Your inventory is full.");
@@ -838,19 +920,22 @@ function updateFishingAction(player, now) {
   event("float", `+${xp} Fishing`, node.x, node.y, node.floor, "#8fd8ff");
 }
 
-function updateCookingAction(player, now) {
-  const fire = fires.get(player.action.fireId);
+function updateCookingAction(player: ServerPlayer, now: number): void {
+  const action = player.action;
+  if (action?.type !== "cooking") return;
+  const fire = fires.get(action.fireId);
   if (!fire || player.dead || fire.floor !== player.floor || distance(player, fire) > 2) {
     player.action = null;
     return;
   }
-  if (now < player.action.nextAt) return;
-  const inputId = player.action.itemId ?? "raw_fish";
-  const recipe = ITEMS[inputId]?.use ?? {};
-  const produces = recipe.produces ?? "cooked_fish";
-  const burns = recipe.burns ?? "burnt_fish";
-  const skill = recipe.skill ?? "cooking";
-  const xp = recipe.xp ?? 22;
+  if (now < action.nextAt) return;
+  const inputId = action.itemId ?? "raw_fish";
+  const recipe = ITEMS[inputId]?.use;
+  const cook = recipe?.kind === "cook_on_fire" ? recipe : null;
+  const produces = cook?.produces ?? "cooked_fish";
+  const burns = cook?.burns ?? "burnt_fish";
+  const skill = cook?.skill ?? "cooking";
+  const xp = cook?.xp ?? 22;
   player.action = null;
   if (!removeInventoryItem(player, inputId, 1)) return;
   const level = skillLevel(player, skill);
@@ -866,17 +951,28 @@ function updateCookingAction(player, now) {
   event("float", cooked ? `+${xp} ${SKILLS[skill]?.label ?? skill}` : "Burnt", fire.x, fire.y, fire.floor, cooked ? "#9ee6b1" : "#a8a29e");
 }
 
-function grantE2EItems(player, message) {
+function grantE2EItems(
+  player: ServerPlayer,
+  message: {
+    type: "e2eGrantItems";
+    items?: Array<{ id: string; qty: number }>;
+    gold?: number;
+    hp?: number;
+    floor?: number;
+    x?: number;
+    y?: number;
+  }
+): void {
   if (!E2E_TEST) return;
   for (const item of message.items ?? []) {
     const id = String(item.id ?? "");
     const qty = Number(item.qty ?? 1);
     if (ITEMS[id]) addInventoryItem(player, id, qty);
   }
-  if (Number.isFinite(message.gold)) player.gold = Math.max(0, Math.floor(message.gold));
+  if (Number.isFinite(message.gold)) player.gold = Math.max(0, Math.floor(Number(message.gold)));
   if (Number.isFinite(message.hp)) player.hp = clamp(Number(message.hp), 0, player.maxHp);
   if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y)) {
-    const spot = findStandableNear(Math.floor(message.floor), Number(message.x), Number(message.y));
+    const spot = findStandableNear(Math.floor(Number(message.floor)), Number(message.x), Number(message.y));
     if (spot) {
       player.floor = spot.floor;
       player.x = spot.x;
@@ -885,7 +981,7 @@ function grantE2EItems(player, message) {
   }
 }
 
-function findStandableNear(floor, x, y) {
+function findStandableNear(floor: number, x: number, y: number): Positioned | null {
   if (canStand(floor, x, y)) return { floor, x, y };
   const baseX = Math.floor(x);
   const baseY = Math.floor(y);
@@ -902,11 +998,11 @@ function findStandableNear(floor, x, y) {
   return null;
 }
 
-function treeTypeSpec(tree) {
-  return TREE_TYPES[tree.type] ?? TREE_TYPES.oak;
+function treeTypeSpec(tree: TreeNodeRuntime): TreeType {
+  return TREE_TYPES[tree.type] ?? TREE_TYPES["oak"]!;
 }
 
-function fishingApproachPoint(node) {
+function fishingApproachPoint(node: { floor: number; x: number; y: number; approachX: number; approachY: number }): Positioned {
   return {
     floor: node.floor,
     x: node.approachX ?? node.x,
@@ -914,7 +1010,7 @@ function fishingApproachPoint(node) {
   };
 }
 
-function npcDialogueLines(player, npc) {
+function npcDialogueLines(player: ServerPlayer, npc: NpcRuntime): DialogueLineView[] {
   if (npc.role === "vendor") {
     return [
       { speaker: npc.name, text: "Fresh supplies, sharp edges, and the little things that keep you alive." },
@@ -928,21 +1024,21 @@ function npcDialogueLines(player, npc) {
   ];
 }
 
-function eventDialogue(player, lines, extra = {}) {
+function eventDialogue(player: ServerPlayer, lines: DialogueLineView[], extra: Partial<GameEvent> = {}): void {
   event("dialogue", "", null, null, null, null, null, null, { to: player.id, lines, ...extra });
 }
 
-function woodcutSwingMs(level, treeSpec) {
+function woodcutSwingMs(level: number, treeSpec: TreeType): number {
   const aboveRequirement = Math.max(0, level - treeSpec.requiredLevel);
   return clamp(treeSpec.baseSwingMs - aboveRequirement * 75, treeSpec.minSwingMs, treeSpec.baseSwingMs);
 }
 
-function woodcutPower(level, treeSpec) {
+function woodcutPower(level: number, treeSpec: TreeType): number {
   return 1 + Math.floor(Math.max(0, level - treeSpec.requiredLevel) / 8);
 }
 
-function dropItem(floor, x, y, items, label) {
-  const drop = {
+function dropItem(floor: number, x: number, y: number, items: Array<{ id: string; qty: number }>, label: string): void {
+  const drop: Corpse = {
     id: `c${nextCorpseId++}`,
     floor,
     x,
@@ -957,7 +1053,7 @@ function dropItem(floor, x, y, items, label) {
   addToSpatial(spatial.corpses, drop);
 }
 
-function spawnNpcs() {
+function spawnNpcs(): void {
   for (const npc of NPCS) {
     if (npc.role === "quest") {
       npcs.set(npc.id, {
@@ -991,12 +1087,14 @@ function spawnNpcs() {
   }
 }
 
-function spawnTreeNodes() {
+function spawnTreeNodes(): void {
   for (let floor = 0; floor <= 4; floor += 1) {
     const rows = makeFloorTiles(floor);
     for (let y = 0; y < rows.length; y += 1) {
-      for (let x = 0; x < rows[y].length; x += 1) {
-        if (rows[y][x] !== "f") continue;
+      const row = rows[y];
+      if (!row) continue;
+      for (let x = 0; x < row.length; x += 1) {
+        if (row[x] !== "f") continue;
         const id = `tree-${floor}-${x}-${y}`;
         treeNodes.set(id, { id, floor, tileX: x, tileY: y, x: x + 0.5, y: y + 0.95, type: treeTypeForTile(floor, x, y), active: true, respawnAt: 0 });
       }
@@ -1008,18 +1106,19 @@ function spawnTreeNodes() {
   }
 }
 
-function treeTypeForTile(floor, x, y) {
+function treeTypeForTile(floor: number, x: number, y: number): string {
   const value = (floor * 73856093) ^ (x * 19349663) ^ (y * 83492791);
   if (floor === 3 && Math.abs(value) % 3 === 0) return "pine";
   if (floor === 4 && Math.abs(value) % 4 === 0) return "pine";
   return "oak";
 }
 
-function updateNpcs(dt, now) {
+function updateNpcs(dt: number, now: number): void {
   for (const npc of npcs.values()) {
-    if (npc.homeX == null) continue;
+    const { homeX, homeY } = npc;
+    if (homeX == null || homeY == null) continue;
     npc.moving = false;
-    if (now >= npc.wanderNextAt && !npc.wanderTarget) {
+    if (now >= (npc.wanderNextAt ?? 0) && !npc.wanderTarget) {
       npc.wanderTarget = pickNpcWanderTarget(npc);
       npc.wanderNextAt = now + roll([1800, 4200]);
     }
@@ -1033,32 +1132,33 @@ function updateNpcs(dt, now) {
   }
 }
 
-function pickNpcWanderTarget(npc) {
+function pickNpcWanderTarget(npc: NpcRuntime): Vec2 | null {
   for (let i = 0; i < 8; i += 1) {
     const angle = Math.random() * Math.PI * 2;
     const radius = 1 + Math.random() * 4;
-    const x = clamp(npc.homeX + Math.cos(angle) * radius, 10, 28);
-    const y = clamp(npc.homeY + Math.sin(angle) * radius, 13, 22);
+    const x = clamp(npc.homeX! + Math.cos(angle) * radius, 10, 28);
+    const y = clamp(npc.homeY! + Math.sin(angle) * radius, 13, 22);
     if (canStand(npc.floor, x, y)) return { x, y };
   }
   return null;
 }
 
-function updateTreeNodes(now) {
+function updateTreeNodes(now: number): void {
   for (const tree of treeNodes.values()) {
     if (!tree.active && now >= tree.respawnAt) tree.active = true;
   }
 }
 
-function updateFires(now) {
+function updateFires(now: number): void {
   for (const [id, fire] of fires) {
     if (now >= fire.expiresAt) fires.delete(id);
   }
 }
 
-function spawnMonster(spawn) {
+function spawnMonster(spawn: MonsterSpawn): void {
   const catalog = MONSTERS[spawn.type];
-  const monster = {
+  if (!catalog) return;
+  const monster: ServerMonster = {
     id: `m${nextMonsterId++}`,
     spawn,
     type: spawn.type,
@@ -1080,8 +1180,9 @@ function spawnMonster(spawn) {
   monsters.set(monster.id, monster);
 }
 
-function respawnMonster(monster) {
+function respawnMonster(monster: ServerMonster): void {
   const catalog = MONSTERS[monster.type];
+  if (!catalog) return;
   monster.floor = monster.spawn.floor;
   monster.x = monster.spawn.x + 0.5;
   monster.y = monster.spawn.y + 0.5;
@@ -1092,7 +1193,7 @@ function respawnMonster(monster) {
   monster.wanderNextAt = performance.now() + roll([1000, 3500]);
 }
 
-function wanderMonster(monster, catalog, dt, now) {
+function wanderMonster(monster: ServerMonster, catalog: { speed: number }, dt: number, now: number): void {
   if (now >= monster.wanderNextAt && !monster.wanderTarget) {
     monster.wanderTarget = pickWanderTarget(monster);
     monster.wanderNextAt = now + roll([2200, 5200]);
@@ -1110,7 +1211,7 @@ function wanderMonster(monster, catalog, dt, now) {
   moveEntity(monster, dx * catalog.speed * 0.34 * dt, dy * catalog.speed * 0.34 * dt);
 }
 
-function pickWanderTarget(monster) {
+function pickWanderTarget(monster: ServerMonster): Vec2 | null {
   for (let i = 0; i < 8; i += 1) {
     const angle = Math.random() * Math.PI * 2;
     const radius = 1.2 + Math.random() * 4.5;
@@ -1122,7 +1223,7 @@ function pickWanderTarget(monster) {
   return null;
 }
 
-function moveEntity(entity, dx, dy) {
+function moveEntity(entity: { floor: number; x: number; y: number; dir: Direction; moving: boolean }, dx: number, dy: number): void {
   const oldX = entity.x;
   const oldY = entity.y;
   if (dx || dy) {
@@ -1135,8 +1236,8 @@ function moveEntity(entity, dx, dy) {
   entity.moving = Math.hypot(entity.x - oldX, entity.y - oldY) > 0.001;
 }
 
-function canStand(floor, x, y) {
-  const checks = [
+function canStand(floor: number, x: number, y: number): boolean {
+  const checks: Array<[number, number]> = [
     [x - 0.28, y - 0.28],
     [x + 0.28, y - 0.28],
     [x - 0.28, y + 0.28],
@@ -1145,8 +1246,8 @@ function canStand(floor, x, y) {
   return checks.every(([cx, cy]) => !isBlockedTile(tileAt(floor, Math.floor(cx), Math.floor(cy))));
 }
 
-function nearestPlayer(monster, maxDistance) {
-  let best = null;
+function nearestPlayer(monster: ServerMonster, maxDistance: number): ServerPlayer | null {
+  let best: ServerPlayer | null = null;
   let bestDist = maxDistance;
   for (const player of querySpatial(spatial.players, monster.floor, monster.x, monster.y, maxDistance)) {
     if (player.dead || player.floor !== monster.floor) continue;
@@ -1159,7 +1260,7 @@ function nearestPlayer(monster, maxDistance) {
   return best;
 }
 
-function awardLevels(player) {
+function awardLevels(player: ServerPlayer): void {
   while (player.xp >= xpForLevel(player.level + 1)) {
     player.level += 1;
     recalculateVitals(player);
@@ -1169,11 +1270,11 @@ function awardLevels(player) {
   }
 }
 
-function armorReduction(player) {
-  return Math.floor(skillLevel(player, "defense") / 3) + player.armorTier * SHOP.armor.armorBonus + wellFedPower(player);
+function armorReduction(player: ServerPlayer): number {
+  return Math.floor(skillLevel(player, "defense") / 3) + player.armorTier * (SHOP["armor"]!.armorBonus ?? 0) + wellFedPower(player);
 }
 
-function broadcastState() {
+function broadcastState(): void {
   updateByteMetric();
   rebuildSpatialIndex();
   for (const session of clients.values()) {
@@ -1187,32 +1288,32 @@ function broadcastState() {
   }
 }
 
-function buildSnapshotFor(viewer) {
-  const players = [];
+function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
+  const players: PlayerView[] = [];
   for (const player of querySpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
     if (player.id !== viewer.id && !inInterestRange(viewer, player)) continue;
     players.push(serializePlayer(player));
   }
 
-  const visibleMonsters = [];
+  const visibleMonsters: MonsterView[] = [];
   for (const monster of querySpatial(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
     if (monster.deadUntil || !inInterestRange(viewer, monster)) continue;
     visibleMonsters.push(serializeMonster(monster));
   }
 
-  const visibleCorpses = [];
+  const visibleCorpses: CorpseView[] = [];
   for (const corpse of querySpatial(spatial.corpses, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
     if (!inInterestRange(viewer, corpse)) continue;
     visibleCorpses.push(corpse);
   }
 
-  const visibleNpcs = [];
+  const visibleNpcs: NpcView[] = [];
   for (const npc of querySpatial(spatial.npcs, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
     if (!inInterestRange(viewer, npc)) continue;
     visibleNpcs.push(serializeNpc(npc));
   }
 
-  const visibleTrees = [];
+  const visibleTrees: TreeView[] = [];
   for (const tree of querySpatial(spatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS)) {
     if (!inTreeInterestRange(viewer, tree)) continue;
     visibleTrees.push(serializeTree(tree));
@@ -1253,7 +1354,13 @@ function buildSnapshotFor(viewer) {
   };
 }
 
-function serializePlayer(player) {
+function actionView(a: PlayerAction): ActionView {
+  if (a.type === "woodcutting") return { type: a.type, treeId: a.treeId };
+  if (a.type === "fishing") return { type: a.type, nodeId: a.nodeId };
+  return { type: a.type, fireId: a.fireId };
+}
+
+function serializePlayer(player: ServerPlayer): PlayerView {
   return {
     id: player.id,
     name: player.name,
@@ -1275,7 +1382,7 @@ function serializePlayer(player) {
     armorTier: player.armorTier,
     targetId: player.targetId,
     dead: player.dead,
-    action: player.action ? { type: player.action.type, treeId: player.action.treeId, nodeId: player.action.nodeId, fireId: player.action.fireId } : null,
+    action: player.action ? actionView(player.action) : null,
     buffs: serializeBuffs(player),
     inventory: serializeInventory(player.inventory),
     quests: serializeQuests(player),
@@ -1284,13 +1391,14 @@ function serializePlayer(player) {
   };
 }
 
-function serializeAbilities(player) {
+function serializeAbilities(player: ServerPlayer): AbilityView[] {
   const now = performance.now();
-  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES.adventurer;
+  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
   const ids = classSpec.abilities ?? [];
-  return ids.map((id) => {
+  return ids.map((id): AbilityView | null => {
     const spec = ABILITIES[id];
     if (!spec) return null;
+    const buff = player.abilityBuffs?.[id as keyof typeof player.abilityBuffs];
     return {
       id,
       label: spec.label,
@@ -1298,16 +1406,16 @@ function serializeAbilities(player) {
       cooldownMs: spec.cooldownMs,
       durationMs: spec.durationMs,
       cooldownRemainingMs: Math.max(0, Math.round((player.abilityCooldowns?.[id] ?? 0) - now)),
-      activeRemainingMs: Math.max(0, Math.round((player.abilityBuffs?.[id]?.until ?? 0) - now))
+      activeRemainingMs: Math.max(0, Math.round((buff?.until ?? 0) - now))
     };
-  }).filter(Boolean);
+  }).filter((a): a is AbilityView => a !== null);
 }
 
-function serializeMonster(monster) {
+function serializeMonster(monster: ServerMonster): MonsterView {
   return {
     id: monster.id,
     type: monster.type,
-    name: MONSTERS[monster.type].name,
+    name: MONSTERS[monster.type]?.name ?? monster.type,
     floor: monster.floor,
     x: round(monster.x),
     y: round(monster.y),
@@ -1319,11 +1427,11 @@ function serializeMonster(monster) {
   };
 }
 
-function serializeNpc(npc) {
+function serializeNpc(npc: NpcRuntime): NpcView {
   return {
     id: npc.id,
     name: npc.name,
-    role: npc.role,
+    role: npc.role as NpcView["role"],
     floor: npc.floor,
     x: round(npc.x),
     y: round(npc.y),
@@ -1333,7 +1441,7 @@ function serializeNpc(npc) {
   };
 }
 
-function serializeTree(tree) {
+function serializeTree(tree: TreeNodeRuntime): TreeView {
   const spec = treeTypeSpec(tree);
   return {
     id: tree.id,
@@ -1347,7 +1455,7 @@ function serializeTree(tree) {
   };
 }
 
-function serializeFishingNode(node) {
+function serializeFishingNode(node: { id: string; floor: number; x: number; y: number; approachX: number; approachY: number }): FishingNodeView {
   return {
     id: node.id,
     floor: node.floor,
@@ -1359,7 +1467,7 @@ function serializeFishingNode(node) {
   };
 }
 
-function serializeFire(fire) {
+function serializeFire(fire: Fire): FireView {
   return {
     id: fire.id,
     floor: fire.floor,
@@ -1369,7 +1477,7 @@ function serializeFire(fire) {
   };
 }
 
-function serializeBuffs(player) {
+function serializeBuffs(player: ServerPlayer): BuffsView {
   const now = performance.now();
   return {
     wellFed: Math.max(0, Math.round((player.wellFedUntil ?? 0) - now)),
@@ -1379,25 +1487,25 @@ function serializeBuffs(player) {
   };
 }
 
-function inInterestRange(viewer, entity) {
+function inInterestRange(viewer: ServerPlayer, entity: Positioned): boolean {
   if (viewer.floor !== entity.floor) return false;
   return distanceSq(viewer, entity) <= SNAPSHOT_RADIUS_SQ;
 }
 
-function inTreeInterestRange(viewer, entity) {
+function inTreeInterestRange(viewer: ServerPlayer, entity: Positioned): boolean {
   if (viewer.floor !== entity.floor) return false;
   return distanceSq(viewer, entity) <= TREE_SNAPSHOT_RADIUS_SQ;
 }
 
-function eventVisibleTo(viewer, item) {
+function eventVisibleTo(viewer: ServerPlayer, item: GameEvent): boolean {
   if (item.to && item.to !== viewer.id) return false;
   if (item.type === "chat" || item.type === "system") return true;
   if (item.type === "dialogue") return true;
   if (item.floor === null || item.x === null || item.y === null) return true;
-  return inInterestRange(viewer, item);
+  return inInterestRange(viewer, { floor: item.floor, x: item.x, y: item.y });
 }
 
-function persistPlayerToDb(player) {
+function persistPlayerToDb(player: ServerPlayer): void {
   db.players[player.name.toLowerCase()] = {
     name: player.name,
     classKey: player.classKey,
@@ -1421,31 +1529,31 @@ function persistPlayerToDb(player) {
   };
 }
 
-function persistPlayer(player) {
+function persistPlayer(player: ServerPlayer): void {
   persistPlayerToDb(player);
   queueSave();
 }
 
-function persistOnlinePlayers() {
+function persistOnlinePlayers(): void {
   for (const session of clients.values()) persistPlayerToDb(session.player);
   queueSave();
 }
 
-function loadDb() {
+function loadDb(): Database {
   if (!existsSync(SAVE_FILE)) return { players: {} };
   try {
-    return JSON.parse(readFileSync(SAVE_FILE, "utf8"));
+    return JSON.parse(readFileSync(SAVE_FILE, "utf8")) as Database;
   } catch {
     return { players: {} };
   }
 }
 
-function queueSave() {
+function queueSave(): void {
   saveQueued = true;
   void flushSaveQueue();
 }
 
-async function flushSaveQueue() {
+async function flushSaveQueue(): Promise<void> {
   if (saveInFlight || !saveQueued) return;
   saveQueued = false;
   saveInFlight = true;
@@ -1459,7 +1567,7 @@ async function flushSaveQueue() {
   }
 }
 
-function sanitizeInput(input) {
+function sanitizeInput(input: Partial<InputPayload> = {}): InputPayload {
   const moveX = clamp(Number(input?.moveX ?? 0), -1, 1);
   const moveY = clamp(Number(input?.moveY ?? 0), -1, 1);
   const hasMoveVector = Number.isFinite(moveX) && Number.isFinite(moveY) && Math.hypot(moveX, moveY) > 0.01;
@@ -1473,23 +1581,24 @@ function sanitizeInput(input) {
   };
 }
 
-function cleanName(name) {
+function cleanName(name: unknown): string {
   return String(name ?? "wanderer").trim().replace(/[^\w -]/g, "").slice(0, 18) || "wanderer";
 }
 
-function createQuestState() {
+function createQuestState(): Record<string, QuestState> {
   return Object.fromEntries(
     Object.values(QUESTS).map((quest) => [quest.id, { accepted: false, progress: 0, complete: false, claimed: false }])
   );
 }
 
-function normalizeQuestState(saved = {}) {
+function normalizeQuestState(saved: unknown): Record<string, QuestState> {
   const quests = createQuestState();
-  for (const [id, state] of Object.entries(saved)) {
-    if (!quests[id]) continue;
+  const src = (saved ?? {}) as Record<string, Partial<QuestState> | undefined>;
+  for (const [id, state] of Object.entries(src)) {
+    if (!quests[id] || !state) continue;
     quests[id] = {
       accepted: Boolean(state.accepted) || Boolean(state.progress) || Boolean(state.complete) || Boolean(state.claimed),
-      progress: clamp(Number(state.progress ?? 0), 0, QUESTS[id].targetCount),
+      progress: clamp(Number(state.progress ?? 0), 0, QUESTS[id]?.targetCount ?? 0),
       complete: Boolean(state.complete),
       claimed: Boolean(state.claimed)
     };
@@ -1497,7 +1606,7 @@ function normalizeQuestState(saved = {}) {
   return quests;
 }
 
-function updateQuestProgress(player, monster) {
+function updateQuestProgress(player: ServerPlayer, monster: ServerMonster): void {
   for (const quest of Object.values(QUESTS)) {
     if (quest.kind !== "kill") continue;
     const state = player.quests[quest.id];
@@ -1511,13 +1620,13 @@ function updateQuestProgress(player, monster) {
   }
 }
 
-function serializeQuests(player) {
+function serializeQuests(player: ServerPlayer): QuestView[] {
   return Object.values(QUESTS).map((quest) => {
     const state = player.quests[quest.id] ?? { accepted: false, progress: 0, complete: false, claimed: false };
     const progress = state.claimed
       ? quest.targetCount
       : (quest.kind === "gather" || quest.kind === "fetch")
-        ? clamp(inventoryCount(player, quest.itemId), 0, quest.targetCount)
+        ? clamp(inventoryCount(player, quest.itemId ?? ""), 0, quest.targetCount)
         : clamp(state.progress, 0, quest.targetCount);
     return {
       id: quest.id,
@@ -1535,38 +1644,39 @@ function serializeQuests(player) {
   });
 }
 
-function createSkillState() {
+function createSkillState(): Record<string, SkillStateEntry> {
   return Object.fromEntries(Object.keys(SKILLS).map((id) => [id, { xp: 0 }]));
 }
 
-function createInventory() {
+function createInventory(): InventorySlot[] {
   return Array.from({ length: INVENTORY_SIZE }, () => null);
 }
 
-function normalizeInventory(saved = []) {
+function normalizeInventory(saved: unknown): InventorySlot[] {
   const inventory = createInventory();
   if (!Array.isArray(saved)) return inventory;
-  saved.slice(0, INVENTORY_SIZE).forEach((item, index) => {
+  saved.slice(0, INVENTORY_SIZE).forEach((item: { id?: unknown; qty?: unknown } | null, index: number) => {
     const id = String(item?.id ?? "");
     if (!ITEMS[id]) return;
-    inventory[index] = { id, qty: Math.max(1, Math.floor(Number(item.qty ?? 1))) };
+    inventory[index] = { id, qty: Math.max(1, Math.floor(Number(item?.qty ?? 1))) };
   });
   return inventory;
 }
 
-function serializeInventory(inventory = []) {
+function serializeInventory(inventory: InventorySlot[] = []): Array<InventoryItemView | null> {
   return normalizeInventory(inventory).map((item) => {
     if (!item) return null;
     const spec = ITEMS[item.id];
+    if (!spec) return null;
     return { id: item.id, label: spec.label, icon: spec.icon, iconUrl: spec.iconUrl, qty: item.qty };
   });
 }
 
-function hasInventoryItem(player, id) {
+function hasInventoryItem(player: ServerPlayer, id: string): boolean {
   return player.inventory.some((item) => item?.id === id && item.qty > 0);
 }
 
-function playerHasCapability(player, capability) {
+function playerHasCapability(player: ServerPlayer, capability: "chop_tree" | "fish"): boolean {
   for (const slot of player.inventory) {
     if (!slot || slot.qty <= 0) continue;
     const spec = ITEMS[slot.id];
@@ -1575,10 +1685,11 @@ function playerHasCapability(player, capability) {
   return false;
 }
 
-function addInventoryItem(player, id, qty = 1) {
-  if (!ITEMS[id]) return false;
+function addInventoryItem(player: ServerPlayer, id: string, qty = 1): boolean {
+  const spec = ITEMS[id];
+  if (!spec) return false;
   let remaining = Math.max(1, Math.floor(qty));
-  const stackable = ITEMS[id].stackable !== false;
+  const stackable = spec.stackable !== false;
   if (stackable) {
     const existing = player.inventory.find((item) => item?.id === id);
     if (existing) {
@@ -1594,7 +1705,7 @@ function addInventoryItem(player, id, qty = 1) {
   return remaining === 0;
 }
 
-function removeInventoryItem(player, id, qty = 1) {
+function removeInventoryItem(player: ServerPlayer, id: string, qty = 1): boolean {
   let remaining = Math.max(1, Math.floor(qty));
   const available = player.inventory.reduce((sum, item) => sum + (item?.id === id ? item.qty : 0), 0);
   if (available < remaining) return false;
@@ -1607,20 +1718,22 @@ function removeInventoryItem(player, id, qty = 1) {
   }
   if (remaining > 0) return false;
   for (let i = 0; i < player.inventory.length; i += 1) {
-    if (player.inventory[i]?.qty <= 0) player.inventory[i] = null;
+    const slot = player.inventory[i];
+    if (slot && slot.qty <= 0) player.inventory[i] = null;
   }
   return true;
 }
 
-function normalizeSkillState(saved = {}) {
+function normalizeSkillState(saved: unknown): Record<string, SkillStateEntry> {
   const skills = createSkillState();
+  const src = (saved ?? {}) as Record<string, { xp?: number } | undefined>;
   for (const id of Object.keys(skills)) {
-    skills[id].xp = Math.max(0, Number(saved[id]?.xp ?? 0));
+    skills[id]!.xp = Math.max(0, Number(src[id]?.xp ?? 0));
   }
   return skills;
 }
 
-function serializeSkills(player) {
+function serializeSkills(player: ServerPlayer): SkillView[] {
   return Object.entries(player.skills).map(([id, state]) => ({
     id,
     label: SKILLS[id]?.label ?? id,
@@ -1631,62 +1744,62 @@ function serializeSkills(player) {
   }));
 }
 
-function skillLevel(player, id) {
+function skillLevel(player: ServerPlayer, id: string): number {
   return Math.max(1, levelForXp(player.skills[id]?.xp ?? 0));
 }
 
-function addSkillXp(player, id, amount) {
-  if (!player.skills[id]) player.skills[id] = { xp: 0 };
+function addSkillXp(player: ServerPlayer, id: string, amount: number): void {
+  const entry = player.skills[id] ?? (player.skills[id] = { xp: 0 });
   const before = skillLevel(player, id);
-  player.skills[id].xp += amount;
+  entry.xp += amount;
   const after = skillLevel(player, id);
-  if (after > before) event("system", `${player.name} reached ${SKILLS[id].label} ${after}.`);
+  if (after > before) event("system", `${player.name} reached ${SKILLS[id]?.label ?? id} ${after}.`);
   if (id === "defense" || id === "magic") recalculateVitals(player);
 }
 
-function fishingCatchMs(level) {
+function fishingCatchMs(level: number): number {
   return clamp(3600 - (level - 1) * 80, 1600, 3600);
 }
 
-function cookingMs(level) {
+function cookingMs(level: number): number {
   if (E2E_TEST) return 150;
   return clamp(2800 - (level - 1) * 55, 1300, 2800);
 }
 
-function firePlacementAtPlayer(player) {
+function firePlacementAtPlayer(player: ServerPlayer): Vec2 | null {
   if (!canStand(player.floor, player.x, player.y) || fireTooClose(player.floor, player.x, player.y)) return null;
   return { x: player.x, y: player.y };
 }
 
-function fireTooClose(floor, x, y) {
+function fireTooClose(floor: number, x: number, y: number): boolean {
   return [...fires.values()].some((fire) => fire.floor === floor && Math.hypot(fire.x - x, fire.y - y) < 1.2);
 }
 
-function isWellFed(player, now = performance.now()) {
+function isWellFed(player: ServerPlayer, now = performance.now()): boolean {
   return now < (player.wellFedUntil ?? 0);
 }
 
-function wellFedPower(player) {
+function wellFedPower(player: ServerPlayer): number {
   return isWellFed(player) ? 2 : 0;
 }
 
-function levelForXp(xp) {
+function levelForXp(xp: number): number {
   let level = 1;
   while (xp >= xpForLevel(level + 1)) level += 1;
   return level;
 }
 
-function recalculateVitals(player) {
-  const spec = CLASSES.adventurer;
+function recalculateVitals(player: ServerPlayer): void {
+  const spec = ADVENTURER;
   player.maxHp = spec.maxHp + (skillLevel(player, "defense") - 1) * spec.hpPerDefense;
   player.maxMana = spec.maxMana + (skillLevel(player, "magic") - 1) * spec.manaPerMagic;
 }
 
-function createSpatialIndex() {
+function createSpatialIndex(): SpatialIndex {
   return { players: new Map(), monsters: new Map(), corpses: new Map(), npcs: new Map(), trees: new Map(), cellCount: 0 };
 }
 
-function rebuildSpatialIndex() {
+function rebuildSpatialIndex(): void {
   spatial = createSpatialIndex();
   for (const { player } of clients.values()) addToSpatial(spatial.players, player);
   for (const monster of monsters.values()) {
@@ -1698,14 +1811,14 @@ function rebuildSpatialIndex() {
   spatial.cellCount = spatial.players.size + spatial.monsters.size + spatial.corpses.size + spatial.npcs.size + spatial.trees.size;
 }
 
-function addToSpatial(index, entity) {
+function addToSpatial<T extends Positioned>(index: Map<string, T[]>, entity: T): void {
   const key = spatialKey(entity.floor, entity.x, entity.y);
   const bucket = index.get(key) ?? [];
   bucket.push(entity);
   index.set(key, bucket);
 }
 
-function removeFromSpatial(index, entity) {
+function removeFromSpatial<T extends Positioned>(index: Map<string, T[]>, entity: T): void {
   const key = spatialKey(entity.floor, entity.x, entity.y);
   const bucket = index.get(key);
   if (!bucket) return;
@@ -1714,12 +1827,12 @@ function removeFromSpatial(index, entity) {
   else index.delete(key);
 }
 
-function querySpatial(index, floor, x, y, radius) {
+function querySpatial<T>(index: Map<string, T[]>, floor: number, x: number, y: number, radius: number): T[] {
   const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
   const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
   const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
   const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
-  const results = [];
+  const results: T[] = [];
   for (let cy = minCy; cy <= maxCy; cy += 1) {
     for (let cx = minCx; cx <= maxCx; cx += 1) {
       const bucket = index.get(`${floor}:${cx}:${cy}`);
@@ -1729,35 +1842,45 @@ function querySpatial(index, floor, x, y, radius) {
   return results;
 }
 
-function spatialKey(floor, x, y) {
+function spatialKey(floor: number, x: number, y: number): string {
   return `${floor}:${Math.floor(x / SPATIAL_CELL_SIZE)}:${Math.floor(y / SPATIAL_CELL_SIZE)}`;
 }
 
-function event(type, text, x = null, y = null, floor = null, color = null, from = null, target = null, extra = {}) {
+function event(
+  type: string,
+  text: string | number,
+  x: number | null = null,
+  y: number | null = null,
+  floor: number | null = null,
+  color: string | null = null,
+  from: string | null = null,
+  target: string | null = null,
+  extra: Partial<GameEvent> = {}
+): void {
   events.push({ type, text, x, y, floor, color, from, target, t: Date.now(), ...extra });
 }
 
-function distance(a, b) {
+function distance(a: { x: number; y: number }, b: { x: number; y: number }): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-function distanceSq(a, b) {
+function distanceSq(a: { x: number; y: number }, b: { x: number; y: number }): number {
   const dx = a.x - b.x;
   const dy = a.y - b.y;
   return dx * dx + dy * dy;
 }
 
-function recordSample(samples, value) {
+function recordSample(samples: number[], value: number): void {
   samples.push(value);
   while (samples.length > METRIC_WINDOW) samples.shift();
 }
 
-function avg(samples) {
+function avg(samples: number[]): number {
   if (!samples.length) return 0;
   return samples.reduce((sum, value) => sum + value, 0) / samples.length;
 }
 
-function updateByteMetric() {
+function updateByteMetric(): void {
   const now = performance.now();
   if (now - metrics.lastBytesAt < 1000) return;
   metrics.bytesOutPerSecond = metrics.bytesOutThisSecond;
@@ -1765,14 +1888,14 @@ function updateByteMetric() {
   metrics.lastBytesAt = now;
 }
 
-function roll([min, max]) {
+function roll([min, max]: Range): number {
   return Math.floor(min + Math.random() * (max - min + 1));
 }
 
-function clamp(value, min, max) {
+function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function round(value) {
+function round(value: number): number {
   return Math.round(value * 100) / 100;
 }

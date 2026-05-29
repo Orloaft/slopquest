@@ -1,5 +1,5 @@
-import { expect, test } from "@playwright/test";
-import { ABILITIES } from "../../src/shared.js";
+import { expect, test, type Page } from "@playwright/test";
+import { ABILITIES } from "../../src/shared.ts";
 
 test("Adventurer class abilities: Sprint and Second Wind activate, run cooldowns, and surface in HUD", async ({ page }) => {
   page.on("pageerror", (error) => console.error(error));
@@ -12,8 +12,8 @@ test("Adventurer class abilities: Sprint and Second Wind activate, run cooldowns
 
   await page.getByRole("button", { name: "Abilities" }).click();
   await expect(page.locator("#abilitiesPanel")).toBeVisible();
-  await expect(page.locator(".ability-row").filter({ hasText: ABILITIES.sprint.label })).toBeVisible();
-  await expect(page.locator(".ability-row").filter({ hasText: ABILITIES.second_wind.label })).toBeVisible();
+  await expect(page.locator(".ability-row").filter({ hasText: ABILITIES.sprint!.label })).toBeVisible();
+  await expect(page.locator(".ability-row").filter({ hasText: ABILITIES.second_wind!.label })).toBeVisible();
 
   // Sprint: activate, verify active+cooldown state, buff strip, and disabled button.
   await page.locator(".ability-activate[data-ability='sprint']").click();
@@ -48,7 +48,7 @@ test("Adventurer class abilities: Sprint and Second Wind activate, run cooldowns
   await expect(page.locator("#buffTracker")).toContainText("Second wind");
 
   await page.waitForFunction(
-    (start) => (window.__TIB_E2E__?.self()?.hp ?? 0) > start + 3,
+    (start) => (window.__TIB_E2E__?.self()?.hp ?? 0) > (start ?? 0) + 3,
     startHp,
     { timeout: 5000 }
   );
@@ -61,16 +61,15 @@ test("Adventurer class abilities: Sprint and Second Wind activate, run cooldowns
   expect(secondWindState.cooldown).toBeGreaterThan(0);
 });
 
-async function joinFreshCharacter(page) {
+async function joinFreshCharacter(page: Page): Promise<void> {
   const name = `e2e_${Date.now().toString(36)}`;
   await page.locator("#nameInput").fill(name);
   await page.locator("#joinButton").click();
   await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.self()));
 }
 
-async function setPlayerHp(page, hp) {
+async function setPlayerHp(page: Page, hp: number): Promise<void> {
   await page.evaluate((value) => {
-    window.__TIB_E2E__.send({ type: "e2eGrantItems", items: [], hp: value });
+    window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [], hp: value });
   }, hp);
 }
-
