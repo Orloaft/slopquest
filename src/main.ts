@@ -29,6 +29,7 @@ import type {
   GameEvent,
   InputPayload,
   InventoryItemView,
+  MiningNodeView,
   MonsterView,
   NpcView,
   PlayerView,
@@ -160,6 +161,10 @@ interface TreeEntityView extends Phaser.GameObjects.Container {
 }
 
 interface FishingEntityView extends Phaser.GameObjects.Container {
+  sprite: Phaser.GameObjects.Image;
+}
+
+interface MiningEntityView extends Phaser.GameObjects.Container {
   sprite: Phaser.GameObjects.Image;
 }
 
@@ -413,6 +418,7 @@ let pendingAttackTarget: string | null = null;
 let pendingLootTarget: string | null = null;
 let pendingNpcTalk: string | null = null;
 let pendingFishingNode: string | null = null;
+let pendingMiningNode: string | null = null;
 let pendingCookingFire: string | null = null;
 let dynamicPathTarget: DynamicPathTarget | null = null;
 let lastDynamicPathRefreshAt = 0;
@@ -430,6 +436,7 @@ const corpseViews = new Map<string, Phaser.GameObjects.Container>();
 const npcViews = new Map<string, NpcEntityView>();
 const treeViews = new Map<string, TreeEntityView>();
 const fishingViews = new Map<string, FishingEntityView>();
+const miningViews = new Map<string, MiningEntityView>();
 const fireViews = new Map<string, FireEntityView>();
 const floaters: Floater[] = [];
 let selectedInventorySlot: number | null = null;
@@ -462,6 +469,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("darkForestTiles", "/dark-forest-tiles.png");
   this.load.image("effectsSheet", "/effects.png");
   this.load.image("waterFishingSpots", "/water-fishing-spots.png");
+  this.load.image("oreNodeSheet", "/ore-rock-gathering-nodes.png");
   this.load.image("spriteCampfire", "/campfire.png");
 }
 
@@ -486,6 +494,11 @@ function create(this: Phaser.Scene): void {
   // "ROCKS & BOULDERS" block.
   makeSpriteTexture(this, "darkForestTiles", "spriteBoulder", 1128, 590, 42, 54);
   makeSpriteTexture(this, "waterFishingSpots", "spriteFishingRipple", 920, 800, 70, 70);
+  // Mining node wired from the reviewed ore/rock gathering source sheet (see
+  // assetsources/asset-review.md). Crop is the stage-1 "rich" copper vein from
+  // the sheet's top-left ORE VEINS block. The sheet ships on the project magenta
+  // key, so it chroma-keys cleanly without normalization.
+  makeSpriteTexture(this, "oreNodeSheet", "spriteCopperVein", 193, 107, 123, 66);
   makeSpriteTexture(this, "graveyardTiles", "spriteGrave", 580, 360, 58, 78);
   makeSpriteTexture(this, "graveyardTiles", "spriteFence", 20, 552, 126, 66);
   makeSpriteTexture(this, "graveyardTiles", "spriteDeadTree", 548, 18, 116, 198);
@@ -674,6 +687,7 @@ function syncEntities(): void {
   const visibleNpcs = new Set<string>();
   const visibleTrees = new Set<string>();
   const visibleFishingNodes = new Set<string>();
+  const visibleMiningNodes = new Set<string>();
   const visibleFires = new Set<string>();
 
   for (const player of latestState.players.filter((item) => item.floor === me.floor)) {
@@ -685,7 +699,7 @@ function syncEntities(): void {
       entityLayer.add(view);
     }
     setEntityTarget(view, player.x * TILE_SIZE, player.y * TILE_SIZE);
-    setActorAnimation(view, "knight", player.dir, player.moving || (player.action != null && ["woodcutting", "fishing", "cooking"].includes(player.action.type)), 40, 48);
+    setActorAnimation(view, "knight", player.dir, player.moving || (player.action != null && ["woodcutting", "fishing", "mining", "cooking"].includes(player.action.type)), 40, 48);
     view.setAlpha(player.dead ? 0.45 : 1);
     view.nameText.setText(player.name);
     view.hp.width = 34 * (player.hp / player.maxHp);
@@ -812,6 +826,23 @@ function syncEntities(): void {
     }
   }
 
+  for (const node of (latestState.miningNodes ?? []).filter((item) => item.floor === me.floor)) {
+    visibleMiningNodes.add(node.id);
+    let view = miningViews.get(node.id);
+    if (!view) {
+      view = createMiningNodeView(node);
+      miningViews.set(node.id, view);
+      entityLayer.add(view);
+    }
+    view.setPosition(node.x * TILE_SIZE, node.y * TILE_SIZE);
+  }
+  for (const [id, view] of miningViews) {
+    if (!visibleMiningNodes.has(id)) {
+      view.destroy();
+      miningViews.delete(id);
+    }
+  }
+
   for (const fire of (latestState.fires ?? []).filter((item) => item.floor === me.floor)) {
     visibleFires.add(fire.id);
     let view = fireViews.get(fire.id);
@@ -910,6 +941,19 @@ function createFishingNodeView(node: FishingNodeView): FishingEntityView {
     startFishingPath(node);
   });
   view.add([ring, sprite, zone]);
+  view.sprite = sprite;
+  return view;
+}
+
+function createMiningNodeView(node: MiningNodeView): MiningEntityView {
+  const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE) as MiningEntityView;
+  const sprite = scene.add.image(0, -2, "spriteCopperVein").setOrigin(0.5, 1).setDisplaySize(46, 30);
+  const zone = scene.add.zone(0, -12, 48, 36).setInteractive({ cursor: "pointer" });
+  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+    event.stopPropagation();
+    startMiningPath(node);
+  });
+  view.add([sprite, zone]);
   view.sprite = sprite;
   return view;
 }
@@ -1761,6 +1805,20 @@ function inputTowardDestination(me: PlayerView): MovementInput | null {
       return null;
     }
   }
+  if (pendingMiningNode) {
+    const node = latestState?.miningNodes?.find((item) => item.id === pendingMiningNode);
+    if (!node || node.floor !== me.floor) {
+      clearClickDestination();
+      return null;
+    }
+    if (isNearMiningNode(me, node)) {
+      const nodeId = pendingMiningNode;
+      clearClickDestination();
+      sendStopInput();
+      send({ type: "mineNode", id: nodeId });
+      return null;
+    }
+  }
   if (pendingCookingFire) {
     const fire = latestState?.fires?.find((item) => item.id === pendingCookingFire);
     if (!fire || fire.floor !== me.floor) {
@@ -1788,6 +1846,8 @@ function inputTowardDestination(me: PlayerView): MovementInput | null {
     } else if (pendingNpcTalk && refreshNpcTalkPath(me)) {
       return null;
     } else if (pendingFishingNode && refreshFishingPath(me)) {
+      return null;
+    } else if (pendingMiningNode && refreshMiningPath(me)) {
       return null;
     } else if (pendingCookingFire && refreshCookingPath(me)) {
       return null;
@@ -1942,6 +2002,48 @@ function fishingApproachTile(me: PlayerView, node: FishingNodeView): ApproachCan
   return nearestEntityApproachTile(me, approach, 1.2);
 }
 
+function startMiningPath(node: MiningNodeView): void {
+  const me = self();
+  if (!me || !node || node.floor !== me.floor) return;
+  clearClickDestination();
+  pendingMiningNode = node.id;
+  if (isNearMiningNode(me, node)) {
+    pendingMiningNode = null;
+    send({ type: "mineNode", id: node.id });
+    return;
+  }
+  if (!refreshMiningPath(me, node)) pendingMiningNode = null;
+}
+
+function refreshMiningPath(me: PlayerView, node: MiningNodeView | null = null): boolean {
+  const target = node ?? latestState?.miningNodes?.find((item) => item.id === pendingMiningNode);
+  if (!target || target.floor !== me.floor) return false;
+  if (isNearMiningNode(me, target)) return true;
+  const destination = miningApproachTile(me, target) ?? nearestEntityApproachTile(me, miningApproachPoint(target), 1.15);
+  return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, null, null, null, null, target.id));
+}
+
+function isNearMiningNode(me: PlayerView, node: MiningNodeView): boolean {
+  const approach = miningApproachPoint(node);
+  return Phaser.Math.Distance.Between(me.x, me.y, approach.x, approach.y) <= 1.35;
+}
+
+function miningApproachPoint(node: MiningNodeView): ApproachPoint {
+  return {
+    floor: node.floor,
+    x: node.approachX ?? node.x,
+    y: node.approachY ?? node.y
+  };
+}
+
+function miningApproachTile(me: PlayerView, node: MiningNodeView): ApproachCandidate | TilePoint | null {
+  const approach = miningApproachPoint(node);
+  const tx = Math.floor(approach.x);
+  const ty = Math.floor(approach.y);
+  if (canStandAtTile(node.floor, tx, ty)) return { x: tx, y: ty };
+  return nearestEntityApproachTile(me, approach, 1.2);
+}
+
 function startCookingPath(fire: FireView, itemId: string | null = selectedInventoryItem): void {
   const me = self();
   if (!me || !fire || fire.floor !== me.floor) return;
@@ -2075,7 +2177,8 @@ function startPathToTile(
   lootId: string | null = null,
   npcId: string | null = null,
   fishingId: string | null = null,
-  fireId: string | null = null
+  fireId: string | null = null,
+  miningId: string | null = null
 ): boolean {
   const me = self();
   if (!me || floor !== me.floor) return false;
@@ -2091,6 +2194,7 @@ function startPathToTile(
   pendingNpcTalk = npcId;
   pendingFishingNode = fishingId;
   pendingCookingFire = fireId;
+  pendingMiningNode = miningId;
   if (!attackId && !npcId) dynamicPathTarget = null;
   drawClickMarker({ floor, x: destination.x + 0.5, y: destination.y + 0.5 });
   return true;
@@ -2283,6 +2387,7 @@ function clearClickDestination({ keepHold = false }: { keepHold?: boolean } = {}
   pendingNpcTalk = null;
   pendingFishingNode = null;
   pendingCookingFire = null;
+  pendingMiningNode = null;
   dynamicPathTarget = null;
   if (!keepHold) {
     holdMoveActive = false;

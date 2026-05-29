@@ -1326,6 +1326,9 @@ function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
     npcs: visibleNpcs,
     trees: visibleTrees,
     fishingNodes: visibleFishingNodes,
+    // Placeholder until a server-side mining system exists; the client already
+    // renders + paths to these nodes (see createMiningNodeView in main.ts).
+    miningNodes: [],
     fires: visibleFires,
     events: events.filter((item) => eventVisibleTo(viewer, item)),
     metrics: {

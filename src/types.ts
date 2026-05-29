@@ -148,6 +148,16 @@ export interface FishingNodeView {
   label: string;
 }
 
+export interface MiningNodeView {
+  id: string;
+  floor: number;
+  x: number;
+  y: number;
+  approachX: number;
+  approachY: number;
+  label: string;
+}
+
 export interface FireView {
   id: string;
   floor: number;
@@ -218,6 +228,7 @@ export interface StateSnapshot {
   npcs: NpcView[];
   trees: TreeView[];
   fishingNodes: FishingNodeView[];
+  miningNodes: MiningNodeView[];
   fires: FireView[];
   events: GameEvent[];
   metrics: StateMetrics;
@@ -274,6 +285,7 @@ export type ClientMessage =
   | { type: "talkNpc"; id: string }
   | { type: "cutTree"; id: string }
   | { type: "fishNode"; id: string }
+  | { type: "mineNode"; id: string }
   | { type: "makeFire"; logItem?: string }
   | { type: "cookFish"; id: string }
   | {
