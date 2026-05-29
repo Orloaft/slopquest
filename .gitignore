@@ -2,6 +2,7 @@ node_modules/
 dist/
 data/players.json
 src/generated/
+test-results/
 
 .env
 .env.*

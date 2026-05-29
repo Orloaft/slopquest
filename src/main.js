@@ -170,6 +170,10 @@ let pendingCookingFire = null;
 let dynamicPathTarget = null;
 let lastDynamicPathRefreshAt = 0;
 let clickMarker = null;
+let holdMoveActive = false;
+let holdMoveTile = null;
+let holdMoveLastRepathAt = 0;
+const HOLD_MOVE_REPATH_MS = 80;
 let mapLayer;
 let entityLayer;
 let fxLayer;
@@ -308,6 +312,7 @@ function update(time) {
     hudStateVersion = stateVersion;
   }
   sendInput(time);
+  tickHoldMove(time);
   updateFloaters();
   const ownView = playerViews.get(selfId);
   if (ownView) scene.cameras.main.centerOn(ownView.x, ownView.y);
@@ -1286,7 +1291,41 @@ function handleWorldClick(pointer) {
   const tx = Math.floor(pointer.worldX / TILE_SIZE);
   const ty = Math.floor(pointer.worldY / TILE_SIZE);
   const me = self();
-  if (!startPathToTile(me.floor, tx, ty)) clearClickDestination();
+  if (startPathToTile(me.floor, tx, ty)) {
+    holdMoveActive = true;
+    holdMoveTile = { x: tx, y: ty };
+    holdMoveLastRepathAt = scene?.time?.now ?? 0;
+  } else {
+    clearClickDestination();
+  }
+}
+
+function tickHoldMove(time) {
+  if (!holdMoveActive) return;
+  const pointer = scene?.input?.activePointer;
+  if (!pointer || !pointer.leftButtonDown()) {
+    holdMoveActive = false;
+    holdMoveTile = null;
+    return;
+  }
+  const me = self();
+  if (!me || me.dead) {
+    holdMoveActive = false;
+    holdMoveTile = null;
+    return;
+  }
+  const tx = Math.floor(pointer.worldX / TILE_SIZE);
+  const ty = Math.floor(pointer.worldY / TILE_SIZE);
+  if (Math.floor(me.x) === tx && Math.floor(me.y) === ty) {
+    holdMoveTile = { x: tx, y: ty };
+    return;
+  }
+  const sameTile = holdMoveTile && holdMoveTile.x === tx && holdMoveTile.y === ty;
+  if (sameTile && clickDestination) return;
+  if (time - holdMoveLastRepathAt < HOLD_MOVE_REPATH_MS && clickDestination) return;
+  if (!startPathToTile(me.floor, tx, ty)) return;
+  holdMoveTile = { x: tx, y: ty };
+  holdMoveLastRepathAt = time;
 }
 
 function inputTowardDestination(me) {
@@ -1403,6 +1442,8 @@ function inputTowardDestination(me) {
       return null;
     } else if (pendingCookingFire && refreshCookingPath(me)) {
       return null;
+    } else if (holdMoveActive && scene?.input?.activePointer?.leftButtonDown()) {
+      clearClickDestination({ keepHold: true });
     } else {
       clearClickDestination();
     }
@@ -1867,7 +1908,7 @@ function drawClickMarker(destination) {
   clickMarker.setVisible(true);
 }
 
-function clearClickDestination() {
+function clearClickDestination({ keepHold = false } = {}) {
   clickDestination = null;
   clickPath = [];
   pendingTreeCut = null;
@@ -1877,6 +1918,10 @@ function clearClickDestination() {
   pendingFishingNode = null;
   pendingCookingFire = null;
   dynamicPathTarget = null;
+  if (!keepHold) {
+    holdMoveActive = false;
+    holdMoveTile = null;
+  }
   if (clickMarker) clickMarker.setVisible(false);
 }
 
