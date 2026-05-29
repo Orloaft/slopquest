@@ -9,12 +9,13 @@ export type SkillId =
   | "magic"
   | "woodcutting"
   | "fishing"
+  | "mining"
   | "firemaking"
   | "cooking";
 
 export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown";
 
-export type Capability = "chop_tree" | "fish";
+export type Capability = "chop_tree" | "fish" | "mine";
 
 export type NpcRole = "vendor" | "quest" | "guide";
 
@@ -116,6 +117,15 @@ export interface TreeNode {
 }
 
 export interface FishingNode {
+  id: string;
+  floor: number;
+  x: number;
+  y: number;
+  approachX: number;
+  approachY: number;
+}
+
+export interface MiningNode {
   id: string;
   floor: number;
   x: number;

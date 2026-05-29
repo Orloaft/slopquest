@@ -24,6 +24,10 @@ fishing_rod:
   cost: 18
   name: Fishing Rod
 
+pickaxe:
+  cost: 25
+  name: Bronze Pickaxe
+
 flint_steel:
   cost: 16
   name: Flint and Steel

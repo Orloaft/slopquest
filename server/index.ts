@@ -9,6 +9,7 @@ import {
   CLASSES,
   COMPOSED_TREE_NODES,
   FISHING_NODES,
+  MINING_NODES,
   ITEMS,
   MAP_COLS,
   MAP_ROWS,
@@ -52,6 +53,7 @@ import type {
   GameEvent,
   InputPayload,
   InventoryItemView,
+  MiningNodeView,
   MonsterView,
   NpcView,
   PlayerView,
@@ -164,6 +166,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
     if (message.type === "talkNpc") talkNpc(session.player, String(message.id ?? ""));
     if (message.type === "cutTree") cutTree(session.player, String(message.id ?? ""));
     if (message.type === "fishNode") fishNode(session.player, String(message.id ?? ""));
+    if (message.type === "mineNode") mineNode(session.player, String(message.id ?? ""));
     if (message.type === "makeFire") makeFire(session.player, String(message.logItem ?? "logs"));
     if (message.type === "cookFish") cookFish(session.player, String(message.id ?? ""));
     if (E2E_TEST && message.type === "e2eGrantItems") grantE2EItems(session.player, message);
@@ -574,6 +577,14 @@ function buyItem(player: ServerPlayer, item: string): void {
     player.gold -= SHOP["fishing_rod"]!.cost;
     event("system", `${player.name} bought a fishing rod.`);
   }
+  if (item === "pickaxe" && !hasInventoryItem(player, "pickaxe") && player.gold >= SHOP["pickaxe"]!.cost) {
+    if (!addInventoryItem(player, "pickaxe", 1)) {
+      event("system", "Your inventory is full.");
+      return;
+    }
+    player.gold -= SHOP["pickaxe"]!.cost;
+    event("system", `${player.name} bought a bronze pickaxe.`);
+  }
   if (item === "flint_steel" && !hasInventoryItem(player, "flint_steel") && player.gold >= SHOP["flint_steel"]!.cost) {
     if (!addInventoryItem(player, "flint_steel", 1)) {
       event("system", "Your inventory is full.");
@@ -756,6 +767,19 @@ function fishNode(player: ServerPlayer, id: string): void {
   event("float", "You cast your line.", node.x, node.y, node.floor, "#8fd8ff");
 }
 
+function mineNode(player: ServerPlayer, id: string): void {
+  const node = MINING_NODES.find((item) => item.id === id);
+  if (!node || player.dead || node.floor !== player.floor || distance(player, miningApproachPoint(node)) > 1.45) return;
+  if (!playerHasCapability(player, "mine")) {
+    event("float", "You need a pickaxe.", player.x, player.y, player.floor, "#f7d486");
+    return;
+  }
+  player.targetId = null;
+  const level = skillLevel(player, "mining");
+  player.action = { type: "mining", nodeId: node.id, nextAt: performance.now() + miningSwingMs(level), startedAt: performance.now() };
+  event("float", "You swing your pickaxe.", node.x, node.y, node.floor, "#d8a86a");
+}
+
 // --- Item use dispatcher (Phase 2) ----------------------------------------
 // useItem looks up `ITEMS[itemId].use.kind` and dispatches to a verb handler.
 // Each verb owns its own validation, consumption, and effects. Authors compose
@@ -863,6 +887,7 @@ function eatItem(player: ServerPlayer, itemId: string): void {
 function updatePlayerAction(player: ServerPlayer, now: number): void {
   if (!player.action) return;
   if (player.action.type === "fishing") return updateFishingAction(player, now);
+  if (player.action.type === "mining") return updateMiningAction(player, now);
   if (player.action.type === "cooking") return updateCookingAction(player, now);
   if (player.action.type !== "woodcutting") return;
   const action = player.action;
@@ -911,6 +936,25 @@ function updateFishingAction(player: ServerPlayer, now: number): void {
   addSkillXp(player, "fishing", xp);
   event("effect", "fish", node.x, node.y, node.floor, null, player.id, node.id);
   event("float", `+${xp} Fishing`, node.x, node.y, node.floor, "#8fd8ff");
+}
+
+function updateMiningAction(player: ServerPlayer, now: number): void {
+  const action = player.action;
+  if (action?.type !== "mining") return;
+  const node = MINING_NODES.find((item) => item.id === action.nodeId);
+  if (!node || player.dead || node.floor !== player.floor || distance(player, miningApproachPoint(node)) > 1.65 || !playerHasCapability(player, "mine")) {
+    player.action = null;
+    return;
+  }
+  if (now < action.nextAt) return;
+  player.action = null;
+  if (!addInventoryItem(player, "copper_ore", 1)) {
+    event("system", "Your inventory is full.");
+    return;
+  }
+  const xp = 20;
+  addSkillXp(player, "mining", xp);
+  event("float", `+${xp} Mining`, node.x, node.y, node.floor, "#d8a86a");
 }
 
 function updateCookingAction(player: ServerPlayer, now: number): void {
@@ -996,6 +1040,14 @@ function treeTypeSpec(tree: TreeNodeRuntime): TreeType {
 }
 
 function fishingApproachPoint(node: { floor: number; x: number; y: number; approachX: number; approachY: number }): Positioned {
+  return {
+    floor: node.floor,
+    x: node.approachX ?? node.x,
+    y: node.approachY ?? node.y
+  };
+}
+
+function miningApproachPoint(node: { floor: number; x: number; y: number; approachX: number; approachY: number }): Positioned {
   return {
     floor: node.floor,
     x: node.approachX ?? node.x,
@@ -1314,6 +1366,9 @@ function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
   const visibleFishingNodes = FISHING_NODES
     .filter((node) => inInterestRange(viewer, node))
     .map(serializeFishingNode);
+  const visibleMiningNodes = MINING_NODES
+    .filter((node) => inInterestRange(viewer, node))
+    .map(serializeMiningNode);
   const visibleFires = querySpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)
     .filter((fire) => inInterestRange(viewer, fire))
     .map(serializeFire);
@@ -1326,9 +1381,7 @@ function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
     npcs: visibleNpcs,
     trees: visibleTrees,
     fishingNodes: visibleFishingNodes,
-    // Placeholder until a server-side mining system exists; the client already
-    // renders + paths to these nodes (see createMiningNodeView in main.ts).
-    miningNodes: [],
+    miningNodes: visibleMiningNodes,
     fires: visibleFires,
     events: events.filter((item) => eventVisibleTo(viewer, item)),
     metrics: {
@@ -1340,6 +1393,7 @@ function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
       visibleCorpses: visibleCorpses.length,
       visibleTrees: visibleTrees.length,
       visibleFishingNodes: visibleFishingNodes.length,
+      visibleMiningNodes: visibleMiningNodes.length,
       visibleFires: visibleFires.length,
       spatialCells: spatial.cellCount,
       tickMs: round(avg(metrics.tickSamples)),
@@ -1352,6 +1406,7 @@ function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
 function actionView(a: PlayerAction): ActionView {
   if (a.type === "woodcutting") return { type: a.type, treeId: a.treeId };
   if (a.type === "fishing") return { type: a.type, nodeId: a.nodeId };
+  if (a.type === "mining") return { type: a.type, nodeId: a.nodeId };
   return { type: a.type, fireId: a.fireId };
 }
 
@@ -1458,6 +1513,18 @@ function serializeFishingNode(node: { id: string; floor: number; x: number; y: n
     approachX: node.approachX,
     approachY: node.approachY,
     label: "Fishing spot"
+  };
+}
+
+function serializeMiningNode(node: { id: string; floor: number; x: number; y: number; approachX: number; approachY: number }): MiningNodeView {
+  return {
+    id: node.id,
+    floor: node.floor,
+    x: node.x,
+    y: node.y,
+    approachX: node.approachX,
+    approachY: node.approachY,
+    label: "Copper vein"
   };
 }
 
@@ -1669,7 +1736,7 @@ function hasInventoryItem(player: ServerPlayer, id: string): boolean {
   return player.inventory.some((item) => item?.id === id && item.qty > 0);
 }
 
-function playerHasCapability(player: ServerPlayer, capability: "chop_tree" | "fish"): boolean {
+function playerHasCapability(player: ServerPlayer, capability: "chop_tree" | "fish" | "mine"): boolean {
   for (const slot of player.inventory) {
     if (!slot || slot.qty <= 0) continue;
     const spec = ITEMS[slot.id];
@@ -1752,6 +1819,11 @@ function addSkillXp(player: ServerPlayer, id: string, amount: number): void {
 
 function fishingCatchMs(level: number): number {
   return clamp(3600 - (level - 1) * 80, 1600, 3600);
+}
+
+function miningSwingMs(level: number): number {
+  if (E2E_TEST) return 150;
+  return clamp(3800 - (level - 1) * 85, 1700, 3800);
 }
 
 function cookingMs(level: number): number {

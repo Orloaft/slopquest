@@ -20,6 +20,7 @@ export interface Vec2 {
 export type PlayerAction =
   | { type: "woodcutting"; treeId: string; nextAt: number; swings: number; remaining: number }
   | { type: "fishing"; nodeId: string; nextAt: number; startedAt: number }
+  | { type: "mining"; nodeId: string; nextAt: number; startedAt: number }
   | { type: "cooking"; itemId: string; fireId: string; nextAt: number };
 
 export interface AbilityBuffs {

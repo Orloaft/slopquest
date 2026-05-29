@@ -54,6 +54,14 @@
   tags: [tool]
   capabilities: [fish]
 
+- id: pickaxe
+  label: Bronze Pickaxe
+  icon: P
+  iconUrl: /icons/item-pickaxe.png
+  stackable: false
+  tags: [tool]
+  capabilities: [mine]
+
 - id: flint_steel
   label: Flint and Steel
   icon: F
@@ -79,6 +87,13 @@
   label: Pine Logs
   icon: P
   iconUrl: /icons/item-pine-logs.png
+  stackable: true
+  tags: [material]
+
+- id: copper_ore
+  label: Copper Ore
+  icon: Cu
+  iconUrl: /icons/item-copper-ore.png
   stackable: true
   tags: [material]
 

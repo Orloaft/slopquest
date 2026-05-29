@@ -10,7 +10,8 @@ export {
   SHOP,
   MONSTER_SPAWNS,
   COMPOSED_TREE_NODES,
-  FISHING_NODES
+  FISHING_NODES,
+  MINING_NODES
 } from "./generated/catalog.ts";
 
 export const TILE_SIZE = 32;
@@ -120,6 +121,7 @@ export const SKILLS: Record<string, SkillDef> = {
   magic: { label: "Magic", iconUrl: "/icons/skill-magic.png" },
   woodcutting: { label: "Woodcutting", iconUrl: "/icons/skill-woodcutting.png" },
   fishing: { label: "Fishing", iconUrl: "/icons/skill-fishing.png" },
+  mining: { label: "Mining", iconUrl: "/icons/skill-mining.png" },
   firemaking: { label: "Firemaking", iconUrl: "/icons/skill-firemaking.png" },
   cooking: { label: "Cooking", iconUrl: "/icons/skill-cooking.png" }
 };

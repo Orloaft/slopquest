@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tib.local/schema/mining-nodes.schema.json",
+  "title": "TIB Mining Nodes",
+  "description": "content/mining-nodes.yaml — ore nodes a player can mine at.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/miningNode" },
+  "$defs": {
+    "miningNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "at", "approach"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "at": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["floor", "x", "y"],
+          "description": "The rock tile coordinates.",
+          "properties": {
+            "floor": { "type": "integer", "minimum": 0 },
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        },
+        "approach": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x", "y"],
+          "description": "The standing tile next to the rock.",
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        }
+      }
+    }
+  }
+}

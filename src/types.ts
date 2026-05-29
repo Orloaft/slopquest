@@ -5,7 +5,7 @@ import type { NpcRole, QuestKind } from "./content-types.ts";
 
 export type Direction = "up" | "down" | "left" | "right";
 
-export type ActionType = "woodcutting" | "fishing" | "cooking";
+export type ActionType = "woodcutting" | "fishing" | "mining" | "cooking";
 
 export interface InputPayload {
   up: boolean;
@@ -211,6 +211,7 @@ export interface StateMetrics {
   visibleCorpses: number;
   visibleTrees: number;
   visibleFishingNodes: number;
+  visibleMiningNodes: number;
   visibleFires: number;
   spatialCells: number;
   tickMs: number;
