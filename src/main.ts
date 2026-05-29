@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import "./style.css";
 import {
+  ABILITIES,
   CLASSES,
   ITEMS,
   MAP_COLS,
@@ -171,11 +172,15 @@ interface Floater extends Phaser.GameObjects.Text {
   life: number;
 }
 
-type HotbarSlot = { kind: "item"; itemId: string } | null;
+type HotbarSlot =
+  | { kind: "item"; itemId: string }
+  | { kind: "ability"; abilityId: string }
+  | null;
 
 type HotbarDrag =
   | { source: "inventory"; itemId: string }
-  | { source: "hotbar"; slotIndex: number; itemId: string };
+  | { source: "abilities"; abilityId: string }
+  | { source: "hotbar"; slotIndex: number };
 
 interface AbilityRowEntry {
   row: HTMLDivElement;
@@ -517,7 +522,8 @@ function create(this: Phaser.Scene): void {
     key.on("down", () => {
       if (isTextEntryFocused()) return;
       if (activateHotbarSlot(index)) return;
-      // Until abilities live in the hotbar, key "1" still fires the Magic strike.
+      // Empty slot 1 still fires the default Magic strike; a bound item/ability
+      // slot consumes the key above before reaching this fallback.
       if (index === 0) send({ type: "ability", slot: "1" });
     });
   });
@@ -1225,6 +1231,17 @@ function renderAbilities(abilities: AbilityView[] = []): void {
 function createAbilityRow(ability: AbilityView): AbilityRowEntry {
   const row = document.createElement("div");
   row.className = "ability-row";
+  row.draggable = true;
+  row.dataset.ability = ability.id;
+  row.addEventListener("dragstart", (event) => {
+    activeHotbarDrag = { source: "abilities", abilityId: ability.id };
+    hotbarDragLandedInHotbar = false;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = "copyMove";
+      event.dataTransfer.setData("text/plain", `ability:${ability.id}`);
+    }
+  });
+  row.addEventListener("dragend", finishHotbarDrag);
 
   const meta = document.createElement("div");
   meta.className = "ability-meta";
@@ -1357,9 +1374,10 @@ function isCookableItem(itemId: string | null): boolean {
 }
 
 // --- Hotbar ---------------------------------------------------------------
-// Bottom-center bar holding consumables for fast use. Layout is per-character
-// in localStorage. Slot model is { kind: "item", itemId } today; "ability" is
-// reserved for future ability bindings.
+// Bottom-center bar holding consumables and class abilities for fast use.
+// Layout is per-character in localStorage. Slots are either
+// { kind: "item", itemId } (dragged from inventory) or
+// { kind: "ability", abilityId } (dragged from the abilities panel).
 
 const HOTBAR_SLOTS = 8;
 let hotbarLayout: HotbarSlot[] = Array<HotbarSlot>(HOTBAR_SLOTS).fill(null);
@@ -1382,9 +1400,11 @@ function loadHotbarFor(name: string): void {
       const parsed: unknown = JSON.parse(raw);
       if (Array.isArray(parsed)) {
         for (let i = 0; i < Math.min(parsed.length, HOTBAR_SLOTS); i++) {
-          const slot = parsed[i] as { kind?: unknown; itemId?: unknown } | null;
+          const slot = parsed[i] as { kind?: unknown; itemId?: unknown; abilityId?: unknown } | null;
           if (slot?.kind === "item" && typeof slot.itemId === "string" && ITEMS[slot.itemId]?.use) {
             hotbarLayout[i] = { kind: "item", itemId: slot.itemId };
+          } else if (slot?.kind === "ability" && typeof slot.abilityId === "string" && ABILITIES[slot.abilityId]) {
+            hotbarLayout[i] = { kind: "ability", abilityId: slot.abilityId };
           }
         }
       }
@@ -1415,12 +1435,21 @@ function isHotbarUsable(itemId: string | null): boolean {
   return Boolean(ITEMS[itemId]?.use);
 }
 
+function isAbilitySlottable(abilityId: string | null): boolean {
+  if (!abilityId) return false;
+  return Boolean(ABILITIES[abilityId]);
+}
+
 function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
+  const abilities = self()?.abilities ?? [];
   const sig = hotbarLayout
     .map((slot, i) => {
       if (!slot) return `${i}:-`;
       if (slot.kind === "item") return `${i}:i:${slot.itemId}:${inventoryQty(inventory, slot.itemId)}`;
-      return `${i}:?`;
+      const live = abilities.find((a) => a.id === slot.abilityId);
+      const onCooldown = (live?.cooldownRemainingMs ?? 0) > 0 ? 1 : 0;
+      const isActive = (live?.activeRemainingMs ?? 0) > 0 ? 1 : 0;
+      return `${i}:a:${slot.abilityId}:${onCooldown}:${isActive}`;
     })
     .join("|");
   if (sig === hotbarRenderedSig) return;
@@ -1440,7 +1469,14 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
         const label = item?.label ?? slot.itemId;
         return `<button class="hotbar-slot${depleted}" type="button" draggable="true" data-slot="${i}" data-item="${escapeHtml(slot.itemId)}" data-label="${escapeHtml(label)}"><b class="hotbar-key">${key}</b>${icon}<span class="hotbar-qty">${qty}</span></button>`;
       }
-      return `<button class="hotbar-slot empty" type="button" data-slot="${i}"><b class="hotbar-key">${key}</b></button>`;
+      const ability = ABILITIES[slot.abilityId];
+      const live = abilities.find((a) => a.id === slot.abilityId);
+      const isActive = (live?.activeRemainingMs ?? 0) > 0;
+      const onCooldown = (live?.cooldownRemainingMs ?? 0) > 0;
+      const stateClass = isActive ? " ability-active" : onCooldown ? " ability-cooldown" : "";
+      const label = ability?.label ?? slot.abilityId;
+      const glyph = abilityGlyph(label);
+      return `<button class="hotbar-slot ability${stateClass}" type="button" draggable="true" data-slot="${i}" data-ability="${escapeHtml(slot.abilityId)}" data-label="${escapeHtml(label)}"><b class="hotbar-key">${key}</b><span class="hotbar-ability">${escapeHtml(glyph)}</span></button>`;
     })
     .join("");
 
@@ -1460,10 +1496,10 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
       hotbarDragLandedInHotbar = true;
       handleHotbarDrop(slotIndex);
     });
-    if (elem.dataset.item) {
-      const itemId = elem.dataset.item;
+    if (elem.getAttribute("draggable") === "true") {
+      const label = elem.dataset.label ?? "";
       elem.addEventListener("dragstart", (event) => {
-        activeHotbarDrag = { source: "hotbar", slotIndex, itemId };
+        activeHotbarDrag = { source: "hotbar", slotIndex };
         hotbarDragLandedInHotbar = false;
         if (event.dataTransfer) {
           event.dataTransfer.effectAllowed = "move";
@@ -1471,7 +1507,7 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
         }
       });
       elem.addEventListener("dragend", finishHotbarDrag);
-      elem.addEventListener("mouseenter", () => showItemPopover(elem, elem.dataset.label ?? ""));
+      elem.addEventListener("mouseenter", () => showItemPopover(elem, label));
       elem.addEventListener("mousemove", () => positionItemPopover(elem));
       elem.addEventListener("mouseleave", hideItemPopover);
     }
@@ -1490,6 +1526,15 @@ function handleHotbarDrop(targetSlot: number): void {
       }
     }
     hotbarLayout[targetSlot] = { kind: "item", itemId: drag.itemId };
+  } else if (drag.source === "abilities") {
+    if (!isAbilitySlottable(drag.abilityId)) return;
+    for (let i = 0; i < HOTBAR_SLOTS; i++) {
+      const slot = hotbarLayout[i];
+      if (i !== targetSlot && slot?.kind === "ability" && slot.abilityId === drag.abilityId) {
+        hotbarLayout[i] = null;
+      }
+    }
+    hotbarLayout[targetSlot] = { kind: "ability", abilityId: drag.abilityId };
   } else if (drag.source === "hotbar") {
     if (drag.slotIndex === targetSlot) return;
     const moved = hotbarLayout[drag.slotIndex] ?? null;
@@ -1525,7 +1570,22 @@ function activateHotbarSlot(slotIndex: number): boolean {
     send({ type: "useItem", item: slot.itemId });
     return true;
   }
+  if (slot.kind === "ability") {
+    const me = self();
+    if (!me || me.dead) return false;
+    if (!me.abilities?.some((a) => a.id === slot.abilityId)) return false;
+    // Server is authoritative on cooldown/active gating; the keypress is still
+    // consumed so a bound slot never falls through to the Magic-strike default.
+    send({ type: "useClassAbility", id: slot.abilityId });
+    return true;
+  }
   return false;
+}
+
+function abilityGlyph(label: string): string {
+  const words = label.split(/\s+/).filter(Boolean);
+  if (words.length >= 2) return `${words[0]![0]!}${words[1]![0]!}`.toUpperCase();
+  return label.slice(0, 2).toUpperCase();
 }
 
 function iconMarkup(url: string | null, fallback: string | null, className: string): string {

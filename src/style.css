@@ -319,7 +319,7 @@ canvas {
   position: fixed;
   left: 50%;
   top: 50%;
-  z-index: 7;
+  z-index: 8;
   width: min(620px, calc(100vw - 32px));
   max-height: min(76vh, 640px);
   overflow: auto;
@@ -425,6 +425,11 @@ canvas {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   background: rgba(7, 10, 8, 0.45);
+  cursor: grab;
+}
+
+.ability-row:active {
+  cursor: grabbing;
 }
 
 .ability-meta {
@@ -656,6 +661,10 @@ canvas {
   left: 50%;
   bottom: 16px;
   transform: translateX(-50%);
+  /* Above the menu backdrop (z-index 6) so items/abilities can be dragged from
+     an open inventory or abilities panel and dropped onto the bar, but below the
+     center panels (z-index 8) so their controls stay clickable when overlapping. */
+  z-index: 7;
   display: grid;
   grid-template-columns: repeat(8, 56px);
   gap: 6px;
@@ -710,6 +719,27 @@ canvas {
   font-size: 10px;
   font-weight: 800;
   pointer-events: none;
+}
+
+.hotbar-slot.ability {
+  background: rgba(12, 18, 14, 0.7);
+}
+
+.hotbar-slot .hotbar-ability {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #9ae6b4;
+  pointer-events: none;
+}
+
+.hotbar-slot.ability.ability-cooldown {
+  opacity: 0.45;
+}
+
+.hotbar-slot.ability.ability-active {
+  border-color: rgba(154, 230, 180, 0.85);
+  box-shadow: inset 0 0 0 2px rgba(154, 230, 180, 0.5);
 }
 
 .death {

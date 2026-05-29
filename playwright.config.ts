@@ -5,6 +5,9 @@ export default defineConfig({
   timeout: 60000,
   expect: { timeout: 8000 },
   fullyParallel: false,
+  // One shared authoritative dev server backs every test, so parallel browser
+  // workers race on world state and starve timing-sensitive specs. Run serially.
+  workers: 1,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
