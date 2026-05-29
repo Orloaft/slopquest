@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
 id: southgate
 title: Thin the Cemetery
 giver: cemetery-warden

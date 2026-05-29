@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./schema/tree-types.schema.json
 # Tree species the woodcutting skill can chop.
 #
 # requiredLevel — minimum woodcutting level to chop this tree.

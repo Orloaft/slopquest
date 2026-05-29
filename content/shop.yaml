@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./schema/shop.schema.json
 # Vendor stock. The trader NPC (see npcs.yaml) sells exactly this list.
 #
 # Each entry has a cost in gold and a display name. Some entries have stat fields

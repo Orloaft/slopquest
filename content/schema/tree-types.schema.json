@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tib.local/schema/tree-types.schema.json",
+  "title": "TIB Tree Types",
+  "description": "content/tree-types.yaml — tree species the woodcutting skill can chop. itemId references items.yaml (checked by scripts/build-content.ts).",
+  "type": "array",
+  "items": { "$ref": "#/$defs/treeType" },
+  "$defs": {
+    "treeType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "label", "requiredLevel", "chopsRequired", "baseSwingMs",
+        "minSwingMs", "xp", "itemId", "dropLabel", "textureKey",
+        "width", "height", "zoneWidth", "zoneHeight"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "label": { "type": "string" },
+        "requiredLevel": { "type": "integer", "minimum": 1, "description": "Minimum woodcutting level." },
+        "chopsRequired": { "type": "integer", "minimum": 1, "description": "Swings before the tree falls." },
+        "baseSwingMs": { "type": "number", "description": "Slowest swing (level 1)." },
+        "minSwingMs": { "type": "number", "description": "Fastest swing (high level)." },
+        "xp": { "type": "number", "description": "Woodcutting xp per tree felled." },
+        "itemId": { "type": "string", "description": "Item dropped; must exist in items.yaml." },
+        "dropLabel": { "type": "string" },
+        "textureKey": { "type": "string", "description": "Phaser sprite key (client-side)." },
+        "width": { "type": "number" },
+        "height": { "type": "number" },
+        "zoneWidth": { "type": "number" },
+        "zoneHeight": { "type": "number" }
+      }
+    }
+  }
+}

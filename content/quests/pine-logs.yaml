@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
 id: pine_logs
 title: Pine for the Yards
 giver: lumberjack

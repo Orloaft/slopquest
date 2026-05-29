@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./schema/spawns.schema.json
 # World placements.
 #
 # monsters — every monster spawn point. type must match a monster id from monsters.yaml.

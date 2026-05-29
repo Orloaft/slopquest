@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./schema/monsters.schema.json
 # Monster catalog. Spawn placements live in spawns.yaml.
 #
 # Required: id, name, maxHp, speed, damage, attackMs, xp, gold, aggro, range

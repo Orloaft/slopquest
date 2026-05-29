@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tib.local/schema/spawns.schema.json",
+  "title": "TIB Spawns",
+  "description": "content/spawns.yaml — world placements. type/zone references are checked by scripts/build-content.ts.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "monsters": {
+      "type": "array",
+      "description": "Monster spawn points. type must match a monster id from monsters.yaml.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "at", "zone"],
+        "properties": {
+          "type": { "type": "string" },
+          "at": { "$ref": "#/$defs/tile" },
+          "zone": { "enum": ["southTown", "cemetery", "crypt", "woods", "northTown"] }
+        }
+      }
+    },
+    "trees": {
+      "type": "array",
+      "description": "Manually placed composed trees. type must match a tree id from tree-types.yaml.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "at"],
+        "properties": {
+          "type": { "type": "string" },
+          "at": { "$ref": "#/$defs/tile" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "tile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["floor", "x", "y"],
+      "properties": {
+        "floor": { "type": "integer", "minimum": 0 },
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    }
+  }
+}

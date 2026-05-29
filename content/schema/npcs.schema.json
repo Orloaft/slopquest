@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tib.local/schema/npcs.schema.json",
+  "title": "TIB NPCs",
+  "description": "content/npcs.yaml — vendors, quest givers, and guides.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/npc" },
+  "$defs": {
+    "npc": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "role", "at"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+        "name": { "type": "string" },
+        "role": {
+          "enum": ["vendor", "quest", "guide"],
+          "description": "vendor opens the shop; quest drives quest dialogue (id must match a quest's giver); guide speaks idleDialogue."
+        },
+        "at": { "$ref": "#/$defs/tile" },
+        "idleDialogue": { "type": "string" }
+      }
+    },
+    "tile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["floor", "x", "y"],
+      "properties": {
+        "floor": { "type": "integer", "minimum": 0 },
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    }
+  }
+}

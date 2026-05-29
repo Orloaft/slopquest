@@ -14,6 +14,18 @@ You can also run the build by itself:
 npm run content:build
 ```
 
+## Editor autocomplete & inline validation
+
+Every content file has a JSON Schema under `content/schema/`, wired up via a
+`# yaml-language-server: $schema=...` line at the top of each YAML file. Install the
+**YAML** extension (`redhat.vscode-yaml`) in VS Code and you get autocomplete, hover
+docs, and red squiggles on bad fields **as you type** — before you even run the build.
+
+The schemas check *shape* (required fields, types, allowed values). The build script
+(`scripts/build-content.ts`) additionally checks *cross-references* (does this drop
+point at a real item, does this quest giver exist, etc.). Between the two you get fast
+editor feedback plus a hard gate at build time.
+
 ## Files at a glance
 
 | File                  | What it holds                                              |

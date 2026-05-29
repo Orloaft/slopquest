@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tib.local/schema/shop.schema.json",
+  "title": "TIB Shop",
+  "description": "content/shop.yaml — vendor stock keyed by slot id (weapon, armor, axe, fishing_rod, flint_steel, potion, ...). The trader NPC sells exactly these entries.",
+  "type": "object",
+  "additionalProperties": { "$ref": "#/$defs/shopEntry" },
+  "$defs": {
+    "shopEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cost"],
+      "properties": {
+        "cost": { "type": "number", "minimum": 0, "description": "Price in gold." },
+        "name": { "type": "string", "description": "Display name for class-neutral items." },
+        "knightName": { "type": "string", "description": "Display name shown to melee classes." },
+        "casterName": { "type": "string", "description": "Display name shown to caster classes." },
+        "damageBonus": { "type": "number" },
+        "armorBonus": { "type": "number" },
+        "heal": { "type": "number" }
+      }
+    }
+  }
+}

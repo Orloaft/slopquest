@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./schema/fishing-nodes.schema.json
 # Spots a player can fish at.
 #
 # at        — the water tile coordinates.

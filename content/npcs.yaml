@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./schema/npcs.schema.json
 # All non-player characters. Vendors, quest givers, guides — all in one place.
 #
 # role: vendor | quest | guide

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./schema/items.schema.json
 # Items players can hold in inventory.
 #
 # Required fields: id, label

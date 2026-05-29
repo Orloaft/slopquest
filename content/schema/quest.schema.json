@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tib.local/schema/quest.schema.json",
+  "title": "TIB Quest",
+  "description": "One quest per file under content/quests/. id/giver/monster/item references and dialogue templating are checked by scripts/build-content.ts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "giver", "objective", "reward", "dialogue"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+    "title": { "type": "string" },
+    "giver": { "type": "string", "description": "Must match an npc id with role: quest." },
+    "objective": { "$ref": "#/$defs/objective" },
+    "reward": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gold", "xp"],
+      "properties": {
+        "gold": { "type": "number", "minimum": 0 },
+        "xp": { "type": "number", "minimum": 0 }
+      }
+    },
+    "dialogue": { "$ref": "#/$defs/dialogue" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "objective": { "properties": { "kind": { "const": "kill" } } } }
+      },
+      "then": {
+        "properties": {
+          "objective": { "required": ["in", "monsters"] }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "objective": { "properties": { "kind": { "enum": ["gather", "fetch"] } } } }
+      },
+      "then": {
+        "properties": {
+          "objective": { "required": ["item"] },
+          "dialogue": { "required": ["missingItems"] }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "count"],
+      "properties": {
+        "kind": { "enum": ["kill", "gather", "fetch"] },
+        "count": { "type": "integer", "minimum": 1 },
+        "in": {
+          "enum": ["southTown", "cemetery", "crypt", "woods", "northTown"],
+          "description": "Zone the kill objective is scoped to (kill quests)."
+        },
+        "monsters": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "Monster ids that count toward a kill quest."
+        },
+        "item": { "type": "string", "description": "Item id to gather/fetch." }
+      }
+    },
+    "dialogue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intro", "progress", "turnIn", "claimed"],
+      "description": "Lines support templating tokens like {target.count}, {progress}, {target.remaining}.",
+      "properties": {
+        "intro": { "$ref": "#/$defs/lines" },
+        "progress": { "$ref": "#/$defs/lines" },
+        "turnIn": { "$ref": "#/$defs/lines" },
+        "claimed": { "$ref": "#/$defs/lines" },
+        "missingItems": { "$ref": "#/$defs/lines" }
+      }
+    },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/line" }
+    },
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1,
+      "description": "Exactly one of npc or player.",
+      "properties": {
+        "npc": { "type": "string" },
+        "player": { "type": "string" }
+      }
+    }
+  }
+}

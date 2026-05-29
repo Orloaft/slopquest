@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tib.local/schema/fishing-nodes.schema.json",
+  "title": "TIB Fishing Nodes",
+  "description": "content/fishing-nodes.yaml — spots a player can fish at.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/fishingNode" },
+  "$defs": {
+    "fishingNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "at", "approach"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "at": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["floor", "x", "y"],
+          "description": "The water tile coordinates.",
+          "properties": {
+            "floor": { "type": "integer", "minimum": 0 },
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        },
+        "approach": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x", "y"],
+          "description": "The standing tile next to the water.",
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        }
+      }
+    }
+  }
+}

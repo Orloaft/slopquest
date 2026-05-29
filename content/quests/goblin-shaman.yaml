@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
 id: goblin_shaman
 title: Silence the Shamans
 giver: hunter

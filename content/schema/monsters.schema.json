@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tib.local/schema/monsters.schema.json",
+  "title": "TIB Monsters",
+  "description": "content/monsters.yaml — monster catalog. Spawn placements live in spawns.yaml. drop.item references are checked by scripts/build-content.ts.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/monster" },
+  "$defs": {
+    "range": {
+      "type": "array",
+      "description": "[min, max] pair.",
+      "items": { "type": "number" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "monster": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "maxHp", "speed", "damage", "attackMs", "xp", "gold", "aggro", "range"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "name": { "type": "string", "description": "Display name." },
+        "maxHp": { "type": "number" },
+        "speed": { "type": "number" },
+        "damage": { "$ref": "#/$defs/range" },
+        "attackMs": { "type": "number" },
+        "xp": { "type": "number" },
+        "gold": { "$ref": "#/$defs/range" },
+        "aggro": { "type": "number", "description": "Detection range in tiles." },
+        "range": { "type": "number", "description": "Melee/magic reach in tiles." },
+        "drops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["item", "chance"],
+            "properties": {
+              "item": { "type": "string", "description": "An item id from items.yaml." },
+              "chance": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

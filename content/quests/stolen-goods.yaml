@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
 id: stolen_goods
 title: Stolen Cargo
 giver: merchant
