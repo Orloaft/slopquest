@@ -459,6 +459,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("townTiles", "/towntiles.png");
   this.load.image("forestTiles", "/foresttiles.png");
   this.load.image("graveyardTiles", "/graveyardtiles.png");
+  this.load.image("darkForestTiles", "/dark-forest-tiles.png");
   this.load.image("effectsSheet", "/effects.png");
   this.load.image("waterFishingSpots", "/water-fishing-spots.png");
   this.load.image("spriteCampfire", "/campfire.png");
@@ -479,6 +480,11 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "forestTiles", "spriteTree", 578, 28, 120, 150);
   makeSpriteTexture(this, "forestTiles", "spritePine", 820, 30, 82, 150);
   makeSpriteTexture(this, "forestTiles", "spriteRock", 640, 500, 92, 72);
+  // First sprite wired from the reviewed dark-forest source sheet (see
+  // assetsources/asset-review.md). Background normalized to the project magenta
+  // key before copying into public/. Crop is the boulder cluster in the sheet's
+  // "ROCKS & BOULDERS" block.
+  makeSpriteTexture(this, "darkForestTiles", "spriteBoulder", 1128, 590, 42, 54);
   makeSpriteTexture(this, "waterFishingSpots", "spriteFishingRipple", 920, 800, 70, 70);
   makeSpriteTexture(this, "graveyardTiles", "spriteGrave", 580, 360, 58, 78);
   makeSpriteTexture(this, "graveyardTiles", "spriteFence", 20, 552, 126, 66);
@@ -2357,7 +2363,9 @@ function addComposedMapObjects(floor: number): void {
     { key: "spritePine", x: 31.3, y: 23.8, w: 56, h: 90 },
     { key: "spriteTree", x: 45.2, y: 15.3, w: 82, h: 106 },
     { key: "spriteRock", x: 18.7, y: 25.2, w: 44, h: 34 },
-    { key: "spriteRock", x: 38.5, y: 5.7, w: 48, h: 36 }
+    { key: "spriteRock", x: 38.5, y: 5.7, w: 48, h: 36 },
+    { key: "spriteBoulder", x: 28.4, y: 12.6, w: 52, h: 64 },
+    { key: "spriteBoulder", x: 41.6, y: 27.3, w: 46, h: 58 }
   ];
 
   const objectsByFloor: Record<number, DecorationSprite[]> = {
