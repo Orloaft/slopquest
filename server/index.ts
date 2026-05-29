@@ -512,7 +512,7 @@ function damagePlayer(player: ServerPlayer, damage: number, source: string): voi
 function lootAdjacent(player: ServerPlayer): void {
   if (player.dead) return;
   let found = 0;
-  for (const corpse of [...corpses.values()]) {
+  for (const corpse of querySpatial(spatial.corpses, player.floor, player.x, player.y, 1.6)) {
     if (corpse.floor !== player.floor || distance(player, corpse) > 1.6) continue;
     found += 1;
     collectCorpse(player, corpse);
@@ -1314,7 +1314,7 @@ function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
   const visibleFishingNodes = FISHING_NODES
     .filter((node) => inInterestRange(viewer, node))
     .map(serializeFishingNode);
-  const visibleFires = [...fires.values()]
+  const visibleFires = querySpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)
     .filter((fire) => inInterestRange(viewer, fire))
     .map(serializeFire);
 
@@ -1786,7 +1786,7 @@ function recalculateVitals(player: ServerPlayer): void {
 }
 
 function createSpatialIndex(): SpatialIndex {
-  return { players: new Map(), monsters: new Map(), corpses: new Map(), npcs: new Map(), trees: new Map(), cellCount: 0 };
+  return { players: new Map(), monsters: new Map(), corpses: new Map(), npcs: new Map(), trees: new Map(), fires: new Map(), cellCount: 0 };
 }
 
 function rebuildSpatialIndex(): void {
@@ -1798,7 +1798,14 @@ function rebuildSpatialIndex(): void {
   for (const corpse of corpses.values()) addToSpatial(spatial.corpses, corpse);
   for (const npc of npcs.values()) addToSpatial(spatial.npcs, npc);
   for (const tree of treeNodes.values()) addToSpatial(spatial.trees, tree);
-  spatial.cellCount = spatial.players.size + spatial.monsters.size + spatial.corpses.size + spatial.npcs.size + spatial.trees.size;
+  for (const fire of fires.values()) addToSpatial(spatial.fires, fire);
+  spatial.cellCount =
+    spatial.players.size +
+    spatial.monsters.size +
+    spatial.corpses.size +
+    spatial.npcs.size +
+    spatial.trees.size +
+    spatial.fires.size;
 }
 
 function addToSpatial<T extends Positioned>(index: Map<string, T[]>, entity: T): void {

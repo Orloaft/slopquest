@@ -165,6 +165,7 @@ export interface SpatialIndex {
   corpses: Map<string, Corpse[]>;
   npcs: Map<string, NpcRuntime[]>;
   trees: Map<string, TreeNodeRuntime[]>;
+  fires: Map<string, Fire[]>;
   cellCount: number;
 }
 

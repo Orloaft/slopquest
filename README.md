@@ -52,10 +52,10 @@ The test sandbox is split into five server instances: the safe Waystone town, So
 - Server snapshots include lightweight metrics for connected clients, visible entities, tick time, snapshot time, and outbound bandwidth.
 - Character persistence is batched through an async save queue instead of writing once per player in the periodic save loop.
 - Floor collision data is cached after generation.
+- Spatial grid buckets back proximity lookups (snapshots, monster aggro, corpse looting, fire checks) instead of floor-wide scans over every entity.
 
 Next foundation targets before adding lots of content:
 
-- Replace floor-wide monster/player scans with spatial grid buckets.
 - Add snapshot deltas with periodic full resyncs.
 - Move persistence from JSON to SQLite or Postgres.
 - Add load-test scripts for simulated players.
