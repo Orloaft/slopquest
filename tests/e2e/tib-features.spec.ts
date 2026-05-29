@@ -44,12 +44,12 @@ test("skills, firemaking, and cooking are usable and visually present", async ({
 
   await page.waitForFunction(() => (window.__TIB_E2E__?.getState()?.fires?.length ?? 0) > 0);
   await expect(page.locator("#inventoryPanel")).toBeHidden();
-  expect(visualStats(await page.locator("canvas").screenshot()).orangePixels).toBeGreaterThan(20);
+  expect(visualStats(await page.locator("#game canvas").screenshot()).orangePixels).toBeGreaterThan(20);
 
   const firePoint = await page.waitForFunction(() => window.__TIB_E2E__?.fireScreenPoint?.() ?? null);
   const firePos = await firePoint.jsonValue();
   if (!firePos) throw new Error("fireScreenPoint never resolved");
-  await page.locator("canvas").click({ position: firePos });
+  await page.locator("#game canvas").click({ position: firePos });
   await expect(page.locator("#inventoryPanel")).toBeVisible();
   await expect(page.locator("[data-item='raw_fish']")).toBeVisible();
   await page.locator("[data-item='raw_fish']").click();

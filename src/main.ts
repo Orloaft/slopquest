@@ -11,6 +11,7 @@ import {
   SHOP,
   TILE_SIZE,
   TREE_TYPES,
+  ZONES,
   isBlockedTile,
   makeFloorTiles,
   tileAt,
@@ -311,6 +312,9 @@ const dom = {
   skillTracker: el<HTMLElement>("#skillTracker"),
   inventoryGrid: el<HTMLElement>("#inventoryGrid"),
   hotbar: el<HTMLElement>("#hotbar"),
+  minimapCanvas: el<HTMLCanvasElement>("#minimapCanvas"),
+  compassCanvas: el<HTMLCanvasElement>("#compassCanvas"),
+  minimapZone: el<HTMLElement>("#minimapZone"),
   netStats: el<HTMLElement>("#netStats"),
   vendor: el<HTMLElement>("#vendor"),
   vendorCloseButton: el<HTMLButtonElement>("#vendorCloseButton"),
@@ -588,6 +592,8 @@ function update(this: Phaser.Scene, time: number): void {
   updateFloaters();
   const ownView = selfId ? playerViews.get(selfId) : undefined;
   if (ownView) scene.cameras.main.centerOn(ownView.x, ownView.y);
+  drawMinimap(me);
+  drawCompass(me.dir);
 }
 
 function ensureSocket(): void {
@@ -3042,6 +3048,198 @@ function setBar(bar: HTMLElement, label: HTMLElement, value: number, max: number
   const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
   bar.style.width = `${pct * 100}%`;
   label.textContent = `${prefix} ${Math.round(value)}/${Math.round(max)}`;
+}
+
+// --- Minimap + compass ----------------------------------------------------
+// Both live in the bottom-right HUD panel. The map data (makeFloorTiles) and the
+// player snapshot are already client-side, so this is pure presentation: no new
+// server traffic. The per-floor tile layer is rasterized once to a 1px-per-tile
+// offscreen canvas and cached; each frame we upscale that and stamp live blips.
+
+const MINIMAP_SCALE = 3;
+const minimapBaseCache = new Map<number, HTMLCanvasElement>();
+
+function minimapTileColor(tile: string): string {
+  const colors: Record<string, string> = {
+    "#": "#262a26", // rock wall
+    ".": "#3f6b3a", // grass
+    F: "#2f5230", // forest floor
+    f: "#234021", // tree/brush (blocked)
+    r: "#4b4a43", // rock (blocked)
+    s: "#6e6e62", // stone
+    p: "#8a7d5a", // town plaza
+    t: "#6a5236", // dirt path
+    d: "#5a4530", // dirt
+    g: "#46433c", // grave dirt
+    b: "#565249", // grave path
+    q: "#35332e", // grave fence (blocked)
+    c: "#5b574e", // grave path
+    h: "#454139", // grave dirt
+    O: "#7a6a52", // building
+    "~": "#2f5d7a", // water
+    ">": "#5a4530",
+    "<": "#5a4530",
+    N: "#d6ad4e", // portal/stairs (landmark)
+    S: "#d6ad4e",
+    T: "#d6ad4e",
+    C: "#d6ad4e",
+    n: "#8a7d5a"
+  };
+  return colors[tile] ?? "#3f6b3a";
+}
+
+function minimapBase(floor: number): HTMLCanvasElement {
+  const cached = minimapBaseCache.get(floor);
+  if (cached) return cached;
+  const canvas = document.createElement("canvas");
+  canvas.width = MAP_COLS;
+  canvas.height = MAP_ROWS;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const rows = makeFloorTiles(floor);
+    for (let y = 0; y < MAP_ROWS; y += 1) {
+      const row = rows[y] ?? "";
+      for (let x = 0; x < MAP_COLS; x += 1) {
+        ctx.fillStyle = minimapTileColor(row[x] ?? "#");
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+  minimapBaseCache.set(floor, canvas);
+  return canvas;
+}
+
+function minimapZoneLabel(floor: number): string {
+  for (const zone of Object.values(ZONES)) {
+    if (zone.floor === floor) return zone.label;
+  }
+  return `Floor ${floor}`;
+}
+
+function drawMinimap(me: PlayerView): void {
+  const ctx = dom.minimapCanvas.getContext("2d");
+  if (!ctx) return;
+  const w = dom.minimapCanvas.width;
+  const h = dom.minimapCanvas.height;
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, w, h);
+  ctx.drawImage(minimapBase(me.floor), 0, 0, w, h);
+
+  // Camera viewport rectangle, so the map shows what's currently on screen.
+  const camera = scene?.cameras?.main;
+  if (camera) {
+    const view = camera.worldView;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(
+      (view.x / TILE_SIZE) * MINIMAP_SCALE,
+      (view.y / TILE_SIZE) * MINIMAP_SCALE,
+      (view.width / TILE_SIZE) * MINIMAP_SCALE,
+      (view.height / TILE_SIZE) * MINIMAP_SCALE
+    );
+  }
+
+  const dot = (x: number, y: number, radius: number, fill: string): void => {
+    ctx.beginPath();
+    ctx.arc(x * MINIMAP_SCALE, y * MINIMAP_SCALE, radius, 0, Math.PI * 2);
+    ctx.fillStyle = fill;
+    ctx.fill();
+  };
+
+  const state = latestState;
+  if (state) {
+    for (const npc of state.npcs) {
+      if (npc.floor === me.floor) dot(npc.x, npc.y, 2, "#f2c14e");
+    }
+    for (const monster of state.monsters) {
+      if (monster.floor === me.floor) dot(monster.x, monster.y, 2, "#e15b5b");
+    }
+    for (const player of state.players) {
+      if (player.floor === me.floor && player.id !== me.id) dot(player.x, player.y, 2.4, "#5cc8e0");
+    }
+  }
+
+  // Self marker: white dot with a dark outline plus a tick in the facing dir.
+  const sx = me.x * MINIMAP_SCALE;
+  const sy = me.y * MINIMAP_SCALE;
+  ctx.beginPath();
+  ctx.arc(sx, sy, 3, 0, Math.PI * 2);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "#101211";
+  ctx.stroke();
+  const facing = directionVector(me.dir);
+  ctx.beginPath();
+  ctx.moveTo(sx, sy);
+  ctx.lineTo(sx + facing.x * 6, sy + facing.y * 6);
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  dom.minimapZone.textContent = `${minimapZoneLabel(me.floor)} · F${me.floor}`;
+}
+
+function directionVector(dir: Direction): { x: number; y: number } {
+  if (dir === "up") return { x: 0, y: -1 };
+  if (dir === "down") return { x: 0, y: 1 };
+  if (dir === "left") return { x: -1, y: 0 };
+  return { x: 1, y: 0 };
+}
+
+function drawCompass(dir: Direction): void {
+  const ctx = dom.compassCanvas.getContext("2d");
+  if (!ctx) return;
+  const w = dom.compassCanvas.width;
+  const h = dom.compassCanvas.height;
+  const cx = w / 2;
+  const cy = h / 2;
+  const radius = Math.min(cx, cy) - 2;
+  ctx.clearRect(0, 0, w, h);
+
+  // Disc + ring.
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(7, 10, 8, 0.78)";
+  ctx.fill();
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+  ctx.stroke();
+
+  // Cardinal letters; north fixed up and marked so it reads at a glance.
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "700 9px Inter, ui-sans-serif, system-ui";
+  const inset = radius - 6;
+  const cardinals: Array<[string, number, number, string]> = [
+    ["N", cx, cy - inset, "#e15b5b"],
+    ["E", cx + inset, cy, "#aeb9af"],
+    ["S", cx, cy + inset, "#aeb9af"],
+    ["W", cx - inset, cy, "#aeb9af"]
+  ];
+  for (const [label, lx, ly, color] of cardinals) {
+    ctx.fillStyle = color;
+    ctx.fillText(label, lx, ly);
+  }
+
+  // Needle pointing in the facing direction.
+  const facing = directionVector(dir);
+  const len = radius - 12;
+  const tipX = cx + facing.x * len;
+  const tipY = cy + facing.y * len;
+  const perpX = -facing.y;
+  const perpY = facing.x;
+  ctx.beginPath();
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(cx + perpX * 4 - facing.x * 3, cy + perpY * 4 - facing.y * 3);
+  ctx.lineTo(cx - perpX * 4 - facing.x * 3, cy - perpY * 4 - facing.y * 3);
+  ctx.closePath();
+  ctx.fillStyle = "#9ae6b4";
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+  ctx.fillStyle = "#dbe7dc";
+  ctx.fill();
 }
 
 function tileBaseTexture(tile: string): string {
