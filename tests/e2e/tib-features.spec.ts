@@ -65,6 +65,59 @@ test("skills, firemaking, and cooking are usable and visually present", async ({
   expect(visualStats(await page.locator("#inventoryPanel").screenshot()).meaningfulPixels).toBeGreaterThan(750);
 });
 
+test("mining a vein yields ore and Mining XP, and floor-0 veins carry distinct ore kinds", async ({ page }) => {
+  page.on("pageerror", (error) => console.error(error));
+  page.on("console", (message) => {
+    if (message.type() === "error") console.error(message.text());
+  });
+  await page.goto("/?e2e");
+  await joinFreshCharacter(page);
+
+  // Grant a pickaxe (the "mine" capability) and stand on the copper vein's
+  // approach tile so the swing lands without any pathing.
+  await page.evaluate(() => {
+    window.__TIB_E2E__?.send({
+      type: "e2eGrantItems",
+      items: [{ id: "pickaxe", qty: 1 }],
+      floor: 0,
+      x: 19.5,
+      y: 8.5,
+      gold: 0
+    });
+  });
+  await page.waitForFunction(() => {
+    const me = window.__TIB_E2E__?.self();
+    if (!me || me.floor !== 0 || Math.hypot(me.x - 19.5, me.y - 8.5) > 0.5) return false;
+    return (me.inventory ?? []).some((item) => item?.id === "pickaxe");
+  });
+
+  // The three seeded floor-0 veins should advertise distinct ore kinds.
+  const kinds = await page.waitForFunction(() => {
+    const nodes = (window.__TIB_E2E__?.getState()?.miningNodes ?? []).filter((node) => node.floor === 0);
+    return nodes.length >= 3 ? nodes.map((node) => node.kind).sort() : null;
+  });
+  expect(await kinds.jsonValue()).toEqual(["copper", "iron", "tin"]);
+
+  const miningXpBefore = await page.evaluate(
+    () => window.__TIB_E2E__?.self()?.skills.find((skill) => skill.id === "mining")?.xp ?? 0
+  );
+
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "mineNode", id: "mine-0-20-8" }));
+  await page.waitForFunction(() => window.__TIB_E2E__?.self()?.action?.type === "mining");
+
+  // After the swing resolves the vein drops ore and awards Mining XP.
+  await page.waitForFunction(
+    (before) => {
+      const me = window.__TIB_E2E__?.self();
+      if (!me) return false;
+      const hasOre = (me.inventory ?? []).some((item) => item?.id === "copper_ore");
+      const xp = me.skills.find((skill) => skill.id === "mining")?.xp ?? 0;
+      return hasOre && xp > before;
+    },
+    miningXpBefore
+  );
+});
+
 test("actor animation frames keep a stable bottom-center anchor", async ({ page }) => {
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
