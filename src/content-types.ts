@@ -132,6 +132,7 @@ export interface MiningNode {
   y: number;
   approachX: number;
   approachY: number;
+  kind: string;
 }
 
 export type DialogueLine = { npc: string } | { player: string };

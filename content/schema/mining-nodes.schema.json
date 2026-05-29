@@ -12,6 +12,11 @@
       "required": ["id", "at", "approach"],
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "kind": {
+          "type": "string",
+          "enum": ["copper", "tin", "iron"],
+          "description": "Ore type; selects the vein sprite and label. Defaults to copper."
+        },
         "at": {
           "type": "object",
           "additionalProperties": false,

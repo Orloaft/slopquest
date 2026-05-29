@@ -1516,7 +1516,13 @@ function serializeFishingNode(node: { id: string; floor: number; x: number; y: n
   };
 }
 
-function serializeMiningNode(node: { id: string; floor: number; x: number; y: number; approachX: number; approachY: number }): MiningNodeView {
+const ORE_LABELS: Record<string, string> = {
+  copper: "Copper vein",
+  tin: "Tin vein",
+  iron: "Iron vein"
+};
+
+function serializeMiningNode(node: { id: string; floor: number; x: number; y: number; approachX: number; approachY: number; kind: string }): MiningNodeView {
   return {
     id: node.id,
     floor: node.floor,
@@ -1524,7 +1530,8 @@ function serializeMiningNode(node: { id: string; floor: number; x: number; y: nu
     y: node.y,
     approachX: node.approachX,
     approachY: node.approachY,
-    label: "Copper vein"
+    kind: node.kind,
+    label: ORE_LABELS[node.kind] ?? "Ore vein"
   };
 }
 

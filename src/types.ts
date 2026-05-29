@@ -155,6 +155,7 @@ export interface MiningNodeView {
   y: number;
   approachX: number;
   approachY: number;
+  kind: string;
   label: string;
 }
 

@@ -498,11 +498,14 @@ function create(this: Phaser.Scene): void {
   // "ROCKS & BOULDERS" block.
   makeSpriteTexture(this, "darkForestTiles", "spriteBoulder", 1128, 590, 42, 54);
   makeSpriteTexture(this, "waterFishingSpots", "spriteFishingRipple", 920, 800, 70, 70);
-  // Mining node wired from the reviewed ore/rock gathering source sheet (see
-  // assetsources/asset-review.md). Crop is the stage-1 "rich" copper vein from
-  // the sheet's top-left ORE VEINS block. The sheet ships on the project magenta
-  // key, so it chroma-keys cleanly without normalization.
+  // Mining nodes wired from the reviewed ore/rock gathering source sheet (see
+  // assetsources/asset-review.md). Crops are the stage-1 "rich" veins from the
+  // sheet's left ORE VEINS column — copper (row 1), tin (row 2), iron (row 3),
+  // each one row (~83px) down from the last. The sheet ships on the project
+  // magenta key, so it chroma-keys cleanly without normalization.
   makeSpriteTexture(this, "oreNodeSheet", "spriteCopperVein", 193, 107, 123, 66);
+  makeSpriteTexture(this, "oreNodeSheet", "spriteTinVein", 193, 190, 123, 66);
+  makeSpriteTexture(this, "oreNodeSheet", "spriteIronVein", 193, 273, 123, 66);
   makeSpriteTexture(this, "graveyardTiles", "spriteGrave", 580, 360, 58, 78);
   makeSpriteTexture(this, "graveyardTiles", "spriteFence", 20, 552, 126, 66);
   makeSpriteTexture(this, "graveyardTiles", "spriteDeadTree", 548, 18, 116, 198);
@@ -951,9 +954,16 @@ function createFishingNodeView(node: FishingNodeView): FishingEntityView {
   return view;
 }
 
+const ORE_VEIN_TEXTURES: Record<string, string> = {
+  copper: "spriteCopperVein",
+  tin: "spriteTinVein",
+  iron: "spriteIronVein"
+};
+
 function createMiningNodeView(node: MiningNodeView): MiningEntityView {
   const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE) as MiningEntityView;
-  const sprite = scene.add.image(0, -2, "spriteCopperVein").setOrigin(0.5, 1).setDisplaySize(46, 30);
+  const texture = ORE_VEIN_TEXTURES[node.kind] ?? "spriteCopperVein";
+  const sprite = scene.add.image(0, -2, texture).setOrigin(0.5, 1).setDisplaySize(46, 30);
   const zone = scene.add.zone(0, -12, 48, 36).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();

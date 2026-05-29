@@ -3,15 +3,19 @@
 #
 # at        — the rock tile coordinates (sits on an impassable rock tile).
 # approach  — the standing tile next to the rock (player walks here to mine).
+# kind      — ore type (copper | tin | iron); picks the vein sprite. Defaults to copper.
 
 - id: mine-0-20-8
+  kind: copper
   at: { floor: 0, x: 20.5, y: 8.5 }
   approach: { x: 19.5, y: 8.5 }
 
 - id: mine-0-34-8
+  kind: tin
   at: { floor: 0, x: 34.5, y: 8.5 }
   approach: { x: 33.5, y: 8.5 }
 
 - id: mine-0-22-17
+  kind: iron
   at: { floor: 0, x: 22.5, y: 17.5 }
   approach: { x: 20.5, y: 17.5 }

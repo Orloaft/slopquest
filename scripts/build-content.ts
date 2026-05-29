@@ -68,6 +68,7 @@ interface RawFishingNode {
 
 interface RawMiningNode {
   id?: string;
+  kind?: string;
   at?: { floor: number; x: number; y: number };
   approach?: { x: number; y: number };
 }
@@ -124,6 +125,7 @@ const zoneIds = new Set(["southTown", "cemetery", "crypt", "woods", "northTown"]
 const useKinds = new Set(["eat", "light_fire", "cook_on_fire", "drink_potion"]);
 const capabilityIds = new Set(["chop_tree", "fish", "mine"]);
 const questKinds = new Set(["kill", "gather", "fetch"]);
+const oreKinds = new Set(["copper", "tin", "iron"]);
 const requiredQuestPhases = ["intro", "progress", "turnIn", "claimed"];
 
 function loadQuests(): RawQuest[] {
@@ -192,6 +194,11 @@ for (const s of spawns.monsters ?? []) {
 }
 for (const t of spawns.trees ?? []) {
   if (!t.type || !treeTypeIds.has(t.type)) fail("spawns.yaml", `tree spawn refs unknown type "${t.type}"`);
+}
+for (const m of miningNodes) {
+  if (m.kind != null && !oreKinds.has(m.kind)) {
+    fail(`mining-nodes.yaml:${m.id ?? "?"}`, `unknown kind "${m.kind}" (known: ${[...oreKinds].join(", ")})`);
+  }
 }
 
 const questIds = new Set<string>();
@@ -332,6 +339,7 @@ const FISHING_NODES = fishingNodes.map((f) => ({
 }));
 const MINING_NODES = miningNodes.map((m) => ({
   id: m.id,
+  kind: m.kind ?? "copper",
   floor: m.at?.floor,
   x: m.at?.x,
   y: m.at?.y,
