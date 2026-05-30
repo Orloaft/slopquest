@@ -368,6 +368,16 @@ function updatePlayers(dt: number, now: number): void {
     } else if (player.abilityBuffs?.sprint) {
       delete player.abilityBuffs.sprint;
     }
+    if (now < (player.abilityBuffs?.fleetFoot?.until ?? 0)) {
+      speed *= 1.25;
+    } else if (player.abilityBuffs?.fleetFoot) {
+      delete player.abilityBuffs.fleetFoot;
+    }
+    if (now < (player.abilityBuffs?.ironClad?.until ?? 0)) {
+      speed *= 0.85;
+    } else if (player.abilityBuffs?.ironClad) {
+      delete player.abilityBuffs.ironClad;
+    }
 
     const hasMoveVector = Math.hypot(Number(input.moveX), Number(input.moveY)) > 0.01;
     let dx = hasMoveVector ? Number(input.moveX) : Number(input.right) - Number(input.left);
@@ -415,21 +425,40 @@ function updateMonsters(dt: number, now: number): void {
     }
     const catalog = MONSTERS[monster.type];
     if (!catalog) continue;
-    const target = nearestPlayer(monster, catalog.aggro);
+    tickMonsterStatus(monster, now);
+    if (monster.deadUntil) continue; // burn may have killed it this tick
+
+    // Taunt (Provoke) overrides aggro to the taunting player while it lasts.
+    let target = nearestPlayer(monster, catalog.aggro);
+    if (monster.tauntUntil && now < monster.tauntUntil && monster.tauntBy) {
+      const taunter = playerById(monster.tauntBy);
+      if (taunter && !taunter.dead && taunter.floor === monster.floor && !isSafeZone(taunter.floor, taunter.x, taunter.y)) {
+        target = taunter;
+      }
+    }
     if (!target || isSafeZone(target.floor, target.x, target.y)) {
-      wanderMonster(monster, catalog, dt, now);
+      if (!(monster.freezeUntil && now < monster.freezeUntil) && !(monster.snareUntil && now < monster.snareUntil)) {
+        wanderMonster(monster, catalog, dt, now);
+      }
       continue;
     }
 
+    const frozen = Boolean(monster.freezeUntil && now < monster.freezeUntil);
+    const snared = Boolean(monster.snareUntil && now < monster.snareUntil);
     const dist = distance(monster, target);
-    if (dist > catalog.range) {
+    if (dist > catalog.range && !frozen && !snared) {
       const dx = (target.x - monster.x) / dist;
       const dy = (target.y - monster.y) / dist;
       moveEntity(monster, dx * catalog.speed * dt, dy * catalog.speed * dt);
     }
 
-    if (dist <= catalog.range + 0.15 && now - monster.lastAttack >= catalog.attackMs) {
+    if (!frozen && dist <= catalog.range + 0.15 && now - monster.lastAttack >= catalog.attackMs) {
       monster.lastAttack = now;
+      // Gas cloud (Volatile Flask) makes the monster miss sometimes.
+      if (monster.inaccurateUntil && now < monster.inaccurateUntil && Math.random() < 0.2) {
+        event("float", "Miss", monster.x, monster.y - 0.5, monster.floor, "#a8a29e");
+        continue;
+      }
       const damage = Math.max(1, roll(catalog.damage) - armorReduction(target));
       if (rollDodge(target)) {
         addSkillXp(target, "agility", Math.max(1, damage));
@@ -439,6 +468,25 @@ function updateMonsters(dt: number, now: number): void {
       damagePlayer(target, damage, catalog.name);
     }
   }
+}
+
+// Apply per-tick status effects (currently the burning DoT) and let it kill.
+function tickMonsterStatus(monster: ServerMonster, now: number): void {
+  if (monster.burnUntil && now < monster.burnUntil && monster.burnNextAt && now >= monster.burnNextAt) {
+    monster.burnNextAt = now + 1000;
+    const burner = monster.burnBy ? playerById(monster.burnBy) : null;
+    const dmg = monster.burnPerTick ?? 0;
+    if (burner && dmg > 0) damageMonster(burner, monster, dmg, "flare");
+  } else if (monster.burnUntil && now >= monster.burnUntil) {
+    monster.burnUntil = 0;
+  }
+}
+
+function playerById(id: string): ServerPlayer | null {
+  for (const session of clients.values()) {
+    if (session.player.id === id) return session.player;
+  }
+  return null;
 }
 
 function autoAttack(player: ServerPlayer, now: number): void {
@@ -483,6 +531,53 @@ function useAbility(player: ServerPlayer): void {
   damageMonster(player, monster, damage, "flare");
 }
 
+const DIR_VECTORS: Record<Direction, Vec2> = {
+  up: { x: 0, y: -1 },
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 }
+};
+
+function monstersInRadius(floor: number, cx: number, cy: number, radius: number): ServerMonster[] {
+  const hits: ServerMonster[] = [];
+  for (const monster of monsters.values()) {
+    if (monster.deadUntil || monster.floor !== floor) continue;
+    if (Math.hypot(monster.x - cx, monster.y - cy) <= radius) hits.push(monster);
+  }
+  return hits;
+}
+
+function applyBurn(player: ServerPlayer, monster: ServerMonster, durationMs: number, perTick: number): void {
+  const now = performance.now();
+  monster.burnUntil = now + durationMs;
+  monster.burnPerTick = perTick;
+  monster.burnNextAt = now + 1000;
+  monster.burnBy = player.id;
+}
+
+// Move the player up to `tiles` tiles along their facing, stopping before the
+// first blocked tile or occupied monster tile.
+function dashPlayer(player: ServerPlayer, tiles: number): void {
+  const dir = DIR_VECTORS[player.dir];
+  const startX = Math.floor(player.x);
+  const startY = Math.floor(player.y);
+  let destX = player.x;
+  let destY = player.y;
+  for (let step = 1; step <= tiles; step += 1) {
+    const tx = startX + dir.x * step;
+    const ty = startY + dir.y * step;
+    if (isBlockedTile(tileAt(player.floor, tx, ty))) break;
+    const occupied = [...monsters.values()].some(
+      (m) => !m.deadUntil && m.floor === player.floor && Math.floor(m.x) === tx && Math.floor(m.y) === ty
+    );
+    if (occupied) break;
+    destX = tx + 0.5;
+    destY = ty + 0.5;
+  }
+  player.x = destX;
+  player.y = destY;
+}
+
 function useClassAbility(player: ServerPlayer, id: string): void {
   if (player.dead) return;
   const spec = ABILITIES[id];
@@ -493,23 +588,155 @@ function useClassAbility(player: ServerPlayer, id: string): void {
   if (!player.abilityCooldowns) player.abilityCooldowns = {};
   if (!player.abilityBuffs) player.abilityBuffs = {};
   if (now < (player.abilityCooldowns[id] ?? 0)) return;
+  const manaCost = spec.manaCost ?? 0;
 
-  // Offensive class abilities: damage the current target.
+  // --- Vanguard: Provoke — taunt nearby monsters onto the player. ---
+  if (id === "provoke") {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    const taunted = monstersInRadius(player.floor, player.x, player.y, 1.8);
+    for (const monster of taunted) {
+      monster.tauntUntil = now + spec.durationMs;
+      monster.tauntBy = player.id;
+    }
+    event("effect", "flare", player.x, player.y, player.floor, "#ffcf6b", player.id);
+    event("float", taunted.length ? "Provoke!" : "Provoke", player.x, player.y - 0.5, player.floor, "#ffcf6b");
+    return;
+  }
+
+  // --- Vanguard: Iron Clad — damage-reduction stance (with a slow). ---
+  if (id === "iron_clad") {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    player.abilityBuffs.ironClad = { until: now + spec.durationMs };
+    event("float", "Iron Clad", player.x, player.y - 0.5, player.floor, "#bcd3e0");
+    return;
+  }
+
+  // --- Archer: Fleet Foot — cleanse + speed burst. ---
+  if (id === "fleet_foot") {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    player.abilityBuffs.fleetFoot = { until: now + spec.durationMs };
+    event("float", "Fleet Foot", player.x, player.y - 0.5, player.floor, "#9ae6b4");
+    return;
+  }
+
+  // --- Thief: Quick Step — short directional dash. ---
+  if (id === "quick_step") {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    dashPlayer(player, 2);
+    event("float", "Quick Step", player.x, player.y - 0.5, player.floor, "#e0c8ff");
+    return;
+  }
+
+  // --- Apothecary: Healing Poultice — instant heal + heal-over-time. ---
+  if (id === "healing_poultice") {
+    if (player.mana < manaCost || player.hp >= player.maxHp) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    const instant = Math.max(1, Math.round(player.maxHp * (spec.healFraction ?? 0)) + skillLevel(player, "alchemy"));
+    player.hp = clamp(player.hp + instant, 0, player.maxHp);
+    const overTime = Math.max(1, Math.round(player.maxHp * 0.12));
+    player.abilityBuffs.second_wind = { until: now + spec.durationMs, healPerMs: overTime / spec.durationMs };
+    addSkillXp(player, "alchemy", 4);
+    event("float", `+${instant} HP`, player.x, player.y - 0.5, player.floor, "#9ee6b1");
+    return;
+  }
+
+  // --- Mage: Flame Burst — 3x3 AoE in front + burning DoT. ---
+  if (id === "flame_burst") {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    const dir = DIR_VECTORS[player.dir];
+    const cx = player.x + dir.x * 1.5;
+    const cy = player.y + dir.y * 1.5;
+    for (const monster of monstersInRadius(player.floor, cx, cy, 1.6)) {
+      const damage = roll(spec.damage ?? [10, 16]) + skillLevel(player, "magic") + wellFedPower(player);
+      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
+      damageMonster(player, monster, damage, "flare");
+      if (!monster.deadUntil) applyBurn(player, monster, spec.durationMs, 3);
+    }
+    event("effect", "flare", cx, cy, player.floor, "#ff8a3d", player.id);
+    event("float", "Flame Burst", cx, cy, player.floor, "#ff8a3d");
+    return;
+  }
+
+  // --- Mage: Frost Nova — ring AoE + freeze (broken by later damage). ---
+  if (id === "frost_nova") {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    for (const monster of monstersInRadius(player.floor, player.x, player.y, 2.2)) {
+      const damage = roll(spec.damage ?? [6, 10]) + skillLevel(player, "magic") + wellFedPower(player);
+      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
+      damageMonster(player, monster, damage, "frost");
+      if (!monster.deadUntil) monster.freezeUntil = now + spec.durationMs;
+    }
+    event("effect", "frost", player.x, player.y, player.floor, "#a8e6ff", player.id);
+    event("float", "Frost Nova", player.x, player.y - 0.5, player.floor, "#a8e6ff");
+    return;
+  }
+
+  // --- Apothecary: Volatile Flask — thrown 3x3 toxic burst + accuracy debuff. ---
+  if (id === "volatile_flask") {
+    if (player.mana < manaCost) return;
+    const target = player.targetId == null ? undefined : monsters.get(player.targetId);
+    let tx: number;
+    let ty: number;
+    if (target && !target.deadUntil && target.floor === player.floor && distance(player, target) <= (spec.range ?? 4)) {
+      tx = target.x;
+      ty = target.y;
+    } else {
+      const dir = DIR_VECTORS[player.dir];
+      tx = player.x + dir.x * 2.5;
+      ty = player.y + dir.y * 2.5;
+    }
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    event("projectile", "flask", tx, ty, player.floor, "#a6e06b", player.id, null, { fromX: player.x, fromY: player.y });
+    for (const monster of monstersInRadius(player.floor, tx, ty, 1.6)) {
+      const damage = roll(spec.damage ?? [10, 16]) + skillLevel(player, "magic") + wellFedPower(player);
+      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
+      damageMonster(player, monster, damage, "flare");
+      if (!monster.deadUntil) monster.inaccurateUntil = now + spec.durationMs;
+    }
+    event("float", "Volatile Flask", tx, ty, player.floor, "#a6e06b");
+    return;
+  }
+
+  // Offensive single-target abilities: damage the current target.
   if (spec.damage) {
     const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
     if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
     const range = spec.range ?? classOf(player).range;
     if (distance(player, monster) > range) return;
-    if (player.mana < (spec.manaCost ?? 0)) return;
+    if (player.mana < manaCost) return;
     const skill = spec.skill ?? "attack";
     const isRanged = skill === "ranged";
     if (isRanged && !hasLineOfSight(player.floor, player.x, player.y, monster.x, monster.y)) return;
     player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= spec.manaCost ?? 0;
-    const damage = roll(spec.damage) + skillLevel(player, skill) + wellFedPower(player);
+    player.mana -= manaCost;
+    let damage = roll(spec.damage) + skillLevel(player, skill) + wellFedPower(player);
+    // Backstab: 2.5x when striking from behind (player faces the monster's back).
+    if (id === "backstab" && player.dir === monster.dir) {
+      damage = Math.round(damage * 2.5);
+      event("float", "Backstab!", monster.x, monster.y - 0.6, monster.floor, "#ffd166");
+    }
     addSkillXp(player, skill, Math.max(1, Math.floor(damage * 1.5)));
     if (isRanged) fireProjectile(player, monster, damage, spec.effectKind ?? "arrow");
     else damageMonster(player, monster, damage, spec.effectKind ?? "flare");
+    // Pinning Shot: snare the struck target in place.
+    if (id === "pinning_shot" && !monster.deadUntil) {
+      monster.snareUntil = now + spec.durationMs;
+      event("float", "Pinned!", monster.x, monster.y - 0.6, monster.floor, "#cfe8a0");
+    }
     return;
   }
 
@@ -533,6 +760,8 @@ function useClassAbility(player: ServerPlayer, id: string): void {
 
 function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: number, kind: string): void {
   monster.hp = clamp(monster.hp - damage, 0, monster.maxHp);
+  // Taking damage shatters a freeze (per Frost Nova design).
+  if (monster.freezeUntil) monster.freezeUntil = 0;
   event("effect", kind, monster.x, monster.y, monster.floor, null, player.id, monster.id, { fromX: player.x, fromY: player.y });
   event("hit", damage, monster.x, monster.y - 0.45, monster.floor, kind === "flare" ? "#8fd8ff" : "#ffd166", player.id, monster.id);
   if (monster.hp > 0) return;
@@ -578,6 +807,10 @@ function rollDodge(player: ServerPlayer): boolean {
 }
 
 function damagePlayer(player: ServerPlayer, damage: number, source: string): void {
+  // Iron Clad mitigates incoming damage.
+  if (player.abilityBuffs?.ironClad && performance.now() < player.abilityBuffs.ironClad.until) {
+    damage = Math.max(1, Math.round(damage * 0.7));
+  }
   player.hp = clamp(player.hp - damage, 0, player.maxHp);
   addSkillXp(player, "defense", Math.max(1, damage));
   event("hit", damage, player.x, player.y - 0.55, player.floor, "#ff6b6b", source);
@@ -1502,6 +1735,12 @@ function respawnMonster(monster: ServerMonster): void {
   monster.deadUntil = 0;
   monster.wanderTarget = null;
   monster.wanderNextAt = performance.now() + roll([1000, 3500]);
+  monster.tauntUntil = 0;
+  monster.tauntBy = undefined;
+  monster.snareUntil = 0;
+  monster.freezeUntil = 0;
+  monster.burnUntil = 0;
+  monster.inaccurateUntil = 0;
 }
 
 function wanderMonster(monster: ServerMonster, catalog: { speed: number }, dt: number, now: number): void {
@@ -1840,7 +2079,9 @@ function serializeBuffs(player: ServerPlayer): BuffsView {
     wellFed: Math.max(0, Math.round((player.wellFedUntil ?? 0) - now)),
     foodRegen: Math.max(0, Math.round((player.foodRegenUntil ?? 0) - now)),
     sprint: Math.max(0, Math.round((player.abilityBuffs?.sprint?.until ?? 0) - now)),
-    secondWind: Math.max(0, Math.round((player.abilityBuffs?.second_wind?.until ?? 0) - now))
+    secondWind: Math.max(0, Math.round((player.abilityBuffs?.second_wind?.until ?? 0) - now)),
+    ironClad: Math.max(0, Math.round((player.abilityBuffs?.ironClad?.until ?? 0) - now)),
+    fleetFoot: Math.max(0, Math.round((player.abilityBuffs?.fleetFoot?.until ?? 0) - now))
   };
 }
 

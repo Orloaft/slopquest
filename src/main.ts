@@ -1229,6 +1229,8 @@ function renderBuffTracker(buffs: Partial<BuffsView> = {}): void {
   if ((buffs.foodRegen ?? 0) > 0) active.push(`Food heal ${Math.ceil((buffs.foodRegen ?? 0) / 1000)}s`);
   if ((buffs.sprint ?? 0) > 0) active.push(`Sprint ${Math.ceil((buffs.sprint ?? 0) / 1000)}s`);
   if ((buffs.secondWind ?? 0) > 0) active.push(`Second wind ${Math.ceil((buffs.secondWind ?? 0) / 1000)}s`);
+  if ((buffs.ironClad ?? 0) > 0) active.push(`Iron Clad ${Math.ceil((buffs.ironClad ?? 0) / 1000)}s`);
+  if ((buffs.fleetFoot ?? 0) > 0) active.push(`Fleet Foot ${Math.ceil((buffs.fleetFoot ?? 0) / 1000)}s`);
   dom.buffTracker.textContent = active.join(" | ");
   dom.buffTracker.classList.toggle("hidden", !active.length);
 }

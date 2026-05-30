@@ -27,6 +27,8 @@ export type PlayerAction =
 export interface AbilityBuffs {
   sprint?: { until: number };
   second_wind?: { until: number; healPerMs: number };
+  ironClad?: { until: number };
+  fleetFoot?: { until: number };
 }
 
 export interface QuestState {
@@ -106,6 +108,16 @@ export interface ServerMonster {
   zone: string;
   wanderTarget: Vec2 | null;
   wanderNextAt: number;
+  // Status effects applied by player abilities (timestamps in performance.now ms).
+  tauntUntil?: number;
+  tauntBy?: string;
+  snareUntil?: number;
+  freezeUntil?: number;
+  burnUntil?: number;
+  burnPerTick?: number;
+  burnNextAt?: number;
+  burnBy?: string;
+  inaccurateUntil?: number;
 }
 
 export interface Corpse {

@@ -30,6 +30,8 @@ export interface BuffsView {
   foodRegen: number;
   sprint: number;
   secondWind: number;
+  ironClad: number;
+  fleetFoot: number;
 }
 
 export interface InventoryItemView {

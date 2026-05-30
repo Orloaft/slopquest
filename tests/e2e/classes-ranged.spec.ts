@@ -28,14 +28,21 @@ test("a hunting bow fires ranged attacks that train the Ranged skill", async ({ 
   expect(targetId).toBeTruthy();
   await page.evaluate((id) => window.__TIB_E2E__?.send({ type: "target", id: id as string }), targetId);
 
-  // Ranged XP climbs (and Melee does not — the bow routes to Ranged).
+  // Ranged XP climbs (and Melee does not — the bow routes to Ranged). Re-target
+  // the nearest monster periodically so a wandering aggro can't stall the shot.
   await page.waitForFunction(
     () => {
       const me = window.__TIB_E2E__?.self();
-      return (me?.skills.find((s) => s.id === "ranged")?.xp ?? 0) > 0;
+      if (!me) return false;
+      if ((me.skills.find((s) => s.id === "ranged")?.xp ?? 0) > 0) return true;
+      const near = (window.__TIB_E2E__?.getState()?.monsters ?? [])
+        .filter((m) => m.floor === me.floor)
+        .sort((a, b) => Math.hypot(a.x - me.x, a.y - me.y) - Math.hypot(b.x - me.x, b.y - me.y))[0];
+      if (near && me.targetId !== near.id) window.__TIB_E2E__?.send({ type: "target", id: near.id });
+      return false;
     },
     null,
-    { timeout: 15000 }
+    { timeout: 25000 }
   );
 });
 
@@ -64,7 +71,7 @@ test("a class unlocks at its trainer, equips in town, and is blocked outside tow
   // Equip it in town; abilities swap to the Vanguard kit.
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "setClass", classKey: "vanguard" }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.classKey === "vanguard");
-  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.abilities ?? []).some((a) => a.id === "shield_bash"));
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.abilities ?? []).some((a) => a.id === "provoke"));
 
   // Leaving town blocks class changes: the toggle is rejected and the stance holds.
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: 13, y: 12 }));

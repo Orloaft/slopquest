@@ -107,11 +107,11 @@ const CLASS_BASE = {
 // dodge profile, and move speed. See CLASS_UNLOCKS for how each is gated.
 export const CLASSES: Record<string, ClassSpec> = {
   adventurer: { ...CLASS_BASE, label: "Adventurer", abilities: ["sprint", "second_wind"], dodgeChance: 0.05 },
-  vanguard: { ...CLASS_BASE, label: "Vanguard", abilities: ["shield_bash", "second_wind", "sprint"], dodgeChance: 0.05 },
-  thief: { ...CLASS_BASE, label: "Thief", speed: 4.65, abilities: ["backstab", "sprint", "second_wind"], dodgeChance: 0.12 },
-  apothecary: { ...CLASS_BASE, label: "Apothecary", abilities: ["second_wind", "noxious_vial", "sprint"], dodgeChance: 0.06 },
-  archer: { ...CLASS_BASE, label: "Archer", speed: 4.4, abilities: ["aimed_shot", "sprint", "second_wind"], dodgeChance: 0.08 },
-  mage: { ...CLASS_BASE, label: "Mage", abilities: ["fireball", "frost_bolt", "second_wind"], dodgeChance: 0.05 }
+  vanguard: { ...CLASS_BASE, label: "Vanguard", abilities: ["provoke", "iron_clad"], dodgeChance: 0.05 },
+  thief: { ...CLASS_BASE, label: "Thief", speed: 4.65, abilities: ["quick_step", "backstab"], dodgeChance: 0.12 },
+  apothecary: { ...CLASS_BASE, label: "Apothecary", abilities: ["healing_poultice", "volatile_flask"], dodgeChance: 0.06 },
+  archer: { ...CLASS_BASE, label: "Archer", speed: 4.4, abilities: ["pinning_shot", "fleet_foot"], dodgeChance: 0.08 },
+  mage: { ...CLASS_BASE, label: "Mage", abilities: ["flame_burst", "frost_nova"], dodgeChance: 0.05 }
 };
 
 export interface ClassUnlock {
@@ -151,77 +151,109 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     durationMs: 5000,
     healFraction: 0.5
   },
-  shield_bash: {
-    id: "shield_bash",
-    label: "Shield Bash",
-    description: "Slam the target for heavy melee damage.",
+  // --- Vanguard ---
+  provoke: {
+    id: "provoke",
+    label: "Provoke",
+    description: "Taunt all nearby monsters, forcing them to attack you.",
+    cooldownMs: 12000,
+    durationMs: 6000,
+    manaCost: 6
+  },
+  iron_clad: {
+    id: "iron_clad",
+    label: "Iron Clad",
+    description: "Take 30% less damage but move 15% slower for 6s.",
+    cooldownMs: 20000,
+    durationMs: 6000,
+    manaCost: 8
+  },
+  // --- Archer ---
+  pinning_shot: {
+    id: "pinning_shot",
+    label: "Pinning Shot",
+    description: "A ranged shot that snares the target in place.",
+    cooldownMs: 8000,
+    durationMs: 2500,
+    manaCost: 8,
+    damage: [10, 16],
+    skill: "ranged",
+    range: 5,
+    effectKind: "arrow"
+  },
+  fleet_foot: {
+    id: "fleet_foot",
+    label: "Fleet Foot",
+    description: "Cleanse slows and move 25% faster for 4s.",
+    cooldownMs: 15000,
+    durationMs: 4000,
+    manaCost: 6
+  },
+  // --- Thief ---
+  quick_step: {
+    id: "quick_step",
+    label: "Quick Step",
+    description: "Dash 2 tiles in the direction you face.",
     cooldownMs: 6000,
     durationMs: 0,
-    damage: [10, 16],
-    manaCost: 8,
-    skill: "attack",
-    range: 1.6,
-    effectKind: "hit"
+    manaCost: 4
   },
   backstab: {
     id: "backstab",
     label: "Backstab",
-    description: "A vicious strike that trains Melee fast.",
-    cooldownMs: 8000,
+    description: "Strike from behind for 2.5x damage; otherwise normal.",
+    cooldownMs: 10000,
     durationMs: 0,
-    damage: [16, 26],
-    manaCost: 10,
+    manaCost: 8,
+    damage: [12, 18],
     skill: "attack",
     range: 1.6,
     effectKind: "hit"
   },
-  noxious_vial: {
-    id: "noxious_vial",
-    label: "Noxious Vial",
-    description: "Hurl a caustic brew that burns the target.",
-    cooldownMs: 7000,
-    durationMs: 0,
-    damage: [12, 20],
-    manaCost: 12,
-    skill: "magic",
-    range: 4.5,
-    effectKind: "flare"
-  },
-  aimed_shot: {
-    id: "aimed_shot",
-    label: "Aimed Shot",
-    description: "A precise long-range arrow. Trains Ranged.",
+  // --- Mage ---
+  flame_burst: {
+    id: "flame_burst",
+    label: "Flame Burst",
+    description: "Ignite a 3x3 area in front of you with a burning DoT.",
     cooldownMs: 5000,
-    durationMs: 0,
-    damage: [14, 22],
-    manaCost: 8,
-    skill: "ranged",
-    range: 6,
-    effectKind: "arrow"
-  },
-  fireball: {
-    id: "fireball",
-    label: "Fireball",
-    description: "Lob a burst of flame at range. Trains Magic.",
-    cooldownMs: 6000,
-    durationMs: 0,
-    damage: [18, 28],
-    manaCost: 14,
+    durationMs: 4000,
+    manaCost: 12,
+    damage: [10, 16],
     skill: "magic",
-    range: 6,
     effectKind: "flare"
   },
-  frost_bolt: {
-    id: "frost_bolt",
-    label: "Frost Bolt",
-    description: "A chilling bolt that trains Magic.",
-    cooldownMs: 4000,
-    durationMs: 0,
-    damage: [12, 18],
-    manaCost: 10,
+  frost_nova: {
+    id: "frost_nova",
+    label: "Frost Nova",
+    description: "Freeze monsters around you for 3s (damage breaks it).",
+    cooldownMs: 18000,
+    durationMs: 3000,
+    manaCost: 14,
+    damage: [6, 10],
     skill: "magic",
-    range: 6,
     effectKind: "frost"
+  },
+  // --- Apothecary ---
+  healing_poultice: {
+    id: "healing_poultice",
+    label: "Healing Poultice",
+    description: "Heal instantly, then regenerate over 5s. Scales with Alchemy.",
+    cooldownMs: 10000,
+    durationMs: 5000,
+    manaCost: 10,
+    healFraction: 0.18
+  },
+  volatile_flask: {
+    id: "volatile_flask",
+    label: "Volatile Flask",
+    description: "Hurl a flask: 3x3 toxic burst that lowers enemy accuracy.",
+    cooldownMs: 14000,
+    durationMs: 5000,
+    manaCost: 12,
+    damage: [10, 16],
+    skill: "magic",
+    range: 4,
+    effectKind: "flare"
   }
 };
 
