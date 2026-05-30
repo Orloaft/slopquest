@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: iron_census_ore
+title: Reinforce the Line
+giver: iron-census-officer
+objective:
+  kind: gather
+  item: copper_ore
+  count: 6
+reward:
+  gold: 120
+  xp: 130
+dialogue:
+  intro:
+    - npc: "Half the frontline's plate is cracked. We need copper, and the Badlands are crawling with it."
+    - player: "Mining duty. Understood."
+    - npc: "Bring me {target.count} {target.item.label} from the eastern canyons. The Census pays in steel and silver."
+  progress:
+    - npc: "{progress}/{target.count} {target.item.label} hauled. The smiths are waiting."
+  missingItems:
+    - npc: "No copper, no reinforcement. Mine it in the Badlands and come back."
+  turnIn:
+    - npc: "Good. The line holds another season because of you."
+    - player: "Hold it well."
+  claimed:
+    - npc: "The Iron Census remembers those who reinforce the wall."

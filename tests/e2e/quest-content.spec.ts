@@ -136,6 +136,11 @@ async function openDialogueWith(page: Page, npcId: string): Promise<DialogueRow[
   const panel = page.locator("#dialogue");
   await panel.waitFor({ state: "hidden" });
 
+  // Givers can live on any floor; teleport to the catalog position first so the
+  // NPC enters the client snapshot before we look it up.
+  const cat = NPCS.find((n) => n.id === npcId);
+  if (cat) await teleportTo(page, cat.floor, Math.floor(cat.x) + 0.5, Math.floor(cat.y) + 0.5, 2000);
+
   let npc: { id: string; x: number; y: number; floor: number } | null = null;
   let lastError: unknown;
   for (let attempt = 0; attempt < 12; attempt += 1) {

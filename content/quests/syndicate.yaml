@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: syndicate_ledger
+title: The Rival's Ledger
+giver: syndicate-contact
+objective:
+  kind: fetch
+  item: black_ledger
+  count: 1
+reward:
+  gold: 160
+  xp: 150
+dialogue:
+  intro:
+    - npc: "A rival crew keeps their books with the jungle totems. Lift that {target.item.label} and we own their routes."
+    - player: "In and out. No noise."
+    - npc: "The Ancient Totem Wraiths guard it deep in the jungle. Bring it to me — quietly."
+  progress:
+    - npc: "Still don't have the {target.item.label}? The totems won't hand it over."
+  missingItems:
+    - npc: "No ledger, no deal. Pull it from the jungle totems first."
+  turnIn:
+    - npc: "Beautiful. Their whole operation, right here in ink."
+    - player: "We never spoke."
+  claimed:
+    - npc: "The Unseen Syndicate owes you one. We don't forget debts."

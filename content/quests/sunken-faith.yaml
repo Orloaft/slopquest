@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: faith_lotus
+title: Tithe of the Tides
+giver: faith-monk
+objective:
+  kind: gather
+  item: herb
+  count: 6
+reward:
+  gold: 100
+  xp: 120
+dialogue:
+  intro:
+    - npc: "The marsh offers its medicine to the faithful. We must test our resistance to its gifts."
+    - player: "You want the lotus."
+    - npc: "Gather {target.count} {target.item.label} from the mire. We will brew, and we will adapt."
+  progress:
+    - npc: "{progress}/{target.count} {target.item.label} gathered. The miasma teaches patience."
+  missingItems:
+    - npc: "The marsh has not yet given its tithe. Forage the lotus and return."
+  turnIn:
+    - npc: "The tides provide. You are blessed by the rising water."
+    - player: "I'll leave the worship to you."
+  claimed:
+    - npc: "Adapt or drown. You chose to adapt."

@@ -194,3 +194,10 @@
   stackable: true
   tags: [material]
   weight: 1
+
+- id: black_ledger
+  label: Black-Market Ledger
+  icon: BL
+  iconUrl: /icons/item-quartz.png
+  stackable: true
+  tags: [quest]

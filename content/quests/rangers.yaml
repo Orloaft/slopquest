@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: rangers_prowlers
+title: Prove Your Aim
+giver: ranger-scout
+objective:
+  kind: kill
+  monsters: [reef_prowler]
+  in: beach
+  count: 5
+reward:
+  gold: 110
+  xp: 140
+dialogue:
+  intro:
+    - npc: "Reef Prowlers are breeding past the dunes. Fast little terrors."
+    - player: "And you want them thinned."
+    - npc: "Drop {target.count} of them out on the open sand — at range, mind you. That's the Ranger way."
+  progress:
+    - npc: "{progress}/{target.count} prowlers down. Keep your distance and keep firing."
+  turnIn:
+    - npc: "Clean shooting. The coast breathes easier."
+    - player: "Call me when they swarm again."
+  claimed:
+    - npc: "A true marksman. The Borderland Rangers could use you."

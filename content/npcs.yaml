@@ -101,3 +101,34 @@
   role: vendor
   at: { floor: 7, x: 24.5, y: 28.5 }
   idleDialogue: "The Oasis Outpost trades in glass and water. Rest, then trek on."
+
+# --- Faction quest-givers (tie the biomes together) ---
+- id: iron-census-officer
+  name: Sergeant Vex
+  role: quest
+  at: { floor: 0, x: 30.5, y: 18.5 }
+  idleDialogue: "The Iron Census holds the line. Broken gear doesn't fortify a frontier."
+
+- id: syndicate-contact
+  name: Fence Corbin
+  role: quest
+  at: { floor: 0, x: 12.5, y: 16.5 }
+  idleDialogue: "Keep your voice down. The Syndicate has work for quiet hands."
+
+- id: faith-monk
+  name: Brother Tidewell
+  role: quest
+  at: { floor: 5, x: 8.5, y: 9.5 }
+  idleDialogue: "The tides rise to cleanse us. The Sunken Faith only helps the willing adapt."
+
+- id: ranger-scout
+  name: Ranger Sable
+  role: quest
+  at: { floor: 8, x: 25.5, y: 5.5 }
+  idleDialogue: "The Borderland Rangers cull what the wild overflows. Prove your aim."
+
+- id: cartographer-adept
+  name: Adept Lyra
+  role: quest
+  at: { floor: 7, x: 27.5, y: 28.5 }
+  idleDialogue: "The Arcane Cartographers chart the ley-bleed. The desert hums with loose power."

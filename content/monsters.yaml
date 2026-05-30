@@ -250,3 +250,6 @@
   ranged: true
   slowPct: 25
   slowMs: 2000
+  drops:
+    - item: black_ledger
+      chance: 0.5

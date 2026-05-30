@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: carto_wraiths
+title: Siphon the Sun
+giver: cartographer-adept
+objective:
+  kind: kill
+  monsters: [sun_wraith]
+  in: desert
+  count: 4
+reward:
+  gold: 130
+  xp: 150
+dialogue:
+  intro:
+    - npc: "The wraiths hoard raw essence around the old obelisks. We must harvest it before the plane tears."
+    - player: "Harvest meaning... destroy them."
+    - npc: "Banish {target.count} Sun-Scorched Wraiths in the desert ruins. Their dispersal feeds the ley-charts."
+  progress:
+    - npc: "{progress}/{target.count} dispersed. The ley-lines steady, barely."
+  turnIn:
+    - npc: "Magnificent. The essence reading is off the charts."
+    - player: "Glad it tore something other than me."
+  claimed:
+    - npc: "The Arcane Cartographers map a little more of the impossible, thanks to you."
