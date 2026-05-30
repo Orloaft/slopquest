@@ -19,12 +19,36 @@ import {
   contentScaleX,
   contentScaleY,
   isBlockedTile,
+  isSafeZone,
   makeFloorTiles,
   tileAt,
   xpForLevel
 } from "./shared.ts";
 import type { ClassSpec } from "./shared.ts";
 import { MAP_OBJECTS } from "./map-objects.ts";
+import { setTrack, unlockAudio, setMusicEnabled, currentTrack } from "./audio.ts";
+
+// --- Music: per-zone score with a crossfade on transitions -----------------
+// Track names map to /music/<name>.mp3 (see public/music/README.md). The OSRS
+// titles in the design doc are the suggested fit per zone; supply your own.
+const TITLE_TRACK = "scape-main";
+const FLOOR_TRACK: Record<number, string> = {
+  0: "garden", // Waystone hub
+  1: "rest-in-peace", // Southgate Cemetery
+  2: "spooky", // Ashen Crypt
+  3: "harmony", // Northwood — central forest valley
+  4: "borderland", // Northwatch outpost
+  5: "swamp-fever", // The Sunken Marsh — rotten causeway
+  6: "al-kharid", // The Searing Badlands — canyon ravines
+  7: "the-desert", // The Sunken Desert
+  8: "sea-shanty-2", // The Sunken Beach
+  9: "tribal" // The Untamed Jungle
+};
+// A different cue when resting in a safe outpost.
+const OUTPOST_TRACK: Record<number, string> = {
+  5: "serenade", // Alchemist's Hut
+  6: "mirage" // Frontier Camp
+};
 import type { ItemUse, TreeType } from "./content-types.ts";
 import type {
   AbilityView,
@@ -265,6 +289,7 @@ interface E2EHooks {
     family: string;
     frames: Array<{ dir: Direction; frame: number; key: string; exists: boolean }>;
   }>;
+  currentTrack: () => string | null;
 }
 
 declare global {
@@ -366,6 +391,7 @@ const dom = {
   titleExit: el<HTMLElement>("#titleExit"),
   settingSound: el<HTMLInputElement>("#settingSound"),
   settingParallax: el<HTMLInputElement>("#settingParallax"),
+  settingMusic: el<HTMLInputElement>("#settingMusic"),
   joinBackdrop: el<HTMLElement>("#joinBackdrop"),
   joinBackButton: el<HTMLButtonElement>("#joinBackButton")
 };
@@ -450,7 +476,8 @@ if (E2E_MODE) {
           })
         );
         return { type, family: spec.family, frames };
-      })
+      }),
+    currentTrack: () => currentTrack()
   };
 }
 
@@ -684,6 +711,7 @@ function update(this: Phaser.Scene, time: number): void {
   if (!latestState || !self()) return;
   const me = self();
   if (!me) return;
+  applyZoneMusic(me);
   // A big floor bakes across frames behind the loading screen; hold the rest of
   // the loop until it finishes so entities never render on a half-built map.
   if (mapBuild) {
@@ -747,6 +775,16 @@ function ensureSocket(): void {
   socket.addEventListener("error", () => addChat("Connection error. Refresh if the world stops updating."));
 }
 
+function zoneTrackFor(me: PlayerView): string {
+  const outpost = OUTPOST_TRACK[me.floor];
+  if (outpost && isSafeZone(me.floor, me.x, me.y)) return outpost;
+  return FLOOR_TRACK[me.floor] ?? TITLE_TRACK;
+}
+
+function applyZoneMusic(me: PlayerView): void {
+  setTrack(zoneTrackFor(me));
+}
+
 // --- Title screen ("The Coastal Overlook") ---------------------------------
 let titleSoundOn = true;
 let titleParallaxOn = true;
@@ -754,13 +792,22 @@ let titleAudioCtx: AudioContext | null = null;
 
 function setupTitleScreen(): void {
   // In e2e the title is skipped so specs land straight on the login form (no
-  // title backdrop, so the "back to title" affordance is irrelevant there).
+  // title backdrop, so the "back to title" affordance is irrelevant there). The
+  // zone-music mapping still updates currentTrack() for assertions, but audio is
+  // never unlocked, so no playback is attempted under test.
   if (E2E_MODE) {
     dom.titleScreen.classList.add("hidden");
     dom.joinBackButton.classList.add("hidden");
     dom.join.classList.remove("hidden");
     return;
   }
+
+  // Queue the title theme; browsers only allow playback after a user gesture.
+  setTrack(TITLE_TRACK);
+  const unlock = (): void => unlockAudio();
+  document.addEventListener("pointerdown", unlock, { once: true });
+  document.addEventListener("keydown", unlock, { once: true });
+  dom.settingMusic.addEventListener("change", () => setMusicEnabled(dom.settingMusic.checked));
 
   dom.joinBackButton.addEventListener("click", () => closeCharacterSelect());
 
