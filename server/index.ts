@@ -94,6 +94,9 @@ const DATA_DIR = join(__dirname, "..", "data");
 const SAVE_FILE = join(DATA_DIR, "players.json");
 const PORT = Number(process.env.PORT ?? 8787);
 const E2E_TEST = process.env.E2E_TEST === "1";
+// Dev/playtest cheats via the `/dev` chat command. On under E2E or `TIB_DEV=1`
+// (see the `dev:tools` npm script). Keep off for normal multiplayer sessions.
+const DEV_TOOLS = E2E_TEST || process.env.TIB_DEV === "1";
 const SNAPSHOT_RADIUS = 18;
 const SNAPSHOT_RADIUS_SQ = SNAPSHOT_RADIUS ** 2;
 const TREE_SNAPSHOT_RADIUS = 32;
@@ -1037,7 +1040,64 @@ function setTarget(player: ServerPlayer, id: string): void {
 function chat(player: ServerPlayer, text: string): void {
   const clean = text.trim().slice(0, 120);
   if (!clean) return;
+  if (DEV_TOOLS && clean.startsWith("/dev")) {
+    handleDevCommand(player, clean);
+    return;
+  }
   event("chat", `${player.name}: ${clean}`);
+}
+
+// Playtest cheats (DEV_TOOLS only). Usage in chat:
+//   /dev          — level all skills to 20, +1000g, plus a bow + alchemy gear
+//   /dev skills N  — set every skill to level N (default 20)
+//   /dev unlock    — unlock all Tier-1 classes (skip the trainers)
+//   /dev gold N    — set gold to N
+//   /dev help      — list commands
+function handleDevCommand(player: ServerPlayer, text: string): void {
+  const [, sub, arg] = text.split(/\s+/);
+  const sysToPlayer = (msg: string): void => event("system", msg);
+  if (!sub || sub === "kit") {
+    devSetAllSkills(player, 20);
+    player.gold += 1000;
+    for (const [id, qty] of [["hunting_bow", 1], ["alchemy_kit", 1], ["empty_flask", 5], ["herb", 5]] as const) {
+      if (!hasInventoryItem(player, id)) addInventoryItem(player, id, qty);
+    }
+    persistPlayer(player);
+    sysToPlayer(`[dev] ${player.name} kitted out: all skills 20, +1000g, bow + alchemy gear. Visit a trainer, then equip in the Classes panel.`);
+    return;
+  }
+  if (sub === "skills") {
+    const level = clamp(Math.floor(Number(arg) || 20), 1, 99);
+    devSetAllSkills(player, level);
+    persistPlayer(player);
+    sysToPlayer(`[dev] ${player.name} set all skills to level ${level}.`);
+    return;
+  }
+  if (sub === "unlock") {
+    for (const unlock of CLASS_UNLOCKS) {
+      if (!player.unlockedClasses.includes(unlock.key)) player.unlockedClasses.push(unlock.key);
+    }
+    persistPlayer(player);
+    sysToPlayer(`[dev] ${player.name} unlocked all classes. Equip them from the Classes panel (in a town).`);
+    return;
+  }
+  if (sub === "gold") {
+    player.gold = clamp(Math.floor(Number(arg) || 0), 0, 1_000_000);
+    persistPlayer(player);
+    sysToPlayer(`[dev] ${player.name} gold set to ${player.gold}.`);
+    return;
+  }
+  sysToPlayer("[dev] commands: /dev (full kit) · /dev skills N · /dev unlock · /dev gold N");
+}
+
+function devSetAllSkills(player: ServerPlayer, level: number): void {
+  const xp = xpForLevel(level);
+  for (const id of Object.keys(SKILLS)) {
+    (player.skills[id] ?? (player.skills[id] = { xp: 0 })).xp = xp;
+  }
+  recalculateVitals(player);
+  player.hp = clamp(player.hp, 1, player.maxHp);
+  player.mana = clamp(player.mana, 0, player.maxMana);
 }
 
 function talkNpc(player: ServerPlayer, id: string): void {
