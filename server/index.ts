@@ -659,13 +659,13 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
     }
     // Pack hunters: an aggroed member alerts nearby same-type members to the kill.
     if (catalog.pack && target && !isSafeZone(target.floor, target.x, target.y)) {
-      for (const other of querySpatial(spatial.monsters, monster.floor, monster.x, monster.y, 8)) {
-        if (other === monster || other.deadUntil || other.hidden || other.type !== monster.type || other.floor !== monster.floor) continue;
+      forEachSpatial(spatial.monsters, monster.floor, monster.x, monster.y, 8, (other) => {
+        if (other === monster || other.deadUntil || other.hidden || other.type !== monster.type || other.floor !== monster.floor) return;
         if (distance(monster, other) <= 8) {
           other.alertUntil = now + 5000;
           other.alertTarget = target.id;
         }
-      }
+      });
     }
     if (!target || isSafeZone(target.floor, target.x, target.y)) {
       if (!(monster.freezeUntil && now < monster.freezeUntil) && !(monster.snareUntil && now < monster.snareUntil)) {
@@ -814,10 +814,10 @@ const DIR_VECTORS: Record<Direction, Vec2> = {
 
 function monstersInRadius(floor: number, cx: number, cy: number, radius: number): ServerMonster[] {
   const hits: ServerMonster[] = [];
-  for (const monster of querySpatial(spatial.monsters, floor, cx, cy, radius)) {
-    if (monster.deadUntil || monster.floor !== floor) continue;
+  forEachSpatial(spatial.monsters, floor, cx, cy, radius, (monster) => {
+    if (monster.deadUntil || monster.floor !== floor) return;
     if (Math.hypot(monster.x - cx, monster.y - cy) <= radius) hits.push(monster);
-  }
+  });
   return hits;
 }
 
@@ -841,9 +841,10 @@ function dashPlayer(player: ServerPlayer, tiles: number): void {
     const tx = startX + dir.x * step;
     const ty = startY + dir.y * step;
     if (isBlockedTile(tileAt(player.floor, tx, ty))) break;
-    const occupied = querySpatial(spatial.monsters, player.floor, tx + 0.5, ty + 0.5, 1).some(
-      (m) => !m.deadUntil && m.floor === player.floor && Math.floor(m.x) === tx && Math.floor(m.y) === ty
-    );
+    let occupied = false;
+    forEachSpatial(spatial.monsters, player.floor, tx + 0.5, ty + 0.5, 1, (monster) => {
+      if (!monster.deadUntil && monster.floor === player.floor && Math.floor(monster.x) === tx && Math.floor(monster.y) === ty) occupied = true;
+    });
     if (occupied) break;
     destX = tx + 0.5;
     destY = ty + 0.5;
@@ -1105,11 +1106,11 @@ function damagePlayer(player: ServerPlayer, damage: number, source: string): voi
 function lootAdjacent(player: ServerPlayer): void {
   if (player.dead) return;
   let found = 0;
-  for (const corpse of querySpatial(spatial.corpses, player.floor, player.x, player.y, 1.6)) {
-    if (corpse.floor !== player.floor || distance(player, corpse) > 1.6) continue;
+  forEachSpatial(spatial.corpses, player.floor, player.x, player.y, 1.6, (corpse) => {
+    if (corpse.floor !== player.floor || distance(player, corpse) > 1.6) return;
     found += 1;
     collectCorpse(player, corpse);
-  }
+  });
   if (found) event("float", `Looted ${found} corpse${found > 1 ? "s" : ""}.`, player.x, player.y, player.floor, "#ffd166");
 }
 
@@ -2302,14 +2303,14 @@ function canStand(floor: number, x: number, y: number): boolean {
 function nearestPlayer(monster: ServerMonster, maxDistance: number): ServerPlayer | null {
   let best: ServerPlayer | null = null;
   let bestDist = maxDistance;
-  for (const player of querySpatial(spatial.players, monster.floor, monster.x, monster.y, maxDistance)) {
-    if (player.dead || player.floor !== monster.floor) continue;
+  forEachSpatial(spatial.players, monster.floor, monster.x, monster.y, maxDistance, (player) => {
+    if (player.dead || player.floor !== monster.floor) return;
     const dist = distance(monster, player);
     if (dist < bestDist) {
       best = player;
       bestDist = dist;
     }
-  }
+  });
   return best;
 }
 
@@ -2350,52 +2351,55 @@ function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: bo
   const cache = snapshotCacheFor(session);
   const players: PlayerView[] = [];
   let includedViewer = false;
-  for (const player of querySpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
-    if (player.id !== viewer.id && !inInterestRange(viewer, player)) continue;
+  forEachSpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (player) => {
+    if (player.id !== viewer.id && !inInterestRange(viewer, player)) return;
     if (player.id === viewer.id) includedViewer = true;
     players.push(player.id === viewer.id ? serializePlayer(player) : serializePlayerPublicCached(player));
-  }
+  });
   if (!includedViewer) players.push(serializePlayer(viewer));
 
   const visibleMonsters: MonsterView[] = [];
-  for (const monster of querySpatial(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
-    if (monster.deadUntil || monster.hidden || !inInterestRange(viewer, monster)) continue;
+  forEachSpatial(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (monster) => {
+    if (monster.deadUntil || monster.hidden || !inInterestRange(viewer, monster)) return;
     visibleMonsters.push(serializeMonster(monster));
-  }
+  });
 
   const visibleCorpses: CorpseView[] = [];
-  for (const corpse of querySpatial(spatial.corpses, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
-    if (!inInterestRange(viewer, corpse)) continue;
+  forEachSpatial(spatial.corpses, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (corpse) => {
+    if (!inInterestRange(viewer, corpse)) return;
     visibleCorpses.push(corpse);
-  }
+  });
 
   const visibleNpcs: NpcView[] = [];
-  for (const npc of querySpatial(spatial.npcs, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
-    if (!inInterestRange(viewer, npc)) continue;
+  forEachSpatial(spatial.npcs, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (npc) => {
+    if (!inInterestRange(viewer, npc)) return;
     visibleNpcs.push(serializeNpc(npc));
-  }
+  });
 
   const visibleTrees: TreeView[] = [];
   if (includeTrees) {
-    for (const tree of querySpatial(staticSpatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS)) {
-      if (!inTreeInterestRange(viewer, tree)) continue;
+    forEachSpatial(staticSpatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS, (tree) => {
+      if (!inTreeInterestRange(viewer, tree)) return;
       visibleTrees.push(serializeTree(tree));
-    }
+    });
   }
 
-  const visibleFishingNodes = querySpatial(staticSpatial.fishingNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)
-    .filter((node) => inInterestRange(viewer, node))
-    .map(serializeFishingNode);
-  const visibleMiningNodes = querySpatial(staticSpatial.miningNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)
-    .filter((node) => inInterestRange(viewer, node))
-    .map(serializeMiningNode);
+  const visibleFishingNodes: FishingNodeView[] = [];
+  forEachSpatial(staticSpatial.fishingNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
+    if (inInterestRange(viewer, node)) visibleFishingNodes.push(serializeFishingNode(node));
+  });
+  const visibleMiningNodes: MiningNodeView[] = [];
+  forEachSpatial(staticSpatial.miningNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
+    if (inInterestRange(viewer, node)) visibleMiningNodes.push(serializeMiningNode(node));
+  });
   const visibleHerbNodes: HerbNodeView[] = [];
-  for (const node of querySpatial(staticSpatial.herbNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
+  forEachSpatial(staticSpatial.herbNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
     if (inInterestRange(viewer, node)) visibleHerbNodes.push(serializeHerbNode(node));
-  }
-  const visibleFires = querySpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)
-    .filter((fire) => inInterestRange(viewer, fire))
-    .map(serializeFire);
+  });
+  const visibleFires: FireView[] = [];
+  forEachSpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (fire) => {
+    if (inInterestRange(viewer, fire)) visibleFires.push(serializeFire(fire));
+  });
   const playersDelta = snapshotDelta(cache.players, players, playerViewSignature, forceFull);
   const monstersDelta = snapshotDelta(cache.monsters, visibleMonsters, monsterViewSignature, forceFull);
   const corpsesDelta = snapshotDelta(cache.corpses, visibleCorpses, corpseViewSignature, forceFull);
@@ -3423,19 +3427,18 @@ function updateSpatialCell<T extends Positioned>(index: Map<string, T[]>, entity
   addToSpatial(index, entity);
 }
 
-function querySpatial<T>(index: Map<string, T[]>, floor: number, x: number, y: number, radius: number): T[] {
+function forEachSpatial<T>(index: Map<string, T[]>, floor: number, x: number, y: number, radius: number, visit: (item: T) => void): void {
   const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
   const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
   const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
   const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
-  const results: T[] = [];
   for (let cy = minCy; cy <= maxCy; cy += 1) {
     for (let cx = minCx; cx <= maxCx; cx += 1) {
       const bucket = index.get(`${floor}:${cx}:${cy}`);
-      if (bucket) results.push(...bucket);
+      if (!bucket) continue;
+      for (const item of bucket) visit(item);
     }
   }
-  return results;
 }
 
 function spatialKey(floor: number, x: number, y: number): string {
