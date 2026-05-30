@@ -367,6 +367,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
       if (!E2E_TEST || !session.player.name.startsWith("e2e_")) persistPlayer(session.player);
       clients.delete(socket);
       playersById.delete(session.player.id);
+      removeFromSpatial(spatial.players, session.player);
       event("system", `${session.player.name} left the world.`);
     }
   });
@@ -433,6 +434,7 @@ function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; 
 
   clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now() });
   playersById.set(player.id, player);
+  addToSpatial(spatial.players, player);
   socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] }));
   event("system", `${player.name} entered the world.`);
 }
@@ -531,6 +533,9 @@ function updatePlayers(dt: number, now: number): void {
     const input = now - session.lastInputAt > 280 ? sanitizeInput({}) : session.input;
     player.moving = false;
     if (player.dead) continue;
+    const oldFloor = player.floor;
+    const oldX = player.x;
+    const oldY = player.y;
     const spec = classOf(player);
     let speed = spec.speed + (isWellFed(player, now) ? 0.25 : 0);
     speed *= encumbranceMultiplier(carriedWeight(player));
@@ -580,6 +585,7 @@ function updatePlayers(dt: number, now: number): void {
       player.portalReadyAt = now + 4000;
       event("float", "The Jungle Vault is sealed... for now.", player.x, player.y - 0.6, player.floor, "#c8e6a0");
     }
+    updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
 
     if (now < player.foodRegenUntil && player.hp < player.maxHp) {
       player.hp = clamp(player.hp + dt * 2.8, 0, player.maxHp);
@@ -1298,9 +1304,13 @@ function trainWithNpc(player: ServerPlayer, npc: NpcRuntime): void {
 
 function respawn(player: ServerPlayer): void {
   if (!player.dead) return;
+  const oldFloor = player.floor;
+  const oldX = player.x;
+  const oldY = player.y;
   player.floor = START.floor;
   player.x = START.x;
   player.y = START.y;
+  updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
   player.portalReadyAt = performance.now() + 650;
   player.hp = player.maxHp;
   player.mana = player.maxMana;
@@ -1822,9 +1832,13 @@ function grantE2EItems(
   if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y)) {
     const spot = findStandableNear(Math.floor(Number(message.floor)), Number(message.x), Number(message.y));
     if (spot) {
+      const oldFloor = player.floor;
+      const oldX = player.x;
+      const oldY = player.y;
       player.floor = spot.floor;
       player.x = spot.x;
       player.y = spot.y;
+      updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
     }
   }
 }
@@ -3344,8 +3358,9 @@ function rebuildStaticSpatialIndex(): void {
 }
 
 function rebuildSpatialIndex(activeRegions: ActiveRegions): void {
+  const playerSpatial = spatial.players;
   spatial = createSpatialIndex();
-  for (const { player } of clients.values()) addToSpatial(spatial.players, player);
+  spatial.players = playerSpatial;
   for (const cell of activeRegions.cells) {
     const cellMonsters = monstersByCell.get(cell);
     if (!cellMonsters) continue;
