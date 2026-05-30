@@ -631,7 +631,7 @@ function updatePlayers(dt: number, now: number): void {
       player.y = portal.y;
       player.portalReadyAt = now + 650;
       player.targetId = null;
-      event("system", `${player.name} changes depth.`);
+      systemToPlayer(player, `${player.name} changes depth.`);
     } else if (now >= player.portalReadyAt && tileAt(player.floor, Math.floor(player.x), Math.floor(player.y)) === "K") {
       // The sealed Jungle Vault — a Tier-1 dungeon hook (no instance yet).
       player.portalReadyAt = now + 4000;
@@ -1122,7 +1122,7 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
   corpses.set(corpse.id, corpse);
   addToCellIndex(corpsesByCell, corpse);
   addToSpatial(spatial.corpses, corpse);
-  event("system", `${player.name} defeated ${catalog.name}.`);
+  systemToPlayer(player, `${player.name} defeated ${catalog.name}.`);
 }
 
 function rollQuestDrops(monsterType: string): Array<{ id: string; qty: number }> {
@@ -1180,7 +1180,7 @@ function lootCorpse(player: ServerPlayer, id: string): void {
 function collectCorpse(player: ServerPlayer, corpse: Corpse): void {
   for (const item of corpse.items ?? []) {
     if (!addInventoryItem(player, item.id, item.qty)) {
-      event("system", "Your inventory is full.");
+      systemToPlayer(player, "Your inventory is full.");
       return;
     }
   }
@@ -1211,12 +1211,12 @@ function buyItem(player: ServerPlayer, item: string): void {
   if (item === "weapon" && player.weaponTier === 0 && player.gold >= SHOP["weapon"]!.cost) {
     player.gold -= SHOP["weapon"]!.cost;
     player.weaponTier = 1;
-    event("system", `${player.name} bought a better weapon.`);
+    systemToPlayer(player, `${player.name} bought a better weapon.`);
   }
   if (item === "armor" && player.armorTier === 0 && player.gold >= SHOP["armor"]!.cost) {
     player.gold -= SHOP["armor"]!.cost;
     player.armorTier = 1;
-    event("system", `${player.name} bought padded mail.`);
+    systemToPlayer(player, `${player.name} bought padded mail.`);
   }
   if (item === "potion" && player.gold >= SHOP["potion"]!.cost) {
     player.gold -= SHOP["potion"]!.cost;
@@ -1224,59 +1224,59 @@ function buyItem(player: ServerPlayer, item: string): void {
   }
   if (item === "axe" && !hasInventoryItem(player, "axe") && player.gold >= SHOP["axe"]!.cost) {
     if (!addInventoryItem(player, "axe", 1)) {
-      event("system", "Your inventory is full.");
+      systemToPlayer(player, "Your inventory is full.");
       return;
     }
     player.gold -= SHOP["axe"]!.cost;
-    event("system", `${player.name} bought a bronze axe.`);
+    systemToPlayer(player, `${player.name} bought a bronze axe.`);
   }
   if (item === "fishing_rod" && !hasInventoryItem(player, "fishing_rod") && player.gold >= SHOP["fishing_rod"]!.cost) {
     if (!addInventoryItem(player, "fishing_rod", 1)) {
-      event("system", "Your inventory is full.");
+      systemToPlayer(player, "Your inventory is full.");
       return;
     }
     player.gold -= SHOP["fishing_rod"]!.cost;
-    event("system", `${player.name} bought a fishing rod.`);
+    systemToPlayer(player, `${player.name} bought a fishing rod.`);
   }
   if (item === "pickaxe" && !hasInventoryItem(player, "pickaxe") && player.gold >= SHOP["pickaxe"]!.cost) {
     if (!addInventoryItem(player, "pickaxe", 1)) {
-      event("system", "Your inventory is full.");
+      systemToPlayer(player, "Your inventory is full.");
       return;
     }
     player.gold -= SHOP["pickaxe"]!.cost;
-    event("system", `${player.name} bought a bronze pickaxe.`);
+    systemToPlayer(player, `${player.name} bought a bronze pickaxe.`);
   }
   if (item === "flint_steel" && !hasInventoryItem(player, "flint_steel") && player.gold >= SHOP["flint_steel"]!.cost) {
     if (!addInventoryItem(player, "flint_steel", 1)) {
-      event("system", "Your inventory is full.");
+      systemToPlayer(player, "Your inventory is full.");
       return;
     }
     player.gold -= SHOP["flint_steel"]!.cost;
-    event("system", `${player.name} bought flint and steel.`);
+    systemToPlayer(player, `${player.name} bought flint and steel.`);
   }
   if (item === "empty_flask" && player.gold >= SHOP["empty_flask"]!.cost) {
     if (!addInventoryItem(player, "empty_flask", 1)) {
-      event("system", "Your inventory is full.");
+      systemToPlayer(player, "Your inventory is full.");
       return;
     }
     player.gold -= SHOP["empty_flask"]!.cost;
-    event("system", `${player.name} bought an empty flask.`);
+    systemToPlayer(player, `${player.name} bought an empty flask.`);
   }
   if (item === "alchemy_kit" && !hasInventoryItem(player, "alchemy_kit") && player.gold >= SHOP["alchemy_kit"]!.cost) {
     if (!addInventoryItem(player, "alchemy_kit", 1)) {
-      event("system", "Your inventory is full.");
+      systemToPlayer(player, "Your inventory is full.");
       return;
     }
     player.gold -= SHOP["alchemy_kit"]!.cost;
-    event("system", `${player.name} bought an alchemy kit.`);
+    systemToPlayer(player, `${player.name} bought an alchemy kit.`);
   }
   if (item === "broken_reach_map" && !hasInventoryItem(player, "broken_reach_map") && player.gold >= SHOP["broken_reach_map"]!.cost) {
     if (!addInventoryItem(player, "broken_reach_map", 1)) {
-      event("system", "Your inventory is full.");
+      systemToPlayer(player, "Your inventory is full.");
       return;
     }
     player.gold -= SHOP["broken_reach_map"]!.cost;
-    event("system", `${player.name} bought the Inked Survey of The Broken Reach.`);
+    systemToPlayer(player, `${player.name} bought the Inked Survey of The Broken Reach.`);
   }
 }
 
@@ -1299,7 +1299,7 @@ function brewPotion(player: ServerPlayer): void {
   if (!addInventoryItem(player, "potion", 1)) {
     addInventoryItem(player, "herb", 1);
     addInventoryItem(player, "empty_flask", 1);
-    event("system", "Your inventory is full.");
+    systemToPlayer(player, "Your inventory is full.");
     return;
   }
   addSkillXp(player, "alchemy", BREW_XP);
@@ -1334,7 +1334,7 @@ function setClass(player: ServerPlayer, classKey: string): void {
   recalculateVitals(player);
   player.hp = clamp(player.hp, 1, player.maxHp);
   player.mana = clamp(player.mana, 0, player.maxMana);
-  event("system", `${player.name} takes up the ${CLASSES[target]!.label} stance.`);
+  systemToPlayer(player, `${player.name} takes up the ${CLASSES[target]!.label} stance.`);
   persistPlayer(player);
 }
 
@@ -1362,7 +1362,7 @@ function trainWithNpc(player: ServerPlayer, npc: NpcRuntime): void {
   eventDialogue(player, [
     { speaker: npc.name, text: `It's done — you are now a ${unlock.label}. Equip the stance from your Classes panel here in town.` }
   ]);
-  event("system", `${player.name} unlocked the ${unlock.label} class.`);
+  systemToPlayer(player, `${player.name} unlocked the ${unlock.label} class.`);
 }
 
 function respawn(player: ServerPlayer): void {
@@ -1378,7 +1378,7 @@ function respawn(player: ServerPlayer): void {
   player.hp = player.maxHp;
   player.mana = player.maxMana;
   player.dead = false;
-  event("system", `${player.name} returns to the temple.`);
+  systemToPlayer(player, `${player.name} returns to the temple.`);
 }
 
 function setTarget(player: ServerPlayer, id: string): void {
@@ -1397,6 +1397,10 @@ function chat(player: ServerPlayer, text: string): void {
   event("chat", `${player.name}: ${clean}`);
 }
 
+function systemToPlayer(player: ServerPlayer, text: string): void {
+  event("system", text, null, null, null, null, null, null, { to: player.id });
+}
+
 // Playtest cheats (DEV_TOOLS only). Usage in chat:
 //   /dev          — level all skills to 20, +1000g, plus a bow + alchemy gear
 //   /dev skills N  — set every skill to level N (default 20)
@@ -1405,7 +1409,7 @@ function chat(player: ServerPlayer, text: string): void {
 //   /dev help      — list commands
 function handleDevCommand(player: ServerPlayer, text: string): void {
   const [, sub, arg] = text.split(/\s+/);
-  const sysToPlayer = (msg: string): void => event("system", msg);
+  const sysToPlayer = (msg: string): void => systemToPlayer(player, msg);
   if (!sub || sub === "kit") {
     devSetAllSkills(player, 20);
     player.gold += 1000;
@@ -1512,7 +1516,7 @@ function handleQuestDialogue(player: ServerPlayer, npc: NpcRuntime, quest: Quest
     player.gold += quest.rewardGold;
     player.xp += quest.rewardXp;
     awardLevels(player);
-    event("system", `${player.name} completed ${quest.title} and earned ${quest.rewardGold} gold.`);
+    systemToPlayer(player, `${player.name} completed ${quest.title} and earned ${quest.rewardGold} gold.`);
     event("float", `+${quest.rewardGold}g`, player.x, player.y, player.floor, "#ffd166");
     eventDialogue(player, questDialogue(npc, player, quest, "turnIn"));
     return;
@@ -1792,7 +1796,7 @@ function updateFishingAction(player: ServerPlayer, now: number): void {
   if (now < action.nextAt) return;
   player.action = null;
   if (!addInventoryItem(player, "raw_fish", 1)) {
-    event("system", "Your inventory is full.");
+    systemToPlayer(player, "Your inventory is full.");
     return;
   }
   const xp = 18;
@@ -1812,7 +1816,7 @@ function updateMiningAction(player: ServerPlayer, now: number): void {
   if (now < action.nextAt) return;
   player.action = null;
   if (!addInventoryItem(player, "copper_ore", 1)) {
-    event("system", "Your inventory is full.");
+    systemToPlayer(player, "Your inventory is full.");
     return;
   }
   const xp = 20;
@@ -1831,7 +1835,7 @@ function updateHerbingAction(player: ServerPlayer, now: number): void {
   if (now < action.nextAt) return;
   player.action = null;
   if (!addInventoryItem(player, node.item, 1)) {
-    event("system", "Your inventory is full.");
+    systemToPlayer(player, "Your inventory is full.");
     return;
   }
   node.active = false;
@@ -1866,7 +1870,7 @@ function updateCookingAction(player: ServerPlayer, now: number): void {
   const result = cooked ? produces : burns;
   if (!addInventoryItem(player, result, 1)) {
     addInventoryItem(player, inputId, 1);
-    event("system", "Your inventory is full.");
+    systemToPlayer(player, "Your inventory is full.");
     return;
   }
   if (cooked) addSkillXp(player, skill, xp);
@@ -2389,7 +2393,7 @@ function awardLevels(player: ServerPlayer): void {
     recalculateVitals(player);
     player.hp = player.maxHp;
     player.mana = player.maxMana;
-    event("system", `${player.name} reached level ${player.level}.`);
+    systemToPlayer(player, `${player.name} reached level ${player.level}.`);
   }
 }
 
@@ -3420,7 +3424,7 @@ function addSkillXp(player: ServerPlayer, id: string, amount: number): void {
   entry.xp += amount;
   markSkillChanged(player);
   const after = skillLevel(player, id);
-  if (after > before) event("system", `${player.name} reached ${SKILLS[id]?.label ?? id} ${after}.`);
+  if (after > before) systemToPlayer(player, `${player.name} reached ${SKILLS[id]?.label ?? id} ${after}.`);
   if (id === "defense" || id === "magic") recalculateVitals(player);
 }
 
