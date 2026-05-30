@@ -316,7 +316,8 @@ const resourceRespawns = new MinHeap<ResourceRespawn>((a, b) => a.at - b.at);
 let nextMonsterId = 1;
 let nextCorpseId = 1;
 let nextFireId = 1;
-const events: GameEvent[] = [];
+const globalEvents: GameEvent[] = [];
+const targetedEventsByPlayer = new Map<string, GameEvent[]>();
 const eventsByCell = new Map<string, GameEvent[]>();
 const eventOrder = new WeakMap<GameEvent, number>();
 const metrics: Metrics = {
@@ -436,7 +437,8 @@ setInterval(() => {
   const started = performance.now();
   broadcastState();
   recordSample(metrics.snapshotSamples, performance.now() - started);
-  events.length = 0;
+  globalEvents.length = 0;
+  targetedEventsByPlayer.clear();
   eventsByCell.clear();
 }, 75);
 
@@ -3066,12 +3068,12 @@ function eventVisibleTo(viewer: ServerPlayer, item: GameEvent): boolean {
 
 function visibleEventsFor(viewer: ServerPlayer): GameEvent[] {
   const visible: GameEvent[] = [];
-  for (const item of events) {
+  visible.push(...globalEvents);
+  const targeted = targetedEventsByPlayer.get(viewer.id);
+  if (targeted) visible.push(...targeted);
+  forEachEventCell(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (item) => {
     if (eventVisibleTo(viewer, item)) visible.push(item);
-  }
-  for (const item of queryEventCells(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
-    if (eventVisibleTo(viewer, item)) visible.push(item);
-  }
+  });
   if (visible.length > 1) visible.sort((a, b) => (eventOrder.get(a) ?? 0) - (eventOrder.get(b) ?? 0));
   return visible;
 }
@@ -3631,8 +3633,14 @@ function event(
 ): void {
   const item: GameEvent = { type, text, x, y, floor, color, from, target, t: Date.now(), ...extra };
   eventOrder.set(item, nextEventOrder++);
-  if (eventIsGlobal(item)) {
-    events.push(item);
+  if (item.to) {
+    const bucket = targetedEventsByPlayer.get(item.to) ?? [];
+    bucket.push(item);
+    targetedEventsByPlayer.set(item.to, bucket);
+    return;
+  }
+  if (eventIsBroadcastGlobal(item)) {
+    globalEvents.push(item);
     return;
   }
   const key = spatialKey(item.floor!, item.x!, item.y!);
@@ -3641,23 +3649,22 @@ function event(
   eventsByCell.set(key, bucket);
 }
 
-function eventIsGlobal(item: GameEvent): boolean {
-  return Boolean(item.to) || item.type === "chat" || item.type === "system" || item.type === "dialogue" || item.floor === null || item.x === null || item.y === null;
+function eventIsBroadcastGlobal(item: GameEvent): boolean {
+  return item.type === "chat" || item.type === "system" || item.type === "dialogue" || item.floor === null || item.x === null || item.y === null;
 }
 
-function queryEventCells(floor: number, x: number, y: number, radius: number): GameEvent[] {
+function forEachEventCell(floor: number, x: number, y: number, radius: number, visit: (event: GameEvent) => void): void {
   const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
   const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
   const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
   const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
-  const results: GameEvent[] = [];
   for (let cy = minCy; cy <= maxCy; cy += 1) {
     for (let cx = minCx; cx <= maxCx; cx += 1) {
       const bucket = eventsByCell.get(`${floor}:${cx}:${cy}`);
-      if (bucket) results.push(...bucket);
+      if (!bucket) continue;
+      for (const item of bucket) visit(item);
     }
   }
-  return results;
 }
 
 function distance(a: { x: number; y: number }, b: { x: number; y: number }): number {
