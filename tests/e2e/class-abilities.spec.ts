@@ -1,4 +1,5 @@
 import { test, type Page } from "@playwright/test";
+import { scaleX, scaleY } from "../../src/shared.ts";
 
 const HIGH = 999999;
 
@@ -66,8 +67,9 @@ test("Mage Frost Nova damages a nearby monster", async ({ page }) => {
     return ids.includes("flame_burst") && ids.includes("frost_nova");
   });
 
-  // Drop next to a skeleton on floor 1 and wait for monsters inside the nova radius.
-  await place(page, 1, 13.5, 13.5);
+  // Drop onto a skeleton on floor 1 and wait for monsters inside the nova radius
+  // (the radius is in tiles, so we must stand right on top on the expanded map).
+  await place(page, 1, 13.5, 12.5);
   const captured = await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
     if (!me) return null;
@@ -111,12 +113,13 @@ async function unlockEquip(
   page: Page,
   opts: { npcId: string; classKey: string; floor: number; x: number; y: number; skills: Record<string, number> }
 ): Promise<void> {
-  await page.evaluate((o) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", skills: o.skills, floor: o.floor, x: o.x, y: o.y }), opts);
+  const scaled = { ...opts, x: scaleX(opts.floor, opts.x), y: scaleY(opts.floor, opts.y) };
+  await page.evaluate((o) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", skills: o.skills, floor: o.floor, x: o.x, y: o.y }), scaled);
   await page.waitForFunction((o) => {
     const me = window.__TIB_E2E__?.self();
     if (!me || me.floor !== o.floor) return false;
     return Object.keys(o.skills).every((id) => (me.skills.find((s) => s.id === id)?.level ?? 0) >= 10);
-  }, opts);
+  }, scaled);
   await page.evaluate((id) => window.__TIB_E2E__?.send({ type: "talkNpc", id }), opts.npcId);
   await page.waitForFunction((k) => (window.__TIB_E2E__?.self()?.unlockedClasses ?? []).includes(k), opts.classKey);
   await page.evaluate((k) => window.__TIB_E2E__?.send({ type: "setClass", classKey: k }), opts.classKey);
@@ -124,13 +127,15 @@ async function unlockEquip(
 }
 
 async function place(page: Page, floor: number, x: number, y: number): Promise<void> {
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), { floor, x, y });
+  const sx = scaleX(floor, x);
+  const sy = scaleY(floor, y);
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), { floor, x: sx, y: sy });
   await page.waitForFunction(
     (p) => {
       const me = window.__TIB_E2E__?.self();
       return Boolean(me && me.floor === p.floor && Math.hypot(me.x - p.x, me.y - p.y) < 0.8);
     },
-    { floor, x, y }
+    { floor, x: sx, y: sy }
   );
 }
 

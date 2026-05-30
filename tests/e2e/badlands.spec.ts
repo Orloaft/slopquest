@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { isBlockedTile, isSightBlocked } from "../../src/shared.ts";
+import { isBlockedTile, isSightBlocked, scaleX, scaleY } from "../../src/shared.ts";
 
 test("badlands tile semantics: cliffs block sight, pits don't", () => {
   // Cliff (X) blocks movement AND sight; pit (P) blocks movement only.
@@ -17,7 +17,7 @@ test("travel loop: forest east portal -> badlands, and the ledge -> Northwatch",
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 88.5, y: 29.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 6, null, { timeout: 8000 });
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 6, x: 46.5, y: 8.5 }));
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 46.5), y: scaleY(6, 8.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 4, null, { timeout: 8000 });
 });
 
@@ -38,7 +38,7 @@ test("copper ore is minable in the badlands dead-end canyon", async ({ page }) =
   await page.goto("/?e2e");
   await join(page);
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "pickaxe", qty: 1 }], floor: 6, x: 3.5, y: 22.5 }));
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "pickaxe", qty: 1 }], floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 3.5), y: scaleY(6, 22.5) });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
     return Boolean(me && me.floor === 6 && (me.inventory ?? []).some((i) => i?.id === "pickaxe"));
@@ -74,12 +74,14 @@ async function join(page: Page): Promise<void> {
 }
 
 async function place(page: Page, floor: number, x: number, y: number): Promise<void> {
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), { floor, x, y });
+  const sx = scaleX(floor, x);
+  const sy = scaleY(floor, y);
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), { floor, x: sx, y: sy });
   await page.waitForFunction(
     (p) => {
       const me = window.__TIB_E2E__?.self();
       return Boolean(me && me.floor === p.floor && Math.hypot(me.x - p.x, me.y - p.y) < 1.4);
     },
-    { floor, x, y }
+    { floor, x: sx, y: sy }
   );
 }

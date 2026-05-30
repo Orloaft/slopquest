@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { scaleX, scaleY } from "../../src/shared.ts";
 
 test("a hunting bow fires ranged attacks that train the Ranged skill", async ({ page }) => {
   page.on("pageerror", (error) => console.error(error));
@@ -9,10 +10,11 @@ test("a hunting bow fires ranged attacks that train the Ranged skill", async ({ 
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
 
-  // Drop next to a skeleton on a non-safe floor with a bow in hand.
-  await page.evaluate(() => {
-    window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "hunting_bow", qty: 1 }], floor: 1, x: 13, y: 12 });
-  });
+  // Drop onto a cemetery skeleton (the southern one, which the class-abilities
+  // nova test never touches) with a bow in hand.
+  await page.evaluate((p) => {
+    window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "hunting_bow", qty: 1 }], floor: 1, x: p.x, y: p.y });
+  }, { x: scaleX(1, 18), y: scaleY(1, 25) });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
     return Boolean(me && me.floor === 1 && (me.inventory ?? []).some((i) => i?.id === "hunting_bow"));
@@ -56,9 +58,9 @@ test("a class unlocks at its trainer, equips in town, and is blocked outside tow
   await joinFreshCharacter(page);
 
   // Meet the Vanguard thresholds (Melee 15 / Defense 15) and stand by Captain Doran.
-  await page.evaluate(() => {
-    window.__TIB_E2E__?.send({ type: "e2eGrantItems", skills: { attack: 99999, defense: 99999 }, floor: 0, x: 28.5, y: 19.5 });
-  });
+  await page.evaluate((p) => {
+    window.__TIB_E2E__?.send({ type: "e2eGrantItems", skills: { attack: 99999, defense: 99999 }, floor: 0, x: p.x, y: p.y });
+  }, { x: scaleX(0, 28.5), y: scaleY(0, 19.5) });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
     return Boolean(me && me.floor === 0 && (me.skills.find((s) => s.id === "attack")?.level ?? 0) >= 15);
@@ -74,7 +76,7 @@ test("a class unlocks at its trainer, equips in town, and is blocked outside tow
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.abilities ?? []).some((a) => a.id === "provoke"));
 
   // Leaving town blocks class changes: the toggle is rejected and the stance holds.
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: 13, y: 12 }));
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: p.x, y: p.y }), { x: scaleX(1, 13), y: scaleY(1, 12) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 1);
   const version = await page.evaluate(() => window.__TIB_E2E__?.stateVersion() ?? 0);
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "setClass", classKey: "adventurer" }));

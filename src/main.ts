@@ -16,6 +16,8 @@ import {
   ZONES,
   floorCols,
   floorRows,
+  contentScaleX,
+  contentScaleY,
   isBlockedTile,
   makeFloorTiles,
   tileAt,
@@ -3153,9 +3155,14 @@ function addComposedMapObjects(floor: number): void {
     8: beachObjects,
     9: jungleObjects
   };
+  // Composed objects are authored in native coords; stretch them to the floor's
+  // expanded footprint (factor 1 for floors authored at the target size).
+  const fx = contentScaleX(floor);
+  const fy = contentScaleY(floor);
   const objects = objectsByFloor[floor] ?? [];
   objects
     .filter((item) => item.key !== "spriteTree" && item.key !== "spritePine")
+    .map((item) => ({ ...item, x: item.x * fx, y: item.y * fy }))
     .sort((a, b) => a.y - b.y)
     .forEach(placeMapSprite);
 }

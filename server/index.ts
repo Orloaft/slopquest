@@ -1821,8 +1821,8 @@ function pickNpcWanderTarget(npc: NpcRuntime): Vec2 | null {
   for (let i = 0; i < 8; i += 1) {
     const angle = Math.random() * Math.PI * 2;
     const radius = 1 + Math.random() * 4;
-    const x = clamp(npc.homeX! + Math.cos(angle) * radius, 10, 28);
-    const y = clamp(npc.homeY! + Math.sin(angle) * radius, 13, 22);
+    const x = clamp(npc.homeX! + Math.cos(angle) * radius, 1.5, floorCols(npc.floor) - 1.5);
+    const y = clamp(npc.homeY! + Math.sin(angle) * radius, 1.5, floorRows(npc.floor) - 1.5);
     if (canStand(npc.floor, x, y)) return { x, y };
   }
   return null;

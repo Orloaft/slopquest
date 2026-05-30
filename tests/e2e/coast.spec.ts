@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { isBlockedTile, isSightBlocked } from "../../src/shared.ts";
+import { isBlockedTile, isSightBlocked, scaleX, scaleY } from "../../src/shared.ts";
 
 test("coast tile semantics: ocean/river block movement not sight; jungle wall blocks both", () => {
   expect(isBlockedTile("I")).toBe(true); // ocean
@@ -15,13 +15,13 @@ test("travel chain: desert -> beach -> jungle, and beach -> desert back", async 
   await page.goto("/?e2e");
   await join(page);
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: 10.5, y: 32.5 }));
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: p.x, y: p.y }), { x: scaleX(7, 10.5), y: scaleY(7, 32.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 8, null, { timeout: 8000 });
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 8, x: 50.5, y: 14.5 }));
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 8, x: p.x, y: p.y }), { x: scaleX(8, 50.5), y: scaleY(8, 14.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 9, null, { timeout: 8000 });
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 8, x: 25.5, y: 1.5 }));
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 8, x: p.x, y: p.y }), { x: scaleX(8, 25.5), y: scaleY(8, 1.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 7, null, { timeout: 8000 });
 });
 
@@ -58,7 +58,7 @@ test("an Ancient Totem Wraith slows the player from down a path", async ({ page 
   await page.goto("/?e2e");
   await join(page);
 
-  await place(page, 9, 20.5, 8.5);
+  await place(page, 9, 22.5, 8.5);
   await page.waitForFunction(() => (window.__TIB_E2E__?.getState()?.monsters ?? []).some((m) => m.type === "totem_wraith" && m.floor === 9));
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.slowed ?? 0) > 0, null, { timeout: 15000 });
 });
@@ -90,12 +90,14 @@ async function join(page: Page): Promise<void> {
 }
 
 async function place(page: Page, floor: number, x: number, y: number): Promise<void> {
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), { floor, x, y });
+  const sx = scaleX(floor, x);
+  const sy = scaleY(floor, y);
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), { floor, x: sx, y: sy });
   await page.waitForFunction(
     (p) => {
       const me = window.__TIB_E2E__?.self();
       return Boolean(me && me.floor === p.floor && Math.hypot(me.x - p.x, me.y - p.y) < 1.4);
     },
-    { floor, x, y }
+    { floor, x: sx, y: sy }
   );
 }

@@ -20,14 +20,69 @@ export const TILE_SIZE = 32;
 // via FLOOR_DIMS, so always size per-floor work with floorCols/floorRows.
 export const MAP_COLS = 52;
 export const MAP_ROWS = 34;
+
+// Every region is enlarged to this footprint (~3x the original area), matching
+// the bespoke Northwood expansion. Floor 3 is authored directly at this size;
+// every other floor is authored at the native 52x34 and upscaled, so its tiles
+// AND its content coordinates scale by the same factor — which keeps walkable
+// tiles walkable and the map connected.
+const EXPANDED = { cols: 90, rows: 60 };
 const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
-  3: { cols: 90, rows: 60 } // The expanded Northwood
+  0: EXPANDED,
+  1: EXPANDED,
+  2: EXPANDED,
+  3: EXPANDED,
+  4: EXPANDED,
+  5: EXPANDED,
+  6: EXPANDED,
+  7: EXPANDED,
+  8: EXPANDED,
+  9: EXPANDED
 };
+// Floors authored directly at the expanded size (their content is already
+// placed in expanded coordinates, so it must NOT be scaled again).
+const AUTHORED_AT_TARGET = new Set<number>([3]);
+
 export function floorCols(floor: number): number {
   return FLOOR_DIMS[floor]?.cols ?? MAP_COLS;
 }
 export function floorRows(floor: number): number {
   return FLOOR_DIMS[floor]?.rows ?? MAP_ROWS;
+}
+
+// Factor by which a floor's native-authored content is stretched to fill its
+// expanded footprint. 1 for floors authored directly at the target size.
+export function contentScaleX(floor: number): number {
+  if (AUTHORED_AT_TARGET.has(floor) || !FLOOR_DIMS[floor]) return 1;
+  return FLOOR_DIMS[floor]!.cols / MAP_COLS;
+}
+export function contentScaleY(floor: number): number {
+  if (AUTHORED_AT_TARGET.has(floor) || !FLOOR_DIMS[floor]) return 1;
+  return FLOOR_DIMS[floor]!.rows / MAP_ROWS;
+}
+export function scaleX(floor: number, x: number): number {
+  return x * contentScaleX(floor);
+}
+export function scaleY(floor: number, y: number): number {
+  return y * contentScaleY(floor);
+}
+
+// Nearest-neighbour upscale of an authored tile grid into a larger footprint.
+function scaleFloorTiles(native: string[][], cols: number, rows: number): string[][] {
+  const nr = native.length;
+  const nc = native[0]?.length ?? 0;
+  const out: string[][] = [];
+  for (let y = 0; y < rows; y += 1) {
+    const oy = Math.min(nr - 1, Math.floor((y * nr) / rows));
+    const srcRow = native[oy] ?? [];
+    const row: string[] = [];
+    for (let x = 0; x < cols; x += 1) {
+      const ox = Math.min(nc - 1, Math.floor((x * nc) / cols));
+      row.push(srcRow[ox] ?? "#");
+    }
+    out.push(row);
+  }
+  return out;
 }
 
 export interface Portal {
@@ -87,7 +142,7 @@ export interface SkillDef {
   iconUrl: string;
 }
 
-export const START: Portal = { floor: 0, x: 16.5, y: 17.5 };
+export const START: Portal = { floor: 0, x: scaleX(0, 16.5), y: scaleY(0, 17.5) };
 
 export const ZONES: Record<ZoneId, Zone> = {
   southTown: { id: "southTown", label: "Waystone", floor: 0, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
@@ -304,7 +359,12 @@ export function makeFloorTiles(floor: number): string[] {
   const cached = FLOOR_TILE_CACHE.get(floor);
   if (cached) return cached;
 
-  const rows = Array.from({ length: floorRows(floor) }, () => Array.from({ length: floorCols(floor) }, () => "#"));
+  // Floor 3 is authored at the expanded size; the rest are authored at the
+  // native footprint and upscaled below.
+  const authored = AUTHORED_AT_TARGET.has(floor);
+  const authorCols = authored ? floorCols(floor) : MAP_COLS;
+  const authorRows = authored ? floorRows(floor) : MAP_ROWS;
+  const rows = Array.from({ length: authorRows }, () => Array.from({ length: authorCols }, () => "#"));
 
   if (floor === 0) {
     fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, ".");
@@ -532,9 +592,10 @@ export function makeFloorTiles(floor: number): string[] {
     scatter(rows, ".", "r", 16, 42);
   }
 
-  frameFloorEdge(rows, floor);
+  const sized = authored || !FLOOR_DIMS[floor] ? rows : scaleFloorTiles(rows, floorCols(floor), floorRows(floor));
+  frameFloorEdge(sized, floor);
 
-  const tiles = rows.map((row) => row.join(""));
+  const tiles = sized.map((row) => row.join(""));
   FLOOR_TILE_CACHE.set(floor, tiles);
   return tiles;
 }
@@ -597,12 +658,16 @@ export function isSightBlocked(tile: string): boolean {
 
 export function isSafeZone(floor: number, x: number, y: number): boolean {
   if (floor === 0 || floor === 4) return true;
+  // Outpost clearings are authored in native coords; scale the rect to match
+  // the floor's expanded footprint.
+  const inRect = (f: number, x1: number, y1: number, x2: number, y2: number): boolean =>
+    floor === f && x >= scaleX(f, x1) && x <= scaleX(f, x2) && y >= scaleY(f, y1) && y <= scaleY(f, y2);
   // The Alchemist's Hut clearing in the Sunken Marsh is a safe rest spot.
-  if (floor === 5 && x >= 3 && x <= 13 && y >= 5 && y <= 15) return true;
+  if (inRect(5, 3, 5, 13, 15)) return true;
   // The Frontier Camp clearing in the Searing Badlands.
-  if (floor === 6 && x >= 38 && x <= 49 && y >= 6 && y <= 14) return true;
+  if (inRect(6, 38, 6, 49, 14)) return true;
   // The Oasis Trade Outpost in the Sunken Desert.
-  if (floor === 7 && x >= 19 && x <= 31 && y >= 25 && y <= 32) return true;
+  if (inRect(7, 19, 25, 31, 32)) return true;
   return false;
 }
 
@@ -615,6 +680,14 @@ export function zoneAt(floor: number, x: number, y: number): string {
 }
 
 export function portalFor(floor: number, x: number, y: number): Portal | null {
+  const dest = portalForRaw(floor, x, y);
+  if (!dest) return null;
+  // Destinations are written in each floor's authored coordinates; stretch them
+  // into the floor's expanded footprint.
+  return { floor: dest.floor, x: scaleX(dest.floor, dest.x), y: scaleY(dest.floor, dest.y) };
+}
+
+function portalForRaw(floor: number, x: number, y: number): Portal | null {
   const tx = Math.floor(x);
   const ty = Math.floor(y);
   const tile = tileAt(floor, tx, ty);

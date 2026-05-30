@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { isBlockedTile, isSightBlocked } from "../../src/shared.ts";
+import { isBlockedTile, isSightBlocked, scaleX, scaleY } from "../../src/shared.ts";
 
 test("desert tile semantics: quicksand/oasis block movement but not sight; ruins block both", () => {
   expect(isBlockedTile("Q")).toBe(true);
@@ -15,10 +15,10 @@ test("travel loop: cemetery south portal -> desert, and the oasis passage -> Way
   await page.goto("/?e2e");
   await join(page);
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: 25.5, y: 32.5 }));
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: p.x, y: p.y }), { x: scaleX(1, 25.5), y: scaleY(1, 32.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 7, null, { timeout: 8000 });
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: 25.5, y: 31.5 }));
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: p.x, y: p.y }), { x: scaleX(7, 25.5), y: scaleY(7, 31.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 0, null, { timeout: 8000 });
 });
 
@@ -47,7 +47,7 @@ test("a Sun-Scorched Wraith weakens the player's physical damage from range", as
   await page.goto("/?e2e");
   await join(page);
 
-  await place(page, 7, 24.5, 10.5);
+  await place(page, 7, 22.5, 10.5);
   await page.waitForFunction(() => (window.__TIB_E2E__?.getState()?.monsters ?? []).some((m) => m.type === "sun_wraith" && m.floor === 7));
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.weakened ?? 0) > 0, null, { timeout: 15000 });
 });
@@ -69,12 +69,14 @@ async function join(page: Page): Promise<void> {
 }
 
 async function place(page: Page, floor: number, x: number, y: number): Promise<void> {
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), { floor, x, y });
+  const sx = scaleX(floor, x);
+  const sy = scaleY(floor, y);
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), { floor, x: sx, y: sy });
   await page.waitForFunction(
     (p) => {
       const me = window.__TIB_E2E__?.self();
       return Boolean(me && me.floor === p.floor && Math.hypot(me.x - p.x, me.y - p.y) < 1.4);
     },
-    { floor, x, y }
+    { floor, x: sx, y: sy }
   );
 }

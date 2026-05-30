@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { PNG } from "pngjs";
-import { MONSTER_SPAWNS, MINING_NODES } from "../../src/shared.ts";
+import { MONSTER_SPAWNS, MINING_NODES, scaleX, scaleY } from "../../src/shared.ts";
 
 const NORTHWOOD_EXPECTED_TYPES = [
   "rat",
@@ -192,7 +192,7 @@ async function joinFreshCharacter(page: Page): Promise<void> {
 }
 
 async function grantFeatureItems(page: Page): Promise<void> {
-  await page.evaluate(() => {
+  await page.evaluate((p) => {
     window.__TIB_E2E__?.send({
       type: "e2eGrantItems",
       items: [
@@ -201,11 +201,11 @@ async function grantFeatureItems(page: Page): Promise<void> {
         { id: "raw_fish", qty: 1 }
       ],
       floor: 0,
-      x: 16.5,
-      y: 17.5,
+      x: p.x,
+      y: p.y,
       gold: 0
     });
-  });
+  }, { x: scaleX(0, 16.5), y: scaleY(0, 17.5) });
   await page.waitForFunction(() => {
     const ids = (window.__TIB_E2E__?.self()?.inventory ?? []).filter(Boolean).map((item) => item!.id);
     return ids.includes("flint_steel") && ids.includes("logs") && ids.includes("raw_fish");

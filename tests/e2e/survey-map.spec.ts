@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { scaleX, scaleY } from "../../src/shared.ts";
 
 test("the [M] regional map is gated behind owning the Inked Survey", async ({ page }) => {
   logErrors(page);
@@ -80,12 +81,14 @@ async function clickRegionNode(page: Page, nodeX: number, nodeY: number): Promis
 }
 
 async function place(page: Page, floor: number, x: number, y: number): Promise<void> {
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), { floor, x, y });
+  const sx = scaleX(floor, x);
+  const sy = scaleY(floor, y);
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), { floor, x: sx, y: sy });
   await page.waitForFunction(
     (p) => {
       const me = window.__TIB_E2E__?.self();
       return Boolean(me && me.floor === p.floor && Math.hypot(me.x - p.x, me.y - p.y) < 1.2);
     },
-    { floor, x, y }
+    { floor, x: sx, y: sy }
   );
 }

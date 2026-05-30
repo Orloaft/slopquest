@@ -344,54 +344,70 @@ const TREE_TYPES = Object.fromEntries(
     return [id, rest];
   })
 );
+// Regions are upscaled to a fixed expanded footprint (see FLOOR_DIMS in
+// shared.ts: every floor -> 90x60). Floors authored at the native 52x34 have
+// their content stretched by the same factor so it stays aligned with the
+// scaled map; floor 3 is authored directly at the target size, so its content
+// is left as-is. A gathering node's "approach" keeps its 1-tile offset from the
+// node (rather than scaling the gap) so the standing spot stays adjacent.
+const SCALE_AUTHORED_AT_TARGET = new Set<number>([3]);
+const EXP_COLS = 90;
+const EXP_ROWS = 60;
+const NAT_COLS = 52;
+const NAT_ROWS = 34;
+const facX = (floor: unknown): number => (SCALE_AUTHORED_AT_TARGET.has(floor as number) ? 1 : EXP_COLS / NAT_COLS);
+const facY = (floor: unknown): number => (SCALE_AUTHORED_AT_TARGET.has(floor as number) ? 1 : EXP_ROWS / NAT_ROWS);
+const sX = (floor: unknown, x: number | undefined): number | undefined => (x == null ? x : x * facX(floor));
+const sY = (floor: unknown, y: number | undefined): number | undefined => (y == null ? y : y * facY(floor));
+
 const NPCS = npcs.map((n) => ({
   id: n.id,
   name: n.name,
   role: n.role,
   floor: n.at?.floor,
-  x: n.at?.x,
-  y: n.at?.y,
+  x: sX(n.at?.floor, n.at?.x),
+  y: sY(n.at?.floor, n.at?.y),
   dialogue: n.idleDialogue ?? ""
 }));
 const SHOP = shop;
 const MONSTER_SPAWNS = (spawns.monsters ?? []).map((s) => ({
   type: s.type,
   floor: s.at?.floor,
-  x: s.at?.x,
-  y: s.at?.y,
+  x: sX(s.at?.floor, s.at?.x),
+  y: sY(s.at?.floor, s.at?.y),
   zone: s.zone
 }));
 const COMPOSED_TREE_NODES = (spawns.trees ?? []).map((t) => ({
   type: t.type,
   floor: t.at?.floor,
-  x: t.at?.x,
-  y: t.at?.y
+  x: sX(t.at?.floor, t.at?.x),
+  y: sY(t.at?.floor, t.at?.y)
 }));
 const FISHING_NODES = fishingNodes.map((f) => ({
   id: f.id,
   floor: f.at?.floor,
-  x: f.at?.x,
-  y: f.at?.y,
-  approachX: f.approach?.x,
-  approachY: f.approach?.y
+  x: sX(f.at?.floor, f.at?.x),
+  y: sY(f.at?.floor, f.at?.y),
+  approachX: sX(f.at?.floor, f.approach?.x),
+  approachY: sY(f.at?.floor, f.approach?.y)
 }));
 const MINING_NODES = miningNodes.map((m) => ({
   id: m.id,
   kind: m.kind ?? "copper",
   floor: m.at?.floor,
-  x: m.at?.x,
-  y: m.at?.y,
-  approachX: m.approach?.x,
-  approachY: m.approach?.y
+  x: sX(m.at?.floor, m.at?.x),
+  y: sY(m.at?.floor, m.at?.y),
+  approachX: sX(m.at?.floor, m.approach?.x),
+  approachY: sY(m.at?.floor, m.approach?.y)
 }));
 const HERB_NODES = herbNodes.map((h) => {
   const entry: Record<string, unknown> = {
     id: h.id,
     floor: h.at?.floor,
-    x: h.at?.x,
-    y: h.at?.y,
-    approachX: h.approach?.x,
-    approachY: h.approach?.y,
+    x: sX(h.at?.floor, h.at?.x),
+    y: sY(h.at?.floor, h.at?.y),
+    approachX: sX(h.at?.floor, h.approach?.x),
+    approachY: sY(h.at?.floor, h.approach?.y),
     label: h.label ?? "Wild Herbs"
   };
   if (h.requiredLevel != null) entry["requiredLevel"] = h.requiredLevel;

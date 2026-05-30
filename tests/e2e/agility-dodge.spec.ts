@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { CLASSES, dodgeChanceFor } from "../../src/shared.ts";
+import { CLASSES, dodgeChanceFor, scaleX, scaleY } from "../../src/shared.ts";
 
 test("dodgeChanceFor: Adventurer base is 5% and scales with Agility, capped", () => {
   expect(CLASSES["adventurer"]!.dodgeChance).toBeCloseTo(0.05, 5);
@@ -33,9 +33,9 @@ test("Agility: a forced dodge negates a monster hit and grants Agility XP", asyn
 
   // Enable deterministic dodging and drop the player onto a non-safe floor right
   // next to a skeleton spawn so it aggros and swings.
-  await page.evaluate(() => {
-    window.__TIB_E2E__?.send({ type: "e2eGrantItems", forceDodge: true, floor: 1, x: 13, y: 12 });
-  });
+  await page.evaluate((p) => {
+    window.__TIB_E2E__?.send({ type: "e2eGrantItems", forceDodge: true, floor: 1, x: p.x, y: p.y });
+  }, { x: scaleX(1, 13), y: scaleY(1, 12) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 1);
 
   const maxHp = await page.evaluate(() => window.__TIB_E2E__?.self()?.maxHp ?? 0);

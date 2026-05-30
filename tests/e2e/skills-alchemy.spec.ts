@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { scaleX, scaleY } from "../../src/shared.ts";
 
 test("gathering a herb node yields a herb", async ({ page }) => {
   page.on("pageerror", (error) => console.error(error));
@@ -33,14 +34,14 @@ test("alchemist sells empty flasks and an alchemy kit", async ({ page }) => {
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
 
-  // Fund the player and place them at the alchemist (floor 0, 25.5,16.5).
-  await page.evaluate(() => {
-    window.__TIB_E2E__?.send({ type: "e2eGrantItems", gold: 100, floor: 0, x: 24.5, y: 16.5 });
-  });
-  await page.waitForFunction(() => {
+  // Fund the player and place them by the alchemist (Sage Ellwyn).
+  await page.evaluate((p) => {
+    window.__TIB_E2E__?.send({ type: "e2eGrantItems", gold: 100, floor: 0, x: p.x, y: p.y });
+  }, { x: scaleX(0, 24.5), y: scaleY(0, 16.5) });
+  await page.waitForFunction((p) => {
     const me = window.__TIB_E2E__?.self();
-    return Boolean(me && me.floor === 0 && me.gold >= 100 && Math.hypot(me.x - 24.5, me.y - 16.5) < 0.6);
-  });
+    return Boolean(me && me.floor === 0 && me.gold >= 100 && Math.hypot(me.x - p.x, me.y - p.y) < 0.6);
+  }, { x: scaleX(0, 24.5), y: scaleY(0, 16.5) });
 
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "buy", item: "empty_flask" }));
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "buy", item: "alchemy_kit" }));
@@ -63,25 +64,25 @@ test("alchemist menu brews a herb + flask into a potion for Alchemy XP", async (
   await joinFreshCharacter(page);
 
   // Give the player the ingredients + kit and stand them at the alchemist.
-  await page.evaluate(() => {
+  await page.evaluate((p) => {
     window.__TIB_E2E__?.send({
       type: "e2eGrantItems",
       floor: 0,
-      x: 24.5,
-      y: 16.5,
+      x: p.x,
+      y: p.y,
       items: [
         { id: "herb", qty: 1 },
         { id: "empty_flask", qty: 1 },
         { id: "alchemy_kit", qty: 1 }
       ]
     });
-  });
-  await page.waitForFunction(() => {
+  }, { x: scaleX(0, 24.5), y: scaleY(0, 16.5) });
+  await page.waitForFunction((p) => {
     const me = window.__TIB_E2E__?.self();
-    if (!me || me.floor !== 0 || Math.hypot(me.x - 24.5, me.y - 16.5) > 0.6) return false;
+    if (!me || me.floor !== 0 || Math.hypot(me.x - p.x, me.y - p.y) > 0.6) return false;
     const inv = me.inventory ?? [];
     return ["herb", "empty_flask", "alchemy_kit"].every((id) => inv.some((i) => i?.id === id));
-  });
+  }, { x: scaleX(0, 24.5), y: scaleY(0, 16.5) });
 
   // Talk to the alchemist, advance through the dialogue, and the craft menu opens.
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "talkNpc", id: "alchemist" }));
