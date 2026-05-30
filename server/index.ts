@@ -113,6 +113,12 @@ interface PlayerPrivateViewCache {
   weight: number;
 }
 
+interface ResourceViewCache<T extends SnapshotEntity> {
+  signature: number;
+  stateKey: string;
+  view: T;
+}
+
 type ResourceRespawnKind = "tree" | "herb";
 
 interface ResourceRespawn {
@@ -310,8 +316,13 @@ let spatial: SpatialIndex = createSpatialIndex();
 let staticSpatial: StaticSpatialIndex = createStaticSpatialIndex();
 const publicPlayerViewCache = new Map<string, PlayerView>();
 const playerViewSignatureCache = new WeakMap<PlayerView, number>();
+const resourceViewSignatureCache = new WeakMap<SnapshotEntity, number>();
 const privatePlayerViewCache = new WeakMap<ServerPlayer, PlayerPrivateViewCache>();
 const activeRegionCache = new WeakMap<ServerPlayer, ActiveRegionCache>();
+const treeViewCache = new WeakMap<TreeNodeRuntime, ResourceViewCache<TreeView>>();
+const fishingNodeViewCache = new WeakMap<FishingNodeRuntime, ResourceViewCache<FishingNodeView>>();
+const miningNodeViewCache = new WeakMap<MiningNodeRuntime, ResourceViewCache<MiningNodeView>>();
+const herbNodeViewCache = new WeakMap<HerbNodeRuntime, ResourceViewCache<HerbNodeView>>();
 const resourceRespawns = new MinHeap<ResourceRespawn>((a, b) => a.at - b.at);
 let nextMonsterId = 1;
 let nextCorpseId = 1;
@@ -2718,6 +2729,8 @@ function npcViewSignature(npc: NpcView): number {
 }
 
 function treeViewSignature(tree: TreeView): number {
+  const cached = resourceViewSignatureCache.get(tree);
+  if (cached !== undefined) return cached;
   let hash = HASH_INIT;
   hash = hashNumber(hash, tree.floor);
   hash = hashNumber(hash, tree.x);
@@ -2728,6 +2741,8 @@ function treeViewSignature(tree: TreeView): number {
 }
 
 function fishingNodeViewSignature(node: FishingNodeView): number {
+  const cached = resourceViewSignatureCache.get(node);
+  if (cached !== undefined) return cached;
   let hash = HASH_INIT;
   hash = hashNumber(hash, node.floor);
   hash = hashNumber(hash, node.x);
@@ -2738,12 +2753,16 @@ function fishingNodeViewSignature(node: FishingNodeView): number {
 }
 
 function miningNodeViewSignature(node: MiningNodeView): number {
+  const cached = resourceViewSignatureCache.get(node);
+  if (cached !== undefined) return cached;
   let hash = fishingNodeViewSignature(node);
   hash = hashString(hash, node.kind);
   return hash;
 }
 
 function herbNodeViewSignature(node: HerbNodeView): number {
+  const cached = resourceViewSignatureCache.get(node);
+  if (cached !== undefined) return cached;
   let hash = HASH_INIT;
   hash = hashNumber(hash, node.floor);
   hash = hashNumber(hash, node.x);
@@ -2972,7 +2991,10 @@ function serializeNpc(npc: NpcRuntime): NpcView {
 }
 
 function serializeTree(tree: TreeNodeRuntime): TreeView {
-  return {
+  const stateKey = tree.active ? "1" : "0";
+  const cached = treeViewCache.get(tree);
+  if (cached?.stateKey === stateKey) return cached.view;
+  const view = {
     id: tree.id,
     type: tree.type,
     floor: tree.floor,
@@ -2980,10 +3002,16 @@ function serializeTree(tree: TreeNodeRuntime): TreeView {
     y: tree.y,
     active: tree.active
   } as TreeView;
+  const signature = treeViewSignature(view);
+  resourceViewSignatureCache.set(view, signature);
+  treeViewCache.set(tree, { signature, stateKey, view });
+  return view;
 }
 
-function serializeFishingNode(node: { id: string; floor: number; x: number; y: number; approachX: number; approachY: number }): FishingNodeView {
-  return {
+function serializeFishingNode(node: FishingNodeRuntime): FishingNodeView {
+  const cached = fishingNodeViewCache.get(node);
+  if (cached) return cached.view;
+  const view = {
     id: node.id,
     floor: node.floor,
     x: node.x,
@@ -2992,6 +3020,10 @@ function serializeFishingNode(node: { id: string; floor: number; x: number; y: n
     approachY: node.approachY,
     label: "Fishing spot"
   };
+  const signature = fishingNodeViewSignature(view);
+  resourceViewSignatureCache.set(view, signature);
+  fishingNodeViewCache.set(node, { signature, stateKey: "static", view });
+  return view;
 }
 
 const ORE_LABELS: Record<string, string> = {
@@ -3000,8 +3032,10 @@ const ORE_LABELS: Record<string, string> = {
   iron: "Iron vein"
 };
 
-function serializeMiningNode(node: { id: string; floor: number; x: number; y: number; approachX: number; approachY: number; kind: string }): MiningNodeView {
-  return {
+function serializeMiningNode(node: MiningNodeRuntime): MiningNodeView {
+  const cached = miningNodeViewCache.get(node);
+  if (cached) return cached.view;
+  const view = {
     id: node.id,
     floor: node.floor,
     x: node.x,
@@ -3011,10 +3045,17 @@ function serializeMiningNode(node: { id: string; floor: number; x: number; y: nu
     kind: node.kind,
     label: ORE_LABELS[node.kind] ?? "Ore vein"
   };
+  const signature = miningNodeViewSignature(view);
+  resourceViewSignatureCache.set(view, signature);
+  miningNodeViewCache.set(node, { signature, stateKey: "static", view });
+  return view;
 }
 
 function serializeHerbNode(node: HerbNodeRuntime): HerbNodeView {
-  return {
+  const stateKey = node.active ? "1" : "0";
+  const cached = herbNodeViewCache.get(node);
+  if (cached?.stateKey === stateKey) return cached.view;
+  const view = {
     id: node.id,
     floor: node.floor,
     x: node.x,
@@ -3025,6 +3066,10 @@ function serializeHerbNode(node: HerbNodeRuntime): HerbNodeView {
     active: node.active,
     requiredLevel: node.requiredLevel
   };
+  const signature = herbNodeViewSignature(view);
+  resourceViewSignatureCache.set(view, signature);
+  herbNodeViewCache.set(node, { signature, stateKey, view });
+  return view;
 }
 
 function serializeFire(fire: Fire): FireView {
