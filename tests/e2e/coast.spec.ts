@@ -15,7 +15,7 @@ test("travel chain: desert -> beach -> jungle, and beach -> desert back", async 
   await page.goto("/?e2e");
   await join(page);
 
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: p.x, y: p.y }), { x: scaleX(7, 10.5), y: scaleY(7, 32.5) });
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: p.x, y: p.y }), { x: scaleX(7, 1.5), y: scaleY(7, 32.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 8, null, { timeout: 8000 });
 
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 8, x: p.x, y: p.y }), { x: scaleX(8, 50.5), y: scaleY(8, 14.5) });
@@ -49,7 +49,7 @@ test("a Venomous Stalker ambushes from the undergrowth, stunning the player", as
   await page.goto("/?e2e");
   await join(page);
 
-  await place(page, 9, 16.5, 17.5);
+  await place(page, 9, 14.5, 20.5);
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.stunned ?? 0) > 0, null, { timeout: 8000 });
 });
 
@@ -58,7 +58,7 @@ test("an Ancient Totem Wraith slows the player from down a path", async ({ page 
   await page.goto("/?e2e");
   await join(page);
 
-  await place(page, 9, 22.5, 8.5);
+  await place(page, 9, 21.5, 8.5);
   await page.waitForFunction(() => (window.__TIB_E2E__?.getState()?.monsters ?? []).some((m) => m.type === "totem_wraith" && m.floor === 9));
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.slowed ?? 0) > 0, null, { timeout: 15000 });
 });
@@ -68,7 +68,7 @@ test("the Jungle Vault is sealed (stepping on it does not transport)", async ({ 
   await page.goto("/?e2e");
   await join(page);
 
-  await place(page, 9, 15.5, 26.5);
+  await place(page, 9, 16.5, 35.5);
   await page.waitForTimeout(700);
   expect(await page.evaluate(() => window.__TIB_E2E__?.self()?.floor)).toBe(9);
 });

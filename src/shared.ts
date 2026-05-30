@@ -42,7 +42,7 @@ const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
 };
 // Floors authored directly at the expanded size (their content is already
 // placed in expanded coordinates, so it must NOT be scaled again).
-const AUTHORED_AT_TARGET = new Set<number>([3, 6]);
+const AUTHORED_AT_TARGET = new Set<number>([3, 5, 6, 7, 8, 9]);
 
 export function floorCols(floor: number): number {
   return FLOOR_DIMS[floor]?.cols ?? MAP_COLS;
@@ -499,86 +499,125 @@ export function makeFloorTiles(floor: number): string[] {
   }
 
   if (floor === 7) {
-    // The Sunken Desert: a wide-open expanse of sand with quicksand hazards,
-    // oasis bottlenecks, and crumbling ruins for cover.
-    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "a"); // open sand
-    setTile(rows, 25, 1, "G"); // north portal to/from the cemetery
-    // Oasis pools (impassable bottlenecks).
-    fillRect(rows, 8, 7, 5, 3, "V");
-    fillRect(rows, 38, 9, 5, 3, "V");
-    fillRect(rows, 16, 20, 4, 3, "V");
-    // Quicksand hazards (impassable, sight-open).
-    fillRect(rows, 28, 6, 3, 3, "Q");
-    fillRect(rows, 12, 16, 3, 2, "Q");
-    fillRect(rows, 33, 18, 3, 2, "Q");
-    // Crumbling ruins for line-of-sight cover.
-    for (const [rx, ry] of [[20, 10], [30, 12], [15, 13], [36, 15], [24, 16], [27, 22]] as const) setTile(rows, rx, ry, "U");
-    // Oasis Trade Outpost (south) — safe, with palm + tent and a passage to Waystone.
-    fillRect(rows, 20, 26, 11, 5, "a");
-    setTile(rows, 25, 31, "H");
-    setTile(rows, 10, 32, "Y"); // coastal trail to the Sunken Beach (floor 8)
+    // The Sunken Desert (bespoke 90x60) — open sweeping dunes of sand (a) split by
+    // sandstone canyons. Mirrors the badlands: fill the canyon bulk with massif
+    // (w), carve the winding sand routes, then applyCliffEdges("a","w","X") drops a
+    // 1-tile sandstone cliff face wherever the massif overhangs open sand. Ruins
+    // (U) give cover, quicksand (Q) and an oasis (V) gate the routes; the Oasis
+    // Trade Outpost (safe) nestles against the south wall.
+    fillRect(rows, 0, 0, 90, 60, "a");
+    fillRect(rows, 6, 4, 26, 12, "w");
+    fillRect(rows, 40, 3, 30, 13, "w");
+    fillRect(rows, 30, 22, 20, 10, "w");
+    fillRect(rows, 52, 34, 30, 16, "w");
+    fillRect(rows, 4, 38, 18, 18, "w");
+    fillRect(rows, 22, 3, 5, 16, "a"); // north entry shaft (G at its top)
+    fillRect(rows, 22, 16, 22, 5, "a");
+    fillRect(rows, 12, 20, 18, 14, "a");
+    fillRect(rows, 50, 18, 14, 16, "a");
+    fillRect(rows, 26, 32, 26, 6, "a");
+    fillRect(rows, 1, 30, 12, 5, "a"); // beach trail (west)
+    fillRect(rows, 22, 38, 6, 12, "a"); // route to the outpost
+    fillRect(rows, 18, 46, 30, 10, "a"); // outpost clearing
+    fillRect(rows, 30, 47, 6, 4, "V"); // oasis pool
+    setTile(rows, 25, 49, "H"); // one-way passage to Waystone
+    setTile(rows, 24, 2, "G"); // north gate to/from the cemetery
+    setTile(rows, 1, 32, "Y"); // west trail to the Sunken Beach
+    fillRect(rows, 16, 22, 4, 3, "V");
+    fillRect(rows, 56, 20, 4, 3, "V");
+    fillRect(rows, 38, 17, 3, 2, "Q");
+    fillRect(rows, 24, 24, 2, 3, "Q");
+    fillRect(rows, 40, 34, 3, 2, "Q");
+    fillRect(rows, 24, 42, 2, 3, "Q");
+    for (const [rx, ry] of [[13, 19], [29, 19], [44, 16], [49, 21], [31, 33], [49, 33], [20, 34], [27, 45], [40, 45]] as Array<[number, number]>)
+      setTile(rows, rx, ry, "U");
+    applyCliffEdges(rows, "a", "w", "X");
   }
 
   if (floor === 8) {
-    // The Sunken Beach: a wide, open coast of white sand with the impassable sea
-    // to the south and shipwreck ruins for sparse cover.
-    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "e"); // white sand
-    fillRect(rows, 1, 24, MAP_COLS - 2, 8, "I"); // the sea (impassable, sight-open)
-    fillRect(rows, 12, 18, 4, 4, "I"); // tidal inlet
-    fillRect(rows, 36, 16, 5, 4, "I"); // tidal inlet
-    for (const [rx, ry] of [[10, 8], [20, 6], [30, 10], [40, 8], [16, 12], [34, 14], [25, 12]] as const) setTile(rows, rx, ry, "U");
+    // The Sunken Beach (bespoke 90x60) — a wide open coast of white sand (e) for
+    // kiting reef prowlers, with the sea (I) washing in along an organic coastline
+    // of coves and spits. A driftwood hut + palms sit on the dry sand.
+    fillRect(rows, 0, 0, 90, 60, "e");
+    fillRect(rows, 1, 46, 88, 13, "I"); // open southern sea
+    fillRect(rows, 6, 42, 18, 4, "I"); // west cove
+    fillRect(rows, 10, 39, 9, 3, "I");
+    fillRect(rows, 30, 43, 14, 3, "I"); // central scoop
+    fillRect(rows, 60, 41, 16, 5, "I"); // east bay
+    fillRect(rows, 64, 37, 8, 4, "I");
+    fillRect(rows, 70, 44, 6, 6, "e"); // sandy spit into the bay
+    fillRect(rows, 36, 22, 12, 7, "I"); // tidal lagoon
+    fillRect(rows, 40, 20, 5, 2, "I");
+    fillRect(rows, 8, 1, 7, 6, "I"); // NW cove
+    fillRect(rows, 54, 1, 10, 5, "I"); // NE cove
+    fillRect(rows, 78, 8, 11, 10, "I"); // eastern inlet by the jungle trail
     setTile(rows, 25, 1, "Y"); // north trail to/from the desert
-    setTile(rows, 50, 14, "j"); // east trail to the Untamed Jungle (floor 9)
+    setTile(rows, 50, 14, "j"); // east trail to the Untamed Jungle
   }
 
   if (floor === 9) {
-    // The Untamed Jungle: a claustrophobic maze of dense canopy walls and rivers,
-    // crossed by a narrow vine bridge, with a sealed vault deep inside.
-    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "E"); // dense jungle (wall + canopy)
-    setTile(rows, 1, 15, "j"); // west portal to/from the beach
-    // Winding 2-tile paths.
-    fillRect(rows, 2, 14, 9, 3, "y"); // west entry run
-    fillRect(rows, 8, 7, 3, 10, "y"); // turn north
-    fillRect(rows, 8, 7, 19, 3, "y"); // upper run east (reaches the bridge)
-    fillRect(rows, 21, 7, 3, 12, "y"); // turn south
-    fillRect(rows, 14, 16, 10, 3, "y"); // lower run west
-    fillRect(rows, 14, 16, 3, 10, "y"); // turn south to the vault
-    fillRect(rows, 10, 24, 12, 4, "y"); // vault clearing
-    setTile(rows, 15, 26, "K"); // sealed Jungle Vault (Tier-1 dungeon hook)
-    // Deep river + vine bridge chokepoint to the east jungle.
-    fillRect(rows, 27, 5, 3, 23, "i"); // river
-    fillRect(rows, 27, 8, 3, 2, "B"); // vine bridge (narrow choke)
-    fillRect(rows, 30, 7, 15, 3, "y"); // east jungle run
-    fillRect(rows, 42, 7, 3, 14, "y"); // east turn south
-    fillRect(rows, 34, 18, 11, 3, "y"); // east lower run
+    // The Untamed Jungle (bespoke 90x60) — a claustrophobic maze of dense canopy
+    // walls (E) threaded by tight 3-wide jungle-floor runs (y). A winding river (i)
+    // splits the map, forded only at 1-tile boulder chokepoints where venomous
+    // stalkers ambush. The sealed Jungle Vault (K) sits in a dead-end clearing.
+    fillRect(rows, 0, 0, 90, 60, "E");
+    setTile(rows, 1, 15, "j"); // west portal to/from the Sunken Beach
+    fillRect(rows, 1, 14, 11, 4, "y"); // entry run
+    fillRect(rows, 8, 6, 4, 12, "y");
+    fillRect(rows, 8, 6, 22, 4, "y");
+    fillRect(rows, 20, 6, 4, 16, "y");
+    fillRect(rows, 12, 18, 12, 4, "y");
+    fillRect(rows, 12, 18, 4, 18, "y");
+    fillRect(rows, 8, 32, 18, 6, "y"); // vault clearing
+    fillRect(rows, 20, 22, 4, 16, "y");
+    fillRect(rows, 30, 2, 4, 30, "i"); // river trunk
+    fillRect(rows, 30, 28, 26, 4, "i");
+    fillRect(rows, 52, 28, 4, 26, "i");
+    fillRect(rows, 30, 7, 4, 1, "y"); // upper ford
+    fillRect(rows, 30, 30, 4, 1, "y"); // lower ford
+    fillRect(rows, 34, 6, 18, 4, "y");
+    fillRect(rows, 48, 6, 4, 19, "y");
+    fillRect(rows, 36, 21, 16, 4, "y");
+    fillRect(rows, 36, 32, 20, 6, "y");
+    fillRect(rows, 58, 32, 5, 12, "y");
+    setTile(rows, 16, 35, "K"); // sealed Jungle Vault (does not transport)
   }
 
   if (floor === 5) {
-    // The Sunken Marsh: a basin of impassable swamp water with a winding marsh
-    // causeway from the east entry to the Alchemist's Hut clearing in the west.
-    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "W");
-    // East entry clearing + portal back to the forest.
-    fillRect(rows, 42, 13, 8, 8, "m");
-    setTile(rows, 50, 16, "M"); // east-edge portal back to the forest
-    // Winding causeway east -> west.
-    fillRect(rows, 30, 14, 13, 4, "m"); // upper-east run
-    fillRect(rows, 27, 14, 3, 2, "B"); // bridge 1 (narrow chokepoint)
-    fillRect(rows, 18, 14, 9, 4, "m"); // mid run
-    fillRect(rows, 18, 6, 4, 11, "m"); // north turn
-    fillRect(rows, 8, 6, 12, 4, "m"); // west run (upper)
-    fillRect(rows, 4, 6, 8, 9, "k"); // Alchemist's Hut clearing (dirt)
-    // South loop (Mire-Lotus pocket) gated by a second bridge.
-    fillRect(rows, 20, 16, 2, 3, "B"); // bridge 2 (narrow chokepoint)
-    fillRect(rows, 14, 18, 8, 5, "m"); // south pocket
-    fillRect(rows, 8, 21, 8, 4, "m"); // south-west pocket
-    // Boulders for line-of-sight cover along the paths.
-    setTile(rows, 35, 15, "o");
-    setTile(rows, 24, 15, "o");
-    setTile(rows, 19, 11, "o");
-    setTile(rows, 16, 20, "o");
-    setTile(rows, 11, 22, "o");
-    // One-way cliff ledge: hop down into northern Waystone.
-    setTile(rows, 5, 9, "L");
+    // The Sunken Marsh (bespoke 90x60) — a drowned basin of deep swamp water (W,
+    // blocks movement not sight) threaded by winding 1-2 tile marsh (m) and
+    // swamp-dirt (k) causeways linked by wooden bridges (B). The Alchemist's Hut
+    // sits on solid ground in the NW; Mire-Spitter turrets are anchored on the
+    // open water and fire across the causeways. Boulders (o) give LOS cover.
+    fillRect(rows, 0, 0, 90, 60, "W");
+    fillRect(rows, 44, 18, 13, 11, "m"); // east entry basin (forest portal arrives)
+    fillRect(rows, 48, 14, 6, 4, "m");
+    setTile(rows, 56, 23, "M"); // east-edge portal back to the forest
+    fillRect(rows, 50, 28, 9, 6, "m"); // SE marsh shelf
+    fillRect(rows, 54, 25, 4, 4, "m");
+    fillRect(rows, 38, 20, 7, 4, "m"); // run west off the entry
+    fillRect(rows, 34, 14, 5, 10, "m"); // climb north
+    fillRect(rows, 31, 14, 3, 3, "B"); // bridge 1 (chokepoint)
+    fillRect(rows, 24, 13, 8, 5, "m");
+    fillRect(rows, 24, 18, 4, 10, "m"); // drop south
+    fillRect(rows, 21, 25, 3, 3, "B"); // bridge 2 (chokepoint)
+    fillRect(rows, 13, 24, 9, 6, "m"); // mid-west shelf
+    fillRect(rows, 13, 16, 5, 9, "m"); // climb to the hut
+    fillRect(rows, 13, 16, 9, 4, "m");
+    fillRect(rows, 4, 12, 12, 10, "k"); // Alchemist's Hut clearing (safe)
+    fillRect(rows, 12, 14, 3, 6, "m");
+    fillRect(rows, 16, 30, 3, 3, "B"); // bridge 3 into the lotus pocket
+    fillRect(rows, 9, 33, 13, 7, "m"); // southern Mire-Lotus pocket
+    fillRect(rows, 18, 36, 8, 4, "m");
+    setTile(rows, 41, 19, "o");
+    setTile(rows, 38, 22, "o");
+    setTile(rows, 27, 14, "o");
+    setTile(rows, 25, 26, "o");
+    setTile(rows, 18, 27, "o");
+    setTile(rows, 11, 35, "o");
+    setTile(rows, 20, 38, "o");
+    setTile(rows, 52, 30, "o");
+    setTile(rows, 6, 13, "L"); // one-way cliff ledge -> northern Waystone
   }
 
   if (floor === 4) {
@@ -712,11 +751,11 @@ export function isSafeZone(floor: number, x: number, y: number): boolean {
   const inRect = (f: number, x1: number, y1: number, x2: number, y2: number): boolean =>
     floor === f && x >= scaleX(f, x1) && x <= scaleX(f, x2) && y >= scaleY(f, y1) && y <= scaleY(f, y2);
   // The Alchemist's Hut clearing in the Sunken Marsh is a safe rest spot.
-  if (inRect(5, 3, 5, 13, 15)) return true;
+  if (inRect(5, 3, 11, 17, 22)) return true;
   // The Frontier Camp clearing in the Searing Badlands (bespoke 90x60 coords).
   if (inRect(6, 52, 12, 81, 22)) return true;
-  // The Oasis Trade Outpost in the Sunken Desert.
-  if (inRect(7, 19, 25, 31, 32)) return true;
+  // The Oasis Trade Outpost in the Sunken Desert (bespoke 90x60 coords).
+  if (inRect(7, 18, 46, 47, 55)) return true;
   return false;
 }
 
@@ -754,11 +793,11 @@ function portalForRaw(floor: number, x: number, y: number): Portal | null {
   if (floor === 3 && tile === "D") return { floor: 6, x: 3.5, y: 33.5 };
   if (floor === 6 && tile === "D") return { floor: 3, x: 87.5, y: 29.5 };
   if (floor === 6 && tile === "Z") return { floor: 4, x: 6.5, y: 16.5 }; // one-way drop into Northwatch
-  if (floor === 1 && tile === "G") return { floor: 7, x: 25.5, y: 2.5 };
+  if (floor === 1 && tile === "G") return { floor: 7, x: 24.5, y: 3.5 };
   if (floor === 7 && tile === "G") return { floor: 1, x: 25.5, y: 30.5 };
   if (floor === 7 && tile === "H") return { floor: 0, x: 25.5, y: 27.5 }; // one-way passage into Waystone
   if (floor === 7 && tile === "Y") return { floor: 8, x: 25.5, y: 2.5 };
-  if (floor === 8 && tile === "Y") return { floor: 7, x: 10.5, y: 31.5 };
+  if (floor === 8 && tile === "Y") return { floor: 7, x: 2.5, y: 32.5 };
   if (floor === 8 && tile === "j") return { floor: 9, x: 2.5, y: 15.5 };
   if (floor === 9 && tile === "j") return { floor: 8, x: 49.5, y: 14.5 };
   return null;

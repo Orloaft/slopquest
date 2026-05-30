@@ -28,3 +28,13 @@
 - id: fish-3-41-48
   at: { floor: 3, x: 41.5, y: 48.5 }
   approach: { x: 41.5, y: 47.5 }
+
+# Sunken Marsh (floor 5) — fish the open swamp water from a causeway edge.
+- id: fish-5-43-22
+  at: { floor: 5, x: 42.5, y: 24.5 }
+  approach: { x: 42.5, y: 23.5 }
+
+# Sunken Beach (floor 8) — surfcasting from the south sand.
+- id: fish-8-50-46
+  at: { floor: 8, x: 50.5, y: 46.5 }
+  approach: { x: 50.5, y: 45.5 }

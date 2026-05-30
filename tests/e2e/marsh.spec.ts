@@ -11,7 +11,7 @@ test("travel loop: forest west portal -> marsh, and the cliff ledge -> Waystone"
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 5, null, { timeout: 8000 });
 
   // The cliff ledge in the hut clearing drops one-way into northern Waystone (floor 0).
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 5, x: p.x, y: p.y }), { x: scaleX(5, 5.5), y: scaleY(5, 9.5) });
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 5, x: p.x, y: p.y }), { x: scaleX(5, 6.5), y: scaleY(5, 13.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 0, null, { timeout: 8000 });
 });
 

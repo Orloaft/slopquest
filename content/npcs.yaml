@@ -87,19 +87,19 @@
 - id: marsh-alchemist
   name: Bogwarden Yssa
   role: alchemist
-  at: { floor: 5, x: 10.5, y: 9.5 }
+  at: { floor: 5, x: 5.5, y: 17.5 }
   idleDialogue: "The marsh gives freely to those who know where to look. Brew well."
 
 - id: frontier-trader
   name: Quartermaster Hale
   role: vendor
-  at: { floor: 6, x: 45.5, y: 10.5 }
+  at: { floor: 6, x: 66.5, y: 18.5 }
   idleDialogue: "Frontier Camp's the last stop before the deep canyons. Stock up."
 
 - id: oasis-trader
   name: Caravan Master Zafira
   role: vendor
-  at: { floor: 7, x: 24.5, y: 28.5 }
+  at: { floor: 7, x: 22.5, y: 52.5 }
   idleDialogue: "The Oasis Outpost trades in glass and water. Rest, then trek on."
 
 # --- Faction quest-givers (tie the biomes together) ---
@@ -118,7 +118,7 @@
 - id: faith-monk
   name: Brother Tidewell
   role: quest
-  at: { floor: 5, x: 8.5, y: 9.5 }
+  at: { floor: 5, x: 13.5, y: 14.5 }
   idleDialogue: "The tides rise to cleanse us. The Sunken Faith only helps the willing adapt."
 
 - id: ranger-scout
@@ -130,5 +130,5 @@
 - id: cartographer-adept
   name: Adept Lyra
   role: quest
-  at: { floor: 7, x: 27.5, y: 28.5 }
+  at: { floor: 7, x: 44.5, y: 52.5 }
   idleDialogue: "The Arcane Cartographers chart the ley-bleed. The desert hums with loose power."

@@ -85,11 +85,12 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spritePine", x: 44, y: 30.2, w: 54, h: 84 }
   ],
   5: [
-    { key: "spriteThatchHouse", x: 7.5, y: 11.6, w: 150, h: 130 }, // Alchemist's Hut
-    { key: "spriteSign", x: 10.5, y: 13.2, w: 48, h: 58 },
-    { key: "spriteDeadTree", x: 4.4, y: 8.6, w: 60, h: 100 },
-    { key: "spriteDeadTree", x: 40.5, y: 13.6, w: 56, h: 92 },
-    { key: "spriteSwampBoulder", x: 44.6, y: 19.2, w: 44, h: 36 }
+    { key: "spriteThatchHouse", x: 9, y: 19, w: 130, h: 176 }, // Alchemist's Hut (NW clearing)
+    { key: "spriteSign", x: 12.5, y: 20.5, w: 48, h: 58 },
+    { key: "spriteDeadTree", x: 5.4, y: 16.6, w: 60, h: 100 },
+    { key: "spriteDeadTree", x: 42.5, y: 17.6, w: 56, h: 92 },
+    { key: "spriteSwampBoulder", x: 52.5, y: 30.2, w: 44, h: 36 },
+    { key: "spriteSwampBoulder", x: 20.5, y: 38.2, w: 44, h: 36 }
   ],
   6: [
     { key: "spriteTent", x: 70.5, y: 17.2, w: 110, h: 86 }, // Frontier Camp (east clearing)
@@ -102,19 +103,24 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteSwampBoulder", x: 14.5, y: 44.6, w: 44, h: 36 }
   ],
   7: [
-    { key: "spriteOutpostTent", x: 23.5, y: 28.6, w: 130, h: 104 }, // Oasis Trade Outpost
-    { key: "spritePalm", x: 28.5, y: 28.8, w: 78, h: 74 },
-    { key: "spritePalm", x: 21.5, y: 30.4, w: 70, h: 66 },
-    { key: "spriteObelisk", x: 40.5, y: 6.4, w: 38, h: 60 }
+    { key: "spriteOutpostTent", x: 38.5, y: 53.6, w: 130, h: 104 }, // Oasis Trade Outpost (south)
+    { key: "spritePalm", x: 33.5, y: 52.6, w: 78, h: 74 },
+    { key: "spritePalm", x: 36.5, y: 50.4, w: 70, h: 66 },
+    { key: "spriteObelisk", x: 24.5, y: 5.4, w: 38, h: 60 } // by the north gate
   ],
   8: [
-    { key: "spriteBeachHut", x: 44.5, y: 20.6, w: 120, h: 122 }, // driftwood hut + surfboard
-    { key: "spritePalm", x: 8.5, y: 5.4, w: 70, h: 66 },
-    { key: "spritePalm", x: 38.5, y: 4.6, w: 66, h: 62 }
+    { key: "spriteBeachHut", x: 60.5, y: 20.6, w: 116, h: 118 }, // driftwood hut on the dry east sand
+    { key: "spritePalm", x: 20.5, y: 9.4, w: 62, h: 58 },
+    { key: "spritePalm", x: 44.5, y: 12.4, w: 62, h: 58 }, // by the jungle trail
+    { key: "spritePalm", x: 72.5, y: 33.4, w: 62, h: 58 }, // on the eastern spit
+    { key: "spritePalm", x: 30.5, y: 35.4, w: 62, h: 58 }
   ],
   9: [
-    { key: "spriteSwampBoulder", x: 12.5, y: 10.2, w: 44, h: 36 },
-    { key: "spriteSwampBoulder", x: 23.5, y: 20.2, w: 44, h: 36 },
-    { key: "spriteObelisk", x: 19.5, y: 25.4, w: 38, h: 60 } // tribal totem by the vault
+    // Boulders clustered at the two river fords (the choke ambush points).
+    { key: "spriteSwampBoulder", x: 29.5, y: 7.85, w: 44, h: 36 },
+    { key: "spriteSwampBoulder", x: 34.5, y: 7.85, w: 40, h: 34 },
+    { key: "spriteSwampBoulder", x: 29.5, y: 30.85, w: 44, h: 36 },
+    { key: "spriteSwampBoulder", x: 34.5, y: 30.85, w: 40, h: 34 },
+    { key: "spriteObelisk", x: 13.5, y: 35.4, w: 38, h: 60 } // tribal totem by the vault
   ]
 };

@@ -41,13 +41,14 @@ monsters:
   - { type: orc,           at: { floor: 3, x: 82, y: 24 }, zone: woods }
   # The Sunken Marsh (floor 5): skitterers patrol the causeway; mire spitters
   # are anchored on deep water and fire across it.
-  - { type: skitterer,     at: { floor: 5, x: 38, y: 15 }, zone: marsh }
-  - { type: skitterer,     at: { floor: 5, x: 22, y: 16 }, zone: marsh }
-  - { type: skitterer,     at: { floor: 5, x: 18, y: 21 }, zone: marsh }
-  - { type: skitterer,     at: { floor: 5, x: 10, y: 8  }, zone: marsh }
-  - { type: mire_spitter,  at: { floor: 5, x: 32, y: 12 }, zone: marsh }
-  - { type: mire_spitter,  at: { floor: 5, x: 24, y: 19 }, zone: marsh }
-  - { type: mire_spitter,  at: { floor: 5, x: 12, y: 16 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 48, y: 20 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 35, y: 18 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 26, y: 22 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 15, y: 26 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 14, y: 35 }, zone: marsh }
+  - { type: mire_spitter,  at: { floor: 5, x: 58, y: 26 }, zone: marsh }
+  - { type: mire_spitter,  at: { floor: 5, x: 30, y: 20 }, zone: marsh }
+  - { type: mire_spitter,  at: { floor: 5, x: 20, y: 32 }, zone: marsh }
   # The Searing Badlands (floor 6): scavengers patrol in pairs (pack aggro);
   # dust burrowers lie hidden until a player steps on them.
   - { type: canyon_scavenger, at: { floor: 6, x: 8,  y: 33 }, zone: badlands }
@@ -57,22 +58,22 @@ monsters:
   - { type: dust_burrower,    at: { floor: 6, x: 24, y: 18 }, zone: badlands }
   - { type: dust_burrower,    at: { floor: 6, x: 35, y: 33 }, zone: badlands }
   # The Sunken Desert (floor 7): fast dune skitterers + ruin-bound sun wraiths.
-  - { type: dune_skitterer, at: { floor: 7, x: 15, y: 8  }, zone: desert }
-  - { type: dune_skitterer, at: { floor: 7, x: 35, y: 12 }, zone: desert }
-  - { type: dune_skitterer, at: { floor: 7, x: 22, y: 15 }, zone: desert }
-  - { type: dune_skitterer, at: { floor: 7, x: 30, y: 20 }, zone: desert }
-  - { type: sun_wraith,     at: { floor: 7, x: 21, y: 10 }, zone: desert }
-  - { type: sun_wraith,     at: { floor: 7, x: 31, y: 12 }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 24, y: 12 }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 36, y: 18 }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 20, y: 27 }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 56, y: 27 }, zone: desert }
+  - { type: sun_wraith,     at: { floor: 7, x: 30, y: 18 }, zone: desert }
+  - { type: sun_wraith,     at: { floor: 7, x: 52, y: 22 }, zone: desert }
   # The Sunken Beach (floor 8): fast reef prowlers in the open sand.
-  - { type: reef_prowler, at: { floor: 8, x: 10, y: 10 }, zone: beach }
-  - { type: reef_prowler, at: { floor: 8, x: 30, y: 8  }, zone: beach }
-  - { type: reef_prowler, at: { floor: 8, x: 20, y: 16 }, zone: beach }
-  - { type: reef_prowler, at: { floor: 8, x: 42, y: 18 }, zone: beach }
+  - { type: reef_prowler, at: { floor: 8, x: 16, y: 20 }, zone: beach }
+  - { type: reef_prowler, at: { floor: 8, x: 34, y: 12 }, zone: beach }
+  - { type: reef_prowler, at: { floor: 8, x: 58, y: 24 }, zone: beach }
+  - { type: reef_prowler, at: { floor: 8, x: 70, y: 28 }, zone: beach }
   # The Untamed Jungle (floor 9): hidden stalkers ambush; totem wraiths fire down paths.
-  - { type: venomous_stalker, at: { floor: 9, x: 16, y: 17 }, zone: jungle }
-  - { type: venomous_stalker, at: { floor: 9, x: 40, y: 9  }, zone: jungle }
-  - { type: totem_wraith,     at: { floor: 9, x: 24, y: 8  }, zone: jungle }
-  - { type: totem_wraith,     at: { floor: 9, x: 43, y: 12 }, zone: jungle }
+  - { type: venomous_stalker, at: { floor: 9, x: 14, y: 20 }, zone: jungle }
+  - { type: venomous_stalker, at: { floor: 9, x: 38, y: 9  }, zone: jungle }
+  - { type: totem_wraith,     at: { floor: 9, x: 21, y: 8  }, zone: jungle }
+  - { type: totem_wraith,     at: { floor: 9, x: 49, y: 22 }, zone: jungle }
 
 trees:
   - { type: oak,  at: { floor: 0, x: 12.8, y: 10.7 } }

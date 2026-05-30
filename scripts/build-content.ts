@@ -350,7 +350,7 @@ const TREE_TYPES = Object.fromEntries(
 // scaled map; floor 3 is authored directly at the target size, so its content
 // is left as-is. A gathering node's "approach" keeps its 1-tile offset from the
 // node (rather than scaling the gap) so the standing spot stays adjacent.
-const SCALE_AUTHORED_AT_TARGET = new Set<number>([3, 6]);
+const SCALE_AUTHORED_AT_TARGET = new Set<number>([3, 5, 6, 7, 8, 9]);
 const EXP_COLS = 90;
 const EXP_ROWS = 60;
 const NAT_COLS = 52;
