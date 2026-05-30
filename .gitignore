@@ -4,6 +4,10 @@ data/players.json
 src/generated/
 test-results/
 
+# Large unused audio archive — moved off-repo to /mnt/nxt-dev/tib-archive/assetsources/soundtracks
+# (see assetsources/SOUNDTRACKS_MOVED.md). Game streams music from public/music/, not this dir.
+assetsources/soundtracks/
+
 .env
 .env.*
 *.log
