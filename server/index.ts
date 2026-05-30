@@ -125,6 +125,11 @@ interface ActiveRegions {
   cells: Set<string>;
 }
 
+interface ActiveRegionCache {
+  key: string;
+  cells: string[];
+}
+
 type SnapshotEntity =
   | PlayerView
   | MonsterView
@@ -300,6 +305,7 @@ let spatial: SpatialIndex = createSpatialIndex();
 let staticSpatial: StaticSpatialIndex = createStaticSpatialIndex();
 const publicPlayerViewCache = new Map<string, PlayerView>();
 const privatePlayerViewCache = new WeakMap<ServerPlayer, PlayerPrivateViewCache>();
+const activeRegionCache = new WeakMap<ServerPlayer, ActiveRegionCache>();
 const resourceRespawns = new MinHeap<ResourceRespawn>((a, b) => a.at - b.at);
 let nextMonsterId = 1;
 let nextCorpseId = 1;
@@ -745,21 +751,28 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
 function occupiedRegions(): ActiveRegions {
   const regions: ActiveRegions = { cells: new Set() };
   for (const { player } of clients.values()) {
-    markActiveRegion(regions, player.floor, player.x, player.y, ACTIVE_REGION_RADIUS);
+    for (const cell of activeRegionCellsFor(player)) regions.cells.add(cell);
   }
   return regions;
 }
 
-function markActiveRegion(regions: ActiveRegions, floor: number, x: number, y: number, radius: number): void {
-  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
-  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
-  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
-  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
+function activeRegionCellsFor(player: ServerPlayer): string[] {
+  const floor = player.floor;
+  const minCx = Math.floor((player.x - ACTIVE_REGION_RADIUS) / SPATIAL_CELL_SIZE);
+  const maxCx = Math.floor((player.x + ACTIVE_REGION_RADIUS) / SPATIAL_CELL_SIZE);
+  const minCy = Math.floor((player.y - ACTIVE_REGION_RADIUS) / SPATIAL_CELL_SIZE);
+  const maxCy = Math.floor((player.y + ACTIVE_REGION_RADIUS) / SPATIAL_CELL_SIZE);
+  const key = `${floor}:${minCx}:${maxCx}:${minCy}:${maxCy}`;
+  const cached = activeRegionCache.get(player);
+  if (cached?.key === key) return cached.cells;
+  const cells: string[] = [];
   for (let cy = minCy; cy <= maxCy; cy += 1) {
     for (let cx = minCx; cx <= maxCx; cx += 1) {
-      regions.cells.add(`${floor}:${cx}:${cy}`);
+      cells.push(`${floor}:${cx}:${cy}`);
     }
   }
+  activeRegionCache.set(player, { key, cells });
+  return cells;
 }
 
 // Apply per-tick status effects (currently the burning DoT) and let it kill.
