@@ -351,7 +351,11 @@ const dom = {
   chatLog: el<HTMLElement>("#chatLog"),
   chatForm: el<HTMLFormElement>("#chatForm"),
   chatInput: el<HTMLInputElement>("#chatInput"),
-  respawnButton: el<HTMLButtonElement>("#respawnButton")
+  respawnButton: el<HTMLButtonElement>("#respawnButton"),
+  loadingScreen: el<HTMLElement>("#loadingScreen"),
+  loadingTitle: el<HTMLElement>("#loadingTitle"),
+  loadingFlavor: el<HTMLElement>("#loadingFlavor"),
+  loadingBarFill: el<HTMLElement>("#loadingBarFill")
 };
 
 dom.joinButton.addEventListener("click", () => joinCharacter(dom.nameInput.value, true));
@@ -667,7 +671,17 @@ function update(this: Phaser.Scene, time: number): void {
   if (!latestState || !self()) return;
   const me = self();
   if (!me) return;
+  // A big floor bakes across frames behind the loading screen; hold the rest of
+  // the loop until it finishes so entities never render on a half-built map.
+  if (mapBuild) {
+    stepMapBuild();
+    return;
+  }
   if (currentFloor !== me.floor) {
+    if (isHeavyFloor(me.floor)) {
+      beginMapBuild(me.floor);
+      return;
+    }
     drawMap(me.floor);
     syncedStateVersion = -1;
     clearClickDestination();
@@ -763,26 +777,101 @@ function renderRoster(characters: CharacterRosterEntry[]): void {
   });
 }
 
-function drawMap(floor: number): void {
-  currentFloor = floor;
+// Floors larger than the default footprint take long enough to bake that we
+// build them across frames behind a loading screen instead of freezing.
+function isHeavyFloor(floor: number): boolean {
+  return floorCols(floor) * floorRows(floor) > MAP_COLS * MAP_ROWS;
+}
+
+interface MapBuild {
+  floor: number;
+  rows: string[];
+  mapTexture: Phaser.GameObjects.RenderTexture;
+  rowCount: number;
+  y: number;
+}
+let mapBuild: MapBuild | null = null;
+const MAP_BUILD_BATCH_ROWS = 4;
+
+function startMapTexture(floor: number): { rows: string[]; mapTexture: Phaser.GameObjects.RenderTexture; rowCount: number } {
   mapLayer.removeAll(true);
   const rows = makeFloorTiles(floor);
   const cols = floorCols(floor);
   const rowCount = floorRows(floor);
   scene.cameras.main.setBounds(0, 0, cols * TILE_SIZE, rowCount * TILE_SIZE);
   const mapTexture = scene.add.renderTexture(0, 0, cols * TILE_SIZE, rowCount * TILE_SIZE).setOrigin(0);
-  for (let y = 0; y < rows.length; y += 1) {
+  mapLayer.add(mapTexture);
+  return { rows, mapTexture, rowCount };
+}
+
+function drawTileRows(mapTexture: Phaser.GameObjects.RenderTexture, rows: string[], fromY: number, toY: number): void {
+  for (let y = fromY; y < toY; y += 1) {
     const row = rows[y];
     if (row === undefined) continue;
     for (let x = 0; x < row.length; x += 1) {
-      const tile = row[x] ?? "";
-      mapTexture.draw(tileBaseTexture(tile), x * TILE_SIZE, y * TILE_SIZE);
+      mapTexture.draw(tileBaseTexture(row[x] ?? ""), x * TILE_SIZE, y * TILE_SIZE);
     }
   }
-  mapLayer.add(mapTexture);
+}
+
+// Synchronous bake — used for default-size floors where the freeze is invisible.
+function drawMap(floor: number): void {
+  currentFloor = floor;
+  const { rows, mapTexture, rowCount } = startMapTexture(floor);
+  drawTileRows(mapTexture, rows, 0, rowCount);
   addTileDecorations(rows);
   addComposedMapObjects(floor);
+}
 
+const LOADING_FLAVORS: Record<number, string> = {
+  3: "The canopy thickens. Boughs creak in the wind.",
+  5: "Mist clings to the black water.",
+  6: "Heat shimmers off the red stone.",
+  7: "The sand drinks every footstep.",
+  8: "Salt on the wind, surf in the dark.",
+  9: "The green closes in behind you."
+};
+
+function showLoadingScreen(floor: number): void {
+  dom.loadingTitle.textContent = `Entering ${minimapZoneLabel(floor)}`;
+  dom.loadingFlavor.textContent = LOADING_FLAVORS[floor] ?? "Charting the way ahead";
+  setLoadingProgress(0);
+  dom.loadingScreen.classList.remove("hidden");
+}
+
+function hideLoadingScreen(): void {
+  dom.loadingScreen.classList.add("hidden");
+}
+
+function setLoadingProgress(fraction: number): void {
+  dom.loadingBarFill.style.width = `${Math.round(Math.max(0, Math.min(1, fraction)) * 100)}%`;
+}
+
+// Progressive bake — spreads a big floor's tile draws over several frames so a
+// CSS-animated loading screen stays smooth and a real progress bar advances.
+function beginMapBuild(floor: number): void {
+  showLoadingScreen(floor);
+  const { rows, mapTexture, rowCount } = startMapTexture(floor);
+  mapBuild = { floor, rows, mapTexture, rowCount, y: 0 };
+  setLoadingProgress(0);
+}
+
+function stepMapBuild(): void {
+  if (!mapBuild) return;
+  const build = mapBuild;
+  const end = Math.min(build.y + MAP_BUILD_BATCH_ROWS, build.rows.length);
+  drawTileRows(build.mapTexture, build.rows, build.y, end);
+  build.y = end;
+  setLoadingProgress(end / build.rowCount);
+  if (end >= build.rows.length) {
+    addTileDecorations(build.rows);
+    addComposedMapObjects(build.floor);
+    currentFloor = build.floor;
+    syncedStateVersion = -1;
+    clearClickDestination();
+    mapBuild = null;
+    hideLoadingScreen();
+  }
 }
 
 function syncEntities(): void {
@@ -4223,8 +4312,9 @@ function drawCompass(dir: Direction): void {
   ctx.fill();
 }
 
-function tileBaseTexture(tile: string): string {
-  const map: Record<string, string> = {
+// Hoisted out of tileBaseTexture so a big-floor rebuild doesn't reallocate this
+// map thousands of times.
+const TILE_BASE_TEXTURE: Record<string, string> = {
     "#": "tileRock",
     ".": "tileGrass",
     F: "tileForest",
@@ -4276,8 +4366,10 @@ function tileBaseTexture(tile: string): string {
     E: "tileJungleWall",
     i: "tileJungleRiver",
     K: "tileJungle"
-  };
-  return map[tile] ?? "tileGrass";
+};
+
+function tileBaseTexture(tile: string): string {
+  return TILE_BASE_TEXTURE[tile] ?? "tileGrass";
 }
 
 function textStyle(size: number, color: string): Phaser.Types.GameObjects.Text.TextStyle {
