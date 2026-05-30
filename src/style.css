@@ -275,14 +275,90 @@ canvas {
   font-weight: 800;
 }
 
-.hud {
-  pointer-events: none;
+/* --- Framed viewport (RuneScape-style): world inset, UI in the border ------ */
+#app {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  grid-template-columns: 150px 1fr 258px;
+  grid-template-rows: 128px 1fr 140px;
+  grid-template-areas:
+    "top    top    top"
+    "left   world  right"
+    "bottom bottom bottom";
+  background: #0a0c09;
 }
 
-.hud button,
-.hud input,
-.hud summary {
+#game {
+  grid-area: world;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  box-shadow: inset 0 0 0 2px #20180e, inset 0 0 60px rgba(0, 0, 0, 0.55);
+}
+#game canvas {
+  display: block;
+}
+
+/* The HUD wrapper vanishes so its frame regions become grid items of #app. */
+.hud {
+  display: contents;
+}
+
+.frame {
+  position: relative;
   pointer-events: auto;
+  background: linear-gradient(180deg, rgba(46, 36, 22, 0.55), rgba(15, 12, 8, 0.7)), #15110b;
+  border: 1px solid #2a2014;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+.frame-top {
+  grid-area: top;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 10px 16px;
+  border-bottom-width: 2px;
+}
+.frame-left {
+  grid-area: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 10px;
+}
+.frame-right {
+  grid-area: right;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  overflow-y: auto;
+}
+.frame-bottom {
+  grid-area: bottom;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top-width: 2px;
+}
+
+.frame-vitals {
+  justify-self: start;
+  width: 100%;
+  max-width: 320px;
+}
+.frame-stats {
+  justify-self: center;
+}
+.frame-minimap {
+  position: relative;
+  justify-self: end;
 }
 
 .panel {
@@ -370,9 +446,6 @@ canvas {
 }
 
 .quest-tracker {
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
   color: #f7d486;
   font-size: 13px;
   line-height: 1.35;
@@ -426,10 +499,9 @@ canvas {
 }
 
 .menu-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 12px;
 }
 
 .menu-buttons button,
@@ -722,7 +794,7 @@ canvas {
 }
 
 .net-stats {
-  margin-top: 12px;
+  margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   color: #9dad9f;
@@ -898,28 +970,27 @@ canvas {
 }
 
 .chat {
-  left: 16px;
-  bottom: 16px;
-  width: min(460px, calc(100vw - 32px));
-  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
 }
 
 #chatLog {
-  height: 132px;
-  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   color: #d9e4da;
   font-size: 13px;
-  line-height: 1.38;
+  line-height: 1.36;
 }
 
 #chatForm {
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .hotbar {
-  left: 50%;
-  bottom: 16px;
-  transform: translateX(-50%);
+  align-self: center;
   /* Above the menu backdrop (z-index 6) so items/abilities can be dragged from
      an open inventory or abilities panel and dropped onto the bar, but below the
      center panels (z-index 8) so their controls stay clickable when overlapping. */
@@ -927,7 +998,6 @@ canvas {
   display: grid;
   grid-template-columns: repeat(8, 56px);
   gap: 6px;
-  padding: 8px;
 }
 
 .hotbar-slot {
@@ -1001,17 +1071,10 @@ canvas {
   box-shadow: inset 0 0 0 2px rgba(154, 230, 180, 0.5);
 }
 
-.minimap {
-  right: 16px;
-  bottom: 16px;
-  padding: 8px;
-  z-index: 5;
-}
-
 .minimap-canvas {
   display: block;
-  width: 156px;
-  height: 102px;
+  width: 150px;
+  height: 92px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   image-rendering: pixelated;
@@ -1019,10 +1082,10 @@ canvas {
 
 .compass {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 46px;
-  height: 46px;
+  top: 4px;
+  right: 4px;
+  width: 40px;
+  height: 40px;
   pointer-events: none;
 }
 
@@ -1046,26 +1109,20 @@ canvas {
   text-align: center;
 }
 
-@media (max-width: 760px) {
-  .top-right {
-    right: 16px;
-    top: 132px;
-    width: calc(100vw - 32px);
-    padding: 10px;
+@media (max-width: 880px) {
+  /* Tighten the frame so the inset world keeps as much room as possible. */
+  #app {
+    grid-template-columns: 116px 1fr 116px;
+    grid-template-rows: 112px 1fr 122px;
   }
 
-  .top-left {
-    width: calc(100vw - 32px);
-  }
-
-  .stat-grid {
-    grid-template-columns: repeat(4, auto);
-    gap: 6px 10px;
-    font-size: 12px;
-  }
-
-  .chat {
+  .frame-stats {
     display: none;
+  }
+
+  .minimap-canvas {
+    width: 108px;
+    height: 66px;
   }
 
   .inventory-grid {
@@ -1077,12 +1134,7 @@ canvas {
   }
 
   .hotbar {
-    grid-template-columns: repeat(8, minmax(40px, 1fr));
-    width: calc(100vw - 32px);
-  }
-
-  .minimap {
-    bottom: 92px;
+    grid-template-columns: repeat(8, minmax(34px, 1fr));
   }
 }
 

@@ -30,7 +30,7 @@ test("title screen: modals, embark to login, into the world", async ({ page }) =
   await page.locator('[data-title-action="embark"]').click();
   await page.locator("#nameInput").fill("titleflow");
   await page.locator("#joinButton").click();
-  await expect(page.locator(".top-left")).toBeVisible({ timeout: 8000 });
+  await expect(page.locator("#frameTop")).toBeVisible({ timeout: 8000 });
   await expect(page.locator("#join")).toBeHidden();
   await expect(page.locator("#titleScreen")).toBeHidden();
   console.log("title -> embark (overlay) -> back -> join -> world OK");
