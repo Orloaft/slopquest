@@ -509,6 +509,7 @@ function createPlayer(name: string): ServerPlayer {
     wellFedUntil: 0,
     foodRegenUntil: 0,
     inventory: createInventory(),
+    carriedWeight: 0,
     quests: createQuestState(),
     skills: createSkillState(),
     online: false,
@@ -540,6 +541,7 @@ function hydratePlayer(saved: SavedPlayer): ServerPlayer {
   player.mana = clamp(player.mana, 0, player.maxMana);
   player.quests = normalizeQuestState(player.quests);
   player.inventory = normalizeInventory(player.inventory);
+  refreshCarriedWeight(player);
   player.wellFedUntil = Number(player.wellFedUntil ?? 0);
   player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
   return player;
@@ -556,7 +558,7 @@ function updatePlayers(dt: number, now: number): void {
     const oldY = player.y;
     const spec = classOf(player);
     let speed = spec.speed + (isWellFed(player, now) ? 0.25 : 0);
-    speed *= encumbranceMultiplier(carriedWeight(player));
+    speed *= encumbranceMultiplier(player.carriedWeight);
     if (now < (player.abilityBuffs?.sprint?.until ?? 0)) {
       speed *= ABILITIES["sprint"]?.speedMultiplier ?? 1;
     } else if (player.abilityBuffs?.sprint) {
@@ -2756,7 +2758,7 @@ function serializePlayerPrivate(player: ServerPlayer): PlayerPrivateViewCache {
     skills: cached?.skillsSignature === skillsSignature ? cached.skills : serializeSkills(player),
     classesSignature,
     unlockedClasses: cached?.classesSignature === classesSignature ? cached.unlockedClasses : [...player.unlockedClasses],
-    weight: cached?.inventorySignature === inventorySignature ? cached.weight : Math.round(carriedWeight(player))
+    weight: cached?.inventorySignature === inventorySignature ? cached.weight : Math.round(player.carriedWeight)
   };
   privatePlayerViewCache.set(player, next);
   return next;
@@ -3205,15 +3207,20 @@ function addInventoryItem(player: ServerPlayer, id: string, qty = 1): boolean {
     const existing = player.inventory.find((item) => item?.id === id);
     if (existing) {
       existing.qty += remaining;
+      refreshCarriedWeight(player);
       return true;
     }
   }
+  let mutated = false;
   for (let i = 0; i < player.inventory.length && remaining > 0; i += 1) {
     if (player.inventory[i]) continue;
     player.inventory[i] = { id, qty: stackable ? remaining : 1 };
+    mutated = true;
     remaining -= stackable ? remaining : 1;
   }
-  return remaining === 0;
+  const added = remaining === 0;
+  if (mutated) refreshCarriedWeight(player);
+  return added;
 }
 
 function removeInventoryItem(player: ServerPlayer, id: string, qty = 1): boolean {
@@ -3232,6 +3239,7 @@ function removeInventoryItem(player: ServerPlayer, id: string, qty = 1): boolean
     const slot = player.inventory[i];
     if (slot && slot.qty <= 0) player.inventory[i] = null;
   }
+  refreshCarriedWeight(player);
   return true;
 }
 
@@ -3341,12 +3349,13 @@ function physicalMult(player: ServerPlayer): number {
   return player.weakUntil && performance.now() < player.weakUntil ? player.weakMult ?? 1 : 1;
 }
 
-function carriedWeight(player: ServerPlayer): number {
+function refreshCarriedWeight(player: ServerPlayer): number {
   let total = 0;
   for (const slot of player.inventory) {
     if (!slot) continue;
     total += (ITEMS[slot.id]?.weight ?? 0) * slot.qty;
   }
+  player.carriedWeight = total;
   return total;
 }
 

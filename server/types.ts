@@ -70,6 +70,7 @@ export interface ServerPlayer {
   wellFedUntil: number;
   foodRegenUntil: number;
   inventory: InventorySlot[];
+  carriedWeight: number;
   quests: Record<string, QuestState>;
   skills: Record<string, SkillStateEntry>;
   online: boolean;
