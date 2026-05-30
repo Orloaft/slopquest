@@ -22,18 +22,19 @@
   at: { floor: 3, x: 78.5, y: 47.5 }
   approach: { x: 79.5, y: 47.5 }
 
-# Copper veins in the Searing Badlands dead-end canyon (floor 6).
-- id: mine-6-2-22
+# Ore veins embedded in the Searing Badlands canyon walls (floor 6, 90x60):
+# the vein sits on the cliff face, mined from the floor below it.
+- id: mine-6-5-40
   kind: copper
-  at: { floor: 6, x: 2.5, y: 22.5 }
-  approach: { x: 3.5, y: 22.5 }
+  at: { floor: 6, x: 5.5, y: 40.5 }
+  approach: { x: 5.5, y: 41.5 }
 
-- id: mine-6-2-23
+- id: mine-6-13-40
   kind: copper
-  at: { floor: 6, x: 2.5, y: 23.5 }
-  approach: { x: 3.5, y: 23.5 }
+  at: { floor: 6, x: 13.5, y: 40.5 }
+  approach: { x: 13.5, y: 41.5 }
 
-- id: mine-6-11-22
+- id: mine-6-41-43
   kind: iron
-  at: { floor: 6, x: 11.5, y: 22.5 }
-  approach: { x: 10.5, y: 22.5 }
+  at: { floor: 6, x: 41.5, y: 43.5 }
+  approach: { x: 41.5, y: 44.5 }

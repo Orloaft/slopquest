@@ -92,11 +92,14 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteSwampBoulder", x: 44.6, y: 19.2, w: 44, h: 36 }
   ],
   6: [
-    { key: "spriteTent", x: 43.5, y: 9.6, w: 110, h: 86 }, // Frontier Camp
-    { key: "spriteCampfire", x: 45.5, y: 11.4, w: 54, h: 54 },
-    { key: "spriteBarrels", x: 41.5, y: 8.4, w: 54, h: 42 },
-    { key: "spriteSwampBoulder", x: 12.5, y: 23.2, w: 44, h: 36 },
-    { key: "spriteSwampBoulder", x: 34.5, y: 11.2, w: 40, h: 34 }
+    { key: "spriteTent", x: 70.5, y: 17.2, w: 110, h: 86 }, // Frontier Camp (east clearing)
+    { key: "spriteCampfire", x: 73.5, y: 19.4, w: 54, h: 54 },
+    { key: "spriteBarrels", x: 67.5, y: 14.4, w: 54, h: 42 },
+    // Boulders ringing the terrace pit-gap, so it reads as a tectonic tear.
+    { key: "spriteSwampBoulder", x: 64.5, y: 33.6, w: 44, h: 36 },
+    { key: "spriteSwampBoulder", x: 74.5, y: 33.6, w: 40, h: 34 },
+    // Cluster against the copper-canyon wall.
+    { key: "spriteSwampBoulder", x: 14.5, y: 44.6, w: 44, h: 36 }
   ],
   7: [
     { key: "spriteOutpostTent", x: 23.5, y: 28.6, w: 130, h: 104 }, // Oasis Trade Outpost

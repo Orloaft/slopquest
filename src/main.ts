@@ -636,6 +636,7 @@ function create(this: Phaser.Scene): void {
   // (1536x1024, magenta-keyed) — rust ground/rock/cliff/pit/ramp tiles + a frontier tent.
   makeTileTexture(this, "badlandsTiles", "tileBadlands", 18, 99, 70, 74);
   makeTileTexture(this, "badlandsTiles", "tileBadlandsRock", 180, 99, 73, 74);
+  makeTileTexture(this, "badlandsTiles", "tileMassif", 180, 180, 72, 74); // dark impassable rock bulk behind cliff faces
   makeTileTexture(this, "badlandsTiles", "tileCliff", 528, 100, 68, 82);
   makeTileTexture(this, "badlandsTiles", "tilePit", 1346, 188, 72, 70);
   makeTileTexture(this, "badlandsTiles", "tileRamp", 392, 864, 68, 80);
@@ -3743,6 +3744,7 @@ function minimapTileColor(tile: string): string {
     L: "#c8a86a", // cliff ledge (landmark)
     R: "#b5703a", // badlands ground
     J: "#9a5e30", // badlands rock
+    w: "#5a3318", // massif (impassable dark rock)
     X: "#5c3320", // cliff wall (blocked)
     P: "#140f0d", // pit chasm (blocked, sight-open)
     A: "#c98a4a", // ramp
@@ -4447,6 +4449,7 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     L: "tileSwampDirt",
     R: "tileBadlands",
     J: "tileBadlandsRock",
+    w: "tileMassif",
     X: "tileCliff",
     P: "tilePit",
     A: "tileRamp",

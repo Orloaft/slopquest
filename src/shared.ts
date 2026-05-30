@@ -42,7 +42,7 @@ const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
 };
 // Floors authored directly at the expanded size (their content is already
 // placed in expanded coordinates, so it must NOT be scaled again).
-const AUTHORED_AT_TARGET = new Set<number>([3]);
+const AUTHORED_AT_TARGET = new Set<number>([3, 6]);
 
 export function floorCols(floor: number): number {
   return FLOOR_DIMS[floor]?.cols ?? MAP_COLS;
@@ -463,31 +463,39 @@ export function makeFloorTiles(floor: number): string[] {
   }
 
   if (floor === 6) {
-    // The Searing Badlands: a rust massif of cliff walls carved into winding
-    // canyon floors, with a high terrace over a pit gap and a frontier camp east.
-    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "X"); // cliff massif (impassable)
-    // West entry ravine + portal back to the forest.
-    fillRect(rows, 2, 14, 9, 6, "R");
-    setTile(rows, 1, 16, "D");
-    // Main winding ravine west -> east (kept clear of pits).
-    fillRect(rows, 9, 15, 13, 4, "R"); // lower-west run
-    fillRect(rows, 18, 8, 4, 11, "R"); // north turn
-    fillRect(rows, 18, 8, 14, 4, "R"); // upper run
-    fillRect(rows, 28, 8, 4, 13, "R"); // south turn
-    fillRect(rows, 28, 18, 14, 4, "R"); // lower-east run
-    fillRect(rows, 38, 9, 4, 11, "R"); // north turn to camp
-    fillRect(rows, 38, 6, 11, 8, "R"); // Frontier Camp clearing
-    setTile(rows, 46, 8, "Z"); // cliff ledge -> western Northwatch (one-way)
-    // Dead-end canyon with copper ore, off the lower-west run.
-    fillRect(rows, 3, 21, 8, 4, "R");
-    fillRect(rows, 5, 19, 3, 2, "R"); // connector
-    // High-ground terrace (ranged vantage) reached by a ramp, over a pit gap.
-    fillRect(rows, 23, 23, 8, 4, "R"); // terrace
-    fillRect(rows, 30, 22, 2, 2, "A"); // ramp up from the lower-east run
-    fillRect(rows, 24, 21, 7, 2, "P"); // pit gap below the upper run (LOS-open)
-    // Pit hazards in canyon floors (block movement, not sight).
-    setTile(rows, 23, 9, "P");
-    setTile(rows, 33, 20, "P");
+    // The Searing Badlands (bespoke 90x60) — a deep ravine carved through a dark
+    // rock massif. Pattern: fill massif (w), carve the winding walkable canyon
+    // floors (R), then applyCliffEdges() drops a 1-tile south-facing cliff face
+    // (X) wherever the massif overhangs a floor, so walls read as layered cliffs
+    // instead of a flat-stacked block. Ore clusters against the walls.
+    fillRect(rows, 0, 0, 90, 60, "w");
+    // Main canyon — an S-curve west mouth -> mid -> Frontier Camp (east).
+    fillRect(rows, 1, 30, 16, 7, "R"); // west mouth (forest portal arrives here)
+    fillRect(rows, 12, 16, 7, 21, "R"); // climb north
+    fillRect(rows, 12, 16, 24, 7, "R"); // upper run east
+    fillRect(rows, 30, 16, 7, 22, "R"); // drop south
+    fillRect(rows, 30, 31, 28, 7, "R"); // mid lower run east
+    fillRect(rows, 52, 14, 7, 24, "R"); // climb to the camp
+    fillRect(rows, 52, 12, 30, 11, "R"); // Frontier Camp clearing
+    // Dead-end copper canyon off the west mouth.
+    fillRect(rows, 4, 41, 12, 5, "R");
+    fillRect(rows, 8, 36, 4, 6, "R"); // connector
+    // Iron pocket off the mid lower run.
+    fillRect(rows, 40, 44, 11, 5, "R");
+    fillRect(rows, 44, 37, 4, 8, "R"); // connector
+    // High terrace (ranged vantage) over a pit gap, reached from the camp.
+    fillRect(rows, 64, 26, 12, 6, "R"); // terrace floor
+    fillRect(rows, 70, 22, 3, 5, "R"); // camp -> terrace connector
+    fillRect(rows, 71, 31, 2, 1, "A"); // ramp lip
+    fillRect(rows, 66, 32, 8, 2, "P"); // pit gap the terrace overlooks (LOS-open)
+    // Pit hazards in the canyon floors (block movement, not sight).
+    setTile(rows, 25, 16, "P");
+    setTile(rows, 33, 37, "P");
+    // Portals.
+    setTile(rows, 1, 33, "D"); // west edge -> the forest
+    setTile(rows, 78, 13, "Z"); // cliff ledge -> western Northwatch (one-way)
+    // Layered cliff faces where the massif overhangs a canyon floor.
+    applyCliffEdges(rows);
   }
 
   if (floor === 7) {
@@ -640,6 +648,21 @@ function stampBuildingCollision(rows: string[][], floor: number): void {
   }
 }
 
+// Layered-cliff helper: any massif tile (`w`) sitting directly above a walkable
+// floor (`R`) becomes a 1-tile south-facing cliff face (`X`). Authoring a zone
+// is then just: fill `w`, carve the `R` canyon floors, call this. Faces stay one
+// tile tall (terminating at the lip), exactly per the map-authoring guide.
+function applyCliffEdges(rows: string[][], floorChar = "R", massifChar = "w", faceChar = "X"): void {
+  for (let y = 0; y < rows.length - 1; y += 1) {
+    const row = rows[y];
+    const below = rows[y + 1];
+    if (!row || !below) continue;
+    for (let x = 0; x < row.length; x += 1) {
+      if (row[x] === massifChar && below[x] === floorChar) row[x] = faceChar;
+    }
+  }
+}
+
 function frameFloorEdge(rows: string[][], floor: number): void {
   const edge = FLOOR_EDGE[floor];
   if (!edge) return;
@@ -664,7 +687,7 @@ export function tileAt(floor: number, tx: number, ty: number): string {
 export function isBlockedTile(tile: string): boolean {
   return (
     tile === "#" || tile === "~" || tile === "W" || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o" ||
-    tile === "X" || tile === "P" || // badlands cliff wall + pit
+    tile === "X" || tile === "P" || tile === "w" || // badlands cliff wall + pit + massif
     tile === "Q" || tile === "V" || tile === "U" || // desert quicksand + oasis + ruin
     tile === "I" || tile === "E" || tile === "i" // beach sea + jungle wall + jungle river
   );
@@ -678,7 +701,7 @@ export function isSightBlocked(tile: string): boolean {
   // Open water/quicksand/pits do NOT block sight; solid walls/ruins/jungle do.
   return (
     tile === "#" || tile === "o" || tile === "O" || tile === "f" || tile === "r" || tile === "q" ||
-    tile === "X" || tile === "U" || tile === "E" // badlands cliff, ruin, jungle wall
+    tile === "X" || tile === "w" || tile === "U" || tile === "E" // badlands cliff/massif, ruin, jungle wall
   );
 }
 
@@ -690,8 +713,8 @@ export function isSafeZone(floor: number, x: number, y: number): boolean {
     floor === f && x >= scaleX(f, x1) && x <= scaleX(f, x2) && y >= scaleY(f, y1) && y <= scaleY(f, y2);
   // The Alchemist's Hut clearing in the Sunken Marsh is a safe rest spot.
   if (inRect(5, 3, 5, 13, 15)) return true;
-  // The Frontier Camp clearing in the Searing Badlands.
-  if (inRect(6, 38, 6, 49, 14)) return true;
+  // The Frontier Camp clearing in the Searing Badlands (bespoke 90x60 coords).
+  if (inRect(6, 52, 12, 81, 22)) return true;
   // The Oasis Trade Outpost in the Sunken Desert.
   if (inRect(7, 19, 25, 31, 32)) return true;
   return false;
@@ -728,7 +751,7 @@ function portalForRaw(floor: number, x: number, y: number): Portal | null {
   if (floor === 4 && tile === "S") return { floor: 3, x: 45.5, y: 2.5 };
   if (floor === 5 && tile === "M") return { floor: 3, x: 2.5, y: 30.5 };
   if (floor === 5 && tile === "L") return { floor: 0, x: 25.5, y: 4.5 }; // one-way drop into Waystone
-  if (floor === 3 && tile === "D") return { floor: 6, x: 3.5, y: 16.5 };
+  if (floor === 3 && tile === "D") return { floor: 6, x: 3.5, y: 33.5 };
   if (floor === 6 && tile === "D") return { floor: 3, x: 87.5, y: 29.5 };
   if (floor === 6 && tile === "Z") return { floor: 4, x: 6.5, y: 16.5 }; // one-way drop into Northwatch
   if (floor === 1 && tile === "G") return { floor: 7, x: 25.5, y: 2.5 };

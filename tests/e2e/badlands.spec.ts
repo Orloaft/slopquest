@@ -17,7 +17,7 @@ test("travel loop: forest east portal -> badlands, and the ledge -> Northwatch",
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 88.5, y: 29.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 6, null, { timeout: 8000 });
 
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 46.5), y: scaleY(6, 8.5) });
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 78.5), y: scaleY(6, 13.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 4, null, { timeout: 8000 });
 });
 
@@ -26,8 +26,8 @@ test("a Dust Burrower ambushes from hiding, stunning the player", async ({ page 
   await page.goto("/?e2e");
   await join(page);
 
-  // The burrower at (20,10) is hidden (not in the snapshot) until stepped on.
-  await place(page, 6, 20.5, 10.5);
+  // The upper-run burrower is hidden (not in the snapshot) until stepped on.
+  await place(page, 6, 24.5, 18.5);
   // Stepping onto it triggers the ambush: it emerges and stuns.
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.stunned ?? 0) > 0, null, { timeout: 8000 });
   await page.waitForFunction(() => (window.__TIB_E2E__?.getState()?.monsters ?? []).some((m) => m.type === "dust_burrower"));
@@ -38,13 +38,13 @@ test("copper ore is minable in the badlands dead-end canyon", async ({ page }) =
   await page.goto("/?e2e");
   await join(page);
 
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "pickaxe", qty: 1 }], floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 3.5), y: scaleY(6, 22.5) });
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "pickaxe", qty: 1 }], floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 5.5), y: scaleY(6, 41.5) });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
     return Boolean(me && me.floor === 6 && (me.inventory ?? []).some((i) => i?.id === "pickaxe"));
   });
   const before = await page.evaluate(() => window.__TIB_E2E__?.self()?.skills.find((s) => s.id === "mining")?.xp ?? 0);
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "mineNode", id: "mine-6-2-22" }));
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "mineNode", id: "mine-6-5-40" }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.action?.type === "mining");
   await page.waitForFunction(
     (b) => {

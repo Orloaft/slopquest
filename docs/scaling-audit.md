@@ -89,6 +89,86 @@ fix is to send those only to their owner.
 
 ---
 
+## Scaling axis 2 — a 100× world (the north star)
+
+> Current state is an **MVP**. The stated goal is a world **100× the current size or larger**, with
+> **many more items, enemies, and abilities**. Everything above this section is about scaling
+> _players_; that's a different axis from scaling the _world_, and the codebase handles the two very
+> differently.
+
+You're scaling two nearly-independent things:
+
+| Axis | What it stresses | How the current design holds up |
+|---|---|---|
+| **More players** | Outbound bandwidth, serialization | **Already well-designed.** Interest management bounds each player's cost to _local_ density, not headcount. One flaw (fix #1). |
+| **100× bigger world + content** | Per-tick CPU, RAM, client GPU/load time | **MVP shortcuts will hard-block it.** Several systems are O(whole world) per tick. |
+
+**Key insight: bandwidth does _not_ get worse just because the world is 100× bigger.** A player still
+only sees ~18 tiles around them, so per-player traffic and the Option-B hosting/egress math are
+unchanged — _as long as you don't cram more players into one spot_. The interest-management
+architecture is the part of the MVP that is genuinely future-proof. **Keep it sacred: never assume
+the client holds the whole world.**
+
+### What a 100× world breaks (invisible at MVP scale, fatal at ~138k trees / ~5,700 monsters)
+
+These systems touch **every entity in the world every tick**:
+
+1. **🔴 `rebuildSpatialIndex()` every tick** (`server/index.ts:2627`) — re-inserts _every_ entity,
+   dominated by static trees. Hundreds of thousands of map inserts 20–40×/s at 100×. The #1
+   showstopper. → Incremental: static layers built once, only moving entities re-bucketed.
+2. **🔴 Global per-tick iteration** — `updateMonsters` (`:432`) ticks _all_ monsters;
+   `updateTreeNodes` (`:1831`) scans _all_ trees every tick just to check respawn timers (~138k
+   useless iterations/tick at 100×); `updateNpcs`/`updateFires` likewise. → **Active-region
+   simulation** (only tick regions with players in/near them) + **event-scheduled respawns** (a timer
+   queue, not a full scan). This is the biggest architectural shift the 100× goal forces.
+3. **🟠 One server object per tree, all resident in memory** — ~138k+ objects plus per-tick
+   index-rebuild allocation churn → GC pressure; pushes past a 1–2 GB box. → Derive static features
+   per-chunk on demand rather than instantiating the whole world.
+4. **🔴 Client renders a whole floor to a single RenderTexture** (`main.ts` `drawMap`) and
+   **preloads every asset up front** (~70-texture `preload`). A 100× floor exceeds GPU texture-size
+   limits + VRAM; preloading thousands of item/enemy textures blows load time. → **Chunked/culled
+   tile rendering** + **region-streamed asset loading**. The single biggest piece of work in the
+   roadmap.
+5. **🟠 Persistence & world state** — whole-file `players.json` saves don't scale, and a large
+   _persistent_ world implies persistent world state (chopped/mined/built) that today lives only in
+   memory. → Real datastore.
+
+### What the content explosion breaks separately (items / enemies / abilities)
+
+- **Lookups are fine** — `ITEMS[id]` / `MONSTERS[type]` / `ABILITIES[id]` are O(1) at any catalog size.
+- **🟠 Abilities are the exception.** `useClassAbility` (`:646`) is a hand-written `if (id === …)`
+  branch per ability — "many more abilities" makes it an unmaintainable monolith. This is a _design_
+  problem, not perf: move abilities to **data-driven effect compositions** (a small set of primitives
+  — damage, AoE, buff, dash, DoT — assembled in YAML). Worth doing **early**; every hand-coded
+  ability now is one you'll rewrite later.
+- A few hot loops walk whole catalogs (`updateQuestProgress` over all quests per kill; per-tick
+  skill/quest serialization). Index quests by zone/type; dirty flags (fix #2) cover the rest.
+
+### Do now (cheap) vs defer (expensive)
+
+**Cheap "don't paint into a corner" moves — worth doing while the world is still small:**
+- [ ] Keep **everything data-driven** — and pull **abilities into data before** the catalog grows.
+- [ ] Introduce a **chunk/region coordinate concept** in the world model even with one process. If
+      "the world is addressable by chunk" is true early, both chunked client rendering _and_ later
+      zone-sharding become natural instead of a rewrite.
+- [ ] Put **"entities near X" behind the spatial-index API** so its implementation can evolve
+      (flat map → quadtree/chunked) without touching callers.
+- [ ] Apply **fix #1** — required on both axes.
+
+**Defer until the world/content actually grows — do NOT pre-build:**
+- [ ] Active-region simulation + incremental spatial index — _first thing to bite_ as monster/tree
+      counts climb.
+- [ ] Chunked client rendering + streamed assets — when a floor outgrows one screen-sized texture.
+- [ ] Zone/process sharding + real DB (Stage 3) — when one core can't tick the populated world, well
+      past 50 players on a big map. Floors are already independent → natural shard seam.
+
+**Bottom line:** the MVP is the right thing to be running. Make the cheap choices above now to keep
+the 100× door open; defer the heavy machinery until content demands it. The thing that eventually
+forces a bigger _architecture_ (not a bigger box — a _sharded_ one) is world size × entity density,
+not player count.
+
+---
+
 ## Staged scaling plan
 
 **Stage 0 — now → ~12 players.** Holds today as long as players stay spread out. The cliff is
@@ -104,6 +184,11 @@ _crowding_, not headcount.
 After Stage 1, 50 co-located players cost ~9 MB/s (~70 Mbps) outbound and a sub-ms snapshot pass —
 comfortably one small cloud VM. **Do not host off a home uplink**; even post-fix, 50 players want a
 datacenter NIC.
+
+> ⚠️ This "one small VM carries 50" conclusion is for the **current MVP world size**. On a 100×
+> world the bottleneck flips from bandwidth to single-core tick time — see
+> [Scaling axis 2](#scaling-axis-2--a-100-world-the-north-star). That conclusion only holds once
+> active-region simulation exists.
 
 **Stage 2 — headroom (only if Stage 1 telemetry still shows pressure):** delta encoding for world
 entities; binary/short-key protocol (JSON key names dominate small payloads); `bufferedAmount`
