@@ -122,7 +122,6 @@ interface ResourceRespawn {
 }
 
 interface ActiveRegions {
-  floors: Set<number>;
   cells: Set<string>;
 }
 
@@ -276,10 +275,13 @@ const monsters = new Map<string, ServerMonster>();
 const monstersByFloor = new Map<number, Set<ServerMonster>>();
 const monstersByCell = new Map<string, Set<ServerMonster>>();
 const corpses = new Map<string, Corpse>();
+const corpsesByCell = new Map<string, Set<Corpse>>();
 const treeNodes = new Map<string, TreeNodeRuntime>();
 const herbNodes = new Map<string, HerbNodeRuntime>();
 const fires = new Map<string, Fire>();
+const firesByCell = new Map<string, Set<Fire>>();
 const npcs = new Map<string, NpcRuntime>();
+const npcsByCell = new Map<string, Set<NpcRuntime>>();
 let spatial: SpatialIndex = createSpatialIndex();
 let staticSpatial: StaticSpatialIndex = createStaticSpatialIndex();
 const publicPlayerViewCache = new Map<string, PlayerView>();
@@ -715,9 +717,8 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
 }
 
 function occupiedRegions(): ActiveRegions {
-  const regions: ActiveRegions = { floors: new Set(), cells: new Set() };
+  const regions: ActiveRegions = { cells: new Set() };
   for (const { player } of clients.values()) {
-    regions.floors.add(player.floor);
     markActiveRegion(regions, player.floor, player.x, player.y, ACTIVE_REGION_RADIUS);
   }
   return regions;
@@ -733,10 +734,6 @@ function markActiveRegion(regions: ActiveRegions, floor: number, x: number, y: n
       regions.cells.add(`${floor}:${cx}:${cy}`);
     }
   }
-}
-
-function isRegionActive(regions: ActiveRegions, floor: number, x: number, y: number): boolean {
-  return regions.cells.has(spatialKey(floor, x, y));
 }
 
 // Apply per-tick status effects (currently the burning DoT) and let it kill.
@@ -1056,6 +1053,7 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
     items: [...rollQuestDrops(monster.type), ...rollPotionDrop(monster.type)]
   };
   corpses.set(corpse.id, corpse);
+  addToCellIndex(corpsesByCell, corpse);
   event("system", `${player.name} defeated ${catalog.name}.`);
 }
 
@@ -1120,13 +1118,14 @@ function collectCorpse(player: ServerPlayer, corpse: Corpse): void {
   }
   player.gold += corpse.gold;
   corpses.delete(corpse.id);
+  removeFromCellIndex(corpsesByCell, corpse);
   removeFromSpatial(spatial.corpses, corpse);
 }
 
 function nearbyNpcOfRole(player: ServerPlayer, role: string): NpcRuntime | null {
   let best: NpcRuntime | null = null;
   let bestDist = Infinity;
-  for (const npc of npcs.values()) {
+  for (const npc of queryCellIndex(npcsByCell, player.floor, player.x, player.y, 2)) {
     if (npc.role !== role || npc.floor !== player.floor) continue;
     const d = distance(player, npc);
     if (d <= 2 && d < bestDist) {
@@ -1629,6 +1628,7 @@ function useVerbLightFire(player: ServerPlayer, item: Item, ctx: UseItemCtx): vo
     owner: player.name
   };
   fires.set(fire.id, fire);
+  addToCellIndex(firesByCell, fire);
   if (u.skill && choice.xp) addSkillXp(player, u.skill, choice.xp);
   event("effect", "fire", fire.x, fire.y, fire.floor, null, player.id, fire.id);
   event("float", "Fire lit", fire.x, fire.y, fire.floor, "#ffb35c");
@@ -1920,13 +1920,15 @@ function dropItem(floor: number, x: number, y: number, items: Array<{ id: string
     items
   };
   corpses.set(drop.id, drop);
+  addToCellIndex(corpsesByCell, drop);
   addToSpatial(spatial.corpses, drop);
 }
 
 function spawnNpcs(): void {
   for (const npc of NPCS) {
+    let runtime: NpcRuntime;
     if (npc.role === "quest") {
-      npcs.set(npc.id, {
+      runtime = {
         id: npc.id,
         name: npc.name,
         role: "quest",
@@ -1940,9 +1942,9 @@ function spawnNpcs(): void {
         wanderTarget: null,
         wanderNextAt: performance.now() + 1400,
         dialogue: npc.dialogue
-      });
+      };
     } else {
-      npcs.set(npc.id, {
+      runtime = {
         id: npc.id,
         name: npc.name,
         role: npc.role,
@@ -1952,8 +1954,10 @@ function spawnNpcs(): void {
         dir: "down",
         moving: false,
         dialogue: npc.dialogue
-      });
+      };
     }
+    npcs.set(npc.id, runtime);
+    addToCellIndex(npcsByCell, runtime);
   }
 }
 
@@ -2003,22 +2007,32 @@ function treeTypeForTile(floor: number, x: number, y: number): string {
 }
 
 function updateNpcs(dt: number, now: number, activeRegions: ActiveRegions): void {
-  for (const npc of npcs.values()) {
-    if (!isRegionActive(activeRegions, npc.floor, npc.x, npc.y)) continue;
-    const { homeX, homeY } = npc;
-    if (homeX == null || homeY == null) continue;
-    npc.moving = false;
-    if (now >= (npc.wanderNextAt ?? 0) && !npc.wanderTarget) {
-      npc.wanderTarget = pickNpcWanderTarget(npc);
-      npc.wanderNextAt = now + roll([1800, 4200]);
+  const visited = new Set<NpcRuntime>();
+  for (const cell of activeRegions.cells) {
+    const cellNpcs = npcsByCell.get(cell);
+    if (!cellNpcs) continue;
+    for (const npc of cellNpcs) {
+      if (visited.has(npc)) continue;
+      visited.add(npc);
+      const { homeX, homeY } = npc;
+      if (homeX == null || homeY == null) continue;
+      npc.moving = false;
+      if (now >= (npc.wanderNextAt ?? 0) && !npc.wanderTarget) {
+        npc.wanderTarget = pickNpcWanderTarget(npc);
+        npc.wanderNextAt = now + roll([1800, 4200]);
+      }
+      if (!npc.wanderTarget) continue;
+      const dist = distance(npc, npc.wanderTarget);
+      if (dist < 0.18) {
+        npc.wanderTarget = null;
+        continue;
+      }
+      const oldFloor = npc.floor;
+      const oldX = npc.x;
+      const oldY = npc.y;
+      moveEntity(npc, ((npc.wanderTarget.x - npc.x) / dist) * 1.35 * dt, ((npc.wanderTarget.y - npc.y) / dist) * 1.35 * dt);
+      updateCellIndex(npcsByCell, npc, oldFloor, oldX, oldY);
     }
-    if (!npc.wanderTarget) continue;
-    const dist = distance(npc, npc.wanderTarget);
-    if (dist < 0.18) {
-      npc.wanderTarget = null;
-      continue;
-    }
-    moveEntity(npc, ((npc.wanderTarget.x - npc.x) / dist) * 1.35 * dt, ((npc.wanderTarget.y - npc.y) / dist) * 1.35 * dt);
   }
 }
 
@@ -2052,9 +2066,17 @@ function scheduleResourceRespawn(kind: ResourceRespawnKind, id: string, at: numb
 }
 
 function updateFires(now: number, activeRegions: ActiveRegions): void {
-  for (const [id, fire] of fires) {
-    if (!isRegionActive(activeRegions, fire.floor, fire.x, fire.y)) continue;
-    if (now >= fire.expiresAt) fires.delete(id);
+  const visited = new Set<Fire>();
+  for (const cell of activeRegions.cells) {
+    const cellFires = firesByCell.get(cell);
+    if (!cellFires) continue;
+    for (const fire of cellFires) {
+      if (visited.has(fire)) continue;
+      visited.add(fire);
+      if (now < fire.expiresAt) continue;
+      fires.delete(fire.id);
+      removeFromCellIndex(firesByCell, fire);
+    }
   }
 }
 
@@ -2148,6 +2170,42 @@ function updateMonsterCell(monster: ServerMonster, oldFloor: number, oldX: numbe
   if (spatialKey(oldFloor, oldX, oldY) === spatialKey(monster.floor, monster.x, monster.y)) return;
   removeMonsterFromCell(monster, oldFloor, oldX, oldY);
   addMonsterToCell(monster);
+}
+
+function addToCellIndex<T extends Positioned>(index: Map<string, Set<T>>, entity: T): void {
+  const key = spatialKey(entity.floor, entity.x, entity.y);
+  const cellSet = index.get(key) ?? new Set<T>();
+  cellSet.add(entity);
+  index.set(key, cellSet);
+}
+
+function removeFromCellIndex<T extends Positioned>(index: Map<string, Set<T>>, entity: T, floor = entity.floor, x = entity.x, y = entity.y): void {
+  const key = spatialKey(floor, x, y);
+  const cellSet = index.get(key);
+  if (!cellSet) return;
+  cellSet.delete(entity);
+  if (!cellSet.size) index.delete(key);
+}
+
+function updateCellIndex<T extends Positioned>(index: Map<string, Set<T>>, entity: T, oldFloor: number, oldX: number, oldY: number): void {
+  if (spatialKey(oldFloor, oldX, oldY) === spatialKey(entity.floor, entity.x, entity.y)) return;
+  removeFromCellIndex(index, entity, oldFloor, oldX, oldY);
+  addToCellIndex(index, entity);
+}
+
+function queryCellIndex<T extends Positioned>(index: Map<string, Set<T>>, floor: number, x: number, y: number, radius: number): T[] {
+  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
+  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
+  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
+  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
+  const results: T[] = [];
+  for (let cy = minCy; cy <= maxCy; cy += 1) {
+    for (let cx = minCx; cx <= maxCx; cx += 1) {
+      const cellSet = index.get(`${floor}:${cx}:${cy}`);
+      if (cellSet) results.push(...cellSet);
+    }
+  }
+  return results;
 }
 
 function wanderMonster(monster: ServerMonster, catalog: { speed: number }, dt: number, now: number): void {
@@ -3169,7 +3227,7 @@ function firePlacementAtPlayer(player: ServerPlayer): Vec2 | null {
 }
 
 function fireTooClose(floor: number, x: number, y: number): boolean {
-  return [...fires.values()].some((fire) => fire.floor === floor && Math.hypot(fire.x - x, fire.y - y) < 1.2);
+  return queryCellIndex(firesByCell, floor, x, y, 1.2).some((fire) => fire.floor === floor && Math.hypot(fire.x - x, fire.y - y) < 1.2);
 }
 
 function isWellFed(player: ServerPlayer, now = performance.now()): boolean {
@@ -3293,14 +3351,20 @@ function rebuildSpatialIndex(activeRegions: ActiveRegions): void {
       if (!monster.deadUntil) addToSpatial(spatial.monsters, monster);
     }
   }
-  for (const corpse of corpses.values()) {
-    if (isRegionActive(activeRegions, corpse.floor, corpse.x, corpse.y)) addToSpatial(spatial.corpses, corpse);
+  for (const cell of activeRegions.cells) {
+    const cellCorpses = corpsesByCell.get(cell);
+    if (!cellCorpses) continue;
+    for (const corpse of cellCorpses) addToSpatial(spatial.corpses, corpse);
   }
-  for (const npc of npcs.values()) {
-    if (isRegionActive(activeRegions, npc.floor, npc.x, npc.y)) addToSpatial(spatial.npcs, npc);
+  for (const cell of activeRegions.cells) {
+    const cellNpcs = npcsByCell.get(cell);
+    if (!cellNpcs) continue;
+    for (const npc of cellNpcs) addToSpatial(spatial.npcs, npc);
   }
-  for (const fire of fires.values()) {
-    if (isRegionActive(activeRegions, fire.floor, fire.x, fire.y)) addToSpatial(spatial.fires, fire);
+  for (const cell of activeRegions.cells) {
+    const cellFires = firesByCell.get(cell);
+    if (!cellFires) continue;
+    for (const fire of cellFires) addToSpatial(spatial.fires, fire);
   }
   spatial.cellCount =
     spatial.players.size +
