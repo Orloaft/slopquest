@@ -34,7 +34,7 @@ import {
   xpForLevel,
   zoneAt
 } from "../src/shared.ts";
-import type { ClassSpec } from "../src/shared.ts";
+import type { AbilitySpec, ClassSpec } from "../src/shared.ts";
 import type {
   Item,
   MonsterSpawn,
@@ -92,6 +92,13 @@ import type {
 
 type FishingNodeRuntime = (typeof FISHING_NODES)[number];
 type MiningNodeRuntime = (typeof MINING_NODES)[number];
+type ClassAbilityHandler = (
+  player: ServerPlayer,
+  id: string,
+  spec: AbilitySpec,
+  now: number,
+  manaCost: number
+) => void;
 
 interface StaticSpatialIndex {
   trees: Map<string, TreeNodeRuntime[]>;
@@ -947,125 +954,9 @@ function useClassAbility(player: ServerPlayer, id: string): void {
   if (now < (player.abilityCooldowns[id] ?? 0)) return;
   const manaCost = spec.manaCost ?? 0;
 
-  // --- Vanguard: Provoke — taunt nearby monsters onto the player. ---
-  if (id === "provoke") {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    const taunted = monstersInRadius(player.floor, player.x, player.y, 1.8);
-    for (const monster of taunted) {
-      monster.tauntUntil = now + spec.durationMs;
-      monster.tauntBy = player.id;
-    }
-    event("effect", "flare", player.x, player.y, player.floor, "#ffcf6b", player.id);
-    event("float", taunted.length ? "Provoke!" : "Provoke", player.x, player.y - 0.5, player.floor, "#ffcf6b");
-    return;
-  }
-
-  // --- Vanguard: Iron Clad — damage-reduction stance (with a slow). ---
-  if (id === "iron_clad") {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    player.abilityBuffs.ironClad = { until: now + spec.durationMs };
-    event("float", "Iron Clad", player.x, player.y - 0.5, player.floor, "#bcd3e0");
-    return;
-  }
-
-  // --- Archer: Fleet Foot — cleanse + speed burst. ---
-  if (id === "fleet_foot") {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    player.abilityBuffs.fleetFoot = { until: now + spec.durationMs };
-    player.slowUntil = 0; // cleanse active movement slows
-    event("float", "Fleet Foot", player.x, player.y - 0.5, player.floor, "#9ae6b4");
-    return;
-  }
-
-  // --- Thief: Quick Step — short directional dash. ---
-  if (id === "quick_step") {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    dashPlayer(player, 2);
-    event("float", "Quick Step", player.x, player.y - 0.5, player.floor, "#e0c8ff");
-    return;
-  }
-
-  // --- Apothecary: Healing Poultice — instant heal + heal-over-time. ---
-  if (id === "healing_poultice") {
-    if (player.mana < manaCost || player.hp >= player.maxHp) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    const instant = Math.max(1, Math.round(player.maxHp * (spec.healFraction ?? 0)) + skillLevel(player, "alchemy"));
-    player.hp = clamp(player.hp + instant, 0, player.maxHp);
-    const overTime = Math.max(1, Math.round(player.maxHp * 0.12));
-    player.abilityBuffs.second_wind = { until: now + spec.durationMs, healPerMs: overTime / spec.durationMs };
-    addSkillXp(player, "alchemy", 4);
-    event("float", `+${instant} HP`, player.x, player.y - 0.5, player.floor, "#9ee6b1");
-    return;
-  }
-
-  // --- Mage: Flame Burst — 3x3 AoE in front + burning DoT. ---
-  if (id === "flame_burst") {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    const dir = DIR_VECTORS[player.dir];
-    const cx = player.x + dir.x * 1.5;
-    const cy = player.y + dir.y * 1.5;
-    for (const monster of monstersInRadius(player.floor, cx, cy, 1.6)) {
-      const damage = roll(spec.damage ?? [10, 16]) + skillLevel(player, "magic") + wellFedPower(player);
-      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
-      damageMonster(player, monster, damage, "flare");
-      if (!monster.deadUntil) applyBurn(player, monster, spec.durationMs, 3);
-    }
-    event("effect", "flare", cx, cy, player.floor, "#ff8a3d", player.id);
-    event("float", "Flame Burst", cx, cy, player.floor, "#ff8a3d");
-    return;
-  }
-
-  // --- Mage: Frost Nova — ring AoE + freeze (broken by later damage). ---
-  if (id === "frost_nova") {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    for (const monster of monstersInRadius(player.floor, player.x, player.y, 2.2)) {
-      const damage = roll(spec.damage ?? [6, 10]) + skillLevel(player, "magic") + wellFedPower(player);
-      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
-      damageMonster(player, monster, damage, "frost");
-      if (!monster.deadUntil) monster.freezeUntil = now + spec.durationMs;
-    }
-    event("effect", "frost", player.x, player.y, player.floor, "#a8e6ff", player.id);
-    event("float", "Frost Nova", player.x, player.y - 0.5, player.floor, "#a8e6ff");
-    return;
-  }
-
-  // --- Apothecary: Volatile Flask — thrown 3x3 toxic burst + accuracy debuff. ---
-  if (id === "volatile_flask") {
-    if (player.mana < manaCost) return;
-    const target = player.targetId == null ? undefined : monsters.get(player.targetId);
-    let tx: number;
-    let ty: number;
-    if (target && !target.deadUntil && target.floor === player.floor && distance(player, target) <= (spec.range ?? 4)) {
-      tx = target.x;
-      ty = target.y;
-    } else {
-      const dir = DIR_VECTORS[player.dir];
-      tx = player.x + dir.x * 2.5;
-      ty = player.y + dir.y * 2.5;
-    }
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    event("projectile", "flask", tx, ty, player.floor, "#a6e06b", player.id, null, { fromX: player.x, fromY: player.y });
-    for (const monster of monstersInRadius(player.floor, tx, ty, 1.6)) {
-      const damage = roll(spec.damage ?? [10, 16]) + skillLevel(player, "magic") + wellFedPower(player);
-      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
-      damageMonster(player, monster, damage, "flare");
-      if (!monster.deadUntil) monster.inaccurateUntil = now + spec.durationMs;
-    }
-    event("float", "Volatile Flask", tx, ty, player.floor, "#a6e06b");
+  const handler = CLASS_ABILITY_HANDLERS[id];
+  if (handler) {
+    handler(player, id, spec, now, manaCost);
     return;
   }
 
@@ -1100,13 +991,122 @@ function useClassAbility(player: ServerPlayer, id: string): void {
     return;
   }
 
-  if (id === "sprint") {
+}
+
+const CLASS_ABILITY_HANDLERS: Record<string, ClassAbilityHandler> = {
+  provoke(player, id, spec, now, manaCost) {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    const taunted = monstersInRadius(player.floor, player.x, player.y, 1.8);
+    for (const monster of taunted) {
+      monster.tauntUntil = now + spec.durationMs;
+      monster.tauntBy = player.id;
+    }
+    event("effect", "flare", player.x, player.y, player.floor, "#ffcf6b", player.id);
+    event("float", taunted.length ? "Provoke!" : "Provoke", player.x, player.y - 0.5, player.floor, "#ffcf6b");
+  },
+
+  iron_clad(player, id, spec, now, manaCost) {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    player.abilityBuffs.ironClad = { until: now + spec.durationMs };
+    event("float", "Iron Clad", player.x, player.y - 0.5, player.floor, "#bcd3e0");
+  },
+
+  fleet_foot(player, id, spec, now, manaCost) {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    player.abilityBuffs.fleetFoot = { until: now + spec.durationMs };
+    player.slowUntil = 0;
+    event("float", "Fleet Foot", player.x, player.y - 0.5, player.floor, "#9ae6b4");
+  },
+
+  quick_step(player, id, spec, now, manaCost) {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    dashPlayer(player, 2);
+    event("float", "Quick Step", player.x, player.y - 0.5, player.floor, "#e0c8ff");
+  },
+
+  healing_poultice(player, id, spec, now, manaCost) {
+    if (player.mana < manaCost || player.hp >= player.maxHp) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    const instant = Math.max(1, Math.round(player.maxHp * (spec.healFraction ?? 0)) + skillLevel(player, "alchemy"));
+    player.hp = clamp(player.hp + instant, 0, player.maxHp);
+    const overTime = Math.max(1, Math.round(player.maxHp * 0.12));
+    player.abilityBuffs.second_wind = { until: now + spec.durationMs, healPerMs: overTime / spec.durationMs };
+    addSkillXp(player, "alchemy", 4);
+    event("float", `+${instant} HP`, player.x, player.y - 0.5, player.floor, "#9ee6b1");
+  },
+
+  flame_burst(player, id, spec, now, manaCost) {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    const dir = DIR_VECTORS[player.dir];
+    const cx = player.x + dir.x * 1.5;
+    const cy = player.y + dir.y * 1.5;
+    for (const monster of monstersInRadius(player.floor, cx, cy, 1.6)) {
+      const damage = roll(spec.damage ?? [10, 16]) + skillLevel(player, "magic") + wellFedPower(player);
+      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
+      damageMonster(player, monster, damage, "flare");
+      if (!monster.deadUntil) applyBurn(player, monster, spec.durationMs, 3);
+    }
+    event("effect", "flare", cx, cy, player.floor, "#ff8a3d", player.id);
+    event("float", "Flame Burst", cx, cy, player.floor, "#ff8a3d");
+  },
+
+  frost_nova(player, id, spec, now, manaCost) {
+    if (player.mana < manaCost) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    for (const monster of monstersInRadius(player.floor, player.x, player.y, 2.2)) {
+      const damage = roll(spec.damage ?? [6, 10]) + skillLevel(player, "magic") + wellFedPower(player);
+      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
+      damageMonster(player, monster, damage, "frost");
+      if (!monster.deadUntil) monster.freezeUntil = now + spec.durationMs;
+    }
+    event("effect", "frost", player.x, player.y, player.floor, "#a8e6ff", player.id);
+    event("float", "Frost Nova", player.x, player.y - 0.5, player.floor, "#a8e6ff");
+  },
+
+  volatile_flask(player, id, spec, now, manaCost) {
+    if (player.mana < manaCost) return;
+    const target = player.targetId == null ? undefined : monsters.get(player.targetId);
+    let tx: number;
+    let ty: number;
+    if (target && !target.deadUntil && target.floor === player.floor && distance(player, target) <= (spec.range ?? 4)) {
+      tx = target.x;
+      ty = target.y;
+    } else {
+      const dir = DIR_VECTORS[player.dir];
+      tx = player.x + dir.x * 2.5;
+      ty = player.y + dir.y * 2.5;
+    }
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= manaCost;
+    event("projectile", "flask", tx, ty, player.floor, "#a6e06b", player.id, null, { fromX: player.x, fromY: player.y });
+    for (const monster of monstersInRadius(player.floor, tx, ty, 1.6)) {
+      const damage = roll(spec.damage ?? [10, 16]) + skillLevel(player, "magic") + wellFedPower(player);
+      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
+      damageMonster(player, monster, damage, "flare");
+      if (!monster.deadUntil) monster.inaccurateUntil = now + spec.durationMs;
+    }
+    event("float", "Volatile Flask", tx, ty, player.floor, "#a6e06b");
+  },
+
+  sprint(player, id, spec, now) {
     player.abilityCooldowns[id] = now + spec.cooldownMs;
     player.abilityBuffs.sprint = { until: now + spec.durationMs };
     event("float", `${player.name} sprints.`, player.x, player.y, player.floor, "#9ae6b4");
-    return;
-  }
-  if (id === "second_wind") {
+  },
+
+  second_wind(player, id, spec, now) {
     if (player.hp >= player.maxHp) return;
     const totalHeal = Math.max(1, Math.round(player.maxHp * (spec.healFraction ?? 0)));
     player.abilityCooldowns[id] = now + spec.cooldownMs;
@@ -1116,7 +1116,7 @@ function useClassAbility(player: ServerPlayer, id: string): void {
     };
     event("float", `${player.name} catches a second wind.`, player.x, player.y, player.floor, "#f7d486");
   }
-}
+};
 
 function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: number, kind: string): void {
   const armor = MONSTERS[monster.type]?.armor ?? 0;
