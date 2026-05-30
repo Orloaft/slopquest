@@ -279,8 +279,11 @@ const FORAGE_XP = 12;
 // How long a monster's attack pose is broadcast as active (drives the bespoke
 // client attack animation for enemies that have one).
 const MONSTER_ATTACK_ANIM_MS = 480;
-const TREE_SNAPSHOT_EVERY = 5;
-const SNAPSHOT_FULL_EVERY = 20;
+// WebSocket delivery is ordered/reliable, so full snapshots are a recovery guard
+// rather than the normal data path. Keep them infrequent enough that crowded
+// towns and tree-dense zones stay delta-dominated at scale.
+const TREE_SNAPSHOT_EVERY = positiveIntEnv("TIB_TREE_SNAPSHOT_EVERY", E2E_TEST ? 5 : 10);
+const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 80);
 const SOCKET_BACKPRESSURE_BYTES = 512 * 1024;
 mkdirSync(DATA_DIR, { recursive: true });
 mkdirSync(PLAYER_DIR, { recursive: true });
@@ -3561,6 +3564,11 @@ function roll([min, max]: Range): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function positiveIntEnv(name: string, fallback: number): number {
+  const value = Math.floor(Number(process.env[name] ?? fallback));
+  return Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
 function round(value: number): number {
