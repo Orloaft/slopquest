@@ -174,7 +174,7 @@ interface MiningEntityView extends Phaser.GameObjects.Container {
 }
 
 interface HerbEntityView extends Phaser.GameObjects.Container {
-  bloom: Phaser.GameObjects.Arc;
+  bloom: Phaser.GameObjects.Arc | Phaser.GameObjects.Image;
 }
 
 interface FireEntityView extends Phaser.GameObjects.Container {
@@ -525,6 +525,9 @@ function preload(this: Phaser.Scene): void {
   this.load.image("waterFishingSpots", "/water-fishing-spots.png");
   this.load.image("oreNodeSheet", "/ore-rock-gathering-nodes.png");
   this.load.image("spriteCampfire", "/campfire.png");
+  this.load.image("herbBloom", "/herb-bloom.png");
+  this.load.image("herbField", "/herb-field.png");
+  this.load.image("herbTidal", "/herb-tidal.png");
 }
 
 function create(this: Phaser.Scene): void {
@@ -1084,26 +1087,56 @@ function createMiningNodeView(node: MiningNodeView): MiningEntityView {
   return view;
 }
 
+// Pixel-art plant per node: the gated Mire-Lotus keeps its swamp sprite, beach
+// Tidal Blooms read blue, and ordinary herb patches alternate white/yellow
+// blooms for natural variety. Mineral nodes (quartz) fall back to a sketch.
+const HERB_SPRITES: Record<string, { key: string; w: number; h: number }> = {
+  herbBloom: { key: "herbBloom", w: 30, h: 40 },
+  herbField: { key: "herbField", w: 28, h: 44 },
+  herbTidal: { key: "herbTidal", w: 29, h: 40 }
+};
+
+function herbPlantSprite(node: HerbNodeView): { key: string; w: number; h: number } | null {
+  const label = node.label.toLowerCase();
+  if (label.includes("tidal")) return HERB_SPRITES.herbTidal ?? null;
+  if (label.includes("quartz")) return null; // a mineral, not a plant
+  let hash = 0;
+  for (let i = 0; i < node.id.length; i += 1) hash = (hash + node.id.charCodeAt(i)) | 0;
+  return (Math.abs(hash) % 2 === 0 ? HERB_SPRITES.herbBloom : HERB_SPRITES.herbField) ?? null;
+}
+
 function createHerbNodeView(node: HerbNodeView): HerbEntityView {
   const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE) as HerbEntityView;
-  const base = scene.add.ellipse(0, 5, 26, 12, 0x3a5a2a, 0.4);
-  const leafA = scene.add.ellipse(-5, -1, 10, 18, 0x4caf50, 0.95).setRotation(-0.4);
-  const leafB = scene.add.ellipse(5, -1, 10, 18, 0x66bb6a, 0.95).setRotation(0.4);
-  const leafC = scene.add.ellipse(0, -5, 9, 17, 0x81c784, 0.95);
-  const bloom = scene.add.circle(0, -10, 3, 0xf6c9e0, 0.95);
-  const zone = scene.add.zone(0, -4, 40, 34).setInteractive({ cursor: "pointer" });
+  const base = scene.add.ellipse(0, 7, 26, 12, 0x3a5a2a, 0.4);
+  view.add(base);
+  const zone = scene.add.zone(0, -4, 40, 40).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
     startHerbPath(node);
   });
-  view.add([base, leafA, leafB, leafC, bloom]);
-  // Mire-Lotus (gated nodes) get the swamp-lotus sprite on top.
+
   if (node.requiredLevel > 0) {
-    const lotus = scene.add.image(0, -6, "spriteMireLotus").setDisplaySize(34, 32);
-    bloom.setFillStyle(0x8fd0ff, 0.95);
-    view.add(lotus);
+    // Mire-Lotus keeps its bespoke swamp-lotus sprite.
+    const lotus = scene.add.image(0, 8, "spriteMireLotus").setOrigin(0.5, 1).setDisplaySize(36, 34);
+    view.add([lotus, zone]);
+    view.bloom = lotus;
+    return view;
   }
-  view.add(zone);
+
+  const plant = herbPlantSprite(node);
+  if (plant) {
+    const sprite = scene.add.image(0, 9, plant.key).setOrigin(0.5, 1).setDisplaySize(plant.w, plant.h);
+    view.add([sprite, zone]);
+    view.bloom = sprite;
+    return view;
+  }
+
+  // Fallback sketch for non-plant foraging nodes (e.g. quartz outcrops).
+  const leafA = scene.add.ellipse(-5, -1, 10, 18, 0x4caf50, 0.95).setRotation(-0.4);
+  const leafB = scene.add.ellipse(5, -1, 10, 18, 0x66bb6a, 0.95).setRotation(0.4);
+  const leafC = scene.add.ellipse(0, -5, 9, 17, 0x81c784, 0.95);
+  const bloom = scene.add.circle(0, -10, 3, 0xf6c9e0, 0.95);
+  view.add([leafA, leafB, leafC, bloom, zone]);
   view.bloom = bloom;
   return view;
 }
