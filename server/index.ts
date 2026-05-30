@@ -391,7 +391,7 @@ setInterval(() => {
   updateNpcs(dt, now, activeRegions);
   updateResourceRespawns(now);
   updateFires(now, activeRegions);
-  rebuildSpatialIndex(activeRegions);
+  refreshSpatialCellMetric();
   updateMonsters(dt, now, activeRegions);
   recordSample(metrics.tickSamples, performance.now() - started);
 }, 50);
@@ -1048,6 +1048,7 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
   const catalog = MONSTERS[monster.type];
   if (!catalog) return;
   monster.deadUntil = performance.now() + (monster.type === "boss" ? 45000 : 18000);
+  removeFromSpatial(spatial.monsters, monster);
   player.xp += catalog.xp;
   updateQuestProgress(player, monster);
   awardLevels(player);
@@ -1064,6 +1065,7 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
   };
   corpses.set(corpse.id, corpse);
   addToCellIndex(corpsesByCell, corpse);
+  addToSpatial(spatial.corpses, corpse);
   event("system", `${player.name} defeated ${catalog.name}.`);
 }
 
@@ -1643,6 +1645,7 @@ function useVerbLightFire(player: ServerPlayer, item: Item, ctx: UseItemCtx): vo
   };
   fires.set(fire.id, fire);
   addToCellIndex(firesByCell, fire);
+  addToSpatial(spatial.fires, fire);
   if (u.skill && choice.xp) addSkillXp(player, u.skill, choice.xp);
   event("effect", "fire", fire.x, fire.y, fire.floor, null, player.id, fire.id);
   event("float", "Fire lit", fire.x, fire.y, fire.floor, "#ffb35c");
@@ -1976,6 +1979,7 @@ function spawnNpcs(): void {
     }
     npcs.set(npc.id, runtime);
     addToCellIndex(npcsByCell, runtime);
+    addToSpatial(spatial.npcs, runtime);
   }
 }
 
@@ -2050,6 +2054,7 @@ function updateNpcs(dt: number, now: number, activeRegions: ActiveRegions): void
       const oldY = npc.y;
       moveEntity(npc, ((npc.wanderTarget.x - npc.x) / dist) * 1.35 * dt, ((npc.wanderTarget.y - npc.y) / dist) * 1.35 * dt);
       updateCellIndex(npcsByCell, npc, oldFloor, oldX, oldY);
+      updateSpatialCell(spatial.npcs, npc, oldFloor, oldX, oldY);
     }
   }
 }
@@ -2094,6 +2099,7 @@ function updateFires(now: number, activeRegions: ActiveRegions): void {
       if (now < fire.expiresAt) continue;
       fires.delete(fire.id);
       removeFromCellIndex(firesByCell, fire);
+      removeFromSpatial(spatial.fires, fire);
     }
   }
 }
@@ -2124,6 +2130,7 @@ function spawnMonster(spawn: MonsterSpawn): void {
   monsters.set(monster.id, monster);
   addMonsterToFloor(monster);
   addMonsterToCell(monster);
+  addToSpatial(spatial.monsters, monster);
 }
 
 function respawnMonster(monster: ServerMonster): void {
@@ -3373,32 +3380,7 @@ function rebuildStaticSpatialIndex(): void {
     staticSpatial.herbNodes.size;
 }
 
-function rebuildSpatialIndex(activeRegions: ActiveRegions): void {
-  const playerSpatial = spatial.players;
-  spatial = createSpatialIndex();
-  spatial.players = playerSpatial;
-  for (const cell of activeRegions.cells) {
-    const cellMonsters = monstersByCell.get(cell);
-    if (!cellMonsters) continue;
-    for (const monster of cellMonsters) {
-      if (!monster.deadUntil) addToSpatial(spatial.monsters, monster);
-    }
-  }
-  for (const cell of activeRegions.cells) {
-    const cellCorpses = corpsesByCell.get(cell);
-    if (!cellCorpses) continue;
-    for (const corpse of cellCorpses) addToSpatial(spatial.corpses, corpse);
-  }
-  for (const cell of activeRegions.cells) {
-    const cellNpcs = npcsByCell.get(cell);
-    if (!cellNpcs) continue;
-    for (const npc of cellNpcs) addToSpatial(spatial.npcs, npc);
-  }
-  for (const cell of activeRegions.cells) {
-    const cellFires = firesByCell.get(cell);
-    if (!cellFires) continue;
-    for (const fire of cellFires) addToSpatial(spatial.fires, fire);
-  }
+function refreshSpatialCellMetric(): void {
   spatial.cellCount =
     spatial.players.size +
     spatial.monsters.size +
@@ -3410,6 +3392,7 @@ function rebuildSpatialIndex(activeRegions: ActiveRegions): void {
 function addToSpatial<T extends Positioned>(index: Map<string, T[]>, entity: T): void {
   const key = spatialKey(entity.floor, entity.x, entity.y);
   const bucket = index.get(key) ?? [];
+  if (bucket.includes(entity)) return;
   bucket.push(entity);
   index.set(key, bucket);
 }
