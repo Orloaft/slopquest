@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tib MVP</title>
+    <title>Jib</title>
   </head>
   <body>
     <div id="app">
       <div id="game"></div>
 
-      <section id="join" class="join-panel">
-        <div class="brand">Waystone</div>
-        <p class="subcopy">A tiny shared dungeon for five brave friends.</p>
+      <section id="join" class="join-panel hidden">
+        <div class="brand">Jib</div>
+        <p class="subcopy">Choose a soul to send into The Broken Reach.</p>
         <div class="roster">
           <div class="roster-head">
             <strong>Characters</strong>
@@ -165,6 +165,75 @@
           <div class="loading-title" id="loadingTitle">Entering the wild...</div>
           <div class="loading-bar"><span id="loadingBarFill"></span></div>
           <div class="loading-flavor" id="loadingFlavor">Charting the way ahead</div>
+        </div>
+      </div>
+
+      <div id="titleScreen" class="title-screen">
+        <div class="ts-scene" id="tsScene">
+          <div class="ts-layer ts-sky" data-depth="2"></div>
+          <div class="ts-layer ts-moon" data-depth="6"></div>
+          <div class="ts-layer ts-miasma ts-miasma-a" data-depth="10"></div>
+          <div class="ts-layer ts-miasma ts-miasma-b" data-depth="16"></div>
+          <div class="ts-layer ts-marsh" data-depth="22"></div>
+          <div class="ts-layer ts-canyon" data-depth="22"></div>
+          <div class="ts-layer ts-valley" data-depth="30"></div>
+          <div class="ts-layer ts-townglow" data-depth="30"></div>
+          <div class="ts-layer ts-cliff" data-depth="48">
+            <div class="ts-hero">
+              <span class="ts-hero-lantern"></span>
+              <span class="ts-hero-body"></span>
+              <span class="ts-hero-cape"></span>
+            </div>
+          </div>
+          <div class="ts-vignette"></div>
+        </div>
+
+        <div class="ts-ui">
+          <div class="ts-logo" aria-label="Jib">JIB</div>
+          <div class="ts-tagline">The Broken Reach</div>
+          <nav class="ts-menu">
+            <button class="ts-btn" data-title-action="embark">Embark</button>
+            <button class="ts-btn" data-title-action="settings">Settings</button>
+            <button class="ts-btn" data-title-action="credits">Credits</button>
+            <button class="ts-btn" data-title-action="exit">Exit</button>
+          </nav>
+          <div class="ts-footnote">Adventure awaits</div>
+        </div>
+
+        <div id="titleSettings" class="ts-modal hidden">
+          <div class="ts-modal-box">
+            <strong>Settings</strong>
+            <label class="ts-toggle">
+              <input type="checkbox" id="settingSound" checked />
+              <span>Interface sounds</span>
+            </label>
+            <label class="ts-toggle">
+              <input type="checkbox" id="settingParallax" checked />
+              <span>Title parallax motion</span>
+            </label>
+            <button class="ts-btn ts-modal-close" data-title-action="close-settings">Back</button>
+          </div>
+        </div>
+
+        <div id="titleCredits" class="ts-modal hidden">
+          <div class="ts-modal-box">
+            <strong>Credits</strong>
+            <p class="ts-credit-line">Jib &mdash; a small shared world in The Broken Reach.</p>
+            <p class="ts-credit-line">Design, code &amp; pixels: the Jib team.</p>
+            <p class="ts-credit-line ts-dim">Thanks for wandering.</p>
+            <button class="ts-btn ts-modal-close" data-title-action="close-credits">Back</button>
+          </div>
+        </div>
+
+        <div id="titleExit" class="ts-modal hidden">
+          <div class="ts-modal-box">
+            <strong>Leave the Reach?</strong>
+            <p class="ts-credit-line">Your characters will be here when you return.</p>
+            <div class="ts-modal-row">
+              <button class="ts-btn" data-title-action="close-exit">Stay</button>
+              <button class="ts-btn ts-btn-danger" data-title-action="confirm-exit">Leave</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

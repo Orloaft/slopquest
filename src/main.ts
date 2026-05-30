@@ -355,7 +355,14 @@ const dom = {
   loadingScreen: el<HTMLElement>("#loadingScreen"),
   loadingTitle: el<HTMLElement>("#loadingTitle"),
   loadingFlavor: el<HTMLElement>("#loadingFlavor"),
-  loadingBarFill: el<HTMLElement>("#loadingBarFill")
+  loadingBarFill: el<HTMLElement>("#loadingBarFill"),
+  titleScreen: el<HTMLElement>("#titleScreen"),
+  tsScene: el<HTMLElement>("#tsScene"),
+  titleSettings: el<HTMLElement>("#titleSettings"),
+  titleCredits: el<HTMLElement>("#titleCredits"),
+  titleExit: el<HTMLElement>("#titleExit"),
+  settingSound: el<HTMLInputElement>("#settingSound"),
+  settingParallax: el<HTMLInputElement>("#settingParallax")
 };
 
 dom.joinButton.addEventListener("click", () => joinCharacter(dom.nameInput.value, true));
@@ -410,6 +417,7 @@ window.addEventListener("blur", () => sendStopInput());
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) sendStopInput();
 });
+setupTitleScreen();
 ensureSocket();
 if (E2E_MODE) {
   window.__TIB_E2E__ = {
@@ -732,6 +740,124 @@ function ensureSocket(): void {
     if (!selfId) dom.rosterList.textContent = "Disconnected. Refresh to retry.";
   });
   socket.addEventListener("error", () => addChat("Connection error. Refresh if the world stops updating."));
+}
+
+// --- Title screen ("The Coastal Overlook") ---------------------------------
+let titleSoundOn = true;
+let titleParallaxOn = true;
+let titleAudioCtx: AudioContext | null = null;
+
+function setupTitleScreen(): void {
+  // In e2e the title is skipped so specs land straight on the login form.
+  if (E2E_MODE) {
+    dom.titleScreen.classList.add("hidden");
+    dom.join.classList.remove("hidden");
+    return;
+  }
+
+  dom.settingSound.addEventListener("change", () => {
+    titleSoundOn = dom.settingSound.checked;
+  });
+  dom.settingParallax.addEventListener("change", () => {
+    titleParallaxOn = dom.settingParallax.checked;
+    if (!titleParallaxOn) resetTitleParallax();
+  });
+
+  dom.titleScreen.querySelectorAll<HTMLElement>("[data-title-action]").forEach((button) => {
+    button.addEventListener("click", () => handleTitleAction(button.dataset.titleAction ?? ""));
+    if (button.classList.contains("ts-btn")) {
+      button.addEventListener("pointerenter", () => playTitleHover());
+    }
+  });
+
+  dom.tsScene.addEventListener("pointermove", onTitleParallax);
+}
+
+function handleTitleAction(action: string): void {
+  switch (action) {
+    case "embark":
+      dom.titleScreen.classList.add("hidden");
+      dom.join.classList.remove("hidden");
+      break;
+    case "settings":
+      dom.titleSettings.classList.remove("hidden");
+      break;
+    case "close-settings":
+      dom.titleSettings.classList.add("hidden");
+      break;
+    case "credits":
+      dom.titleCredits.classList.remove("hidden");
+      break;
+    case "close-credits":
+      dom.titleCredits.classList.add("hidden");
+      break;
+    case "exit":
+      dom.titleExit.classList.remove("hidden");
+      break;
+    case "close-exit":
+      dom.titleExit.classList.add("hidden");
+      break;
+    case "confirm-exit":
+      leaveGame();
+      break;
+    default:
+      break;
+  }
+}
+
+function leaveGame(): void {
+  sendStopInput();
+  // A browser tab can't be force-closed unless it was script-opened; try, then
+  // fall back to a calm goodbye screen.
+  window.close();
+  document.body.innerHTML =
+    '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;' +
+    'background:#07090a;color:#9ee6b1;font-family:Georgia,serif;font-size:20px;letter-spacing:0.1em;text-align:center;">' +
+    "Safe travels, wanderer.<br><br>" +
+    '<span style="font-size:13px;color:#8a9b8e;">You may close this tab.</span></div>';
+}
+
+function onTitleParallax(event: PointerEvent): void {
+  if (!titleParallaxOn) return;
+  const dx = event.clientX / window.innerWidth - 0.5;
+  const dy = event.clientY / window.innerHeight - 0.5;
+  dom.tsScene.querySelectorAll<HTMLElement>(".ts-layer").forEach((layer) => {
+    const depth = Number(layer.dataset.depth ?? 0);
+    layer.style.transform = `translate(${(-dx * depth).toFixed(1)}px, ${(-dy * depth * 0.6).toFixed(1)}px)`;
+  });
+}
+
+function resetTitleParallax(): void {
+  dom.tsScene.querySelectorAll<HTMLElement>(".ts-layer").forEach((layer) => {
+    layer.style.transform = "";
+  });
+}
+
+function playTitleHover(): void {
+  if (!titleSoundOn) return;
+  try {
+    if (!titleAudioCtx) titleAudioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const ctx = titleAudioCtx;
+    if (ctx.state === "suspended") void ctx.resume();
+    const now = ctx.currentTime;
+    // A short, soft "stone slide" — low triangle tone through a quick low-pass.
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(190, now);
+    osc.frequency.exponentialRampToValueAtTime(120, now + 0.12);
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(900, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.12, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+    osc.connect(filter).connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.18);
+  } catch {
+    // Audio is a nicety; never let it break the menu.
+  }
 }
 
 function joinCharacter(name: string, fresh = false): void {

@@ -1061,3 +1061,370 @@ canvas {
     bottom: 92px;
   }
 }
+
+/* --- Title screen: "The Coastal Overlook" ---------------------------------- */
+.title-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: hidden;
+  background: #0a0712;
+  font-family: Georgia, "Times New Roman", serif;
+  user-select: none;
+}
+
+.ts-scene {
+  position: absolute;
+  inset: 0;
+}
+
+.ts-layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+/* Layer 1 — deep sky: dark purple bleeding to a miasma-green horizon. */
+.ts-sky {
+  inset: -4% -4% 0 -4%;
+  background: linear-gradient(180deg, #160f2c 0%, #221842 34%, #2b2b40 60%, #243a34 82%, #1d3330 100%);
+}
+
+/* Oversized pale moon, low and cold. */
+.ts-moon {
+  inset: -4% -4% 0 -4%;
+  background:
+    radial-gradient(circle 150px at 38% 30%, #e9ecdd 0%, #c9cfb8 45%, rgba(201, 207, 184, 0.18) 66%, rgba(201, 207, 184, 0) 72%);
+}
+
+/* Layer 1.5 — drifting green-tinged miasma clouds (background-position drift so
+   the parallax transform stays free). */
+.ts-miasma {
+  inset: -6% -20% 0 -20%;
+  opacity: 0.5;
+  mix-blend-mode: screen;
+}
+.ts-miasma-a {
+  background:
+    radial-gradient(60% 40% at 20% 28%, rgba(120, 184, 140, 0.4), rgba(120, 184, 140, 0) 60%),
+    radial-gradient(50% 36% at 60% 22%, rgba(90, 150, 120, 0.34), rgba(90, 150, 120, 0) 60%),
+    radial-gradient(70% 44% at 88% 32%, rgba(120, 184, 140, 0.3), rgba(120, 184, 140, 0) 60%);
+  background-size: 200% 100%;
+  animation: tsMiasma 46s linear infinite;
+}
+.ts-miasma-b {
+  top: 8%;
+  background:
+    radial-gradient(54% 40% at 35% 40%, rgba(150, 200, 160, 0.26), rgba(150, 200, 160, 0) 60%),
+    radial-gradient(64% 46% at 78% 30%, rgba(110, 170, 130, 0.24), rgba(110, 170, 130, 0) 60%);
+  background-size: 220% 100%;
+  animation: tsMiasma 64s linear infinite reverse;
+}
+
+/* Layer 2 — left horizon: murky willow silhouettes of the Sunken Marsh. */
+.ts-marsh {
+  left: -4%;
+  right: 52%;
+  top: 40%;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(18, 40, 32, 0) 0%, #143025 30%, #0c1f18 100%);
+  clip-path: polygon(
+    0% 38%, 4% 24%, 8% 34%, 13% 20%, 18% 32%, 23% 18%, 28% 30%, 34% 22%,
+    40% 34%, 46% 26%, 52% 40%, 58% 30%, 64% 42%, 100% 52%, 100% 100%, 0% 100%
+  );
+}
+.ts-marsh::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22%;
+  background: linear-gradient(180deg, rgba(70, 200, 150, 0) 0%, rgba(64, 180, 140, 0.28) 100%);
+}
+
+/* Layer 2 — right horizon: jagged red sandstone of the Searing Badlands. */
+.ts-canyon {
+  left: 52%;
+  right: -4%;
+  top: 36%;
+  bottom: 0;
+  background: linear-gradient(180deg, #6e3a22 0%, #58301c 46%, #38200f 100%);
+  clip-path: polygon(
+    0% 60%, 6% 40%, 9% 58%, 14% 30%, 18% 54%, 24% 26%, 30% 50%, 37% 22%,
+    44% 46%, 52% 20%, 60% 44%, 70% 24%, 82% 40%, 92% 26%, 100% 38%, 100% 100%, 0% 100%
+  );
+}
+
+/* Layer 3 — the central forest valley, narrowing toward distant Waystone. */
+.ts-valley {
+  left: 28%;
+  right: 28%;
+  top: 44%;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(28, 58, 40, 0) 0%, #1c4a30 36%, #0f2e1d 100%);
+  clip-path: polygon(42% 0%, 58% 0%, 78% 40%, 92% 100%, 8% 100%, 22% 40%);
+}
+.ts-townglow {
+  left: 0;
+  right: 0;
+  top: 44%;
+  bottom: 0;
+  background: radial-gradient(circle 26px at 50% 16%, rgba(255, 184, 77, 0.55), rgba(255, 150, 60, 0) 70%);
+  animation: tsTorch 3.4s ease-in-out infinite;
+}
+
+/* Layer 4 — foreground mossy cliff ledge. */
+.ts-cliff {
+  top: auto;
+  height: 30%;
+  bottom: 0;
+  background: linear-gradient(180deg, #1a1f1a 0%, #11140f 60%, #0a0c08 100%);
+  clip-path: polygon(
+    0% 26%, 9% 18%, 17% 24%, 27% 16%, 38% 22%, 50% 15%, 62% 22%, 74% 16%,
+    85% 23%, 94% 17%, 100% 24%, 100% 100%, 0% 100%
+  );
+  box-shadow: inset 0 30px 50px -20px rgba(60, 120, 80, 0.18);
+}
+
+/* The lone adventurer, lantern in hand, looking out over the Reach. */
+.ts-hero {
+  position: absolute;
+  left: 21%;
+  top: 8%;
+  width: 40px;
+  height: 78px;
+}
+.ts-hero-body {
+  position: absolute;
+  bottom: 0;
+  left: 11px;
+  width: 18px;
+  height: 46px;
+  background: #050806;
+  border-radius: 9px 9px 4px 4px;
+}
+.ts-hero-body::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: 3px;
+  width: 12px;
+  height: 13px;
+  border-radius: 50% 50% 48% 48%;
+  background: #050806;
+}
+.ts-hero-cape {
+  position: absolute;
+  bottom: 8px;
+  left: 5px;
+  width: 15px;
+  height: 38px;
+  background: #02050380;
+  background: #020503;
+  border-radius: 8px 3px 12px 9px;
+  transform-origin: 50% 0;
+  animation: tsCape 4.6s ease-in-out infinite;
+}
+.ts-hero-lantern {
+  position: absolute;
+  bottom: 24px;
+  right: 1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffd27a;
+  box-shadow: 0 0 22px 11px rgba(255, 184, 77, 0.45);
+  animation: tsLantern 2.6s ease-in-out infinite;
+}
+
+.ts-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 100% at 50% 34%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.72) 100%);
+}
+
+/* --- Logo + menu UI -------------------------------------------------------- */
+.ts-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  pointer-events: none;
+}
+.ts-ui > * {
+  pointer-events: auto;
+}
+
+.ts-logo {
+  margin-top: -3vh;
+  font-size: clamp(64px, 15vw, 172px);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: 0.1em;
+  padding-left: 0.1em;
+  color: #9a9384;
+  background: linear-gradient(180deg, #c5bda9 0%, #8d8676 48%, #5d564a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter:
+    drop-shadow(-2px -2px 0 rgba(226, 220, 204, 0.35))
+    drop-shadow(3px 4px 1px rgba(0, 0, 0, 0.6))
+    drop-shadow(0 10px 26px rgba(0, 0, 0, 0.6));
+}
+.ts-tagline {
+  font-size: clamp(13px, 2.2vw, 19px);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(158, 230, 177, 0.72);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+  margin-bottom: 26px;
+}
+
+.ts-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 26px;
+  border: 2px solid #3a2c1b;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(28, 22, 14, 0.84), rgba(14, 11, 7, 0.9));
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.ts-btn {
+  width: 248px;
+  padding: 11px 18px;
+  font-family: Georgia, serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c9bfa3;
+  background: linear-gradient(180deg, #241d14, #181209);
+  border: 1px solid #3a2c1b;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 6px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.07s ease;
+}
+.ts-btn:hover,
+.ts-btn:focus-visible {
+  color: #9ee6b1;
+  border-color: rgba(158, 230, 177, 0.6);
+  box-shadow: inset 0 0 14px rgba(158, 230, 177, 0.18), 0 0 16px rgba(158, 230, 177, 0.28);
+  outline: none;
+}
+.ts-btn:active {
+  transform: translateY(1px);
+}
+.ts-btn-danger:hover,
+.ts-btn-danger:focus-visible {
+  color: #ef9a8a;
+  border-color: rgba(225, 120, 100, 0.6);
+  box-shadow: inset 0 0 14px rgba(225, 120, 100, 0.16), 0 0 16px rgba(225, 120, 100, 0.26);
+}
+
+.ts-footnote {
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  right: 0;
+  font-size: 12px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgba(214, 224, 206, 0.4);
+}
+
+/* --- Title modals ---------------------------------------------------------- */
+.ts-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 8, 10, 0.66);
+}
+.ts-modal-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(420px, calc(100vw - 40px));
+  padding: 24px;
+  text-align: center;
+  border: 2px solid #3a2c1b;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(30, 24, 16, 0.97), rgba(16, 12, 8, 0.98));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  color: #e8dfca;
+}
+.ts-modal-box strong {
+  font-size: 20px;
+  letter-spacing: 0.06em;
+  color: #f3ead0;
+}
+.ts-credit-line {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(214, 224, 206, 0.82);
+}
+.ts-credit-line.ts-dim {
+  color: rgba(158, 230, 177, 0.6);
+  font-style: italic;
+}
+.ts-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+  font-size: 15px;
+  color: #d8d0bb;
+  cursor: pointer;
+}
+.ts-toggle input {
+  width: auto;
+  accent-color: #4f9d6a;
+}
+.ts-modal-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.ts-modal-row .ts-btn,
+.ts-modal-close {
+  width: auto;
+  min-width: 120px;
+  margin: 0 auto;
+}
+
+@keyframes tsMiasma {
+  from { background-position: 0% 0; }
+  to { background-position: 200% 0; }
+}
+@keyframes tsTorch {
+  0%, 100% { opacity: 0.55; }
+  45% { opacity: 0.95; }
+  60% { opacity: 0.7; }
+}
+@keyframes tsCape {
+  0%, 100% { transform: rotate(-3deg) skewX(2deg); }
+  50% { transform: rotate(4deg) skewX(-3deg); }
+}
+@keyframes tsLantern {
+  0%, 100% { opacity: 0.75; box-shadow: 0 0 18px 9px rgba(255, 184, 77, 0.38); }
+  50% { opacity: 1; box-shadow: 0 0 26px 13px rgba(255, 184, 77, 0.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-miasma-a, .ts-miasma-b, .ts-townglow, .ts-hero-cape, .ts-hero-lantern {
+    animation: none;
+  }
+}
