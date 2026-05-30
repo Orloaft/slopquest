@@ -93,7 +93,7 @@ function openClient(index: number): void {
 
   socket.on("open", () => {
     stats.opened += 1;
-    socket.send(JSON.stringify({ type: "join", name: `load_${index}`, class: index % 3 === 0 ? "caster" : "knight" }));
+    socket.send(JSON.stringify({ type: "join", name: `load_${index}`, class: index % 3 === 0 ? "caster" : "knight", fresh: true }));
   });
 
   socket.on("message", (raw: RawData) => {

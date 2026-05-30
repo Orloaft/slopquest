@@ -516,6 +516,7 @@ let cursors: { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; l
 let keys: Record<string, Phaser.Input.Keyboard.Key>;
 let lastInputAt = 0;
 let lastInputSignature = "";
+let lastMinimapDrawAt = 0;
 let currentFloor: number | null = null;
 let clickDestination: PathDestination | null = null;
 let clickPath: PathDestination[] = [];
@@ -534,6 +535,7 @@ let holdMoveActive = false;
 let holdMoveTile: HoldMoveTile | null = null;
 let holdMoveLastRepathAt = 0;
 const HOLD_MOVE_REPATH_MS = 80;
+const MINIMAP_DRAW_MS = 100;
 let mapLayer: Phaser.GameObjects.Container;
 let entityLayer: Phaser.GameObjects.Container;
 let fxLayer: Phaser.GameObjects.Container;
@@ -741,6 +743,7 @@ function update(this: Phaser.Scene, time: number): void {
     return;
   }
   if (currentFloor !== me.floor) {
+    clearResourceViews();
     if (isHeavyFloor(me.floor)) {
       beginMapBuild(me.floor);
       return;
@@ -765,7 +768,10 @@ function update(this: Phaser.Scene, time: number): void {
   updateFloaters();
   const ownView = selfId ? playerViews.get(selfId) : undefined;
   if (ownView) scene.cameras.main.centerOn(ownView.x, ownView.y);
-  drawMinimap(me);
+  if (time - lastMinimapDrawAt >= MINIMAP_DRAW_MS) {
+    drawMinimap(me);
+    lastMinimapDrawAt = time;
+  }
   drawCompass(me.dir);
   updateFog(me, time);
   if (!dom.mapScreen.classList.contains("hidden")) renderMapScreen(me);
@@ -785,7 +791,7 @@ function ensureSocket(): void {
     if (message.type === "characterDeleted" && !message.ok) dom.rosterList.textContent = "That character is online or no longer exists.";
     if (message.type === "welcome") selfId = message.id;
     if (message.type === "state") {
-      latestState = message;
+      latestState = mergeStateSnapshot(latestState, message);
       stateVersion += 1;
       consumeEvents(message.events ?? []);
     }
@@ -795,6 +801,54 @@ function ensureSocket(): void {
     if (!selfId) dom.rosterList.textContent = "Disconnected. Refresh to retry.";
   });
   socket.addEventListener("error", () => addSystemLine("Connection error. Refresh if the world stops updating."));
+}
+
+function mergeStateSnapshot(previous: StateSnapshot | null, next: StateSnapshot): StateSnapshot {
+  if (!previous) return withSnapshotDefaults(next);
+  return {
+    ...next,
+    players: mergeEntityViews(previous.players, next.players, next.removedPlayerIds, next.playersFull),
+    monsters: mergeEntityViews(previous.monsters, next.monsters, next.removedMonsterIds, next.monstersFull),
+    corpses: mergeEntityViews(previous.corpses, next.corpses, next.removedCorpseIds, next.corpsesFull),
+    npcs: mergeEntityViews(previous.npcs, next.npcs, next.removedNpcIds, next.npcsFull),
+    trees: mergeEntityViews(previous.trees, next.trees, next.removedTreeIds, next.treesFull),
+    fishingNodes: mergeEntityViews(previous.fishingNodes, next.fishingNodes, next.removedFishingNodeIds, next.fishingNodesFull),
+    miningNodes: mergeEntityViews(previous.miningNodes, next.miningNodes, next.removedMiningNodeIds, next.miningNodesFull),
+    herbNodes: mergeEntityViews(previous.herbNodes, next.herbNodes, next.removedHerbNodeIds, next.herbNodesFull),
+    fires: mergeEntityViews(previous.fires, next.fires, next.removedFireIds, next.firesFull)
+  };
+}
+
+function withSnapshotDefaults(snapshot: StateSnapshot): StateSnapshot {
+  return {
+    ...snapshot,
+    playersFull: snapshot.playersFull ?? true,
+    removedPlayerIds: snapshot.removedPlayerIds ?? [],
+    monstersFull: snapshot.monstersFull ?? true,
+    removedMonsterIds: snapshot.removedMonsterIds ?? [],
+    corpsesFull: snapshot.corpsesFull ?? true,
+    removedCorpseIds: snapshot.removedCorpseIds ?? [],
+    npcsFull: snapshot.npcsFull ?? true,
+    removedNpcIds: snapshot.removedNpcIds ?? [],
+    treesFull: snapshot.treesFull ?? true,
+    removedTreeIds: snapshot.removedTreeIds ?? [],
+    fishingNodesFull: snapshot.fishingNodesFull ?? true,
+    removedFishingNodeIds: snapshot.removedFishingNodeIds ?? [],
+    miningNodesFull: snapshot.miningNodesFull ?? true,
+    removedMiningNodeIds: snapshot.removedMiningNodeIds ?? [],
+    herbNodesFull: snapshot.herbNodesFull ?? true,
+    removedHerbNodeIds: snapshot.removedHerbNodeIds ?? [],
+    firesFull: snapshot.firesFull ?? true,
+    removedFireIds: snapshot.removedFireIds ?? []
+  };
+}
+
+function mergeEntityViews<T extends { id: string }>(previous: T[], updates: T[], removedIds: string[] = [], full = true): T[] {
+  if (full) return updates;
+  const byId = new Map(previous.map((item) => [item.id, item]));
+  for (const id of removedIds) byId.delete(id);
+  for (const item of updates) byId.set(item.id, item);
+  return [...byId.values()];
 }
 
 function zoneTrackFor(me: PlayerView): string {
@@ -1200,26 +1254,28 @@ function syncEntities(): void {
     }
   }
 
-  for (const tree of (latestState.trees ?? []).filter((item) => item.floor === me.floor)) {
-    visibleTrees.add(tree.id);
-    let view = treeViews.get(tree.id);
-    if (!view) {
-      view = createTreeView(tree);
-      treeViews.set(tree.id, view);
-      entityLayer.add(view);
+  if (latestState.treesFull) {
+    for (const tree of (latestState.trees ?? []).filter((item) => item.floor === me.floor)) {
+      visibleTrees.add(tree.id);
+      let view = treeViews.get(tree.id);
+      if (!view) {
+        view = createTreeView(tree);
+        treeViews.set(tree.id, view);
+        entityLayer.add(view);
+      }
+      view.setPosition(tree.x * TILE_SIZE, tree.y * TILE_SIZE);
+      if (view.treeType !== tree.type) {
+        updateTreeViewTexture(view, tree);
+      }
+      view.treeSprite.setVisible(tree.active);
+      view.stump.setVisible(false);
+      if (view.zone.input) view.zone.input.enabled = tree.active;
     }
-    view.setPosition(tree.x * TILE_SIZE, tree.y * TILE_SIZE);
-    if (view.treeType !== tree.type) {
-      updateTreeViewTexture(view, tree);
-    }
-    view.treeSprite.setVisible(tree.active);
-    view.stump.setVisible(false);
-    if (view.zone.input) view.zone.input.enabled = tree.active;
-  }
-  for (const [id, view] of treeViews) {
-    if (!visibleTrees.has(id)) {
-      view.destroy();
-      treeViews.delete(id);
+    for (const [id, view] of treeViews) {
+      if (!visibleTrees.has(id)) {
+        view.destroy();
+        treeViews.delete(id);
+      }
     }
   }
 
@@ -1292,6 +1348,13 @@ function syncEntities(): void {
       view.destroy();
       fireViews.delete(id);
     }
+  }
+}
+
+function clearResourceViews(): void {
+  for (const views of [treeViews, fishingViews, miningViews, herbViews, fireViews]) {
+    for (const view of views.values()) view.destroy();
+    views.clear();
   }
 }
 
@@ -3040,14 +3103,14 @@ function simplifyTilePath(path: TilePoint[]): TilePoint[] {
 function findTilePath(floor: number, startX: number, startY: number, goalX: number, goalY: number): TilePoint[] {
   if (startX === goalX && startY === goalY) return [{ x: startX, y: startY }];
   const startNode: PathNode = { x: startX, y: startY, g: 0, f: tileHeuristic(startX, startY, goalX, goalY), parent: null };
-  const open: PathNode[] = [startNode];
+  const open = new BinaryHeap<PathNode>((a, b) => a.f - b.f);
+  open.push(startNode);
   const bestByKey = new Map<string, PathNode>([[tileKey(startX, startY), startNode]]);
   const closed = new Set<string>();
   const maxVisited = floorCols(floor) * floorRows(floor);
 
-  while (open.length && closed.size < maxVisited) {
-    open.sort((a, b) => a.f - b.f);
-    const current = open.shift();
+  while (open.size > 0 && closed.size < maxVisited) {
+    const current = open.pop();
     if (!current) break;
     const currentKey = tileKey(current.x, current.y);
     if (closed.has(currentKey)) continue;
@@ -3073,6 +3136,68 @@ function findTilePath(floor: number, startX: number, startY: number, goalX: numb
   }
 
   return [];
+}
+
+class BinaryHeap<T> {
+  private readonly items: T[] = [];
+  private readonly compare: (a: T, b: T) => number;
+
+  constructor(compare: (a: T, b: T) => number) {
+    this.compare = compare;
+  }
+
+  get size(): number {
+    return this.items.length;
+  }
+
+  push(item: T): void {
+    this.items.push(item);
+    this.bubbleUp(this.items.length - 1);
+  }
+
+  pop(): T | undefined {
+    const first = this.items[0];
+    const last = this.items.pop();
+    if (!first || !last) return first;
+    if (this.items.length > 0) {
+      this.items[0] = last;
+      this.sinkDown(0);
+    }
+    return first;
+  }
+
+  private bubbleUp(index: number): void {
+    while (index > 0) {
+      const parent = Math.floor((index - 1) / 2);
+      const item = this.items[index];
+      const parentItem = this.items[parent];
+      if (item === undefined || parentItem === undefined || this.compare(item, parentItem) >= 0) break;
+      this.items[index] = parentItem;
+      this.items[parent] = item;
+      index = parent;
+    }
+  }
+
+  private sinkDown(index: number): void {
+    while (true) {
+      const left = index * 2 + 1;
+      const right = left + 1;
+      let smallest = index;
+      const leftItem = this.items[left];
+      const rightItem = this.items[right];
+      const smallestItem = this.items[smallest];
+      if (leftItem !== undefined && smallestItem !== undefined && this.compare(leftItem, smallestItem) < 0) smallest = left;
+      const nextSmallest = this.items[smallest];
+      if (rightItem !== undefined && nextSmallest !== undefined && this.compare(rightItem, nextSmallest) < 0) smallest = right;
+      if (smallest === index) break;
+      const item = this.items[index];
+      const swap = this.items[smallest];
+      if (item === undefined || swap === undefined) break;
+      this.items[index] = swap;
+      this.items[smallest] = item;
+      index = smallest;
+    }
+  }
 }
 
 function pathNeighbors(floor: number, x: number, y: number): Array<{ x: number; y: number; cost: number }> {

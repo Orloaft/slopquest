@@ -1,6 +1,8 @@
 node_modules/
 dist/
 data/players.json
+data/players/
+data/players.v2
 src/generated/
 test-results/
 

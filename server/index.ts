@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { unlink, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer } from "ws";
@@ -90,9 +90,144 @@ import type {
   Vec2
 } from "./types.ts";
 
+type FishingNodeRuntime = (typeof FISHING_NODES)[number];
+type MiningNodeRuntime = (typeof MINING_NODES)[number];
+
+interface StaticSpatialIndex {
+  trees: Map<string, TreeNodeRuntime[]>;
+  fishingNodes: Map<string, FishingNodeRuntime[]>;
+  miningNodes: Map<string, MiningNodeRuntime[]>;
+  herbNodes: Map<string, HerbNodeRuntime[]>;
+  cellCount: number;
+}
+
+interface PlayerPrivateViewCache {
+  inventorySignature: string;
+  inventory: Array<InventoryItemView | null>;
+  questsSignature: string;
+  quests: QuestView[];
+  skillsSignature: string;
+  skills: SkillView[];
+  classesSignature: string;
+  unlockedClasses: string[];
+  weight: number;
+}
+
+type ResourceRespawnKind = "tree" | "herb";
+
+interface ResourceRespawn {
+  at: number;
+  kind: ResourceRespawnKind;
+  id: string;
+}
+
+type SnapshotEntity =
+  | PlayerView
+  | MonsterView
+  | CorpseView
+  | NpcView
+  | TreeView
+  | FishingNodeView
+  | MiningNodeView
+  | HerbNodeView
+  | FireView;
+
+type SnapshotCategory =
+  | "players"
+  | "monsters"
+  | "corpses"
+  | "npcs"
+  | "trees"
+  | "fishingNodes"
+  | "miningNodes"
+  | "herbNodes"
+  | "fires";
+
+interface SnapshotDelta<T extends SnapshotEntity> {
+  items: T[];
+  removedIds: string[];
+  full: boolean;
+  visibleCount: number;
+}
+
+interface SnapshotCategoryCache {
+  initialized: boolean;
+  signatures: Map<string, number>;
+}
+
+type SnapshotCache = Record<SnapshotCategory, SnapshotCategoryCache>;
+
+class MinHeap<T> {
+  private readonly items: T[] = [];
+  private readonly compare: (a: T, b: T) => number;
+
+  constructor(compare: (a: T, b: T) => number) {
+    this.compare = compare;
+  }
+
+  get size(): number {
+    return this.items.length;
+  }
+
+  peek(): T | undefined {
+    return this.items[0];
+  }
+
+  push(item: T): void {
+    this.items.push(item);
+    this.bubbleUp(this.items.length - 1);
+  }
+
+  pop(): T | undefined {
+    const first = this.items[0];
+    const last = this.items.pop();
+    if (!first || !last) return first;
+    if (this.items.length > 0) {
+      this.items[0] = last;
+      this.sinkDown(0);
+    }
+    return first;
+  }
+
+  private bubbleUp(index: number): void {
+    while (index > 0) {
+      const parent = Math.floor((index - 1) / 2);
+      const item = this.items[index];
+      const parentItem = this.items[parent];
+      if (item === undefined || parentItem === undefined || this.compare(item, parentItem) >= 0) break;
+      this.items[index] = parentItem;
+      this.items[parent] = item;
+      index = parent;
+    }
+  }
+
+  private sinkDown(index: number): void {
+    while (true) {
+      const left = index * 2 + 1;
+      const right = left + 1;
+      let smallest = index;
+      const leftItem = this.items[left];
+      const rightItem = this.items[right];
+      const smallestItem = this.items[smallest];
+      if (leftItem !== undefined && smallestItem !== undefined && this.compare(leftItem, smallestItem) < 0) smallest = left;
+      const nextSmallest = this.items[smallest];
+      if (rightItem !== undefined && nextSmallest !== undefined && this.compare(rightItem, nextSmallest) < 0) smallest = right;
+      if (smallest === index) break;
+      const item = this.items[index];
+      const swap = this.items[smallest];
+      if (item === undefined || swap === undefined) break;
+      this.items[index] = swap;
+      this.items[smallest] = item;
+      index = smallest;
+    }
+  }
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "..", "data");
 const SAVE_FILE = join(DATA_DIR, "players.json");
+const PLAYER_DIR = join(DATA_DIR, "players");
+const LEGACY_MIGRATION_MARKER = join(DATA_DIR, "players.v2");
 const PORT = Number(process.env.PORT ?? 8787);
 const E2E_TEST = process.env.E2E_TEST === "1";
 // Dev/playtest cheats via the `/dev` chat command. On under E2E or `TIB_DEV=1`
@@ -120,19 +255,29 @@ const FORAGE_XP = 12;
 // How long a monster's attack pose is broadcast as active (drives the bespoke
 // client attack animation for enemies that have one).
 const MONSTER_ATTACK_ANIM_MS = 480;
+const TREE_SNAPSHOT_EVERY = 5;
+const SNAPSHOT_FULL_EVERY = 20;
+const SOCKET_BACKPRESSURE_BYTES = 512 * 1024;
 mkdirSync(DATA_DIR, { recursive: true });
+mkdirSync(PLAYER_DIR, { recursive: true });
 
 const ADVENTURER: ClassSpec = CLASSES["adventurer"]!;
 
 const db: Database = loadDb();
 const clients = new Map<ExtWebSocket, Session>();
+const playersById = new Map<string, ServerPlayer>();
 const monsters = new Map<string, ServerMonster>();
+const monstersByFloor = new Map<number, Set<ServerMonster>>();
 const corpses = new Map<string, Corpse>();
 const treeNodes = new Map<string, TreeNodeRuntime>();
 const herbNodes = new Map<string, HerbNodeRuntime>();
 const fires = new Map<string, Fire>();
 const npcs = new Map<string, NpcRuntime>();
 let spatial: SpatialIndex = createSpatialIndex();
+let staticSpatial: StaticSpatialIndex = createStaticSpatialIndex();
+const publicPlayerViewCache = new Map<string, PlayerView>();
+const privatePlayerViewCache = new WeakMap<ServerPlayer, PlayerPrivateViewCache>();
+const resourceRespawns = new MinHeap<ResourceRespawn>((a, b) => a.at - b.at);
 let nextMonsterId = 1;
 let nextCorpseId = 1;
 let nextFireId = 1;
@@ -146,6 +291,9 @@ const metrics: Metrics = {
 };
 let saveQueued = false;
 let saveInFlight = false;
+const dirtyPlayerKeys = new Set<string>();
+let snapshotSequence = 0;
+const snapshotCaches = new WeakMap<Session, SnapshotCache>();
 
 for (const spawn of MONSTER_SPAWNS) {
   spawnMonster(spawn);
@@ -153,6 +301,7 @@ for (const spawn of MONSTER_SPAWNS) {
 spawnNpcs();
 spawnTreeNodes();
 spawnHerbNodes();
+rebuildStaticSpatialIndex();
 
 const wss = new WebSocketServer({ port: PORT });
 console.log(`Waystone server listening on ws://0.0.0.0:${PORT}`);
@@ -208,6 +357,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
     if (session) {
       if (!E2E_TEST || !session.player.name.startsWith("e2e_")) persistPlayer(session.player);
       clients.delete(socket);
+      playersById.delete(session.player.id);
       event("system", `${session.player.name} left the world.`);
     }
   });
@@ -223,12 +373,15 @@ setInterval(() => {
   const dt = Math.min(0.08, (now - last) / 1000);
   last = now;
   const started = performance.now();
+  const activeFloors = occupiedFloors();
   updatePlayers(dt, now);
-  updateNpcs(dt, now);
-  updateTreeNodes(now);
-  updateFires(now);
-  rebuildSpatialIndex();
-  updateMonsters(dt, now);
+  activeFloors.clear();
+  for (const { player } of clients.values()) activeFloors.add(player.floor);
+  updateNpcs(dt, now, activeFloors);
+  updateResourceRespawns(now);
+  updateFires(now, activeFloors);
+  rebuildSpatialIndex(activeFloors);
+  updateMonsters(dt, now, activeFloors);
   recordSample(metrics.tickSamples, performance.now() - started);
 }, 50);
 
@@ -237,7 +390,7 @@ setInterval(() => {
   broadcastState();
   recordSample(metrics.snapshotSamples, performance.now() - started);
   events.length = 0;
-}, 50);
+}, 75);
 
 setInterval(() => {
   persistOnlinePlayers();
@@ -272,6 +425,7 @@ function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; 
   player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
 
   clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now() });
+  playersById.set(player.id, player);
   socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] }));
   event("system", `${player.name} entered the world.`);
 }
@@ -297,7 +451,10 @@ function deleteCharacter(socket: ExtWebSocket, rawName: string): void {
     return;
   }
   delete db.players[key];
-  queueSave();
+  dirtyPlayerKeys.delete(key);
+  void unlink(playerFilePath(key)).catch((error: NodeJS.ErrnoException) => {
+    if (error.code !== "ENOENT") console.error(`Failed to delete character save for ${name}:`, error);
+  });
   socket.send(JSON.stringify({ type: "characterDeleted", ok: true, name }));
   sendCharacterRoster(socket);
 }
@@ -432,8 +589,11 @@ function updatePlayers(dt: number, now: number): void {
   }
 }
 
-function updateMonsters(dt: number, now: number): void {
-  for (const monster of monsters.values()) {
+function updateMonsters(dt: number, now: number, activeFloors: Set<number>): void {
+  for (const floor of activeFloors) {
+    const floorMonsters = monstersByFloor.get(floor);
+    if (!floorMonsters) continue;
+    for (const monster of floorMonsters) {
     monster.moving = false;
     if (monster.deadUntil) {
       if (now >= monster.deadUntil) respawnMonster(monster);
@@ -476,7 +636,7 @@ function updateMonsters(dt: number, now: number): void {
     }
     // Pack hunters: an aggroed member alerts nearby same-type members to the kill.
     if (catalog.pack && target && !isSafeZone(target.floor, target.x, target.y)) {
-      for (const other of monsters.values()) {
+      for (const other of querySpatial(spatial.monsters, monster.floor, monster.x, monster.y, 8)) {
         if (other === monster || other.deadUntil || other.hidden || other.type !== monster.type || other.floor !== monster.floor) continue;
         if (distance(monster, other) <= 8) {
           other.alertUntil = now + 5000;
@@ -539,6 +699,15 @@ function updateMonsters(dt: number, now: number): void {
       damagePlayer(target, damage, catalog.name);
     }
   }
+  }
+}
+
+function occupiedFloors(): Set<number> {
+  const floors = new Set<number>();
+  for (const { player } of clients.values()) {
+    floors.add(player.floor);
+  }
+  return floors;
 }
 
 // Apply per-tick status effects (currently the burning DoT) and let it kill.
@@ -554,10 +723,7 @@ function tickMonsterStatus(monster: ServerMonster, now: number): void {
 }
 
 function playerById(id: string): ServerPlayer | null {
-  for (const session of clients.values()) {
-    if (session.player.id === id) return session.player;
-  }
-  return null;
+  return playersById.get(id) ?? null;
 }
 
 function autoAttack(player: ServerPlayer, now: number): void {
@@ -1497,6 +1663,7 @@ function updatePlayerAction(player: ServerPlayer, now: number): void {
 
   tree.active = false;
   tree.respawnAt = performance.now() + TREE_RESPAWN_MS;
+  scheduleResourceRespawn("tree", tree.id, tree.respawnAt);
   player.action = null;
   addSkillXp(player, "woodcutting", treeSpec.xp);
   dropItem(tree.floor, tree.x + 0.12, tree.y, [{ id: treeSpec.itemId, qty: 1 }], treeSpec.dropLabel);
@@ -1558,6 +1725,7 @@ function updateHerbingAction(player: ServerPlayer, now: number): void {
   }
   node.active = false;
   node.respawnAt = performance.now() + HERB_RESPAWN_MS;
+  scheduleResourceRespawn("herb", node.id, node.respawnAt);
   addSkillXp(player, "foraging", node.xp);
   const label = ITEMS[node.item]?.label ?? node.item;
   event("float", `+1 ${label} · +${node.xp} Foraging`, node.x, node.y, node.floor, "#9ee6b1");
@@ -1805,8 +1973,9 @@ function treeTypeForTile(floor: number, x: number, y: number): string {
   return "oak";
 }
 
-function updateNpcs(dt: number, now: number): void {
+function updateNpcs(dt: number, now: number, activeFloors: Set<number>): void {
   for (const npc of npcs.values()) {
+    if (!activeFloors.has(npc.floor)) continue;
     const { homeX, homeY } = npc;
     if (homeX == null || homeY == null) continue;
     npc.moving = false;
@@ -1835,17 +2004,27 @@ function pickNpcWanderTarget(npc: NpcRuntime): Vec2 | null {
   return null;
 }
 
-function updateTreeNodes(now: number): void {
-  for (const tree of treeNodes.values()) {
-    if (!tree.active && now >= tree.respawnAt) tree.active = true;
-  }
-  for (const node of herbNodes.values()) {
-    if (!node.active && now >= node.respawnAt) node.active = true;
+function updateResourceRespawns(now: number): void {
+  while (resourceRespawns.size > 0 && (resourceRespawns.peek()?.at ?? Infinity) <= now) {
+    const respawn = resourceRespawns.pop();
+    if (!respawn) break;
+    if (respawn.kind === "tree") {
+      const tree = treeNodes.get(respawn.id);
+      if (tree && !tree.active && tree.respawnAt <= now) tree.active = true;
+      continue;
+    }
+    const node = herbNodes.get(respawn.id);
+    if (node && !node.active && node.respawnAt <= now) node.active = true;
   }
 }
 
-function updateFires(now: number): void {
+function scheduleResourceRespawn(kind: ResourceRespawnKind, id: string, at: number): void {
+  resourceRespawns.push({ kind, id, at });
+}
+
+function updateFires(now: number, activeFloors: Set<number>): void {
   for (const [id, fire] of fires) {
+    if (!activeFloors.has(fire.floor)) continue;
     if (now >= fire.expiresAt) fires.delete(id);
   }
 }
@@ -1874,11 +2053,13 @@ function spawnMonster(spawn: MonsterSpawn): void {
     hidden: catalog.burrow === true
   };
   monsters.set(monster.id, monster);
+  addMonsterToFloor(monster);
 }
 
 function respawnMonster(monster: ServerMonster): void {
   const catalog = MONSTERS[monster.type];
   if (!catalog) return;
+  const oldFloor = monster.floor;
   monster.floor = monster.spawn.floor;
   monster.x = monster.spawn.x + 0.5;
   monster.y = monster.spawn.y + 0.5;
@@ -1896,6 +2077,23 @@ function respawnMonster(monster: ServerMonster): void {
   monster.alertUntil = 0;
   monster.alertTarget = undefined;
   monster.hidden = catalog.burrow === true; // re-bury ambushers
+  if (monster.floor !== oldFloor) {
+    removeMonsterFromFloor(monster, oldFloor);
+    addMonsterToFloor(monster);
+  }
+}
+
+function addMonsterToFloor(monster: ServerMonster): void {
+  const floorSet = monstersByFloor.get(monster.floor) ?? new Set<ServerMonster>();
+  floorSet.add(monster);
+  monstersByFloor.set(monster.floor, floorSet);
+}
+
+function removeMonsterFromFloor(monster: ServerMonster, floor = monster.floor): void {
+  const floorSet = monstersByFloor.get(floor);
+  if (!floorSet) return;
+  floorSet.delete(monster);
+  if (!floorSet.size) monstersByFloor.delete(floor);
 }
 
 function wanderMonster(monster: ServerMonster, catalog: { speed: number }, dt: number, now: number): void {
@@ -1988,24 +2186,33 @@ function armorReduction(player: ServerPlayer): number {
 
 function broadcastState(): void {
   updateByteMetric();
-  rebuildSpatialIndex();
+  publicPlayerViewCache.clear();
+  snapshotSequence += 1;
+  const includeTrees = snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
+  const forceFull = snapshotSequence % SNAPSHOT_FULL_EVERY === 0;
   for (const session of clients.values()) {
-    const { socket, player } = session;
+    const { socket } = session;
     if (socket.readyState !== socket.OPEN) continue;
+    if (socket.bufferedAmount > SOCKET_BACKPRESSURE_BYTES) continue;
 
-    const snapshot = buildSnapshotFor(player);
+    const snapshot = buildSnapshotFor(session, includeTrees, forceFull);
     const raw = JSON.stringify(snapshot);
     metrics.bytesOutThisSecond += Buffer.byteLength(raw);
     socket.send(raw);
   }
 }
 
-function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
+function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: boolean): StateSnapshot {
+  const viewer = session.player;
+  const cache = snapshotCacheFor(session);
   const players: PlayerView[] = [];
+  let includedViewer = false;
   for (const player of querySpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
     if (player.id !== viewer.id && !inInterestRange(viewer, player)) continue;
-    players.push(serializePlayer(player));
+    if (player.id === viewer.id) includedViewer = true;
+    players.push(player.id === viewer.id ? serializePlayer(player) : serializePlayerPublicCached(player));
   }
+  if (!includedViewer) players.push(serializePlayer(viewer));
 
   const visibleMonsters: MonsterView[] = [];
   for (const monster of querySpatial(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
@@ -2026,54 +2233,300 @@ function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
   }
 
   const visibleTrees: TreeView[] = [];
-  for (const tree of querySpatial(spatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS)) {
-    if (!inTreeInterestRange(viewer, tree)) continue;
-    visibleTrees.push(serializeTree(tree));
+  if (includeTrees) {
+    for (const tree of querySpatial(staticSpatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS)) {
+      if (!inTreeInterestRange(viewer, tree)) continue;
+      visibleTrees.push(serializeTree(tree));
+    }
   }
 
-  const visibleFishingNodes = FISHING_NODES
+  const visibleFishingNodes = querySpatial(staticSpatial.fishingNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)
     .filter((node) => inInterestRange(viewer, node))
     .map(serializeFishingNode);
-  const visibleMiningNodes = MINING_NODES
+  const visibleMiningNodes = querySpatial(staticSpatial.miningNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)
     .filter((node) => inInterestRange(viewer, node))
     .map(serializeMiningNode);
   const visibleHerbNodes: HerbNodeView[] = [];
-  for (const node of herbNodes.values()) {
+  for (const node of querySpatial(staticSpatial.herbNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
     if (inInterestRange(viewer, node)) visibleHerbNodes.push(serializeHerbNode(node));
   }
   const visibleFires = querySpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)
     .filter((fire) => inInterestRange(viewer, fire))
     .map(serializeFire);
+  const playersDelta = snapshotDelta(cache.players, players, playerViewSignature, forceFull);
+  const monstersDelta = snapshotDelta(cache.monsters, visibleMonsters, monsterViewSignature, forceFull);
+  const corpsesDelta = snapshotDelta(cache.corpses, visibleCorpses, corpseViewSignature, forceFull);
+  const npcsDelta = snapshotDelta(cache.npcs, visibleNpcs, npcViewSignature, forceFull);
+  const treesDelta = snapshotDelta(cache.trees, visibleTrees, treeViewSignature, forceFull, !includeTrees);
+  const fishingDelta = snapshotDelta(cache.fishingNodes, visibleFishingNodes, fishingNodeViewSignature, forceFull);
+  const miningDelta = snapshotDelta(cache.miningNodes, visibleMiningNodes, miningNodeViewSignature, forceFull);
+  const herbDelta = snapshotDelta(cache.herbNodes, visibleHerbNodes, herbNodeViewSignature, forceFull);
+  const firesDelta = snapshotDelta(cache.fires, visibleFires, fireViewSignature, forceFull);
 
   return {
     type: "state",
-    players,
-    monsters: visibleMonsters,
-    corpses: visibleCorpses,
-    npcs: visibleNpcs,
-    trees: visibleTrees,
-    fishingNodes: visibleFishingNodes,
-    miningNodes: visibleMiningNodes,
-    herbNodes: visibleHerbNodes,
-    fires: visibleFires,
+    players: playersDelta.items,
+    playersFull: playersDelta.full,
+    removedPlayerIds: playersDelta.removedIds,
+    monsters: monstersDelta.items,
+    monstersFull: monstersDelta.full,
+    removedMonsterIds: monstersDelta.removedIds,
+    corpses: corpsesDelta.items,
+    corpsesFull: corpsesDelta.full,
+    removedCorpseIds: corpsesDelta.removedIds,
+    npcs: npcsDelta.items,
+    npcsFull: npcsDelta.full,
+    removedNpcIds: npcsDelta.removedIds,
+    trees: treesDelta.items,
+    treesFull: treesDelta.full,
+    removedTreeIds: treesDelta.removedIds,
+    fishingNodes: fishingDelta.items,
+    fishingNodesFull: fishingDelta.full,
+    removedFishingNodeIds: fishingDelta.removedIds,
+    miningNodes: miningDelta.items,
+    miningNodesFull: miningDelta.full,
+    removedMiningNodeIds: miningDelta.removedIds,
+    herbNodes: herbDelta.items,
+    herbNodesFull: herbDelta.full,
+    removedHerbNodeIds: herbDelta.removedIds,
+    fires: firesDelta.items,
+    firesFull: firesDelta.full,
+    removedFireIds: firesDelta.removedIds,
     events: events.filter((item) => eventVisibleTo(viewer, item)),
     metrics: {
       clients: clients.size,
       monsters: monsters.size,
       zone: zoneAt(viewer.floor, viewer.x, viewer.y),
-      visiblePlayers: players.length,
-      visibleMonsters: visibleMonsters.length,
-      visibleCorpses: visibleCorpses.length,
-      visibleTrees: visibleTrees.length,
-      visibleFishingNodes: visibleFishingNodes.length,
-      visibleMiningNodes: visibleMiningNodes.length,
-      visibleFires: visibleFires.length,
-      spatialCells: spatial.cellCount,
+      visiblePlayers: playersDelta.visibleCount,
+      visibleMonsters: monstersDelta.visibleCount,
+      visibleCorpses: corpsesDelta.visibleCount,
+      visibleTrees: treesDelta.visibleCount,
+      visibleFishingNodes: fishingDelta.visibleCount,
+      visibleMiningNodes: miningDelta.visibleCount,
+      visibleFires: firesDelta.visibleCount,
+      spatialCells: spatial.cellCount + staticSpatial.cellCount,
       tickMs: round(avg(metrics.tickSamples)),
       snapshotMs: round(avg(metrics.snapshotSamples)),
       bytesOutPerSecond: metrics.bytesOutPerSecond
     }
   };
+}
+
+function snapshotCacheFor(session: Session): SnapshotCache {
+  let cache = snapshotCaches.get(session);
+  if (cache) return cache;
+  cache = {
+    players: snapshotCategoryCache(),
+    monsters: snapshotCategoryCache(),
+    corpses: snapshotCategoryCache(),
+    npcs: snapshotCategoryCache(),
+    trees: snapshotCategoryCache(),
+    fishingNodes: snapshotCategoryCache(),
+    miningNodes: snapshotCategoryCache(),
+    herbNodes: snapshotCategoryCache(),
+    fires: snapshotCategoryCache()
+  };
+  snapshotCaches.set(session, cache);
+  return cache;
+}
+
+function snapshotCategoryCache(): SnapshotCategoryCache {
+  return { initialized: false, signatures: new Map() };
+}
+
+function snapshotDelta<T extends SnapshotEntity>(
+  cache: SnapshotCategoryCache,
+  visible: T[],
+  signatureFor: (item: T) => number,
+  forceFull: boolean,
+  preserve = false
+): SnapshotDelta<T> {
+  if (preserve) return { items: [], removedIds: [], full: false, visibleCount: cache.signatures.size };
+  const next = new Map<string, number>();
+  const changed: T[] = [];
+  const full = forceFull || !cache.initialized;
+  for (const item of visible) {
+    const signature = signatureFor(item);
+    next.set(item.id, signature);
+    if (full || cache.signatures.get(item.id) !== signature) changed.push(item);
+  }
+  const removedIds = full ? [] : [...cache.signatures.keys()].filter((id) => !next.has(id));
+  cache.initialized = true;
+  cache.signatures = next;
+  return { items: full ? visible : changed, removedIds, full, visibleCount: visible.length };
+}
+
+function playerViewSignature(player: PlayerView): number {
+  let hash = HASH_INIT;
+  hash = hashNumber(hash, player.floor);
+  hash = hashNumber(hash, player.x);
+  hash = hashNumber(hash, player.y);
+  hash = hashString(hash, player.dir);
+  hash = hashBool(hash, player.moving);
+  hash = hashNumber(hash, player.hp);
+  hash = hashNumber(hash, player.maxHp);
+  hash = hashNumber(hash, player.mana ?? 0);
+  hash = hashNumber(hash, player.maxMana ?? 0);
+  hash = hashNumber(hash, player.level ?? 0);
+  hash = hashNumber(hash, player.xp ?? 0);
+  hash = hashNumber(hash, player.gold ?? 0);
+  hash = hashNumber(hash, player.weaponTier ?? 0);
+  hash = hashNumber(hash, player.armorTier ?? 0);
+  hash = hashString(hash, player.targetId ?? "");
+  hash = hashBool(hash, player.dead);
+  hash = hashAction(hash, player.action);
+  hash = hashBuffs(hash, player.buffs);
+  for (const item of player.inventory ?? []) {
+    hash = hashString(hash, item?.id ?? "");
+    hash = hashNumber(hash, item?.qty ?? 0);
+  }
+  for (const quest of player.quests ?? []) {
+    hash = hashString(hash, quest.id);
+    hash = hashBool(hash, quest.accepted);
+    hash = hashNumber(hash, quest.progress);
+    hash = hashBool(hash, quest.complete);
+    hash = hashBool(hash, quest.claimed);
+  }
+  for (const skill of player.skills ?? []) {
+    hash = hashString(hash, skill.id);
+    hash = hashNumber(hash, skill.xp);
+    hash = hashNumber(hash, skill.level);
+  }
+  for (const ability of player.abilities ?? []) {
+    hash = hashString(hash, ability.id);
+    hash = hashNumber(hash, Math.ceil(ability.cooldownRemainingMs / 100));
+    hash = hashNumber(hash, Math.ceil(ability.activeRemainingMs / 100));
+  }
+  for (const classKey of player.unlockedClasses ?? []) hash = hashString(hash, classKey);
+  hash = hashNumber(hash, player.weight ?? 0);
+  return hash;
+}
+
+function monsterViewSignature(monster: MonsterView): number {
+  let hash = HASH_INIT;
+  hash = hashNumber(hash, monster.floor);
+  hash = hashNumber(hash, monster.x);
+  hash = hashNumber(hash, monster.y);
+  hash = hashString(hash, monster.dir);
+  hash = hashBool(hash, monster.moving);
+  hash = hashBool(hash, monster.attacking ?? false);
+  hash = hashNumber(hash, monster.hp);
+  hash = hashNumber(hash, monster.maxHp);
+  return hash;
+}
+
+function corpseViewSignature(corpse: CorpseView): number {
+  let hash = HASH_INIT;
+  hash = hashNumber(hash, corpse.floor);
+  hash = hashNumber(hash, corpse.x);
+  hash = hashNumber(hash, corpse.y);
+  hash = hashNumber(hash, corpse.gold);
+  hash = hashString(hash, corpse.kind);
+  for (const item of corpse.items) {
+    hash = hashString(hash, item.id);
+    hash = hashNumber(hash, item.qty);
+  }
+  return hash;
+}
+
+function npcViewSignature(npc: NpcView): number {
+  let hash = HASH_INIT;
+  hash = hashNumber(hash, npc.floor);
+  hash = hashNumber(hash, npc.x);
+  hash = hashNumber(hash, npc.y);
+  hash = hashString(hash, npc.dir);
+  hash = hashBool(hash, npc.moving);
+  hash = hashString(hash, npc.dialogue);
+  return hash;
+}
+
+function treeViewSignature(tree: TreeView): number {
+  let hash = HASH_INIT;
+  hash = hashNumber(hash, tree.floor);
+  hash = hashNumber(hash, tree.x);
+  hash = hashNumber(hash, tree.y);
+  hash = hashString(hash, tree.type);
+  hash = hashBool(hash, tree.active);
+  return hash;
+}
+
+function fishingNodeViewSignature(node: FishingNodeView): number {
+  let hash = HASH_INIT;
+  hash = hashNumber(hash, node.floor);
+  hash = hashNumber(hash, node.x);
+  hash = hashNumber(hash, node.y);
+  hash = hashNumber(hash, node.approachX);
+  hash = hashNumber(hash, node.approachY);
+  return hash;
+}
+
+function miningNodeViewSignature(node: MiningNodeView): number {
+  let hash = fishingNodeViewSignature(node);
+  hash = hashString(hash, node.kind);
+  return hash;
+}
+
+function herbNodeViewSignature(node: HerbNodeView): number {
+  let hash = HASH_INIT;
+  hash = hashNumber(hash, node.floor);
+  hash = hashNumber(hash, node.x);
+  hash = hashNumber(hash, node.y);
+  hash = hashNumber(hash, node.approachX);
+  hash = hashNumber(hash, node.approachY);
+  hash = hashBool(hash, node.active);
+  hash = hashNumber(hash, node.requiredLevel);
+  return hash;
+}
+
+function fireViewSignature(fire: FireView): number {
+  let hash = HASH_INIT;
+  hash = hashNumber(hash, fire.floor);
+  hash = hashNumber(hash, fire.x);
+  hash = hashNumber(hash, fire.y);
+  hash = hashNumber(hash, Math.ceil(fire.remainingMs / 1000));
+  return hash;
+}
+
+const HASH_INIT = 2166136261;
+
+function hashNumber(hash: number, value: number): number {
+  return hashMix(hash, Math.round(value * 1000));
+}
+
+function hashBool(hash: number, value: boolean): number {
+  return hashMix(hash, value ? 1 : 0);
+}
+
+function hashString(hash: number, value: string): number {
+  for (let i = 0; i < value.length; i += 1) {
+    hash = hashMix(hash, value.charCodeAt(i));
+  }
+  return hashMix(hash, 0);
+}
+
+function hashAction(hash: number, action: ActionView | null): number {
+  if (!action) return hashMix(hash, 0);
+  hash = hashString(hash, action.type);
+  hash = hashString(hash, action.treeId ?? action.nodeId ?? action.fireId ?? "");
+  return hash;
+}
+
+function hashBuffs(hash: number, buffs: BuffsView | undefined): number {
+  if (!buffs) return hashMix(hash, 0);
+  hash = hashNumber(hash, Math.ceil(buffs.wellFed / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.foodRegen / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.sprint / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.secondWind / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.ironClad / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.fleetFoot / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.slowed / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.stunned / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.weakened / 100));
+  return hash;
+}
+
+function hashMix(hash: number, value: number): number {
+  return Math.imul(hash ^ value, 16777619) >>> 0;
 }
 
 function actionView(a: PlayerAction): ActionView {
@@ -2085,6 +2538,7 @@ function actionView(a: PlayerAction): ActionView {
 }
 
 function serializePlayer(player: ServerPlayer): PlayerView {
+  const privateView = serializePlayerPrivate(player);
   return {
     id: player.id,
     name: player.name,
@@ -2107,14 +2561,69 @@ function serializePlayer(player: ServerPlayer): PlayerView {
     dead: player.dead,
     action: player.action ? actionView(player.action) : null,
     buffs: serializeBuffs(player),
-    inventory: serializeInventory(player.inventory),
-    quests: serializeQuests(player),
-    skills: serializeSkills(player),
+    inventory: privateView.inventory,
+    quests: privateView.quests,
+    skills: privateView.skills,
     abilities: serializeAbilities(player),
-    unlockedClasses: [...player.unlockedClasses],
-    weight: Math.round(carriedWeight(player)),
+    unlockedClasses: privateView.unlockedClasses,
+    weight: privateView.weight,
     maxWeight: WEIGHT_SOFT_CAP
   };
+}
+
+function serializePlayerPrivate(player: ServerPlayer): PlayerPrivateViewCache {
+  const inventorySignature = inventoryCacheSignature(player.inventory);
+  const questsSignature = `${questCacheSignature(player)}|inv:${inventorySignature}`;
+  const skillsSignature = skillCacheSignature(player);
+  const classesSignature = player.unlockedClasses.join("|");
+  const cached = privatePlayerViewCache.get(player);
+  if (
+    cached &&
+    cached.inventorySignature === inventorySignature &&
+    cached.questsSignature === questsSignature &&
+    cached.skillsSignature === skillsSignature &&
+    cached.classesSignature === classesSignature
+  ) {
+    return cached;
+  }
+  const next: PlayerPrivateViewCache = {
+    inventorySignature,
+    inventory: cached?.inventorySignature === inventorySignature ? cached.inventory : serializeInventory(player.inventory),
+    questsSignature,
+    quests: cached?.questsSignature === questsSignature ? cached.quests : serializeQuests(player),
+    skillsSignature,
+    skills: cached?.skillsSignature === skillsSignature ? cached.skills : serializeSkills(player),
+    classesSignature,
+    unlockedClasses: cached?.classesSignature === classesSignature ? cached.unlockedClasses : [...player.unlockedClasses],
+    weight: cached?.inventorySignature === inventorySignature ? cached.weight : Math.round(carriedWeight(player))
+  };
+  privatePlayerViewCache.set(player, next);
+  return next;
+}
+
+function serializePlayerPublicCached(player: ServerPlayer): PlayerView {
+  const cached = publicPlayerViewCache.get(player.id);
+  if (cached) return cached;
+  const view = serializePlayerPublic(player);
+  publicPlayerViewCache.set(player.id, view);
+  return view;
+}
+
+function serializePlayerPublic(player: ServerPlayer): PlayerView {
+  return {
+    id: player.id,
+    name: player.name,
+    classKey: player.classKey,
+    floor: player.floor,
+    x: round(player.x),
+    y: round(player.y),
+    dir: player.dir,
+    moving: player.moving,
+    hp: Math.round(player.hp),
+    maxHp: player.maxHp,
+    dead: player.dead,
+    action: player.action ? actionView(player.action) : null
+  } as PlayerView;
 }
 
 function serializeAbilities(player: ServerPlayer): AbilityView[] {
@@ -2169,17 +2678,14 @@ function serializeNpc(npc: NpcRuntime): NpcView {
 }
 
 function serializeTree(tree: TreeNodeRuntime): TreeView {
-  const spec = treeTypeSpec(tree);
   return {
     id: tree.id,
     type: tree.type,
-    label: spec.label,
-    requiredLevel: spec.requiredLevel,
     floor: tree.floor,
     x: tree.x,
     y: tree.y,
     active: tree.active
-  };
+  } as TreeView;
 }
 
 function serializeFishingNode(node: { id: string; floor: number; x: number; y: number; approachX: number; approachY: number }): FishingNodeView {
@@ -2270,8 +2776,9 @@ function eventVisibleTo(viewer: ServerPlayer, item: GameEvent): boolean {
   return inInterestRange(viewer, { floor: item.floor, x: item.x, y: item.y });
 }
 
-function persistPlayerToDb(player: ServerPlayer): void {
-  db.players[player.name.toLowerCase()] = {
+function persistPlayerToDb(player: ServerPlayer): string {
+  const key = player.name.toLowerCase();
+  db.players[key] = {
     name: player.name,
     classKey: player.classKey,
     floor: player.floor,
@@ -2292,25 +2799,62 @@ function persistPlayerToDb(player: ServerPlayer): void {
     unlockedClasses: [...player.unlockedClasses],
     updatedAt: new Date().toISOString()
   };
+  return key;
 }
 
 function persistPlayer(player: ServerPlayer): void {
-  persistPlayerToDb(player);
+  dirtyPlayerKeys.add(persistPlayerToDb(player));
   queueSave();
 }
 
 function persistOnlinePlayers(): void {
-  for (const session of clients.values()) persistPlayerToDb(session.player);
+  for (const session of clients.values()) dirtyPlayerKeys.add(persistPlayerToDb(session.player));
   queueSave();
 }
 
 function loadDb(): Database {
-  if (!existsSync(SAVE_FILE)) return { players: {} };
+  const players: Record<string, SavedPlayer> = {};
+  loadLegacyDb(players);
+  loadPlayerFiles(players);
+  return { players };
+}
+
+function loadLegacyDb(players: Record<string, SavedPlayer>): void {
+  if (existsSync(LEGACY_MIGRATION_MARKER) || !existsSync(SAVE_FILE)) return;
   try {
-    return JSON.parse(readFileSync(SAVE_FILE, "utf8")) as Database;
-  } catch {
-    return { players: {} };
+    const legacy = JSON.parse(readFileSync(SAVE_FILE, "utf8")) as Partial<Database>;
+    Object.assign(players, legacy.players ?? {});
+    migrateLegacyPlayers(players);
+  } catch (error) {
+    console.error("Failed to load legacy player database:", error);
   }
+}
+
+function loadPlayerFiles(players: Record<string, SavedPlayer>): void {
+  for (const file of readdirSync(PLAYER_DIR)) {
+    if (!file.endsWith(".json")) continue;
+    const key = decodeURIComponent(file.slice(0, -".json".length));
+    try {
+      players[key] = JSON.parse(readFileSync(join(PLAYER_DIR, file), "utf8")) as SavedPlayer;
+    } catch (error) {
+      console.error(`Failed to load player save ${file}:`, error);
+    }
+  }
+}
+
+function migrateLegacyPlayers(players: Record<string, SavedPlayer>): void {
+  try {
+    for (const [key, player] of Object.entries(players)) {
+      writeFileSync(playerFilePath(key), JSON.stringify(player, null, 2));
+    }
+    writeFileSync(LEGACY_MIGRATION_MARKER, `migratedAt=${new Date().toISOString()}\n`);
+  } catch (error) {
+    console.error("Failed to migrate legacy player database:", error);
+  }
+}
+
+function playerFilePath(key: string): string {
+  return join(PLAYER_DIR, `${encodeURIComponent(key)}.json`);
 }
 
 function queueSave(): void {
@@ -2319,13 +2863,22 @@ function queueSave(): void {
 }
 
 async function flushSaveQueue(): Promise<void> {
-  if (saveInFlight || !saveQueued) return;
+  if (saveInFlight || !saveQueued || dirtyPlayerKeys.size === 0) return;
   saveQueued = false;
   saveInFlight = true;
+  const keys = [...dirtyPlayerKeys];
+  dirtyPlayerKeys.clear();
   try {
-    await writeFile(SAVE_FILE, JSON.stringify(db, null, 2));
+    await Promise.all(
+      keys.map((key) => {
+        const player = db.players[key];
+        if (!player) return Promise.resolve();
+        return writeFile(playerFilePath(key), JSON.stringify(player, null, 2));
+      })
+    );
   } catch (error) {
     console.error("Failed to save player data:", error);
+    for (const key of keys) dirtyPlayerKeys.add(key);
   } finally {
     saveInFlight = false;
     if (saveQueued) void flushSaveQueue();
@@ -2426,6 +2979,22 @@ function normalizeInventory(saved: unknown): InventorySlot[] {
     inventory[index] = { id, qty: Math.max(1, Math.floor(Number(item?.qty ?? 1))) };
   });
   return inventory;
+}
+
+function inventoryCacheSignature(inventory: InventorySlot[]): string {
+  return inventory.map((item) => (item ? `${item.id}:${item.qty}` : "")).join("|");
+}
+
+function questCacheSignature(player: ServerPlayer): string {
+  return Object.entries(player.quests)
+    .map(([id, state]) => `${id}:${Number(state.accepted)}:${state.progress}:${Number(state.complete)}:${Number(state.claimed)}`)
+    .join("|");
+}
+
+function skillCacheSignature(player: ServerPlayer): string {
+  return Object.entries(player.skills)
+    .map(([id, state]) => `${id}:${Math.floor(state.xp)}`)
+    .join("|");
 }
 
 function serializeInventory(inventory: InventorySlot[] = []): Array<InventoryItemView | null> {
@@ -2639,22 +3208,47 @@ function createSpatialIndex(): SpatialIndex {
   return { players: new Map(), monsters: new Map(), corpses: new Map(), npcs: new Map(), trees: new Map(), fires: new Map(), cellCount: 0 };
 }
 
-function rebuildSpatialIndex(): void {
+function createStaticSpatialIndex(): StaticSpatialIndex {
+  return { trees: new Map(), fishingNodes: new Map(), miningNodes: new Map(), herbNodes: new Map(), cellCount: 0 };
+}
+
+function rebuildStaticSpatialIndex(): void {
+  staticSpatial = createStaticSpatialIndex();
+  for (const tree of treeNodes.values()) addToSpatial(staticSpatial.trees, tree);
+  for (const node of FISHING_NODES) addToSpatial(staticSpatial.fishingNodes, node);
+  for (const node of MINING_NODES) addToSpatial(staticSpatial.miningNodes, node);
+  for (const node of herbNodes.values()) addToSpatial(staticSpatial.herbNodes, node);
+  staticSpatial.cellCount =
+    staticSpatial.trees.size +
+    staticSpatial.fishingNodes.size +
+    staticSpatial.miningNodes.size +
+    staticSpatial.herbNodes.size;
+}
+
+function rebuildSpatialIndex(activeFloors: Set<number>): void {
   spatial = createSpatialIndex();
   for (const { player } of clients.values()) addToSpatial(spatial.players, player);
-  for (const monster of monsters.values()) {
-    if (!monster.deadUntil) addToSpatial(spatial.monsters, monster);
+  for (const floor of activeFloors) {
+    const floorMonsters = monstersByFloor.get(floor);
+    if (!floorMonsters) continue;
+    for (const monster of floorMonsters) {
+      if (!monster.deadUntil) addToSpatial(spatial.monsters, monster);
+    }
   }
-  for (const corpse of corpses.values()) addToSpatial(spatial.corpses, corpse);
-  for (const npc of npcs.values()) addToSpatial(spatial.npcs, npc);
-  for (const tree of treeNodes.values()) addToSpatial(spatial.trees, tree);
-  for (const fire of fires.values()) addToSpatial(spatial.fires, fire);
+  for (const corpse of corpses.values()) {
+    if (activeFloors.has(corpse.floor)) addToSpatial(spatial.corpses, corpse);
+  }
+  for (const npc of npcs.values()) {
+    if (activeFloors.has(npc.floor)) addToSpatial(spatial.npcs, npc);
+  }
+  for (const fire of fires.values()) {
+    if (activeFloors.has(fire.floor)) addToSpatial(spatial.fires, fire);
+  }
   spatial.cellCount =
     spatial.players.size +
     spatial.monsters.size +
     spatial.corpses.size +
     spatial.npcs.size +
-    spatial.trees.size +
     spatial.fires.size;
 }
 

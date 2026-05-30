@@ -247,14 +247,32 @@ export interface StateMetrics {
 export interface StateSnapshot {
   type: "state";
   players: PlayerView[];
+  playersFull: boolean;
+  removedPlayerIds: string[];
   monsters: MonsterView[];
+  monstersFull: boolean;
+  removedMonsterIds: string[];
   corpses: CorpseView[];
+  corpsesFull: boolean;
+  removedCorpseIds: string[];
   npcs: NpcView[];
+  npcsFull: boolean;
+  removedNpcIds: string[];
   trees: TreeView[];
+  treesFull: boolean;
+  removedTreeIds: string[];
   fishingNodes: FishingNodeView[];
+  fishingNodesFull: boolean;
+  removedFishingNodeIds: string[];
   miningNodes: MiningNodeView[];
+  miningNodesFull: boolean;
+  removedMiningNodeIds: string[];
   herbNodes: HerbNodeView[];
+  herbNodesFull: boolean;
+  removedHerbNodeIds: string[];
   fires: FireView[];
+  firesFull: boolean;
+  removedFireIds: string[];
   events: GameEvent[];
   metrics: StateMetrics;
 }
