@@ -343,6 +343,7 @@ const dom = {
   mapCanvas: el<HTMLCanvasElement>("#mapCanvas"),
   mapHint: el<HTMLElement>("#mapHint"),
   mapCloseButton: el<HTMLButtonElement>("#mapCloseButton"),
+  mapBackButton: el<HTMLButtonElement>("#mapBackButton"),
   itemPopover: el<HTMLElement>("#itemPopover"),
   death: el<HTMLElement>("#death"),
   chatLog: el<HTMLElement>("#chatLog"),
@@ -368,11 +369,12 @@ dom.classesCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.vendorCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.alchemistCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.mapCloseButton.addEventListener("click", () => hideCenterPanels());
-dom.mapCanvas.addEventListener("click", () => {
-  showFactionMarkers = !showFactionMarkers;
+dom.mapBackButton.addEventListener("click", () => {
+  mapView = "region";
   const me = self();
   if (me) renderMapScreen(me);
 });
+dom.mapCanvas.addEventListener("click", (event) => handleMapClick(event));
 dom.menuBackdrop.addEventListener("click", () => hideCenterPanels());
 dom.dialogueNextButton.addEventListener("click", advanceDialogue);
 [dom.vendor, dom.alchemist].forEach((panel) => {
@@ -3649,6 +3651,54 @@ let fogSet = new Set<number>();
 let fogDirty = false;
 let lastFogSave = 0;
 let showFactionMarkers = true;
+let mapView: "region" | "zone" = "region";
+let mapZoneFloor = 0;
+
+// The Broken Reach laid out as it sits in the travel graph: a cross centred on
+// Waystone. col/row are abstract region cells; floor ties a node to its map.
+interface RegionNode {
+  floor: number;
+  col: number;
+  row: number;
+  label: string;
+  short: string;
+  color: string;
+  kind: "town" | "forest" | "marsh" | "badlands" | "grave" | "crypt" | "desert" | "beach" | "jungle";
+}
+const REGION_NODES: RegionNode[] = [
+  { floor: 4, col: 2, row: 0, label: "Northwatch", short: "Northwatch", color: "#9aa7b6", kind: "town" },
+  { floor: 3, col: 2, row: 1, label: "Northwood", short: "Northwood", color: "#3c6b35", kind: "forest" },
+  { floor: 5, col: 0, row: 1, label: "The Sunken Marsh", short: "Marsh", color: "#4a5b3a", kind: "marsh" },
+  { floor: 6, col: 4, row: 1, label: "The Searing Badlands", short: "Badlands", color: "#b5703a", kind: "badlands" },
+  { floor: 0, col: 2, row: 2, label: "Waystone", short: "Waystone", color: "#c2a878", kind: "town" },
+  { floor: 1, col: 2, row: 3, label: "Southgate Cemetery", short: "Cemetery", color: "#6f6f5c", kind: "grave" },
+  { floor: 2, col: 3, row: 3, label: "Ashen Crypt", short: "Crypt", color: "#5a4f63", kind: "crypt" },
+  { floor: 7, col: 2, row: 4, label: "The Sunken Desert", short: "Desert", color: "#d8b367", kind: "desert" },
+  { floor: 8, col: 2, row: 5, label: "The Sunken Beach", short: "Beach", color: "#e6d7a8", kind: "beach" },
+  { floor: 9, col: 4, row: 5, label: "The Untamed Jungle", short: "Jungle", color: "#2f6b35", kind: "jungle" }
+];
+// [from, to, oneWay]: a route ink only once both ends are charted; one-way
+// drops draw dashed.
+const REGION_EDGES: Array<[number, number, boolean]> = [
+  [0, 3, false],
+  [3, 4, false],
+  [3, 5, false],
+  [3, 6, false],
+  [5, 0, true],
+  [6, 4, true],
+  [0, 1, false],
+  [1, 2, false],
+  [1, 7, false],
+  [7, 0, true],
+  [7, 8, false],
+  [8, 9, false]
+];
+const REGION_W = 540;
+const REGION_H = 600;
+
+function regionNodeCenter(node: RegionNode): { x: number; y: number } {
+  return { x: 70 + node.col * 100, y: 55 + node.row * 98 };
+}
 
 function fogStorageKey(name: string, floor: number): string {
   return `tib.fog.${name}.${floor}`;
@@ -3707,6 +3757,31 @@ function updateFog(me: PlayerView, time: number): void {
   }
 }
 
+// Revealed tiles for any floor: the live in-memory set for the floor you're on,
+// otherwise the persisted set so the survey remembers floors between visits.
+function revealedFor(name: string, floor: number): Set<number> {
+  if (fogName === name && fogFloor === floor) return fogSet;
+  const out = new Set<number>();
+  try {
+    const raw = localStorage.getItem(fogStorageKey(name, floor));
+    if (raw) for (const idx of JSON.parse(raw) as number[]) out.add(idx);
+  } catch {
+    // Non-fatal: an unreadable floor just reads as uncharted.
+  }
+  return out;
+}
+
+// A floor counts as "visited" the moment the survey has inked any of it.
+function isCharted(name: string, floor: number): boolean {
+  if (fogName === name && fogFloor === floor) return fogSet.size > 0;
+  try {
+    const raw = localStorage.getItem(fogStorageKey(name, floor));
+    return Boolean(raw) && raw !== "[]";
+  } catch {
+    return false;
+  }
+}
+
 function toggleMapScreen(): void {
   if (!dom.mapScreen.classList.contains("hidden")) {
     hideCenterPanels();
@@ -3718,8 +3793,40 @@ function toggleMapScreen(): void {
     addChat("You have no survey to read. Merchant Nicolas sells the Inked Survey of The Broken Reach.");
     return;
   }
+  mapView = "region";
   showCenterPanel(dom.mapScreen);
   renderMapScreen(me);
+}
+
+function canvasPoint(event: MouseEvent): { x: number; y: number } {
+  const rect = dom.mapCanvas.getBoundingClientRect();
+  return {
+    x: ((event.clientX - rect.left) / rect.width) * dom.mapCanvas.width,
+    y: ((event.clientY - rect.top) / rect.height) * dom.mapCanvas.height
+  };
+}
+
+function handleMapClick(event: MouseEvent): void {
+  const me = self();
+  if (!me) return;
+  if (mapView === "zone") {
+    // In a zone, clicking toggles its faction markers.
+    showFactionMarkers = !showFactionMarkers;
+    renderMapScreen(me);
+    return;
+  }
+  // In the region view, clicking a charted biome zooms into its detail map.
+  const point = canvasPoint(event);
+  for (const node of REGION_NODES) {
+    if (!isCharted(me.name, node.floor)) continue;
+    const center = regionNodeCenter(node);
+    if (Math.hypot(point.x - center.x, point.y - center.y) <= 42) {
+      mapView = "zone";
+      mapZoneFloor = node.floor;
+      renderMapScreen(me);
+      return;
+    }
+  }
 }
 
 function parchmentTint(hex: string): string {
@@ -3753,21 +3860,37 @@ function markLandmark(ctx: CanvasRenderingContext2D, x: number, y: number, label
 }
 
 function renderMapScreen(me: PlayerView): void {
+  dom.mapBackButton.classList.toggle("hidden", mapView !== "zone");
+  if (mapView === "zone") renderZoneMap(me, mapZoneFloor);
+  else renderRegionMap(me);
+}
+
+// Aged-parchment backing shared by both views.
+function paintParchment(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = "#cdb487";
+  ctx.fillRect(0, 0, w, h);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "rgba(70, 50, 28, 0.6)";
+  ctx.strokeRect(2, 2, w - 4, h - 4);
+}
+
+function renderZoneMap(me: PlayerView, floor: number): void {
   const canvas = dom.mapCanvas;
+  if (canvas.width !== 520 || canvas.height !== 340) {
+    canvas.width = 520;
+    canvas.height = 340;
+  }
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   const cw = canvas.width;
   const ch = canvas.height;
   const sx = cw / MAP_COLS;
   const sy = ch / MAP_ROWS;
-  ctx.imageSmoothingEnabled = false;
+  paintParchment(ctx, cw, ch);
 
-  // Aged-parchment backing; un-inked tiles read as bare paper.
-  ctx.fillStyle = "#cdb487";
-  ctx.fillRect(0, 0, cw, ch);
-
-  const revealed = fogName === me.name && fogFloor === me.floor ? fogSet : new Set<number>();
-  const rows = makeFloorTiles(me.floor);
+  const revealed = revealedFor(me.name, floor);
+  const rows = makeFloorTiles(floor);
   let revealedCount = 0;
   for (let y = 0; y < MAP_ROWS; y += 1) {
     const row = rows[y] ?? "";
@@ -3779,14 +3902,9 @@ function renderMapScreen(me: PlayerView): void {
     }
   }
 
-  // Ink border vignette.
-  ctx.lineWidth = 4;
-  ctx.strokeStyle = "rgba(70, 50, 28, 0.6)";
-  ctx.strokeRect(2, 2, cw - 4, ch - 4);
-
   if (showFactionMarkers) {
     for (const npc of NPCS) {
-      if (npc.floor !== me.floor) continue;
+      if (npc.floor !== floor) continue;
       const label = FACTION_LANDMARKS[npc.id];
       if (!label) continue;
       if (!revealed.has(Math.floor(npc.y) * MAP_COLS + Math.floor(npc.x))) continue;
@@ -3794,8 +3912,8 @@ function renderMapScreen(me: PlayerView): void {
     }
   }
 
-  // Player dot — glows only once part of the sheet is charted.
-  if (revealedCount > 0) {
+  // Player dot only appears on the floor you actually stand on.
+  if (floor === me.floor && revealedCount > 0) {
     const px = me.x * sx;
     const py = me.y * sy;
     ctx.beginPath();
@@ -3811,12 +3929,190 @@ function renderMapScreen(me: PlayerView): void {
     ctx.stroke();
   }
 
-  dom.mapTitle.textContent = `${minimapZoneLabel(me.floor)} — The Broken Reach`;
+  dom.mapTitle.textContent = minimapZoneLabel(floor);
   const pct = Math.round((revealedCount / (MAP_COLS * MAP_ROWS)) * 100);
   dom.mapHint.textContent =
     revealedCount === 0
       ? "Uncharted. Walk the land to ink this sheet."
-      : `${pct}% charted · click to ${showFactionMarkers ? "hide" : "show"} faction markers · M to close`;
+      : `${pct}% charted · click to ${showFactionMarkers ? "hide" : "show"} faction markers · ‹ Region to zoom out`;
+}
+
+function renderRegionMap(me: PlayerView): void {
+  const canvas = dom.mapCanvas;
+  if (canvas.width !== REGION_W || canvas.height !== REGION_H) {
+    canvas.width = REGION_W;
+    canvas.height = REGION_H;
+  }
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  paintParchment(ctx, REGION_W, REGION_H);
+
+  ctx.font = "20px Georgia, serif";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#3a2410";
+  ctx.fillText("The Broken Reach", REGION_W / 2, 32);
+
+  // Known routes: only ink a road once both ends are charted.
+  for (const [from, to, oneWay] of REGION_EDGES) {
+    const a = REGION_NODES.find((n) => n.floor === from);
+    const b = REGION_NODES.find((n) => n.floor === to);
+    if (!a || !b) continue;
+    if (!isCharted(me.name, from) || !isCharted(me.name, to)) continue;
+    const pa = regionNodeCenter(a);
+    const pb = regionNodeCenter(b);
+    ctx.beginPath();
+    ctx.moveTo(pa.x, pa.y);
+    ctx.lineTo(pb.x, pb.y);
+    ctx.strokeStyle = "rgba(78, 54, 30, 0.7)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash(oneWay ? [5, 5] : []);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  let charted = 0;
+  for (const node of REGION_NODES) {
+    const center = regionNodeCenter(node);
+    const visited = isCharted(me.name, node.floor);
+    if (visited) charted += 1;
+    drawRegionNode(ctx, node, center, visited, node.floor === me.floor);
+  }
+
+  dom.mapTitle.textContent = "The Broken Reach";
+  dom.mapHint.textContent =
+    charted <= 1
+      ? "Travel the Reach to chart its lands. Click a charted region to zoom in."
+      : `${charted} of ${REGION_NODES.length} regions charted · click a region to zoom in`;
+}
+
+function drawRegionNode(
+  ctx: CanvasRenderingContext2D,
+  node: RegionNode,
+  center: { x: number; y: number },
+  visited: boolean,
+  here: boolean
+): void {
+  const rx = node.kind === "crypt" ? 26 : 38;
+  const ry = node.kind === "crypt" ? 20 : 30;
+  if (!visited) {
+    // Uncharted: a torn, blank patch of parchment — no name, no detail.
+    ctx.beginPath();
+    ctx.ellipse(center.x, center.y, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(120, 96, 60, 0.10)";
+    ctx.fill();
+    ctx.setLineDash([3, 4]);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(70, 50, 28, 0.35)";
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = "16px Georgia, serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(70, 50, 28, 0.4)";
+    ctx.fillText("?", center.x, center.y + 5);
+    return;
+  }
+
+  // Charted: an inked, illustrated region in its biome colour.
+  ctx.beginPath();
+  ctx.ellipse(center.x, center.y, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fillStyle = parchmentTint(node.color);
+  ctx.fill();
+  ctx.lineWidth = here ? 2.5 : 1.5;
+  ctx.strokeStyle = here ? "#f2e2b6" : "#3a2410";
+  ctx.stroke();
+  if (here) {
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#3a2410";
+    ctx.stroke();
+  }
+
+  drawBiomeMotif(ctx, node.kind, center.x, center.y - 2);
+
+  // "You are here" beacon.
+  if (here) {
+    ctx.beginPath();
+    ctx.arc(center.x, center.y - ry - 6, 4, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#2a2014";
+    ctx.stroke();
+  }
+
+  ctx.font = "12px Georgia, serif";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(247, 238, 214, 0.85)";
+  ctx.fillText(node.short, center.x + 1, center.y + ry + 14);
+  ctx.fillStyle = "#2a1c0e";
+  ctx.fillText(node.short, center.x, center.y + ry + 13);
+}
+
+// A few ink strokes per biome — enough to read at a glance, drawn not loaded.
+function drawBiomeMotif(ctx: CanvasRenderingContext2D, kind: RegionNode["kind"], x: number, y: number): void {
+  ctx.save();
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = "rgba(40, 28, 14, 0.75)";
+  ctx.fillStyle = "rgba(40, 28, 14, 0.7)";
+  const tree = (tx: number, ty: number): void => {
+    ctx.beginPath();
+    ctx.moveTo(tx, ty - 7);
+    ctx.lineTo(tx - 5, ty + 4);
+    ctx.lineTo(tx + 5, ty + 4);
+    ctx.closePath();
+    ctx.fill();
+  };
+  const wave = (wy: number): void => {
+    ctx.beginPath();
+    for (let i = -10; i <= 10; i += 2) {
+      const yy = wy + Math.sin(i / 2) * 2;
+      if (i === -10) ctx.moveTo(x + i, yy);
+      else ctx.lineTo(x + i, yy);
+    }
+    ctx.stroke();
+  };
+  if (kind === "town") {
+    ctx.beginPath();
+    ctx.moveTo(x - 7, y + 5);
+    ctx.lineTo(x - 7, y - 2);
+    ctx.lineTo(x, y - 8);
+    ctx.lineTo(x + 7, y - 2);
+    ctx.lineTo(x + 7, y + 5);
+    ctx.closePath();
+    ctx.stroke();
+  } else if (kind === "forest" || kind === "jungle") {
+    tree(x - 7, y);
+    tree(x + 7, y);
+    tree(x, y - 4);
+  } else if (kind === "marsh") {
+    wave(y - 3);
+    wave(y + 3);
+  } else if (kind === "badlands") {
+    ctx.beginPath();
+    ctx.moveTo(x - 10, y + 6);
+    ctx.lineTo(x - 3, y - 6);
+    ctx.lineTo(x + 1, y + 1);
+    ctx.lineTo(x + 5, y - 7);
+    ctx.lineTo(x + 11, y + 6);
+    ctx.stroke();
+  } else if (kind === "grave" || kind === "crypt") {
+    ctx.beginPath();
+    ctx.moveTo(x, y - 7);
+    ctx.lineTo(x, y + 6);
+    ctx.moveTo(x - 5, y - 2);
+    ctx.lineTo(x + 5, y - 2);
+    ctx.stroke();
+  } else if (kind === "desert") {
+    ctx.beginPath();
+    ctx.arc(x + 6, y - 5, 3, 0, Math.PI * 2);
+    ctx.stroke();
+    wave(y + 4);
+  } else if (kind === "beach") {
+    ctx.beginPath();
+    ctx.arc(x + 6, y - 5, 3, 0, Math.PI * 2);
+    ctx.stroke();
+    wave(y + 3);
+  }
+  ctx.restore();
 }
 
 function directionVector(dir: Direction): { x: number; y: number } {
