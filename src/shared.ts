@@ -86,7 +86,9 @@ export const ZONES: Record<ZoneId, Zone> = {
   northTown: { id: "northTown", label: "Northwatch", floor: 4, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   marsh: { id: "marsh", label: "The Sunken Marsh", floor: 5, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   badlands: { id: "badlands", label: "The Searing Badlands", floor: 6, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
-  desert: { id: "desert", label: "The Sunken Desert", floor: 7, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 }
+  desert: { id: "desert", label: "The Sunken Desert", floor: 7, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
+  beach: { id: "beach", label: "The Sunken Beach", floor: 8, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
+  jungle: { id: "jungle", label: "The Untamed Jungle", floor: 9, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 }
 };
 const FLOOR_TILE_CACHE = new Map<number, string[]>();
 
@@ -423,6 +425,41 @@ export function makeFloorTiles(floor: number): string[] {
     // Oasis Trade Outpost (south) — safe, with palm + tent and a passage to Waystone.
     fillRect(rows, 20, 26, 11, 5, "a");
     setTile(rows, 25, 31, "H");
+    setTile(rows, 10, 32, "Y"); // coastal trail to the Sunken Beach (floor 8)
+  }
+
+  if (floor === 8) {
+    // The Sunken Beach: a wide, open coast of white sand with the impassable sea
+    // to the south and shipwreck ruins for sparse cover.
+    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "e"); // white sand
+    fillRect(rows, 1, 24, MAP_COLS - 2, 8, "I"); // the sea (impassable, sight-open)
+    fillRect(rows, 12, 18, 4, 4, "I"); // tidal inlet
+    fillRect(rows, 36, 16, 5, 4, "I"); // tidal inlet
+    for (const [rx, ry] of [[10, 8], [20, 6], [30, 10], [40, 8], [16, 12], [34, 14], [25, 12]] as const) setTile(rows, rx, ry, "U");
+    setTile(rows, 25, 1, "Y"); // north trail to/from the desert
+    setTile(rows, 50, 14, "j"); // east trail to the Untamed Jungle (floor 9)
+  }
+
+  if (floor === 9) {
+    // The Untamed Jungle: a claustrophobic maze of dense canopy walls and rivers,
+    // crossed by a narrow vine bridge, with a sealed vault deep inside.
+    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "E"); // dense jungle (wall + canopy)
+    setTile(rows, 1, 15, "j"); // west portal to/from the beach
+    // Winding 2-tile paths.
+    fillRect(rows, 2, 14, 9, 3, "y"); // west entry run
+    fillRect(rows, 8, 7, 3, 10, "y"); // turn north
+    fillRect(rows, 8, 7, 19, 3, "y"); // upper run east (reaches the bridge)
+    fillRect(rows, 21, 7, 3, 12, "y"); // turn south
+    fillRect(rows, 14, 16, 10, 3, "y"); // lower run west
+    fillRect(rows, 14, 16, 3, 10, "y"); // turn south to the vault
+    fillRect(rows, 10, 24, 12, 4, "y"); // vault clearing
+    setTile(rows, 15, 26, "K"); // sealed Jungle Vault (Tier-1 dungeon hook)
+    // Deep river + vine bridge chokepoint to the east jungle.
+    fillRect(rows, 27, 5, 3, 23, "i"); // river
+    fillRect(rows, 27, 8, 3, 2, "B"); // vine bridge (narrow choke)
+    fillRect(rows, 30, 7, 15, 3, "y"); // east jungle run
+    fillRect(rows, 42, 7, 3, 14, "y"); // east turn south
+    fillRect(rows, 34, 18, 11, 3, "y"); // east lower run
   }
 
   if (floor === 5) {
@@ -483,7 +520,8 @@ export function isBlockedTile(tile: string): boolean {
   return (
     tile === "#" || tile === "~" || tile === "W" || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o" ||
     tile === "X" || tile === "P" || // badlands cliff wall + pit
-    tile === "Q" || tile === "V" || tile === "U" // desert quicksand + oasis + ruin
+    tile === "Q" || tile === "V" || tile === "U" || // desert quicksand + oasis + ruin
+    tile === "I" || tile === "E" || tile === "i" // beach sea + jungle wall + jungle river
   );
 }
 
@@ -492,8 +530,11 @@ export function isBlockedTile(tile: string): boolean {
 // NOT — so projectiles skim over swamp water / badlands pits, while boulders and
 // cliffs give cover.
 export function isSightBlocked(tile: string): boolean {
-  // Quicksand (Q) and oasis water (V) do NOT block sight; ruins (U) do.
-  return tile === "#" || tile === "o" || tile === "O" || tile === "f" || tile === "r" || tile === "q" || tile === "X" || tile === "U";
+  // Open water/quicksand/pits do NOT block sight; solid walls/ruins/jungle do.
+  return (
+    tile === "#" || tile === "o" || tile === "O" || tile === "f" || tile === "r" || tile === "q" ||
+    tile === "X" || tile === "U" || tile === "E" // badlands cliff, ruin, jungle wall
+  );
 }
 
 export function isSafeZone(floor: number, x: number, y: number): boolean {
@@ -536,6 +577,10 @@ export function portalFor(floor: number, x: number, y: number): Portal | null {
   if (floor === 1 && tile === "G") return { floor: 7, x: 25.5, y: 2.5 };
   if (floor === 7 && tile === "G") return { floor: 1, x: 25.5, y: 30.5 };
   if (floor === 7 && tile === "H") return { floor: 0, x: 25.5, y: 27.5 }; // one-way passage into Waystone
+  if (floor === 7 && tile === "Y") return { floor: 8, x: 25.5, y: 2.5 };
+  if (floor === 8 && tile === "Y") return { floor: 7, x: 10.5, y: 31.5 };
+  if (floor === 8 && tile === "j") return { floor: 9, x: 2.5, y: 15.5 };
+  if (floor === 9 && tile === "j") return { floor: 8, x: 49.5, y: 14.5 };
   return null;
 }
 

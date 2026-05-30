@@ -269,7 +269,7 @@ function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; 
   player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
 
   clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now() });
-  socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5, 6, 7] }));
+  socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] }));
   event("system", `${player.name} entered the world.`);
 }
 
@@ -408,6 +408,10 @@ function updatePlayers(dt: number, now: number): void {
       player.portalReadyAt = now + 650;
       player.targetId = null;
       event("system", `${player.name} changes depth.`);
+    } else if (now >= player.portalReadyAt && tileAt(player.floor, Math.floor(player.x), Math.floor(player.y)) === "K") {
+      // The sealed Jungle Vault — a Tier-1 dungeon hook (no instance yet).
+      player.portalReadyAt = now + 4000;
+      event("float", "The Jungle Vault is sealed... for now.", player.x, player.y - 0.6, player.floor, "#c8e6a0");
     }
 
     if (now < player.foodRegenUntil && player.hp < player.maxHp) {

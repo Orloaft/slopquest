@@ -505,6 +505,8 @@ function preload(this: Phaser.Scene): void {
   this.load.image("swampTiles", "/swamp-tiles.png");
   this.load.image("badlandsTiles", "/badlands-tiles.png");
   this.load.image("desertTiles", "/desert-tiles.png");
+  this.load.image("beachTiles", "/beach-tiles.png");
+  this.load.image("jungleTiles", "/jungle-tiles.png");
   this.load.image("effectsSheet", "/effects.png");
   this.load.image("waterFishingSpots", "/water-fishing-spots.png");
   this.load.image("oreNodeSheet", "/ore-rock-gathering-nodes.png");
@@ -584,6 +586,15 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "desertTiles", "spriteOutpostTent", 1364, 854, 104, 84);
   makeSpriteTexture(this, "desertTiles", "spritePalm", 1456, 958, 62, 58);
   makeSpriteTexture(this, "desertTiles", "spriteDesertLedge", 22, 856, 66, 86);
+  // Sunken Beach (floor 8). Crops from assetsources/rejected/beach-biome-tiles.png.
+  makeTileTexture(this, "beachTiles", "tileBeachSand", 20, 99, 70, 72);
+  makeTileTexture(this, "beachTiles", "tileOcean", 1052, 101, 72, 72);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachHut", 1366, 860, 116, 118);
+  // Untamed Jungle (floor 9). Crops from assetsources/rejected/jungle-biome-tiles.png.
+  makeTileTexture(this, "jungleTiles", "tileJungle", 18, 97, 72, 74);
+  makeTileTexture(this, "jungleTiles", "tileJungleWall", 524, 100, 68, 82);
+  makeTileTexture(this, "jungleTiles", "tileJungleRiver", 1069, 100, 72, 72);
+  makeSpriteTexture(this, "jungleTiles", "spriteJungleVault", 676, 862, 120, 100);
 
   mapLayer = this.add.container(0, 0);
   entityLayer = this.add.container(0, 0);
@@ -2724,7 +2735,8 @@ function addTileDecorations(rows: string[]): void {
       if (tile === "Z") decorations.push({ key: "spriteBadlandsLedge", x: x + 0.5, y: y + 0.95, w: 54, h: 50 });
       if (tile === "U") decorations.push({ key: "spriteObelisk", x: x + 0.5, y: y + 0.95, w: 40, h: 64 });
       if (tile === "H") decorations.push({ key: "spriteDesertLedge", x: x + 0.5, y: y + 0.95, w: 52, h: 50 });
-      if (["N", "S", "T", "C", "M", "D", "G", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
+      if (tile === "K") decorations.push({ key: "spriteJungleVault", x: x + 0.5, y: y + 1.0, w: 96, h: 80 });
+      if (["N", "S", "T", "C", "M", "D", "G", "Y", "j", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
     }
   }
   decorations.sort((a, b) => a.y - b.y).forEach(placeMapSprite);
@@ -2814,6 +2826,18 @@ function addComposedMapObjects(floor: number): void {
     { key: "spriteObelisk", x: 40.5, y: 6.4, w: 38, h: 60 }
   ];
 
+  const beachObjects: DecorationSprite[] = [
+    { key: "spriteBeachHut", x: 44.5, y: 20.6, w: 120, h: 122 }, // driftwood hut + surfboard
+    { key: "spritePalm", x: 8.5, y: 5.4, w: 70, h: 66 },
+    { key: "spritePalm", x: 38.5, y: 4.6, w: 66, h: 62 }
+  ];
+
+  const jungleObjects: DecorationSprite[] = [
+    { key: "spriteSwampBoulder", x: 12.5, y: 10.2, w: 44, h: 36 },
+    { key: "spriteSwampBoulder", x: 23.5, y: 20.2, w: 44, h: 36 },
+    { key: "spriteObelisk", x: 19.5, y: 25.4, w: 38, h: 60 } // tribal totem by the vault
+  ];
+
   const objectsByFloor: Record<number, DecorationSprite[]> = {
     0: southTownObjects,
     1: cemeteryObjects,
@@ -2822,7 +2846,9 @@ function addComposedMapObjects(floor: number): void {
     4: northTownObjects,
     5: marshObjects,
     6: badlandsObjects,
-    7: desertObjects
+    7: desertObjects,
+    8: beachObjects,
+    9: jungleObjects
   };
   const objects = objectsByFloor[floor] ?? [];
   objects
@@ -3462,7 +3488,15 @@ function minimapTileColor(tile: string): string {
     V: "#2f7d8a", // oasis water (blocked)
     U: "#9a8a6a", // ruin (blocked, sight cover)
     G: "#d6ad4e", // desert portal (landmark)
-    H: "#e0c070" // oasis passage (landmark)
+    H: "#e0c070", // oasis passage (landmark)
+    e: "#e6d7a8", // beach sand
+    I: "#2f9bb0", // ocean (blocked, sight-open)
+    Y: "#d6ad4e", // beach portal (landmark)
+    j: "#d6ad4e", // beach<->jungle portal (landmark)
+    y: "#3c6b35", // jungle floor
+    E: "#26401f", // jungle wall (blocked)
+    i: "#274d44", // jungle river (blocked)
+    K: "#caa84e" // jungle vault (landmark)
   };
   return colors[tile] ?? "#3f6b3a";
 }
@@ -3665,7 +3699,15 @@ function tileBaseTexture(tile: string): string {
     V: "tileOasisWater",
     U: "tileSand",
     G: "tileSand",
-    H: "tileSand"
+    H: "tileSand",
+    e: "tileBeachSand",
+    I: "tileOcean",
+    Y: "tileBeachSand",
+    j: "tileBeachSand",
+    y: "tileJungle",
+    E: "tileJungleWall",
+    i: "tileJungleRiver",
+    K: "tileJungle"
   };
   return map[tile] ?? "tileGrass";
 }

@@ -210,3 +210,43 @@
   ranged: true
   weakenPct: 35
   weakenMs: 4000
+
+# --- The Sunken Beach (floor 8) ---
+- id: reef_prowler
+  name: Reef Prowler
+  maxHp: 34
+  speed: 4.0
+  damage: [6, 11]
+  attackMs: 820
+  xp: 32
+  gold: [5, 11]
+  aggro: 9
+  range: 1
+
+# --- The Untamed Jungle (floor 9) ---
+- id: venomous_stalker
+  name: Venomous Stalker
+  maxHp: 80
+  speed: 2.8
+  damage: [18, 28]
+  attackMs: 1100
+  xp: 70
+  gold: [14, 28]
+  aggro: 5
+  range: 1.05
+  burrow: true
+  stunMs: 900
+
+- id: totem_wraith
+  name: Ancient Totem Wraith
+  maxHp: 80
+  speed: 0
+  damage: [6, 11]
+  attackMs: 1800
+  xp: 60
+  gold: [12, 24]
+  aggro: 7
+  range: 6
+  ranged: true
+  slowPct: 25
+  slowMs: 2000
