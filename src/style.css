@@ -280,7 +280,9 @@ canvas {
   display: grid;
   width: 100vw;
   height: 100vh;
-  grid-template-rows: 140px 1fr 132px;
+  /* Top + bottom bars size to their content (no clipping); the world takes the
+     rest. Scrollable areas inside are capped so the bars can't grow unbounded. */
+  grid-template-rows: auto minmax(0, 1fr) auto;
   grid-template-areas:
     "top"
     "world"
@@ -335,6 +337,10 @@ canvas {
   align-items: stretch;
   gap: 10px;
   padding: 8px 10px;
+  /* Definite height so the feed/chat logs scroll inside their columns instead
+     of the flex:1 logs growing the whole bar (which clipped the chat input). */
+  height: 132px;
+  box-sizing: border-box;
 }
 
 /* --- Character Console (top-left): vitals + weight + menu buttons --- */
@@ -367,9 +373,15 @@ canvas {
 }
 .console .menu-buttons {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 5px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
   margin-top: 4px;
+}
+/* Compact, single-row menu so the console fits the top bar without clipping. */
+.console .menu-buttons button {
+  padding: 6px 2px;
+  font-size: 11px;
+  letter-spacing: -0.01em;
 }
 
 /* --- Centre stats (top-centre): chips + quest/buff trackers --- */
@@ -379,6 +391,9 @@ canvas {
   align-items: center;
   gap: 7px;
   min-width: 0;
+  /* Bound the centre column so a long quest list can't grow the top bar. */
+  max-height: 150px;
+  overflow-y: auto;
 }
 .frame-minimap {
   position: relative;
