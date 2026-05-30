@@ -165,6 +165,15 @@ interface SnapshotDelta<T extends SnapshotEntity> {
   visibleCount: number;
 }
 
+interface SnapshotMetricFrame {
+  clients: number;
+  monsters: number;
+  spatialCells: number;
+  tickMs: number;
+  snapshotMs: number;
+  bytesOutPerSecond: number;
+}
+
 interface SnapshotCategoryCache {
   initialized: boolean;
   signatures: Map<string, number>;
@@ -2417,19 +2426,31 @@ function broadcastState(): void {
   snapshotSequence += 1;
   const includeTrees = snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
   const forceFull = snapshotSequence % SNAPSHOT_FULL_EVERY === 0;
+  const metricFrame = snapshotMetricFrame();
   for (const session of clients.values()) {
     const { socket } = session;
     if (socket.readyState !== socket.OPEN) continue;
     if (socket.bufferedAmount > SOCKET_BACKPRESSURE_BYTES) continue;
 
-    const snapshot = buildSnapshotFor(session, includeTrees, forceFull);
+    const snapshot = buildSnapshotFor(session, includeTrees, forceFull, metricFrame);
     const raw = JSON.stringify(snapshot);
     metrics.bytesOutThisSecond += Buffer.byteLength(raw);
     socket.send(raw);
   }
 }
 
-function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: boolean): StateSnapshot {
+function snapshotMetricFrame(): SnapshotMetricFrame {
+  return {
+    clients: clients.size,
+    monsters: monsters.size,
+    spatialCells: spatial.cellCount + staticSpatial.cellCount,
+    tickMs: round(avg(metrics.tickSamples)),
+    snapshotMs: round(avg(metrics.snapshotSamples)),
+    bytesOutPerSecond: metrics.bytesOutPerSecond
+  };
+}
+
+function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: boolean, metricFrame: SnapshotMetricFrame): StateSnapshot {
   const viewer = session.player;
   const cache = snapshotCacheFor(session);
   const players: PlayerView[] = [];
@@ -2524,8 +2545,8 @@ function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: bo
     removedFireIds: firesDelta.removedIds,
     events: visibleEventsFor(viewer),
     metrics: {
-      clients: clients.size,
-      monsters: monsters.size,
+      clients: metricFrame.clients,
+      monsters: metricFrame.monsters,
       zone: zoneAt(viewer.floor, viewer.x, viewer.y),
       visiblePlayers: playersDelta.visibleCount,
       visibleMonsters: monstersDelta.visibleCount,
@@ -2534,10 +2555,10 @@ function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: bo
       visibleFishingNodes: fishingDelta.visibleCount,
       visibleMiningNodes: miningDelta.visibleCount,
       visibleFires: firesDelta.visibleCount,
-      spatialCells: spatial.cellCount + staticSpatial.cellCount,
-      tickMs: round(avg(metrics.tickSamples)),
-      snapshotMs: round(avg(metrics.snapshotSamples)),
-      bytesOutPerSecond: metrics.bytesOutPerSecond
+      spatialCells: metricFrame.spatialCells,
+      tickMs: metricFrame.tickMs,
+      snapshotMs: metricFrame.snapshotMs,
+      bytesOutPerSecond: metricFrame.bytesOutPerSecond
     }
   };
 }
