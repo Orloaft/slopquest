@@ -121,6 +121,11 @@ interface ResourceRespawn {
   id: string;
 }
 
+interface ActiveRegions {
+  floors: Set<number>;
+  cells: Set<string>;
+}
+
 type SnapshotEntity =
   | PlayerView
   | MonsterView
@@ -239,6 +244,7 @@ const TREE_SNAPSHOT_RADIUS = 32;
 const TREE_SNAPSHOT_RADIUS_SQ = TREE_SNAPSHOT_RADIUS ** 2;
 const METRIC_WINDOW = 60;
 const SPATIAL_CELL_SIZE = 8;
+const ACTIVE_REGION_RADIUS = SNAPSHOT_RADIUS + SPATIAL_CELL_SIZE;
 const TREE_RESPAWN_MS = 30000;
 const HERB_RESPAWN_MS = 25000;
 const HERB_GATHER_MS = 2600;
@@ -373,15 +379,13 @@ setInterval(() => {
   const dt = Math.min(0.08, (now - last) / 1000);
   last = now;
   const started = performance.now();
-  const activeFloors = occupiedFloors();
   updatePlayers(dt, now);
-  activeFloors.clear();
-  for (const { player } of clients.values()) activeFloors.add(player.floor);
-  updateNpcs(dt, now, activeFloors);
+  const activeRegions = occupiedRegions();
+  updateNpcs(dt, now, activeRegions);
   updateResourceRespawns(now);
-  updateFires(now, activeFloors);
-  rebuildSpatialIndex(activeFloors);
-  updateMonsters(dt, now, activeFloors);
+  updateFires(now, activeRegions);
+  rebuildSpatialIndex(activeRegions);
+  updateMonsters(dt, now, activeRegions);
   recordSample(metrics.tickSamples, performance.now() - started);
 }, 50);
 
@@ -589,18 +593,19 @@ function updatePlayers(dt: number, now: number): void {
   }
 }
 
-function updateMonsters(dt: number, now: number, activeFloors: Set<number>): void {
-  for (const floor of activeFloors) {
+function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): void {
+  for (const floor of activeRegions.floors) {
     const floorMonsters = monstersByFloor.get(floor);
     if (!floorMonsters) continue;
     for (const monster of floorMonsters) {
-    monster.moving = false;
-    if (monster.deadUntil) {
-      if (now >= monster.deadUntil) respawnMonster(monster);
-      continue;
-    }
-    const catalog = MONSTERS[monster.type];
-    if (!catalog) continue;
+      if (!isRegionActive(activeRegions, monster.floor, monster.x, monster.y)) continue;
+      monster.moving = false;
+      if (monster.deadUntil) {
+        if (now >= monster.deadUntil) respawnMonster(monster);
+        continue;
+      }
+      const catalog = MONSTERS[monster.type];
+      if (!catalog) continue;
 
     // Hidden burrower (Dust Burrower): inert and invisible until a player steps
     // adjacent, then it bursts out for heavy damage + a stun.
@@ -702,12 +707,29 @@ function updateMonsters(dt: number, now: number, activeFloors: Set<number>): voi
   }
 }
 
-function occupiedFloors(): Set<number> {
-  const floors = new Set<number>();
+function occupiedRegions(): ActiveRegions {
+  const regions: ActiveRegions = { floors: new Set(), cells: new Set() };
   for (const { player } of clients.values()) {
-    floors.add(player.floor);
+    regions.floors.add(player.floor);
+    markActiveRegion(regions, player.floor, player.x, player.y, ACTIVE_REGION_RADIUS);
   }
-  return floors;
+  return regions;
+}
+
+function markActiveRegion(regions: ActiveRegions, floor: number, x: number, y: number, radius: number): void {
+  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
+  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
+  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
+  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
+  for (let cy = minCy; cy <= maxCy; cy += 1) {
+    for (let cx = minCx; cx <= maxCx; cx += 1) {
+      regions.cells.add(`${floor}:${cx}:${cy}`);
+    }
+  }
+}
+
+function isRegionActive(regions: ActiveRegions, floor: number, x: number, y: number): boolean {
+  return regions.cells.has(spatialKey(floor, x, y));
 }
 
 // Apply per-tick status effects (currently the burning DoT) and let it kill.
@@ -778,7 +800,7 @@ const DIR_VECTORS: Record<Direction, Vec2> = {
 
 function monstersInRadius(floor: number, cx: number, cy: number, radius: number): ServerMonster[] {
   const hits: ServerMonster[] = [];
-  for (const monster of monsters.values()) {
+  for (const monster of querySpatial(spatial.monsters, floor, cx, cy, radius)) {
     if (monster.deadUntil || monster.floor !== floor) continue;
     if (Math.hypot(monster.x - cx, monster.y - cy) <= radius) hits.push(monster);
   }
@@ -805,7 +827,7 @@ function dashPlayer(player: ServerPlayer, tiles: number): void {
     const tx = startX + dir.x * step;
     const ty = startY + dir.y * step;
     if (isBlockedTile(tileAt(player.floor, tx, ty))) break;
-    const occupied = [...monsters.values()].some(
+    const occupied = querySpatial(spatial.monsters, player.floor, tx + 0.5, ty + 0.5, 1).some(
       (m) => !m.deadUntil && m.floor === player.floor && Math.floor(m.x) === tx && Math.floor(m.y) === ty
     );
     if (occupied) break;
@@ -1973,9 +1995,9 @@ function treeTypeForTile(floor: number, x: number, y: number): string {
   return "oak";
 }
 
-function updateNpcs(dt: number, now: number, activeFloors: Set<number>): void {
+function updateNpcs(dt: number, now: number, activeRegions: ActiveRegions): void {
   for (const npc of npcs.values()) {
-    if (!activeFloors.has(npc.floor)) continue;
+    if (!isRegionActive(activeRegions, npc.floor, npc.x, npc.y)) continue;
     const { homeX, homeY } = npc;
     if (homeX == null || homeY == null) continue;
     npc.moving = false;
@@ -2022,9 +2044,9 @@ function scheduleResourceRespawn(kind: ResourceRespawnKind, id: string, at: numb
   resourceRespawns.push({ kind, id, at });
 }
 
-function updateFires(now: number, activeFloors: Set<number>): void {
+function updateFires(now: number, activeRegions: ActiveRegions): void {
   for (const [id, fire] of fires) {
-    if (!activeFloors.has(fire.floor)) continue;
+    if (!isRegionActive(activeRegions, fire.floor, fire.x, fire.y)) continue;
     if (now >= fire.expiresAt) fires.delete(id);
   }
 }
@@ -3225,24 +3247,25 @@ function rebuildStaticSpatialIndex(): void {
     staticSpatial.herbNodes.size;
 }
 
-function rebuildSpatialIndex(activeFloors: Set<number>): void {
+function rebuildSpatialIndex(activeRegions: ActiveRegions): void {
   spatial = createSpatialIndex();
   for (const { player } of clients.values()) addToSpatial(spatial.players, player);
-  for (const floor of activeFloors) {
+  for (const floor of activeRegions.floors) {
     const floorMonsters = monstersByFloor.get(floor);
     if (!floorMonsters) continue;
     for (const monster of floorMonsters) {
+      if (!isRegionActive(activeRegions, monster.floor, monster.x, monster.y)) continue;
       if (!monster.deadUntil) addToSpatial(spatial.monsters, monster);
     }
   }
   for (const corpse of corpses.values()) {
-    if (activeFloors.has(corpse.floor)) addToSpatial(spatial.corpses, corpse);
+    if (isRegionActive(activeRegions, corpse.floor, corpse.x, corpse.y)) addToSpatial(spatial.corpses, corpse);
   }
   for (const npc of npcs.values()) {
-    if (activeFloors.has(npc.floor)) addToSpatial(spatial.npcs, npc);
+    if (isRegionActive(activeRegions, npc.floor, npc.x, npc.y)) addToSpatial(spatial.npcs, npc);
   }
   for (const fire of fires.values()) {
-    if (activeFloors.has(fire.floor)) addToSpatial(spatial.fires, fire);
+    if (isRegionActive(activeRegions, fire.floor, fire.x, fire.y)) addToSpatial(spatial.fires, fire);
   }
   spatial.cellCount =
     spatial.players.size +
