@@ -1204,14 +1204,14 @@ function collectCorpse(player: ServerPlayer, corpse: Corpse): void {
 function nearbyNpcOfRole(player: ServerPlayer, role: string): NpcRuntime | null {
   let best: NpcRuntime | null = null;
   let bestDist = Infinity;
-  for (const npc of queryCellIndex(npcsByCell, player.floor, player.x, player.y, 2)) {
-    if (npc.role !== role || npc.floor !== player.floor) continue;
+  forEachCellIndex(npcsByCell, player.floor, player.x, player.y, 2, (npc) => {
+    if (npc.role !== role || npc.floor !== player.floor) return;
     const d = distance(player, npc);
     if (d <= 2 && d < bestDist) {
       best = npc;
       bestDist = d;
     }
-  }
+  });
   return best;
 }
 
@@ -2305,19 +2305,18 @@ function updateCellIndex<T extends Positioned>(index: Map<string, Set<T>>, entit
   addToCellIndex(index, entity);
 }
 
-function queryCellIndex<T extends Positioned>(index: Map<string, Set<T>>, floor: number, x: number, y: number, radius: number): T[] {
+function forEachCellIndex<T extends Positioned>(index: Map<string, Set<T>>, floor: number, x: number, y: number, radius: number, visit: (item: T) => void): void {
   const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
   const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
   const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
   const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
-  const results: T[] = [];
   for (let cy = minCy; cy <= maxCy; cy += 1) {
     for (let cx = minCx; cx <= maxCx; cx += 1) {
       const cellSet = index.get(`${floor}:${cx}:${cy}`);
-      if (cellSet) results.push(...cellSet);
+      if (!cellSet) continue;
+      for (const item of cellSet) visit(item);
     }
   }
-  return results;
 }
 
 function wanderMonster(monster: ServerMonster, catalog: { speed: number }, dt: number, now: number): void {
@@ -2581,7 +2580,12 @@ function snapshotDelta<T extends SnapshotEntity>(
     next.set(item.id, signature);
     if (full || cache.signatures.get(item.id) !== signature) changed.push(item);
   }
-  const removedIds = full ? [] : [...cache.signatures.keys()].filter((id) => !next.has(id));
+  const removedIds: string[] = [];
+  if (!full) {
+    for (const id of cache.signatures.keys()) {
+      if (!next.has(id)) removedIds.push(id);
+    }
+  }
   cache.initialized = true;
   cache.signatures = next;
   return { items: full ? visible : changed, removedIds, full, visibleCount: visible.length };
@@ -3493,7 +3497,11 @@ function firePlacementAtPlayer(player: ServerPlayer): Vec2 | null {
 }
 
 function fireTooClose(floor: number, x: number, y: number): boolean {
-  return queryCellIndex(firesByCell, floor, x, y, 1.2).some((fire) => fire.floor === floor && Math.hypot(fire.x - x, fire.y - y) < 1.2);
+  let tooClose = false;
+  forEachCellIndex(firesByCell, floor, x, y, 1.2, (fire) => {
+    if (!tooClose && fire.floor === floor && Math.hypot(fire.x - x, fire.y - y) < 1.2) tooClose = true;
+  });
+  return tooClose;
 }
 
 function isWellFed(player: ServerPlayer, now = performance.now()): boolean {
@@ -3637,9 +3645,10 @@ function removeFromSpatialAt<T extends Positioned>(index: Map<string, T[]>, enti
   const key = spatialKey(floor, x, y);
   const bucket = index.get(key);
   if (!bucket) return;
-  const next = bucket.filter((item) => item !== entity);
-  if (next.length) index.set(key, next);
-  else index.delete(key);
+  const indexInBucket = bucket.indexOf(entity);
+  if (indexInBucket < 0) return;
+  bucket.splice(indexInBucket, 1);
+  if (!bucket.length) index.delete(key);
 }
 
 function updateSpatialCell<T extends Positioned>(index: Map<string, T[]>, entity: T, oldFloor: number, oldX: number, oldY: number): void {
