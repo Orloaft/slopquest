@@ -14,7 +14,7 @@ test("travel loop: forest east portal -> badlands, and the ledge -> Northwatch",
   await page.goto("/?e2e");
   await join(page);
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 50.5, y: 16.5 }));
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 88.5, y: 29.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 6, null, { timeout: 8000 });
 
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 6, x: 46.5, y: 8.5 }));

@@ -14,6 +14,8 @@ import {
   TILE_SIZE,
   TREE_TYPES,
   ZONES,
+  floorCols,
+  floorRows,
   isBlockedTile,
   makeFloorTiles,
   tileAt,
@@ -765,7 +767,10 @@ function drawMap(floor: number): void {
   currentFloor = floor;
   mapLayer.removeAll(true);
   const rows = makeFloorTiles(floor);
-  const mapTexture = scene.add.renderTexture(0, 0, MAP_COLS * TILE_SIZE, MAP_ROWS * TILE_SIZE).setOrigin(0);
+  const cols = floorCols(floor);
+  const rowCount = floorRows(floor);
+  scene.cameras.main.setBounds(0, 0, cols * TILE_SIZE, rowCount * TILE_SIZE);
+  const mapTexture = scene.add.renderTexture(0, 0, cols * TILE_SIZE, rowCount * TILE_SIZE).setOrigin(0);
   for (let y = 0; y < rows.length; y += 1) {
     const row = rows[y];
     if (row === undefined) continue;
@@ -2587,7 +2592,7 @@ function startPathToTile(
 }
 
 function findReachableClickTile(floor: number, startX: number, startY: number, tx: number, ty: number): TilePoint | null {
-  if (!isInMap(tx, ty)) return null;
+  if (!isInMap(floor, tx, ty)) return null;
   if (canStandAtTile(floor, tx, ty)) return { x: tx, y: ty };
 
   const maxRadius = 4;
@@ -2644,7 +2649,7 @@ function findTilePath(floor: number, startX: number, startY: number, goalX: numb
   const open: PathNode[] = [startNode];
   const bestByKey = new Map<string, PathNode>([[tileKey(startX, startY), startNode]]);
   const closed = new Set<string>();
-  const maxVisited = MAP_COLS * MAP_ROWS;
+  const maxVisited = floorCols(floor) * floorRows(floor);
 
   while (open.length && closed.size < maxVisited) {
     open.sort((a, b) => a.f - b.f);
@@ -2692,11 +2697,11 @@ function pathNeighbors(floor: number, x: number, y: number): Array<{ x: number; 
 }
 
 function canStandAtTile(floor: number, tx: number, ty: number): boolean {
-  return isInMap(tx, ty) && !isBlockedTile(tileAt(floor, tx, ty));
+  return isInMap(floor, tx, ty) && !isBlockedTile(tileAt(floor, tx, ty));
 }
 
-function isInMap(tx: number, ty: number): boolean {
-  return tx >= 0 && ty >= 0 && tx < MAP_COLS && ty < MAP_ROWS;
+function isInMap(floor: number, tx: number, ty: number): boolean {
+  return tx >= 0 && ty >= 0 && tx < floorCols(floor) && ty < floorRows(floor);
 }
 
 function tileHeuristic(x: number, y: number, goalX: number, goalY: number): number {
@@ -3513,8 +3518,6 @@ function setBar(bar: HTMLElement, label: HTMLElement, value: number, max: number
 // player snapshot are already client-side, so this is pure presentation: no new
 // server traffic. The per-floor tile layer is rasterized once to a 1px-per-tile
 // offscreen canvas and cached; each frame we upscale that and stamp live blips.
-
-const MINIMAP_SCALE = 3;
 const minimapBaseCache = new Map<number, HTMLCanvasElement>();
 
 function minimapTileColor(tile: string): string {
@@ -3577,15 +3580,17 @@ function minimapTileColor(tile: string): string {
 function minimapBase(floor: number): HTMLCanvasElement {
   const cached = minimapBaseCache.get(floor);
   if (cached) return cached;
+  const cols = floorCols(floor);
+  const rowCount = floorRows(floor);
   const canvas = document.createElement("canvas");
-  canvas.width = MAP_COLS;
-  canvas.height = MAP_ROWS;
+  canvas.width = cols;
+  canvas.height = rowCount;
   const ctx = canvas.getContext("2d");
   if (ctx) {
     const rows = makeFloorTiles(floor);
-    for (let y = 0; y < MAP_ROWS; y += 1) {
+    for (let y = 0; y < rowCount; y += 1) {
       const row = rows[y] ?? "";
-      for (let x = 0; x < MAP_COLS; x += 1) {
+      for (let x = 0; x < cols; x += 1) {
         ctx.fillStyle = minimapTileColor(row[x] ?? "#");
         ctx.fillRect(x, y, 1, 1);
       }
@@ -3611,6 +3616,10 @@ function drawMinimap(me: PlayerView): void {
   ctx.clearRect(0, 0, w, h);
   ctx.drawImage(minimapBase(me.floor), 0, 0, w, h);
 
+  // Tiles-to-pixels scale, per floor (bigger floors pack into the same canvas).
+  const scaleX = w / floorCols(me.floor);
+  const scaleY = h / floorRows(me.floor);
+
   // Camera viewport rectangle, so the map shows what's currently on screen.
   const camera = scene?.cameras?.main;
   if (camera) {
@@ -3618,16 +3627,16 @@ function drawMinimap(me: PlayerView): void {
     ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
     ctx.lineWidth = 1;
     ctx.strokeRect(
-      (view.x / TILE_SIZE) * MINIMAP_SCALE,
-      (view.y / TILE_SIZE) * MINIMAP_SCALE,
-      (view.width / TILE_SIZE) * MINIMAP_SCALE,
-      (view.height / TILE_SIZE) * MINIMAP_SCALE
+      (view.x / TILE_SIZE) * scaleX,
+      (view.y / TILE_SIZE) * scaleY,
+      (view.width / TILE_SIZE) * scaleX,
+      (view.height / TILE_SIZE) * scaleY
     );
   }
 
   const dot = (x: number, y: number, radius: number, fill: string): void => {
     ctx.beginPath();
-    ctx.arc(x * MINIMAP_SCALE, y * MINIMAP_SCALE, radius, 0, Math.PI * 2);
+    ctx.arc(x * scaleX, y * scaleY, radius, 0, Math.PI * 2);
     ctx.fillStyle = fill;
     ctx.fill();
   };
@@ -3646,8 +3655,8 @@ function drawMinimap(me: PlayerView): void {
   }
 
   // Self marker: white dot with a dark outline plus a tick in the facing dir.
-  const sx = me.x * MINIMAP_SCALE;
-  const sy = me.y * MINIMAP_SCALE;
+  const sx = me.x * scaleX;
+  const sy = me.y * scaleY;
   ctx.beginPath();
   ctx.arc(sx, sy, 3, 0, Math.PI * 2);
   ctx.fillStyle = "#ffffff";
@@ -3770,14 +3779,16 @@ function updateFog(me: PlayerView, time: number): void {
     saveFog();
     loadFog(me.name, me.floor);
   }
+  const cols = floorCols(me.floor);
+  const rowCount = floorRows(me.floor);
   const cx = Math.floor(me.x);
   const cy = Math.floor(me.y);
   for (let dy = -FOG_RADIUS; dy <= FOG_RADIUS; dy += 1) {
     for (let dx = -FOG_RADIUS; dx <= FOG_RADIUS; dx += 1) {
       const x = cx + dx;
       const y = cy + dy;
-      if (x < 0 || y < 0 || x >= MAP_COLS || y >= MAP_ROWS) continue;
-      const idx = y * MAP_COLS + x;
+      if (x < 0 || y < 0 || x >= cols || y >= rowCount) continue;
+      const idx = y * cols + x;
       if (!fogSet.has(idx)) {
         fogSet.add(idx);
         fogDirty = true;
@@ -3918,17 +3929,19 @@ function renderZoneMap(me: PlayerView, floor: number): void {
   if (!ctx) return;
   const cw = canvas.width;
   const ch = canvas.height;
-  const sx = cw / MAP_COLS;
-  const sy = ch / MAP_ROWS;
+  const cols = floorCols(floor);
+  const rowCount = floorRows(floor);
+  const sx = cw / cols;
+  const sy = ch / rowCount;
   paintParchment(ctx, cw, ch);
 
   const revealed = revealedFor(me.name, floor);
   const rows = makeFloorTiles(floor);
   let revealedCount = 0;
-  for (let y = 0; y < MAP_ROWS; y += 1) {
+  for (let y = 0; y < rowCount; y += 1) {
     const row = rows[y] ?? "";
-    for (let x = 0; x < MAP_COLS; x += 1) {
-      if (!revealed.has(y * MAP_COLS + x)) continue;
+    for (let x = 0; x < cols; x += 1) {
+      if (!revealed.has(y * cols + x)) continue;
       revealedCount += 1;
       ctx.fillStyle = parchmentTint(minimapTileColor(row[x] ?? "#"));
       ctx.fillRect(Math.floor(x * sx), Math.floor(y * sy), Math.ceil(sx), Math.ceil(sy));
@@ -3940,7 +3953,7 @@ function renderZoneMap(me: PlayerView, floor: number): void {
       if (npc.floor !== floor) continue;
       const label = FACTION_LANDMARKS[npc.id];
       if (!label) continue;
-      if (!revealed.has(Math.floor(npc.y) * MAP_COLS + Math.floor(npc.x))) continue;
+      if (!revealed.has(Math.floor(npc.y) * cols + Math.floor(npc.x))) continue;
       markLandmark(ctx, npc.x * sx, npc.y * sy, label);
     }
   }
@@ -3963,7 +3976,7 @@ function renderZoneMap(me: PlayerView, floor: number): void {
   }
 
   dom.mapTitle.textContent = minimapZoneLabel(floor);
-  const pct = Math.round((revealedCount / (MAP_COLS * MAP_ROWS)) * 100);
+  const pct = Math.round((revealedCount / (cols * rowCount)) * 100);
   dom.mapHint.textContent =
     revealedCount === 0
       ? "Uncharted. Walk the land to ink this sheet."

@@ -92,12 +92,12 @@ test("gathering trains Foraging and heavy loads register as weight", async ({ pa
   await joinFreshCharacter(page);
 
   // Foraging XP from a herb patch.
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 0, x: 10.5, y: 10.5 }));
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 12.5, y: 9.5 }));
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
-    return Boolean(me && me.floor === 0 && Math.hypot(me.x - 10.5, me.y - 10.5) < 0.6);
+    return Boolean(me && me.floor === 3 && Math.hypot(me.x - 12.5, me.y - 9.5) < 0.6);
   });
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "gatherHerb", id: "herb-0-11-10" }));
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "gatherHerb", id: "herb-3-11-9" }));
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.skills.find((s) => s.id === "foraging")?.xp ?? 0) > 0);
 
   // A heavy stack pushes carried weight past the soft cap.

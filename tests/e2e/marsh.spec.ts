@@ -6,7 +6,7 @@ test("travel loop: forest west portal -> marsh, and the cliff ledge -> Waystone"
   await join(page);
 
   // Step the forest's west-edge portal into the Sunken Marsh (floor 5).
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 1.5, y: 17.5 }));
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 1.5, y: 30.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 5, null, { timeout: 8000 });
 
   // The cliff ledge in the hut clearing drops one-way into northern Waystone (floor 0).

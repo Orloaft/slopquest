@@ -15,27 +15,30 @@ monsters:
   - { type: skeleton,      at: { floor: 2, x: 33, y: 12 }, zone: crypt }
   - { type: ghoul,         at: { floor: 2, x: 39, y: 24 }, zone: crypt }
   - { type: boss,          at: { floor: 2, x: 43, y: 17 }, zone: crypt }
-  - { type: rat,           at: { floor: 3, x: 10, y: 26 }, zone: woods }
-  - { type: spider,        at: { floor: 3, x: 16, y: 20 }, zone: woods }
-  - { type: goblin_scout,  at: { floor: 3, x: 14, y: 8  }, zone: woods }
-  - { type: goblin_scout,  at: { floor: 3, x: 7,  y: 12 }, zone: woods }
-  - { type: goblin_scout,  at: { floor: 3, x: 19, y: 27 }, zone: woods }
-  - { type: wolf,          at: { floor: 3, x: 12, y: 21 }, zone: woods }
-  - { type: wolf,          at: { floor: 3, x: 8,  y: 28 }, zone: woods }
-  - { type: wolf,          at: { floor: 3, x: 21, y: 5  }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 6,  y: 4  }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 17, y: 13 }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 11, y: 19 }, zone: woods }
-  - { type: goblin,        at: { floor: 3, x: 32, y: 11 }, zone: woods }
-  - { type: goblin,        at: { floor: 3, x: 44, y: 18 }, zone: woods }
-  - { type: goblin_shaman, at: { floor: 3, x: 31, y: 21 }, zone: woods }
-  - { type: goblin_shaman, at: { floor: 3, x: 45, y: 26 }, zone: woods }
-  - { type: orc,           at: { floor: 3, x: 37, y: 11 }, zone: woods }
-  - { type: orc,           at: { floor: 3, x: 47, y: 13 }, zone: woods }
-  - { type: orc,           at: { floor: 3, x: 33, y: 29 }, zone: woods }
-  - { type: wolf,          at: { floor: 3, x: 41, y: 21 }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 33, y: 6  }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 49, y: 5  }, zone: woods }
+  # Northwood (90x60): the same roster spread thin across the expanded wood —
+  # gentle critters near the Waystone arrival in the south, tougher greenskins
+  # deeper north and out toward the marsh/badlands gates.
+  - { type: rat,           at: { floor: 3, x: 38, y: 52 }, zone: woods }
+  - { type: spider,        at: { floor: 3, x: 52, y: 52 }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 28, y: 46 }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 60, y: 47 }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 16, y: 38 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 12, y: 50 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 74, y: 49 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 34, y: 40 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 58, y: 34 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 24, y: 52 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 54, y: 55 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 10, y: 42 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 77, y: 40 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 47, y: 44 }, zone: woods }
+  - { type: goblin,        at: { floor: 3, x: 29, y: 22 }, zone: woods }
+  - { type: goblin,        at: { floor: 3, x: 60, y: 24 }, zone: woods }
+  - { type: goblin_shaman, at: { floor: 3, x: 18, y: 9  }, zone: woods }
+  - { type: goblin_shaman, at: { floor: 3, x: 74, y: 10 }, zone: woods }
+  - { type: orc,           at: { floor: 3, x: 42, y: 7  }, zone: woods }
+  - { type: orc,           at: { floor: 3, x: 56, y: 12 }, zone: woods }
+  - { type: orc,           at: { floor: 3, x: 82, y: 24 }, zone: woods }
   # The Sunken Marsh (floor 5): skitterers patrol the causeway; mire spitters
   # are anchored on deep water and fire across it.
   - { type: skitterer,     at: { floor: 5, x: 38, y: 15 }, zone: marsh }
@@ -75,14 +78,14 @@ trees:
   - { type: oak,  at: { floor: 0, x: 12.8, y: 10.7 } }
   - { type: oak,  at: { floor: 0, x: 36.2, y: 17.4 } }
   - { type: pine, at: { floor: 0, x: 20.2, y: 31.6 } }
-  - { type: oak,  at: { floor: 3, x: 8.5,  y: 10.4 } }
-  - { type: pine, at: { floor: 3, x: 11.5, y: 18.8 } }
-  - { type: pine, at: { floor: 3, x: 14.2, y: 29.8 } }
-  - { type: oak,  at: { floor: 3, x: 19.5, y: 7.4  } }
-  - { type: pine, at: { floor: 3, x: 23.4, y: 27.2 } }
-  - { type: pine, at: { floor: 3, x: 28.8, y: 9.6  } }
-  - { type: pine, at: { floor: 3, x: 31.3, y: 23.8 } }
-  - { type: pine, at: { floor: 3, x: 38.6, y: 17.8 } }
-  - { type: oak,  at: { floor: 3, x: 45.2, y: 15.3 } }
+  - { type: oak,  at: { floor: 3, x: 18.5, y: 6.4  } }
+  - { type: pine, at: { floor: 3, x: 35.4, y: 12.2 } }
+  - { type: pine, at: { floor: 3, x: 64.3, y: 7.8  } }
+  - { type: oak,  at: { floor: 3, x: 6.5,  y: 36.4 } }
+  - { type: pine, at: { floor: 3, x: 50.4, y: 33.2 } }
+  - { type: pine, at: { floor: 3, x: 83.8, y: 38.6 } }
+  - { type: pine, at: { floor: 3, x: 22.3, y: 54.8 } }
+  - { type: pine, at: { floor: 3, x: 66.6, y: 53.8 } }
+  - { type: oak,  at: { floor: 3, x: 52.2, y: 46.3 } }
   - { type: oak,  at: { floor: 4, x: 9,    y: 9.5  } }
   - { type: pine, at: { floor: 4, x: 44,   y: 30.2 } }

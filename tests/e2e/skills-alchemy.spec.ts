@@ -9,16 +9,16 @@ test("gathering a herb node yields a herb", async ({ page }) => {
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
 
-  // Stand on the floor-0 herb patch's approach tile so the gather lands with no pathing.
+  // Stand on a Northwood herb patch's approach tile so the gather lands with no pathing.
   await page.evaluate(() => {
-    window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 0, x: 10.5, y: 10.5 });
+    window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 12.5, y: 9.5 });
   });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
-    return Boolean(me && me.floor === 0 && Math.hypot(me.x - 10.5, me.y - 10.5) < 0.6);
+    return Boolean(me && me.floor === 3 && Math.hypot(me.x - 12.5, me.y - 9.5) < 0.6);
   });
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "gatherHerb", id: "herb-0-11-10" }));
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "gatherHerb", id: "herb-3-11-9" }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.action?.type === "herbing");
 
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.inventory ?? []).some((item) => item?.id === "herb"));

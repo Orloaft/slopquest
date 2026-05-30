@@ -13,8 +13,6 @@ import {
   MINING_NODES,
   HERB_NODES,
   ITEMS,
-  MAP_COLS,
-  MAP_ROWS,
   MONSTERS,
   MONSTER_SPAWNS,
   NPCS,
@@ -25,6 +23,8 @@ import {
   START,
   TREE_TYPES,
   dodgeChanceFor,
+  floorCols,
+  floorRows,
   isBlockedTile,
   isSightBlocked,
   isSafeZone,
@@ -1913,8 +1913,8 @@ function pickWanderTarget(monster: ServerMonster): Vec2 | null {
   for (let i = 0; i < 8; i += 1) {
     const angle = Math.random() * Math.PI * 2;
     const radius = 1.2 + Math.random() * 4.5;
-    const x = clamp(monster.homeX + Math.cos(angle) * radius, 1.5, MAP_COLS - 1.5);
-    const y = clamp(monster.homeY + Math.sin(angle) * radius, 1.5, MAP_ROWS - 1.5);
+    const x = clamp(monster.homeX + Math.cos(angle) * radius, 1.5, floorCols(monster.floor) - 1.5);
+    const y = clamp(monster.homeY + Math.sin(angle) * radius, 1.5, floorRows(monster.floor) - 1.5);
     if (zoneAt(monster.floor, x, y) !== monster.zone) continue;
     if (canStand(monster.floor, x, y)) return { x, y };
   }
@@ -1927,9 +1927,9 @@ function moveEntity(entity: { floor: number; x: number; y: number; dir: Directio
   if (dx || dy) {
     entity.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up";
   }
-  const nextX = clamp(entity.x + dx, 0.5, MAP_COLS - 0.5);
+  const nextX = clamp(entity.x + dx, 0.5, floorCols(entity.floor) - 0.5);
   if (canStand(entity.floor, nextX, entity.y)) entity.x = nextX;
-  const nextY = clamp(entity.y + dy, 0.5, MAP_ROWS - 0.5);
+  const nextY = clamp(entity.y + dy, 0.5, floorRows(entity.floor) - 0.5);
   if (canStand(entity.floor, entity.x, nextY)) entity.y = nextY;
   entity.moving = Math.hypot(entity.x - oldX, entity.y - oldY) > 0.001;
 }

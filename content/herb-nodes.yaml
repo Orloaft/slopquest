@@ -6,34 +6,36 @@
 # label     — hover label shown on the node.
 # The patch depletes when picked and regrows after a short delay.
 
-- id: herb-0-11-10
-  at: { floor: 0, x: 11.5, y: 10.5 }
-  approach: { x: 10.5, y: 10.5 }
-  label: Wild Herbs
-
-- id: herb-0-29-14
-  at: { floor: 0, x: 29.5, y: 14.5 }
-  approach: { x: 28.5, y: 14.5 }
-  label: Wild Herbs
-
-- id: herb-0-21-21
-  at: { floor: 0, x: 21.5, y: 21.5 }
-  approach: { x: 20.5, y: 21.5 }
-  label: Wild Herbs
-
-- id: herb-3-23-4
-  at: { floor: 3, x: 23.5, y: 4.5 }
-  approach: { x: 22.5, y: 4.5 }
+# Forest Herbs — wild patches in Northwood's glades (floor 3). Foraging moved
+# out of the Waystone town; the wood's clearings now hold all the early herbs.
+- id: herb-3-11-9
+  at: { floor: 3, x: 11.5, y: 9.5 }
+  approach: { x: 12.5, y: 9.5 }
   label: Forest Herbs
 
-- id: herb-3-34-14
-  at: { floor: 3, x: 34.5, y: 14.5 }
-  approach: { x: 33.5, y: 14.5 }
+- id: herb-3-74-11
+  at: { floor: 3, x: 74.5, y: 11.5 }
+  approach: { x: 73.5, y: 11.5 }
   label: Forest Herbs
 
-- id: herb-3-47-21
-  at: { floor: 3, x: 47.5, y: 21.5 }
-  approach: { x: 46.5, y: 21.5 }
+- id: herb-3-33-15
+  at: { floor: 3, x: 33.5, y: 15.5 }
+  approach: { x: 34.5, y: 15.5 }
+  label: Forest Herbs
+
+- id: herb-3-13-47
+  at: { floor: 3, x: 13.5, y: 47.5 }
+  approach: { x: 14.5, y: 47.5 }
+  label: Forest Herbs
+
+- id: herb-3-72-46
+  at: { floor: 3, x: 72.5, y: 46.5 }
+  approach: { x: 73.5, y: 46.5 }
+  label: Forest Herbs
+
+- id: herb-3-57-39
+  at: { floor: 3, x: 57.5, y: 39.5 }
+  approach: { x: 56.5, y: 39.5 }
   label: Forest Herbs
 
 # Mire-Lotus — Sunken Marsh (floor 5). Gated behind Foraging 5; richer XP.

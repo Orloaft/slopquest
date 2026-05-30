@@ -5,20 +5,22 @@
 # approach  — the standing tile next to the rock (player walks here to mine).
 # kind      — ore type (copper | tin | iron); picks the vein sprite. Defaults to copper.
 
-- id: mine-0-20-8
+# Ore outcrops scattered through Northwood (floor 3) — the starter veins,
+# moved out of the Waystone town and spread across the wood.
+- id: mine-3-8-49
   kind: copper
-  at: { floor: 0, x: 20.5, y: 8.5 }
-  approach: { x: 19.5, y: 8.5 }
+  at: { floor: 3, x: 8.5, y: 49.5 }
+  approach: { x: 9.5, y: 49.5 }
 
-- id: mine-0-34-8
+- id: mine-3-80-12
   kind: tin
-  at: { floor: 0, x: 34.5, y: 8.5 }
-  approach: { x: 33.5, y: 8.5 }
+  at: { floor: 3, x: 80.5, y: 12.5 }
+  approach: { x: 81.5, y: 12.5 }
 
-- id: mine-0-22-17
+- id: mine-3-78-47
   kind: iron
-  at: { floor: 0, x: 22.5, y: 17.5 }
-  approach: { x: 20.5, y: 17.5 }
+  at: { floor: 3, x: 78.5, y: 47.5 }
+  approach: { x: 79.5, y: 47.5 }
 
 # Copper veins in the Searing Badlands dead-end canyon (floor 6).
 - id: mine-6-2-22

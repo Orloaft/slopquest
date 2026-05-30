@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { PNG } from "pngjs";
-import { MONSTER_SPAWNS } from "../../src/shared.ts";
+import { MONSTER_SPAWNS, MINING_NODES } from "../../src/shared.ts";
 
 const NORTHWOOD_EXPECTED_TYPES = [
   "rat",
@@ -14,9 +14,9 @@ const NORTHWOOD_EXPECTED_TYPES = [
 ];
 
 const NORTHWOOD_SUBZONE_PROBES = [
-  { label: "central NW dirt", x: 16.5, y: 13.5 },
-  { label: "central E dirt", x: 32.5, y: 20.5 },
-  { label: "NE goblin camp margin", x: 41.5, y: 5.5 }
+  { label: "south wood (gentle critters)", x: 47.5, y: 49.5 },
+  { label: "north meadow (orcs)", x: 40.5, y: 14.5 },
+  { label: "NW shaman thicket", x: 22.5, y: 12.5 }
 ];
 
 test("skills, firemaking, and cooking are usable and visually present", async ({ page }) => {
@@ -65,7 +65,7 @@ test("skills, firemaking, and cooking are usable and visually present", async ({
   expect(visualStats(await page.locator("#inventoryPanel").screenshot()).meaningfulPixels).toBeGreaterThan(750);
 });
 
-test("mining a vein yields ore and Mining XP, and floor-0 veins carry distinct ore kinds", async ({ page }) => {
+test("mining a vein yields ore and Mining XP, and Northwood veins carry distinct ore kinds", async ({ page }) => {
   page.on("pageerror", (error) => console.error(error));
   page.on("console", (message) => {
     if (message.type() === "error") console.error(message.text());
@@ -73,36 +73,38 @@ test("mining a vein yields ore and Mining XP, and floor-0 veins carry distinct o
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
 
-  // Grant a pickaxe (the "mine" capability) and stand on the copper vein's
-  // approach tile so the swing lands without any pathing.
+  // Grant a pickaxe (the "mine" capability) and stand on the Northwood copper
+  // vein's approach tile so the swing lands without any pathing.
   await page.evaluate(() => {
     window.__TIB_E2E__?.send({
       type: "e2eGrantItems",
       items: [{ id: "pickaxe", qty: 1 }],
-      floor: 0,
-      x: 19.5,
-      y: 8.5,
+      floor: 3,
+      x: 9.5,
+      y: 49.5,
       gold: 0
     });
   });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
-    if (!me || me.floor !== 0 || Math.hypot(me.x - 19.5, me.y - 8.5) > 0.5) return false;
+    if (!me || me.floor !== 3 || Math.hypot(me.x - 9.5, me.y - 49.5) > 0.5) return false;
     return (me.inventory ?? []).some((item) => item?.id === "pickaxe");
   });
 
-  // The three seeded floor-0 veins should advertise distinct ore kinds.
-  const kinds = await page.waitForFunction(() => {
-    const nodes = (window.__TIB_E2E__?.getState()?.miningNodes ?? []).filter((node) => node.floor === 0);
-    return nodes.length >= 3 ? nodes.map((node) => node.kind).sort() : null;
-  });
-  expect(await kinds.jsonValue()).toEqual(["copper", "iron", "tin"]);
+  // The three Northwood veins (spread across the wood) carry distinct ore kinds.
+  const forestKinds = MINING_NODES.filter((node) => node.floor === 3).map((node) => node.kind).sort();
+  expect(forestKinds).toEqual(["copper", "iron", "tin"]);
+
+  // The nearby copper vein is in view from its approach tile.
+  await page.waitForFunction(() =>
+    (window.__TIB_E2E__?.getState()?.miningNodes ?? []).some((node) => node.id === "mine-3-8-49")
+  );
 
   const miningXpBefore = await page.evaluate(
     () => window.__TIB_E2E__?.self()?.skills.find((skill) => skill.id === "mining")?.xp ?? 0
   );
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "mineNode", id: "mine-0-20-8" }));
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "mineNode", id: "mine-3-8-49" }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.action?.type === "mining");
 
   // After the swing resolves the vein drops ore and awards Mining XP.

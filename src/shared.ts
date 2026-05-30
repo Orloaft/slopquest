@@ -16,8 +16,19 @@ export {
 } from "./generated/catalog.ts";
 
 export const TILE_SIZE = 32;
+// Default floor footprint. Most floors are this size; a few biomes override it
+// via FLOOR_DIMS, so always size per-floor work with floorCols/floorRows.
 export const MAP_COLS = 52;
 export const MAP_ROWS = 34;
+const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
+  3: { cols: 90, rows: 60 } // The expanded Northwood
+};
+export function floorCols(floor: number): number {
+  return FLOOR_DIMS[floor]?.cols ?? MAP_COLS;
+}
+export function floorRows(floor: number): number {
+  return FLOOR_DIMS[floor]?.rows ?? MAP_ROWS;
+}
 
 export interface Portal {
   floor: number;
@@ -82,7 +93,7 @@ export const ZONES: Record<ZoneId, Zone> = {
   southTown: { id: "southTown", label: "Waystone", floor: 0, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   cemetery: { id: "cemetery", label: "Southgate Cemetery", floor: 1, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   crypt: { id: "crypt", label: "Ashen Crypt", floor: 2, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
-  woods: { id: "woods", label: "Northwood", floor: 3, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
+  woods: { id: "woods", label: "Northwood", floor: 3, x1: 0, y1: 0, x2: floorCols(3) - 1, y2: floorRows(3) - 1 },
   northTown: { id: "northTown", label: "Northwatch", floor: 4, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   marsh: { id: "marsh", label: "The Sunken Marsh", floor: 5, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   badlands: { id: "badlands", label: "The Searing Badlands", floor: 6, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
@@ -293,7 +304,7 @@ export function makeFloorTiles(floor: number): string[] {
   const cached = FLOOR_TILE_CACHE.get(floor);
   if (cached) return cached;
 
-  const rows = Array.from({ length: MAP_ROWS }, () => Array.from({ length: MAP_COLS }, () => "#"));
+  const rows = Array.from({ length: floorRows(floor) }, () => Array.from({ length: floorCols(floor) }, () => "#"));
 
   if (floor === 0) {
     fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, ".");
@@ -357,26 +368,42 @@ export function makeFloorTiles(floor: number): string[] {
   }
 
   if (floor === 3) {
-    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "F");
-    fillRect(rows, 24, 1, 4, MAP_ROWS - 2, "t");
-    fillRect(rows, 4, 16, 44, 2, "t");
-    fillRect(rows, 7, 23, 36, 3, "t");
-    fillRect(rows, 9, 7, 3, 8, "t");
-    fillRect(rows, 40, 18, 8, 3, "t");
-    fillRect(rows, 34, 5, 8, 7, "d");
-    fillRect(rows, 35, 6, 6, 5, "~");
-    fillRect(rows, 5, 4, 6, 4, "d");
-    fillRect(rows, 6, 5, 4, 2, "~");
-    fillRect(rows, 6, 25, 5, 5, "d");
-    fillRect(rows, 38, 25, 8, 5, "d");
-    fillRect(rows, 14, 11, 6, 5, "d");
-    fillRect(rows, 30, 19, 6, 4, "d");
-    setTile(rows, 25, 31, "S");
-    setTile(rows, 25, 2, "N");
-    setTile(rows, 1, 17, "M"); // west-edge portal to the Sunken Marsh (floor 5)
-    setTile(rows, 50, 16, "D"); // east-edge portal to the Searing Badlands (floor 6)
-    scatter(rows, "F", "f", 220, 31);
-    scatter(rows, "F", "r", 48, 32);
+    // Northwood, expanded ~3x (90x60). One open canopy of walkable forest floor
+    // threaded by two broad roads that cross at the heart of the wood, so all
+    // four edge portals stay reachable.
+    fillRect(rows, 1, 1, 88, 58, "F");
+    fillRect(rows, 44, 2, 3, 56, "t"); // north-south spine
+    fillRect(rows, 2, 29, 86, 2, "t"); // east-west road
+
+    // Glades: open clearings that break up the trees and host gathering.
+    fillRect(rows, 8, 7, 8, 6, "d"); // NW glade
+    fillRect(rows, 70, 9, 9, 6, "d"); // NE glade
+    fillRect(rows, 10, 45, 9, 6, "d"); // SW glade
+    fillRect(rows, 68, 44, 10, 7, "d"); // SE glade
+    fillRect(rows, 30, 13, 7, 5, "d"); // north meadow
+    fillRect(rows, 54, 37, 7, 5, "d"); // south meadow
+    fillRect(rows, 40, 26, 11, 9, "d"); // central crossroads clearing
+
+    // Woodland ponds (impassable water; anglers fish from the bank).
+    fillRect(rows, 20, 20, 6, 4, "~");
+    fillRect(rows, 64, 20, 6, 4, "~");
+    fillRect(rows, 38, 48, 7, 4, "~");
+
+    setTile(rows, 45, 58, "S"); // south edge -> Waystone (floor 0)
+    setTile(rows, 45, 1, "N"); // north edge -> Northwatch (floor 4)
+    setTile(rows, 1, 30, "M"); // west edge -> the Sunken Marsh (floor 5)
+    setTile(rows, 88, 29, "D"); // east edge -> the Searing Badlands (floor 6)
+
+    scatter(rows, "F", "f", 540, 31); // dense canopy
+    scatter(rows, "F", "r", 120, 32); // mossy boulders
+
+    // Three ore outcrops, spread across the wood (mining moved out of town).
+    // Each sits on rock with a cleared standing spot carved beside it (set
+    // after scatter so a stray tree never blocks the approach).
+    for (const [rx, ry] of [[8, 49], [80, 12], [78, 47]] as Array<[number, number]>) {
+      setTile(rows, rx, ry, "r");
+      setTile(rows, rx + 1, ry, "d");
+    }
   }
 
   if (floor === 6) {
@@ -512,7 +539,7 @@ export function makeFloorTiles(floor: number): string[] {
 
 export function tileAt(floor: number, tx: number, ty: number): string {
   const rows = makeFloorTiles(floor);
-  if (tx < 0 || ty < 0 || tx >= MAP_COLS || ty >= MAP_ROWS) return "#";
+  if (tx < 0 || ty < 0 || tx >= floorCols(floor) || ty >= floorRows(floor)) return "#";
   return rows[ty]?.[tx] ?? "#";
 }
 
@@ -560,7 +587,7 @@ export function portalFor(floor: number, x: number, y: number): Portal | null {
   const tx = Math.floor(x);
   const ty = Math.floor(y);
   const tile = tileAt(floor, tx, ty);
-  if (floor === 0 && tile === "N") return { floor: 3, x: 25.5, y: 30.5 };
+  if (floor === 0 && tile === "N") return { floor: 3, x: 45.5, y: 57.5 };
   if (floor === 0 && tile === "S") return { floor: 1, x: 25.5, y: 3.5 };
   if (floor === 1 && tile === "T") return { floor: 0, x: 25.5, y: 30.5 };
   if (floor === 1 && tile === "C") return { floor: 2, x: 6.5, y: 6.5 };
@@ -568,11 +595,11 @@ export function portalFor(floor: number, x: number, y: number): Portal | null {
   if (floor === 3 && tile === "S") return { floor: 0, x: 25.5, y: 3.5 };
   if (floor === 3 && tile === "N") return { floor: 4, x: 25.5, y: 30.5 };
   if (floor === 3 && tile === "M") return { floor: 5, x: 48.5, y: 16.5 };
-  if (floor === 4 && tile === "S") return { floor: 3, x: 25.5, y: 3.5 };
-  if (floor === 5 && tile === "M") return { floor: 3, x: 2.5, y: 17.5 };
+  if (floor === 4 && tile === "S") return { floor: 3, x: 45.5, y: 2.5 };
+  if (floor === 5 && tile === "M") return { floor: 3, x: 2.5, y: 30.5 };
   if (floor === 5 && tile === "L") return { floor: 0, x: 25.5, y: 4.5 }; // one-way drop into Waystone
   if (floor === 3 && tile === "D") return { floor: 6, x: 3.5, y: 16.5 };
-  if (floor === 6 && tile === "D") return { floor: 3, x: 49.5, y: 16.5 };
+  if (floor === 6 && tile === "D") return { floor: 3, x: 87.5, y: 29.5 };
   if (floor === 6 && tile === "Z") return { floor: 4, x: 6.5, y: 16.5 }; // one-way drop into Northwatch
   if (floor === 1 && tile === "G") return { floor: 7, x: 25.5, y: 2.5 };
   if (floor === 7 && tile === "G") return { floor: 1, x: 25.5, y: 30.5 };
@@ -600,12 +627,14 @@ function setTile(rows: string[][], x: number, y: number, tile: string): void {
 }
 
 function scatter(rows: string[][], onTile: string, newTile: string, count: number, seed: number): void {
+  const cols = rows[0]?.length ?? MAP_COLS;
+  const rowCount = rows.length;
   let value = seed * 9973;
   for (let i = 0; i < count; i += 1) {
     value = (value * 48271) % 2147483647;
-    const x = 3 + (value % (MAP_COLS - 6));
+    const x = 3 + (value % (cols - 6));
     value = (value * 48271) % 2147483647;
-    const y = 3 + (value % (MAP_ROWS - 6));
+    const y = 3 + (value % (rowCount - 6));
     const row = rows[y];
     if (row && row[x] === onTile) row[x] = newTile;
   }
