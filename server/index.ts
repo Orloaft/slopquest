@@ -177,6 +177,7 @@ interface SnapshotMetricFrame {
 interface SnapshotCategoryCache {
   initialized: boolean;
   signatures: Map<string, number>;
+  nextSignatures: Map<string, number>;
 }
 
 type SnapshotCache = Record<SnapshotCategory, SnapshotCategoryCache>;
@@ -2590,7 +2591,7 @@ function snapshotCacheFor(session: Session): SnapshotCache {
 }
 
 function snapshotCategoryCache(): SnapshotCategoryCache {
-  return { initialized: false, signatures: new Map() };
+  return { initialized: false, signatures: new Map(), nextSignatures: new Map() };
 }
 
 function snapshotDelta<T extends SnapshotEntity>(
@@ -2601,7 +2602,8 @@ function snapshotDelta<T extends SnapshotEntity>(
   preserve = false
 ): SnapshotDelta<T> {
   if (preserve) return { items: [], removedIds: [], full: false, visibleCount: cache.signatures.size };
-  const next = new Map<string, number>();
+  const next = cache.nextSignatures;
+  next.clear();
   const changed: T[] = [];
   const full = forceFull || !cache.initialized;
   for (const item of visible) {
@@ -2616,6 +2618,7 @@ function snapshotDelta<T extends SnapshotEntity>(
     }
   }
   cache.initialized = true;
+  cache.nextSignatures = cache.signatures;
   cache.signatures = next;
   return { items: full ? visible : changed, removedIds, full, visibleCount: visible.length };
 }
