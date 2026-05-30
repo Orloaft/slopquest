@@ -275,36 +275,34 @@ canvas {
   font-weight: 800;
 }
 
-/* --- Framed viewport (RuneScape-style): world inset, UI in the border ------ */
+/* --- Full-screen world, floating HUD (RuneScape-style overlay) ------------- */
+/* The game canvas fills the whole viewport; the HUD panels float over it in the
+   corners, each only as big as its content, so nothing reserves a thick band. */
 #app {
-  display: grid;
+  position: relative;
   width: 100vw;
   height: 100vh;
-  /* Top + bottom bars size to their content (no clipping); the world takes the
-     rest. Scrollable areas inside are capped so the bars can't grow unbounded. */
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    "top"
-    "world"
-    "bottom";
+  overflow: hidden;
   background: #07090a;
 }
 
 #game {
-  grid-area: world;
-  position: relative;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
-  min-width: 0;
-  min-height: 0;
-  box-shadow: inset 0 0 0 2px #0a0d0a, inset 0 0 60px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
 }
 #game canvas {
   display: block;
 }
 
-/* The HUD wrapper vanishes so its frame regions become grid items of #app. */
+/* The HUD is a transparent overlay layer that passes clicks through to the game
+   everywhere except on the panels themselves (which re-enable pointer events). */
 .hud {
-  display: contents;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
 }
 
 /* Retro dithered dark-slate panel with a 1px light bevel — ties the UI to the
@@ -322,25 +320,57 @@ canvas {
   box-shadow: inset 1px 1px 0 rgba(186, 196, 180, 0.18), inset -1px -1px 0 rgba(0, 0, 0, 0.55);
   overflow: hidden;
 }
+/* The top/bottom rails are transparent layout-only strips pinned to the screen
+   edges. They carry no background — only their child clusters do — so the gaps
+   between clusters show the game underneath and pass clicks through. */
+.frame-top,
+.frame-bottom {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  gap: 12px;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+  pointer-events: none;
+}
 .frame-top {
-  grid-area: top;
-  display: grid;
-  grid-template-columns: minmax(286px, 366px) minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 14px;
-  padding: 8px 10px;
+  top: 10px;
+  align-items: flex-start;
+  justify-content: space-between;
 }
 .frame-bottom {
-  grid-area: bottom;
-  display: grid;
-  grid-template-columns: minmax(170px, 290px) minmax(0, 1fr) auto;
-  align-items: stretch;
-  gap: 10px;
-  padding: 8px 10px;
-  /* Definite height so the feed/chat logs scroll inside their columns instead
-     of the flex:1 logs growing the whole bar (which clipped the chat input). */
-  height: 132px;
+  bottom: 10px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+/* Shared floating-panel chrome for the HUD clusters: dithered dark slate with a
+   1px light bevel, sized to its content. */
+.console,
+.frame-center,
+.system-feed,
+.chat {
+  pointer-events: auto;
   box-sizing: border-box;
+  background-color: #1b211b;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(220, 230, 215, 0.022) 0 1px, transparent 1px 2px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 2px),
+    linear-gradient(180deg, #242b24, #161a16);
+  border: 1px solid #0a0d0a;
+  border-radius: 5px;
+  box-shadow: inset 1px 1px 0 rgba(186, 196, 180, 0.18), inset -1px -1px 0 rgba(0, 0, 0, 0.55);
+  padding: 8px 10px;
+}
+.hotbar {
+  pointer-events: auto;
+  /* Pin to the far right so the feed + chat sit bottom-left and the centre of
+     the screen stays clear of UI. */
+  margin-left: auto;
 }
 
 /* --- Character Console (top-left): vitals + weight + menu buttons --- */
@@ -348,7 +378,8 @@ canvas {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  min-width: 0;
+  width: 300px;
+  flex: none;
 }
 .console .identity {
   margin-bottom: 2px;
@@ -1046,10 +1077,9 @@ canvas {
 .system-feed {
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  border-right: 1px solid #0a0d0a;
-  box-shadow: 1px 0 0 rgba(186, 196, 180, 0.12);
-  padding-right: 10px;
+  flex: none;
+  width: 264px;
+  height: 124px;
 }
 .system-log {
   flex: 1;
@@ -1066,10 +1096,9 @@ canvas {
 .chat {
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  border-right: 1px solid #0a0d0a;
-  box-shadow: 1px 0 0 rgba(186, 196, 180, 0.1);
-  padding-right: 10px;
+  flex: none;
+  width: 320px;
+  height: 124px;
 }
 
 #chatLog {
@@ -1225,10 +1254,9 @@ canvas {
 }
 
 @media (max-width: 880px) {
-  /* Tighten the frame so the inset world keeps as much room as possible. */
-  #app {
-    grid-template-columns: 116px 1fr 116px;
-    grid-template-rows: 112px 1fr 122px;
+  /* Shrink the floating panels so they cover less of the world on small screens. */
+  .console {
+    width: 264px;
   }
 
   .frame-stats {
