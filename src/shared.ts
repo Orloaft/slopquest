@@ -532,9 +532,40 @@ export function makeFloorTiles(floor: number): string[] {
     scatter(rows, ".", "r", 16, 42);
   }
 
+  frameFloorEdge(rows, floor);
+
   const tiles = rows.map((row) => row.join(""));
   FLOOR_TILE_CACHE.set(floor, tiles);
   return tiles;
+}
+
+// Natural biome boundary for each floor's outer ring, so map edges read as
+// forest/water/cliff/canopy instead of a bare grey rock wall. Only ever
+// recolors the grey `#` border tiles — portals and interior are left untouched.
+const FLOOR_EDGE: Record<number, string> = {
+  0: "f", // Waystone — ringed by woods
+  3: "f", // Northwood — dense treeline
+  4: "f", // Northwatch — ringed by woods
+  5: "W", // The Sunken Marsh — deep water
+  6: "X", // The Searing Badlands — cliff walls
+  7: "X", // The Sunken Desert — sandstone walls
+  8: "I", // The Sunken Beach — open sea
+  9: "E" // The Untamed Jungle — impassable canopy
+};
+
+function frameFloorEdge(rows: string[][], floor: number): void {
+  const edge = FLOOR_EDGE[floor];
+  if (!edge) return;
+  const h = rows.length;
+  const w = rows[0]?.length ?? 0;
+  for (let y = 0; y < h; y += 1) {
+    const onVerticalEdge = y === 0 || y === h - 1;
+    const row = rows[y];
+    if (!row) continue;
+    for (let x = 0; x < w; x += 1) {
+      if ((onVerticalEdge || x === 0 || x === w - 1) && row[x] === "#") row[x] = edge;
+    }
+  }
 }
 
 export function tileAt(floor: number, tx: number, ty: number): string {
