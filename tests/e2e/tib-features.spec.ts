@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { PNG } from "pngjs";
-import { MONSTER_SPAWNS, MINING_NODES, scaleX, scaleY } from "../../src/shared.ts";
+import { MONSTER_SPAWNS, MINING_NODES, TILE_SIZE, floorCols, floorRows, scaleX, scaleY } from "../../src/shared.ts";
 
 const NORTHWOOD_EXPECTED_TYPES = [
   "rat",
@@ -131,6 +131,20 @@ test("actor animation frames keep a stable bottom-center anchor", async ({ page 
   if (!rows) throw new Error("actorFrameAnchorDrift never resolved");
   const unstable = rows.filter((row) => row.driftX > 0.5 || row.driftY > 0);
   expect(unstable).toEqual([]);
+});
+
+test("map renderer uses culled chunks instead of one floor-sized texture", async ({ page }) => {
+  await page.goto("/?e2e");
+  await joinFreshCharacter(page);
+  const statsHandle = await page.waitForFunction(() => {
+    const stats = window.__TIB_E2E__?.mapChunkStats?.();
+    return stats && stats.activeChunks > 0 ? stats : null;
+  });
+  const stats = await statsHandle.jsonValue();
+  if (!stats || stats.floor === null) throw new Error("mapChunkStats never resolved");
+  const totalChunks = Math.ceil(floorCols(stats.floor) / stats.chunkTiles) * Math.ceil(floorRows(stats.floor) / stats.chunkTiles);
+  expect(stats.activeChunks).toBeLessThan(totalChunks);
+  expect(stats.maxChunkTextureEdge).toBe(16 * TILE_SIZE);
 });
 
 test("Northwood spawn table covers every enemy type and renders 4-direction frames", async ({ page }) => {

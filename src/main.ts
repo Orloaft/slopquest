@@ -257,6 +257,21 @@ interface DecorationSprite {
   h: number;
 }
 
+interface MapRenderState {
+  floor: number;
+  rows: string[];
+  cols: number;
+  rowCount: number;
+  chunks: Map<string, Phaser.GameObjects.Container>;
+}
+
+interface MapChunkStats {
+  floor: number | null;
+  chunkTiles: number;
+  activeChunks: number;
+  maxChunkTextureEdge: number;
+}
+
 interface BoundingBox {
   x: number;
   y: number;
@@ -290,6 +305,7 @@ interface E2EHooks {
     family: string;
     frames: Array<{ dir: Direction; frame: number; key: string; exists: boolean }>;
   }>;
+  mapChunkStats: () => MapChunkStats;
   currentTrack: () => string | null;
 }
 
@@ -491,6 +507,7 @@ if (E2E_MODE) {
         );
         return { type, family: spec.family, frames };
       }),
+    mapChunkStats: () => mapChunkStats(),
     currentTrack: () => currentTrack()
   };
 }
@@ -536,9 +553,12 @@ let holdMoveTile: HoldMoveTile | null = null;
 let holdMoveLastRepathAt = 0;
 const HOLD_MOVE_REPATH_MS = 80;
 const MINIMAP_DRAW_MS = 100;
+const MAP_CHUNK_TILES = 16;
+const MAP_CHUNK_PADDING = 1;
 let mapLayer: Phaser.GameObjects.Container;
 let entityLayer: Phaser.GameObjects.Container;
 let fxLayer: Phaser.GameObjects.Container;
+let mapRender: MapRenderState | null = null;
 const playerViews = new Map<string, PlayerEntityView>();
 const monsterViews = new Map<string, MonsterEntityView>();
 const corpseViews = new Map<string, Phaser.GameObjects.Container>();
@@ -736,19 +756,9 @@ function update(this: Phaser.Scene, time: number): void {
   const me = self();
   if (!me) return;
   applyZoneMusic(me);
-  // A big floor bakes across frames behind the loading screen; hold the rest of
-  // the loop until it finishes so entities never render on a half-built map.
-  if (mapBuild) {
-    stepMapBuild();
-    return;
-  }
   if (currentFloor !== me.floor) {
     clearResourceViews();
-    if (isHeavyFloor(me.floor)) {
-      beginMapBuild(me.floor);
-      return;
-    }
-    drawMap(me.floor);
+    drawMap(me.floor, { x: me.x, y: me.y });
     syncedStateVersion = -1;
     clearClickDestination();
   }
@@ -767,7 +777,10 @@ function update(this: Phaser.Scene, time: number): void {
   tickHoldMove(time);
   updateFloaters();
   const ownView = selfId ? playerViews.get(selfId) : undefined;
-  if (ownView) scene.cameras.main.centerOn(ownView.x, ownView.y);
+  if (ownView) {
+    scene.cameras.main.centerOn(ownView.x, ownView.y);
+    updateVisibleMapChunks();
+  }
   if (time - lastMinimapDrawAt >= MINIMAP_DRAW_MS) {
     drawMinimap(me);
     lastMinimapDrawAt = time;
@@ -1049,101 +1062,94 @@ function renderRoster(characters: CharacterRosterEntry[]): void {
   });
 }
 
-// Floors larger than the default footprint take long enough to bake that we
-// build them across frames behind a loading screen instead of freezing.
-function isHeavyFloor(floor: number): boolean {
-  return floorCols(floor) * floorRows(floor) > MAP_COLS * MAP_ROWS;
-}
-
-interface MapBuild {
-  floor: number;
-  rows: string[];
-  mapTexture: Phaser.GameObjects.RenderTexture;
-  rowCount: number;
-  y: number;
-}
-let mapBuild: MapBuild | null = null;
-const MAP_BUILD_BATCH_ROWS = 4;
-
-function startMapTexture(floor: number): { rows: string[]; mapTexture: Phaser.GameObjects.RenderTexture; rowCount: number } {
+function drawMap(floor: number, center?: TilePoint): void {
+  currentFloor = floor;
+  hideLoadingScreen();
   mapLayer.removeAll(true);
   const rows = makeFloorTiles(floor);
   const cols = floorCols(floor);
   const rowCount = floorRows(floor);
   scene.cameras.main.setBounds(0, 0, cols * TILE_SIZE, rowCount * TILE_SIZE);
-  const mapTexture = scene.add.renderTexture(0, 0, cols * TILE_SIZE, rowCount * TILE_SIZE).setOrigin(0);
-  mapLayer.add(mapTexture);
-  return { rows, mapTexture, rowCount };
-}
-
-function drawTileRows(mapTexture: Phaser.GameObjects.RenderTexture, rows: string[], fromY: number, toY: number): void {
-  for (let y = fromY; y < toY; y += 1) {
-    const row = rows[y];
-    if (row === undefined) continue;
-    for (let x = 0; x < row.length; x += 1) {
-      mapTexture.draw(tileBaseTexture(row[x] ?? ""), x * TILE_SIZE, y * TILE_SIZE);
-    }
-  }
-}
-
-// Synchronous bake — used for default-size floors where the freeze is invisible.
-function drawMap(floor: number): void {
-  currentFloor = floor;
-  const { rows, mapTexture, rowCount } = startMapTexture(floor);
-  drawTileRows(mapTexture, rows, 0, rowCount);
-  addTileDecorations(rows);
-  addComposedMapObjects(floor);
-}
-
-const LOADING_FLAVORS: Record<number, string> = {
-  3: "The canopy thickens. Boughs creak in the wind.",
-  5: "Mist clings to the black water.",
-  6: "Heat shimmers off the red stone.",
-  7: "The sand drinks every footstep.",
-  8: "Salt on the wind, surf in the dark.",
-  9: "The green closes in behind you."
-};
-
-function showLoadingScreen(floor: number): void {
-  dom.loadingTitle.textContent = `Entering ${minimapZoneLabel(floor)}`;
-  dom.loadingFlavor.textContent = LOADING_FLAVORS[floor] ?? "Charting the way ahead";
-  setLoadingProgress(0);
-  dom.loadingScreen.classList.remove("hidden");
+  mapRender = { floor, rows, cols, rowCount, chunks: new Map() };
+  updateVisibleMapChunks(center ? center.x * TILE_SIZE : undefined, center ? center.y * TILE_SIZE : undefined);
 }
 
 function hideLoadingScreen(): void {
   dom.loadingScreen.classList.add("hidden");
 }
 
-function setLoadingProgress(fraction: number): void {
-  dom.loadingBarFill.style.width = `${Math.round(Math.max(0, Math.min(1, fraction)) * 100)}%`;
-}
+function updateVisibleMapChunks(centerX?: number, centerY?: number): void {
+  if (!mapRender) return;
+  const camera = scene.cameras.main;
+  const view = camera.worldView;
+  const fallbackWidth = camera.width / camera.zoom;
+  const fallbackHeight = camera.height / camera.zoom;
+  const left = centerX === undefined ? view.x : centerX - fallbackWidth / 2;
+  const right = centerX === undefined ? view.right : centerX + fallbackWidth / 2;
+  const top = centerY === undefined ? view.y : centerY - fallbackHeight / 2;
+  const bottom = centerY === undefined ? view.bottom : centerY + fallbackHeight / 2;
 
-// Progressive bake — spreads a big floor's tile draws over several frames so a
-// CSS-animated loading screen stays smooth and a real progress bar advances.
-function beginMapBuild(floor: number): void {
-  showLoadingScreen(floor);
-  const { rows, mapTexture, rowCount } = startMapTexture(floor);
-  mapBuild = { floor, rows, mapTexture, rowCount, y: 0 };
-  setLoadingProgress(0);
-}
+  const minChunkX = clampChunk(Math.floor(Math.floor(left / TILE_SIZE) / MAP_CHUNK_TILES) - MAP_CHUNK_PADDING, mapRender.cols);
+  const maxChunkX = clampChunk(Math.floor(Math.floor(right / TILE_SIZE) / MAP_CHUNK_TILES) + MAP_CHUNK_PADDING, mapRender.cols);
+  const minChunkY = clampChunk(Math.floor(Math.floor(top / TILE_SIZE) / MAP_CHUNK_TILES) - MAP_CHUNK_PADDING, mapRender.rowCount);
+  const maxChunkY = clampChunk(Math.floor(Math.floor(bottom / TILE_SIZE) / MAP_CHUNK_TILES) + MAP_CHUNK_PADDING, mapRender.rowCount);
+  const needed = new Set<string>();
 
-function stepMapBuild(): void {
-  if (!mapBuild) return;
-  const build = mapBuild;
-  const end = Math.min(build.y + MAP_BUILD_BATCH_ROWS, build.rows.length);
-  drawTileRows(build.mapTexture, build.rows, build.y, end);
-  build.y = end;
-  setLoadingProgress(end / build.rowCount);
-  if (end >= build.rows.length) {
-    addTileDecorations(build.rows);
-    addComposedMapObjects(build.floor);
-    currentFloor = build.floor;
-    syncedStateVersion = -1;
-    clearClickDestination();
-    mapBuild = null;
-    hideLoadingScreen();
+  for (let chunkY = minChunkY; chunkY <= maxChunkY; chunkY += 1) {
+    for (let chunkX = minChunkX; chunkX <= maxChunkX; chunkX += 1) {
+      const key = mapChunkKey(chunkX, chunkY);
+      needed.add(key);
+      if (!mapRender.chunks.has(key)) mapRender.chunks.set(key, createMapChunk(mapRender, chunkX, chunkY));
+    }
   }
+
+  for (const [key, chunk] of mapRender.chunks) {
+    if (needed.has(key)) continue;
+    chunk.destroy(true);
+    mapRender.chunks.delete(key);
+  }
+}
+
+function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): Phaser.GameObjects.Container {
+  const tileX = chunkX * MAP_CHUNK_TILES;
+  const tileY = chunkY * MAP_CHUNK_TILES;
+  const tileRight = Math.min(tileX + MAP_CHUNK_TILES, state.cols);
+  const tileBottom = Math.min(tileY + MAP_CHUNK_TILES, state.rowCount);
+  const width = (tileRight - tileX) * TILE_SIZE;
+  const height = (tileBottom - tileY) * TILE_SIZE;
+  const chunk = scene.add.container(0, 0);
+  chunk.setDepth(chunkY);
+
+  const texture = scene.add.renderTexture(tileX * TILE_SIZE, tileY * TILE_SIZE, width, height).setOrigin(0);
+  for (let y = tileY; y < tileBottom; y += 1) {
+    const row = state.rows[y];
+    if (row === undefined) continue;
+    for (let x = tileX; x < tileRight; x += 1) {
+      texture.draw(tileBaseTexture(row[x] ?? ""), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+    }
+  }
+  chunk.add(texture);
+  addTileDecorations(state.rows, chunk, tileX, tileY, tileRight, tileBottom);
+  addComposedMapObjects(state.floor, chunk, tileX, tileY, tileRight, tileBottom);
+  mapLayer.add(chunk);
+  return chunk;
+}
+
+function clampChunk(value: number, tileCount: number): number {
+  return Math.max(0, Math.min(Math.ceil(tileCount / MAP_CHUNK_TILES) - 1, value));
+}
+
+function mapChunkKey(chunkX: number, chunkY: number): string {
+  return `${chunkX},${chunkY}`;
+}
+
+function mapChunkStats(): MapChunkStats {
+  return {
+    floor: mapRender?.floor ?? null,
+    chunkTiles: MAP_CHUNK_TILES,
+    activeChunks: mapRender?.chunks.size ?? 0,
+    maxChunkTextureEdge: MAP_CHUNK_TILES * TILE_SIZE
+  };
 }
 
 function syncEntities(): void {
@@ -3307,12 +3313,19 @@ function clearClickDestination({ keepHold = false }: { keepHold?: boolean } = {}
   if (clickMarker) clickMarker.setVisible(false);
 }
 
-function addTileDecorations(rows: string[]): void {
+function addTileDecorations(
+  rows: string[],
+  parent: Phaser.GameObjects.Container,
+  fromX = 0,
+  fromY = 0,
+  toX = rows[0]?.length ?? 0,
+  toY = rows.length
+): void {
   const decorations: DecorationSprite[] = [];
-  for (let y = 0; y < rows.length; y += 1) {
+  for (let y = fromY; y < toY; y += 1) {
     const row = rows[y];
     if (row === undefined) continue;
-    for (let x = 0; x < row.length; x += 1) {
+    for (let x = fromX; x < Math.min(toX, row.length); x += 1) {
       const tile = row[x] ?? "";
       if (tile === "r") decorations.push({ key: "spriteRock", x: x + 0.5, y: y + 0.78, w: 38, h: 28 });
       if (tile === "h") decorations.push({ key: "spriteGrave", x: x + 0.5, y: y + 0.95, w: 24, h: 34 });
@@ -3326,10 +3339,17 @@ function addTileDecorations(rows: string[]): void {
       if (["N", "S", "T", "C", "M", "D", "G", "Y", "j", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
     }
   }
-  decorations.sort((a, b) => a.y - b.y).forEach(placeMapSprite);
+  decorations.sort((a, b) => a.y - b.y).forEach((item) => placeMapSprite(item, parent));
 }
 
-function addComposedMapObjects(floor: number): void {
+function addComposedMapObjects(
+  floor: number,
+  parent: Phaser.GameObjects.Container,
+  fromX = 0,
+  fromY = 0,
+  toX = floorCols(floor),
+  toY = floorRows(floor)
+): void {
   // Composed objects are authored in native coords; stretch them to the floor's
   // expanded footprint (factor 1 for floors authored at the target size).
   const fx = contentScaleX(floor);
@@ -3338,14 +3358,15 @@ function addComposedMapObjects(floor: number): void {
   objects
     .filter((item) => item.key !== "spriteTree" && item.key !== "spritePine")
     .map((item) => ({ ...item, x: item.x * fx, y: item.y * fy }))
+    .filter((item) => item.x >= fromX - 2 && item.x < toX + 2 && item.y >= fromY - 3 && item.y < toY + 1)
     .sort((a, b) => a.y - b.y)
-    .forEach(placeMapSprite);
+    .forEach((item) => placeMapSprite(item, parent));
 }
 
-function placeMapSprite(item: DecorationSprite): Phaser.GameObjects.Image {
+function placeMapSprite(item: DecorationSprite, parent: Phaser.GameObjects.Container): Phaser.GameObjects.Image {
   const sprite = scene.add.image(item.x * TILE_SIZE, item.y * TILE_SIZE, item.key).setOrigin(0.5, 1);
   sprite.setDisplaySize(item.w, item.h);
-  mapLayer.add(sprite);
+  parent.add(sprite);
   return sprite;
 }
 
