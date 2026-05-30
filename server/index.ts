@@ -161,6 +161,20 @@ interface SnapshotCategoryCache {
 
 type SnapshotCache = Record<SnapshotCategory, SnapshotCategoryCache>;
 
+const QUEST_LIST = Object.values(QUESTS);
+const QUESTS_BY_GIVER = new Map<string, Quest>();
+const KILL_QUESTS_BY_ZONE_AND_TARGET = new Map<string, Quest[]>();
+for (const quest of QUEST_LIST) {
+  if (!QUESTS_BY_GIVER.has(quest.giverId)) QUESTS_BY_GIVER.set(quest.giverId, quest);
+  if (quest.kind !== "kill" || !quest.zone) continue;
+  for (const targetType of quest.targetTypes) {
+    const key = killQuestKey(quest.zone, targetType);
+    const quests = KILL_QUESTS_BY_ZONE_AND_TARGET.get(key) ?? [];
+    quests.push(quest);
+    KILL_QUESTS_BY_ZONE_AND_TARGET.set(key, quests);
+  }
+}
+
 class MinHeap<T> {
   private readonly items: T[] = [];
   private readonly compare: (a: T, b: T) => number;
@@ -1417,7 +1431,7 @@ function talkNpc(player: ServerPlayer, id: string): void {
 }
 
 function questForGiver(giverId: string): Quest | null {
-  return Object.values(QUESTS).find((quest) => quest.giverId === giverId) ?? null;
+  return QUESTS_BY_GIVER.get(giverId) ?? null;
 }
 
 function handleQuestDialogue(player: ServerPlayer, npc: NpcRuntime, quest: Quest): void {
@@ -3064,7 +3078,7 @@ function cleanName(name: unknown): string {
 
 function createQuestState(): Record<string, QuestState> {
   return Object.fromEntries(
-    Object.values(QUESTS).map((quest) => [quest.id, { accepted: false, progress: 0, complete: false, claimed: false }])
+    QUEST_LIST.map((quest) => [quest.id, { accepted: false, progress: 0, complete: false, claimed: false }])
   );
 }
 
@@ -3084,11 +3098,11 @@ function normalizeQuestState(saved: unknown): Record<string, QuestState> {
 }
 
 function updateQuestProgress(player: ServerPlayer, monster: ServerMonster): void {
-  for (const quest of Object.values(QUESTS)) {
-    if (quest.kind !== "kill") continue;
+  const quests = KILL_QUESTS_BY_ZONE_AND_TARGET.get(killQuestKey(monster.zone, monster.type));
+  if (!quests) return;
+  for (const quest of quests) {
     const state = player.quests[quest.id];
     if (!state || !state.accepted || state.claimed || state.complete) continue;
-    if (monster.zone !== quest.zone || !quest.targetTypes.includes(monster.type)) continue;
     state.progress = clamp(state.progress + 1, 0, quest.targetCount);
     if (state.progress >= quest.targetCount) {
       state.complete = true;
@@ -3097,8 +3111,12 @@ function updateQuestProgress(player: ServerPlayer, monster: ServerMonster): void
   }
 }
 
+function killQuestKey(zone: string, monsterType: string): string {
+  return `${zone}:${monsterType}`;
+}
+
 function serializeQuests(player: ServerPlayer): QuestView[] {
-  return Object.values(QUESTS).map((quest) => {
+  return QUEST_LIST.map((quest) => {
     const state = player.quests[quest.id] ?? { accepted: false, progress: 0, complete: false, claimed: false };
     const progress = state.claimed
       ? quest.targetCount
