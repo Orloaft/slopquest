@@ -335,6 +335,8 @@ const dom = {
   weaponText: el<HTMLElement>("#weaponText"),
   armorText: el<HTMLElement>("#armorText"),
   weightText: el<HTMLElement>("#weightText"),
+  weightMax: el<HTMLElement>("#weightMax"),
+  systemFeed: el<HTMLElement>("#systemFeed"),
   buffTracker: el<HTMLElement>("#buffTracker"),
   questTracker: el<HTMLElement>("#questTracker"),
   menuBackdrop: el<HTMLElement>("#menuBackdrop"),
@@ -770,10 +772,10 @@ function ensureSocket(): void {
     }
   });
   socket.addEventListener("close", () => {
-    addChat("Disconnected from server.");
+    addSystemLine("Disconnected from server.");
     if (!selfId) dom.rosterList.textContent = "Disconnected. Refresh to retry.";
   });
-  socket.addEventListener("error", () => addChat("Connection error. Refresh if the world stops updating."));
+  socket.addEventListener("error", () => addSystemLine("Connection error. Refresh if the world stops updating."));
 }
 
 function zoneTrackFor(me: PlayerView): string {
@@ -939,7 +941,7 @@ function joinCharacter(name: string, fresh = false): void {
     dom.joinBackdrop.classList.add("hidden");
     dom.titleScreen.classList.add("hidden");
     dom.hud.classList.remove("hidden");
-    addChat("Connected to Waystone.");
+    addSystemLine("Connected to Waystone.");
     return;
   }
   dom.rosterList.textContent = "Connecting...";
@@ -1560,7 +1562,8 @@ function renderHud(me: PlayerView): void {
   dom.goldText.textContent = String(me.gold);
   dom.weaponText.textContent = me.weaponTier ? (SHOP.weapon?.knightName ?? "Basic") : "Basic";
   dom.armorText.textContent = me.armorTier ? (SHOP.armor?.name ?? "Cloth") : "Cloth";
-  dom.weightText.textContent = `${me.weight}/${me.maxWeight}`;
+  dom.weightText.textContent = String(me.weight);
+  dom.weightMax.textContent = String(me.maxWeight);
   dom.weightText.classList.toggle("over", me.weight > me.maxWeight);
   renderBuffTracker(me.buffs);
   renderQuestTracker(me.quests);
@@ -2076,8 +2079,11 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
   dom.hotbar.innerHTML = hotbarLayout
     .map((slot, i) => {
       const key = i < 9 ? `${i + 1}` : "";
+      // Slots 1, 3, 4 are the class-specific slots that swap with the equipped
+      // weapon/class — flagged with a faint jade frame.
+      const classSlot = i === 0 || i === 2 || i === 3 ? " class-slot" : "";
       if (!slot) {
-        return `<button class="hotbar-slot empty" type="button" data-slot="${i}"><b class="hotbar-key">${key}</b></button>`;
+        return `<button class="hotbar-slot empty${classSlot}" type="button" data-slot="${i}"><b class="hotbar-key">${key}</b></button>`;
       }
       if (slot.kind === "item") {
         const item = ITEMS[slot.itemId];
@@ -2085,7 +2091,7 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
         const depleted = qty === 0 ? " depleted" : "";
         const icon = item ? iconMarkup(item.iconUrl, item.icon, "item-icon") : "?";
         const label = item?.label ?? slot.itemId;
-        return `<button class="hotbar-slot${depleted}" type="button" draggable="true" data-slot="${i}" data-item="${escapeHtml(slot.itemId)}" data-label="${escapeHtml(label)}"><b class="hotbar-key">${key}</b>${icon}<span class="hotbar-qty">${qty}</span></button>`;
+        return `<button class="hotbar-slot${depleted}${classSlot}" type="button" draggable="true" data-slot="${i}" data-item="${escapeHtml(slot.itemId)}" data-label="${escapeHtml(label)}"><b class="hotbar-key">${key}</b>${icon}<span class="hotbar-qty">${qty}</span></button>`;
       }
       const ability = ABILITIES[slot.abilityId];
       const live = abilities.find((a) => a.id === slot.abilityId);
@@ -2094,7 +2100,7 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
       const stateClass = isActive ? " ability-active" : onCooldown ? " ability-cooldown" : "";
       const label = ability?.label ?? slot.abilityId;
       const glyph = abilityGlyph(label);
-      return `<button class="hotbar-slot ability${stateClass}" type="button" draggable="true" data-slot="${i}" data-ability="${escapeHtml(slot.abilityId)}" data-label="${escapeHtml(label)}"><b class="hotbar-key">${key}</b><span class="hotbar-ability">${escapeHtml(glyph)}</span></button>`;
+      return `<button class="hotbar-slot ability${stateClass}${classSlot}" type="button" draggable="true" data-slot="${i}" data-ability="${escapeHtml(slot.abilityId)}" data-label="${escapeHtml(label)}"><b class="hotbar-key">${key}</b><span class="hotbar-ability">${escapeHtml(glyph)}</span></button>`;
     })
     .join("");
 
@@ -3118,7 +3124,8 @@ function placeMapSprite(item: DecorationSprite): Phaser.GameObjects.Image {
 
 function consumeEvents(events: GameEvent[]): void {
   for (const event of events) {
-    if (event.type === "system" || event.type === "chat") addChat(String(event.text));
+    if (event.type === "system") addSystemLine(String(event.text));
+    if (event.type === "chat") addChat(String(event.text));
     if (event.type === "dialogue") openDialogue(event);
     if (event.type === "effect" && self()?.floor === event.floor) playCombatEffect(event);
     if (event.type === "projectile" && self()?.floor === event.floor) playProjectile(event);
@@ -3689,6 +3696,16 @@ function addChat(line: string): void {
   dom.chatLog.scrollTop = dom.chatLog.scrollHeight;
 }
 
+const systemLines: string[] = [];
+// Engine/zone notifications go to the bottom-left system feed, kept apart from
+// party chat so debug strings never overlap the world.
+function addSystemLine(line: string): void {
+  systemLines.push(line);
+  while (systemLines.length > 9) systemLines.shift();
+  dom.systemFeed.innerHTML = systemLines.map((item) => `<div>${escapeHtml(item)}</div>`).join("");
+  dom.systemFeed.scrollTop = dom.systemFeed.scrollHeight;
+}
+
 function send(message: ClientMessage): void {
   if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
 }
@@ -4025,7 +4042,7 @@ function toggleMapScreen(): void {
   const me = self();
   if (!me) return;
   if (!ownsSurveyMap(me)) {
-    addChat("You have no survey to read. Merchant Nicolas sells the Inked Survey of The Broken Reach.");
+    addSystemLine("You have no survey to read. Merchant Nicolas sells the Inked Survey of The Broken Reach.");
     return;
   }
   mapView = "region";

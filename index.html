@@ -31,7 +31,7 @@
 
       <div id="hud" class="hud">
         <div id="frameTop" class="frame frame-top">
-          <div class="frame-vitals">
+          <div class="console">
             <div class="identity">
               <strong id="charName">-</strong>
               <span id="classLabel">-</span>
@@ -39,36 +39,29 @@
             <div class="bar hp"><span id="hpBar"></span><b id="hpText"></b></div>
             <div class="bar mana"><span id="manaBar"></span><b id="manaText"></b></div>
             <div class="bar xp"><span id="xpBar"></span><b id="xpText"></b></div>
-          </div>
-          <div class="frame-stats">
-            <div class="stat-grid">
-              <span>Level</span><b id="levelText">1</b>
-              <span>Gold</span><b id="goldText">0</b>
-              <span>Weapon</span><b id="weaponText">Basic</b>
-              <span>Armor</span><b id="armorText">Cloth</b>
-              <span>Weight</span><b id="weightText">0</b>
+            <div class="weight-line"><span>Weight</span><b id="weightText">0</b><i>/</i><b id="weightMax">40</b></div>
+            <div class="menu-buttons">
+              <button id="skillsButton" type="button">Skills</button>
+              <button id="inventoryButton" type="button">Inventory</button>
+              <button id="abilitiesButton" type="button">Abilities</button>
+              <button id="classesButton" type="button">Classes</button>
             </div>
+          </div>
+          <div class="frame-center">
+            <div class="stat-grid">
+              <span class="stat-chip"><i class="stat-ic stat-lvl">Lv</i><b id="levelText">1</b></span>
+              <span class="stat-chip"><img class="stat-ic" src="/icons/ui-coin.png" alt="Gold" /><b id="goldText">0</b></span>
+              <span class="stat-chip"><img class="stat-ic" src="/icons/ui-weapon.png" alt="Weapon" /><b id="weaponText">Basic</b></span>
+              <span class="stat-chip"><img class="stat-ic" src="/icons/ui-armor.png" alt="Armor" /><b id="armorText">Cloth</b></span>
+            </div>
+            <div id="buffTracker" class="buff-tracker hidden"></div>
+            <div id="questTracker" class="quest-tracker"></div>
           </div>
           <div class="frame-minimap">
             <canvas id="minimapCanvas" class="minimap-canvas" width="156" height="102"></canvas>
             <canvas id="compassCanvas" class="compass" width="46" height="46"></canvas>
             <div id="minimapZone" class="minimap-zone">-</div>
           </div>
-        </div>
-
-        <div id="frameLeft" class="frame frame-left">
-          <div class="menu-buttons">
-            <button id="skillsButton" type="button">Skills</button>
-            <button id="inventoryButton" type="button">Inventory</button>
-            <button id="abilitiesButton" type="button">Abilities</button>
-            <button id="classesButton" type="button">Classes</button>
-          </div>
-          <div id="netStats" class="net-stats">net -</div>
-        </div>
-
-        <div id="frameRight" class="frame frame-right">
-          <div id="buffTracker" class="buff-tracker hidden"></div>
-          <div id="questTracker" class="quest-tracker"></div>
         </div>
 
         <div id="menuBackdrop" class="menu-backdrop hidden"></div>
@@ -147,6 +140,10 @@
         </div>
 
         <div id="frameBottom" class="frame frame-bottom">
+          <div class="system-feed">
+            <div id="systemFeed" class="system-log"></div>
+            <div id="netStats" class="net-stats">net -</div>
+          </div>
           <div class="chat">
             <div id="chatLog"></div>
             <form id="chatForm">
