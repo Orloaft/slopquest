@@ -117,6 +117,9 @@ const WEIGHT_HARD_CAP = 90;
 const MIN_ENCUMBRANCE_MULT = 0.55;
 const RANGED_RANGE = 5;
 const FORAGE_XP = 12;
+// How long a monster's attack pose is broadcast as active (drives the bespoke
+// client attack animation for enemies that have one).
+const MONSTER_ATTACK_ANIM_MS = 480;
 mkdirSync(DATA_DIR, { recursive: true });
 
 const ADVENTURER: ClassSpec = CLASSES["adventurer"]!;
@@ -496,6 +499,8 @@ function updateMonsters(dt: number, now: number): void {
     if (catalog.ranged) {
       if (!frozen && dist <= catalog.range && now - monster.lastAttack >= catalog.attackMs && hasLineOfSight(monster.floor, monster.x, monster.y, target.x, target.y)) {
         monster.lastAttack = now;
+        monster.attackUntil = now + MONSTER_ATTACK_ANIM_MS;
+        monster.dir = facing(monster, target);
         const shot = Math.max(1, roll(catalog.damage) - armorReduction(target));
         if (rollDodge(target)) {
           addSkillXp(target, "agility", Math.max(1, shot));
@@ -518,6 +523,8 @@ function updateMonsters(dt: number, now: number): void {
 
     if (!frozen && dist <= catalog.range + 0.15 && now - monster.lastAttack >= catalog.attackMs) {
       monster.lastAttack = now;
+      monster.attackUntil = now + MONSTER_ATTACK_ANIM_MS;
+      monster.dir = facing(monster, target);
       // Gas cloud (Volatile Flask) makes the monster miss sometimes.
       if (monster.inaccurateUntil && now < monster.inaccurateUntil && Math.random() < 0.2) {
         event("float", "Miss", monster.x, monster.y - 0.5, monster.floor, "#a8a29e");
@@ -1921,6 +1928,13 @@ function pickWanderTarget(monster: ServerMonster): Vec2 | null {
   return null;
 }
 
+// Which way an attacker should face to point at its target.
+function facing(from: { x: number; y: number }, to: { x: number; y: number }): Direction {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up";
+}
+
 function moveEntity(entity: { floor: number; x: number; y: number; dir: Direction; moving: boolean }, dx: number, dy: number): void {
   const oldX = entity.x;
   const oldY = entity.y;
@@ -2133,6 +2147,7 @@ function serializeMonster(monster: ServerMonster): MonsterView {
     y: round(monster.y),
     dir: monster.dir,
     moving: monster.moving,
+    attacking: (monster.attackUntil ?? 0) > performance.now(),
     hp: Math.round(monster.hp),
     maxHp: monster.maxHp,
     zone: monster.zone

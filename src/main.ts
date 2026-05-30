@@ -164,6 +164,7 @@ interface EntityView extends Phaser.GameObjects.Container {
   animFamily?: string;
   animDir?: Direction;
   animMoving?: boolean;
+  animAttacking?: boolean;
   animWidth?: number;
   animHeight?: number;
   currentFrameKey?: string;
@@ -540,6 +541,12 @@ let selectedInventoryItem: string | null = null;
 let activeDialogue: ActiveDialogue | null = null;
 const DIRECTIONS: Direction[] = ["up", "right", "down", "left"];
 const WALK_FRAME_MS = 125;
+const ATTACK_FRAME_MS = 110;
+// Walk cycles are 4 frames unless a family overrides it here.
+const FAMILY_WALK_FRAMES: Record<string, number> = { mire_spitter: 3 };
+// Families with a bespoke attack animation: base family -> attack texture family.
+const ATTACK_FAMILY: Record<string, string> = { skitterer: "skittererAtk", mire_spitter: "mireSpitterAtk" };
+const ATTACK_FAMILY_FRAMES: Record<string, number> = { skittererAtk: 3, mireSpitterAtk: 4 };
 const DYNAMIC_PATH_REFRESH_MS = 350;
 const DYNAMIC_PATH_REFRESH_DISTANCE = 0.65;
 function itemUseKind(itemId: string | null): ItemUse["kind"] | null {
@@ -559,6 +566,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("greyWolfSheet", "/grey-wolf-sheet.png");
   this.load.image("wispSheet", "/wisp-sheet.png");
   this.load.image("newEnemiesSheet", "/new-enemies.png");
+  this.load.image("swampEnemySheet", "/skitterer-spitter.png");
   this.load.image("uiSheet", "/ui-sheet.png");
   this.load.image("townTiles", "/towntiles.png");
   this.load.image("forestTiles", "/foresttiles.png");
@@ -1119,7 +1127,7 @@ function syncEntities(): void {
     }
     setEntityTarget(view, monster.x * TILE_SIZE, monster.y * TILE_SIZE);
     const actor = monsterActorSpec(monster);
-    setActorAnimation(view, actor.family, monster.dir, monster.moving, actor.width, actor.height);
+    setActorAnimation(view, actor.family, monster.dir, monster.moving, actor.width, actor.height, monster.attacking);
     view.sprite.y = actor.yOffset;
     view.sprite.clearTint();
     if (actor.tint) view.sprite.setTint(actor.tint);
@@ -1470,7 +1478,7 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
   view.hp = hp;
   view.targetRing = targetRing;
   view.sprite = sprite;
-  setActorAnimation(view, actor.family, monster.dir, monster.moving, actor.width, actor.height);
+  setActorAnimation(view, actor.family, monster.dir, monster.moving, actor.width, actor.height, monster.attacking);
   return view;
 }
 
@@ -1519,10 +1527,11 @@ function easeToTarget(view: EntityView): void {
   view.y += (view.targetY - view.y) * 0.32;
 }
 
-function setActorAnimation(view: EntityView, family: string, dir: Direction = "down", moving = false, width = 40, height = 48): void {
+function setActorAnimation(view: EntityView, family: string, dir: Direction = "down", moving = false, width = 40, height = 48, attacking = false): void {
   view.animFamily = family;
   view.animDir = DIRECTIONS.includes(dir) ? dir : "down";
   view.animMoving = Boolean(moving);
+  view.animAttacking = Boolean(attacking);
   view.animWidth = width;
   view.animHeight = height;
 }
@@ -1539,14 +1548,24 @@ function animateEntities(): void {
 
 function animateActor(view: EntityView): void {
   if (!view.sprite || !view.animFamily || !view.animDir) return;
-  const frame = view.animMoving ? Math.floor(scene.time.now / WALK_FRAME_MS) % 4 : 0;
-  const key = actorTextureKey(view.animFamily, view.animDir, frame);
+  const attackFamily = view.animAttacking ? ATTACK_FAMILY[view.animFamily] : undefined;
+  let family = view.animFamily;
+  let frame = 0;
+  if (attackFamily) {
+    family = attackFamily;
+    const count = ATTACK_FAMILY_FRAMES[attackFamily] ?? 4;
+    frame = Math.floor(scene.time.now / ATTACK_FRAME_MS) % count;
+  } else if (view.animMoving) {
+    const count = FAMILY_WALK_FRAMES[view.animFamily] ?? 4;
+    frame = Math.floor(scene.time.now / WALK_FRAME_MS) % count;
+  }
+  const key = actorTextureKey(family, view.animDir, frame);
   if (view.currentFrameKey !== key) {
     view.sprite.setTexture(key);
     view.sprite.setDisplaySize(view.animWidth ?? 40, view.animHeight ?? 48);
     view.currentFrameKey = key;
   }
-  view.sprite.setFlipX(actorFlipX(view.animFamily, view.animDir));
+  view.sprite.setFlipX(actorFlipX(family, view.animDir));
 }
 
 function renderHud(me: PlayerView): void {
@@ -3387,16 +3406,57 @@ function createActorFrames(scene: Phaser.Scene): void {
     down: wispRow,
     left: wispRow
   });
-  // The nine new-area monsters share one montage sheet (public/new-enemies.png):
+  // The remaining new-area monsters share one montage sheet (public/new-enemies.png):
   // a 4-frame walk row per family, the same frames used for all four facings.
   const newEnemyFamilies = [
-    "skitterer", "mire_spitter", "canyon_scavenger", "dust_burrower", "dune_skitterer",
+    "canyon_scavenger", "dust_burrower", "dune_skitterer",
     "sun_wraith", "reef_prowler", "venomous_stalker", "totem_wraith"
   ];
   newEnemyFamilies.forEach((family, r) => {
-    const frames = spriteFrames([0, 64, 128, 192], r * 56, 64, 56);
+    // These sit on rows 2..8 of the sheet (rows 0..1 were the now-bespoke swamp pair).
+    const frames = spriteFrames([0, 64, 128, 192], (r + 2) * 56, 64, 56);
     createExplicitFrameSet(scene, "newEnemiesSheet", family, { up: frames, right: frames, down: frames, left: frames });
   });
+
+  createSwampEnemyFrames(scene);
+}
+
+// The two swamp enemies get hand-authored 4-direction walk + attack animations
+// from public/skitterer-spitter.png (magenta-keyed at runtime). The Skitterer
+// walks in 4 frames and attacks in 3; the Mire Spitter walks in 3 and spits in 4.
+function createSwampEnemyFrames(scene: Phaser.Scene): void {
+  // Movement block (top of sheet): UP/RIGHT/DOWN/LEFT row y-bands.
+  const moveY: Record<Direction, number> = { up: 58, right: 163, down: 274, left: 372 };
+  const moveH: Record<Direction, number> = { up: 102, right: 100, down: 96, left: 100 };
+  const skitterMoveXs = [257, 357, 457, 557];
+  const spitterMoveXs = [683, 789, 895];
+  const skitterMove: DirectionFrames = {} as DirectionFrames;
+  const spitterMove: DirectionFrames = {} as DirectionFrames;
+  for (const dir of DIRECTIONS) {
+    skitterMove[dir] = spriteFrames(skitterMoveXs, moveY[dir], 88, moveH[dir]);
+    spitterMove[dir] = spriteFrames(spitterMoveXs, moveY[dir], 100, moveH[dir]);
+  }
+  createExplicitFrameSet(scene, "swampEnemySheet", "skitterer", skitterMove);
+  createExplicitFrameSet(scene, "swampEnemySheet", "mire_spitter", spitterMove);
+
+  // Attack block (bottom of sheet): UP/RIGHT/DOWN/LEFT row y-bands.
+  const atkY: Record<Direction, number> = { up: 559, right: 673, down: 772, left: 884 };
+  const atkH: Record<Direction, number> = { up: 100, right: 100, down: 98, left: 104 };
+  const skitterAtkXs = [252, 353, 454];
+  const skitterAtk: DirectionFrames = {} as DirectionFrames;
+  const spitterAtk: DirectionFrames = {} as DirectionFrames;
+  for (const dir of DIRECTIONS) {
+    skitterAtk[dir] = spriteFrames(skitterAtkXs, atkY[dir], 96, atkH[dir]);
+    // The spit frames pack tighter and the final lash-out frame is wider.
+    spitterAtk[dir] = [
+      { x: 570, y: atkY[dir], w: 94, h: atkH[dir] },
+      { x: 672, y: atkY[dir], w: 92, h: atkH[dir] },
+      { x: 773, y: atkY[dir], w: 102, h: atkH[dir] },
+      { x: 876, y: atkY[dir], w: 120, h: atkH[dir] }
+    ];
+  }
+  createExplicitFrameSet(scene, "swampEnemySheet", "skittererAtk", skitterAtk);
+  createExplicitFrameSet(scene, "swampEnemySheet", "mireSpitterAtk", spitterAtk);
 }
 
 function uniformDirectionFrames(cellW: number, cellH: number, frames: number): DirectionFrames {

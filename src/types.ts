@@ -118,6 +118,7 @@ export interface MonsterView {
   y: number;
   dir: Direction;
   moving: boolean;
+  attacking?: boolean;
   hp: number;
   maxHp: number;
   zone: string;

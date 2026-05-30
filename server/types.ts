@@ -110,6 +110,9 @@ export interface ServerMonster {
   dir: Direction;
   moving: boolean;
   lastAttack: number;
+  // When set and in the future, the monster is mid-attack — drives the client's
+  // bespoke attack animation (timestamp in performance.now ms).
+  attackUntil?: number;
   deadUntil: number;
   homeX: number;
   homeY: number;
