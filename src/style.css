@@ -404,11 +404,11 @@ canvas {
 }
 .console .menu-buttons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   margin-top: 4px;
 }
-/* Compact, single-row menu so the console fits the top bar without clipping. */
+/* Compact menu (3 per row -> 3 + 2) so the console stays tidy. */
 .console .menu-buttons button {
   padding: 6px 2px;
   font-size: 11px;
@@ -858,6 +858,111 @@ canvas {
   display: grid;
   grid-template-columns: repeat(10, minmax(42px, 1fr));
   gap: 6px;
+}
+
+/* --- Worn-equipment paperdoll --- */
+.equip-banner {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.equip-banner-label {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8fa08f;
+}
+.equip-banner b {
+  font-size: 16px;
+  color: #f3ead0;
+}
+.paperdoll {
+  display: grid;
+  grid-template-columns: repeat(3, 96px);
+  grid-auto-rows: 96px;
+  gap: 10px;
+  justify-content: center;
+  /* A faint plinth so the slot cluster reads as a worn-gear figure. */
+  padding: 16px;
+  border-radius: 10px;
+  background:
+    radial-gradient(120px 150px at 50% 46%, rgba(158, 230, 177, 0.08), transparent 70%),
+    repeating-linear-gradient(0deg, rgba(220, 230, 215, 0.02) 0 1px, transparent 1px 2px),
+    linear-gradient(180deg, #1d231d, #141813);
+  box-shadow: inset 1px 1px 0 rgba(186, 196, 180, 0.14), inset -1px -1px 0 rgba(0, 0, 0, 0.5);
+}
+.equip-spacer {
+  visibility: hidden;
+}
+.equip-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid #0a0d0a;
+  border-radius: 6px;
+  background: rgba(7, 10, 8, 0.55);
+  box-shadow: inset 1px 1px 0 rgba(186, 196, 180, 0.1), inset -1px -1px 0 rgba(0, 0, 0, 0.55);
+}
+.equip-slot.filled {
+  border-color: rgba(158, 230, 177, 0.5);
+  background: rgba(30, 54, 38, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(158, 230, 177, 0.22), 0 0 8px rgba(158, 230, 177, 0.16);
+}
+.equip-icon {
+  width: 42px;
+  height: 42px;
+  image-rendering: pixelated;
+}
+.equip-tag {
+  max-width: 88px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  color: #d8e4d9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.equip-empty-label {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #5d685c;
+}
+.equip-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: center;
+}
+.equip-stats span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 84px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(7, 10, 8, 0.5);
+}
+.equip-stats i {
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8fa08f;
+}
+.equip-stats b {
+  font-size: 15px;
+  color: #f3ead0;
 }
 
 .inventory-slot {

@@ -43,6 +43,7 @@
             <div class="menu-buttons">
               <button id="skillsButton" type="button">Skills</button>
               <button id="inventoryButton" type="button">Inventory</button>
+              <button id="equipmentButton" type="button">Equipment</button>
               <button id="abilitiesButton" type="button">Abilities</button>
               <button id="classesButton" type="button">Classes</button>
             </div>
@@ -78,6 +79,15 @@
             <button id="inventoryCloseButton" type="button">Close</button>
           </div>
           <div id="inventoryGrid" class="inventory-grid"></div>
+        </div>
+        <div id="equipmentPanel" class="center-panel menu-panel hidden">
+          <div class="panel-head">
+            <strong>Equipment</strong>
+            <button id="equipmentCloseButton" type="button">Close</button>
+          </div>
+          <div class="equip-banner"><span class="equip-banner-label">Stance</span><b id="equipClass">Adventurer</b></div>
+          <div id="paperdoll" class="paperdoll"></div>
+          <div id="equipStats" class="equip-stats"></div>
         </div>
         <div id="abilitiesPanel" class="center-panel menu-panel hidden">
           <div class="panel-head">

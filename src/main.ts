@@ -357,6 +357,12 @@ const dom = {
   classList: el<HTMLElement>("#classList"),
   skillTracker: el<HTMLElement>("#skillTracker"),
   inventoryGrid: el<HTMLElement>("#inventoryGrid"),
+  equipmentButton: el<HTMLButtonElement>("#equipmentButton"),
+  equipmentPanel: el<HTMLElement>("#equipmentPanel"),
+  equipmentCloseButton: el<HTMLButtonElement>("#equipmentCloseButton"),
+  equipClass: el<HTMLElement>("#equipClass"),
+  paperdoll: el<HTMLElement>("#paperdoll"),
+  equipStats: el<HTMLElement>("#equipStats"),
   hotbar: el<HTMLElement>("#hotbar"),
   minimapCanvas: el<HTMLCanvasElement>("#minimapCanvas"),
   compassCanvas: el<HTMLCanvasElement>("#compassCanvas"),
@@ -404,6 +410,10 @@ dom.refreshRosterButton.addEventListener("click", () => send({ type: "characters
 dom.respawnButton.addEventListener("click", () => send({ type: "respawn" }));
 dom.skillsButton.addEventListener("click", () => toggleCenterPanel(dom.skillsPanel));
 dom.inventoryButton.addEventListener("click", () => toggleCenterPanel(dom.inventoryPanel));
+dom.equipmentButton.addEventListener("click", () => {
+  toggleCenterPanel(dom.equipmentPanel);
+  if (!dom.equipmentPanel.classList.contains("hidden")) renderEquipment(self());
+});
 dom.abilitiesButton.addEventListener("click", () => toggleCenterPanel(dom.abilitiesPanel));
 dom.classesButton.addEventListener("click", () => {
   toggleCenterPanel(dom.classesPanel);
@@ -411,6 +421,7 @@ dom.classesButton.addEventListener("click", () => {
 });
 dom.skillsCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.inventoryCloseButton.addEventListener("click", () => hideCenterPanels());
+dom.equipmentCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.abilitiesCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.classesCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.vendorCloseButton.addEventListener("click", () => hideCenterPanels());
@@ -1588,6 +1599,7 @@ function renderHud(me: PlayerView): void {
   renderQuestTracker(me.quests);
   renderSkillTracker(me.skills);
   renderInventory(me.inventory);
+  if (!dom.equipmentPanel.classList.contains("hidden")) renderEquipment(me);
   renderAbilities(me.abilities);
   if (!dom.classesPanel.classList.contains("hidden")) renderClasses(me);
   loadHotbarFor(me.name);
@@ -1681,6 +1693,76 @@ function renderSkillTracker(skills: SkillView[] = []): void {
       `;
     })
     .join("");
+}
+
+// The worn-equipment paperdoll. Equipment is currently a small model — a melee
+// weapon tier (or a bow held in the pack), a body-armour tier, and the equipped
+// class stance — so the populated slots are Weapon and Body; the rest are shown
+// as empty wells in the familiar slot layout, ready for future gear.
+interface EquipSlotFill {
+  name: string;
+  iconUrl: string | null;
+  detail: string;
+}
+
+const PAPERDOLL_LAYOUT: Array<string | null> = [
+  null, "head", null,
+  "cape", "amulet", "ammo",
+  "weapon", "body", "shield",
+  null, "legs", null,
+  "hands", "feet", "ring"
+];
+const SLOT_LABELS: Record<string, string> = {
+  head: "Head", cape: "Cape", amulet: "Amulet", ammo: "Ammo", weapon: "Weapon",
+  body: "Body", shield: "Shield", legs: "Legs", hands: "Hands", feet: "Feet", ring: "Ring"
+};
+
+function renderEquipment(me: PlayerView | null | undefined): void {
+  if (!me) return;
+  const spec: ClassSpec = CLASSES[me.classKey] ?? CLASSES.adventurer ?? fallbackClassSpec();
+  dom.equipClass.textContent = spec.label;
+
+  // A bow in the pack acts as the worn weapon (attacks route to Ranged).
+  const bow = (me.inventory ?? []).find((item) => item && /bow/.test(item.id));
+  const dmgBonus = me.weaponTier * (SHOP.weapon?.damageBonus ?? 0);
+  const armorBonus = me.armorTier * (SHOP.armor?.armorBonus ?? 0);
+
+  const fills: Record<string, EquipSlotFill> = {};
+  if (bow) {
+    fills.weapon = { name: bow.label, iconUrl: bow.iconUrl, detail: "Ranged" };
+  } else {
+    fills.weapon = me.weaponTier
+      ? { name: SHOP.weapon?.knightName ?? "Forged Blade", iconUrl: "/icons/shop-weapon.png", detail: `+${dmgBonus} dmg` }
+      : { name: "Worn Blade", iconUrl: "/icons/ui-weapon.png", detail: "starter" };
+  }
+  fills.body = me.armorTier
+    ? { name: SHOP.armor?.name ?? "Plated Mail", iconUrl: "/icons/shop-armor.png", detail: `+${armorBonus} armour` }
+    : { name: "Cloth Tunic", iconUrl: "/icons/ui-armor.png", detail: "starter" };
+
+  dom.paperdoll.innerHTML = PAPERDOLL_LAYOUT
+    .map((slot) => {
+      if (!slot) return `<div class="equip-spacer"></div>`;
+      const fill = fills[slot];
+      if (fill) {
+        return `<div class="equip-slot filled" title="${escapeHtml(`${fill.name} — ${fill.detail}`)}">${iconMarkup(fill.iconUrl, fill.name, "equip-icon")}<span class="equip-tag">${escapeHtml(fill.name)}</span></div>`;
+      }
+      return `<div class="equip-slot empty" title="${escapeHtml(SLOT_LABELS[slot] ?? slot)}"><span class="equip-empty-label">${escapeHtml(SLOT_LABELS[slot] ?? slot)}</span></div>`;
+    })
+    .join("");
+
+  const attackTotal = skillLevelOf(me, "attack") + dmgBonus;
+  const defenceTotal = Math.floor(skillLevelOf(me, "defense") / 3) + armorBonus;
+  dom.equipStats.innerHTML = [
+    bow
+      ? `<span><i>Ranged</i><b>${skillLevelOf(me, "ranged")}</b></span>`
+      : `<span><i>Attack</i><b>${attackTotal}</b></span>`,
+    `<span><i>Armour</i><b>${defenceTotal}</b></span>`,
+    `<span><i>Weapon</i><b>${escapeHtml(fills.weapon.name)}</b></span>`
+  ].join("");
+}
+
+function skillLevelOf(me: PlayerView, id: string): number {
+  return me.skills.find((skill) => skill.id === id)?.level ?? 1;
 }
 
 function renderInventory(inventory: Array<InventoryItemView | null> = []): void {
@@ -2818,6 +2900,7 @@ function hideCenterPanels(): void {
   dom.menuBackdrop.classList.add("hidden");
   dom.skillsPanel.classList.add("hidden");
   dom.inventoryPanel.classList.add("hidden");
+  dom.equipmentPanel.classList.add("hidden");
   dom.abilitiesPanel.classList.add("hidden");
   dom.classesPanel.classList.add("hidden");
   dom.vendor.classList.add("hidden");
@@ -3194,7 +3277,7 @@ function closeDialogue(openFollowup = true): void {
     (opensAlchemist ? dom.alchemist : dom.vendor).classList.remove("hidden");
     return;
   }
-  if ([dom.skillsPanel, dom.inventoryPanel, dom.abilitiesPanel, dom.vendor, dom.alchemist].every((panel) => panel.classList.contains("hidden"))) {
+  if ([dom.skillsPanel, dom.inventoryPanel, dom.equipmentPanel, dom.abilitiesPanel, dom.vendor, dom.alchemist].every((panel) => panel.classList.contains("hidden"))) {
     dom.menuBackdrop.classList.add("hidden");
   }
 }
