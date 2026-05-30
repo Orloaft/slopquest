@@ -333,6 +333,10 @@ const fishingNodeViewCache = new WeakMap<FishingNodeRuntime, ResourceViewCache<F
 const miningNodeViewCache = new WeakMap<MiningNodeRuntime, ResourceViewCache<MiningNodeView>>();
 const herbNodeViewCache = new WeakMap<HerbNodeRuntime, ResourceViewCache<HerbNodeView>>();
 const resourceRespawns = new MinHeap<ResourceRespawn>((a, b) => a.at - b.at);
+const activeRegionsScratch: ActiveRegions = { cells: new Set() };
+const visitedMonsterScratch = new Set<ServerMonster>();
+const visitedNpcScratch = new Set<NpcRuntime>();
+const visitedFireScratch = new Set<Fire>();
 let nextMonsterId = 1;
 let nextCorpseId = 1;
 let nextFireId = 1;
@@ -675,7 +679,8 @@ function updatePlayers(dt: number, now: number): void {
 }
 
 function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): void {
-  const visited = new Set<ServerMonster>();
+  const visited = visitedMonsterScratch;
+  visited.clear();
   for (const cell of activeRegions.cells) {
     const cellMonsters = monstersByCell.get(cell);
     if (!cellMonsters) continue;
@@ -795,7 +800,8 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
 }
 
 function occupiedRegions(): ActiveRegions {
-  const regions: ActiveRegions = { cells: new Set() };
+  const regions = activeRegionsScratch;
+  regions.cells.clear();
   for (const { player } of clients.values()) {
     for (const cell of activeRegionCellsFor(player)) regions.cells.add(cell);
   }
@@ -2123,7 +2129,8 @@ function treeTypeForTile(floor: number, x: number, y: number): string {
 }
 
 function updateNpcs(dt: number, now: number, activeRegions: ActiveRegions): void {
-  const visited = new Set<NpcRuntime>();
+  const visited = visitedNpcScratch;
+  visited.clear();
   for (const cell of activeRegions.cells) {
     const cellNpcs = npcsByCell.get(cell);
     if (!cellNpcs) continue;
@@ -2183,7 +2190,8 @@ function scheduleResourceRespawn(kind: ResourceRespawnKind, id: string, at: numb
 }
 
 function updateFires(now: number, activeRegions: ActiveRegions): void {
-  const visited = new Set<Fire>();
+  const visited = visitedFireScratch;
+  visited.clear();
   for (const cell of activeRegions.cells) {
     const cellFires = firesByCell.get(cell);
     if (!cellFires) continue;
