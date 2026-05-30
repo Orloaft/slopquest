@@ -201,3 +201,10 @@
   iconUrl: /icons/item-quartz.png
   stackable: true
   tags: [quest]
+
+- id: broken_reach_map
+  label: Inked Survey of The Broken Reach
+  icon: Map
+  iconUrl: /icons/item-map.png
+  stackable: false
+  tags: [tool, map]

@@ -338,6 +338,11 @@ const dom = {
   dialogueSpeaker: el<HTMLElement>("#dialogueSpeaker"),
   dialogueLine: el<HTMLElement>("#dialogueLine"),
   dialogueNextButton: el<HTMLButtonElement>("#dialogueNextButton"),
+  mapScreen: el<HTMLElement>("#mapScreen"),
+  mapTitle: el<HTMLElement>("#mapTitle"),
+  mapCanvas: el<HTMLCanvasElement>("#mapCanvas"),
+  mapHint: el<HTMLElement>("#mapHint"),
+  mapCloseButton: el<HTMLButtonElement>("#mapCloseButton"),
   itemPopover: el<HTMLElement>("#itemPopover"),
   death: el<HTMLElement>("#death"),
   chatLog: el<HTMLElement>("#chatLog"),
@@ -362,6 +367,12 @@ dom.abilitiesCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.classesCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.vendorCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.alchemistCloseButton.addEventListener("click", () => hideCenterPanels());
+dom.mapCloseButton.addEventListener("click", () => hideCenterPanels());
+dom.mapCanvas.addEventListener("click", () => {
+  showFactionMarkers = !showFactionMarkers;
+  const me = self();
+  if (me) renderMapScreen(me);
+});
 dom.menuBackdrop.addEventListener("click", () => hideCenterPanels());
 dom.dialogueNextButton.addEventListener("click", advanceDialogue);
 [dom.vendor, dom.alchemist].forEach((panel) => {
@@ -612,7 +623,7 @@ function create(this: Phaser.Scene): void {
     right: Phaser.Input.Keyboard.KeyCodes.RIGHT
   }, false) as typeof cursors;
   keyboard.addCapture([Phaser.Input.Keyboard.KeyCodes.TAB]);
-  keys = keyboard.addKeys("W,A,S,D,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,F,B,ENTER,TAB", false) as Record<string, Phaser.Input.Keyboard.Key>;
+  keys = keyboard.addKeys("W,A,S,D,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,F,B,M,ENTER,TAB", false) as Record<string, Phaser.Input.Keyboard.Key>;
   const hotbarKeys = [keys.ONE, keys.TWO, keys.THREE, keys.FOUR, keys.FIVE, keys.SIX, keys.SEVEN, keys.EIGHT];
   hotbarKeys.forEach((key, index) => {
     if (!key) return;
@@ -629,6 +640,9 @@ function create(this: Phaser.Scene): void {
   });
   keys.B?.on("down", () => {
     if (!isTextEntryFocused()) toggleCenterPanel(dom.vendor);
+  });
+  keys.M?.on("down", () => {
+    if (!isTextEntryFocused()) toggleMapScreen();
   });
   keys.ENTER?.on("down", () => {
     if (!isTextEntryFocused()) dom.chatInput.focus();
@@ -669,6 +683,8 @@ function update(this: Phaser.Scene, time: number): void {
   if (ownView) scene.cameras.main.centerOn(ownView.x, ownView.y);
   drawMinimap(me);
   drawCompass(me.dir);
+  updateFog(me, time);
+  if (!dom.mapScreen.classList.contains("hidden")) renderMapScreen(me);
 }
 
 function ensureSocket(): void {
@@ -2455,6 +2471,7 @@ function hideCenterPanels(): void {
   dom.classesPanel.classList.add("hidden");
   dom.vendor.classList.add("hidden");
   dom.alchemist.classList.add("hidden");
+  dom.mapScreen.classList.add("hidden");
   closeDialogue(false);
 }
 
@@ -3612,6 +3629,194 @@ function drawMinimap(me: PlayerView): void {
   ctx.stroke();
 
   dom.minimapZone.textContent = `${minimapZoneLabel(me.floor)} · F${me.floor}`;
+}
+
+// --- The Inked Survey: fog of war + the [M] regional map ------------------
+// Owning `broken_reach_map` grants the survey perk: walking inks the parchment.
+// Revealed tiles are tracked client-side per character + floor in localStorage,
+// so a fresh character starts with a blank sheet and charts it by exploring.
+const FACTION_LANDMARKS: Record<string, string> = {
+  "iron-census-officer": "Iron Census Front",
+  "syndicate-contact": "Syndicate Drop",
+  "faith-monk": "Sunken Faith Shrine",
+  "ranger-scout": "Ranger Camp",
+  "cartographer-adept": "Cartographers' Post"
+};
+const FOG_RADIUS = 2;
+let fogName = "";
+let fogFloor = -1;
+let fogSet = new Set<number>();
+let fogDirty = false;
+let lastFogSave = 0;
+let showFactionMarkers = true;
+
+function fogStorageKey(name: string, floor: number): string {
+  return `tib.fog.${name}.${floor}`;
+}
+
+function loadFog(name: string, floor: number): void {
+  fogName = name;
+  fogFloor = floor;
+  fogSet = new Set<number>();
+  try {
+    const raw = localStorage.getItem(fogStorageKey(name, floor));
+    if (raw) for (const idx of JSON.parse(raw) as number[]) fogSet.add(idx);
+  } catch {
+    // Corrupt/disabled storage is non-fatal — the sheet just starts blank.
+  }
+  fogDirty = false;
+}
+
+function saveFog(): void {
+  if (!fogDirty || !fogName) return;
+  try {
+    localStorage.setItem(fogStorageKey(fogName, fogFloor), JSON.stringify([...fogSet]));
+  } catch {
+    // Quota or disabled storage — fog reveal still works for this session.
+  }
+  fogDirty = false;
+}
+
+function ownsSurveyMap(me: PlayerView): boolean {
+  return inventoryQty(me.inventory, "broken_reach_map") > 0;
+}
+
+function updateFog(me: PlayerView, time: number): void {
+  if (!ownsSurveyMap(me)) return;
+  if (fogName !== me.name || fogFloor !== me.floor) {
+    saveFog();
+    loadFog(me.name, me.floor);
+  }
+  const cx = Math.floor(me.x);
+  const cy = Math.floor(me.y);
+  for (let dy = -FOG_RADIUS; dy <= FOG_RADIUS; dy += 1) {
+    for (let dx = -FOG_RADIUS; dx <= FOG_RADIUS; dx += 1) {
+      const x = cx + dx;
+      const y = cy + dy;
+      if (x < 0 || y < 0 || x >= MAP_COLS || y >= MAP_ROWS) continue;
+      const idx = y * MAP_COLS + x;
+      if (!fogSet.has(idx)) {
+        fogSet.add(idx);
+        fogDirty = true;
+      }
+    }
+  }
+  if (fogDirty && time - lastFogSave > 1500) {
+    saveFog();
+    lastFogSave = time;
+  }
+}
+
+function toggleMapScreen(): void {
+  if (!dom.mapScreen.classList.contains("hidden")) {
+    hideCenterPanels();
+    return;
+  }
+  const me = self();
+  if (!me) return;
+  if (!ownsSurveyMap(me)) {
+    addChat("You have no survey to read. Merchant Nicolas sells the Inked Survey of The Broken Reach.");
+    return;
+  }
+  showCenterPanel(dom.mapScreen);
+  renderMapScreen(me);
+}
+
+function parchmentTint(hex: string): string {
+  const match = /^#?([0-9a-f]{6})$/i.exec(hex);
+  if (!match?.[1]) return hex;
+  const n = parseInt(match[1], 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  const blend = (c: number, paper: number): number => Math.round(c * 0.68 + paper * 0.32);
+  return `rgb(${blend(r, 205)}, ${blend(g, 180)}, ${blend(b, 135)})`;
+}
+
+function markLandmark(ctx: CanvasRenderingContext2D, x: number, y: number, label: string): void {
+  ctx.beginPath();
+  ctx.moveTo(x, y - 7);
+  ctx.lineTo(x + 5, y + 4);
+  ctx.lineTo(x - 5, y + 4);
+  ctx.closePath();
+  ctx.fillStyle = "#7d2b1f";
+  ctx.fill();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "#2a2014";
+  ctx.stroke();
+  ctx.font = "10px Georgia, serif";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(245, 235, 210, 0.9)";
+  ctx.fillText(label, x + 1, y - 10);
+  ctx.fillStyle = "#3a2410";
+  ctx.fillText(label, x, y - 11);
+}
+
+function renderMapScreen(me: PlayerView): void {
+  const canvas = dom.mapCanvas;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  const cw = canvas.width;
+  const ch = canvas.height;
+  const sx = cw / MAP_COLS;
+  const sy = ch / MAP_ROWS;
+  ctx.imageSmoothingEnabled = false;
+
+  // Aged-parchment backing; un-inked tiles read as bare paper.
+  ctx.fillStyle = "#cdb487";
+  ctx.fillRect(0, 0, cw, ch);
+
+  const revealed = fogName === me.name && fogFloor === me.floor ? fogSet : new Set<number>();
+  const rows = makeFloorTiles(me.floor);
+  let revealedCount = 0;
+  for (let y = 0; y < MAP_ROWS; y += 1) {
+    const row = rows[y] ?? "";
+    for (let x = 0; x < MAP_COLS; x += 1) {
+      if (!revealed.has(y * MAP_COLS + x)) continue;
+      revealedCount += 1;
+      ctx.fillStyle = parchmentTint(minimapTileColor(row[x] ?? "#"));
+      ctx.fillRect(Math.floor(x * sx), Math.floor(y * sy), Math.ceil(sx), Math.ceil(sy));
+    }
+  }
+
+  // Ink border vignette.
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "rgba(70, 50, 28, 0.6)";
+  ctx.strokeRect(2, 2, cw - 4, ch - 4);
+
+  if (showFactionMarkers) {
+    for (const npc of NPCS) {
+      if (npc.floor !== me.floor) continue;
+      const label = FACTION_LANDMARKS[npc.id];
+      if (!label) continue;
+      if (!revealed.has(Math.floor(npc.y) * MAP_COLS + Math.floor(npc.x))) continue;
+      markLandmark(ctx, npc.x * sx, npc.y * sy, label);
+    }
+  }
+
+  // Player dot — glows only once part of the sheet is charted.
+  if (revealedCount > 0) {
+    const px = me.x * sx;
+    const py = me.y * sy;
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(px, py, 3, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#2a2014";
+    ctx.stroke();
+  }
+
+  dom.mapTitle.textContent = `${minimapZoneLabel(me.floor)} — The Broken Reach`;
+  const pct = Math.round((revealedCount / (MAP_COLS * MAP_ROWS)) * 100);
+  dom.mapHint.textContent =
+    revealedCount === 0
+      ? "Uncharted. Walk the land to ink this sheet."
+      : `${pct}% charted · click to ${showFactionMarkers ? "hide" : "show"} faction markers · M to close`;
 }
 
 function directionVector(dir: Direction): { x: number; y: number } {

@@ -332,8 +332,29 @@ canvas {
 }
 
 .menu-panel,
-.dialogue {
+.dialogue,
+.map-screen {
   padding: 16px;
+}
+
+.map-screen {
+  width: min(580px, calc(100vw - 32px));
+}
+
+.map-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  border-radius: 4px;
+  border: 1px solid rgba(70, 50, 28, 0.7);
+  background: #cdb487;
+  cursor: pointer;
+}
+
+.map-screen .subcopy {
+  margin: 8px 0 0;
+  text-align: center;
 }
 
 .panel-head {

@@ -1001,6 +1001,14 @@ function buyItem(player: ServerPlayer, item: string): void {
     player.gold -= SHOP["alchemy_kit"]!.cost;
     event("system", `${player.name} bought an alchemy kit.`);
   }
+  if (item === "broken_reach_map" && !hasInventoryItem(player, "broken_reach_map") && player.gold >= SHOP["broken_reach_map"]!.cost) {
+    if (!addInventoryItem(player, "broken_reach_map", 1)) {
+      event("system", "Your inventory is full.");
+      return;
+    }
+    player.gold -= SHOP["broken_reach_map"]!.cost;
+    event("system", `${player.name} bought the Inked Survey of The Broken Reach.`);
+  }
 }
 
 function brewPotion(player: ServerPlayer): void {

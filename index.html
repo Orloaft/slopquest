@@ -100,6 +100,7 @@
             <button data-buy="pickaxe"><img src="/icons/item-pickaxe.png" alt="" />Buy pickaxe</button>
             <button data-buy="flint_steel"><img src="/icons/item-flint-steel.png" alt="" />Buy flint and steel</button>
             <button data-buy="potion"><img src="/icons/item-potion.png" alt="" />Buy potion</button>
+            <button data-buy="broken_reach_map"><img src="/icons/item-map.png" alt="" />Buy survey map (150g)</button>
           </div>
         </div>
         <div id="alchemist" class="center-panel vendor hidden">
@@ -120,6 +121,14 @@
           <div class="dialogue-speaker" id="dialogueSpeaker"></div>
           <div class="dialogue-line" id="dialogueLine"></div>
           <button id="dialogueNextButton" type="button">Continue</button>
+        </div>
+        <div id="mapScreen" class="center-panel map-screen hidden">
+          <div class="panel-head">
+            <strong id="mapTitle">The Broken Reach</strong>
+            <button id="mapCloseButton" type="button">Close</button>
+          </div>
+          <canvas id="mapCanvas" class="map-canvas" width="520" height="340"></canvas>
+          <p id="mapHint" class="subcopy">Press M to toggle. Explore to chart the fog.</p>
         </div>
 
         <div class="bottom-left panel chat">

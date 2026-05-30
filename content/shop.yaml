@@ -49,3 +49,7 @@ empty_flask:
 alchemy_kit:
   cost: 40
   name: Alchemy Kit
+
+broken_reach_map:
+  cost: 150
+  name: Inked Survey of The Broken Reach
