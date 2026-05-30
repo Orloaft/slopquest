@@ -21,6 +21,7 @@ export type PlayerAction =
   | { type: "woodcutting"; treeId: string; nextAt: number; swings: number; remaining: number }
   | { type: "fishing"; nodeId: string; nextAt: number; startedAt: number }
   | { type: "mining"; nodeId: string; nextAt: number; startedAt: number }
+  | { type: "herbing"; nodeId: string; nextAt: number; startedAt: number }
   | { type: "cooking"; itemId: string; fireId: string; nextAt: number };
 
 export interface AbilityBuffs {
@@ -79,6 +80,12 @@ export interface ServerPlayer {
   portalReadyAt: number;
   dead: boolean;
   updatedAt?: string;
+  // Tier-1 classes this player has unlocked from trainers. classKey is the one
+  // currently equipped (always "adventurer" or an unlocked key).
+  unlockedClasses: string[];
+  // E2E-only: when set, the player always dodges incoming hits (deterministic
+  // testing of the dodge mechanic). Never set outside E2E_TEST.
+  forceDodge?: boolean;
 }
 
 export interface ServerMonster {
@@ -149,6 +156,18 @@ export interface TreeNodeRuntime {
   respawnAt: number;
 }
 
+export interface HerbNodeRuntime {
+  id: string;
+  floor: number;
+  x: number;
+  y: number;
+  approachX: number;
+  approachY: number;
+  label: string;
+  active: boolean;
+  respawnAt: number;
+}
+
 export interface ExtWebSocket extends WebSocket {
   isAlive?: boolean;
 }
@@ -188,6 +207,7 @@ export interface SavedPlayer {
   inventory?: unknown;
   quests?: unknown;
   skills?: unknown;
+  unlockedClasses?: string[];
   updatedAt?: string;
 }
 

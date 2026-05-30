@@ -24,9 +24,10 @@
         },
         "stackable": { "type": "boolean" },
         "tags": { "type": "array", "items": { "type": "string" } },
+        "weight": { "type": "number", "minimum": 0, "description": "Mass carried per unit; drives encumbrance." },
         "capabilities": {
           "type": "array",
-          "items": { "enum": ["chop_tree", "fish"] },
+          "items": { "enum": ["chop_tree", "fish", "mine", "ranged"] },
           "description": "Capabilities this item grants while carried."
         },
         "use": { "$ref": "#/$defs/use" }

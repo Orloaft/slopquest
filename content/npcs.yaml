@@ -1,10 +1,11 @@
 # yaml-language-server: $schema=./schema/npcs.schema.json
 # All non-player characters. Vendors, quest givers, guides — all in one place.
 #
-# role: vendor | quest | guide
-#   vendor — opens the shop UI when interacted with.
-#   quest  — drives a quest dialogue. The id must match a quest's `giver` field.
-#   guide  — speaks idleDialogue. Currently used for flavor NPCs.
+# role: vendor | quest | guide | alchemist
+#   vendor    — opens the shop UI when interacted with.
+#   quest     — drives a quest dialogue. The id must match a quest's `giver` field.
+#   guide     — speaks idleDialogue. Currently used for flavor NPCs.
+#   alchemist — opens the alchemist craft menu (buy flasks/kit, brew potions).
 #
 # at: { floor, x, y }  — tile-coordinate placement.
 # idleDialogue          — what they say when they have nothing quest-specific to share.
@@ -44,3 +45,41 @@
   role: quest
   at: { floor: 0, x: 20.5, y: 19.5 }
   idleDialogue: "Orcs raided my cart on the north road."
+
+- id: alchemist
+  name: Sage Ellwyn
+  role: alchemist
+  at: { floor: 0, x: 25.5, y: 16.5 }
+  idleDialogue: "Bring me wild herbs and a flask, and I'll show you how to brew."
+
+# Class trainers (role: trainer) — gate the Tier-1 classes once skill
+# thresholds are met. See CLASS_UNLOCKS in src/shared.ts.
+- id: fighter-captain
+  name: Captain Doran
+  role: trainer
+  at: { floor: 0, x: 28.5, y: 18.5 }
+  idleDialogue: "Hold the line, recruit. Earn your steel and I'll make you a Vanguard."
+
+- id: shady-contact
+  name: Sly Nessa
+  role: trainer
+  at: { floor: 0, x: 14.5, y: 16.5 }
+  idleDialogue: "Quick hands and quicker feet. Show me, and the Thief's trade is yours."
+
+- id: cleric-monk
+  name: Brother Aldric
+  role: trainer
+  at: { floor: 0, x: 27.5, y: 14.5 }
+  idleDialogue: "Patience and poultices. An Apothecary mends what blades break."
+
+- id: scout-leader
+  name: Ranger Wynn
+  role: trainer
+  at: { floor: 4, x: 23.5, y: 16.5 }
+  idleDialogue: "A steady draw and a forager's eye. That's how an Archer is made."
+
+- id: hermit-academic
+  name: Magister Vael
+  role: trainer
+  at: { floor: 4, x: 27.5, y: 16.5 }
+  idleDialogue: "Power answers study. Master the arcane and become a Mage."

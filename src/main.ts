@@ -2,7 +2,9 @@ import Phaser from "phaser";
 import "./style.css";
 import {
   ABILITIES,
+  SKILLS,
   CLASSES,
+  CLASS_UNLOCKS,
   ITEMS,
   MAP_COLS,
   MAP_ROWS,
@@ -28,6 +30,7 @@ import type {
   FireView,
   FishingNodeView,
   GameEvent,
+  HerbNodeView,
   InputPayload,
   InventoryItemView,
   MiningNodeView,
@@ -116,6 +119,7 @@ interface ActiveDialogue {
   lines: DialogueLine[];
   index: number;
   opensShop: boolean;
+  opensAlchemist: boolean;
 }
 
 interface DialogueLine {
@@ -167,6 +171,10 @@ interface FishingEntityView extends Phaser.GameObjects.Container {
 
 interface MiningEntityView extends Phaser.GameObjects.Container {
   sprite: Phaser.GameObjects.Image;
+}
+
+interface HerbEntityView extends Phaser.GameObjects.Container {
+  bloom: Phaser.GameObjects.Arc;
 }
 
 interface FireEntityView extends Phaser.GameObjects.Container {
@@ -296,6 +304,7 @@ const dom = {
   goldText: el<HTMLElement>("#goldText"),
   weaponText: el<HTMLElement>("#weaponText"),
   armorText: el<HTMLElement>("#armorText"),
+  weightText: el<HTMLElement>("#weightText"),
   buffTracker: el<HTMLElement>("#buffTracker"),
   questTracker: el<HTMLElement>("#questTracker"),
   menuBackdrop: el<HTMLElement>("#menuBackdrop"),
@@ -309,6 +318,10 @@ const dom = {
   abilitiesPanel: el<HTMLElement>("#abilitiesPanel"),
   abilitiesCloseButton: el<HTMLButtonElement>("#abilitiesCloseButton"),
   abilitiesList: el<HTMLElement>("#abilitiesList"),
+  classesButton: el<HTMLButtonElement>("#classesButton"),
+  classesPanel: el<HTMLElement>("#classesPanel"),
+  classesCloseButton: el<HTMLButtonElement>("#classesCloseButton"),
+  classList: el<HTMLElement>("#classList"),
   skillTracker: el<HTMLElement>("#skillTracker"),
   inventoryGrid: el<HTMLElement>("#inventoryGrid"),
   hotbar: el<HTMLElement>("#hotbar"),
@@ -318,6 +331,9 @@ const dom = {
   netStats: el<HTMLElement>("#netStats"),
   vendor: el<HTMLElement>("#vendor"),
   vendorCloseButton: el<HTMLButtonElement>("#vendorCloseButton"),
+  alchemist: el<HTMLElement>("#alchemist"),
+  alchemistCloseButton: el<HTMLButtonElement>("#alchemistCloseButton"),
+  brewButton: el<HTMLButtonElement>("#brewButton"),
   dialogue: el<HTMLElement>("#dialogue"),
   dialogueSpeaker: el<HTMLElement>("#dialogueSpeaker"),
   dialogueLine: el<HTMLElement>("#dialogueLine"),
@@ -336,18 +352,27 @@ dom.respawnButton.addEventListener("click", () => send({ type: "respawn" }));
 dom.skillsButton.addEventListener("click", () => toggleCenterPanel(dom.skillsPanel));
 dom.inventoryButton.addEventListener("click", () => toggleCenterPanel(dom.inventoryPanel));
 dom.abilitiesButton.addEventListener("click", () => toggleCenterPanel(dom.abilitiesPanel));
+dom.classesButton.addEventListener("click", () => {
+  toggleCenterPanel(dom.classesPanel);
+  if (!dom.classesPanel.classList.contains("hidden")) renderClasses(self());
+});
 dom.skillsCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.inventoryCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.abilitiesCloseButton.addEventListener("click", () => hideCenterPanels());
+dom.classesCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.vendorCloseButton.addEventListener("click", () => hideCenterPanels());
+dom.alchemistCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.menuBackdrop.addEventListener("click", () => hideCenterPanels());
 dom.dialogueNextButton.addEventListener("click", advanceDialogue);
-dom.vendor.querySelectorAll<HTMLElement>("[data-buy]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const item = button.dataset.buy;
-    if (item) send({ type: "buy", item });
+[dom.vendor, dom.alchemist].forEach((panel) => {
+  panel.querySelectorAll<HTMLElement>("[data-buy]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const item = button.dataset.buy;
+      if (item) send({ type: "buy", item });
+    });
   });
 });
+dom.brewButton.addEventListener("click", () => send({ type: "brewPotion" }));
 dom.chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = dom.chatInput.value.trim();
@@ -405,6 +430,10 @@ const game = new Phaser.Game({
   backgroundColor: "#111412",
   pixelArt: true,
   scene: { preload, create, update },
+  // Listen for pointer events on the canvas only, not the window. Otherwise
+  // clicks on the HTML HUD/menus also reach Phaser and hit-test world entities
+  // behind them — e.g. opening the inventory would path the player to an NPC.
+  input: { windowEvents: false },
   scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH }
 });
 void game;
@@ -423,6 +452,7 @@ let pendingLootTarget: string | null = null;
 let pendingNpcTalk: string | null = null;
 let pendingFishingNode: string | null = null;
 let pendingMiningNode: string | null = null;
+let pendingHerbNode: string | null = null;
 let pendingCookingFire: string | null = null;
 let dynamicPathTarget: DynamicPathTarget | null = null;
 let lastDynamicPathRefreshAt = 0;
@@ -441,6 +471,7 @@ const npcViews = new Map<string, NpcEntityView>();
 const treeViews = new Map<string, TreeEntityView>();
 const fishingViews = new Map<string, FishingEntityView>();
 const miningViews = new Map<string, MiningEntityView>();
+const herbViews = new Map<string, HerbEntityView>();
 const fireViews = new Map<string, FireEntityView>();
 const floaters: Floater[] = [];
 let selectedInventorySlot: number | null = null;
@@ -697,6 +728,7 @@ function syncEntities(): void {
   const visibleTrees = new Set<string>();
   const visibleFishingNodes = new Set<string>();
   const visibleMiningNodes = new Set<string>();
+  const visibleHerbNodes = new Set<string>();
   const visibleFires = new Set<string>();
 
   for (const player of latestState.players.filter((item) => item.floor === me.floor)) {
@@ -852,6 +884,25 @@ function syncEntities(): void {
     }
   }
 
+  for (const node of (latestState.herbNodes ?? []).filter((item) => item.floor === me.floor)) {
+    visibleHerbNodes.add(node.id);
+    let view = herbViews.get(node.id);
+    if (!view) {
+      view = createHerbNodeView(node);
+      herbViews.set(node.id, view);
+      entityLayer.add(view);
+    }
+    view.setPosition(node.x * TILE_SIZE, node.y * TILE_SIZE);
+    view.setAlpha(node.active ? 1 : 0.3);
+    view.bloom.setVisible(node.active);
+  }
+  for (const [id, view] of herbViews) {
+    if (!visibleHerbNodes.has(id)) {
+      view.destroy();
+      herbViews.delete(id);
+    }
+  }
+
   for (const fire of (latestState.fires ?? []).filter((item) => item.floor === me.floor)) {
     visibleFires.add(fire.id);
     let view = fireViews.get(fire.id);
@@ -974,6 +1025,23 @@ function createMiningNodeView(node: MiningNodeView): MiningEntityView {
   return view;
 }
 
+function createHerbNodeView(node: HerbNodeView): HerbEntityView {
+  const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE) as HerbEntityView;
+  const base = scene.add.ellipse(0, 5, 26, 12, 0x3a5a2a, 0.4);
+  const leafA = scene.add.ellipse(-5, -1, 10, 18, 0x4caf50, 0.95).setRotation(-0.4);
+  const leafB = scene.add.ellipse(5, -1, 10, 18, 0x66bb6a, 0.95).setRotation(0.4);
+  const leafC = scene.add.ellipse(0, -5, 9, 17, 0x81c784, 0.95);
+  const bloom = scene.add.circle(0, -10, 3, 0xf6c9e0, 0.95);
+  const zone = scene.add.zone(0, -4, 40, 34).setInteractive({ cursor: "pointer" });
+  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+    event.stopPropagation();
+    startHerbPath(node);
+  });
+  view.add([base, leafA, leafB, leafC, bloom, zone]);
+  view.bloom = bloom;
+  return view;
+}
+
 function createFireView(fire: FireView): FireEntityView {
   const view = scene.add.container(fire.x * TILE_SIZE, fire.y * TILE_SIZE) as FireEntityView;
   const glow = scene.add.ellipse(0, 7, 34, 16, 0xff7a2f, 0.28);
@@ -1092,17 +1160,23 @@ function renderHud(me: PlayerView): void {
   dom.goldText.textContent = String(me.gold);
   dom.weaponText.textContent = me.weaponTier ? (SHOP.weapon?.knightName ?? "Basic") : "Basic";
   dom.armorText.textContent = me.armorTier ? (SHOP.armor?.name ?? "Cloth") : "Cloth";
+  dom.weightText.textContent = `${me.weight}/${me.maxWeight}`;
+  dom.weightText.classList.toggle("over", me.weight > me.maxWeight);
   renderBuffTracker(me.buffs);
   renderQuestTracker(me.quests);
   renderSkillTracker(me.skills);
   renderInventory(me.inventory);
   renderAbilities(me.abilities);
+  if (!dom.classesPanel.classList.contains("hidden")) renderClasses(me);
   loadHotbarFor(me.name);
   renderHotbar(me.inventory);
   dom.death.classList.toggle("hidden", !me.dead);
   const vendorNpc = NPCS[0];
   const nearVendor = vendorNpc != null && me.floor === vendorNpc.floor && Phaser.Math.Distance.Between(me.x, me.y, vendorNpc.x, vendorNpc.y) < 2.2;
   if (!nearVendor && !dom.vendor.classList.contains("hidden")) hideCenterPanels();
+  const alchemistNpc = NPCS.find((npc) => npc.role === "alchemist");
+  const nearAlchemist = alchemistNpc != null && me.floor === alchemistNpc.floor && Phaser.Math.Distance.Between(me.x, me.y, alchemistNpc.x, alchemistNpc.y) < 2.2;
+  if (!nearAlchemist && !dom.alchemist.classList.contains("hidden")) hideCenterPanels();
 }
 
 function fallbackClassSpec(): ClassSpec {
@@ -1120,7 +1194,8 @@ function fallbackClassSpec(): ClassSpec {
     abilityMs: 2800,
     hpPerDefense: 10,
     manaPerMagic: 8,
-    abilities: ["sprint", "second_wind"]
+    abilities: ["sprint", "second_wind"],
+    dodgeChance: 0.05
   };
 }
 
@@ -1202,22 +1277,21 @@ function renderInventory(inventory: Array<InventoryItemView | null> = []): void 
     })
     .join("");
   dom.inventoryGrid.querySelectorAll<HTMLElement>("[data-item]").forEach((slot) => {
-    slot.addEventListener("pointerdown", (event) => {
-      event.preventDefault();
-      const itemId = slot.dataset.item;
+    const itemId = slot.dataset.item ?? "";
+    const select = (): void => {
       if (itemId) handleInventoryClick(Number(slot.dataset.slot), itemId);
-    });
-    slot.addEventListener("mouseenter", () => showItemPopover(slot, slot.dataset.label ?? ""));
-    slot.addEventListener("mousemove", () => positionItemPopover(slot));
-    slot.addEventListener("mouseleave", hideItemPopover);
-    slot.addEventListener("dblclick", () => {
-      const id = slot.dataset.item;
-      if (id && itemUseKind(id) === "eat") send({ type: "eatItem", item: id });
-    });
-    if (isHotbarUsable(slot.dataset.item ?? null)) {
+    };
+    // Hotbar-usable items must be draggable onto the hotbar (like abilities).
+    // They select on `click`, not `pointerdown`: calling preventDefault on
+    // pointerdown cancels the browser's native HTML5 drag, and re-rendering the
+    // grid on pointerdown would destroy the drag source before dragstart fires.
+    // A real `click` only fires when the press did not become a drag, so this
+    // keeps click-to-select and drag-to-hotbar both working. Non-usable items
+    // can't be slotted, so they keep the snappier pointerdown selection.
+    if (isHotbarUsable(itemId)) {
       slot.setAttribute("draggable", "true");
+      slot.addEventListener("click", select);
       slot.addEventListener("dragstart", (event) => {
-        const itemId = slot.dataset.item ?? "";
         activeHotbarDrag = { source: "inventory", itemId };
         hotbarDragLandedInHotbar = false;
         if (event.dataTransfer) {
@@ -1226,7 +1300,18 @@ function renderInventory(inventory: Array<InventoryItemView | null> = []): void 
         }
       });
       slot.addEventListener("dragend", finishHotbarDrag);
+    } else {
+      slot.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        select();
+      });
     }
+    slot.addEventListener("mouseenter", () => showItemPopover(slot, slot.dataset.label ?? ""));
+    slot.addEventListener("mousemove", () => positionItemPopover(slot));
+    slot.addEventListener("mouseleave", hideItemPopover);
+    slot.addEventListener("dblclick", () => {
+      if (itemId && itemUseKind(itemId) === "eat") send({ type: "eatItem", item: itemId });
+    });
   });
   dom.inventoryGrid.querySelectorAll<HTMLElement>(".inventory-slot.empty").forEach((slot) => {
     slot.addEventListener("pointerdown", (event) => {
@@ -1235,6 +1320,70 @@ function renderInventory(inventory: Array<InventoryItemView | null> = []): void 
       renderInventory(self()?.inventory ?? []);
     });
   });
+}
+
+let classesClickBound = false;
+
+function renderClasses(me: PlayerView | undefined): void {
+  if (!classesClickBound) {
+    dom.classList.addEventListener("click", (event) => {
+      const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>(".class-equip");
+      if (!button || button.disabled) return;
+      const key = button.dataset.class;
+      if (key) send({ type: "setClass", classKey: key });
+    });
+    classesClickBound = true;
+  }
+  if (!me) {
+    dom.classList.innerHTML = "";
+    return;
+  }
+  const inTown = me.floor === 0 || me.floor === 4;
+  const levelOf = (id: string): number => me.skills.find((skill) => skill.id === id)?.level ?? 1;
+
+  const entries = [
+    { key: "adventurer", label: "Adventurer", town: null as string | null, npcName: null as string | null, requires: {} as Partial<Record<string, number>>, unlocked: true },
+    ...CLASS_UNLOCKS.map((unlock) => ({
+      key: unlock.key,
+      label: unlock.label,
+      town: unlock.town,
+      npcName: unlock.npcName,
+      requires: unlock.requires,
+      unlocked: me.unlockedClasses.includes(unlock.key)
+    }))
+  ];
+
+  dom.classList.innerHTML = entries
+    .map((entry) => {
+      const equipped = me.classKey === entry.key;
+      const reqs = Object.entries(entry.requires)
+        .map(([skill, level]) => {
+          const have = levelOf(skill);
+          const ok = have >= (level ?? 0);
+          return `<span class="class-req ${ok ? "met" : "unmet"}">${escapeHtml(SKILLS[skill]?.label ?? skill)} ${have}/${level}</span>`;
+        })
+        .join("");
+      const abilities = (CLASSES[entry.key]?.abilities ?? [])
+        .map((id) => `<span>${escapeHtml(ABILITIES[id]?.label ?? id)}</span>`)
+        .join("");
+      let action: string;
+      if (equipped) {
+        action = `<span class="class-status equipped">Equipped</span>`;
+      } else if (entry.unlocked) {
+        action = `<button class="class-equip" type="button" data-class="${escapeHtml(entry.key)}"${inTown ? "" : " disabled"}>${inTown ? "Equip" : "Town only"}</button>`;
+      } else {
+        const hint = `Unlock from ${entry.npcName ?? "a trainer"} in ${entry.town ?? "town"}`;
+        action = `<span class="class-status locked" title="${escapeHtml(hint)}">Locked</span>`;
+      }
+      const lockHint = !entry.unlocked && entry.npcName ? `<div class="class-hint">See ${escapeHtml(entry.npcName)} · ${escapeHtml(entry.town ?? "")}</div>` : "";
+      return `<div class="class-row ${equipped ? "equipped" : entry.unlocked ? "unlocked" : "locked"}">
+        <div class="class-head"><strong>${escapeHtml(entry.label)}</strong>${action}</div>
+        ${reqs ? `<div class="class-reqs">${reqs}</div>` : `<div class="class-reqs"><span class="class-req met">Starter stance</span></div>`}
+        <div class="class-abilities">${abilities}</div>
+        ${lockHint}
+      </div>`;
+    })
+    .join("");
 }
 
 let abilitiesClickBound = false;
@@ -1546,7 +1695,7 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
 
   dom.hotbar.querySelectorAll<HTMLElement>(".hotbar-slot").forEach((elem) => {
     const slotIndex = Number(elem.dataset.slot);
-    elem.addEventListener("click", () => activateHotbarSlot(slotIndex));
+    elem.addEventListener("click", () => handleHotbarSlotClick(slotIndex));
     elem.addEventListener("dragover", (event) => {
       if (!activeHotbarDrag) return;
       event.preventDefault();
@@ -1578,19 +1727,48 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
   });
 }
 
+// Place an inventory item shortcut into a hotbar slot, clearing any other slot
+// that already held the same item so it never appears twice. Shared by the
+// drag path and the click-to-place path.
+function assignInventoryItemToHotbar(itemId: string, targetSlot: number): void {
+  if (!isHotbarUsable(itemId)) return;
+  for (let i = 0; i < HOTBAR_SLOTS; i++) {
+    const slot = hotbarLayout[i];
+    if (i !== targetSlot && slot?.kind === "item" && slot.itemId === itemId) {
+      hotbarLayout[i] = null;
+    }
+  }
+  hotbarLayout[targetSlot] = { kind: "item", itemId };
+  saveHotbar();
+  hotbarRenderedSig = "";
+  renderHotbar(self()?.inventory ?? []);
+}
+
+// Clicking a hotbar slot while a hotbar-usable inventory item is highlighted
+// drops that item's shortcut onto the slot instead of activating it. Returns
+// true if it consumed the click as a placement.
+function tryPlaceSelectedItemOnHotbar(slotIndex: number): boolean {
+  if (!selectedInventoryItem || !isHotbarUsable(selectedInventoryItem)) return false;
+  assignInventoryItemToHotbar(selectedInventoryItem, slotIndex);
+  clearInventorySelection();
+  hideItemPopover();
+  renderInventory(self()?.inventory ?? []);
+  return true;
+}
+
+function handleHotbarSlotClick(slotIndex: number): void {
+  if (tryPlaceSelectedItemOnHotbar(slotIndex)) return;
+  activateHotbarSlot(slotIndex);
+}
+
 function handleHotbarDrop(targetSlot: number): void {
   const drag = activeHotbarDrag;
   if (!drag) return;
   if (drag.source === "inventory") {
-    if (!isHotbarUsable(drag.itemId)) return;
-    for (let i = 0; i < HOTBAR_SLOTS; i++) {
-      const slot = hotbarLayout[i];
-      if (i !== targetSlot && slot?.kind === "item" && slot.itemId === drag.itemId) {
-        hotbarLayout[i] = null;
-      }
-    }
-    hotbarLayout[targetSlot] = { kind: "item", itemId: drag.itemId };
-  } else if (drag.source === "abilities") {
+    assignInventoryItemToHotbar(drag.itemId, targetSlot);
+    return;
+  }
+  if (drag.source === "abilities") {
     if (!isAbilitySlottable(drag.abilityId)) return;
     for (let i = 0; i < HOTBAR_SLOTS; i++) {
       const slot = hotbarLayout[i];
@@ -1654,7 +1832,9 @@ function abilityGlyph(label: string): string {
 
 function iconMarkup(url: string | null, fallback: string | null, className: string): string {
   if (!url) return escapeHtml(fallback ?? "");
-  return `<img class="${className}" src="${escapeHtml(url)}" alt="${escapeHtml(fallback ?? "")}" loading="lazy" />`;
+  // draggable="false": images drag natively by default, which would hijack the
+  // press and start an image-drag instead of the parent slot's hotbar drag.
+  return `<img class="${className}" src="${escapeHtml(url)}" alt="${escapeHtml(fallback ?? "")}" draggable="false" loading="lazy" />`;
 }
 
 function lootLabel(corpse: CorpseView): string {
@@ -1694,8 +1874,14 @@ function sendStopInput(): void {
   send({ type: "input", input });
 }
 
+function isMenuOpen(): boolean {
+  return !dom.menuBackdrop.classList.contains("hidden");
+}
+
 function handleWorldClick(pointer: Phaser.Input.Pointer): void {
   if (!latestState || !self() || pointer.leftButtonDown() === false) return;
+  // A center panel / dialogue is open: don't let clicks fall through to world movement.
+  if (isMenuOpen()) return;
   const tx = Math.floor(pointer.worldX / TILE_SIZE);
   const ty = Math.floor(pointer.worldY / TILE_SIZE);
   const me = self();
@@ -1711,6 +1897,11 @@ function handleWorldClick(pointer: Phaser.Input.Pointer): void {
 
 function tickHoldMove(time: number): void {
   if (!holdMoveActive) return;
+  if (isMenuOpen()) {
+    holdMoveActive = false;
+    holdMoveTile = null;
+    return;
+  }
   const pointer = scene?.input?.activePointer;
   if (!pointer || !pointer.leftButtonDown()) {
     holdMoveActive = false;
@@ -1835,6 +2026,20 @@ function inputTowardDestination(me: PlayerView): MovementInput | null {
       return null;
     }
   }
+  if (pendingHerbNode) {
+    const node = latestState?.herbNodes?.find((item) => item.id === pendingHerbNode);
+    if (!node || node.floor !== me.floor) {
+      clearClickDestination();
+      return null;
+    }
+    if (isNearHerbNode(me, node)) {
+      const nodeId = pendingHerbNode;
+      clearClickDestination();
+      sendStopInput();
+      send({ type: "gatherHerb", id: nodeId });
+      return null;
+    }
+  }
   if (pendingCookingFire) {
     const fire = latestState?.fires?.find((item) => item.id === pendingCookingFire);
     if (!fire || fire.floor !== me.floor) {
@@ -1864,6 +2069,8 @@ function inputTowardDestination(me: PlayerView): MovementInput | null {
     } else if (pendingFishingNode && refreshFishingPath(me)) {
       return null;
     } else if (pendingMiningNode && refreshMiningPath(me)) {
+      return null;
+    } else if (pendingHerbNode && refreshHerbPath(me)) {
       return null;
     } else if (pendingCookingFire && refreshCookingPath(me)) {
       return null;
@@ -2060,6 +2267,50 @@ function miningApproachTile(me: PlayerView, node: MiningNodeView): ApproachCandi
   return nearestEntityApproachTile(me, approach, 1.2);
 }
 
+function startHerbPath(node: HerbNodeView): void {
+  const me = self();
+  if (!me || !node || node.floor !== me.floor) return;
+  clearClickDestination();
+  pendingHerbNode = node.id;
+  if (isNearHerbNode(me, node)) {
+    pendingHerbNode = null;
+    send({ type: "gatherHerb", id: node.id });
+    return;
+  }
+  if (!refreshHerbPath(me, node)) pendingHerbNode = null;
+}
+
+function refreshHerbPath(me: PlayerView, node: HerbNodeView | null = null): boolean {
+  const target = node ?? latestState?.herbNodes?.find((item) => item.id === pendingHerbNode);
+  if (!target || target.floor !== me.floor) return false;
+  if (isNearHerbNode(me, target)) return true;
+  const destination = herbApproachTile(me, target) ?? nearestEntityApproachTile(me, herbApproachPoint(target), 1.15);
+  return Boolean(
+    destination && startPathToTile(me.floor, destination.x, destination.y, null, null, null, null, null, null, null, target.id)
+  );
+}
+
+function isNearHerbNode(me: PlayerView, node: HerbNodeView): boolean {
+  const approach = herbApproachPoint(node);
+  return Phaser.Math.Distance.Between(me.x, me.y, approach.x, approach.y) <= 1.35;
+}
+
+function herbApproachPoint(node: HerbNodeView): ApproachPoint {
+  return {
+    floor: node.floor,
+    x: node.approachX ?? node.x,
+    y: node.approachY ?? node.y
+  };
+}
+
+function herbApproachTile(me: PlayerView, node: HerbNodeView): ApproachCandidate | TilePoint | null {
+  const approach = herbApproachPoint(node);
+  const tx = Math.floor(approach.x);
+  const ty = Math.floor(approach.y);
+  if (canStandAtTile(node.floor, tx, ty)) return { x: tx, y: ty };
+  return nearestEntityApproachTile(me, approach, 1.2);
+}
+
 function startCookingPath(fire: FireView, itemId: string | null = selectedInventoryItem): void {
   const me = self();
   if (!me || !fire || fire.floor !== me.floor) return;
@@ -2138,7 +2389,9 @@ function hideCenterPanels(): void {
   dom.skillsPanel.classList.add("hidden");
   dom.inventoryPanel.classList.add("hidden");
   dom.abilitiesPanel.classList.add("hidden");
+  dom.classesPanel.classList.add("hidden");
   dom.vendor.classList.add("hidden");
+  dom.alchemist.classList.add("hidden");
   closeDialogue(false);
 }
 
@@ -2194,7 +2447,8 @@ function startPathToTile(
   npcId: string | null = null,
   fishingId: string | null = null,
   fireId: string | null = null,
-  miningId: string | null = null
+  miningId: string | null = null,
+  herbId: string | null = null
 ): boolean {
   const me = self();
   if (!me || floor !== me.floor) return false;
@@ -2211,6 +2465,7 @@ function startPathToTile(
   pendingFishingNode = fishingId;
   pendingCookingFire = fireId;
   pendingMiningNode = miningId;
+  pendingHerbNode = herbId;
   if (!attackId && !npcId) dynamicPathTarget = null;
   drawClickMarker({ floor, x: destination.x + 0.5, y: destination.y + 0.5 });
   return true;
@@ -2404,6 +2659,7 @@ function clearClickDestination({ keepHold = false }: { keepHold?: boolean } = {}
   pendingFishingNode = null;
   pendingCookingFire = null;
   pendingMiningNode = null;
+  pendingHerbNode = null;
   dynamicPathTarget = null;
   if (!keepHold) {
     holdMoveActive = false;
@@ -2515,6 +2771,7 @@ function consumeEvents(events: GameEvent[]): void {
     if (event.type === "system" || event.type === "chat") addChat(String(event.text));
     if (event.type === "dialogue") openDialogue(event);
     if (event.type === "effect" && self()?.floor === event.floor) playCombatEffect(event);
+    if (event.type === "projectile" && self()?.floor === event.floor) playProjectile(event);
     if ((event.type === "hit" || event.type === "float") && self()?.floor === event.floor) {
       const floater = scene.add.text((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, String(event.text), textStyle(13, event.color ?? "#fff")).setOrigin(0.5) as Floater;
       floater.life = 1000;
@@ -2528,7 +2785,7 @@ function openDialogue(event: GameEvent): void {
   const lines: DialogueLine[] = Array.isArray(event.lines) ? event.lines : [];
   if (!lines.length) return;
   hideCenterPanels();
-  activeDialogue = { lines, index: 0, opensShop: Boolean(event.opensShop) };
+  activeDialogue = { lines, index: 0, opensShop: Boolean(event.opensShop), opensAlchemist: Boolean(event.opensAlchemist) };
   dom.menuBackdrop.classList.remove("hidden");
   dom.dialogue.classList.remove("hidden");
   renderDialogueLine();
@@ -2553,14 +2810,15 @@ function advanceDialogue(): void {
 
 function closeDialogue(openFollowup = true): void {
   const opensShop = Boolean(activeDialogue?.opensShop);
+  const opensAlchemist = Boolean(activeDialogue?.opensAlchemist);
   activeDialogue = null;
   dom.dialogue.classList.add("hidden");
-  if (openFollowup && opensShop) {
+  if (openFollowup && (opensShop || opensAlchemist)) {
     dom.menuBackdrop.classList.remove("hidden");
-    dom.vendor.classList.remove("hidden");
+    (opensAlchemist ? dom.alchemist : dom.vendor).classList.remove("hidden");
     return;
   }
-  if ([dom.skillsPanel, dom.inventoryPanel, dom.abilitiesPanel, dom.vendor].every((panel) => panel.classList.contains("hidden"))) {
+  if ([dom.skillsPanel, dom.inventoryPanel, dom.abilitiesPanel, dom.vendor, dom.alchemist].every((panel) => panel.classList.contains("hidden"))) {
     dom.menuBackdrop.classList.add("hidden");
   }
 }
@@ -2586,7 +2844,7 @@ function playCombatEffect(event: GameEvent): void {
     return;
   }
 
-  if (event.text === "bolt" || event.text === "flare") {
+  if (event.text === "bolt" || event.text === "flare" || event.text === "frost") {
     const family = event.text === "flare" ? "fireMissile" : "iceMissile";
     const missile = scene.add.sprite(fromX, fromY, effectFrameKey(family, 0)).setOrigin(0.5);
     missile.setDisplaySize(58, 28);
@@ -2611,6 +2869,25 @@ function playCombatEffect(event: GameEvent): void {
   }
 
   playSlash(targetX, targetY, angle);
+}
+
+function playProjectile(event: GameEvent): void {
+  const targetX = (event.x ?? 0) * TILE_SIZE;
+  const targetY = (event.y ?? 0) * TILE_SIZE - 10;
+  const fromX = (event.fromX ?? event.x ?? 0) * TILE_SIZE;
+  const fromY = (event.fromY ?? event.y ?? 0) * TILE_SIZE - 10;
+  const angle = Phaser.Math.Angle.Between(fromX, fromY, targetX, targetY);
+  const arrow = scene.add.rectangle(fromX, fromY, 20, 3, 0xf4e3b0).setRotation(angle);
+  arrow.setStrokeStyle(1, 0x6b4a1f);
+  fxLayer.add(arrow);
+  scene.tweens.add({
+    targets: arrow,
+    x: targetX,
+    y: targetY,
+    duration: 150,
+    ease: "Quad.easeIn",
+    onComplete: () => arrow.destroy()
+  });
 }
 
 function playSlash(x: number, y: number, angle: number): void {

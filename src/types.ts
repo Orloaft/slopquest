@@ -5,7 +5,7 @@ import type { NpcRole, QuestKind } from "./content-types.ts";
 
 export type Direction = "up" | "down" | "left" | "right";
 
-export type ActionType = "woodcutting" | "fishing" | "mining" | "cooking";
+export type ActionType = "woodcutting" | "fishing" | "mining" | "herbing" | "cooking";
 
 export interface InputPayload {
   up: boolean;
@@ -99,6 +99,9 @@ export interface PlayerView {
   quests: QuestView[];
   skills: SkillView[];
   abilities: AbilityView[];
+  unlockedClasses: string[];
+  weight: number;
+  maxWeight: number;
 }
 
 export interface MonsterView {
@@ -159,6 +162,17 @@ export interface MiningNodeView {
   label: string;
 }
 
+export interface HerbNodeView {
+  id: string;
+  floor: number;
+  x: number;
+  y: number;
+  approachX: number;
+  approachY: number;
+  label: string;
+  active: boolean;
+}
+
 export interface FireView {
   id: string;
   floor: number;
@@ -201,6 +215,7 @@ export interface GameEvent {
   to?: string;
   lines?: DialogueLineView[];
   opensShop?: boolean;
+  opensAlchemist?: boolean;
 }
 
 export interface StateMetrics {
@@ -231,6 +246,7 @@ export interface StateSnapshot {
   trees: TreeView[];
   fishingNodes: FishingNodeView[];
   miningNodes: MiningNodeView[];
+  herbNodes: HerbNodeView[];
   fires: FireView[];
   events: GameEvent[];
   metrics: StateMetrics;
@@ -288,6 +304,9 @@ export type ClientMessage =
   | { type: "cutTree"; id: string }
   | { type: "fishNode"; id: string }
   | { type: "mineNode"; id: string }
+  | { type: "gatherHerb"; id: string }
+  | { type: "brewPotion" }
+  | { type: "setClass"; classKey: string }
   | { type: "makeFire"; logItem?: string }
   | { type: "cookFish"; id: string }
   | {
@@ -298,6 +317,8 @@ export type ClientMessage =
       floor?: number;
       x?: number;
       y?: number;
+      skills?: Record<string, number>;
+      forceDodge?: boolean;
     }
   | { type: "eatItem"; item: string }
   | { type: "useItem"; item: string; ctx?: UseItemCtx }

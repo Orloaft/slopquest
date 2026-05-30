@@ -113,6 +113,42 @@ test("a health potion drags from the inventory into the hotbar and heals on use"
   await expect(potionSlot.locator(".hotbar-qty")).toHaveText("1");
 });
 
+test("a health potion is bound to the hotbar by highlighting it and clicking a slot", async ({ page }) => {
+  page.on("pageerror", (error) => console.error(error));
+  page.on("console", (message) => {
+    if (message.type() === "error") console.error(message.text());
+  });
+
+  await page.goto("/?e2e");
+  await joinFreshCharacter(page);
+  await grantItems(page, [{ id: "potion", qty: 2 }]);
+  // Potions heal only below full HP, so drop HP before testing the drink.
+  await setPlayerHp(page, 10);
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.hp ?? 999) <= 12);
+
+  await page.getByRole("button", { name: "Inventory" }).click();
+  await expect(page.locator("#inventoryPanel")).toBeVisible();
+  const invSlot = page.locator("#inventoryGrid [data-item='potion']");
+  await expect(invSlot).toBeVisible();
+
+  // Highlight the potion, then click an empty hotbar slot to bind the shortcut.
+  await invSlot.click();
+  await expect(invSlot).toHaveClass(/selected/);
+  await hotbarSlot(page, 3).click();
+
+  const potionSlot = page.locator(".hotbar-slot[data-slot='3'][data-item='potion']");
+  await expect(potionSlot).toBeVisible();
+  await expect(potionSlot.locator(".hotbar-qty")).toHaveText("2");
+  // Placing clears the inventory highlight so the next click drinks, not rebinds.
+  await expect(invSlot).not.toHaveClass(/selected/);
+
+  // Clicking the bound slot drinks one potion: HP climbs and the stack drops.
+  const hpBefore = await page.evaluate(() => window.__TIB_E2E__?.self()?.hp ?? 0);
+  await potionSlot.click();
+  await page.waitForFunction((hp) => (window.__TIB_E2E__?.self()?.hp ?? 0) > hp, hpBefore);
+  await expect(potionSlot.locator(".hotbar-qty")).toHaveText("1");
+});
+
 function hotbarSlot(page: Page, index: number): Locator {
   return page.locator(`.hotbar-slot[data-slot='${index}']`);
 }

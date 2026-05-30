@@ -44,6 +44,7 @@
             <span>Gold</span><b id="goldText">0</b>
             <span>Weapon</span><b id="weaponText">Basic</b>
             <span>Armor</span><b id="armorText">Cloth</b>
+            <span>Weight</span><b id="weightText">0</b>
           </div>
           <div id="buffTracker" class="buff-tracker hidden"></div>
           <div id="questTracker" class="quest-tracker"></div>
@@ -51,6 +52,7 @@
             <button id="skillsButton" type="button">Skills</button>
             <button id="inventoryButton" type="button">Inventory</button>
             <button id="abilitiesButton" type="button">Abilities</button>
+            <button id="classesButton" type="button">Classes</button>
           </div>
           <div id="netStats" class="net-stats">net -</div>
         </div>
@@ -77,6 +79,14 @@
           </div>
           <div id="abilitiesList" class="abilities-list"></div>
         </div>
+        <div id="classesPanel" class="center-panel menu-panel hidden">
+          <div class="panel-head">
+            <strong>Classes</strong>
+            <button id="classesCloseButton" type="button">Close</button>
+          </div>
+          <p class="subcopy">Equip a stance at a town (Waystone or Northwatch). Unlock new classes from their trainer.</p>
+          <div id="classList" class="class-list"></div>
+        </div>
         <div id="vendor" class="center-panel vendor hidden">
           <div class="panel-head">
             <strong>Wayfarer Trader</strong>
@@ -90,6 +100,20 @@
             <button data-buy="pickaxe"><img src="/icons/item-pickaxe.png" alt="" />Buy pickaxe</button>
             <button data-buy="flint_steel"><img src="/icons/item-flint-steel.png" alt="" />Buy flint and steel</button>
             <button data-buy="potion"><img src="/icons/item-potion.png" alt="" />Buy potion</button>
+          </div>
+        </div>
+        <div id="alchemist" class="center-panel vendor hidden">
+          <div class="panel-head">
+            <strong>Sage Ellwyn</strong>
+            <button id="alchemistCloseButton" type="button">Close</button>
+          </div>
+          <div class="shop-grid">
+            <button data-buy="empty_flask"><img src="/icons/item-empty-flask.png" alt="" />Buy empty flask</button>
+            <button data-buy="alchemy_kit"><img src="/icons/item-alchemy-kit.png" alt="" />Buy alchemy kit</button>
+          </div>
+          <div class="brew-row">
+            <button id="brewButton" type="button"><img src="/icons/item-potion.png" alt="" />Brew Health Potion</button>
+            <p id="brewHint" class="subcopy">Combine a wild herb and an empty flask (alchemy kit required).</p>
           </div>
         </div>
         <div id="dialogue" class="center-panel dialogue hidden">

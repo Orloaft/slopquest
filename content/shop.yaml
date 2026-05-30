@@ -28,6 +28,10 @@ pickaxe:
   cost: 25
   name: Bronze Pickaxe
 
+hunting_bow:
+  cost: 35
+  name: Hunting Bow
+
 flint_steel:
   cost: 16
   name: Flint and Steel
@@ -36,3 +40,12 @@ potion:
   cost: 12
   name: Health Potion
   heal: 58
+
+# Alchemist stock (sold by the alchemist NPC, see npcs.yaml).
+empty_flask:
+  cost: 6
+  name: Empty Flask
+
+alchemy_kit:
+  cost: 40
+  name: Alchemy Kit

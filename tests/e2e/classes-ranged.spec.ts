@@ -1,0 +1,110 @@
+import { expect, test, type Page } from "@playwright/test";
+
+test("a hunting bow fires ranged attacks that train the Ranged skill", async ({ page }) => {
+  page.on("pageerror", (error) => console.error(error));
+  page.on("console", (message) => {
+    if (message.type() === "error") console.error(message.text());
+  });
+
+  await page.goto("/?e2e");
+  await joinFreshCharacter(page);
+
+  // Drop next to a skeleton on a non-safe floor with a bow in hand.
+  await page.evaluate(() => {
+    window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "hunting_bow", qty: 1 }], floor: 1, x: 13, y: 12 });
+  });
+  await page.waitForFunction(() => {
+    const me = window.__TIB_E2E__?.self();
+    return Boolean(me && me.floor === 1 && (me.inventory ?? []).some((i) => i?.id === "hunting_bow"));
+  });
+
+  // Target the nearest monster; the tick auto-fires arrows at range.
+  const targetId = await page.evaluate(() => {
+    const me = window.__TIB_E2E__?.self();
+    const monsters = (window.__TIB_E2E__?.getState()?.monsters ?? []).filter((m) => m.floor === me?.floor);
+    monsters.sort((a, b) => Math.hypot(a.x - (me?.x ?? 0), a.y - (me?.y ?? 0)) - Math.hypot(b.x - (me?.x ?? 0), b.y - (me?.y ?? 0)));
+    return monsters[0]?.id ?? null;
+  });
+  expect(targetId).toBeTruthy();
+  await page.evaluate((id) => window.__TIB_E2E__?.send({ type: "target", id: id as string }), targetId);
+
+  // Ranged XP climbs (and Melee does not — the bow routes to Ranged).
+  await page.waitForFunction(
+    () => {
+      const me = window.__TIB_E2E__?.self();
+      return (me?.skills.find((s) => s.id === "ranged")?.xp ?? 0) > 0;
+    },
+    null,
+    { timeout: 15000 }
+  );
+});
+
+test("a class unlocks at its trainer, equips in town, and is blocked outside town", async ({ page }) => {
+  page.on("pageerror", (error) => console.error(error));
+  page.on("console", (message) => {
+    if (message.type() === "error") console.error(message.text());
+  });
+
+  await page.goto("/?e2e");
+  await joinFreshCharacter(page);
+
+  // Meet the Vanguard thresholds (Melee 15 / Defense 15) and stand by Captain Doran.
+  await page.evaluate(() => {
+    window.__TIB_E2E__?.send({ type: "e2eGrantItems", skills: { attack: 99999, defense: 99999 }, floor: 0, x: 28.5, y: 19.5 });
+  });
+  await page.waitForFunction(() => {
+    const me = window.__TIB_E2E__?.self();
+    return Boolean(me && me.floor === 0 && (me.skills.find((s) => s.id === "attack")?.level ?? 0) >= 15);
+  });
+
+  // Talk to the trainer to unlock Vanguard.
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "talkNpc", id: "fighter-captain" }));
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.unlockedClasses ?? []).includes("vanguard"));
+
+  // Equip it in town; abilities swap to the Vanguard kit.
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "setClass", classKey: "vanguard" }));
+  await page.waitForFunction(() => window.__TIB_E2E__?.self()?.classKey === "vanguard");
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.abilities ?? []).some((a) => a.id === "shield_bash"));
+
+  // Leaving town blocks class changes: the toggle is rejected and the stance holds.
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: 13, y: 12 }));
+  await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 1);
+  const version = await page.evaluate(() => window.__TIB_E2E__?.stateVersion() ?? 0);
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "setClass", classKey: "adventurer" }));
+  await page.waitForFunction((v) => (window.__TIB_E2E__?.stateVersion() ?? 0) > v + 4, version);
+  expect(await page.evaluate(() => window.__TIB_E2E__?.self()?.classKey)).toBe("vanguard");
+});
+
+test("gathering trains Foraging and heavy loads register as weight", async ({ page }) => {
+  page.on("pageerror", (error) => console.error(error));
+  page.on("console", (message) => {
+    if (message.type() === "error") console.error(message.text());
+  });
+
+  await page.goto("/?e2e");
+  await joinFreshCharacter(page);
+
+  // Foraging XP from a herb patch.
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 0, x: 10.5, y: 10.5 }));
+  await page.waitForFunction(() => {
+    const me = window.__TIB_E2E__?.self();
+    return Boolean(me && me.floor === 0 && Math.hypot(me.x - 10.5, me.y - 10.5) < 0.6);
+  });
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "gatherHerb", id: "herb-0-11-10" }));
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.skills.find((s) => s.id === "foraging")?.xp ?? 0) > 0);
+
+  // A heavy stack pushes carried weight past the soft cap.
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "copper_ore", qty: 40 }] }));
+  await page.waitForFunction(() => {
+    const me = window.__TIB_E2E__?.self();
+    return Boolean(me && me.weight > me.maxWeight);
+  });
+});
+
+async function joinFreshCharacter(page: Page): Promise<string> {
+  const name = `e2e_${Date.now().toString(36)}`;
+  await page.locator("#nameInput").fill(name);
+  await page.locator("#joinButton").click();
+  await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.self()));
+  return name;
+}

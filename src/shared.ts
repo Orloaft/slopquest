@@ -11,7 +11,8 @@ export {
   MONSTER_SPAWNS,
   COMPOSED_TREE_NODES,
   FISHING_NODES,
-  MINING_NODES
+  MINING_NODES,
+  HERB_NODES
 } from "./generated/catalog.ts";
 
 export const TILE_SIZE = 32;
@@ -49,6 +50,9 @@ export interface ClassSpec {
   hpPerDefense: number;
   manaPerMagic: number;
   abilities: string[];
+  // Passive chance (0..1) to fully dodge an incoming hit. Class-differentiated;
+  // Agility level raises it further (see dodgeChanceFor).
+  dodgeChance: number;
 }
 
 export interface AbilitySpec {
@@ -59,6 +63,12 @@ export interface AbilitySpec {
   durationMs: number;
   speedMultiplier?: number;
   healFraction?: number;
+  // Offensive (class "strike") abilities: deal damage to the current target.
+  damage?: Range;
+  manaCost?: number;
+  skill?: string; // skill trained + scaled by (e.g. "attack" | "ranged" | "magic")
+  range?: number; // attack range in tiles (defaults to the class melee range)
+  effectKind?: string; // visual effect kind (e.g. "hit" | "flare" | "frost" | "arrow")
 }
 
 export interface SkillDef {
@@ -77,24 +87,52 @@ export const ZONES: Record<ZoneId, Zone> = {
 };
 const FLOOR_TILE_CACHE = new Map<number, string[]>();
 
-export const CLASSES: Record<string, ClassSpec> = {
-  adventurer: {
-    label: "Adventurer",
-    maxHp: 120,
-    maxMana: 60,
-    speed: 4.25,
-    range: 1.35,
-    magicRange: 6,
-    attackDamage: [8, 13],
-    abilityDamage: [18, 28],
-    abilityCost: 14,
-    attackMs: 820,
-    abilityMs: 2800,
-    hpPerDefense: 10,
-    manaPerMagic: 8,
-    abilities: ["sprint", "second_wind"]
-  }
+const CLASS_BASE = {
+  maxHp: 120,
+  maxMana: 60,
+  speed: 4.25,
+  range: 1.35,
+  magicRange: 6,
+  attackDamage: [8, 13] as Range,
+  abilityDamage: [18, 28] as Range,
+  abilityCost: 14,
+  attackMs: 820,
+  abilityMs: 2800,
+  hpPerDefense: 10,
+  manaPerMagic: 8
 };
+
+// Tier-1 classes are stances layered over the blank-slate Adventurer. Core stats
+// stay skill-driven (shared base); a class only swaps the bound ability toolkit,
+// dodge profile, and move speed. See CLASS_UNLOCKS for how each is gated.
+export const CLASSES: Record<string, ClassSpec> = {
+  adventurer: { ...CLASS_BASE, label: "Adventurer", abilities: ["sprint", "second_wind"], dodgeChance: 0.05 },
+  vanguard: { ...CLASS_BASE, label: "Vanguard", abilities: ["shield_bash", "second_wind", "sprint"], dodgeChance: 0.05 },
+  thief: { ...CLASS_BASE, label: "Thief", speed: 4.65, abilities: ["backstab", "sprint", "second_wind"], dodgeChance: 0.12 },
+  apothecary: { ...CLASS_BASE, label: "Apothecary", abilities: ["second_wind", "noxious_vial", "sprint"], dodgeChance: 0.06 },
+  archer: { ...CLASS_BASE, label: "Archer", speed: 4.4, abilities: ["aimed_shot", "sprint", "second_wind"], dodgeChance: 0.08 },
+  mage: { ...CLASS_BASE, label: "Mage", abilities: ["fireball", "frost_bolt", "second_wind"], dodgeChance: 0.05 }
+};
+
+export interface ClassUnlock {
+  key: string;
+  label: string;
+  npcId: string;
+  npcName: string;
+  town: string;
+  requires: Partial<Record<string, number>>;
+}
+
+// Each Tier-1 class is unlocked by reaching its skill thresholds and talking to
+// the named NPC trainer in the named town. The client reads this to render the
+// class panel (requirements + trainer hint); the server enforces it on unlock.
+export const CLASS_UNLOCKS: ClassUnlock[] = [
+  { key: "vanguard", label: "Vanguard", npcId: "fighter-captain", npcName: "Captain Doran", town: "Waystone", requires: { attack: 15, defense: 15 } },
+  { key: "thief", label: "Thief", npcId: "shady-contact", npcName: "Sly Nessa", town: "Waystone", requires: { agility: 15, attack: 10 } },
+  { key: "apothecary", label: "Apothecary", npcId: "cleric-monk", npcName: "Brother Aldric", town: "Waystone", requires: { defense: 10, alchemy: 15 } },
+  { key: "archer", label: "Archer", npcId: "scout-leader", npcName: "Ranger Wynn", town: "Northwatch", requires: { ranged: 15, foraging: 10 } },
+  { key: "mage", label: "Mage", npcId: "hermit-academic", npcName: "Magister Vael", town: "Northwatch", requires: { magic: 15, alchemy: 10 } }
+];
 
 export const ABILITIES: Record<string, AbilitySpec> = {
   sprint: {
@@ -112,6 +150,78 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     cooldownMs: 90000,
     durationMs: 5000,
     healFraction: 0.5
+  },
+  shield_bash: {
+    id: "shield_bash",
+    label: "Shield Bash",
+    description: "Slam the target for heavy melee damage.",
+    cooldownMs: 6000,
+    durationMs: 0,
+    damage: [10, 16],
+    manaCost: 8,
+    skill: "attack",
+    range: 1.6,
+    effectKind: "hit"
+  },
+  backstab: {
+    id: "backstab",
+    label: "Backstab",
+    description: "A vicious strike that trains Melee fast.",
+    cooldownMs: 8000,
+    durationMs: 0,
+    damage: [16, 26],
+    manaCost: 10,
+    skill: "attack",
+    range: 1.6,
+    effectKind: "hit"
+  },
+  noxious_vial: {
+    id: "noxious_vial",
+    label: "Noxious Vial",
+    description: "Hurl a caustic brew that burns the target.",
+    cooldownMs: 7000,
+    durationMs: 0,
+    damage: [12, 20],
+    manaCost: 12,
+    skill: "magic",
+    range: 4.5,
+    effectKind: "flare"
+  },
+  aimed_shot: {
+    id: "aimed_shot",
+    label: "Aimed Shot",
+    description: "A precise long-range arrow. Trains Ranged.",
+    cooldownMs: 5000,
+    durationMs: 0,
+    damage: [14, 22],
+    manaCost: 8,
+    skill: "ranged",
+    range: 6,
+    effectKind: "arrow"
+  },
+  fireball: {
+    id: "fireball",
+    label: "Fireball",
+    description: "Lob a burst of flame at range. Trains Magic.",
+    cooldownMs: 6000,
+    durationMs: 0,
+    damage: [18, 28],
+    manaCost: 14,
+    skill: "magic",
+    range: 6,
+    effectKind: "flare"
+  },
+  frost_bolt: {
+    id: "frost_bolt",
+    label: "Frost Bolt",
+    description: "A chilling bolt that trains Magic.",
+    cooldownMs: 4000,
+    durationMs: 0,
+    damage: [12, 18],
+    manaCost: 10,
+    skill: "magic",
+    range: 6,
+    effectKind: "frost"
   }
 };
 
@@ -123,11 +233,23 @@ export const SKILLS: Record<string, SkillDef> = {
   fishing: { label: "Fishing", iconUrl: "/icons/skill-fishing.png" },
   mining: { label: "Mining", iconUrl: "/icons/skill-mining.png" },
   firemaking: { label: "Firemaking", iconUrl: "/icons/skill-firemaking.png" },
-  cooking: { label: "Cooking", iconUrl: "/icons/skill-cooking.png" }
+  cooking: { label: "Cooking", iconUrl: "/icons/skill-cooking.png" },
+  agility: { label: "Agility", iconUrl: "/icons/skill-agility.png" },
+  alchemy: { label: "Alchemy", iconUrl: "/icons/skill-alchemy.png" },
+  ranged: { label: "Ranged", iconUrl: "/icons/skill-ranged.png" },
+  foraging: { label: "Foraging", iconUrl: "/icons/skill-foraging.png" }
 };
 
 export function xpForLevel(level: number): number {
   return level <= 1 ? 0 : Math.round(70 * (level - 1) ** 1.55);
+}
+
+// Chance (0..1) to dodge an incoming hit: the class base plus +0.5% per Agility
+// level above 1, with a soft cap on the Agility bonus and a hard overall cap.
+export function dodgeChanceFor(classKey: string, agilityLevel: number): number {
+  const base = CLASSES[classKey]?.dodgeChance ?? 0;
+  const bonus = Math.min(0.2, Math.max(0, agilityLevel - 1) * 0.005);
+  return Math.min(0.3, base + bonus);
 }
 
 export function makeFloorTiles(floor: number): string[] {

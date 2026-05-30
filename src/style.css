@@ -371,6 +371,10 @@ canvas {
   height: 24px;
   image-rendering: pixelated;
   object-fit: contain;
+  /* Don't let the icon image capture the drag; the parent slot is the drag source. */
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
 }
 
 .skill-meta {
@@ -598,6 +602,109 @@ canvas {
   height: 24px;
   image-rendering: pixelated;
   object-fit: contain;
+}
+
+.brew-row {
+  display: grid;
+  gap: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 12px;
+}
+
+.class-list {
+  display: grid;
+  gap: 10px;
+  max-height: 52vh;
+  overflow-y: auto;
+}
+
+.class-row {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.class-row.equipped {
+  border-color: #7bd88f;
+  background: rgba(123, 216, 143, 0.12);
+}
+
+.class-row.locked {
+  opacity: 0.7;
+}
+
+.class-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.class-reqs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.class-req {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.class-req.met {
+  color: #9ee6b1;
+}
+
+.class-req.unmet {
+  color: #f3a9a0;
+}
+
+.class-abilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.class-abilities span {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.class-hint {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.class-status.equipped {
+  color: #7bd88f;
+  font-weight: 600;
+}
+
+.class-status.locked {
+  color: #c9a98f;
+  font-size: 12px;
+}
+
+.class-equip {
+  padding: 4px 12px;
+}
+
+#weightText.over {
+  color: #f3a9a0;
+}
+
+.brew-row .subcopy {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.7;
 }
 
 .dialogue {

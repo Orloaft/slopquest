@@ -45,6 +45,7 @@
   stackable: false
   tags: [tool]
   capabilities: [chop_tree]
+  weight: 2
 
 - id: fishing_rod
   label: Fishing Rod
@@ -53,6 +54,7 @@
   stackable: false
   tags: [tool]
   capabilities: [fish]
+  weight: 2
 
 - id: pickaxe
   label: Bronze Pickaxe
@@ -61,6 +63,7 @@
   stackable: false
   tags: [tool]
   capabilities: [mine]
+  weight: 3
 
 - id: flint_steel
   label: Flint and Steel
@@ -82,6 +85,7 @@
   iconUrl: /icons/item-logs.png
   stackable: true
   tags: [material]
+  weight: 1
 
 - id: pine_logs
   label: Pine Logs
@@ -89,6 +93,7 @@
   iconUrl: /icons/item-pine-logs.png
   stackable: true
   tags: [material]
+  weight: 1
 
 - id: copper_ore
   label: Copper Ore
@@ -96,6 +101,7 @@
   iconUrl: /icons/item-copper-ore.png
   stackable: true
   tags: [material]
+  weight: 2
 
 - id: raw_fish
   label: Raw Fish
@@ -142,6 +148,37 @@
   use:
     kind: drink_potion
     restoreHp: 58
+
+- id: herb
+  label: Wild Herb
+  icon: H
+  iconUrl: /icons/item-herb.png
+  stackable: true
+  tags: [herb, raw]
+
+- id: empty_flask
+  label: Empty Flask
+  icon: eF
+  iconUrl: /icons/item-empty-flask.png
+  stackable: true
+  tags: [container]
+
+- id: alchemy_kit
+  label: Alchemy Kit
+  icon: aK
+  iconUrl: /icons/item-alchemy-kit.png
+  stackable: false
+  tags: [tool]
+  weight: 4
+
+- id: hunting_bow
+  label: Hunting Bow
+  icon: bow
+  iconUrl: /icons/item-hunting-bow.png
+  stackable: false
+  tags: [tool, weapon]
+  capabilities: [ranged]
+  weight: 3
 
 - id: stolen_goods
   label: Stolen Cargo

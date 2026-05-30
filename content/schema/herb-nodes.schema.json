@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tib.local/schema/herb-nodes.schema.json",
+  "title": "TIB Herb Nodes",
+  "description": "content/herb-nodes.yaml — wild herb patches a player can gather from.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/herbNode" },
+  "$defs": {
+    "herbNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "at", "approach"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "label": { "type": "string", "description": "Hover label shown on the node." },
+        "at": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["floor", "x", "y"],
+          "description": "The herb tile coordinates.",
+          "properties": {
+            "floor": { "type": "integer", "minimum": 0 },
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        },
+        "approach": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x", "y"],
+          "description": "The standing tile next to the patch.",
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -7,9 +7,11 @@ import type { WebSocket, RawData } from "ws";
 import {
   ABILITIES,
   CLASSES,
+  CLASS_UNLOCKS,
   COMPOSED_TREE_NODES,
   FISHING_NODES,
   MINING_NODES,
+  HERB_NODES,
   ITEMS,
   MAP_COLS,
   MAP_ROWS,
@@ -22,6 +24,7 @@ import {
   SHOP,
   START,
   TREE_TYPES,
+  dodgeChanceFor,
   isBlockedTile,
   isSafeZone,
   makeFloorTiles,
@@ -51,6 +54,7 @@ import type {
   FireView,
   FishingNodeView,
   GameEvent,
+  HerbNodeView,
   InputPayload,
   InventoryItemView,
   MiningNodeView,
@@ -75,6 +79,7 @@ import type {
   Positioned,
   QuestState,
   SavedPlayer,
+  HerbNodeRuntime,
   ServerMonster,
   ServerPlayer,
   Session,
@@ -96,8 +101,18 @@ const TREE_SNAPSHOT_RADIUS_SQ = TREE_SNAPSHOT_RADIUS ** 2;
 const METRIC_WINDOW = 60;
 const SPATIAL_CELL_SIZE = 8;
 const TREE_RESPAWN_MS = 30000;
+const HERB_RESPAWN_MS = 25000;
+const HERB_GATHER_MS = 2600;
 const FIRE_DURATION_MS = 120000;
 const INVENTORY_SIZE = 30;
+const BREW_XP = 30;
+// Encumbrance: at/below the soft cap you move at full speed; past it, speed
+// falls off linearly to MIN_ENCUMBRANCE_MULT at the hard cap.
+const WEIGHT_SOFT_CAP = 40;
+const WEIGHT_HARD_CAP = 90;
+const MIN_ENCUMBRANCE_MULT = 0.55;
+const RANGED_RANGE = 5;
+const FORAGE_XP = 12;
 mkdirSync(DATA_DIR, { recursive: true });
 
 const ADVENTURER: ClassSpec = CLASSES["adventurer"]!;
@@ -107,6 +122,7 @@ const clients = new Map<ExtWebSocket, Session>();
 const monsters = new Map<string, ServerMonster>();
 const corpses = new Map<string, Corpse>();
 const treeNodes = new Map<string, TreeNodeRuntime>();
+const herbNodes = new Map<string, HerbNodeRuntime>();
 const fires = new Map<string, Fire>();
 const npcs = new Map<string, NpcRuntime>();
 let spatial: SpatialIndex = createSpatialIndex();
@@ -129,6 +145,7 @@ for (const spawn of MONSTER_SPAWNS) {
 }
 spawnNpcs();
 spawnTreeNodes();
+spawnHerbNodes();
 
 const wss = new WebSocketServer({ port: PORT });
 console.log(`Waystone server listening on ws://0.0.0.0:${PORT}`);
@@ -167,6 +184,9 @@ wss.on("connection", (rawSocket: WebSocket) => {
     if (message.type === "cutTree") cutTree(session.player, String(message.id ?? ""));
     if (message.type === "fishNode") fishNode(session.player, String(message.id ?? ""));
     if (message.type === "mineNode") mineNode(session.player, String(message.id ?? ""));
+    if (message.type === "gatherHerb") gatherHerb(session.player, String(message.id ?? ""));
+    if (message.type === "brewPotion") brewPotion(session.player);
+    if (message.type === "setClass") setClass(session.player, String(message.classKey ?? ""));
     if (message.type === "makeFire") makeFire(session.player, String(message.logItem ?? "logs"));
     if (message.type === "cookFish") cookFish(session.player, String(message.id ?? ""));
     if (E2E_TEST && message.type === "e2eGrantItems") grantE2EItems(session.player, message);
@@ -308,12 +328,21 @@ function createPlayer(name: string): ServerPlayer {
     abilityBuffs: {},
     action: null,
     portalReadyAt: 0,
-    dead: false
+    dead: false,
+    unlockedClasses: []
   };
 }
 
 function hydratePlayer(saved: SavedPlayer): ServerPlayer {
-  const player = { ...createPlayer(saved.name), ...saved, classKey: "adventurer" } as ServerPlayer;
+  const player = { ...createPlayer(saved.name), ...saved } as ServerPlayer;
+  player.unlockedClasses = Array.isArray(saved.unlockedClasses)
+    ? saved.unlockedClasses.filter((key) => CLASSES[key] && key !== "adventurer")
+    : [];
+  // Only keep an equipped class the player still has unlocked; otherwise revert.
+  player.classKey =
+    saved.classKey && (saved.classKey === "adventurer" || player.unlockedClasses.includes(saved.classKey))
+      ? saved.classKey
+      : "adventurer";
   player.skills = normalizeSkillState(player.skills);
   recalculateVitals(player);
   player.hp = clamp(player.hp, 1, player.maxHp);
@@ -331,8 +360,9 @@ function updatePlayers(dt: number, now: number): void {
     const input = now - session.lastInputAt > 280 ? sanitizeInput({}) : session.input;
     player.moving = false;
     if (player.dead) continue;
-    const spec = ADVENTURER;
+    const spec = classOf(player);
     let speed = spec.speed + (isWellFed(player, now) ? 0.25 : 0);
+    speed *= encumbranceMultiplier(carriedWeight(player));
     if (now < (player.abilityBuffs?.sprint?.until ?? 0)) {
       speed *= ABILITIES["sprint"]?.speedMultiplier ?? 1;
     } else if (player.abilityBuffs?.sprint) {
@@ -400,8 +430,13 @@ function updateMonsters(dt: number, now: number): void {
 
     if (dist <= catalog.range + 0.15 && now - monster.lastAttack >= catalog.attackMs) {
       monster.lastAttack = now;
-      const damage = roll(catalog.damage) - armorReduction(target);
-      damagePlayer(target, Math.max(1, damage), catalog.name);
+      const damage = Math.max(1, roll(catalog.damage) - armorReduction(target));
+      if (rollDodge(target)) {
+        addSkillXp(target, "agility", Math.max(1, damage));
+        event("float", "Dodge!", target.x, target.y - 0.55, target.floor, "#a0e8ff");
+        continue;
+      }
+      damagePlayer(target, damage, catalog.name);
     }
   }
 }
@@ -410,7 +445,20 @@ function autoAttack(player: ServerPlayer, now: number): void {
   const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
   if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
   const spec = ADVENTURER;
-  if (distance(player, monster) > spec.range) return;
+  const ranged = playerHasCapability(player, "ranged");
+  const dist = distance(player, monster);
+  if (ranged) {
+    // Bow attack: fire up to RANGED_RANGE tiles with clear line of sight.
+    if (dist > RANGED_RANGE) return;
+    if (now - player.lastAttack < spec.attackMs) return;
+    if (!hasLineOfSight(player.floor, player.x, player.y, monster.x, monster.y)) return;
+    player.lastAttack = now;
+    const damage = roll([6, 11]) + skillLevel(player, "ranged") + wellFedPower(player);
+    addSkillXp(player, "ranged", Math.max(1, Math.floor(damage * 1.5)));
+    fireProjectile(player, monster, damage, "arrow");
+    return;
+  }
+  if (dist > spec.range) return;
   if (now - player.lastAttack < spec.attackMs) return;
   player.lastAttack = now;
   const damage = roll(spec.attackDamage) + skillLevel(player, "attack") + player.weaponTier * (SHOP["weapon"]!.damageBonus ?? 0) + wellFedPower(player);
@@ -445,6 +493,25 @@ function useClassAbility(player: ServerPlayer, id: string): void {
   if (!player.abilityCooldowns) player.abilityCooldowns = {};
   if (!player.abilityBuffs) player.abilityBuffs = {};
   if (now < (player.abilityCooldowns[id] ?? 0)) return;
+
+  // Offensive class abilities: damage the current target.
+  if (spec.damage) {
+    const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
+    if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
+    const range = spec.range ?? classOf(player).range;
+    if (distance(player, monster) > range) return;
+    if (player.mana < (spec.manaCost ?? 0)) return;
+    const skill = spec.skill ?? "attack";
+    const isRanged = skill === "ranged";
+    if (isRanged && !hasLineOfSight(player.floor, player.x, player.y, monster.x, monster.y)) return;
+    player.abilityCooldowns[id] = now + spec.cooldownMs;
+    player.mana -= spec.manaCost ?? 0;
+    const damage = roll(spec.damage) + skillLevel(player, skill) + wellFedPower(player);
+    addSkillXp(player, skill, Math.max(1, Math.floor(damage * 1.5)));
+    if (isRanged) fireProjectile(player, monster, damage, spec.effectKind ?? "arrow");
+    else damageMonster(player, monster, damage, spec.effectKind ?? "flare");
+    return;
+  }
 
   if (id === "sprint") {
     player.abilityCooldowns[id] = now + spec.cooldownMs;
@@ -502,6 +569,14 @@ function rollPotionDrop(monsterType: string): Array<{ id: string; qty: number }>
   return [];
 }
 
+// Passive dodge: class base + Agility scaling (see dodgeChanceFor). Under E2E
+// the outcome is deterministic (the player's forceDodge flag, default false) so
+// existing combat tests are unaffected.
+function rollDodge(player: ServerPlayer): boolean {
+  if (E2E_TEST) return player.forceDodge === true;
+  return Math.random() < dodgeChanceFor(player.classKey, skillLevel(player, "agility"));
+}
+
 function damagePlayer(player: ServerPlayer, damage: number, source: string): void {
   player.hp = clamp(player.hp - damage, 0, player.maxHp);
   addSkillXp(player, "defense", Math.max(1, damage));
@@ -543,10 +618,24 @@ function collectCorpse(player: ServerPlayer, corpse: Corpse): void {
   removeFromSpatial(spatial.corpses, corpse);
 }
 
+function nearbyNpcOfRole(player: ServerPlayer, role: string): NpcRuntime | null {
+  let best: NpcRuntime | null = null;
+  let bestDist = Infinity;
+  for (const npc of npcs.values()) {
+    if (npc.role !== role || npc.floor !== player.floor) continue;
+    const d = distance(player, npc);
+    if (d <= 2 && d < bestDist) {
+      best = npc;
+      bestDist = d;
+    }
+  }
+  return best;
+}
+
 function buyItem(player: ServerPlayer, item: string): void {
-  const trader = NPCS[0];
-  if (!trader) return;
-  if (player.dead || distance(player, trader) > 2 || player.floor !== trader.floor) return;
+  if (player.dead) return;
+  const role = item === "empty_flask" || item === "alchemy_kit" ? "alchemist" : "vendor";
+  if (!nearbyNpcOfRole(player, role)) return;
   if (item === "weapon" && player.weaponTier === 0 && player.gold >= SHOP["weapon"]!.cost) {
     player.gold -= SHOP["weapon"]!.cost;
     player.weaponTier = 1;
@@ -593,6 +682,105 @@ function buyItem(player: ServerPlayer, item: string): void {
     player.gold -= SHOP["flint_steel"]!.cost;
     event("system", `${player.name} bought flint and steel.`);
   }
+  if (item === "empty_flask" && player.gold >= SHOP["empty_flask"]!.cost) {
+    if (!addInventoryItem(player, "empty_flask", 1)) {
+      event("system", "Your inventory is full.");
+      return;
+    }
+    player.gold -= SHOP["empty_flask"]!.cost;
+    event("system", `${player.name} bought an empty flask.`);
+  }
+  if (item === "alchemy_kit" && !hasInventoryItem(player, "alchemy_kit") && player.gold >= SHOP["alchemy_kit"]!.cost) {
+    if (!addInventoryItem(player, "alchemy_kit", 1)) {
+      event("system", "Your inventory is full.");
+      return;
+    }
+    player.gold -= SHOP["alchemy_kit"]!.cost;
+    event("system", `${player.name} bought an alchemy kit.`);
+  }
+}
+
+function brewPotion(player: ServerPlayer): void {
+  if (player.dead) return;
+  if (!nearbyNpcOfRole(player, "alchemist")) return;
+  if (!hasInventoryItem(player, "alchemy_kit")) {
+    event("float", "You need an alchemy kit.", player.x, player.y, player.floor, "#f7d486");
+    return;
+  }
+  if (!hasInventoryItem(player, "herb") || !hasInventoryItem(player, "empty_flask")) {
+    event("float", "You need a herb and an empty flask.", player.x, player.y, player.floor, "#f7d486");
+    return;
+  }
+  if (!removeInventoryItem(player, "herb", 1)) return;
+  if (!removeInventoryItem(player, "empty_flask", 1)) {
+    addInventoryItem(player, "herb", 1);
+    return;
+  }
+  if (!addInventoryItem(player, "potion", 1)) {
+    addInventoryItem(player, "herb", 1);
+    addInventoryItem(player, "empty_flask", 1);
+    event("system", "Your inventory is full.");
+    return;
+  }
+  addSkillXp(player, "alchemy", BREW_XP);
+  event("float", `+${BREW_XP} Alchemy`, player.x, player.y - 0.55, player.floor, "#c8a8ff");
+}
+
+// --- Tier-1 classes --------------------------------------------------------
+
+// Class switching is a safe-zone activity (Waystone floor 0 / Northwatch floor 4).
+function meetsClassRequirements(player: ServerPlayer, unlock: { requires: Partial<Record<string, number>> }): boolean {
+  return Object.entries(unlock.requires).every(([skill, level]) => skillLevel(player, skill) >= (level ?? 0));
+}
+
+function setClass(player: ServerPlayer, classKey: string): void {
+  if (player.dead) return;
+  if (!isSafeZone(player.floor, player.x, player.y)) {
+    event("float", "You can only change class in a town.", player.x, player.y, player.floor, "#f7d486");
+    return;
+  }
+  const target = classKey || "adventurer";
+  if (target !== "adventurer" && !player.unlockedClasses.includes(target)) {
+    event("float", "That class is not unlocked.", player.x, player.y, player.floor, "#f7d486");
+    return;
+  }
+  if (!CLASSES[target]) return;
+  if (player.classKey === target) return;
+  player.classKey = target;
+  // Drop any cooldowns/buffs tied to abilities the new class can't use.
+  player.abilityCooldowns = {};
+  player.abilityBuffs = {};
+  recalculateVitals(player);
+  player.hp = clamp(player.hp, 1, player.maxHp);
+  player.mana = clamp(player.mana, 0, player.maxMana);
+  event("system", `${player.name} takes up the ${CLASSES[target]!.label} stance.`);
+  persistPlayer(player);
+}
+
+function trainWithNpc(player: ServerPlayer, npc: NpcRuntime): void {
+  const unlock = CLASS_UNLOCKS.find((entry) => entry.npcId === npc.id);
+  if (!unlock) return;
+  if (player.unlockedClasses.includes(unlock.key)) {
+    eventDialogue(player, [
+      { speaker: npc.name, text: `You already walk the ${unlock.label}'s path. Equip it from your Classes panel in town.` }
+    ]);
+    return;
+  }
+  if (!meetsClassRequirements(player, unlock)) {
+    const reqs = Object.entries(unlock.requires)
+      .map(([skill, level]) => `${SKILLS[skill]?.label ?? skill} ${level} (you have ${skillLevel(player, skill)})`)
+      .join(", ");
+    eventDialogue(player, [
+      { speaker: npc.name, text: unlock.requires ? `Come back when you're ready: ${reqs}.` : "Not yet." }
+    ]);
+    return;
+  }
+  player.unlockedClasses.push(unlock.key);
+  persistPlayer(player);
+  eventDialogue(player, [
+    { speaker: npc.name, text: `It's done — you are now a ${unlock.label}. Equip the stance from your Classes panel here in town.` }
+  ]);
+  event("system", `${player.name} unlocked the ${unlock.label} class.`);
 }
 
 function respawn(player: ServerPlayer): void {
@@ -629,8 +817,16 @@ function talkNpc(player: ServerPlayer, id: string): void {
     return;
   }
 
+  if (npc.role === "trainer") {
+    trainWithNpc(player, npc);
+    return;
+  }
+
   const dialogue = npcDialogueLines(player, npc);
-  if (dialogue) eventDialogue(player, dialogue, npc.role === "vendor" ? { opensShop: true } : {});
+  if (!dialogue) return;
+  if (npc.role === "vendor") eventDialogue(player, dialogue, { opensShop: true });
+  else if (npc.role === "alchemist") eventDialogue(player, dialogue, { opensAlchemist: true });
+  else eventDialogue(player, dialogue, {});
 }
 
 function questForGiver(giverId: string): Quest | null {
@@ -780,6 +976,14 @@ function mineNode(player: ServerPlayer, id: string): void {
   event("float", "You swing your pickaxe.", node.x, node.y, node.floor, "#d8a86a");
 }
 
+function gatherHerb(player: ServerPlayer, id: string): void {
+  const node = herbNodes.get(id);
+  if (!node || player.dead || !node.active || node.floor !== player.floor || distance(player, herbApproachPoint(node)) > 1.45) return;
+  player.targetId = null;
+  player.action = { type: "herbing", nodeId: node.id, nextAt: performance.now() + HERB_GATHER_MS, startedAt: performance.now() };
+  event("float", "You start gathering herbs.", node.x, node.y, node.floor, "#9ee6b1");
+}
+
 // --- Item use dispatcher (Phase 2) ----------------------------------------
 // useItem looks up `ITEMS[itemId].use.kind` and dispatches to a verb handler.
 // Each verb owns its own validation, consumption, and effects. Authors compose
@@ -888,6 +1092,7 @@ function updatePlayerAction(player: ServerPlayer, now: number): void {
   if (!player.action) return;
   if (player.action.type === "fishing") return updateFishingAction(player, now);
   if (player.action.type === "mining") return updateMiningAction(player, now);
+  if (player.action.type === "herbing") return updateHerbingAction(player, now);
   if (player.action.type === "cooking") return updateCookingAction(player, now);
   if (player.action.type !== "woodcutting") return;
   const action = player.action;
@@ -957,6 +1162,26 @@ function updateMiningAction(player: ServerPlayer, now: number): void {
   event("float", `+${xp} Mining`, node.x, node.y, node.floor, "#d8a86a");
 }
 
+function updateHerbingAction(player: ServerPlayer, now: number): void {
+  const action = player.action;
+  if (action?.type !== "herbing") return;
+  const node = herbNodes.get(action.nodeId);
+  if (!node || player.dead || !node.active || node.floor !== player.floor || distance(player, herbApproachPoint(node)) > 1.65) {
+    player.action = null;
+    return;
+  }
+  if (now < action.nextAt) return;
+  player.action = null;
+  if (!addInventoryItem(player, "herb", 1)) {
+    event("system", "Your inventory is full.");
+    return;
+  }
+  node.active = false;
+  node.respawnAt = performance.now() + HERB_RESPAWN_MS;
+  addSkillXp(player, "foraging", FORAGE_XP);
+  event("float", `+1 Herb · +${FORAGE_XP} Foraging`, node.x, node.y, node.floor, "#9ee6b1");
+}
+
 function updateCookingAction(player: ServerPlayer, now: number): void {
   const action = player.action;
   if (action?.type !== "cooking") return;
@@ -998,6 +1223,8 @@ function grantE2EItems(
     floor?: number;
     x?: number;
     y?: number;
+    skills?: Record<string, number>;
+    forceDodge?: boolean;
   }
 ): void {
   if (!E2E_TEST) return;
@@ -1008,6 +1235,12 @@ function grantE2EItems(
   }
   if (Number.isFinite(message.gold)) player.gold = Math.max(0, Math.floor(Number(message.gold)));
   if (Number.isFinite(message.hp)) player.hp = clamp(Number(message.hp), 0, player.maxHp);
+  if (message.skills) {
+    for (const [id, xp] of Object.entries(message.skills)) {
+      if (SKILLS[id] && Number.isFinite(xp)) (player.skills[id] ?? (player.skills[id] = { xp: 0 })).xp = Math.max(0, Number(xp));
+    }
+  }
+  if (typeof message.forceDodge === "boolean") player.forceDodge = message.forceDodge;
   if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y)) {
     const spot = findStandableNear(Math.floor(Number(message.floor)), Number(message.x), Number(message.y));
     if (spot) {
@@ -1055,12 +1288,27 @@ function miningApproachPoint(node: { floor: number; x: number; y: number; approa
   };
 }
 
+function herbApproachPoint(node: HerbNodeRuntime): Positioned {
+  return {
+    floor: node.floor,
+    x: node.approachX ?? node.x,
+    y: node.approachY ?? node.y
+  };
+}
+
 function npcDialogueLines(player: ServerPlayer, npc: NpcRuntime): DialogueLineView[] {
   if (npc.role === "vendor") {
     return [
       { speaker: npc.name, text: "Fresh supplies, sharp edges, and the little things that keep you alive." },
       { speaker: player.name, text: "Show me what you have." },
       { speaker: npc.name, text: "Take your time. Good tools pay for themselves out there." }
+    ];
+  }
+  if (npc.role === "alchemist") {
+    return [
+      { speaker: npc.name, text: "Herbs from the wild, a clean flask, a steady kit — that's all a tonic needs." },
+      { speaker: player.name, text: "Show me how to brew." },
+      { speaker: npc.name, text: "Gather what you can and bring it to my bench." }
     ];
   }
   return [
@@ -1150,6 +1398,22 @@ function spawnTreeNodes(): void {
   }
 }
 
+function spawnHerbNodes(): void {
+  for (const node of HERB_NODES) {
+    herbNodes.set(node.id, {
+      id: node.id,
+      floor: node.floor,
+      x: node.x,
+      y: node.y,
+      approachX: node.approachX,
+      approachY: node.approachY,
+      label: node.label,
+      active: true,
+      respawnAt: 0
+    });
+  }
+}
+
 function treeTypeForTile(floor: number, x: number, y: number): string {
   const value = (floor * 73856093) ^ (x * 19349663) ^ (y * 83492791);
   if (floor === 3 && Math.abs(value) % 3 === 0) return "pine";
@@ -1190,6 +1454,9 @@ function pickNpcWanderTarget(npc: NpcRuntime): Vec2 | null {
 function updateTreeNodes(now: number): void {
   for (const tree of treeNodes.values()) {
     if (!tree.active && now >= tree.respawnAt) tree.active = true;
+  }
+  for (const node of herbNodes.values()) {
+    if (!node.active && now >= node.respawnAt) node.active = true;
   }
 }
 
@@ -1369,6 +1636,10 @@ function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
   const visibleMiningNodes = MINING_NODES
     .filter((node) => inInterestRange(viewer, node))
     .map(serializeMiningNode);
+  const visibleHerbNodes: HerbNodeView[] = [];
+  for (const node of herbNodes.values()) {
+    if (inInterestRange(viewer, node)) visibleHerbNodes.push(serializeHerbNode(node));
+  }
   const visibleFires = querySpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)
     .filter((fire) => inInterestRange(viewer, fire))
     .map(serializeFire);
@@ -1382,6 +1653,7 @@ function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
     trees: visibleTrees,
     fishingNodes: visibleFishingNodes,
     miningNodes: visibleMiningNodes,
+    herbNodes: visibleHerbNodes,
     fires: visibleFires,
     events: events.filter((item) => eventVisibleTo(viewer, item)),
     metrics: {
@@ -1407,6 +1679,7 @@ function actionView(a: PlayerAction): ActionView {
   if (a.type === "woodcutting") return { type: a.type, treeId: a.treeId };
   if (a.type === "fishing") return { type: a.type, nodeId: a.nodeId };
   if (a.type === "mining") return { type: a.type, nodeId: a.nodeId };
+  if (a.type === "herbing") return { type: a.type, nodeId: a.nodeId };
   return { type: a.type, fireId: a.fireId };
 }
 
@@ -1436,7 +1709,10 @@ function serializePlayer(player: ServerPlayer): PlayerView {
     inventory: serializeInventory(player.inventory),
     quests: serializeQuests(player),
     skills: serializeSkills(player),
-    abilities: serializeAbilities(player)
+    abilities: serializeAbilities(player),
+    unlockedClasses: [...player.unlockedClasses],
+    weight: Math.round(carriedWeight(player)),
+    maxWeight: WEIGHT_SOFT_CAP
   };
 }
 
@@ -1535,6 +1811,19 @@ function serializeMiningNode(node: { id: string; floor: number; x: number; y: nu
   };
 }
 
+function serializeHerbNode(node: HerbNodeRuntime): HerbNodeView {
+  return {
+    id: node.id,
+    floor: node.floor,
+    x: node.x,
+    y: node.y,
+    approachX: node.approachX,
+    approachY: node.approachY,
+    label: node.label,
+    active: node.active
+  };
+}
+
 function serializeFire(fire: Fire): FireView {
   return {
     id: fire.id,
@@ -1592,6 +1881,7 @@ function persistPlayerToDb(player: ServerPlayer): void {
     inventory: serializeInventory(player.inventory),
     quests: normalizeQuestState(player.quests),
     skills: normalizeSkillState(player.skills),
+    unlockedClasses: [...player.unlockedClasses],
     updatedAt: new Date().toISOString()
   };
 }
@@ -1743,7 +2033,7 @@ function hasInventoryItem(player: ServerPlayer, id: string): boolean {
   return player.inventory.some((item) => item?.id === id && item.qty > 0);
 }
 
-function playerHasCapability(player: ServerPlayer, capability: "chop_tree" | "fish" | "mine"): boolean {
+function playerHasCapability(player: ServerPlayer, capability: "chop_tree" | "fish" | "mine" | "ranged"): boolean {
   for (const slot of player.inventory) {
     if (!slot || slot.qty <= 0) continue;
     const spec = ITEMS[slot.id];
@@ -1865,6 +2155,49 @@ function recalculateVitals(player: ServerPlayer): void {
   const spec = ADVENTURER;
   player.maxHp = spec.maxHp + (skillLevel(player, "defense") - 1) * spec.hpPerDefense;
   player.maxMana = spec.maxMana + (skillLevel(player, "magic") - 1) * spec.manaPerMagic;
+}
+
+function classOf(player: ServerPlayer): ClassSpec {
+  return CLASSES[player.classKey ?? "adventurer"] ?? ADVENTURER;
+}
+
+function carriedWeight(player: ServerPlayer): number {
+  let total = 0;
+  for (const slot of player.inventory) {
+    if (!slot) continue;
+    total += (ITEMS[slot.id]?.weight ?? 0) * slot.qty;
+  }
+  return total;
+}
+
+// Linear speed falloff from full at WEIGHT_SOFT_CAP down to MIN_ENCUMBRANCE_MULT
+// at WEIGHT_HARD_CAP.
+function encumbranceMultiplier(weight: number): number {
+  if (weight <= WEIGHT_SOFT_CAP) return 1;
+  if (weight >= WEIGHT_HARD_CAP) return MIN_ENCUMBRANCE_MULT;
+  const t = (weight - WEIGHT_SOFT_CAP) / (WEIGHT_HARD_CAP - WEIGHT_SOFT_CAP);
+  return 1 - t * (1 - MIN_ENCUMBRANCE_MULT);
+}
+
+// True line of sight between two points: no blocked tile along the segment.
+function hasLineOfSight(floor: number, ax: number, ay: number, bx: number, by: number): boolean {
+  const dist = Math.hypot(bx - ax, by - ay);
+  const steps = Math.max(1, Math.ceil(dist * 4));
+  for (let i = 1; i < steps; i += 1) {
+    const t = i / steps;
+    const x = ax + (bx - ax) * t;
+    const y = ay + (by - ay) * t;
+    if (isBlockedTile(tileAt(floor, Math.floor(x), Math.floor(y)))) return false;
+  }
+  return true;
+}
+
+function fireProjectile(player: ServerPlayer, monster: ServerMonster, damage: number, kind: string): void {
+  event("projectile", kind, monster.x, monster.y, monster.floor, null, player.id, monster.id, {
+    fromX: player.x,
+    fromY: player.y
+  });
+  damageMonster(player, monster, damage, "hit");
 }
 
 function createSpatialIndex(): SpatialIndex {

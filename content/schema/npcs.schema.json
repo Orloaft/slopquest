@@ -14,8 +14,8 @@
         "id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
         "name": { "type": "string" },
         "role": {
-          "enum": ["vendor", "quest", "guide"],
-          "description": "vendor opens the shop; quest drives quest dialogue (id must match a quest's giver); guide speaks idleDialogue."
+          "enum": ["vendor", "quest", "guide", "alchemist", "trainer"],
+          "description": "vendor opens the shop; quest drives quest dialogue (id must match a quest's giver); guide speaks idleDialogue; alchemist opens the alchemist craft menu; trainer gates a Tier-1 class unlock."
         },
         "at": { "$ref": "#/$defs/tile" },
         "idleDialogue": { "type": "string" }

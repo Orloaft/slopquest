@@ -11,13 +11,17 @@ export type SkillId =
   | "fishing"
   | "mining"
   | "firemaking"
-  | "cooking";
+  | "cooking"
+  | "agility"
+  | "alchemy"
+  | "ranged"
+  | "foraging";
 
 export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown";
 
-export type Capability = "chop_tree" | "fish" | "mine";
+export type Capability = "chop_tree" | "fish" | "mine" | "ranged";
 
-export type NpcRole = "vendor" | "quest" | "guide";
+export type NpcRole = "vendor" | "quest" | "guide" | "alchemist" | "trainer";
 
 export type QuestKind = "kill" | "gather" | "fetch";
 
@@ -46,6 +50,8 @@ export interface Item {
   tags?: string[];
   capabilities?: Capability[];
   use?: ItemUse;
+  // Mass carried in the inventory; drives the encumbrance speed modifier.
+  weight?: number;
 }
 
 export interface Monster {
@@ -133,6 +139,16 @@ export interface MiningNode {
   approachX: number;
   approachY: number;
   kind: string;
+}
+
+export interface HerbNode {
+  id: string;
+  floor: number;
+  x: number;
+  y: number;
+  approachX: number;
+  approachY: number;
+  label: string;
 }
 
 export type DialogueLine = { npc: string } | { player: string };
