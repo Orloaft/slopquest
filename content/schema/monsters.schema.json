@@ -31,6 +31,8 @@
         "ranged": { "type": "boolean", "description": "Anchored turret that fires projectiles (needs line of sight)." },
         "slowPct": { "type": "number", "description": "Movement-slow percent applied to the hit player." },
         "slowMs": { "type": "number", "description": "Duration of the applied slow in ms." },
+        "weakenPct": { "type": "number", "description": "Reduces the hit player's physical damage by this percent." },
+        "weakenMs": { "type": "number", "description": "Duration of the weaken debuff in ms." },
         "armor": { "type": "number", "description": "Flat damage reduction on incoming hits." },
         "pack": { "type": "boolean", "description": "Aggroing alerts nearby same-type monsters." },
         "burrow": { "type": "boolean", "description": "Hidden until a player steps adjacent, then bursts." },

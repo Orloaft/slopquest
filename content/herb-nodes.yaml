@@ -57,3 +57,23 @@
   label: Mire-Lotus
   requiredLevel: 5
   xp: 26
+
+# Glass-Sand Quartz — Sunken Desert (floor 7). Yields quartz; trains Foraging.
+- id: quartz-7-10-12
+  at: { floor: 7, x: 10.5, y: 12.5 }
+  approach: { x: 11.5, y: 12.5 }
+  label: Glass-Sand Quartz
+  item: quartz
+  xp: 16
+- id: quartz-7-40-14
+  at: { floor: 7, x: 40.5, y: 14.5 }
+  approach: { x: 40.5, y: 15.5 }
+  label: Glass-Sand Quartz
+  item: quartz
+  xp: 16
+- id: quartz-7-18-24
+  at: { floor: 7, x: 18.5, y: 24.5 }
+  approach: { x: 18.5, y: 23.5 }
+  label: Glass-Sand Quartz
+  item: quartz
+  xp: 16

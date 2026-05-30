@@ -90,6 +90,9 @@ export interface ServerPlayer {
   slowMult?: number;
   // Stun (e.g. from a Dust Burrower ambush): no move/act briefly.
   stunUntil?: number;
+  // Weaken (e.g. from a Sun-Scorched Wraith): reduced PHYSICAL damage output.
+  weakUntil?: number;
+  weakMult?: number;
   // E2E-only: when set, the player always dodges incoming hits (deterministic
   // testing of the dodge mechanic). Never set outside E2E_TEST.
   forceDodge?: boolean;
@@ -187,6 +190,7 @@ export interface HerbNodeRuntime {
   label: string;
   requiredLevel: number;
   xp: number;
+  item: string;
   active: boolean;
   respawnAt: number;
 }

@@ -48,6 +48,8 @@ interface RawMonster {
   ranged?: boolean;
   slowPct?: number;
   slowMs?: number;
+  weakenPct?: number;
+  weakenMs?: number;
   armor?: number;
   pack?: boolean;
   burrow?: boolean;
@@ -86,6 +88,7 @@ interface RawHerbNode {
   label?: string;
   requiredLevel?: number;
   xp?: number;
+  item?: string;
   at?: { floor: number; x: number; y: number };
   approach?: { x: number; y: number };
 }
@@ -139,7 +142,7 @@ const itemIds = new Set(items.map((i) => i.id));
 const monsterIds = new Set(monsters.map((m) => m.id));
 const treeTypeIds = new Set(treeTypes.map((t) => t.id));
 const npcIdsByRole = new Map(npcs.map((n) => [n.id, n.role]));
-const zoneIds = new Set(["southTown", "cemetery", "crypt", "woods", "northTown", "marsh", "badlands"]);
+const zoneIds = new Set(["southTown", "cemetery", "crypt", "woods", "northTown", "marsh", "badlands", "desert"]);
 const useKinds = new Set(["eat", "light_fire", "cook_on_fire", "drink_potion"]);
 const capabilityIds = new Set(["chop_tree", "fish", "mine", "ranged"]);
 const questKinds = new Set(["kill", "gather", "fetch"]);
@@ -320,6 +323,8 @@ const MONSTERS = Object.fromEntries(
     if (m.ranged) entry["ranged"] = true;
     if (m.slowPct != null) entry["slowPct"] = m.slowPct;
     if (m.slowMs != null) entry["slowMs"] = m.slowMs;
+    if (m.weakenPct != null) entry["weakenPct"] = m.weakenPct;
+    if (m.weakenMs != null) entry["weakenMs"] = m.weakenMs;
     if (m.armor != null) entry["armor"] = m.armor;
     if (m.pack) entry["pack"] = true;
     if (m.burrow) entry["burrow"] = true;
@@ -391,6 +396,7 @@ const HERB_NODES = herbNodes.map((h) => {
   };
   if (h.requiredLevel != null) entry["requiredLevel"] = h.requiredLevel;
   if (h.xp != null) entry["xp"] = h.xp;
+  if (h.item != null) entry["item"] = h.item;
   return entry;
 });
 const QUESTS = Object.fromEntries(

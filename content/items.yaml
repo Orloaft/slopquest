@@ -186,3 +186,11 @@
   iconUrl: null
   stackable: true
   tags: [quest]
+
+- id: quartz
+  label: Glass-Sand Quartz
+  icon: Qz
+  iconUrl: /icons/item-quartz.png
+  stackable: true
+  tags: [material]
+  weight: 1

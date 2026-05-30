@@ -504,6 +504,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("darkForestTiles", "/dark-forest-tiles.png");
   this.load.image("swampTiles", "/swamp-tiles.png");
   this.load.image("badlandsTiles", "/badlands-tiles.png");
+  this.load.image("desertTiles", "/desert-tiles.png");
   this.load.image("effectsSheet", "/effects.png");
   this.load.image("waterFishingSpots", "/water-fishing-spots.png");
   this.load.image("oreNodeSheet", "/ore-rock-gathering-nodes.png");
@@ -575,6 +576,14 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "badlandsTiles", "tileRamp", 392, 864, 68, 80);
   makeSpriteTexture(this, "badlandsTiles", "spriteTent", 1070, 873, 92, 72);
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsLedge", 20, 862, 72, 86);
+  // Sunken Desert (floor 7). Crops from assetsources/rejected/desert-biome-tiles.png
+  // (1536x1024, magenta-keyed) — sand/quicksand/oasis tiles + palm, market tent, ledge.
+  makeTileTexture(this, "desertTiles", "tileSand", 25, 101, 71, 73);
+  makeTileTexture(this, "desertTiles", "tileQuicksand", 1344, 188, 70, 70);
+  makeTileTexture(this, "desertTiles", "tileOasisWater", 98, 862, 70, 72);
+  makeSpriteTexture(this, "desertTiles", "spriteOutpostTent", 1364, 854, 104, 84);
+  makeSpriteTexture(this, "desertTiles", "spritePalm", 1456, 958, 62, 58);
+  makeSpriteTexture(this, "desertTiles", "spriteDesertLedge", 22, 856, 66, 86);
 
   mapLayer = this.add.container(0, 0);
   entityLayer = this.add.container(0, 0);
@@ -1260,6 +1269,7 @@ function renderBuffTracker(buffs: Partial<BuffsView> = {}): void {
   if ((buffs.fleetFoot ?? 0) > 0) active.push(`Fleet Foot ${Math.ceil((buffs.fleetFoot ?? 0) / 1000)}s`);
   if ((buffs.slowed ?? 0) > 0) active.push(`Slowed ${Math.ceil((buffs.slowed ?? 0) / 1000)}s`);
   if ((buffs.stunned ?? 0) > 0) active.push(`Stunned ${Math.ceil((buffs.stunned ?? 0) / 1000)}s`);
+  if ((buffs.weakened ?? 0) > 0) active.push(`Weakened ${Math.ceil((buffs.weakened ?? 0) / 1000)}s`);
   dom.buffTracker.textContent = active.join(" | ");
   dom.buffTracker.classList.toggle("hidden", !active.length);
 }
@@ -2712,7 +2722,9 @@ function addTileDecorations(rows: string[]): void {
       if (tile === "o") decorations.push({ key: "spriteSwampBoulder", x: x + 0.5, y: y + 0.85, w: 44, h: 36 });
       if (tile === "L") decorations.push({ key: "spriteCliffLedge", x: x + 0.5, y: y + 0.95, w: 52, h: 44 });
       if (tile === "Z") decorations.push({ key: "spriteBadlandsLedge", x: x + 0.5, y: y + 0.95, w: 54, h: 50 });
-      if (["N", "S", "T", "C", "M", "D", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
+      if (tile === "U") decorations.push({ key: "spriteObelisk", x: x + 0.5, y: y + 0.95, w: 40, h: 64 });
+      if (tile === "H") decorations.push({ key: "spriteDesertLedge", x: x + 0.5, y: y + 0.95, w: 52, h: 50 });
+      if (["N", "S", "T", "C", "M", "D", "G", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
     }
   }
   decorations.sort((a, b) => a.y - b.y).forEach(placeMapSprite);
@@ -2795,6 +2807,13 @@ function addComposedMapObjects(floor: number): void {
     { key: "spriteSwampBoulder", x: 34.5, y: 11.2, w: 40, h: 34 }
   ];
 
+  const desertObjects: DecorationSprite[] = [
+    { key: "spriteOutpostTent", x: 23.5, y: 28.6, w: 130, h: 104 }, // Oasis Trade Outpost
+    { key: "spritePalm", x: 28.5, y: 28.8, w: 78, h: 74 },
+    { key: "spritePalm", x: 21.5, y: 30.4, w: 70, h: 66 },
+    { key: "spriteObelisk", x: 40.5, y: 6.4, w: 38, h: 60 }
+  ];
+
   const objectsByFloor: Record<number, DecorationSprite[]> = {
     0: southTownObjects,
     1: cemeteryObjects,
@@ -2802,7 +2821,8 @@ function addComposedMapObjects(floor: number): void {
     3: woodsObjects,
     4: northTownObjects,
     5: marshObjects,
-    6: badlandsObjects
+    6: badlandsObjects,
+    7: desertObjects
   };
   const objects = objectsByFloor[floor] ?? [];
   objects
@@ -3436,7 +3456,13 @@ function minimapTileColor(tile: string): string {
     P: "#140f0d", // pit chasm (blocked, sight-open)
     A: "#c98a4a", // ramp
     D: "#d6ad4e", // badlands portal (landmark)
-    Z: "#e0c070" // badlands ledge (landmark)
+    Z: "#e0c070", // badlands ledge (landmark)
+    a: "#d8b367", // sand
+    Q: "#7a5a2e", // quicksand (blocked, sight-open)
+    V: "#2f7d8a", // oasis water (blocked)
+    U: "#9a8a6a", // ruin (blocked, sight cover)
+    G: "#d6ad4e", // desert portal (landmark)
+    H: "#e0c070" // oasis passage (landmark)
   };
   return colors[tile] ?? "#3f6b3a";
 }
@@ -3633,7 +3659,13 @@ function tileBaseTexture(tile: string): string {
     P: "tilePit",
     A: "tileRamp",
     D: "tileBadlands",
-    Z: "tileBadlands"
+    Z: "tileBadlands",
+    a: "tileSand",
+    Q: "tileQuicksand",
+    V: "tileOasisWater",
+    U: "tileSand",
+    G: "tileSand",
+    H: "tileSand"
   };
   return map[tile] ?? "tileGrass";
 }

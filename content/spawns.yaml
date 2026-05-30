@@ -53,6 +53,13 @@ monsters:
   - { type: canyon_scavenger, at: { floor: 6, x: 34, y: 20 }, zone: badlands }
   - { type: dust_burrower,    at: { floor: 6, x: 20, y: 10 }, zone: badlands }
   - { type: dust_burrower,    at: { floor: 6, x: 30, y: 19 }, zone: badlands }
+  # The Sunken Desert (floor 7): fast dune skitterers + ruin-bound sun wraiths.
+  - { type: dune_skitterer, at: { floor: 7, x: 15, y: 8  }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 35, y: 12 }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 22, y: 15 }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 30, y: 20 }, zone: desert }
+  - { type: sun_wraith,     at: { floor: 7, x: 21, y: 10 }, zone: desert }
+  - { type: sun_wraith,     at: { floor: 7, x: 31, y: 12 }, zone: desert }
 
 trees:
   - { type: oak,  at: { floor: 0, x: 12.8, y: 10.7 } }

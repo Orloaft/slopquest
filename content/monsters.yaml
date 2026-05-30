@@ -184,3 +184,29 @@
   range: 1
   burrow: true
   stunMs: 1200
+
+# --- The Sunken Desert (floor 7) ---
+- id: dune_skitterer
+  name: Dune Skitterer
+  maxHp: 30
+  speed: 4.1
+  damage: [5, 9]
+  attackMs: 850
+  xp: 30
+  gold: [4, 9]
+  aggro: 8
+  range: 1
+
+- id: sun_wraith
+  name: Sun-Scorched Wraith
+  maxHp: 64
+  speed: 0
+  damage: [4, 8]
+  attackMs: 2000
+  xp: 52
+  gold: [12, 22]
+  aggro: 7
+  range: 6
+  ranged: true
+  weakenPct: 35
+  weakenMs: 4000

@@ -95,3 +95,9 @@
   role: vendor
   at: { floor: 6, x: 45.5, y: 10.5 }
   idleDialogue: "Frontier Camp's the last stop before the deep canyons. Stock up."
+
+- id: oasis-trader
+  name: Caravan Master Zafira
+  role: vendor
+  at: { floor: 7, x: 24.5, y: 28.5 }
+  idleDialogue: "The Oasis Outpost trades in glass and water. Rest, then trek on."

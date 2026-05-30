@@ -17,7 +17,7 @@ export type SkillId =
   | "ranged"
   | "foraging";
 
-export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown" | "marsh" | "badlands";
+export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown" | "marsh" | "badlands" | "desert";
 
 export type Capability = "chop_tree" | "fish" | "mine" | "ranged";
 
@@ -69,6 +69,9 @@ export interface Monster {
   ranged?: boolean;
   slowPct?: number;
   slowMs?: number;
+  // Ranged debuff that reduces the hit player's PHYSICAL damage output.
+  weakenPct?: number;
+  weakenMs?: number;
   // Flat damage reduction on incoming hits (armored monsters).
   armor?: number;
   // Pack hunters: aggroing alerts nearby same-type monsters to the same target.
@@ -164,6 +167,7 @@ export interface HerbNode {
   label: string;
   requiredLevel?: number;
   xp?: number;
+  item?: string;
 }
 
 export type DialogueLine = { npc: string } | { player: string };

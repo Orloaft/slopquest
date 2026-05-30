@@ -34,6 +34,7 @@ export interface BuffsView {
   fleetFoot: number;
   slowed: number;
   stunned: number;
+  weakened: number;
 }
 
 export interface InventoryItemView {

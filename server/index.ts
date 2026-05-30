@@ -269,7 +269,7 @@ function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; 
   player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
 
   clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now() });
-  socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5, 6] }));
+  socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5, 6, 7] }));
   event("system", `${player.name} entered the world.`);
 }
 
@@ -500,6 +500,7 @@ function updateMonsters(dt: number, now: number): void {
           event("projectile", "spit", target.x, target.y, target.floor, "#9ad36b", monster.id, target.id, { fromX: monster.x, fromY: monster.y });
           damagePlayer(target, shot, catalog.name);
           if (catalog.slowPct) applyPlayerSlow(target, catalog.slowPct, catalog.slowMs ?? 1500);
+          if (catalog.weakenPct) applyPlayerWeaken(target, catalog.weakenPct, catalog.weakenMs ?? 4000);
         }
       }
       continue; // anchored — never chases or melees
@@ -561,7 +562,7 @@ function autoAttack(player: ServerPlayer, now: number): void {
     if (now - player.lastAttack < spec.attackMs) return;
     if (!hasLineOfSight(player.floor, player.x, player.y, monster.x, monster.y)) return;
     player.lastAttack = now;
-    const damage = roll([6, 11]) + skillLevel(player, "ranged") + wellFedPower(player);
+    const damage = Math.max(1, Math.round((roll([6, 11]) + skillLevel(player, "ranged") + wellFedPower(player)) * physicalMult(player)));
     addSkillXp(player, "ranged", Math.max(1, Math.floor(damage * 1.5)));
     fireProjectile(player, monster, damage, "arrow");
     return;
@@ -569,7 +570,7 @@ function autoAttack(player: ServerPlayer, now: number): void {
   if (dist > spec.range) return;
   if (now - player.lastAttack < spec.attackMs) return;
   player.lastAttack = now;
-  const damage = roll(spec.attackDamage) + skillLevel(player, "attack") + player.weaponTier * (SHOP["weapon"]!.damageBonus ?? 0) + wellFedPower(player);
+  const damage = Math.max(1, Math.round((roll(spec.attackDamage) + skillLevel(player, "attack") + player.weaponTier * (SHOP["weapon"]!.damageBonus ?? 0) + wellFedPower(player)) * physicalMult(player)));
   addSkillXp(player, "attack", Math.max(1, Math.floor(damage * 1.5)));
   damageMonster(player, monster, damage, "hit");
 }
@@ -785,6 +786,8 @@ function useClassAbility(player: ServerPlayer, id: string): void {
     player.abilityCooldowns[id] = now + spec.cooldownMs;
     player.mana -= manaCost;
     let damage = roll(spec.damage) + skillLevel(player, skill) + wellFedPower(player);
+    // Weaken (Sun-Scorched Wraith) saps physical strikes, not magic.
+    if (skill !== "magic") damage = Math.max(1, Math.round(damage * physicalMult(player)));
     // Backstab: 2.5x when striking from behind (player faces the monster's back).
     if (id === "backstab" && player.dir === monster.dir) {
       damage = Math.round(damage * 2.5);
@@ -1530,14 +1533,15 @@ function updateHerbingAction(player: ServerPlayer, now: number): void {
   }
   if (now < action.nextAt) return;
   player.action = null;
-  if (!addInventoryItem(player, "herb", 1)) {
+  if (!addInventoryItem(player, node.item, 1)) {
     event("system", "Your inventory is full.");
     return;
   }
   node.active = false;
   node.respawnAt = performance.now() + HERB_RESPAWN_MS;
   addSkillXp(player, "foraging", node.xp);
-  event("float", `+1 Herb · +${node.xp} Foraging`, node.x, node.y, node.floor, "#9ee6b1");
+  const label = ITEMS[node.item]?.label ?? node.item;
+  event("float", `+1 ${label} · +${node.xp} Foraging`, node.x, node.y, node.floor, "#9ee6b1");
 }
 
 function updateCookingAction(player: ServerPlayer, now: number): void {
@@ -1768,6 +1772,7 @@ function spawnHerbNodes(): void {
       label: node.label,
       requiredLevel: node.requiredLevel ?? 0,
       xp: node.xp ?? FORAGE_XP,
+      item: node.item ?? "herb",
       active: true,
       respawnAt: 0
     });
@@ -2215,7 +2220,8 @@ function serializeBuffs(player: ServerPlayer): BuffsView {
     ironClad: Math.max(0, Math.round((player.abilityBuffs?.ironClad?.until ?? 0) - now)),
     fleetFoot: Math.max(0, Math.round((player.abilityBuffs?.fleetFoot?.until ?? 0) - now)),
     slowed: Math.max(0, Math.round((player.slowUntil ?? 0) - now)),
-    stunned: Math.max(0, Math.round((player.stunUntil ?? 0) - now))
+    stunned: Math.max(0, Math.round((player.stunUntil ?? 0) - now)),
+    weakened: Math.max(0, Math.round((player.weakUntil ?? 0) - now))
   };
 }
 
@@ -2549,6 +2555,17 @@ function applyPlayerStun(player: ServerPlayer, ms: number): void {
 
 function isStunned(player: ServerPlayer): boolean {
   return Boolean(player.stunUntil && performance.now() < player.stunUntil);
+}
+
+function applyPlayerWeaken(player: ServerPlayer, pct: number, ms: number): void {
+  player.weakUntil = performance.now() + ms;
+  player.weakMult = Math.max(0.2, 1 - pct / 100);
+  event("float", "Weakened!", player.x, player.y - 0.55, player.floor, "#e6c27a");
+}
+
+// Multiplier applied to PHYSICAL (melee/ranged) damage while weakened.
+function physicalMult(player: ServerPlayer): number {
+  return player.weakUntil && performance.now() < player.weakUntil ? player.weakMult ?? 1 : 1;
 }
 
 function carriedWeight(player: ServerPlayer): number {
