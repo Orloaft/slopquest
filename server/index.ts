@@ -291,6 +291,8 @@ let nextMonsterId = 1;
 let nextCorpseId = 1;
 let nextFireId = 1;
 const events: GameEvent[] = [];
+const eventsByCell = new Map<string, GameEvent[]>();
+const eventOrder = new WeakMap<GameEvent, number>();
 const metrics: Metrics = {
   tickSamples: [],
   snapshotSamples: [],
@@ -302,6 +304,7 @@ let saveQueued = false;
 let saveInFlight = false;
 const dirtyPlayerKeys = new Set<string>();
 let snapshotSequence = 0;
+let nextEventOrder = 1;
 const snapshotCaches = new WeakMap<Session, SnapshotCache>();
 
 for (const spawn of MONSTER_SPAWNS) {
@@ -398,6 +401,7 @@ setInterval(() => {
   broadcastState();
   recordSample(metrics.snapshotSamples, performance.now() - started);
   events.length = 0;
+  eventsByCell.clear();
 }, 75);
 
 setInterval(() => {
@@ -2424,7 +2428,7 @@ function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: bo
     fires: firesDelta.items,
     firesFull: firesDelta.full,
     removedFireIds: firesDelta.removedIds,
-    events: events.filter((item) => eventVisibleTo(viewer, item)),
+    events: visibleEventsFor(viewer),
     metrics: {
       clients: clients.size,
       monsters: monsters.size,
@@ -2906,6 +2910,18 @@ function eventVisibleTo(viewer: ServerPlayer, item: GameEvent): boolean {
   if (item.type === "dialogue") return true;
   if (item.floor === null || item.x === null || item.y === null) return true;
   return inInterestRange(viewer, { floor: item.floor, x: item.x, y: item.y });
+}
+
+function visibleEventsFor(viewer: ServerPlayer): GameEvent[] {
+  const visible: GameEvent[] = [];
+  for (const item of events) {
+    if (eventVisibleTo(viewer, item)) visible.push(item);
+  }
+  for (const item of queryEventCells(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
+    if (eventVisibleTo(viewer, item)) visible.push(item);
+  }
+  if (visible.length > 1) visible.sort((a, b) => (eventOrder.get(a) ?? 0) - (eventOrder.get(b) ?? 0));
+  return visible;
 }
 
 function persistPlayerToDb(player: ServerPlayer): string {
@@ -3454,7 +3470,35 @@ function event(
   target: string | null = null,
   extra: Partial<GameEvent> = {}
 ): void {
-  events.push({ type, text, x, y, floor, color, from, target, t: Date.now(), ...extra });
+  const item: GameEvent = { type, text, x, y, floor, color, from, target, t: Date.now(), ...extra };
+  eventOrder.set(item, nextEventOrder++);
+  if (eventIsGlobal(item)) {
+    events.push(item);
+    return;
+  }
+  const key = spatialKey(item.floor!, item.x!, item.y!);
+  const bucket = eventsByCell.get(key) ?? [];
+  bucket.push(item);
+  eventsByCell.set(key, bucket);
+}
+
+function eventIsGlobal(item: GameEvent): boolean {
+  return Boolean(item.to) || item.type === "chat" || item.type === "system" || item.type === "dialogue" || item.floor === null || item.x === null || item.y === null;
+}
+
+function queryEventCells(floor: number, x: number, y: number, radius: number): GameEvent[] {
+  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
+  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
+  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
+  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
+  const results: GameEvent[] = [];
+  for (let cy = minCy; cy <= maxCy; cy += 1) {
+    for (let cx = minCx; cx <= maxCx; cx += 1) {
+      const bucket = eventsByCell.get(`${floor}:${cx}:${cy}`);
+      if (bucket) results.push(...bucket);
+    }
+  }
+  return results;
 }
 
 function distance(a: { x: number; y: number }, b: { x: number; y: number }): number {
