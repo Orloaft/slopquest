@@ -1,4 +1,5 @@
 import type { Range, ZoneId } from "./content-types.ts";
+import { MAP_OBJECTS, BLOCKING_OBJECT_KEYS } from "./map-objects.ts";
 
 export {
   ITEMS,
@@ -376,12 +377,8 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 10, 17, 40, 2, "s");
     fillRect(rows, 16, 7, 2, 23, "s");
     fillRect(rows, 35, 14, 10, 6, "d");
-    fillRect(rows, 20, 6, 10, 5, "O");
-    fillRect(rows, 34, 6, 8, 5, "O");
-    fillRect(rows, 8, 23, 8, 5, "O");
-    fillRect(rows, 24, 25, 8, 5, "O");
-    fillRect(rows, 38, 22, 8, 5, "O");
-    fillRect(rows, 21, 16, 3, 3, "O");
+    // Building collision is stamped from the composed sprites post-scale
+    // (stampBuildingCollision), so it stays aligned with the visible building.
     fillRect(rows, 5, 24, 39, 1, "q");
     fillRect(rows, 5, 29, 39, 1, "q");
     fillRect(rows, 5, 24, 1, 6, "q");
@@ -406,7 +403,6 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 23, 28, 5, 1, "c");
     setTile(rows, 5, 16, "g");
     setTile(rows, 44, 16, "g");
-    fillRect(rows, 22, 18, 8, 5, "O");
     fillRect(rows, 25, 18, 1, 3, "c");
     setTile(rows, 25, 2, "T");
     setTile(rows, 25, 20, "C");
@@ -583,10 +579,6 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 13, 14, 12, 6, "p");
     fillRect(rows, 24, 2, 3, 30, "s");
     fillRect(rows, 10, 16, 34, 3, "s");
-    fillRect(rows, 12, 7, 9, 5, "O");
-    fillRect(rows, 31, 7, 8, 5, "O");
-    fillRect(rows, 17, 23, 9, 5, "O");
-    fillRect(rows, 34, 23, 8, 5, "O");
     setTile(rows, 25, 31, "S");
     scatter(rows, ".", "f", 28, 41);
     scatter(rows, ".", "r", 16, 42);
@@ -594,6 +586,7 @@ export function makeFloorTiles(floor: number): string[] {
 
   const sized = authored || !FLOOR_DIMS[floor] ? rows : scaleFloorTiles(rows, floorCols(floor), floorRows(floor));
   frameFloorEdge(sized, floor);
+  stampBuildingCollision(sized, floor);
 
   const tiles = sized.map((row) => row.join(""));
   FLOOR_TILE_CACHE.set(floor, tiles);
@@ -613,6 +606,39 @@ const FLOOR_EDGE: Record<number, string> = {
   8: "I", // The Sunken Beach — open sea
   9: "E" // The Untamed Jungle — impassable canopy
 };
+
+// Door/portal/landmark tiles that must stay walkable even if a building
+// footprint overlaps them.
+const FOOTPRINT_SKIP = new Set<string>(["N", "S", "T", "C", "M", "D", "G", "H", "Y", "j", "L", "Z", "A", ">", "<"]);
+
+// Block a footprint under each solid composed building, sized to the sprite
+// (native pixel size at the scaled position), so collision matches what the
+// player sees instead of the old over-scaled rectangle.
+function stampBuildingCollision(rows: string[][], floor: number): void {
+  const objects = MAP_OBJECTS[floor];
+  if (!objects) return;
+  const sx = contentScaleX(floor);
+  const sy = contentScaleY(floor);
+  for (const obj of objects) {
+    if (!BLOCKING_OBJECT_KEYS.has(obj.key)) continue;
+    const cx = obj.x * sx;
+    const baseY = obj.y * sy; // sprite bottom-centre anchor, scaled position
+    const halfW = (obj.w / TILE_SIZE) * 0.42;
+    const left = Math.round(cx - halfW);
+    const right = Math.round(cx + halfW);
+    const bottom = Math.round(baseY - 0.6); // leave the doorstep row walkable
+    const top = Math.round(baseY - (obj.h / TILE_SIZE) * 0.8);
+    for (let y = top; y <= bottom; y += 1) {
+      const row = rows[y];
+      if (!row) continue;
+      for (let x = left; x <= right; x += 1) {
+        const tile = row[x];
+        if (tile === undefined || isBlockedTile(tile) || FOOTPRINT_SKIP.has(tile)) continue;
+        row[x] = "O";
+      }
+    }
+  }
+}
 
 function frameFloorEdge(rows: string[][], floor: number): void {
   const edge = FLOOR_EDGE[floor];
