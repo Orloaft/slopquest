@@ -3672,7 +3672,13 @@ function sampleOpaqueColor(image: ImageData, width: number, height: number): Rgb
 }
 
 function isMagentaKey(r: number, g: number, b: number): boolean {
-  return r > 95 && b > 90 && g < 135 && Math.abs(r - b) < 95 && r > g * 1.35 && b > g * 1.25;
+  if (r > 95 && b > 90 && g < 135 && Math.abs(r - b) < 95 && r > g * 1.35 && b > g * 1.25) return true;
+  // Darker keyed magenta whose blue dips below the main threshold (e.g. the
+  // badlands tent's 143,3,82 -> 91,2,52 gradient): green is essentially zero,
+  // red dominates blue, and blue stays well above zero. That near-black-green,
+  // red-leaning-purple combination is a chroma key, never real art (warm colours
+  // keep green >= ~15; blue-purples have blue above red).
+  return g < 10 && r > 70 && b > 42 && r > b - 5 && r > g * 7 && b > g * 7;
 }
 
 function addChat(line: string): void {
