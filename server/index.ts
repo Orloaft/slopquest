@@ -274,6 +274,7 @@ const clients = new Map<ExtWebSocket, Session>();
 const playersById = new Map<string, ServerPlayer>();
 const monsters = new Map<string, ServerMonster>();
 const monstersByFloor = new Map<number, Set<ServerMonster>>();
+const monstersByCell = new Map<string, Set<ServerMonster>>();
 const corpses = new Map<string, Corpse>();
 const treeNodes = new Map<string, TreeNodeRuntime>();
 const herbNodes = new Map<string, HerbNodeRuntime>();
@@ -594,11 +595,16 @@ function updatePlayers(dt: number, now: number): void {
 }
 
 function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): void {
-  for (const floor of activeRegions.floors) {
-    const floorMonsters = monstersByFloor.get(floor);
-    if (!floorMonsters) continue;
-    for (const monster of floorMonsters) {
-      if (!isRegionActive(activeRegions, monster.floor, monster.x, monster.y)) continue;
+  const visited = new Set<ServerMonster>();
+  for (const cell of activeRegions.cells) {
+    const cellMonsters = monstersByCell.get(cell);
+    if (!cellMonsters) continue;
+    for (const monster of cellMonsters) {
+      if (visited.has(monster)) continue;
+      visited.add(monster);
+      const oldFloor = monster.floor;
+      const oldX = monster.x;
+      const oldY = monster.y;
       monster.moving = false;
       if (monster.deadUntil) {
         if (now >= monster.deadUntil) respawnMonster(monster);
@@ -684,6 +690,7 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
       const dx = (target.x - monster.x) / dist;
       const dy = (target.y - monster.y) / dist;
       moveEntity(monster, dx * catalog.speed * dt, dy * catalog.speed * dt);
+      updateMonsterCell(monster, oldFloor, oldX, oldY);
     }
 
     if (!frozen && dist <= catalog.range + 0.15 && now - monster.lastAttack >= catalog.attackMs) {
@@ -2076,12 +2083,15 @@ function spawnMonster(spawn: MonsterSpawn): void {
   };
   monsters.set(monster.id, monster);
   addMonsterToFloor(monster);
+  addMonsterToCell(monster);
 }
 
 function respawnMonster(monster: ServerMonster): void {
   const catalog = MONSTERS[monster.type];
   if (!catalog) return;
   const oldFloor = monster.floor;
+  const oldX = monster.x;
+  const oldY = monster.y;
   monster.floor = monster.spawn.floor;
   monster.x = monster.spawn.x + 0.5;
   monster.y = monster.spawn.y + 0.5;
@@ -2103,6 +2113,7 @@ function respawnMonster(monster: ServerMonster): void {
     removeMonsterFromFloor(monster, oldFloor);
     addMonsterToFloor(monster);
   }
+  updateMonsterCell(monster, oldFloor, oldX, oldY);
 }
 
 function addMonsterToFloor(monster: ServerMonster): void {
@@ -2116,6 +2127,27 @@ function removeMonsterFromFloor(monster: ServerMonster, floor = monster.floor): 
   if (!floorSet) return;
   floorSet.delete(monster);
   if (!floorSet.size) monstersByFloor.delete(floor);
+}
+
+function addMonsterToCell(monster: ServerMonster): void {
+  const key = spatialKey(monster.floor, monster.x, monster.y);
+  const cellSet = monstersByCell.get(key) ?? new Set<ServerMonster>();
+  cellSet.add(monster);
+  monstersByCell.set(key, cellSet);
+}
+
+function removeMonsterFromCell(monster: ServerMonster, floor = monster.floor, x = monster.x, y = monster.y): void {
+  const key = spatialKey(floor, x, y);
+  const cellSet = monstersByCell.get(key);
+  if (!cellSet) return;
+  cellSet.delete(monster);
+  if (!cellSet.size) monstersByCell.delete(key);
+}
+
+function updateMonsterCell(monster: ServerMonster, oldFloor: number, oldX: number, oldY: number): void {
+  if (spatialKey(oldFloor, oldX, oldY) === spatialKey(monster.floor, monster.x, monster.y)) return;
+  removeMonsterFromCell(monster, oldFloor, oldX, oldY);
+  addMonsterToCell(monster);
 }
 
 function wanderMonster(monster: ServerMonster, catalog: { speed: number }, dt: number, now: number): void {
@@ -2133,7 +2165,11 @@ function wanderMonster(monster: ServerMonster, catalog: { speed: number }, dt: n
 
   const dx = (monster.wanderTarget.x - monster.x) / dist;
   const dy = (monster.wanderTarget.y - monster.y) / dist;
+  const oldFloor = monster.floor;
+  const oldX = monster.x;
+  const oldY = monster.y;
   moveEntity(monster, dx * catalog.speed * 0.34 * dt, dy * catalog.speed * 0.34 * dt);
+  updateMonsterCell(monster, oldFloor, oldX, oldY);
 }
 
 function pickWanderTarget(monster: ServerMonster): Vec2 | null {
@@ -3250,11 +3286,10 @@ function rebuildStaticSpatialIndex(): void {
 function rebuildSpatialIndex(activeRegions: ActiveRegions): void {
   spatial = createSpatialIndex();
   for (const { player } of clients.values()) addToSpatial(spatial.players, player);
-  for (const floor of activeRegions.floors) {
-    const floorMonsters = monstersByFloor.get(floor);
-    if (!floorMonsters) continue;
-    for (const monster of floorMonsters) {
-      if (!isRegionActive(activeRegions, monster.floor, monster.x, monster.y)) continue;
+  for (const cell of activeRegions.cells) {
+    const cellMonsters = monstersByCell.get(cell);
+    if (!cellMonsters) continue;
+    for (const monster of cellMonsters) {
       if (!monster.deadUntil) addToSpatial(spatial.monsters, monster);
     }
   }
