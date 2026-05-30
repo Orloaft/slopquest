@@ -2167,9 +2167,11 @@ function removeMonsterFromCell(monster: ServerMonster, floor = monster.floor, x 
 }
 
 function updateMonsterCell(monster: ServerMonster, oldFloor: number, oldX: number, oldY: number): void {
-  if (spatialKey(oldFloor, oldX, oldY) === spatialKey(monster.floor, monster.x, monster.y)) return;
-  removeMonsterFromCell(monster, oldFloor, oldX, oldY);
-  addMonsterToCell(monster);
+  if (spatialKey(oldFloor, oldX, oldY) !== spatialKey(monster.floor, monster.x, monster.y)) {
+    removeMonsterFromCell(monster, oldFloor, oldX, oldY);
+    addMonsterToCell(monster);
+  }
+  updateSpatialCell(spatial.monsters, monster, oldFloor, oldX, oldY);
 }
 
 function addToCellIndex<T extends Positioned>(index: Map<string, Set<T>>, entity: T): void {
@@ -3381,13 +3383,30 @@ function addToSpatial<T extends Positioned>(index: Map<string, T[]>, entity: T):
   index.set(key, bucket);
 }
 
+function hasSpatialEntity<T extends Positioned>(index: Map<string, T[]>, entity: T): boolean {
+  return index.get(spatialKey(entity.floor, entity.x, entity.y))?.includes(entity) ?? false;
+}
+
 function removeFromSpatial<T extends Positioned>(index: Map<string, T[]>, entity: T): void {
-  const key = spatialKey(entity.floor, entity.x, entity.y);
+  removeFromSpatialAt(index, entity, entity.floor, entity.x, entity.y);
+}
+
+function removeFromSpatialAt<T extends Positioned>(index: Map<string, T[]>, entity: T, floor: number, x: number, y: number): void {
+  const key = spatialKey(floor, x, y);
   const bucket = index.get(key);
   if (!bucket) return;
   const next = bucket.filter((item) => item !== entity);
   if (next.length) index.set(key, next);
   else index.delete(key);
+}
+
+function updateSpatialCell<T extends Positioned>(index: Map<string, T[]>, entity: T, oldFloor: number, oldX: number, oldY: number): void {
+  if (spatialKey(oldFloor, oldX, oldY) === spatialKey(entity.floor, entity.x, entity.y)) {
+    if (!hasSpatialEntity(index, entity)) addToSpatial(index, entity);
+    return;
+  }
+  removeFromSpatialAt(index, entity, oldFloor, oldX, oldY);
+  addToSpatial(index, entity);
 }
 
 function querySpatial<T>(index: Map<string, T[]>, floor: number, x: number, y: number, radius: number): T[] {
