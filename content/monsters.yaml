@@ -161,15 +161,15 @@
 # --- The Searing Badlands (floor 6) ---
 - id: canyon_scavenger
   name: Canyon Scavenger
-  maxHp: 110
+  maxHp: 90
   speed: 2.2
-  damage: [10, 16]
+  damage: [9, 14]
   attackMs: 1100
   xp: 60
   gold: [12, 24]
   aggro: 6
   range: 1.05
-  armor: 6
+  armor: 4
   pack: true
 
 - id: dust_burrower

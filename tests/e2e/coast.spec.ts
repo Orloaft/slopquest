@@ -49,7 +49,7 @@ test("a Venomous Stalker ambushes from the undergrowth, stunning the player", as
   await page.goto("/?e2e");
   await join(page);
 
-  await place(page, 9, 12.5, 8.5);
+  await place(page, 9, 16.5, 17.5);
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.stunned ?? 0) > 0, null, { timeout: 8000 });
 });
 
