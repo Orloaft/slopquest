@@ -2,7 +2,7 @@
 
 The game streams a background track per zone with a 2-second crossfade on
 transitions (see `src/audio.ts` and the `FLOOR_TRACK` / `OUTPOST_TRACK` maps in
-`src/main.ts`). The engine loads `/music/<name>.mp3` for each name below.
+`src/main.ts`). The engine loads `/music/<name>.ogg` for each name below.
 
 **No audio ships with this repo.** Drop your own legally-licensed files here with
 the exact filenames. A missing file just means that zone plays silent — nothing
@@ -11,19 +11,19 @@ doc; use audio you actually have the rights to use.
 
 | File (`public/music/`)   | Zone                                   | Suggested track |
 | ------------------------ | -------------------------------------- | --------------- |
-| `scape-main.mp3`         | Title screen ("The Coastal Overlook")  | Scape Main / Autumn Voyage |
-| `garden.mp3`             | Waystone (hub town)                    | Garden / Flute Salad |
-| `borderland.mp3`         | Northwatch (frontier outpost)          | Borderland / Unknown Land |
-| `harmony.mp3`            | Northwood (central forest valley)      | Harmony / Tree Spirits |
-| `rest-in-peace.mp3`      | Southgate Cemetery                     | Rest in Peace / Spooky |
-| `spooky.mp3`             | Ashen Crypt (dungeon)                  | Spooky |
-| `swamp-fever.mp3`        | The Sunken Marsh (rotten causeway)     | Swamp Fever / Mage Arena |
-| `serenade.mp3`           | Alchemist's Hut (marsh safe outpost)   | Serenade |
-| `al-kharid.mp3`          | The Searing Badlands (canyon ravines)  | Al Kharid / Arabian 2 |
-| `mirage.mp3`             | Frontier Camp (badlands safe outpost)  | Mirage |
-| `the-desert.mp3`         | The Sunken Desert                      | The Desert / Shine |
-| `sea-shanty-2.mp3`       | The Sunken Beach                       | Sea Shanty II / Horizon |
-| `tribal.mp3`             | The Untamed Jungle                     | Tribal / Jungle Island |
+| `scape-main.ogg`         | Title screen ("The Coastal Overlook")  | Scape Main / Autumn Voyage |
+| `garden.ogg`             | Waystone (hub town)                    | Garden / Flute Salad |
+| `borderland.ogg`         | Northwatch (frontier outpost)          | Borderland / Unknown Land |
+| `harmony.ogg`            | Northwood (central forest valley)      | Harmony / Tree Spirits |
+| `rest-in-peace.ogg`      | Southgate Cemetery                     | Rest in Peace / Spooky |
+| `spooky.ogg`             | Ashen Crypt (dungeon)                  | Spooky |
+| `swamp-fever.ogg`        | The Sunken Marsh (rotten causeway)     | Swamp Fever / Mage Arena |
+| `serenade.ogg`           | Alchemist's Hut (marsh safe outpost)   | Serenade |
+| `al-kharid.ogg`          | The Searing Badlands (canyon ravines)  | Al Kharid / Arabian 2 |
+| `mirage.ogg`             | Frontier Camp (badlands safe outpost)  | Mirage |
+| `the-desert.ogg`         | The Sunken Desert                      | The Desert / Shine |
+| `sea-shanty-2.ogg`       | The Sunken Beach                       | Sea Shanty II / Horizon |
+| `tribal.ogg`             | The Untamed Jungle                     | Tribal / Jungle Island |
 
 ## How it works
 

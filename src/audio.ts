@@ -6,7 +6,7 @@
 // suggested fit per zone; supply audio you have the rights to use).
 
 const TRACK_DIR = "/music/";
-const TRACK_EXT = ".mp3";
+const TRACK_EXT = ".ogg";
 const FADE_MS = 2000;
 
 let enabled = true;
