@@ -497,6 +497,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("goblinRaiderSheet", "/goblin-raider-sheet.png");
   this.load.image("greyWolfSheet", "/grey-wolf-sheet.png");
   this.load.image("wispSheet", "/wisp-sheet.png");
+  this.load.image("newEnemiesSheet", "/new-enemies.png");
   this.load.image("uiSheet", "/ui-sheet.png");
   this.load.image("townTiles", "/towntiles.png");
   this.load.image("forestTiles", "/foresttiles.png");
@@ -1140,6 +1141,16 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "goblin_shaman") return { family: "goblinShaman", width: 46, height: 56, yOffset: -16 };
   if (monster.type === "wolf") return { family: "greyWolf", width: 58, height: 44, yOffset: -8 };
   if (monster.type === "wisp") return { family: "wisp", width: 40, height: 56, yOffset: -18 };
+  // New-area monsters (montage families in /new-enemies.png).
+  if (monster.type === "skitterer") return { family: "skitterer", width: 50, height: 44, yOffset: -6 };
+  if (monster.type === "mire_spitter") return { family: "mire_spitter", width: 50, height: 56, yOffset: -16 };
+  if (monster.type === "canyon_scavenger") return { family: "canyon_scavenger", width: 52, height: 56, yOffset: -14 };
+  if (monster.type === "dust_burrower") return { family: "dust_burrower", width: 54, height: 46, yOffset: -6 };
+  if (monster.type === "dune_skitterer") return { family: "dune_skitterer", width: 50, height: 48, yOffset: -10 };
+  if (monster.type === "sun_wraith") return { family: "sun_wraith", width: 50, height: 56, yOffset: -16, tint: 0xffd98a };
+  if (monster.type === "reef_prowler") return { family: "reef_prowler", width: 54, height: 50, yOffset: -10 };
+  if (monster.type === "venomous_stalker") return { family: "venomous_stalker", width: 52, height: 46, yOffset: -8, tint: 0x9fd07a };
+  if (monster.type === "totem_wraith") return { family: "totem_wraith", width: 48, height: 56, yOffset: -16, tint: 0xd0b3ff };
   return { family: "goblin", width: 42, height: 46, yOffset: -10 };
 }
 
@@ -3127,6 +3138,16 @@ function createActorFrames(scene: Phaser.Scene): void {
     right: wispRow,
     down: wispRow,
     left: wispRow
+  });
+  // The nine new-area monsters share one montage sheet (public/new-enemies.png):
+  // a 4-frame walk row per family, the same frames used for all four facings.
+  const newEnemyFamilies = [
+    "skitterer", "mire_spitter", "canyon_scavenger", "dust_burrower", "dune_skitterer",
+    "sun_wraith", "reef_prowler", "venomous_stalker", "totem_wraith"
+  ];
+  newEnemyFamilies.forEach((family, r) => {
+    const frames = spriteFrames([0, 64, 128, 192], r * 56, 64, 56);
+    createExplicitFrameSet(scene, "newEnemiesSheet", family, { up: frames, right: frames, down: frames, left: frames });
   });
 }
 
