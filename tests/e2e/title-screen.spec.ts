@@ -15,15 +15,23 @@ test("title screen: modals, embark to login, into the world", async ({ page }) =
   await expect(page.locator("#titleCredits")).toBeVisible();
   await page.locator('[data-title-action="close-credits"]').click();
 
-  // Embark reveals the login/character-select.
+  // Embark opens the character-select OVER the title, which stays as a backdrop.
   await page.locator('[data-title-action="embark"]').click();
-  await expect(page.locator("#titleScreen")).toBeHidden();
   await expect(page.locator("#join")).toBeVisible();
+  await expect(page.locator("#joinBackdrop")).toBeVisible();
+  await expect(page.locator("#titleScreen")).toBeVisible();
 
-  // And a character can still be created into the world.
+  // "Back to title" closes the character-select again.
+  await page.locator("#joinBackButton").click();
+  await expect(page.locator("#join")).toBeHidden();
+  await expect(page.locator("#titleScreen")).toBeVisible();
+
+  // Re-open and create a character into the world (which dismisses the title).
+  await page.locator('[data-title-action="embark"]').click();
   await page.locator("#nameInput").fill("titleflow");
   await page.locator("#joinButton").click();
   await expect(page.locator(".top-left")).toBeVisible({ timeout: 8000 });
   await expect(page.locator("#join")).toBeHidden();
-  console.log("title -> embark -> join -> world OK");
+  await expect(page.locator("#titleScreen")).toBeHidden();
+  console.log("title -> embark (overlay) -> back -> join -> world OK");
 });

@@ -362,7 +362,9 @@ const dom = {
   titleCredits: el<HTMLElement>("#titleCredits"),
   titleExit: el<HTMLElement>("#titleExit"),
   settingSound: el<HTMLInputElement>("#settingSound"),
-  settingParallax: el<HTMLInputElement>("#settingParallax")
+  settingParallax: el<HTMLInputElement>("#settingParallax"),
+  joinBackdrop: el<HTMLElement>("#joinBackdrop"),
+  joinBackButton: el<HTMLButtonElement>("#joinBackButton")
 };
 
 dom.joinButton.addEventListener("click", () => joinCharacter(dom.nameInput.value, true));
@@ -748,12 +750,16 @@ let titleParallaxOn = true;
 let titleAudioCtx: AudioContext | null = null;
 
 function setupTitleScreen(): void {
-  // In e2e the title is skipped so specs land straight on the login form.
+  // In e2e the title is skipped so specs land straight on the login form (no
+  // title backdrop, so the "back to title" affordance is irrelevant there).
   if (E2E_MODE) {
     dom.titleScreen.classList.add("hidden");
+    dom.joinBackButton.classList.add("hidden");
     dom.join.classList.remove("hidden");
     return;
   }
+
+  dom.joinBackButton.addEventListener("click", () => closeCharacterSelect());
 
   dom.settingSound.addEventListener("change", () => {
     titleSoundOn = dom.settingSound.checked;
@@ -776,8 +782,7 @@ function setupTitleScreen(): void {
 function handleTitleAction(action: string): void {
   switch (action) {
     case "embark":
-      dom.titleScreen.classList.add("hidden");
-      dom.join.classList.remove("hidden");
+      openCharacterSelect();
       break;
     case "settings":
       dom.titleSettings.classList.remove("hidden");
@@ -803,6 +808,19 @@ function handleTitleAction(action: string): void {
     default:
       break;
   }
+}
+
+// Embark opens the character-select over the title scene, which stays as a
+// living backdrop; "Back to title" closes it again.
+function openCharacterSelect(): void {
+  dom.joinBackdrop.classList.remove("hidden");
+  dom.join.classList.remove("hidden");
+  playTitleHover();
+}
+
+function closeCharacterSelect(): void {
+  dom.join.classList.add("hidden");
+  dom.joinBackdrop.classList.add("hidden");
 }
 
 function leaveGame(): void {
@@ -867,6 +885,8 @@ function joinCharacter(name: string, fresh = false): void {
   if (socket && socket.readyState === WebSocket.OPEN) {
     send({ type: "join", name: clean, fresh });
     dom.join.classList.add("hidden");
+    dom.joinBackdrop.classList.add("hidden");
+    dom.titleScreen.classList.add("hidden");
     dom.hud.classList.remove("hidden");
     addChat("Connected to Waystone.");
     return;
