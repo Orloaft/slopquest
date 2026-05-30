@@ -48,20 +48,31 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spritePine", x: 78.2, y: 14.6, w: 54, h: 84 }
   ],
   1: [
-    { key: "spriteCrypt", x: 26, y: 23.1, w: 126, h: 206 },
-    { key: "spriteStoneWall", x: 15, y: 6.1, w: 112, h: 54 },
-    { key: "spriteStoneWall", x: 36, y: 28.8, w: 112, h: 54 },
-    { key: "spriteMausoleum", x: 37.5, y: 17.1, w: 118, h: 150 },
-    { key: "spriteDeadTree", x: 10.4, y: 14.8, w: 72, h: 118 },
-    { key: "spriteDeadTree", x: 41.2, y: 10.8, w: 66, h: 108 },
-    { key: "spriteObelisk", x: 15.8, y: 18.5, w: 38, h: 60 },
-    { key: "spriteObelisk", x: 34.3, y: 23.4, w: 34, h: 54 }
+    // Southgate Cemetery (bespoke 90x60). The Crypt squats at the heart of the
+    // graveyard with its entrance (`C` portal) on the cleared dirt apron just
+    // below its footprint; a mausoleum sits in the eastern plots. Dead trees,
+    // obelisks and stone walls cluster against the iron fences. NPCs/monsters
+    // roam the grave dirt outside these footprints (see spawns.yaml).
+    { key: "spriteCrypt", x: 45, y: 28.1, w: 126, h: 206 }, // central crypt; entrance apron below
+    { key: "spriteMausoleum", x: 65, y: 22.1, w: 118, h: 150 }, // eastern mausoleum
+    { key: "spriteStoneWall", x: 16, y: 11.1, w: 112, h: 54 }, // NW plot wall
+    { key: "spriteStoneWall", x: 70, y: 44.8, w: 112, h: 54 }, // SE plot wall
+    { key: "spriteDeadTree", x: 14.4, y: 23.8, w: 72, h: 118 },
+    { key: "spriteDeadTree", x: 74.2, y: 14.8, w: 66, h: 108 },
+    { key: "spriteDeadTree", x: 24.2, y: 49.8, w: 66, h: 108 },
+    { key: "spriteObelisk", x: 33.8, y: 15.5, w: 38, h: 60 },
+    { key: "spriteObelisk", x: 58.3, y: 41.4, w: 34, h: 54 },
+    { key: "spriteObelisk", x: 20.5, y: 40.4, w: 34, h: 54 }
   ],
   2: [
-    { key: "spriteStoneWall", x: 8, y: 11.1, w: 118, h: 58 },
-    { key: "spriteStoneWall", x: 36, y: 9.8, w: 118, h: 58 },
-    { key: "spriteObelisk", x: 16.4, y: 18.8, w: 36, h: 58 },
-    { key: "spriteObelisk", x: 42.6, y: 23.8, w: 40, h: 64 }
+    // Ashen Crypt (bespoke 90x60) — an enclosed dungeon of stone chambers. The
+    // Ashen Warden boss waits in the far east chamber; stone-wall slabs and
+    // obelisks dress the chambers (scenery only — corridors are walled by `#`).
+    { key: "spriteStoneWall", x: 14, y: 16.1, w: 118, h: 58 },
+    { key: "spriteStoneWall", x: 70, y: 40.8, w: 118, h: 58 },
+    { key: "spriteObelisk", x: 26.4, y: 13.8, w: 36, h: 58 },
+    { key: "spriteObelisk", x: 78.6, y: 19.8, w: 40, h: 64 },
+    { key: "spriteObelisk", x: 50.6, y: 47.8, w: 40, h: 64 }
   ],
   3: [
     { key: "spriteTree", x: 8.5, y: 10.4, w: 80, h: 104 },

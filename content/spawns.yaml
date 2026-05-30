@@ -6,15 +6,21 @@
 # trees    — manually placed composed trees (in addition to procedurally generated tile trees).
 
 monsters:
+  # Southgate Cemetery (90x60): skeletons/ghouls roam the fenced grave plots and
+  # the winding paths between them. (13,12) is the NW-plot skeleton the dodge/
+  # ranged e2e tests drop next to.
   - { type: skeleton,      at: { floor: 1, x: 13, y: 12 }, zone: cemetery }
-  - { type: ghoul,         at: { floor: 1, x: 31, y: 13 }, zone: cemetery }
-  - { type: skeleton,      at: { floor: 1, x: 18, y: 25 }, zone: cemetery }
-  - { type: ghoul,         at: { floor: 1, x: 38, y: 25 }, zone: cemetery }
-  - { type: skeleton,      at: { floor: 2, x: 13, y: 9  }, zone: crypt }
-  - { type: ghoul,         at: { floor: 2, x: 22, y: 23 }, zone: crypt }
-  - { type: skeleton,      at: { floor: 2, x: 33, y: 12 }, zone: crypt }
-  - { type: ghoul,         at: { floor: 2, x: 39, y: 24 }, zone: crypt }
-  - { type: boss,          at: { floor: 2, x: 43, y: 17 }, zone: crypt }
+  - { type: ghoul,         at: { floor: 1, x: 30, y: 22 }, zone: cemetery }
+  - { type: skeleton,      at: { floor: 1, x: 71, y: 24 }, zone: cemetery }
+  - { type: ghoul,         at: { floor: 1, x: 18, y: 48 }, zone: cemetery }
+  - { type: skeleton,      at: { floor: 1, x: 70, y: 49 }, zone: cemetery }
+  # The Ashen Crypt (90x60): undead lurk in the chambers; the Ashen Warden boss
+  # holds the far-east chamber.
+  - { type: skeleton,      at: { floor: 2, x: 10, y: 9  }, zone: crypt }
+  - { type: ghoul,         at: { floor: 2, x: 12, y: 34 }, zone: crypt }
+  - { type: skeleton,      at: { floor: 2, x: 31, y: 16 }, zone: crypt }
+  - { type: ghoul,         at: { floor: 2, x: 53, y: 31 }, zone: crypt }
+  - { type: boss,          at: { floor: 2, x: 76, y: 29 }, zone: crypt }
   # Northwood (90x60): the same roster spread thin across the expanded wood —
   # gentle critters near the Waystone arrival in the south, tougher greenskins
   # deeper north and out toward the marsh/badlands gates.

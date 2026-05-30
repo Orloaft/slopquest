@@ -42,7 +42,7 @@ const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
 };
 // Floors authored directly at the expanded size (their content is already
 // placed in expanded coordinates, so it must NOT be scaled again).
-const AUTHORED_AT_TARGET = new Set<number>([0, 3, 4, 5, 6, 7, 8, 9]);
+const AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
 export function floorCols(floor: number): number {
   return FLOOR_DIMS[floor]?.cols ?? MAP_COLS;
@@ -427,34 +427,112 @@ export function makeFloorTiles(floor: number): string[] {
   }
 
   if (floor === 1) {
-    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "g");
-    fillRect(rows, 23, 1, 5, 31, "c");
-    fillRect(rows, 5, 5, 40, 1, "q");
-    fillRect(rows, 5, 28, 40, 1, "q");
-    fillRect(rows, 5, 5, 1, 24, "q");
-    fillRect(rows, 44, 5, 1, 24, "q");
-    fillRect(rows, 23, 5, 5, 1, "c");
-    fillRect(rows, 23, 28, 5, 1, "c");
-    setTile(rows, 5, 16, "g");
-    setTile(rows, 44, 16, "g");
-    fillRect(rows, 25, 18, 1, 3, "c");
-    setTile(rows, 25, 2, "T");
-    setTile(rows, 25, 20, "C");
-    setTile(rows, 25, 32, "G"); // south-edge portal to the Sunken Desert (floor 7)
-    scatter(rows, "g", "h", 72, 21);
-    scatter(rows, "g", "r", 16, 22);
+    // Southgate Cemetery (bespoke 90x60) — a soft, melancholy graveyard of grave
+    // dirt (g) carved into fenced plots (q) by winding grave paths (c/b). The
+    // Crypt building broods at the centre with its entrance (C) on a cleared
+    // apron just below it; a mausoleum sits in the east. Headstones (h) and
+    // obelisks cluster against the fences. Skeletons/ghouls roam the dirt.
+    fillRect(rows, 1, 1, 88, 58, "g"); // grave-dirt base
+
+    // --- Fenced grave plots (q blocks; leave gateway gaps onto the paths). ---
+    // NW plot
+    fillRect(rows, 10, 9, 26, 1, "q");
+    fillRect(rows, 10, 26, 26, 1, "q");
+    fillRect(rows, 10, 9, 1, 18, "q");
+    fillRect(rows, 35, 9, 1, 18, "q");
+    fillRect(rows, 21, 26, 3, 1, "g"); // south gate
+    fillRect(rows, 35, 16, 1, 3, "g"); // east gate onto the spine
+    // NE plot (around the mausoleum)
+    fillRect(rows, 54, 9, 26, 1, "q");
+    fillRect(rows, 54, 27, 26, 1, "q");
+    fillRect(rows, 54, 9, 1, 19, "q");
+    fillRect(rows, 79, 9, 1, 19, "q");
+    fillRect(rows, 54, 16, 1, 3, "g"); // west gate onto the spine
+    fillRect(rows, 64, 27, 3, 1, "g"); // south gate
+    // SW plot
+    fillRect(rows, 8, 36, 24, 1, "q");
+    fillRect(rows, 8, 52, 24, 1, "q");
+    fillRect(rows, 8, 36, 1, 17, "q");
+    fillRect(rows, 31, 36, 1, 17, "q");
+    fillRect(rows, 19, 36, 3, 1, "g"); // north gate
+    fillRect(rows, 31, 43, 1, 3, "g"); // east gate
+    // SE plot
+    fillRect(rows, 56, 38, 26, 1, "q");
+    fillRect(rows, 56, 54, 26, 1, "q");
+    fillRect(rows, 56, 38, 1, 17, "q");
+    fillRect(rows, 81, 38, 1, 17, "q");
+    fillRect(rows, 56, 45, 1, 3, "g"); // west gate
+    fillRect(rows, 67, 38, 3, 1, "g"); // north gate
+
+    // --- Winding grave paths (the spine: T north -> crypt -> G south). ---
+    fillRect(rows, 44, 1, 3, 7, "c"); // from the north gate
+    fillRect(rows, 39, 7, 8, 3, "c"); // bend west
+    fillRect(rows, 39, 9, 3, 10, "c"); // drop south
+    fillRect(rows, 39, 16, 18, 3, "c"); // cross east past the crypt's west flank
+    fillRect(rows, 49, 18, 3, 5, "b"); // dip toward the crypt apron
+    fillRect(rows, 41, 29, 12, 3, "c"); // crypt-entrance apron (C sits here, just below the footprint)
+    fillRect(rows, 44, 31, 3, 10, "c"); // drop south from the apron
+    fillRect(rows, 36, 39, 14, 3, "c"); // bend west
+    fillRect(rows, 36, 41, 3, 12, "c"); // continue south
+    fillRect(rows, 36, 50, 12, 3, "b"); // bend back east
+    fillRect(rows, 45, 50, 3, 9, "c"); // down to the south gate (G)
+
+    // A connecting walk linking the two western plot gates to the spine.
+    fillRect(rows, 22, 28, 3, 9, "b");
+    fillRect(rows, 22, 34, 18, 3, "b");
+
+    // Portals.
+    setTile(rows, 45, 1, "T"); // north edge -> Waystone (floor 0)
+    setTile(rows, 46, 30, "C"); // crypt entrance -> the Ashen Crypt (floor 2)
+    setTile(rows, 46, 58, "G"); // south edge -> the Sunken Desert (floor 7)
+
+    // Headstones (decoration) and mossy rocks, scattered across the dirt.
+    scatter(rows, "g", "h", 150, 21);
+    scatter(rows, "g", "r", 22, 22);
   }
 
   if (floor === 2) {
-    fillRect(rows, 3, 3, MAP_COLS - 6, MAP_ROWS - 6, "c");
-    fillRect(rows, 3, 3, 10, 8, "d");
-    fillRect(rows, 31, 9, 16, 16, "b");
-    fillRect(rows, 25, 14, 7, 5, "c");
-    fillRect(rows, 18, 5, 4, 17, "#");
-    fillRect(rows, 12, 25, 21, 3, "#");
-    setTile(rows, 6, 6, "T");
-    scatter(rows, "c", "r", 26, 4);
-    scatter(rows, "b", "r", 12, 5);
+    // The Ashen Crypt (bespoke 90x60) — a claustrophobic enclosed dungeon. Solid
+    // rock (#, blocks move + sight) fills the bulk; tight crypt-stone corridors
+    // (c) and chamber floors (b/d) are carved out as a maze of linked chambers.
+    // The Ashen Warden boss waits in the far east chamber. T returns to the
+    // cemetery from the entry chamber.
+    fillRect(rows, 0, 0, 90, 60, "#"); // solid rock bulk
+
+    // --- Entry chamber (NW) — T arrives here. ---
+    fillRect(rows, 4, 4, 14, 11, "d");
+    setTile(rows, 6, 6, "T"); // -> back to the cemetery (floor 1)
+
+    // --- Corridor south out of the entry chamber, then east. ---
+    fillRect(rows, 9, 15, 3, 12, "c"); // drop south
+    fillRect(rows, 9, 24, 20, 3, "c"); // run east
+
+    // --- West-central chamber. ---
+    fillRect(rows, 6, 29, 14, 12, "b");
+    fillRect(rows, 11, 27, 3, 3, "c"); // link up to the east-running corridor
+    fillRect(rows, 10, 41, 3, 10, "c"); // corridor south
+    fillRect(rows, 10, 49, 22, 3, "c"); // run east along the south
+
+    // --- Corridor north-east from the east-running corridor into mid chamber. ---
+    fillRect(rows, 26, 18, 3, 9, "c"); // climb north
+    fillRect(rows, 24, 14, 16, 6, "b"); // mid-north chamber
+    fillRect(rows, 37, 19, 3, 10, "c"); // drop south out of the mid chamber
+    fillRect(rows, 37, 28, 16, 3, "c"); // run east
+
+    // --- Central junction chamber. ---
+    fillRect(rows, 48, 26, 12, 12, "d");
+    fillRect(rows, 53, 38, 3, 12, "c"); // corridor south
+    fillRect(rows, 30, 49, 26, 3, "c"); // long south corridor links to the SW corridor
+    fillRect(rows, 58, 30, 12, 3, "c"); // corridor east toward the boss
+
+    // --- Boss chamber (far east) — the Ashen Warden. ---
+    fillRect(rows, 68, 22, 18, 16, "b");
+    fillRect(rows, 70, 38, 3, 9, "c"); // a southern back-passage into the chamber
+    fillRect(rows, 56, 45, 16, 3, "c"); // link the back-passage to the south corridor
+
+    scatter(rows, "c", "r", 30, 4);
+    scatter(rows, "b", "r", 14, 5);
+    scatter(rows, "d", "r", 8, 6);
   }
 
   if (floor === 3) {
@@ -842,10 +920,10 @@ function portalForRaw(floor: number, x: number, y: number): Portal | null {
   const ty = Math.floor(y);
   const tile = tileAt(floor, tx, ty);
   if (floor === 0 && tile === "N") return { floor: 3, x: 45.5, y: 57.5 };
-  if (floor === 0 && tile === "S") return { floor: 1, x: 25.5, y: 3.5 };
+  if (floor === 0 && tile === "S") return { floor: 1, x: 45.5, y: 2.5 }; // arrive just inside the cemetery's north gate
   if (floor === 1 && tile === "T") return { floor: 0, x: 52.5, y: 55.5 }; // arrive at Waystone's south gate
-  if (floor === 1 && tile === "C") return { floor: 2, x: 6.5, y: 6.5 };
-  if (floor === 2 && tile === "T") return { floor: 1, x: 25.5, y: 21.5 };
+  if (floor === 1 && tile === "C") return { floor: 2, x: 7.5, y: 6.5 }; // arrive in the crypt's entry chamber
+  if (floor === 2 && tile === "T") return { floor: 1, x: 46.5, y: 31.5 }; // arrive on the cemetery's crypt-entrance apron
   if (floor === 3 && tile === "S") return { floor: 0, x: 45.5, y: 4.5 }; // arrive at Waystone's north gate
   if (floor === 3 && tile === "N") return { floor: 4, x: 45.5, y: 50.5 }; // arrive at Northwatch's south gate
   if (floor === 3 && tile === "M") return { floor: 5, x: 48.5, y: 16.5 };
@@ -856,7 +934,7 @@ function portalForRaw(floor: number, x: number, y: number): Portal | null {
   if (floor === 6 && tile === "D") return { floor: 3, x: 87.5, y: 29.5 };
   if (floor === 6 && tile === "Z") return { floor: 4, x: 22.5, y: 30.5 }; // one-way drop just inside Northwatch's west gate
   if (floor === 1 && tile === "G") return { floor: 7, x: 24.5, y: 3.5 };
-  if (floor === 7 && tile === "G") return { floor: 1, x: 25.5, y: 30.5 };
+  if (floor === 7 && tile === "G") return { floor: 1, x: 46.5, y: 57.5 }; // arrive just inside the cemetery's south gate
   if (floor === 7 && tile === "H") return { floor: 0, x: 62.5, y: 29.5 }; // one-way passage into eastern Waystone
   if (floor === 7 && tile === "Y") return { floor: 8, x: 25.5, y: 2.5 };
   if (floor === 8 && tile === "Y") return { floor: 7, x: 2.5, y: 32.5 };

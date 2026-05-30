@@ -10,11 +10,11 @@ test("a hunting bow fires ranged attacks that train the Ranged skill", async ({ 
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
 
-  // Drop onto a cemetery skeleton (the southern one, which the class-abilities
-  // nova test never touches) with a bow in hand.
+  // Drop into the cemetery's NW grave plot, a few tiles from its skeleton
+  // (clear LOS across the grave dirt inside the same fenced plot), bow in hand.
   await page.evaluate((p) => {
     window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "hunting_bow", qty: 1 }], floor: 1, x: p.x, y: p.y });
-  }, { x: scaleX(1, 18), y: scaleY(1, 25) });
+  }, { x: scaleX(1, 15.5), y: scaleY(1, 13.5) });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
     return Boolean(me && me.floor === 1 && (me.inventory ?? []).some((i) => i?.id === "hunting_bow"));
