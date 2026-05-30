@@ -285,6 +285,8 @@ const MONSTER_ATTACK_ANIM_MS = 480;
 const TREE_SNAPSHOT_EVERY = positiveIntEnv("TIB_TREE_SNAPSHOT_EVERY", E2E_TEST ? 5 : 10);
 const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 80);
 const SOCKET_BACKPRESSURE_BYTES = 512 * 1024;
+const WS_COMPRESSION = process.env.TIB_WS_COMPRESSION === "1" || (!E2E_TEST && process.env.TIB_WS_COMPRESSION !== "0");
+const WS_COMPRESSION_THRESHOLD = positiveIntEnv("TIB_WS_COMPRESSION_THRESHOLD", 1024);
 mkdirSync(DATA_DIR, { recursive: true });
 mkdirSync(PLAYER_DIR, { recursive: true });
 
@@ -338,7 +340,17 @@ spawnTreeNodes();
 spawnHerbNodes();
 rebuildStaticSpatialIndex();
 
-const wss = new WebSocketServer({ port: PORT });
+const wss = new WebSocketServer({
+  port: PORT,
+  perMessageDeflate: WS_COMPRESSION
+    ? {
+        clientNoContextTakeover: true,
+        concurrencyLimit: 8,
+        serverNoContextTakeover: true,
+        threshold: WS_COMPRESSION_THRESHOLD
+      }
+    : false
+});
 console.log(`Waystone server listening on ws://0.0.0.0:${PORT}`);
 
 wss.on("connection", (rawSocket: WebSocket) => {
