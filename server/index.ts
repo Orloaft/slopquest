@@ -269,7 +269,7 @@ function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; 
   player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
 
   clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now() });
-  socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5] }));
+  socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5, 6] }));
   event("system", `${player.name} entered the world.`);
 }
 
@@ -391,7 +391,7 @@ function updatePlayers(dt: number, now: number): void {
     const hasMoveVector = Math.hypot(Number(input.moveX), Number(input.moveY)) > 0.01;
     let dx = hasMoveVector ? Number(input.moveX) : Number(input.right) - Number(input.left);
     let dy = hasMoveVector ? Number(input.moveY) : Number(input.down) - Number(input.up);
-    if (dx || dy) {
+    if ((dx || dy) && !isStunned(player)) {
       player.action = null;
       const length = Math.hypot(dx, dy);
       dx /= length;
@@ -434,6 +434,23 @@ function updateMonsters(dt: number, now: number): void {
     }
     const catalog = MONSTERS[monster.type];
     if (!catalog) continue;
+
+    // Hidden burrower (Dust Burrower): inert and invisible until a player steps
+    // adjacent, then it bursts out for heavy damage + a stun.
+    if (monster.hidden) {
+      const victim = nearestPlayer(monster, 1.3);
+      if (victim && !victim.dead && !isSafeZone(victim.floor, victim.x, victim.y)) {
+        monster.hidden = false;
+        monster.lastAttack = now;
+        const burst = Math.max(1, roll(catalog.damage) - armorReduction(victim));
+        event("effect", "hit", monster.x, monster.y, monster.floor, "#d9a441", monster.id, victim.id);
+        event("float", "Ambush!", monster.x, monster.y - 0.6, monster.floor, "#f0b24a");
+        damagePlayer(victim, burst, catalog.name);
+        if (catalog.stunMs) applyPlayerStun(victim, catalog.stunMs);
+      }
+      continue; // stays buried (and unrendered) until triggered
+    }
+
     tickMonsterStatus(monster, now);
     if (monster.deadUntil) continue; // burn may have killed it this tick
 
@@ -443,6 +460,21 @@ function updateMonsters(dt: number, now: number): void {
       const taunter = playerById(monster.tauntBy);
       if (taunter && !taunter.dead && taunter.floor === monster.floor && !isSafeZone(taunter.floor, taunter.x, taunter.y)) {
         target = taunter;
+      }
+    }
+    // Pack alert: honor a partner's call even if the player is out of aggro range.
+    if (!target && monster.alertUntil && now < monster.alertUntil && monster.alertTarget) {
+      const ally = playerById(monster.alertTarget);
+      if (ally && !ally.dead && ally.floor === monster.floor && !isSafeZone(ally.floor, ally.x, ally.y)) target = ally;
+    }
+    // Pack hunters: an aggroed member alerts nearby same-type members to the kill.
+    if (catalog.pack && target && !isSafeZone(target.floor, target.x, target.y)) {
+      for (const other of monsters.values()) {
+        if (other === monster || other.deadUntil || other.hidden || other.type !== monster.type || other.floor !== monster.floor) continue;
+        if (distance(monster, other) <= 8) {
+          other.alertUntil = now + 5000;
+          other.alertTarget = target.id;
+        }
       }
     }
     if (!target || isSafeZone(target.floor, target.x, target.y)) {
@@ -517,6 +549,7 @@ function playerById(id: string): ServerPlayer | null {
 }
 
 function autoAttack(player: ServerPlayer, now: number): void {
+  if (isStunned(player)) return;
   const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
   if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
   const spec = ADVENTURER;
@@ -542,7 +575,7 @@ function autoAttack(player: ServerPlayer, now: number): void {
 }
 
 function useAbility(player: ServerPlayer): void {
-  if (player.dead) return;
+  if (player.dead || isStunned(player)) return;
   const now = performance.now();
   const spec = ADVENTURER;
   const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
@@ -606,7 +639,7 @@ function dashPlayer(player: ServerPlayer, tiles: number): void {
 }
 
 function useClassAbility(player: ServerPlayer, id: string): void {
-  if (player.dead) return;
+  if (player.dead || isStunned(player)) return;
   const spec = ABILITIES[id];
   if (!spec) return;
   const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
@@ -787,11 +820,13 @@ function useClassAbility(player: ServerPlayer, id: string): void {
 }
 
 function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: number, kind: string): void {
-  monster.hp = clamp(monster.hp - damage, 0, monster.maxHp);
+  const armor = MONSTERS[monster.type]?.armor ?? 0;
+  const dealt = Math.max(1, damage - armor);
+  monster.hp = clamp(monster.hp - dealt, 0, monster.maxHp);
   // Taking damage shatters a freeze (per Frost Nova design).
   if (monster.freezeUntil) monster.freezeUntil = 0;
   event("effect", kind, monster.x, monster.y, monster.floor, null, player.id, monster.id, { fromX: player.x, fromY: player.y });
-  event("hit", damage, monster.x, monster.y - 0.45, monster.floor, kind === "flare" ? "#8fd8ff" : "#ffd166", player.id, monster.id);
+  event("hit", dealt, monster.x, monster.y - 0.45, monster.floor, kind === "flare" ? "#8fd8ff" : "#ffd166", player.id, monster.id);
   if (monster.hp > 0) return;
 
   const catalog = MONSTERS[monster.type];
@@ -1811,7 +1846,8 @@ function spawnMonster(spawn: MonsterSpawn): void {
     homeY: spawn.y + 0.5,
     zone: spawn.zone ?? zoneAt(spawn.floor, spawn.x + 0.5, spawn.y + 0.5),
     wanderTarget: null,
-    wanderNextAt: performance.now() + roll([800, 2800])
+    wanderNextAt: performance.now() + roll([800, 2800]),
+    hidden: catalog.burrow === true
   };
   monsters.set(monster.id, monster);
 }
@@ -1833,6 +1869,9 @@ function respawnMonster(monster: ServerMonster): void {
   monster.freezeUntil = 0;
   monster.burnUntil = 0;
   monster.inaccurateUntil = 0;
+  monster.alertUntil = 0;
+  monster.alertTarget = undefined;
+  monster.hidden = catalog.burrow === true; // re-bury ambushers
 }
 
 function wanderMonster(monster: ServerMonster, catalog: { speed: number }, dt: number, now: number): void {
@@ -1939,7 +1978,7 @@ function buildSnapshotFor(viewer: ServerPlayer): StateSnapshot {
 
   const visibleMonsters: MonsterView[] = [];
   for (const monster of querySpatial(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)) {
-    if (monster.deadUntil || !inInterestRange(viewer, monster)) continue;
+    if (monster.deadUntil || monster.hidden || !inInterestRange(viewer, monster)) continue;
     visibleMonsters.push(serializeMonster(monster));
   }
 
@@ -2175,7 +2214,8 @@ function serializeBuffs(player: ServerPlayer): BuffsView {
     secondWind: Math.max(0, Math.round((player.abilityBuffs?.second_wind?.until ?? 0) - now)),
     ironClad: Math.max(0, Math.round((player.abilityBuffs?.ironClad?.until ?? 0) - now)),
     fleetFoot: Math.max(0, Math.round((player.abilityBuffs?.fleetFoot?.until ?? 0) - now)),
-    slowed: Math.max(0, Math.round((player.slowUntil ?? 0) - now))
+    slowed: Math.max(0, Math.round((player.slowUntil ?? 0) - now)),
+    stunned: Math.max(0, Math.round((player.stunUntil ?? 0) - now))
   };
 }
 
@@ -2500,6 +2540,15 @@ function applyPlayerSlow(player: ServerPlayer, pct: number, ms: number): void {
   player.slowUntil = performance.now() + ms;
   player.slowMult = Math.max(0.2, 1 - pct / 100);
   event("float", "Slowed!", player.x, player.y - 0.55, player.floor, "#9ad36b");
+}
+
+function applyPlayerStun(player: ServerPlayer, ms: number): void {
+  player.stunUntil = performance.now() + ms;
+  event("float", "Stunned!", player.x, player.y - 0.55, player.floor, "#f0c84a");
+}
+
+function isStunned(player: ServerPlayer): boolean {
+  return Boolean(player.stunUntil && performance.now() < player.stunUntil);
 }
 
 function carriedWeight(player: ServerPlayer): number {

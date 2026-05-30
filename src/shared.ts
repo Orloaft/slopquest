@@ -84,7 +84,8 @@ export const ZONES: Record<ZoneId, Zone> = {
   crypt: { id: "crypt", label: "Ashen Crypt", floor: 2, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   woods: { id: "woods", label: "Northwood", floor: 3, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   northTown: { id: "northTown", label: "Northwatch", floor: 4, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
-  marsh: { id: "marsh", label: "The Sunken Marsh", floor: 5, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 }
+  marsh: { id: "marsh", label: "The Sunken Marsh", floor: 5, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
+  badlands: { id: "badlands", label: "The Searing Badlands", floor: 6, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 }
 };
 const FLOOR_TILE_CACHE = new Map<number, string[]>();
 
@@ -369,8 +370,37 @@ export function makeFloorTiles(floor: number): string[] {
     setTile(rows, 25, 31, "S");
     setTile(rows, 25, 2, "N");
     setTile(rows, 1, 17, "M"); // west-edge portal to the Sunken Marsh (floor 5)
+    setTile(rows, 50, 16, "D"); // east-edge portal to the Searing Badlands (floor 6)
     scatter(rows, "F", "f", 220, 31);
     scatter(rows, "F", "r", 48, 32);
+  }
+
+  if (floor === 6) {
+    // The Searing Badlands: a rust massif of cliff walls carved into winding
+    // canyon floors, with a high terrace over a pit gap and a frontier camp east.
+    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "X"); // cliff massif (impassable)
+    // West entry ravine + portal back to the forest.
+    fillRect(rows, 2, 14, 9, 6, "R");
+    setTile(rows, 1, 16, "D");
+    // Main winding ravine west -> east (kept clear of pits).
+    fillRect(rows, 9, 15, 13, 4, "R"); // lower-west run
+    fillRect(rows, 18, 8, 4, 11, "R"); // north turn
+    fillRect(rows, 18, 8, 14, 4, "R"); // upper run
+    fillRect(rows, 28, 8, 4, 13, "R"); // south turn
+    fillRect(rows, 28, 18, 14, 4, "R"); // lower-east run
+    fillRect(rows, 38, 9, 4, 11, "R"); // north turn to camp
+    fillRect(rows, 38, 6, 11, 8, "R"); // Frontier Camp clearing
+    setTile(rows, 46, 8, "Z"); // cliff ledge -> western Northwatch (one-way)
+    // Dead-end canyon with copper ore, off the lower-west run.
+    fillRect(rows, 3, 21, 8, 4, "R");
+    fillRect(rows, 5, 19, 3, 2, "R"); // connector
+    // High-ground terrace (ranged vantage) reached by a ramp, over a pit gap.
+    fillRect(rows, 23, 23, 8, 4, "R"); // terrace
+    fillRect(rows, 30, 22, 2, 2, "A"); // ramp up from the lower-east run
+    fillRect(rows, 24, 21, 7, 2, "P"); // pit gap below the upper run (LOS-open)
+    // Pit hazards in canyon floors (block movement, not sight).
+    setTile(rows, 23, 9, "P");
+    setTile(rows, 33, 20, "P");
   }
 
   if (floor === 5) {
@@ -429,21 +459,25 @@ export function tileAt(floor: number, tx: number, ty: number): string {
 
 export function isBlockedTile(tile: string): boolean {
   return (
-    tile === "#" || tile === "~" || tile === "W" || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o"
+    tile === "#" || tile === "~" || tile === "W" || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o" ||
+    tile === "X" || tile === "P" // badlands cliff wall + pit
   );
 }
 
 // Blocks line-of-sight for ranged attacks. Solid terrain (walls, boulders,
-// buildings, trees, fences) blocks sight; open water does NOT — so projectiles
-// skim over swamp water while boulders give cover.
+// buildings, trees, fences, cliffs) blocks sight; open water and pit chasms do
+// NOT — so projectiles skim over swamp water / badlands pits, while boulders and
+// cliffs give cover.
 export function isSightBlocked(tile: string): boolean {
-  return tile === "#" || tile === "o" || tile === "O" || tile === "f" || tile === "r" || tile === "q";
+  return tile === "#" || tile === "o" || tile === "O" || tile === "f" || tile === "r" || tile === "q" || tile === "X";
 }
 
 export function isSafeZone(floor: number, x: number, y: number): boolean {
   if (floor === 0 || floor === 4) return true;
   // The Alchemist's Hut clearing in the Sunken Marsh is a safe rest spot.
   if (floor === 5 && x >= 3 && x <= 13 && y >= 5 && y <= 15) return true;
+  // The Frontier Camp clearing in the Searing Badlands.
+  if (floor === 6 && x >= 38 && x <= 49 && y >= 6 && y <= 14) return true;
   return false;
 }
 
@@ -470,6 +504,9 @@ export function portalFor(floor: number, x: number, y: number): Portal | null {
   if (floor === 4 && tile === "S") return { floor: 3, x: 25.5, y: 3.5 };
   if (floor === 5 && tile === "M") return { floor: 3, x: 2.5, y: 17.5 };
   if (floor === 5 && tile === "L") return { floor: 0, x: 25.5, y: 4.5 }; // one-way drop into Waystone
+  if (floor === 3 && tile === "D") return { floor: 6, x: 3.5, y: 16.5 };
+  if (floor === 6 && tile === "D") return { floor: 3, x: 49.5, y: 16.5 };
+  if (floor === 6 && tile === "Z") return { floor: 4, x: 6.5, y: 16.5 }; // one-way drop into Northwatch
   return null;
 }
 

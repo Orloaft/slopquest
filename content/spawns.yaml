@@ -45,6 +45,14 @@ monsters:
   - { type: mire_spitter,  at: { floor: 5, x: 32, y: 12 }, zone: marsh }
   - { type: mire_spitter,  at: { floor: 5, x: 24, y: 19 }, zone: marsh }
   - { type: mire_spitter,  at: { floor: 5, x: 12, y: 16 }, zone: marsh }
+  # The Searing Badlands (floor 6): scavengers patrol in pairs (pack aggro);
+  # dust burrowers lie hidden until a player steps on them.
+  - { type: canyon_scavenger, at: { floor: 6, x: 12, y: 16 }, zone: badlands }
+  - { type: canyon_scavenger, at: { floor: 6, x: 14, y: 17 }, zone: badlands }
+  - { type: canyon_scavenger, at: { floor: 6, x: 32, y: 19 }, zone: badlands }
+  - { type: canyon_scavenger, at: { floor: 6, x: 34, y: 20 }, zone: badlands }
+  - { type: dust_burrower,    at: { floor: 6, x: 20, y: 10 }, zone: badlands }
+  - { type: dust_burrower,    at: { floor: 6, x: 30, y: 19 }, zone: badlands }
 
 trees:
   - { type: oak,  at: { floor: 0, x: 12.8, y: 10.7 } }

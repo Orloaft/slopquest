@@ -33,6 +33,7 @@ export interface BuffsView {
   ironClad: number;
   fleetFoot: number;
   slowed: number;
+  stunned: number;
 }
 
 export interface InventoryItemView {

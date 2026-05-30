@@ -19,3 +19,19 @@
   kind: iron
   at: { floor: 0, x: 22.5, y: 17.5 }
   approach: { x: 20.5, y: 17.5 }
+
+# Copper veins in the Searing Badlands dead-end canyon (floor 6).
+- id: mine-6-2-22
+  kind: copper
+  at: { floor: 6, x: 2.5, y: 22.5 }
+  approach: { x: 3.5, y: 22.5 }
+
+- id: mine-6-2-23
+  kind: copper
+  at: { floor: 6, x: 2.5, y: 23.5 }
+  approach: { x: 3.5, y: 23.5 }
+
+- id: mine-6-11-22
+  kind: iron
+  at: { floor: 6, x: 11.5, y: 22.5 }
+  approach: { x: 10.5, y: 22.5 }

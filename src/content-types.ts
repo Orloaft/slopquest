@@ -17,7 +17,7 @@ export type SkillId =
   | "ranged"
   | "foraging";
 
-export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown" | "marsh";
+export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown" | "marsh" | "badlands";
 
 export type Capability = "chop_tree" | "fish" | "mine" | "ranged";
 
@@ -69,6 +69,14 @@ export interface Monster {
   ranged?: boolean;
   slowPct?: number;
   slowMs?: number;
+  // Flat damage reduction on incoming hits (armored monsters).
+  armor?: number;
+  // Pack hunters: aggroing alerts nearby same-type monsters to the same target.
+  pack?: boolean;
+  // Ambushers: hidden underground until a player steps adjacent, then burst for
+  // damage + a stun (stunMs).
+  burrow?: boolean;
+  stunMs?: number;
 }
 
 export interface QuestDrop {

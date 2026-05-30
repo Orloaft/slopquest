@@ -48,6 +48,10 @@ interface RawMonster {
   ranged?: boolean;
   slowPct?: number;
   slowMs?: number;
+  armor?: number;
+  pack?: boolean;
+  burrow?: boolean;
+  stunMs?: number;
   drops?: Array<{ item?: string; chance?: number }>;
 }
 
@@ -135,7 +139,7 @@ const itemIds = new Set(items.map((i) => i.id));
 const monsterIds = new Set(monsters.map((m) => m.id));
 const treeTypeIds = new Set(treeTypes.map((t) => t.id));
 const npcIdsByRole = new Map(npcs.map((n) => [n.id, n.role]));
-const zoneIds = new Set(["southTown", "cemetery", "crypt", "woods", "northTown", "marsh"]);
+const zoneIds = new Set(["southTown", "cemetery", "crypt", "woods", "northTown", "marsh", "badlands"]);
 const useKinds = new Set(["eat", "light_fire", "cook_on_fire", "drink_potion"]);
 const capabilityIds = new Set(["chop_tree", "fish", "mine", "ranged"]);
 const questKinds = new Set(["kill", "gather", "fetch"]);
@@ -316,6 +320,10 @@ const MONSTERS = Object.fromEntries(
     if (m.ranged) entry["ranged"] = true;
     if (m.slowPct != null) entry["slowPct"] = m.slowPct;
     if (m.slowMs != null) entry["slowMs"] = m.slowMs;
+    if (m.armor != null) entry["armor"] = m.armor;
+    if (m.pack) entry["pack"] = true;
+    if (m.burrow) entry["burrow"] = true;
+    if (m.stunMs != null) entry["stunMs"] = m.stunMs;
     return [m.id, entry];
   })
 );

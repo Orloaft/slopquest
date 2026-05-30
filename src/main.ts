@@ -503,6 +503,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("graveyardTiles", "/graveyardtiles.png");
   this.load.image("darkForestTiles", "/dark-forest-tiles.png");
   this.load.image("swampTiles", "/swamp-tiles.png");
+  this.load.image("badlandsTiles", "/badlands-tiles.png");
   this.load.image("effectsSheet", "/effects.png");
   this.load.image("waterFishingSpots", "/water-fishing-spots.png");
   this.load.image("oreNodeSheet", "/ore-rock-gathering-nodes.png");
@@ -565,6 +566,15 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "swampTiles", "spriteSwampBoulder", 1150, 392, 62, 50);
   makeSpriteTexture(this, "swampTiles", "spriteMireLotus", 820, 388, 38, 36);
   makeSpriteTexture(this, "swampTiles", "spriteCliffLedge", 714, 958, 70, 58);
+  // Searing Badlands (floor 6). Crops from assetsources/rejected/badlands-biome-tiles-01.png
+  // (1536x1024, magenta-keyed) — rust ground/rock/cliff/pit/ramp tiles + a frontier tent.
+  makeTileTexture(this, "badlandsTiles", "tileBadlands", 18, 99, 70, 74);
+  makeTileTexture(this, "badlandsTiles", "tileBadlandsRock", 180, 99, 73, 74);
+  makeTileTexture(this, "badlandsTiles", "tileCliff", 528, 100, 68, 82);
+  makeTileTexture(this, "badlandsTiles", "tilePit", 1346, 188, 72, 70);
+  makeTileTexture(this, "badlandsTiles", "tileRamp", 392, 864, 68, 80);
+  makeSpriteTexture(this, "badlandsTiles", "spriteTent", 1070, 873, 92, 72);
+  makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsLedge", 20, 862, 72, 86);
 
   mapLayer = this.add.container(0, 0);
   entityLayer = this.add.container(0, 0);
@@ -1249,6 +1259,7 @@ function renderBuffTracker(buffs: Partial<BuffsView> = {}): void {
   if ((buffs.ironClad ?? 0) > 0) active.push(`Iron Clad ${Math.ceil((buffs.ironClad ?? 0) / 1000)}s`);
   if ((buffs.fleetFoot ?? 0) > 0) active.push(`Fleet Foot ${Math.ceil((buffs.fleetFoot ?? 0) / 1000)}s`);
   if ((buffs.slowed ?? 0) > 0) active.push(`Slowed ${Math.ceil((buffs.slowed ?? 0) / 1000)}s`);
+  if ((buffs.stunned ?? 0) > 0) active.push(`Stunned ${Math.ceil((buffs.stunned ?? 0) / 1000)}s`);
   dom.buffTracker.textContent = active.join(" | ");
   dom.buffTracker.classList.toggle("hidden", !active.length);
 }
@@ -2700,7 +2711,8 @@ function addTileDecorations(rows: string[]): void {
       if (tile === "q") decorations.push({ key: "spriteFence", x: x + 0.5, y: y + 0.78, w: 46, h: 24 });
       if (tile === "o") decorations.push({ key: "spriteSwampBoulder", x: x + 0.5, y: y + 0.85, w: 44, h: 36 });
       if (tile === "L") decorations.push({ key: "spriteCliffLedge", x: x + 0.5, y: y + 0.95, w: 52, h: 44 });
-      if (["N", "S", "T", "C", "M", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
+      if (tile === "Z") decorations.push({ key: "spriteBadlandsLedge", x: x + 0.5, y: y + 0.95, w: 54, h: 50 });
+      if (["N", "S", "T", "C", "M", "D", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
     }
   }
   decorations.sort((a, b) => a.y - b.y).forEach(placeMapSprite);
@@ -2775,13 +2787,22 @@ function addComposedMapObjects(floor: number): void {
     { key: "spriteSwampBoulder", x: 44.6, y: 19.2, w: 44, h: 36 }
   ];
 
+  const badlandsObjects: DecorationSprite[] = [
+    { key: "spriteTent", x: 43.5, y: 9.6, w: 110, h: 86 }, // Frontier Camp
+    { key: "spriteCampfire", x: 45.5, y: 11.4, w: 54, h: 54 },
+    { key: "spriteBarrels", x: 41.5, y: 8.4, w: 54, h: 42 },
+    { key: "spriteSwampBoulder", x: 12.5, y: 23.2, w: 44, h: 36 },
+    { key: "spriteSwampBoulder", x: 34.5, y: 11.2, w: 40, h: 34 }
+  ];
+
   const objectsByFloor: Record<number, DecorationSprite[]> = {
     0: southTownObjects,
     1: cemeteryObjects,
     2: cryptObjects,
     3: woodsObjects,
     4: northTownObjects,
-    5: marshObjects
+    5: marshObjects,
+    6: badlandsObjects
   };
   const objects = objectsByFloor[floor] ?? [];
   objects
@@ -3408,7 +3429,14 @@ function minimapTileColor(tile: string): string {
     B: "#6e5836", // wooden bridge
     o: "#5d6452", // boulder (blocked)
     M: "#d6ad4e", // marsh portal (landmark)
-    L: "#c8a86a" // cliff ledge (landmark)
+    L: "#c8a86a", // cliff ledge (landmark)
+    R: "#b5703a", // badlands ground
+    J: "#9a5e30", // badlands rock
+    X: "#5c3320", // cliff wall (blocked)
+    P: "#140f0d", // pit chasm (blocked, sight-open)
+    A: "#c98a4a", // ramp
+    D: "#d6ad4e", // badlands portal (landmark)
+    Z: "#e0c070" // badlands ledge (landmark)
   };
   return colors[tile] ?? "#3f6b3a";
 }
@@ -3598,7 +3626,14 @@ function tileBaseTexture(tile: string): string {
     B: "tileBridge",
     o: "tileMarsh",
     M: "tileSwampDirt",
-    L: "tileSwampDirt"
+    L: "tileSwampDirt",
+    R: "tileBadlands",
+    J: "tileBadlandsRock",
+    X: "tileCliff",
+    P: "tilePit",
+    A: "tileRamp",
+    D: "tileBadlands",
+    Z: "tileBadlands"
   };
   return map[tile] ?? "tileGrass";
 }

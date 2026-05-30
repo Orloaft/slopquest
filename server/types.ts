@@ -88,6 +88,8 @@ export interface ServerPlayer {
   // Movement slow (e.g. from a Mire Spitter); cleared by Fleet Foot.
   slowUntil?: number;
   slowMult?: number;
+  // Stun (e.g. from a Dust Burrower ambush): no move/act briefly.
+  stunUntil?: number;
   // E2E-only: when set, the player always dodges incoming hits (deterministic
   // testing of the dodge mechanic). Never set outside E2E_TEST.
   forceDodge?: boolean;
@@ -121,6 +123,10 @@ export interface ServerMonster {
   burnNextAt?: number;
   burnBy?: string;
   inaccurateUntil?: number;
+  // Badlands: hidden burrower (invisible until it ambushes) and pack-alert state.
+  hidden?: boolean;
+  alertUntil?: number;
+  alertTarget?: string;
 }
 
 export interface Corpse {
