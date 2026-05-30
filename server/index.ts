@@ -309,6 +309,7 @@ const npcsByCell = new Map<string, Set<NpcRuntime>>();
 let spatial: SpatialIndex = createSpatialIndex();
 let staticSpatial: StaticSpatialIndex = createStaticSpatialIndex();
 const publicPlayerViewCache = new Map<string, PlayerView>();
+const playerViewSignatureCache = new WeakMap<PlayerView, number>();
 const privatePlayerViewCache = new WeakMap<ServerPlayer, PlayerPrivateViewCache>();
 const activeRegionCache = new WeakMap<ServerPlayer, ActiveRegionCache>();
 const resourceRespawns = new MinHeap<ResourceRespawn>((a, b) => a.at - b.at);
@@ -531,8 +532,11 @@ function createPlayer(name: string): ServerPlayer {
     foodRegenUntil: 0,
     inventory: createInventory(),
     carriedWeight: 0,
+    inventoryRevision: 0,
     quests: createQuestState(),
+    questRevision: 0,
     skills: createSkillState(),
+    skillRevision: 0,
     online: false,
     targetId: null,
     lastAttack: 0,
@@ -542,7 +546,8 @@ function createPlayer(name: string): ServerPlayer {
     action: null,
     portalReadyAt: 0,
     dead: false,
-    unlockedClasses: []
+    unlockedClasses: [],
+    classesRevision: 0
   };
 }
 
@@ -563,6 +568,10 @@ function hydratePlayer(saved: SavedPlayer): ServerPlayer {
   player.quests = normalizeQuestState(player.quests);
   player.inventory = normalizeInventory(player.inventory);
   refreshCarriedWeight(player);
+  player.inventoryRevision = 0;
+  player.questRevision = 0;
+  player.skillRevision = 0;
+  player.classesRevision = 0;
   player.wellFedUntil = Number(player.wellFedUntil ?? 0);
   player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
   return player;
@@ -1346,6 +1355,7 @@ function trainWithNpc(player: ServerPlayer, npc: NpcRuntime): void {
     return;
   }
   player.unlockedClasses.push(unlock.key);
+  markClassesChanged(player);
   persistPlayer(player);
   eventDialogue(player, [
     { speaker: npc.name, text: `It's done — you are now a ${unlock.label}. Equip the stance from your Classes panel here in town.` }
@@ -1412,9 +1422,14 @@ function handleDevCommand(player: ServerPlayer, text: string): void {
     return;
   }
   if (sub === "unlock") {
+    let changed = false;
     for (const unlock of CLASS_UNLOCKS) {
-      if (!player.unlockedClasses.includes(unlock.key)) player.unlockedClasses.push(unlock.key);
+      if (!player.unlockedClasses.includes(unlock.key)) {
+        player.unlockedClasses.push(unlock.key);
+        changed = true;
+      }
     }
+    if (changed) markClassesChanged(player);
     persistPlayer(player);
     sysToPlayer(`[dev] ${player.name} unlocked all classes. Equip them from the Classes panel (in a town).`);
     return;
@@ -1433,6 +1448,7 @@ function devSetAllSkills(player: ServerPlayer, level: number): void {
   for (const id of Object.keys(SKILLS)) {
     (player.skills[id] ?? (player.skills[id] = { xp: 0 })).xp = xp;
   }
+  markSkillChanged(player);
   recalculateVitals(player);
   player.hp = clamp(player.hp, 1, player.maxHp);
   player.mana = clamp(player.mana, 0, player.maxMana);
@@ -1475,6 +1491,7 @@ function handleQuestDialogue(player: ServerPlayer, npc: NpcRuntime, quest: Quest
 
   if (!state.accepted) {
     state.accepted = true;
+    markQuestChanged(player);
     eventDialogue(player, questDialogue(npc, player, quest, "intro"));
     event("float", "Quest accepted", player.x, player.y, player.floor, "#f7d486");
     return;
@@ -1489,6 +1506,7 @@ function handleQuestDialogue(player: ServerPlayer, npc: NpcRuntime, quest: Quest
     state.progress = quest.targetCount;
     state.complete = true;
     state.claimed = true;
+    markQuestChanged(player);
     player.gold += quest.rewardGold;
     player.xp += quest.rewardXp;
     awardLevels(player);
@@ -1876,9 +1894,14 @@ function grantE2EItems(
   if (Number.isFinite(message.gold)) player.gold = Math.max(0, Math.floor(Number(message.gold)));
   if (Number.isFinite(message.hp)) player.hp = clamp(Number(message.hp), 0, player.maxHp);
   if (message.skills) {
+    let changed = false;
     for (const [id, xp] of Object.entries(message.skills)) {
-      if (SKILLS[id] && Number.isFinite(xp)) (player.skills[id] ?? (player.skills[id] = { xp: 0 })).xp = Math.max(0, Number(xp));
+      if (SKILLS[id] && Number.isFinite(xp)) {
+        (player.skills[id] ?? (player.skills[id] = { xp: 0 })).xp = Math.max(0, Number(xp));
+        changed = true;
+      }
     }
+    if (changed) markSkillChanged(player);
   }
   if (typeof message.forceDodge === "boolean") player.forceDodge = message.forceDodge;
   if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y)) {
@@ -2548,7 +2571,12 @@ function snapshotDelta<T extends SnapshotEntity>(
 }
 
 function playerViewSignature(player: PlayerView): number {
+  const cached = playerViewSignatureCache.get(player);
+  if (cached !== undefined) return cached;
   let hash = HASH_INIT;
+  hash = hashString(hash, player.id);
+  hash = hashString(hash, player.name);
+  hash = hashString(hash, player.classKey);
   hash = hashNumber(hash, player.floor);
   hash = hashNumber(hash, player.x);
   hash = hashNumber(hash, player.y);
@@ -2590,6 +2618,58 @@ function playerViewSignature(player: PlayerView): number {
   }
   for (const classKey of player.unlockedClasses ?? []) hash = hashString(hash, classKey);
   hash = hashNumber(hash, player.weight ?? 0);
+  return hash;
+}
+
+function buildPlayerSignature(player: ServerPlayer, privateView: PlayerPrivateViewCache | null): number {
+  let hash = HASH_INIT;
+  hash = hashString(hash, player.id);
+  hash = hashString(hash, player.name);
+  hash = hashString(hash, player.classKey);
+  hash = hashNumber(hash, player.floor);
+  hash = hashNumber(hash, round(player.x));
+  hash = hashNumber(hash, round(player.y));
+  hash = hashString(hash, player.dir);
+  hash = hashBool(hash, player.moving);
+  hash = hashNumber(hash, Math.round(player.hp));
+  hash = hashNumber(hash, player.maxHp);
+  hash = hashNumber(hash, Math.round(player.mana));
+  hash = hashNumber(hash, player.maxMana);
+  hash = hashNumber(hash, player.level);
+  hash = hashNumber(hash, player.xp);
+  hash = hashNumber(hash, player.gold);
+  hash = hashNumber(hash, player.weaponTier);
+  hash = hashNumber(hash, player.armorTier);
+  hash = hashString(hash, player.targetId ?? "");
+  hash = hashBool(hash, player.dead);
+  hash = hashAction(hash, player.action ? actionView(player.action) : null);
+  hash = hashBuffs(hash, serializeBuffs(player));
+  if (privateView) {
+    hash = hashString(hash, privateView.inventorySignature);
+    hash = hashString(hash, privateView.questsSignature);
+    hash = hashString(hash, privateView.skillsSignature);
+    hash = hashString(hash, privateView.classesSignature);
+    hash = hashNumber(hash, privateView.weight);
+    hash = hashNumber(hash, WEIGHT_SOFT_CAP);
+    hash = hashString(hash, abilityCacheSignature(player));
+  }
+  return hash;
+}
+
+function buildPlayerPublicSignature(player: ServerPlayer): number {
+  let hash = HASH_INIT;
+  hash = hashString(hash, player.id);
+  hash = hashString(hash, player.name);
+  hash = hashString(hash, player.classKey);
+  hash = hashNumber(hash, player.floor);
+  hash = hashNumber(hash, round(player.x));
+  hash = hashNumber(hash, round(player.y));
+  hash = hashString(hash, player.dir);
+  hash = hashBool(hash, player.moving);
+  hash = hashNumber(hash, Math.round(player.hp));
+  hash = hashNumber(hash, player.maxHp);
+  hash = hashBool(hash, player.dead);
+  hash = hashAction(hash, player.action ? actionView(player.action) : null);
   return hash;
 }
 
@@ -2730,7 +2810,7 @@ function actionView(a: PlayerAction): ActionView {
 
 function serializePlayer(player: ServerPlayer): PlayerView {
   const privateView = serializePlayerPrivate(player);
-  return {
+  const view: PlayerView = {
     id: player.id,
     name: player.name,
     classKey: player.classKey,
@@ -2760,13 +2840,15 @@ function serializePlayer(player: ServerPlayer): PlayerView {
     weight: privateView.weight,
     maxWeight: WEIGHT_SOFT_CAP
   };
+  playerViewSignatureCache.set(view, buildPlayerSignature(player, privateView));
+  return view;
 }
 
 function serializePlayerPrivate(player: ServerPlayer): PlayerPrivateViewCache {
-  const inventorySignature = inventoryCacheSignature(player.inventory);
+  const inventorySignature = inventoryCacheSignature(player);
   const questsSignature = `${questCacheSignature(player)}|inv:${inventorySignature}`;
   const skillsSignature = skillCacheSignature(player);
-  const classesSignature = player.unlockedClasses.join("|");
+  const classesSignature = String(player.classesRevision);
   const cached = privatePlayerViewCache.get(player);
   if (
     cached &&
@@ -2801,7 +2883,7 @@ function serializePlayerPublicCached(player: ServerPlayer): PlayerView {
 }
 
 function serializePlayerPublic(player: ServerPlayer): PlayerView {
-  return {
+  const view = {
     id: player.id,
     name: player.name,
     classKey: player.classKey,
@@ -2815,6 +2897,21 @@ function serializePlayerPublic(player: ServerPlayer): PlayerView {
     dead: player.dead,
     action: player.action ? actionView(player.action) : null
   } as PlayerView;
+  playerViewSignatureCache.set(view, buildPlayerPublicSignature(player));
+  return view;
+}
+
+function abilityCacheSignature(player: ServerPlayer): string {
+  const now = performance.now();
+  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
+  return (classSpec.abilities ?? [])
+    .map((id) => {
+      const buff = player.abilityBuffs?.[id as keyof typeof player.abilityBuffs];
+      const cooldown = Math.ceil(Math.max(0, (player.abilityCooldowns?.[id] ?? 0) - now) / 100);
+      const active = Math.ceil(Math.max(0, (buff?.until ?? 0) - now) / 100);
+      return `${id}:${cooldown}:${active}`;
+    })
+    .join("|");
 }
 
 function serializeAbilities(player: ServerPlayer): AbilityView[] {
@@ -3130,15 +3227,18 @@ function normalizeQuestState(saved: unknown): Record<string, QuestState> {
 function updateQuestProgress(player: ServerPlayer, monster: ServerMonster): void {
   const quests = KILL_QUESTS_BY_ZONE_AND_TARGET.get(killQuestKey(monster.zone, monster.type));
   if (!quests) return;
+  let changed = false;
   for (const quest of quests) {
     const state = player.quests[quest.id];
     if (!state || !state.accepted || state.claimed || state.complete) continue;
     state.progress = clamp(state.progress + 1, 0, quest.targetCount);
+    changed = true;
     if (state.progress >= quest.targetCount) {
       state.complete = true;
       event("float", `${quest.title} ready to turn in`, player.x, player.y, player.floor, "#f7d486");
     }
   }
+  if (changed) markQuestChanged(player);
 }
 
 function killQuestKey(zone: string, monsterType: string): string {
@@ -3188,20 +3288,32 @@ function normalizeInventory(saved: unknown): InventorySlot[] {
   return inventory;
 }
 
-function inventoryCacheSignature(inventory: InventorySlot[]): string {
-  return inventory.map((item) => (item ? `${item.id}:${item.qty}` : "")).join("|");
+function inventoryCacheSignature(player: ServerPlayer): string {
+  return String(player.inventoryRevision);
 }
 
 function questCacheSignature(player: ServerPlayer): string {
-  return Object.entries(player.quests)
-    .map(([id, state]) => `${id}:${Number(state.accepted)}:${state.progress}:${Number(state.complete)}:${Number(state.claimed)}`)
-    .join("|");
+  return String(player.questRevision);
 }
 
 function skillCacheSignature(player: ServerPlayer): string {
-  return Object.entries(player.skills)
-    .map(([id, state]) => `${id}:${Math.floor(state.xp)}`)
-    .join("|");
+  return String(player.skillRevision);
+}
+
+function markInventoryChanged(player: ServerPlayer): void {
+  player.inventoryRevision += 1;
+}
+
+function markQuestChanged(player: ServerPlayer): void {
+  player.questRevision += 1;
+}
+
+function markSkillChanged(player: ServerPlayer): void {
+  player.skillRevision += 1;
+}
+
+function markClassesChanged(player: ServerPlayer): void {
+  player.classesRevision += 1;
 }
 
 function serializeInventory(inventory: InventorySlot[] = []): Array<InventoryItemView | null> {
@@ -3236,6 +3348,7 @@ function addInventoryItem(player: ServerPlayer, id: string, qty = 1): boolean {
     if (existing) {
       existing.qty += remaining;
       refreshCarriedWeight(player);
+      markInventoryChanged(player);
       return true;
     }
   }
@@ -3247,7 +3360,10 @@ function addInventoryItem(player: ServerPlayer, id: string, qty = 1): boolean {
     remaining -= stackable ? remaining : 1;
   }
   const added = remaining === 0;
-  if (mutated) refreshCarriedWeight(player);
+  if (mutated) {
+    refreshCarriedWeight(player);
+    markInventoryChanged(player);
+  }
   return added;
 }
 
@@ -3268,6 +3384,7 @@ function removeInventoryItem(player: ServerPlayer, id: string, qty = 1): boolean
     if (slot && slot.qty <= 0) player.inventory[i] = null;
   }
   refreshCarriedWeight(player);
+  markInventoryChanged(player);
   return true;
 }
 
@@ -3299,6 +3416,7 @@ function addSkillXp(player: ServerPlayer, id: string, amount: number): void {
   const entry = player.skills[id] ?? (player.skills[id] = { xp: 0 });
   const before = skillLevel(player, id);
   entry.xp += amount;
+  markSkillChanged(player);
   const after = skillLevel(player, id);
   if (after > before) event("system", `${player.name} reached ${SKILLS[id]?.label ?? id} ${after}.`);
   if (id === "defense" || id === "magic") recalculateVitals(player);

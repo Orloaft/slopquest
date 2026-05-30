@@ -71,8 +71,11 @@ export interface ServerPlayer {
   foodRegenUntil: number;
   inventory: InventorySlot[];
   carriedWeight: number;
+  inventoryRevision: number;
   quests: Record<string, QuestState>;
+  questRevision: number;
   skills: Record<string, SkillStateEntry>;
+  skillRevision: number;
   online: boolean;
   targetId: string | null;
   lastAttack: number;
@@ -86,6 +89,7 @@ export interface ServerPlayer {
   // Tier-1 classes this player has unlocked from trainers. classKey is the one
   // currently equipped (always "adventurer" or an unlocked key).
   unlockedClasses: string[];
+  classesRevision: number;
   // Movement slow (e.g. from a Mire Spitter); cleared by Fleet Foot.
   slowUntil?: number;
   slowMult?: number;
