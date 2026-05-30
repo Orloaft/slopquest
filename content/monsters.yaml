@@ -131,3 +131,29 @@
   gold: [80, 135]
   aggro: 9
   range: 1.15
+
+# --- The Sunken Marsh (floor 5) ---
+- id: skitterer
+  name: Skitterer
+  maxHp: 24
+  speed: 3.6
+  damage: [4, 8]
+  attackMs: 800
+  xp: 24
+  gold: [3, 7]
+  aggro: 7
+  range: 1
+
+- id: mire_spitter
+  name: Mire Spitter
+  maxHp: 70
+  speed: 0
+  damage: [5, 9]
+  attackMs: 1900
+  xp: 48
+  gold: [10, 20]
+  aggro: 7
+  range: 6
+  ranged: true
+  slowPct: 20
+  slowMs: 1500

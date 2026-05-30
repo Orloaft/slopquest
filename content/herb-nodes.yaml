@@ -35,3 +35,25 @@
   at: { floor: 3, x: 47.5, y: 21.5 }
   approach: { x: 46.5, y: 21.5 }
   label: Forest Herbs
+
+# Mire-Lotus — Sunken Marsh (floor 5). Gated behind Foraging 5; richer XP.
+- id: lotus-5-36-16
+  at: { floor: 5, x: 36.5, y: 16.5 }
+  approach: { x: 36.5, y: 15.5 }
+  label: Mire-Lotus
+  requiredLevel: 5
+  xp: 26
+
+- id: lotus-5-20-21
+  at: { floor: 5, x: 20.5, y: 21.5 }
+  approach: { x: 20.5, y: 20.5 }
+  label: Mire-Lotus
+  requiredLevel: 5
+  xp: 26
+
+- id: lotus-5-12-22
+  at: { floor: 5, x: 12.5, y: 22.5 }
+  approach: { x: 11.5, y: 22.5 }
+  label: Mire-Lotus
+  requiredLevel: 5
+  xp: 26

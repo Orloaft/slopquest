@@ -36,6 +36,15 @@ monsters:
   - { type: wolf,          at: { floor: 3, x: 41, y: 21 }, zone: woods }
   - { type: wisp,          at: { floor: 3, x: 33, y: 6  }, zone: woods }
   - { type: wisp,          at: { floor: 3, x: 49, y: 5  }, zone: woods }
+  # The Sunken Marsh (floor 5): skitterers patrol the causeway; mire spitters
+  # are anchored on deep water and fire across it.
+  - { type: skitterer,     at: { floor: 5, x: 38, y: 15 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 22, y: 16 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 18, y: 21 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 10, y: 8  }, zone: marsh }
+  - { type: mire_spitter,  at: { floor: 5, x: 32, y: 12 }, zone: marsh }
+  - { type: mire_spitter,  at: { floor: 5, x: 24, y: 19 }, zone: marsh }
+  - { type: mire_spitter,  at: { floor: 5, x: 12, y: 16 }, zone: marsh }
 
 trees:
   - { type: oak,  at: { floor: 0, x: 12.8, y: 10.7 } }

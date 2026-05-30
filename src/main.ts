@@ -502,6 +502,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("forestTiles", "/foresttiles.png");
   this.load.image("graveyardTiles", "/graveyardtiles.png");
   this.load.image("darkForestTiles", "/dark-forest-tiles.png");
+  this.load.image("swampTiles", "/swamp-tiles.png");
   this.load.image("effectsSheet", "/effects.png");
   this.load.image("waterFishingSpots", "/water-fishing-spots.png");
   this.load.image("oreNodeSheet", "/ore-rock-gathering-nodes.png");
@@ -555,6 +556,15 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "townTiles", "spriteSign", 616, 420, 74, 90);
   makeSpriteTexture(this, "townTiles", "spriteLamp", 912, 424, 38, 136);
   makeSpriteTexture(this, "townTiles", "spriteBarrels", 1200, 700, 90, 70);
+  // Sunken Marsh (floor 5). Crops dialed in from assetsources/deferred/swamp-biome-tiles.png
+  // (1536x1024, magenta-keyed) — ground/dirt/water tiles, a plank bridge, and swamp props.
+  makeTileTexture(this, "swampTiles", "tileMarsh", 18, 98, 69, 72);
+  makeTileTexture(this, "swampTiles", "tileSwampDirt", 97, 98, 67, 72);
+  makeTileTexture(this, "swampTiles", "tileSwampWater", 1041, 102, 74, 71);
+  makeTileTexture(this, "swampTiles", "tileBridge", 95, 744, 68, 66);
+  makeSpriteTexture(this, "swampTiles", "spriteSwampBoulder", 1150, 392, 62, 50);
+  makeSpriteTexture(this, "swampTiles", "spriteMireLotus", 820, 388, 38, 36);
+  makeSpriteTexture(this, "swampTiles", "spriteCliffLedge", 714, 958, 70, 58);
 
   mapLayer = this.add.container(0, 0);
   entityLayer = this.add.container(0, 0);
@@ -1037,7 +1047,14 @@ function createHerbNodeView(node: HerbNodeView): HerbEntityView {
     event.stopPropagation();
     startHerbPath(node);
   });
-  view.add([base, leafA, leafB, leafC, bloom, zone]);
+  view.add([base, leafA, leafB, leafC, bloom]);
+  // Mire-Lotus (gated nodes) get the swamp-lotus sprite on top.
+  if (node.requiredLevel > 0) {
+    const lotus = scene.add.image(0, -6, "spriteMireLotus").setDisplaySize(34, 32);
+    bloom.setFillStyle(0x8fd0ff, 0.95);
+    view.add(lotus);
+  }
+  view.add(zone);
   view.bloom = bloom;
   return view;
 }
@@ -1231,6 +1248,7 @@ function renderBuffTracker(buffs: Partial<BuffsView> = {}): void {
   if ((buffs.secondWind ?? 0) > 0) active.push(`Second wind ${Math.ceil((buffs.secondWind ?? 0) / 1000)}s`);
   if ((buffs.ironClad ?? 0) > 0) active.push(`Iron Clad ${Math.ceil((buffs.ironClad ?? 0) / 1000)}s`);
   if ((buffs.fleetFoot ?? 0) > 0) active.push(`Fleet Foot ${Math.ceil((buffs.fleetFoot ?? 0) / 1000)}s`);
+  if ((buffs.slowed ?? 0) > 0) active.push(`Slowed ${Math.ceil((buffs.slowed ?? 0) / 1000)}s`);
   dom.buffTracker.textContent = active.join(" | ");
   dom.buffTracker.classList.toggle("hidden", !active.length);
 }
@@ -2680,7 +2698,9 @@ function addTileDecorations(rows: string[]): void {
       if (tile === "r") decorations.push({ key: "spriteRock", x: x + 0.5, y: y + 0.78, w: 38, h: 28 });
       if (tile === "h") decorations.push({ key: "spriteGrave", x: x + 0.5, y: y + 0.95, w: 24, h: 34 });
       if (tile === "q") decorations.push({ key: "spriteFence", x: x + 0.5, y: y + 0.78, w: 46, h: 24 });
-      if (["N", "S", "T", "C", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
+      if (tile === "o") decorations.push({ key: "spriteSwampBoulder", x: x + 0.5, y: y + 0.85, w: 44, h: 36 });
+      if (tile === "L") decorations.push({ key: "spriteCliffLedge", x: x + 0.5, y: y + 0.95, w: 52, h: 44 });
+      if (["N", "S", "T", "C", "M", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
     }
   }
   decorations.sort((a, b) => a.y - b.y).forEach(placeMapSprite);
@@ -2747,12 +2767,21 @@ function addComposedMapObjects(floor: number): void {
     { key: "spriteBoulder", x: 41.6, y: 27.3, w: 46, h: 58 }
   ];
 
+  const marshObjects: DecorationSprite[] = [
+    { key: "spriteThatchHouse", x: 7.5, y: 11.6, w: 150, h: 130 }, // Alchemist's Hut
+    { key: "spriteSign", x: 10.5, y: 13.2, w: 48, h: 58 },
+    { key: "spriteDeadTree", x: 4.4, y: 8.6, w: 60, h: 100 },
+    { key: "spriteDeadTree", x: 40.5, y: 13.6, w: 56, h: 92 },
+    { key: "spriteSwampBoulder", x: 44.6, y: 19.2, w: 44, h: 36 }
+  ];
+
   const objectsByFloor: Record<number, DecorationSprite[]> = {
     0: southTownObjects,
     1: cemeteryObjects,
     2: cryptObjects,
     3: woodsObjects,
-    4: northTownObjects
+    4: northTownObjects,
+    5: marshObjects
   };
   const objects = objectsByFloor[floor] ?? [];
   objects
@@ -3372,7 +3401,14 @@ function minimapTileColor(tile: string): string {
     S: "#d6ad4e",
     T: "#d6ad4e",
     C: "#d6ad4e",
-    n: "#8a7d5a"
+    n: "#8a7d5a",
+    m: "#4a5b3a", // marsh ground
+    k: "#5a4d33", // swamp dirt
+    W: "#2b3b38", // swamp water (blocked)
+    B: "#6e5836", // wooden bridge
+    o: "#5d6452", // boulder (blocked)
+    M: "#d6ad4e", // marsh portal (landmark)
+    L: "#c8a86a" // cliff ledge (landmark)
   };
   return colors[tile] ?? "#3f6b3a";
 }
@@ -3555,7 +3591,14 @@ function tileBaseTexture(tile: string): string {
     S: "tileDirt",
     T: "tileDirt",
     C: "tileGravePath",
-    n: "tileTownFloor"
+    n: "tileTownFloor",
+    m: "tileMarsh",
+    k: "tileSwampDirt",
+    W: "tileSwampWater",
+    B: "tileBridge",
+    o: "tileMarsh",
+    M: "tileSwampDirt",
+    L: "tileSwampDirt"
   };
   return map[tile] ?? "tileGrass";
 }

@@ -85,6 +85,9 @@ export interface ServerPlayer {
   // Tier-1 classes this player has unlocked from trainers. classKey is the one
   // currently equipped (always "adventurer" or an unlocked key).
   unlockedClasses: string[];
+  // Movement slow (e.g. from a Mire Spitter); cleared by Fleet Foot.
+  slowUntil?: number;
+  slowMult?: number;
   // E2E-only: when set, the player always dodges incoming hits (deterministic
   // testing of the dodge mechanic). Never set outside E2E_TEST.
   forceDodge?: boolean;
@@ -176,6 +179,8 @@ export interface HerbNodeRuntime {
   approachX: number;
   approachY: number;
   label: string;
+  requiredLevel: number;
+  xp: number;
   active: boolean;
   respawnAt: number;
 }

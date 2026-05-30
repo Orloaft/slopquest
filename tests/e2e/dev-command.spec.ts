@@ -1,4 +1,4 @@
-import { test, type Page } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test("/dev chat command kits skills and /dev unlock opens all classes", async ({ page }) => {
   page.on("pageerror", (error) => console.error(error));

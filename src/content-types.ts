@@ -17,7 +17,7 @@ export type SkillId =
   | "ranged"
   | "foraging";
 
-export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown";
+export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown" | "marsh";
 
 export type Capability = "chop_tree" | "fish" | "mine" | "ranged";
 
@@ -64,6 +64,11 @@ export interface Monster {
   gold: Range;
   aggro: number;
   range: number;
+  // Ranged "turret" monsters stay anchored and fire projectiles (needs line of
+  // sight). `slowPct`/`slowMs` apply a movement slow to the hit player.
+  ranged?: boolean;
+  slowPct?: number;
+  slowMs?: number;
 }
 
 export interface QuestDrop {
@@ -149,6 +154,8 @@ export interface HerbNode {
   approachX: number;
   approachY: number;
   label: string;
+  requiredLevel?: number;
+  xp?: number;
 }
 
 export type DialogueLine = { npc: string } | { player: string };

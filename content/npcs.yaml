@@ -83,3 +83,9 @@
   role: trainer
   at: { floor: 4, x: 27.5, y: 16.5 }
   idleDialogue: "Power answers study. Master the arcane and become a Mage."
+
+- id: marsh-alchemist
+  name: Bogwarden Yssa
+  role: alchemist
+  at: { floor: 5, x: 10.5, y: 9.5 }
+  idleDialogue: "The marsh gives freely to those who know where to look. Brew well."

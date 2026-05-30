@@ -32,6 +32,7 @@ export interface BuffsView {
   secondWind: number;
   ironClad: number;
   fleetFoot: number;
+  slowed: number;
 }
 
 export interface InventoryItemView {
@@ -173,6 +174,7 @@ export interface HerbNodeView {
   approachY: number;
   label: string;
   active: boolean;
+  requiredLevel: number;
 }
 
 export interface FireView {

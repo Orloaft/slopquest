@@ -83,7 +83,8 @@ export const ZONES: Record<ZoneId, Zone> = {
   cemetery: { id: "cemetery", label: "Southgate Cemetery", floor: 1, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   crypt: { id: "crypt", label: "Ashen Crypt", floor: 2, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   woods: { id: "woods", label: "Northwood", floor: 3, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
-  northTown: { id: "northTown", label: "Northwatch", floor: 4, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 }
+  northTown: { id: "northTown", label: "Northwatch", floor: 4, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
+  marsh: { id: "marsh", label: "The Sunken Marsh", floor: 5, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 }
 };
 const FLOOR_TILE_CACHE = new Map<number, string[]>();
 
@@ -367,8 +368,37 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 30, 19, 6, 4, "d");
     setTile(rows, 25, 31, "S");
     setTile(rows, 25, 2, "N");
+    setTile(rows, 1, 17, "M"); // west-edge portal to the Sunken Marsh (floor 5)
     scatter(rows, "F", "f", 220, 31);
     scatter(rows, "F", "r", 48, 32);
+  }
+
+  if (floor === 5) {
+    // The Sunken Marsh: a basin of impassable swamp water with a winding marsh
+    // causeway from the east entry to the Alchemist's Hut clearing in the west.
+    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, "W");
+    // East entry clearing + portal back to the forest.
+    fillRect(rows, 42, 13, 8, 8, "m");
+    setTile(rows, 50, 16, "M"); // east-edge portal back to the forest
+    // Winding causeway east -> west.
+    fillRect(rows, 30, 14, 13, 4, "m"); // upper-east run
+    fillRect(rows, 27, 14, 3, 2, "B"); // bridge 1 (narrow chokepoint)
+    fillRect(rows, 18, 14, 9, 4, "m"); // mid run
+    fillRect(rows, 18, 6, 4, 11, "m"); // north turn
+    fillRect(rows, 8, 6, 12, 4, "m"); // west run (upper)
+    fillRect(rows, 4, 6, 8, 9, "k"); // Alchemist's Hut clearing (dirt)
+    // South loop (Mire-Lotus pocket) gated by a second bridge.
+    fillRect(rows, 20, 16, 2, 3, "B"); // bridge 2 (narrow chokepoint)
+    fillRect(rows, 14, 18, 8, 5, "m"); // south pocket
+    fillRect(rows, 8, 21, 8, 4, "m"); // south-west pocket
+    // Boulders for line-of-sight cover along the paths.
+    setTile(rows, 35, 15, "o");
+    setTile(rows, 24, 15, "o");
+    setTile(rows, 19, 11, "o");
+    setTile(rows, 16, 20, "o");
+    setTile(rows, 11, 22, "o");
+    // One-way cliff ledge: hop down into northern Waystone.
+    setTile(rows, 5, 9, "L");
   }
 
   if (floor === 4) {
@@ -398,11 +428,23 @@ export function tileAt(floor: number, tx: number, ty: number): string {
 }
 
 export function isBlockedTile(tile: string): boolean {
-  return tile === "#" || tile === "~" || tile === "f" || tile === "q" || tile === "r" || tile === "O";
+  return (
+    tile === "#" || tile === "~" || tile === "W" || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o"
+  );
 }
 
-export function isSafeZone(floor: number, _x: number, _y: number): boolean {
-  return floor === 0 || floor === 4;
+// Blocks line-of-sight for ranged attacks. Solid terrain (walls, boulders,
+// buildings, trees, fences) blocks sight; open water does NOT — so projectiles
+// skim over swamp water while boulders give cover.
+export function isSightBlocked(tile: string): boolean {
+  return tile === "#" || tile === "o" || tile === "O" || tile === "f" || tile === "r" || tile === "q";
+}
+
+export function isSafeZone(floor: number, x: number, y: number): boolean {
+  if (floor === 0 || floor === 4) return true;
+  // The Alchemist's Hut clearing in the Sunken Marsh is a safe rest spot.
+  if (floor === 5 && x >= 3 && x <= 13 && y >= 5 && y <= 15) return true;
+  return false;
 }
 
 export function zoneAt(floor: number, x: number, y: number): string {
@@ -424,7 +466,10 @@ export function portalFor(floor: number, x: number, y: number): Portal | null {
   if (floor === 2 && tile === "T") return { floor: 1, x: 25.5, y: 21.5 };
   if (floor === 3 && tile === "S") return { floor: 0, x: 25.5, y: 3.5 };
   if (floor === 3 && tile === "N") return { floor: 4, x: 25.5, y: 30.5 };
+  if (floor === 3 && tile === "M") return { floor: 5, x: 48.5, y: 16.5 };
   if (floor === 4 && tile === "S") return { floor: 3, x: 25.5, y: 3.5 };
+  if (floor === 5 && tile === "M") return { floor: 3, x: 2.5, y: 17.5 };
+  if (floor === 5 && tile === "L") return { floor: 0, x: 25.5, y: 4.5 }; // one-way drop into Waystone
   return null;
 }
 

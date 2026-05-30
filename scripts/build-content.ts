@@ -45,6 +45,9 @@ interface RawMonster {
   gold?: Range;
   aggro?: number;
   range?: number;
+  ranged?: boolean;
+  slowPct?: number;
+  slowMs?: number;
   drops?: Array<{ item?: string; chance?: number }>;
 }
 
@@ -77,6 +80,8 @@ interface RawMiningNode {
 interface RawHerbNode {
   id?: string;
   label?: string;
+  requiredLevel?: number;
+  xp?: number;
   at?: { floor: number; x: number; y: number };
   approach?: { x: number; y: number };
 }
@@ -130,7 +135,7 @@ const itemIds = new Set(items.map((i) => i.id));
 const monsterIds = new Set(monsters.map((m) => m.id));
 const treeTypeIds = new Set(treeTypes.map((t) => t.id));
 const npcIdsByRole = new Map(npcs.map((n) => [n.id, n.role]));
-const zoneIds = new Set(["southTown", "cemetery", "crypt", "woods", "northTown"]);
+const zoneIds = new Set(["southTown", "cemetery", "crypt", "woods", "northTown", "marsh"]);
 const useKinds = new Set(["eat", "light_fire", "cook_on_fire", "drink_potion"]);
 const capabilityIds = new Set(["chop_tree", "fish", "mine", "ranged"]);
 const questKinds = new Set(["kill", "gather", "fetch"]);
@@ -303,10 +308,16 @@ const ITEMS = Object.fromEntries(
   })
 );
 const MONSTERS = Object.fromEntries(
-  monsters.map((m) => [
-    m.id,
-    { name: m.name, maxHp: m.maxHp, speed: m.speed, damage: m.damage, attackMs: m.attackMs, xp: m.xp, gold: m.gold, aggro: m.aggro, range: m.range }
-  ])
+  monsters.map((m) => {
+    const entry: Record<string, unknown> = {
+      name: m.name, maxHp: m.maxHp, speed: m.speed, damage: m.damage, attackMs: m.attackMs,
+      xp: m.xp, gold: m.gold, aggro: m.aggro, range: m.range
+    };
+    if (m.ranged) entry["ranged"] = true;
+    if (m.slowPct != null) entry["slowPct"] = m.slowPct;
+    if (m.slowMs != null) entry["slowMs"] = m.slowMs;
+    return [m.id, entry];
+  })
 );
 const QUEST_DROPS: Record<string, { itemId: string; chance: number }> = {};
 for (const m of monsters) {
@@ -360,15 +371,20 @@ const MINING_NODES = miningNodes.map((m) => ({
   approachX: m.approach?.x,
   approachY: m.approach?.y
 }));
-const HERB_NODES = herbNodes.map((h) => ({
-  id: h.id,
-  floor: h.at?.floor,
-  x: h.at?.x,
-  y: h.at?.y,
-  approachX: h.approach?.x,
-  approachY: h.approach?.y,
-  label: h.label ?? "Wild Herbs"
-}));
+const HERB_NODES = herbNodes.map((h) => {
+  const entry: Record<string, unknown> = {
+    id: h.id,
+    floor: h.at?.floor,
+    x: h.at?.x,
+    y: h.at?.y,
+    approachX: h.approach?.x,
+    approachY: h.approach?.y,
+    label: h.label ?? "Wild Herbs"
+  };
+  if (h.requiredLevel != null) entry["requiredLevel"] = h.requiredLevel;
+  if (h.xp != null) entry["xp"] = h.xp;
+  return entry;
+});
 const QUESTS = Object.fromEntries(
   quests.map((q) => [
     q.id,

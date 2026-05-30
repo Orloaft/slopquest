@@ -26,6 +26,7 @@ import {
   TREE_TYPES,
   dodgeChanceFor,
   isBlockedTile,
+  isSightBlocked,
   isSafeZone,
   makeFloorTiles,
   portalFor,
@@ -268,7 +269,7 @@ function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; 
   player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
 
   clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now() });
-  socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4] }));
+  socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5] }));
   event("system", `${player.name} entered the world.`);
 }
 
@@ -381,6 +382,11 @@ function updatePlayers(dt: number, now: number): void {
     } else if (player.abilityBuffs?.ironClad) {
       delete player.abilityBuffs.ironClad;
     }
+    if (player.slowUntil && now < player.slowUntil) {
+      speed *= player.slowMult ?? 1;
+    } else if (player.slowUntil) {
+      player.slowUntil = 0;
+    }
 
     const hasMoveVector = Math.hypot(Number(input.moveX), Number(input.moveY)) > 0.01;
     let dx = hasMoveVector ? Number(input.moveX) : Number(input.right) - Number(input.left);
@@ -449,6 +455,24 @@ function updateMonsters(dt: number, now: number): void {
     const frozen = Boolean(monster.freezeUntil && now < monster.freezeUntil);
     const snared = Boolean(monster.snareUntil && now < monster.snareUntil);
     const dist = distance(monster, target);
+
+    // Ranged turret (Mire Spitter): anchored, fires a slowing projectile on sight.
+    if (catalog.ranged) {
+      if (!frozen && dist <= catalog.range && now - monster.lastAttack >= catalog.attackMs && hasLineOfSight(monster.floor, monster.x, monster.y, target.x, target.y)) {
+        monster.lastAttack = now;
+        const shot = Math.max(1, roll(catalog.damage) - armorReduction(target));
+        if (rollDodge(target)) {
+          addSkillXp(target, "agility", Math.max(1, shot));
+          event("float", "Dodge!", target.x, target.y - 0.55, target.floor, "#a0e8ff");
+        } else {
+          event("projectile", "spit", target.x, target.y, target.floor, "#9ad36b", monster.id, target.id, { fromX: monster.x, fromY: monster.y });
+          damagePlayer(target, shot, catalog.name);
+          if (catalog.slowPct) applyPlayerSlow(target, catalog.slowPct, catalog.slowMs ?? 1500);
+        }
+      }
+      continue; // anchored — never chases or melees
+    }
+
     if (dist > catalog.range && !frozen && !snared) {
       const dx = (target.x - monster.x) / dist;
       const dy = (target.y - monster.y) / dist;
@@ -624,6 +648,7 @@ function useClassAbility(player: ServerPlayer, id: string): void {
     player.abilityCooldowns[id] = now + spec.cooldownMs;
     player.mana -= manaCost;
     player.abilityBuffs.fleetFoot = { until: now + spec.durationMs };
+    player.slowUntil = 0; // cleanse active movement slows
     event("float", "Fleet Foot", player.x, player.y - 0.5, player.floor, "#9ae6b4");
     return;
   }
@@ -971,7 +996,8 @@ function meetsClassRequirements(player: ServerPlayer, unlock: { requires: Partia
 
 function setClass(player: ServerPlayer, classKey: string): void {
   if (player.dead) return;
-  if (!isSafeZone(player.floor, player.x, player.y)) {
+  // Class toggling is a town activity (Waystone / Northwatch) — not every safe spot.
+  if (player.floor !== 0 && player.floor !== 4) {
     event("float", "You can only change class in a town.", player.x, player.y, player.floor, "#f7d486");
     return;
   }
@@ -1272,6 +1298,10 @@ function mineNode(player: ServerPlayer, id: string): void {
 function gatherHerb(player: ServerPlayer, id: string): void {
   const node = herbNodes.get(id);
   if (!node || player.dead || !node.active || node.floor !== player.floor || distance(player, herbApproachPoint(node)) > 1.45) return;
+  if (node.requiredLevel > 0 && skillLevel(player, "foraging") < node.requiredLevel) {
+    event("float", `Requires Foraging ${node.requiredLevel}.`, node.x, node.y, node.floor, "#f7d486");
+    return;
+  }
   player.targetId = null;
   player.action = { type: "herbing", nodeId: node.id, nextAt: performance.now() + HERB_GATHER_MS, startedAt: performance.now() };
   event("float", "You start gathering herbs.", node.x, node.y, node.floor, "#9ee6b1");
@@ -1471,8 +1501,8 @@ function updateHerbingAction(player: ServerPlayer, now: number): void {
   }
   node.active = false;
   node.respawnAt = performance.now() + HERB_RESPAWN_MS;
-  addSkillXp(player, "foraging", FORAGE_XP);
-  event("float", `+1 Herb · +${FORAGE_XP} Foraging`, node.x, node.y, node.floor, "#9ee6b1");
+  addSkillXp(player, "foraging", node.xp);
+  event("float", `+1 Herb · +${node.xp} Foraging`, node.x, node.y, node.floor, "#9ee6b1");
 }
 
 function updateCookingAction(player: ServerPlayer, now: number): void {
@@ -1701,6 +1731,8 @@ function spawnHerbNodes(): void {
       approachX: node.approachX,
       approachY: node.approachY,
       label: node.label,
+      requiredLevel: node.requiredLevel ?? 0,
+      xp: node.xp ?? FORAGE_XP,
       active: true,
       respawnAt: 0
     });
@@ -2119,7 +2151,8 @@ function serializeHerbNode(node: HerbNodeRuntime): HerbNodeView {
     approachX: node.approachX,
     approachY: node.approachY,
     label: node.label,
-    active: node.active
+    active: node.active,
+    requiredLevel: node.requiredLevel
   };
 }
 
@@ -2141,7 +2174,8 @@ function serializeBuffs(player: ServerPlayer): BuffsView {
     sprint: Math.max(0, Math.round((player.abilityBuffs?.sprint?.until ?? 0) - now)),
     secondWind: Math.max(0, Math.round((player.abilityBuffs?.second_wind?.until ?? 0) - now)),
     ironClad: Math.max(0, Math.round((player.abilityBuffs?.ironClad?.until ?? 0) - now)),
-    fleetFoot: Math.max(0, Math.round((player.abilityBuffs?.fleetFoot?.until ?? 0) - now))
+    fleetFoot: Math.max(0, Math.round((player.abilityBuffs?.fleetFoot?.until ?? 0) - now)),
+    slowed: Math.max(0, Math.round((player.slowUntil ?? 0) - now))
   };
 }
 
@@ -2462,6 +2496,12 @@ function classOf(player: ServerPlayer): ClassSpec {
   return CLASSES[player.classKey ?? "adventurer"] ?? ADVENTURER;
 }
 
+function applyPlayerSlow(player: ServerPlayer, pct: number, ms: number): void {
+  player.slowUntil = performance.now() + ms;
+  player.slowMult = Math.max(0.2, 1 - pct / 100);
+  event("float", "Slowed!", player.x, player.y - 0.55, player.floor, "#9ad36b");
+}
+
 function carriedWeight(player: ServerPlayer): number {
   let total = 0;
   for (const slot of player.inventory) {
@@ -2488,7 +2528,8 @@ function hasLineOfSight(floor: number, ax: number, ay: number, bx: number, by: n
     const t = i / steps;
     const x = ax + (bx - ax) * t;
     const y = ay + (by - ay) * t;
-    if (isBlockedTile(tileAt(floor, Math.floor(x), Math.floor(y)))) return false;
+    // Sight-blocking only (walls/boulders/buildings) — projectiles skim over water.
+    if (isSightBlocked(tileAt(floor, Math.floor(x), Math.floor(y)))) return false;
   }
   return true;
 }

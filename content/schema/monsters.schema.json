@@ -28,6 +28,9 @@
         "gold": { "$ref": "#/$defs/range" },
         "aggro": { "type": "number", "description": "Detection range in tiles." },
         "range": { "type": "number", "description": "Melee/magic reach in tiles." },
+        "ranged": { "type": "boolean", "description": "Anchored turret that fires projectiles (needs line of sight)." },
+        "slowPct": { "type": "number", "description": "Movement-slow percent applied to the hit player." },
+        "slowMs": { "type": "number", "description": "Duration of the applied slow in ms." },
         "drops": {
           "type": "array",
           "items": {
