@@ -8,6 +8,11 @@ test-results/
 # (see assetsources/SOUNDTRACKS_MOVED.md). Game streams music from public/music/, not this dir.
 assetsources/soundtracks/
 
+# Local music tracks (e.g. licensed/OSRS .ogg) live in public/music/ but are
+# never committed — supply your own per public/music/README.md.
+public/music/*.ogg
+public/music/*.mp3
+
 .env
 .env.*
 *.log
