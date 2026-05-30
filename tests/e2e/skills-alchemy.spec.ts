@@ -37,11 +37,11 @@ test("alchemist sells empty flasks and an alchemy kit", async ({ page }) => {
   // Fund the player and place them by the alchemist (Sage Ellwyn).
   await page.evaluate((p) => {
     window.__TIB_E2E__?.send({ type: "e2eGrantItems", gold: 100, floor: 0, x: p.x, y: p.y });
-  }, { x: scaleX(0, 24.5), y: scaleY(0, 16.5) });
+  }, { x: scaleX(0, 48.5), y: scaleY(0, 31.5) });
   await page.waitForFunction((p) => {
     const me = window.__TIB_E2E__?.self();
     return Boolean(me && me.floor === 0 && me.gold >= 100 && Math.hypot(me.x - p.x, me.y - p.y) < 0.6);
-  }, { x: scaleX(0, 24.5), y: scaleY(0, 16.5) });
+  }, { x: scaleX(0, 48.5), y: scaleY(0, 31.5) });
 
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "buy", item: "empty_flask" }));
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "buy", item: "alchemy_kit" }));
@@ -76,13 +76,13 @@ test("alchemist menu brews a herb + flask into a potion for Alchemy XP", async (
         { id: "alchemy_kit", qty: 1 }
       ]
     });
-  }, { x: scaleX(0, 24.5), y: scaleY(0, 16.5) });
+  }, { x: scaleX(0, 48.5), y: scaleY(0, 31.5) });
   await page.waitForFunction((p) => {
     const me = window.__TIB_E2E__?.self();
     if (!me || me.floor !== 0 || Math.hypot(me.x - p.x, me.y - p.y) > 0.6) return false;
     const inv = me.inventory ?? [];
     return ["herb", "empty_flask", "alchemy_kit"].every((id) => inv.some((i) => i?.id === id));
-  }, { x: scaleX(0, 24.5), y: scaleY(0, 16.5) });
+  }, { x: scaleX(0, 48.5), y: scaleY(0, 31.5) });
 
   // Talk to the alchemist, advance through the dialogue, and the craft menu opens.
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "talkNpc", id: "alchemist" }));

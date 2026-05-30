@@ -26,23 +26,26 @@ export const BLOCKING_OBJECT_KEYS = new Set<string>([
 
 export const MAP_OBJECTS: Record<number, MapObject[]> = {
   0: [
-    { key: "spriteBridge", x: 7.2, y: 18.6, w: 108, h: 58 },
-    { key: "spriteRedHouse", x: 25, y: 11.4, w: 288, h: 198 },
-    { key: "spriteBlueHouse", x: 38, y: 11.3, w: 244, h: 176 },
-    { key: "spriteGreenHouse", x: 12, y: 28.3, w: 192, h: 184 },
-    { key: "spriteThatchHouse", x: 28, y: 30.3, w: 210, h: 172 },
-    { key: "spriteBlueHouse", x: 42, y: 27.4, w: 210, h: 156 },
-    { key: "spriteWell", x: 22.5, y: 19.5, w: 94, h: 132 },
-    { key: "spriteMarket", x: 43, y: 31.2, w: 174, h: 78 },
-    { key: "spriteLamp", x: 19.5, y: 19.2, w: 28, h: 100 },
-    { key: "spriteLamp", x: 25.5, y: 19.2, w: 28, h: 100 },
-    { key: "spriteSign", x: 14.2, y: 20.4, w: 54, h: 66 },
-    { key: "spriteSign", x: 32.4, y: 16.1, w: 58, h: 70 },
-    { key: "spriteBarrels", x: 18.8, y: 12.2, w: 58, h: 46 },
-    { key: "spriteBarrels", x: 40.8, y: 21.2, w: 58, h: 46 },
-    { key: "spriteTree", x: 12.8, y: 10.7, w: 70, h: 90 },
-    { key: "spriteTree", x: 36.2, y: 17.4, w: 62, h: 80 },
-    { key: "spritePine", x: 20.2, y: 31.6, w: 54, h: 84 }
+    // Waystone (bespoke 90x60). Houses, well and market cluster around the
+    // central plaza; NPCs in npcs.yaml stand on the lanes just outside these
+    // footprints. Anchors are bottom-centre tile coords in 90x60 space.
+    { key: "spriteWell", x: 46.5, y: 26.5, w: 94, h: 132 }, // plaza well (north edge of plaza)
+    { key: "spriteMarket", x: 63, y: 27.5, w: 188, h: 84 }, // market on the east apron
+    { key: "spriteRedHouse", x: 36.5, y: 23, w: 238, h: 176 }, // NW of plaza
+    { key: "spriteBlueHouse", x: 50.5, y: 22, w: 250, h: 180 }, // N of plaza
+    { key: "spriteGreenHouse", x: 27, y: 22, w: 142, h: 178 }, // riverside district (west)
+    { key: "spriteThatchHouse", x: 30, y: 35.5, w: 130, h: 176 }, // SW of plaza
+    { key: "spriteBlueHouse", x: 72, y: 30, w: 250, h: 180 }, // eastern house by the garden
+    { key: "spriteRedHouse", x: 40, y: 44.5, w: 238, h: 176 }, // south lane house
+    { key: "spriteLamp", x: 39.5, y: 26.5, w: 28, h: 100 },
+    { key: "spriteLamp", x: 53.5, y: 26.5, w: 28, h: 100 },
+    { key: "spriteSign", x: 45, y: 23.5, w: 54, h: 66 }, // sign by the north lane
+    { key: "spriteBarrels", x: 58.8, y: 36.2, w: 58, h: 46 }, // by the garden fence
+    { key: "spriteBarrels", x: 34.8, y: 31.2, w: 58, h: 46 },
+    { key: "spriteTree", x: 18.8, y: 47.7, w: 70, h: 90 }, // shade trees in the open meadow
+    { key: "spriteTree", x: 76.2, y: 50.4, w: 62, h: 80 },
+    { key: "spritePine", x: 22.2, y: 13.6, w: 54, h: 84 },
+    { key: "spritePine", x: 78.2, y: 14.6, w: 54, h: 84 }
   ],
   1: [
     { key: "spriteCrypt", x: 26, y: 23.1, w: 126, h: 206 },
@@ -72,17 +75,22 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteBoulder", x: 41.6, y: 27.3, w: 46, h: 58 }
   ],
   4: [
-    { key: "spriteGreenHouse", x: 16.5, y: 12.6, w: 190, h: 176 },
-    { key: "spriteBlueHouse", x: 35.3, y: 12.7, w: 220, h: 164 },
-    { key: "spriteThatchHouse", x: 21.5, y: 28.4, w: 210, h: 170 },
-    { key: "spriteRedHouse", x: 37.2, y: 28.2, w: 230, h: 172 },
-    { key: "spriteWell", x: 25.5, y: 19.5, w: 88, h: 122 },
-    { key: "spriteMarket", x: 42, y: 20.6, w: 160, h: 72 },
-    { key: "spriteLamp", x: 22, y: 19.2, w: 28, h: 100 },
-    { key: "spriteLamp", x: 29, y: 19.2, w: 28, h: 100 },
-    { key: "spriteSign", x: 25.5, y: 30.8, w: 54, h: 66 },
-    { key: "spriteTree", x: 9, y: 9.5, w: 66, h: 86 },
-    { key: "spritePine", x: 44, y: 30.2, w: 54, h: 84 }
+    // Northwatch (bespoke 90x60). Barracks, quarters, well and quartermaster's
+    // market cluster inside the palisade around the parade ground. NPCs in
+    // npcs.yaml stand on the roads just outside these footprints.
+    { key: "spriteWell", x: 46.5, y: 24, w: 88, h: 122 }, // muster-square well
+    { key: "spriteMarket", x: 64, y: 25.5, w: 160, h: 72 }, // quartermaster's market (east)
+    { key: "spriteGreenHouse", x: 37, y: 20, w: 190, h: 176 }, // barracks (NW)
+    { key: "spriteBlueHouse", x: 54, y: 20, w: 220, h: 164 }, // officers' quarters (NE)
+    { key: "spriteThatchHouse", x: 35, y: 44.5, w: 210, h: 170 }, // quarters (SW)
+    { key: "spriteRedHouse", x: 57, y: 44.5, w: 230, h: 172 }, // smithy (SE)
+    { key: "spriteLamp", x: 39.5, y: 24, w: 28, h: 100 },
+    { key: "spriteLamp", x: 53.5, y: 24, w: 28, h: 100 },
+    { key: "spriteSign", x: 45, y: 21, w: 54, h: 66 }, // muster sign
+    { key: "spriteBarrels", x: 60.8, y: 35.2, w: 58, h: 46 },
+    { key: "spriteTree", x: 12, y: 52.5, w: 66, h: 86 }, // frontier woodland outside the walls
+    { key: "spritePine", x: 78, y: 18.2, w: 54, h: 84 },
+    { key: "spritePine", x: 10, y: 14.2, w: 54, h: 84 }
   ],
   5: [
     { key: "spriteThatchHouse", x: 9, y: 19, w: 130, h: 176 }, // Alchemist's Hut (NW clearing)

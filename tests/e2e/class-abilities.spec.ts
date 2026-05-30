@@ -7,10 +7,10 @@ test("Thief Quick Step dashes the player forward", async ({ page }) => {
   logErrors(page);
   await page.goto("/?e2e");
   await join(page);
-  await unlockEquip(page, { npcId: "shady-contact", classKey: "thief", floor: 0, x: 14.5, y: 16.5, skills: { agility: HIGH, attack: HIGH } });
+  await unlockEquip(page, { npcId: "shady-contact", classKey: "thief", floor: 0, x: 35.5, y: 30.5, skills: { agility: HIGH, attack: HIGH } });
 
-  // Stand in an open corridor facing down (default), then dash.
-  await place(page, 0, 16.5, 15.5);
+  // Stand on the open stone apron facing down (default), then dash.
+  await place(page, 0, 35.5, 27.5);
   const before = await pos(page);
   await cast(page, "quick_step");
   await page.waitForFunction(
@@ -26,7 +26,7 @@ test("Apothecary Healing Poultice heals instantly and over time", async ({ page 
   logErrors(page);
   await page.goto("/?e2e");
   await join(page);
-  await unlockEquip(page, { npcId: "cleric-monk", classKey: "apothecary", floor: 0, x: 27.5, y: 14.5, skills: { defense: HIGH, alchemy: HIGH } });
+  await unlockEquip(page, { npcId: "cleric-monk", classKey: "apothecary", floor: 0, x: 51.5, y: 34.5, skills: { defense: HIGH, alchemy: HIGH } });
 
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", hp: 20 }));
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.hp ?? 999) <= 22);
@@ -41,7 +41,7 @@ test("Vanguard Iron Clad applies a mitigation buff", async ({ page }) => {
   logErrors(page);
   await page.goto("/?e2e");
   await join(page);
-  await unlockEquip(page, { npcId: "fighter-captain", classKey: "vanguard", floor: 0, x: 28.5, y: 18.5, skills: { attack: HIGH, defense: HIGH } });
+  await unlockEquip(page, { npcId: "fighter-captain", classKey: "vanguard", floor: 0, x: 42.5, y: 38.5, skills: { attack: HIGH, defense: HIGH } });
   await cast(page, "iron_clad");
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.ironClad ?? 0) > 0);
 });
@@ -51,7 +51,7 @@ test("Archer Fleet Foot applies a speed buff", async ({ page }) => {
   await page.goto("/?e2e");
   await join(page);
   // The Archer trainer is in Northwatch (floor 4); unlock + equip there.
-  await unlockEquip(page, { npcId: "scout-leader", classKey: "archer", floor: 4, x: 23.5, y: 16.5, skills: { ranged: HIGH, foraging: HIGH } });
+  await unlockEquip(page, { npcId: "scout-leader", classKey: "archer", floor: 4, x: 41.5, y: 30.5, skills: { ranged: HIGH, foraging: HIGH } });
   await cast(page, "fleet_foot");
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.fleetFoot ?? 0) > 0);
 });
@@ -60,7 +60,7 @@ test("Mage Frost Nova damages a nearby monster", async ({ page }) => {
   logErrors(page);
   await page.goto("/?e2e");
   await join(page);
-  await unlockEquip(page, { npcId: "hermit-academic", classKey: "mage", floor: 4, x: 27.5, y: 16.5, skills: { magic: HIGH, alchemy: HIGH } });
+  await unlockEquip(page, { npcId: "hermit-academic", classKey: "mage", floor: 4, x: 50.5, y: 30.5, skills: { magic: HIGH, alchemy: HIGH } });
   // Confirm the kit swapped to the Mage abilities.
   await page.waitForFunction(() => {
     const ids = (window.__TIB_E2E__?.self()?.abilities ?? []).map((a) => a.id);

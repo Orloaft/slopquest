@@ -13,43 +13,43 @@
 - id: trader
   name: Wayfarer Trader
   role: vendor
-  at: { floor: 0, x: 17.5, y: 15.5 }
+  at: { floor: 0, x: 40.5, y: 31.5 }
   idleDialogue: "Need supplies? Stand close and open the shop."
 
 - id: northwatch
   name: Northwatch Guide
   role: guide
-  at: { floor: 4, x: 25.5, y: 16.5 }
+  at: { floor: 4, x: 45.5, y: 36.5 }
   idleDialogue: "Northwatch is quiet for now."
 
 - id: cemetery-warden
   name: Mira Gravewatch
   role: quest
-  at: { floor: 0, x: 18.5, y: 18.5 }
+  at: { floor: 0, x: 50.5, y: 49.5 }
   idleDialogue: "Southgate Cemetery is restless."
 
 - id: lumberjack
   name: Brann Splitlog
   role: quest
-  at: { floor: 0, x: 22.5, y: 16.5 }
+  at: { floor: 0, x: 61.5, y: 29.5 }
   idleDialogue: "Pine yards are short on stock."
 
 - id: hunter
   name: Kael Brookfoot
   role: quest
-  at: { floor: 0, x: 15.5, y: 19.5 }
+  at: { floor: 0, x: 47.5, y: 22.5 }
   idleDialogue: "The shamans in Northwood worry me."
 
 - id: merchant
   name: Marda Vell
   role: quest
-  at: { floor: 0, x: 20.5, y: 19.5 }
+  at: { floor: 0, x: 47.5, y: 48.5 }
   idleDialogue: "Orcs raided my cart on the north road."
 
 - id: alchemist
   name: Sage Ellwyn
   role: alchemist
-  at: { floor: 0, x: 25.5, y: 16.5 }
+  at: { floor: 0, x: 48.5, y: 31.5 }
   idleDialogue: "Bring me wild herbs and a flask, and I'll show you how to brew."
 
 # Class trainers (role: trainer) — gate the Tier-1 classes once skill
@@ -57,31 +57,31 @@
 - id: fighter-captain
   name: Captain Doran
   role: trainer
-  at: { floor: 0, x: 28.5, y: 18.5 }
+  at: { floor: 0, x: 42.5, y: 38.5 }
   idleDialogue: "Hold the line, recruit. Earn your steel and I'll make you a Vanguard."
 
 - id: shady-contact
   name: Sly Nessa
   role: trainer
-  at: { floor: 0, x: 14.5, y: 16.5 }
+  at: { floor: 0, x: 35.5, y: 30.5 }
   idleDialogue: "Quick hands and quicker feet. Show me, and the Thief's trade is yours."
 
 - id: cleric-monk
   name: Brother Aldric
   role: trainer
-  at: { floor: 0, x: 27.5, y: 14.5 }
+  at: { floor: 0, x: 51.5, y: 34.5 }
   idleDialogue: "Patience and poultices. An Apothecary mends what blades break."
 
 - id: scout-leader
   name: Ranger Wynn
   role: trainer
-  at: { floor: 4, x: 23.5, y: 16.5 }
+  at: { floor: 4, x: 41.5, y: 30.5 }
   idleDialogue: "A steady draw and a forager's eye. That's how an Archer is made."
 
 - id: hermit-academic
   name: Magister Vael
   role: trainer
-  at: { floor: 4, x: 27.5, y: 16.5 }
+  at: { floor: 4, x: 50.5, y: 30.5 }
   idleDialogue: "Power answers study. Master the arcane and become a Mage."
 
 - id: marsh-alchemist
@@ -106,13 +106,13 @@
 - id: iron-census-officer
   name: Sergeant Vex
   role: quest
-  at: { floor: 0, x: 30.5, y: 18.5 }
+  at: { floor: 0, x: 50.5, y: 38.5 }
   idleDialogue: "The Iron Census holds the line. Broken gear doesn't fortify a frontier."
 
 - id: syndicate-contact
   name: Fence Corbin
   role: quest
-  at: { floor: 0, x: 12.5, y: 16.5 }
+  at: { floor: 0, x: 35.5, y: 34.5 }
   idleDialogue: "Keep your voice down. The Syndicate has work for quiet hands."
 
 - id: faith-monk

@@ -205,7 +205,7 @@ async function grantFeatureItems(page: Page): Promise<void> {
       y: p.y,
       gold: 0
     });
-  }, { x: scaleX(0, 16.5), y: scaleY(0, 17.5) });
+  }, { x: scaleX(0, 45.5), y: scaleY(0, 33.5) });
   await page.waitForFunction(() => {
     const ids = (window.__TIB_E2E__?.self()?.inventory ?? []).filter(Boolean).map((item) => item!.id);
     return ids.includes("flint_steel") && ids.includes("logs") && ids.includes("raw_fish");

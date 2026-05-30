@@ -42,7 +42,7 @@ const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
 };
 // Floors authored directly at the expanded size (their content is already
 // placed in expanded coordinates, so it must NOT be scaled again).
-const AUTHORED_AT_TARGET = new Set<number>([3, 5, 6, 7, 8, 9]);
+const AUTHORED_AT_TARGET = new Set<number>([0, 3, 4, 5, 6, 7, 8, 9]);
 
 export function floorCols(floor: number): number {
   return FLOOR_DIMS[floor]?.cols ?? MAP_COLS;
@@ -143,7 +143,7 @@ export interface SkillDef {
   iconUrl: string;
 }
 
-export const START: Portal = { floor: 0, x: scaleX(0, 16.5), y: scaleY(0, 17.5) };
+export const START: Portal = { floor: 0, x: 45.5, y: 33.5 };
 
 export const ZONES: Record<ZoneId, Zone> = {
   southTown: { id: "southTown", label: "Waystone", floor: 0, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
@@ -368,28 +368,62 @@ export function makeFloorTiles(floor: number): string[] {
   const rows = Array.from({ length: authorRows }, () => Array.from({ length: authorCols }, () => "#"));
 
   if (floor === 0) {
-    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, ".");
-    fillRect(rows, 1, 5, 6, 27, "~");
-    fillRect(rows, 6, 5, 1, 27, "r");
-    fillRect(rows, 5, 16, 5, 3, "t");
-    fillRect(rows, 9, 12, 27, 11, "s");
-    fillRect(rows, 13, 15, 13, 6, "p");
-    fillRect(rows, 10, 17, 40, 2, "s");
-    fillRect(rows, 16, 7, 2, 23, "s");
-    fillRect(rows, 35, 14, 10, 6, "d");
-    // Building collision is stamped from the composed sprites post-scale
-    // (stampBuildingCollision), so it stays aligned with the visible building.
-    fillRect(rows, 5, 24, 39, 1, "q");
-    fillRect(rows, 5, 29, 39, 1, "q");
-    fillRect(rows, 5, 24, 1, 6, "q");
-    fillRect(rows, 43, 24, 1, 6, "q");
-    fillRect(rows, 23, 24, 5, 1, "c");
-    fillRect(rows, 23, 29, 5, 1, "c");
-    fillRect(rows, 20, 26, 8, 2, "c");
-    setTile(rows, 25, 2, "N");
-    setTile(rows, 25, 31, "S");
-    setTile(rows, 17, 15, "n");
-    scatter(rows, ".", "f", 10, 15);
+    // Waystone (bespoke 90x60) — the peaceful starting hub. A townfloor plaza at
+    // the heart, ringed by a stone apron and clustered houses/well/market, with
+    // winding dirt lanes linking them and a willow-shaded river curling down the
+    // west bank (fishing spots on its edge). Woodland frames the whole clearing.
+    fillRect(rows, 1, 1, 88, 58, "."); // grass meadow base
+
+    // --- River & pond down the west side (blocks movement, not sight). ---
+    fillRect(rows, 7, 8, 5, 9, "~");
+    fillRect(rows, 9, 16, 5, 10, "~");
+    fillRect(rows, 7, 25, 6, 9, "~"); // widens into a fishing pond
+    fillRect(rows, 9, 33, 5, 9, "~");
+    fillRect(rows, 11, 40, 4, 7, "~");
+    // Reedy rock bank where the water meets the bog edge.
+    setTile(rows, 6, 12, "r");
+    setTile(rows, 6, 30, "r");
+    setTile(rows, 13, 22, "r");
+    setTile(rows, 14, 38, "r");
+
+    // --- Central plaza (townfloor) on a broad stone apron. ---
+    fillRect(rows, 33, 23, 26, 18, "s"); // stone apron
+    fillRect(rows, 38, 27, 16, 10, "p"); // townfloor plaza
+
+    // --- Winding dirt lanes (no straight central corridor). ---
+    // North lane: from the N gate, bending down to the plaza.
+    fillRect(rows, 44, 3, 3, 6, "t");
+    fillRect(rows, 44, 9, 9, 3, "t");
+    fillRect(rows, 50, 12, 3, 8, "t");
+    fillRect(rows, 45, 20, 8, 3, "t");
+    // South lane: plaza down to the S gate, curving east.
+    fillRect(rows, 44, 41, 3, 6, "d");
+    fillRect(rows, 44, 47, 10, 3, "d");
+    fillRect(rows, 51, 50, 3, 7, "d");
+    // West lane: plaza out to the riverside (market/well district).
+    fillRect(rows, 24, 30, 9, 3, "t");
+    fillRect(rows, 21, 24, 3, 9, "t");
+    fillRect(rows, 16, 24, 5, 3, "t");
+    // East lane: plaza out to the eastern houses.
+    fillRect(rows, 59, 28, 10, 3, "d");
+    fillRect(rows, 67, 31, 3, 8, "d");
+
+    // --- Garden plot fenced off beside the plaza (decoration only). ---
+    fillRect(rows, 60, 40, 12, 1, "q");
+    fillRect(rows, 60, 47, 12, 1, "q");
+    fillRect(rows, 60, 40, 1, 8, "q");
+    fillRect(rows, 71, 40, 1, 8, "q");
+    fillRect(rows, 64, 47, 3, 1, "d"); // garden gate gap on the path side
+
+    // Portals at the north and south edges.
+    setTile(rows, 45, 2, "N"); // north -> Northwood (floor 3)
+    setTile(rows, 52, 58, "S"); // south -> Southgate Cemetery (floor 1)
+    // Approach stubs so the gates open onto walkable lane, not raw grass/edge.
+    setTile(rows, 45, 3, "t");
+    setTile(rows, 52, 57, "d");
+
+    // Woodland framing the clearing (kept clear of the lanes/plaza by seed).
+    scatter(rows, ".", "f", 90, 15);
   }
 
   if (floor === 1) {
@@ -621,14 +655,42 @@ export function makeFloorTiles(floor: number): string[] {
   }
 
   if (floor === 4) {
-    fillRect(rows, 1, 1, MAP_COLS - 2, MAP_ROWS - 2, ".");
-    fillRect(rows, 9, 10, 34, 13, "s");
-    fillRect(rows, 13, 14, 12, 6, "p");
-    fillRect(rows, 24, 2, 3, 30, "s");
-    fillRect(rows, 10, 16, 34, 3, "s");
-    setTile(rows, 25, 31, "S");
-    scatter(rows, ".", "f", 28, 41);
-    scatter(rows, ".", "r", 16, 42);
+    // Northwatch (bespoke 90x60) — a rugged frontier garrison ringed by a timber
+    // palisade. A stone parade ground musters at its heart, barracks/quarters and
+    // a quartermaster's market cluster inside the walls, and gates pierce the
+    // palisade to the south (forest road) and west (the badlands cliff drop).
+    fillRect(rows, 1, 1, 88, 58, "."); // open ground base
+    scatter(rows, ".", "r", 70, 42); // scattered rubble/boulders on the frontier
+
+    // --- Timber palisade enclosing the garrison core. ---
+    fillRect(rows, 20, 12, 51, 1, "q"); // north wall
+    fillRect(rows, 20, 47, 51, 1, "q"); // south wall
+    fillRect(rows, 20, 12, 1, 36, "q"); // west wall
+    fillRect(rows, 70, 12, 1, 36, "q"); // east wall
+    // Gate gaps (kept walkable by laying path over the wall line).
+    fillRect(rows, 44, 47, 4, 1, "d"); // south gate
+    fillRect(rows, 20, 29, 1, 4, "d"); // west gate (badlands drop arrives here)
+
+    // --- Stone parade ground with a townfloor muster square. ---
+    fillRect(rows, 32, 20, 28, 20, "s"); // parade ground
+    fillRect(rows, 40, 25, 12, 10, "p"); // muster square
+
+    // --- Roads (winding, hugging the buildings). ---
+    // South road: muster square down to the south gate and out to the forest.
+    fillRect(rows, 44, 35, 3, 13, "d");
+    fillRect(rows, 44, 48, 3, 10, "d");
+    // West road: muster square out to the west gate (the drop-in lands here).
+    fillRect(rows, 21, 29, 12, 3, "d");
+    // North spur to the barracks.
+    fillRect(rows, 45, 13, 3, 8, "d");
+    // East spur to the quartermaster's market.
+    fillRect(rows, 59, 28, 9, 3, "d");
+
+    // South-edge portal to the forest, with an approach stub past the gate.
+    setTile(rows, 45, 58, "S"); // south -> Northwood (floor 3)
+    setTile(rows, 45, 57, "d");
+
+    scatter(rows, ".", "f", 80, 41); // woodland framing the clearing
   }
 
   const sized = authored || !FLOOR_DIMS[floor] ? rows : scaleFloorTiles(rows, floorCols(floor), floorRows(floor));
@@ -781,21 +843,21 @@ function portalForRaw(floor: number, x: number, y: number): Portal | null {
   const tile = tileAt(floor, tx, ty);
   if (floor === 0 && tile === "N") return { floor: 3, x: 45.5, y: 57.5 };
   if (floor === 0 && tile === "S") return { floor: 1, x: 25.5, y: 3.5 };
-  if (floor === 1 && tile === "T") return { floor: 0, x: 25.5, y: 30.5 };
+  if (floor === 1 && tile === "T") return { floor: 0, x: 52.5, y: 55.5 }; // arrive at Waystone's south gate
   if (floor === 1 && tile === "C") return { floor: 2, x: 6.5, y: 6.5 };
   if (floor === 2 && tile === "T") return { floor: 1, x: 25.5, y: 21.5 };
-  if (floor === 3 && tile === "S") return { floor: 0, x: 25.5, y: 3.5 };
-  if (floor === 3 && tile === "N") return { floor: 4, x: 25.5, y: 30.5 };
+  if (floor === 3 && tile === "S") return { floor: 0, x: 45.5, y: 4.5 }; // arrive at Waystone's north gate
+  if (floor === 3 && tile === "N") return { floor: 4, x: 45.5, y: 50.5 }; // arrive at Northwatch's south gate
   if (floor === 3 && tile === "M") return { floor: 5, x: 48.5, y: 16.5 };
   if (floor === 4 && tile === "S") return { floor: 3, x: 45.5, y: 2.5 };
   if (floor === 5 && tile === "M") return { floor: 3, x: 2.5, y: 30.5 };
-  if (floor === 5 && tile === "L") return { floor: 0, x: 25.5, y: 4.5 }; // one-way drop into Waystone
+  if (floor === 5 && tile === "L") return { floor: 0, x: 45.5, y: 7.5 }; // one-way drop into northern Waystone
   if (floor === 3 && tile === "D") return { floor: 6, x: 3.5, y: 33.5 };
   if (floor === 6 && tile === "D") return { floor: 3, x: 87.5, y: 29.5 };
-  if (floor === 6 && tile === "Z") return { floor: 4, x: 6.5, y: 16.5 }; // one-way drop into Northwatch
+  if (floor === 6 && tile === "Z") return { floor: 4, x: 22.5, y: 30.5 }; // one-way drop just inside Northwatch's west gate
   if (floor === 1 && tile === "G") return { floor: 7, x: 24.5, y: 3.5 };
   if (floor === 7 && tile === "G") return { floor: 1, x: 25.5, y: 30.5 };
-  if (floor === 7 && tile === "H") return { floor: 0, x: 25.5, y: 27.5 }; // one-way passage into Waystone
+  if (floor === 7 && tile === "H") return { floor: 0, x: 62.5, y: 29.5 }; // one-way passage into eastern Waystone
   if (floor === 7 && tile === "Y") return { floor: 8, x: 25.5, y: 2.5 };
   if (floor === 8 && tile === "Y") return { floor: 7, x: 2.5, y: 32.5 };
   if (floor === 8 && tile === "j") return { floor: 9, x: 2.5, y: 15.5 };
