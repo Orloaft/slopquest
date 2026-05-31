@@ -198,16 +198,17 @@ and combat fanout without making every client see every other client.
   slow-reader scenarios.
 - The load driver now records raw state message byte sizes. The perf gate caps
   state packets at `60 KB` max and `25 KB` average; the latest 100-client
-  targeted regional sample peaked at roughly `33 KB` and averaged roughly `9 KB`.
+  targeted regional sample peaked at roughly `27 KB` and averaged roughly `7 KB`.
 - State packets now omit empty removed-id lists and empty event arrays on the
   wire; clients treat absent values as empty, preserving compatibility while
   trimming repeated JSON key overhead.
 - Metrics frames are now sent at a per-client interval instead of on every state
   packet. The client carries forward the latest frame, and `npm run perf:gate`
   requires minimum metrics sample counts so the telemetry path remains covered.
-- State packets now use compact top-level keys on the wire and are expanded by
-  shared client/load-test helpers. The perf gate requires minimum compact-state
-  counts, proving the compact path is active during every load scenario.
+- State packets now use compact top-level and entity keys on the wire and are
+  expanded by shared client/load-test helpers. The perf gate requires minimum
+  compact-state counts, proving the compact path is active during every load
+  scenario.
 - `npm run check` now includes `npm run assets:budget`, currently guarding
   runtime assets at `100 MiB` total, `5 MiB` per file, and `500` files.
 - Save flush telemetry is now part of snapshots and the load driver. The perf
@@ -219,16 +220,16 @@ and combat fanout without making every client see every other client.
 
 ## Same-Day Protocol Compaction Gate
 
-After throttling metrics frames to the per-client `TIB_SNAPSHOT_METRICS_MS`
-interval, `npm run perf:gate` passed all scenarios with explicit minimum
-metrics-sample thresholds. Headline state-packet averages:
+After throttling metrics frames and compacting state/entity wire keys,
+`npm run perf:gate` passed all scenarios with explicit minimum metrics-sample
+and compact-state thresholds. Headline state-packet averages:
 
 | Scenario | Metric samples | Compact states | State bytes avg/max | Wire bytes avg/max |
 |---|---:|---:|---:|---:|
-| 50 clustered town | 709 | 9,558 | 13.26 / 22.97 KB | 8.06 / 9.58 MB/s |
-| 150 capped town, compressed | 1,512 | 20,175 | 13.57 / 23.17 KB | 5.37 / 6.90 MB/s |
-| 50 mixed town/combat | 709 | 9,558 | 7.85 / 29.01 KB | 4.71 / 5.73 MB/s |
-| 100 distributed regional combat | 1,826 | 24,983 | 8.19 / 32.70 KB | 10.22 / 11.81 MB/s |
-| 50 co-located crypt combat | 709 | 9,558 | 12.52 / 15.21 KB | 7.61 / 9.06 MB/s |
-| 50 mixed slow readers | 639 | 8,631 | 8.05 / 29.25 KB | 4.64 / 5.65 MB/s |
-| 25 persistent save flush | 315 | 4,233 | 8.80 / 18.11 KB | 2.60 / 3.23 MB/s |
+| 50 clustered town | 709 | 9,558 | 10.83 / 18.87 KB | 6.57 / 7.99 MB/s |
+| 150 capped town, compressed | 1,517 | 20,225 | 11.24 / 19.03 KB | 5.22 / 6.68 MB/s |
+| 50 mixed town/combat | 709 | 9,558 | 6.75 / 24.06 KB | 4.06 / 4.85 MB/s |
+| 100 distributed regional combat | 1,826 | 24,983 | 6.97 / 26.67 KB | 8.68 / 10.13 MB/s |
+| 50 co-located crypt combat | 710 | 9,573 | 10.45 / 13.50 KB | 6.35 / 7.50 MB/s |
+| 50 mixed slow readers | 639 | 8,630 | 6.98 / 24.06 KB | 4.04 / 4.92 MB/s |
+| 25 persistent save flush | 315 | 4,233 | 7.58 / 15.19 KB | 2.25 / 2.77 MB/s |

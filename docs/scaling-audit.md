@@ -115,11 +115,12 @@ minimum metrics sample count, preventing telemetry throttling from masking a
 broken metrics path.
 
 State packets now use compact top-level keys on the wire (`p`, `m`, `t`, `x`,
-and matching full/removal flags) and are expanded by shared client/load-test
-wire helpers before normal game logic sees them. This keeps the server's
-authoritative snapshot model readable while removing repeated category key
-overhead from every socket send. The perf gate counts compact state packets
-explicitly, so a regression back to long-form state packets fails loudly.
+and matching full/removal flags), and snapshot entity objects use compact wire
+keys as well. Shared client/load-test wire helpers expand packets before normal
+game logic sees them. This keeps the server's authoritative snapshot model
+readable while removing repeated category and entity key overhead from every
+socket send. The perf gate counts compact state packets explicitly, so a
+regression back to long-form state packets fails loudly.
 
 Worst-case co-located player fanout is bounded by a nearest-player cap. The
 viewer is always included, and other player views are sorted by distance before
@@ -270,10 +271,11 @@ process cannot tick the populated world.
 - [x] Safe JSON wire compaction for empty removed-id/event fields.
 - [x] Throttled metrics frames with minimum telemetry sample gates.
 - [x] Compact top-level state packet keys with compact-packet load gates.
+- [x] Compact entity view keys inside state packets.
 - [x] Runtime asset budget gate in `npm run check`.
 - [x] Bounded player-save flushes with persistence telemetry and a temp-data
   perf gate.
-- [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
+- [ ] Binary/delta protocol if JSON bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
 
 ### Stage 3 - Defer until one process is the bottleneck
