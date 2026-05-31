@@ -21,9 +21,13 @@ TIB is a top-down 2D MMO prototype for friends.
 
 ## Git
 
-Make sure Git resolves to `/home/orlovboros/projects/tib` before autonomous
-commits. If `git rev-parse --show-toplevel` returns `/home/orlovboros/projects`,
-ask to initialize TIB as its own repo or do that first.
+TIB lives on a mounted ext4 image (loop device, label `NXT-DEV`) at
+`/mnt/nxt-dev/tib`. Make sure Git resolves there before autonomous commits. If
+`git rev-parse --show-toplevel` returns `/mnt/nxt-dev` (the image root) or
+anything other than `/mnt/nxt-dev/tib`, ask to initialize TIB as its own repo or
+do that first. If `/mnt/nxt-dev` is empty, the loop image isn't mounted — remount
+it before working (`losetup -a` to find the backing `.ext4` file, then
+`sudo mount -o loop <file> /mnt/nxt-dev`).
 
 ## Assets
 
