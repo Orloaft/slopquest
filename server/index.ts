@@ -131,6 +131,12 @@ interface PlayerPublicViewCache {
   view: PlayerView;
 }
 
+interface PlayerSelfViewCache {
+  checkedSequence: number;
+  signature: number;
+  view: PlayerView;
+}
+
 interface ResourceViewCache<T extends SnapshotEntity> {
   signature: number;
   stateKey: string;
@@ -366,6 +372,7 @@ const publicPlayerViewCache = new Map<string, PlayerPublicViewCache>();
 const playerViewSignatureCache = new WeakMap<PlayerView, number>();
 const resourceViewSignatureCache = new WeakMap<SnapshotEntity, number>();
 const privatePlayerViewCache = new WeakMap<ServerPlayer, PlayerPrivateViewCache>();
+const selfPlayerViewCache = new WeakMap<ServerPlayer, PlayerSelfViewCache>();
 const activeRegionCache = new WeakMap<ServerPlayer, ActiveRegionCache>();
 const treeViewCache = new WeakMap<TreeNodeRuntime, ResourceViewCache<TreeView>>();
 const fishingNodeViewCache = new WeakMap<FishingNodeRuntime, ResourceViewCache<FishingNodeView>>();
@@ -3039,9 +3046,16 @@ function actionView(a: PlayerAction): ActionView {
 }
 
 function serializePlayer(player: ServerPlayer): PlayerView {
+  const cached = selfPlayerViewCache.get(player);
+  if (cached?.checkedSequence === snapshotSequence) return cached.view;
   const privateView = serializePlayerPrivate(player);
   const action = player.action ? actionView(player.action) : null;
   const buffs = serializeBuffs(player);
+  const signature = buildPlayerSignature(player, privateView, action, buffs);
+  if (cached?.signature === signature) {
+    cached.checkedSequence = snapshotSequence;
+    return cached.view;
+  }
   const view: PlayerView = {
     id: player.id,
     name: player.name,
@@ -3072,7 +3086,8 @@ function serializePlayer(player: ServerPlayer): PlayerView {
     weight: privateView.weight,
     maxWeight: WEIGHT_SOFT_CAP
   };
-  playerViewSignatureCache.set(view, buildPlayerSignature(player, privateView, action, buffs));
+  playerViewSignatureCache.set(view, signature);
+  selfPlayerViewCache.set(player, { checkedSequence: snapshotSequence, signature, view });
   return view;
 }
 
