@@ -325,6 +325,7 @@ const MONSTER_ATTACK_ANIM_MS = 480;
 // towns and tree-dense zones stay delta-dominated at scale.
 const TREE_SNAPSHOT_EVERY = positiveIntEnv("TIB_TREE_SNAPSHOT_EVERY", E2E_TEST ? 5 : 10);
 const NPC_SNAPSHOT_EVERY = positiveIntEnv("TIB_NPC_SNAPSHOT_EVERY", E2E_TEST ? 1 : 3);
+const RESOURCE_SNAPSHOT_EVERY = positiveIntEnv("TIB_RESOURCE_SNAPSHOT_EVERY", E2E_TEST ? 1 : 5);
 const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 80);
 const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 1000);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
@@ -2492,9 +2493,10 @@ function broadcastState(): void {
   updateByteMetric();
   publicPlayerViewCache.clear();
   snapshotSequence += 1;
-  const includeTrees = snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
-  const includeNpcs = snapshotSequence % NPC_SNAPSHOT_EVERY === 0;
   const forceFull = snapshotSequence % SNAPSHOT_FULL_EVERY === 0;
+  const includeTrees = forceFull || snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
+  const includeNpcs = forceFull || snapshotSequence % NPC_SNAPSHOT_EVERY === 0;
+  const includeResources = forceFull || snapshotSequence % RESOURCE_SNAPSHOT_EVERY === 0;
   const metricFrame = snapshotMetricFrame();
   for (const session of clients.values()) {
     const { socket } = session;
@@ -2504,7 +2506,7 @@ function broadcastState(): void {
       continue;
     }
 
-    const snapshot = buildSnapshotFor(session, includeTrees, includeNpcs, forceFull, metricFrame);
+    const snapshot = buildSnapshotFor(session, includeTrees, includeNpcs, includeResources, forceFull, metricFrame);
     if (!shouldSendSnapshot(session, snapshot, now)) continue;
     const raw = JSON.stringify(snapshot);
     metrics.bytesOutThisSecond += Buffer.byteLength(raw);
@@ -2566,7 +2568,14 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
   };
 }
 
-function buildSnapshotFor(session: Session, includeTrees: boolean, includeNpcs: boolean, forceFull: boolean, metricFrame: SnapshotMetricFrame): StateSnapshot {
+function buildSnapshotFor(
+  session: Session,
+  includeTrees: boolean,
+  includeNpcs: boolean,
+  includeResources: boolean,
+  forceFull: boolean,
+  metricFrame: SnapshotMetricFrame
+): StateSnapshot {
   const viewer = session.player;
   const cache = snapshotCacheFor(session);
   const players: PlayerView[] = [];
@@ -2607,17 +2616,23 @@ function buildSnapshotFor(session: Session, includeTrees: boolean, includeNpcs: 
   }
 
   const visibleFishingNodes: FishingNodeView[] = [];
-  forEachSpatial(staticSpatial.fishingNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
-    if (inInterestRange(viewer, node)) visibleFishingNodes.push(serializeFishingNode(node));
-  });
+  if (includeResources) {
+    forEachSpatial(staticSpatial.fishingNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
+      if (inInterestRange(viewer, node)) visibleFishingNodes.push(serializeFishingNode(node));
+    });
+  }
   const visibleMiningNodes: MiningNodeView[] = [];
-  forEachSpatial(staticSpatial.miningNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
-    if (inInterestRange(viewer, node)) visibleMiningNodes.push(serializeMiningNode(node));
-  });
+  if (includeResources) {
+    forEachSpatial(staticSpatial.miningNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
+      if (inInterestRange(viewer, node)) visibleMiningNodes.push(serializeMiningNode(node));
+    });
+  }
   const visibleHerbNodes: HerbNodeView[] = [];
-  forEachSpatial(staticSpatial.herbNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
-    if (inInterestRange(viewer, node)) visibleHerbNodes.push(serializeHerbNode(node));
-  });
+  if (includeResources) {
+    forEachSpatial(staticSpatial.herbNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
+      if (inInterestRange(viewer, node)) visibleHerbNodes.push(serializeHerbNode(node));
+    });
+  }
   const visibleFires: FireView[] = [];
   forEachSpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (fire) => {
     if (inInterestRange(viewer, fire)) visibleFires.push(serializeFire(fire));
@@ -2627,9 +2642,9 @@ function buildSnapshotFor(session: Session, includeTrees: boolean, includeNpcs: 
   const corpsesDelta = snapshotDelta(cache.corpses, visibleCorpses, corpseViewSignature, forceFull);
   const npcsDelta = snapshotDelta(cache.npcs, visibleNpcs, npcViewSignature, forceFull, !includeNpcs);
   const treesDelta = snapshotDelta(cache.trees, visibleTrees, treeViewSignature, forceFull, !includeTrees);
-  const fishingDelta = snapshotDelta(cache.fishingNodes, visibleFishingNodes, fishingNodeViewSignature, forceFull);
-  const miningDelta = snapshotDelta(cache.miningNodes, visibleMiningNodes, miningNodeViewSignature, forceFull);
-  const herbDelta = snapshotDelta(cache.herbNodes, visibleHerbNodes, herbNodeViewSignature, forceFull);
+  const fishingDelta = snapshotDelta(cache.fishingNodes, visibleFishingNodes, fishingNodeViewSignature, forceFull, !includeResources);
+  const miningDelta = snapshotDelta(cache.miningNodes, visibleMiningNodes, miningNodeViewSignature, forceFull, !includeResources);
+  const herbDelta = snapshotDelta(cache.herbNodes, visibleHerbNodes, herbNodeViewSignature, forceFull, !includeResources);
   const firesDelta = snapshotDelta(cache.fires, visibleFires, fireViewSignature, forceFull);
 
   return {
