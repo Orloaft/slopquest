@@ -128,6 +128,11 @@ export interface AbilitySpec {
   description: string;
   cooldownMs: number;
   durationMs: number;
+  guards?: AbilityGuard[];
+  targeting?: AbilityTargeting;
+  effects?: AbilityEffect[];
+  vfx?: AbilityVfx;
+  float?: AbilityFloat;
   speedMultiplier?: number;
   healFraction?: number;
   // Offensive (class "strike") abilities: deal damage to the current target.
@@ -136,6 +141,31 @@ export interface AbilitySpec {
   skill?: string; // skill trained + scaled by (e.g. "attack" | "ranged" | "magic")
   range?: number; // attack range in tiles (defaults to the class melee range)
   effectKind?: string; // visual effect kind (e.g. "hit" | "flare" | "frost" | "arrow")
+}
+
+export type AbilityGuard = "requireBelowMaxHp";
+
+export type AbilityTargeting =
+  | { mode: "self" }
+  | { mode: "aoe_self"; radius: number }
+  | { mode: "dash"; tiles: number };
+
+export type AbilityEffect =
+  | { kind: "buff_self"; buff: "sprint" | "ironClad" | "fleetFoot"; durationMs?: number; cleanse?: Array<"slow"> }
+  | { kind: "heal_over_time"; buff: "second_wind"; fraction?: number; durationMs?: number }
+  | { kind: "dash"; tiles?: number }
+  | { kind: "taunt"; durationMs?: number };
+
+export interface AbilityVfx {
+  effectKind: string;
+  color?: string;
+}
+
+export interface AbilityFloat {
+  text: string;
+  color: string;
+  noTargetsText?: string;
+  yOffset?: number;
 }
 
 export interface SkillDef {
@@ -213,7 +243,10 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     description: "Move 50% faster for 10s.",
     cooldownMs: 30000,
     durationMs: 10000,
-    speedMultiplier: 1.5
+    speedMultiplier: 1.5,
+    targeting: { mode: "self" },
+    effects: [{ kind: "buff_self", buff: "sprint" }],
+    float: { text: "{name} sprints.", color: "#9ae6b4", yOffset: 0 }
   },
   second_wind: {
     id: "second_wind",
@@ -221,7 +254,11 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     description: "Regenerate 50% of max HP over 5s.",
     cooldownMs: 90000,
     durationMs: 5000,
-    healFraction: 0.5
+    healFraction: 0.5,
+    guards: ["requireBelowMaxHp"],
+    targeting: { mode: "self" },
+    effects: [{ kind: "heal_over_time", buff: "second_wind", fraction: 0.5 }],
+    float: { text: "{name} catches a second wind.", color: "#f7d486", yOffset: 0 }
   },
   // --- Vanguard ---
   provoke: {
@@ -230,7 +267,11 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     description: "Taunt all nearby monsters, forcing them to attack you.",
     cooldownMs: 12000,
     durationMs: 6000,
-    manaCost: 6
+    manaCost: 6,
+    targeting: { mode: "aoe_self", radius: 1.8 },
+    effects: [{ kind: "taunt" }],
+    vfx: { effectKind: "flare", color: "#ffcf6b" },
+    float: { text: "Provoke!", noTargetsText: "Provoke", color: "#ffcf6b" }
   },
   iron_clad: {
     id: "iron_clad",
@@ -238,7 +279,10 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     description: "Take 30% less damage but move 15% slower for 6s.",
     cooldownMs: 20000,
     durationMs: 6000,
-    manaCost: 8
+    manaCost: 8,
+    targeting: { mode: "self" },
+    effects: [{ kind: "buff_self", buff: "ironClad" }],
+    float: { text: "Iron Clad", color: "#bcd3e0" }
   },
   // --- Archer ---
   pinning_shot: {
@@ -259,7 +303,10 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     description: "Cleanse slows and move 25% faster for 4s.",
     cooldownMs: 15000,
     durationMs: 4000,
-    manaCost: 6
+    manaCost: 6,
+    targeting: { mode: "self" },
+    effects: [{ kind: "buff_self", buff: "fleetFoot", cleanse: ["slow"] }],
+    float: { text: "Fleet Foot", color: "#9ae6b4" }
   },
   // --- Thief ---
   quick_step: {
@@ -268,7 +315,10 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     description: "Dash 2 tiles in the direction you face.",
     cooldownMs: 6000,
     durationMs: 0,
-    manaCost: 4
+    manaCost: 4,
+    targeting: { mode: "dash", tiles: 2 },
+    effects: [{ kind: "dash", tiles: 2 }],
+    float: { text: "Quick Step", color: "#e0c8ff" }
   },
   backstab: {
     id: "backstab",

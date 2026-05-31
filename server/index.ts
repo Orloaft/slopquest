@@ -34,7 +34,7 @@ import {
   xpForLevel,
   zoneAt
 } from "../src/shared.ts";
-import type { AbilitySpec, ClassSpec } from "../src/shared.ts";
+import type { AbilityEffect, AbilitySpec, ClassSpec } from "../src/shared.ts";
 import type {
   Item,
   MonsterSpawn,
@@ -99,6 +99,11 @@ type ClassAbilityHandler = (
   now: number,
   manaCost: number
 ) => void;
+
+interface AbilityResolution {
+  origin: Vec2;
+  targets: ServerMonster[];
+}
 
 interface StaticSpatialIndex {
   trees: Map<string, TreeNodeRuntime[]>;
@@ -954,6 +959,8 @@ function useClassAbility(player: ServerPlayer, id: string): void {
   if (now < (player.abilityCooldowns[id] ?? 0)) return;
   const manaCost = spec.manaCost ?? 0;
 
+  if (tryUseComposedAbility(player, id, spec, now, manaCost)) return;
+
   const handler = CLASS_ABILITY_HANDLERS[id];
   if (handler) {
     handler(player, id, spec, now, manaCost);
@@ -993,45 +1000,83 @@ function useClassAbility(player: ServerPlayer, id: string): void {
 
 }
 
-const CLASS_ABILITY_HANDLERS: Record<string, ClassAbilityHandler> = {
-  provoke(player, id, spec, now, manaCost) {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    const taunted = monstersInRadius(player.floor, player.x, player.y, 1.8);
-    for (const monster of taunted) {
-      monster.tauntUntil = now + spec.durationMs;
+function tryUseComposedAbility(player: ServerPlayer, id: string, spec: AbilitySpec, now: number, manaCost: number): boolean {
+  if (!spec.targeting || !spec.effects) return false;
+  const resolution = resolveAbilityTargeting(player, spec);
+  if (!resolution) return true;
+  if (!abilityGuardsPass(player, spec)) return true;
+  if (player.mana < manaCost) return true;
+
+  player.abilityCooldowns[id] = now + spec.cooldownMs;
+  player.mana -= manaCost;
+
+  let affected = 0;
+  for (const effect of spec.effects) affected += applyAbilityEffect(player, resolution, effect, spec, now);
+  if (spec.vfx) event("effect", spec.vfx.effectKind, resolution.origin.x, resolution.origin.y, player.floor, spec.vfx.color ?? null, player.id);
+  if (spec.float) {
+    const text = (affected === 0 && spec.float.noTargetsText ? spec.float.noTargetsText : spec.float.text).replaceAll("{name}", player.name);
+    event("float", text, resolution.origin.x, resolution.origin.y + (spec.float.yOffset ?? -0.5), player.floor, spec.float.color);
+  }
+  return true;
+}
+
+function resolveAbilityTargeting(player: ServerPlayer, spec: AbilitySpec): AbilityResolution | null {
+  if (!spec.targeting) return null;
+  if (spec.targeting.mode === "self" || spec.targeting.mode === "dash") {
+    return { origin: { x: player.x, y: player.y }, targets: [] };
+  }
+  if (spec.targeting.mode === "aoe_self") {
+    const targets = monstersInRadius(player.floor, player.x, player.y, spec.targeting.radius);
+    return { origin: { x: player.x, y: player.y }, targets };
+  }
+  return null;
+}
+
+function abilityGuardsPass(player: ServerPlayer, spec: AbilitySpec): boolean {
+  for (const guard of spec.guards ?? []) {
+    if (guard === "requireBelowMaxHp" && player.hp >= player.maxHp) return false;
+  }
+  return true;
+}
+
+function applyAbilityEffect(
+  player: ServerPlayer,
+  resolution: AbilityResolution,
+  effect: AbilityEffect,
+  spec: AbilitySpec,
+  now: number
+): number {
+  if (effect.kind === "buff_self") {
+    const durationMs = effect.durationMs ?? spec.durationMs;
+    if (effect.cleanse?.includes("slow")) player.slowUntil = 0;
+    player.abilityBuffs[effect.buff] = { until: now + durationMs };
+    return 1;
+  }
+  if (effect.kind === "heal_over_time") {
+    const durationMs = effect.durationMs ?? spec.durationMs;
+    const totalHeal = Math.max(1, Math.round(player.maxHp * (effect.fraction ?? spec.healFraction ?? 0)));
+    player.abilityBuffs[effect.buff] = { until: now + durationMs, healPerMs: totalHeal / durationMs };
+    return 1;
+  }
+  if (effect.kind === "dash") {
+    const tiles = effect.tiles ?? (spec.targeting?.mode === "dash" ? spec.targeting.tiles : 1);
+    dashPlayer(player, tiles);
+    resolution.origin.x = player.x;
+    resolution.origin.y = player.y;
+    return 1;
+  }
+  if (effect.kind === "taunt") {
+    const durationMs = effect.durationMs ?? spec.durationMs;
+    for (const monster of resolution.targets) {
+      monster.tauntUntil = now + durationMs;
       monster.tauntBy = player.id;
     }
-    event("effect", "flare", player.x, player.y, player.floor, "#ffcf6b", player.id);
-    event("float", taunted.length ? "Provoke!" : "Provoke", player.x, player.y - 0.5, player.floor, "#ffcf6b");
-  },
+    return resolution.targets.length;
+  }
+  return 0;
+}
 
-  iron_clad(player, id, spec, now, manaCost) {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    player.abilityBuffs.ironClad = { until: now + spec.durationMs };
-    event("float", "Iron Clad", player.x, player.y - 0.5, player.floor, "#bcd3e0");
-  },
-
-  fleet_foot(player, id, spec, now, manaCost) {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    player.abilityBuffs.fleetFoot = { until: now + spec.durationMs };
-    player.slowUntil = 0;
-    event("float", "Fleet Foot", player.x, player.y - 0.5, player.floor, "#9ae6b4");
-  },
-
-  quick_step(player, id, spec, now, manaCost) {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    dashPlayer(player, 2);
-    event("float", "Quick Step", player.x, player.y - 0.5, player.floor, "#e0c8ff");
-  },
-
+const CLASS_ABILITY_HANDLERS: Record<string, ClassAbilityHandler> = {
   healing_poultice(player, id, spec, now, manaCost) {
     if (player.mana < manaCost || player.hp >= player.maxHp) return;
     player.abilityCooldowns[id] = now + spec.cooldownMs;
@@ -1098,23 +1143,6 @@ const CLASS_ABILITY_HANDLERS: Record<string, ClassAbilityHandler> = {
       if (!monster.deadUntil) monster.inaccurateUntil = now + spec.durationMs;
     }
     event("float", "Volatile Flask", tx, ty, player.floor, "#a6e06b");
-  },
-
-  sprint(player, id, spec, now) {
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.abilityBuffs.sprint = { until: now + spec.durationMs };
-    event("float", `${player.name} sprints.`, player.x, player.y, player.floor, "#9ae6b4");
-  },
-
-  second_wind(player, id, spec, now) {
-    if (player.hp >= player.maxHp) return;
-    const totalHeal = Math.max(1, Math.round(player.maxHp * (spec.healFraction ?? 0)));
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.abilityBuffs.second_wind = {
-      until: now + spec.durationMs,
-      healPerMs: totalHeal / spec.durationMs
-    };
-    event("float", `${player.name} catches a second wind.`, player.x, player.y, player.floor, "#f7d486");
   }
 };
 
