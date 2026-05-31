@@ -205,6 +205,9 @@ and combat fanout without making every client see every other client.
 - Metrics frames are now sent at a per-client interval instead of on every state
   packet. The client carries forward the latest frame, and `npm run perf:gate`
   requires minimum metrics sample counts so the telemetry path remains covered.
+- State packets now use compact top-level keys on the wire and are expanded by
+  shared client/load-test helpers. The perf gate requires minimum compact-state
+  counts, proving the compact path is active during every load scenario.
 - `npm run check` now includes `npm run assets:budget`, currently guarding
   runtime assets at `100 MiB` total, `5 MiB` per file, and `500` files.
 - Save flush telemetry is now part of snapshots and the load driver. The perf
@@ -220,12 +223,12 @@ After throttling metrics frames to the per-client `TIB_SNAPSHOT_METRICS_MS`
 interval, `npm run perf:gate` passed all scenarios with explicit minimum
 metrics-sample thresholds. Headline state-packet averages:
 
-| Scenario | Metric samples | State bytes avg/max | Wire bytes avg/max |
-|---|---:|---:|---:|
-| 50 clustered town | 709 | 13.52 / 23.19 KB | 8.22 / 9.84 MB/s |
-| 150 capped town, compressed | 1,512 | 13.90 / 23.53 KB | 5.54 / 7.01 MB/s |
-| 50 mixed town/combat | 709 | 8.05 / 29.57 KB | 4.84 / 5.80 MB/s |
-| 100 distributed regional combat | 1,826 | 8.43 / 33.00 KB | 10.52 / 12.06 MB/s |
-| 50 co-located crypt combat | 708 | 12.77 / 15.43 KB | 7.74 / 9.18 MB/s |
-| 50 mixed slow readers | 639 | 8.42 / 29.32 KB | 4.84 / 5.83 MB/s |
-| 25 persistent save flush | 315 | 9.17 / 18.32 KB | 2.71 / 3.37 MB/s |
+| Scenario | Metric samples | Compact states | State bytes avg/max | Wire bytes avg/max |
+|---|---:|---:|---:|---:|
+| 50 clustered town | 709 | 9,558 | 13.26 / 22.97 KB | 8.06 / 9.58 MB/s |
+| 150 capped town, compressed | 1,512 | 20,175 | 13.57 / 23.17 KB | 5.37 / 6.90 MB/s |
+| 50 mixed town/combat | 709 | 9,558 | 7.85 / 29.01 KB | 4.71 / 5.73 MB/s |
+| 100 distributed regional combat | 1,826 | 24,983 | 8.19 / 32.70 KB | 10.22 / 11.81 MB/s |
+| 50 co-located crypt combat | 709 | 9,558 | 12.52 / 15.21 KB | 7.61 / 9.06 MB/s |
+| 50 mixed slow readers | 639 | 8,631 | 8.05 / 29.25 KB | 4.64 / 5.65 MB/s |
+| 25 persistent save flush | 315 | 4,233 | 8.80 / 18.11 KB | 2.60 / 3.23 MB/s |

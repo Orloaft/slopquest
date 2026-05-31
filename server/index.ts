@@ -67,6 +67,7 @@ import type {
   TreeView,
   UseItemCtx
 } from "../src/types.ts";
+import type { CompactStateSnapshot } from "../src/wire.ts";
 import type {
   Corpse,
   Database,
@@ -237,34 +238,7 @@ interface PlayerSnapshotCandidate {
 }
 
 type SnapshotCache = Record<SnapshotCategory, SnapshotCategoryCache>;
-type WireStateSnapshot = Omit<
-  StateSnapshot,
-  | "removedPlayerIds"
-  | "removedMonsterIds"
-  | "removedCorpseIds"
-  | "removedNpcIds"
-  | "removedTreeIds"
-  | "removedFishingNodeIds"
-  | "removedMiningNodeIds"
-  | "removedHerbNodeIds"
-  | "removedFireIds"
-  | "events"
-> &
-  Partial<
-    Pick<
-      StateSnapshot,
-      | "removedPlayerIds"
-      | "removedMonsterIds"
-      | "removedCorpseIds"
-      | "removedNpcIds"
-      | "removedTreeIds"
-      | "removedFishingNodeIds"
-      | "removedMiningNodeIds"
-      | "removedHerbNodeIds"
-      | "removedFireIds"
-      | "events"
-    >
-  >;
+type WireStateSnapshot = CompactStateSnapshot;
 
 const QUEST_LIST = Object.values(QUESTS);
 const QUESTS_BY_GIVER = new Map<string, Quest>();
@@ -2922,17 +2896,36 @@ function snapshotIsEmptyDelta(snapshot: StateSnapshot): boolean {
 }
 
 function compactSnapshotForWire(snapshot: StateSnapshot): WireStateSnapshot {
-  const wire: WireStateSnapshot = { ...snapshot };
-  if (wire.removedPlayerIds?.length === 0) delete wire.removedPlayerIds;
-  if (wire.removedMonsterIds?.length === 0) delete wire.removedMonsterIds;
-  if (wire.removedCorpseIds?.length === 0) delete wire.removedCorpseIds;
-  if (wire.removedNpcIds?.length === 0) delete wire.removedNpcIds;
-  if (wire.removedTreeIds?.length === 0) delete wire.removedTreeIds;
-  if (wire.removedFishingNodeIds?.length === 0) delete wire.removedFishingNodeIds;
-  if (wire.removedMiningNodeIds?.length === 0) delete wire.removedMiningNodeIds;
-  if (wire.removedHerbNodeIds?.length === 0) delete wire.removedHerbNodeIds;
-  if (wire.removedFireIds?.length === 0) delete wire.removedFireIds;
-  if (wire.events?.length === 0) delete wire.events;
+  const wire: WireStateSnapshot = { type: "state" };
+  if (snapshot.players.length > 0) wire.p = snapshot.players;
+  if (snapshot.playersFull) wire.pF = 1;
+  if (snapshot.removedPlayerIds.length > 0) wire.pR = snapshot.removedPlayerIds;
+  if (snapshot.monsters.length > 0) wire.m = snapshot.monsters;
+  if (snapshot.monstersFull) wire.mF = 1;
+  if (snapshot.removedMonsterIds.length > 0) wire.mR = snapshot.removedMonsterIds;
+  if (snapshot.corpses.length > 0) wire.c = snapshot.corpses;
+  if (snapshot.corpsesFull) wire.cF = 1;
+  if (snapshot.removedCorpseIds.length > 0) wire.cR = snapshot.removedCorpseIds;
+  if (snapshot.npcs.length > 0) wire.n = snapshot.npcs;
+  if (snapshot.npcsFull) wire.nF = 1;
+  if (snapshot.removedNpcIds.length > 0) wire.nR = snapshot.removedNpcIds;
+  if (snapshot.trees.length > 0) wire.t = snapshot.trees;
+  if (snapshot.treesFull) wire.tF = 1;
+  if (snapshot.removedTreeIds.length > 0) wire.tR = snapshot.removedTreeIds;
+  if (snapshot.fishingNodes.length > 0) wire.fn = snapshot.fishingNodes;
+  if (snapshot.fishingNodesFull) wire.fnF = 1;
+  if (snapshot.removedFishingNodeIds.length > 0) wire.fnR = snapshot.removedFishingNodeIds;
+  if (snapshot.miningNodes.length > 0) wire.mn = snapshot.miningNodes;
+  if (snapshot.miningNodesFull) wire.mnF = 1;
+  if (snapshot.removedMiningNodeIds.length > 0) wire.mnR = snapshot.removedMiningNodeIds;
+  if (snapshot.herbNodes.length > 0) wire.hn = snapshot.herbNodes;
+  if (snapshot.herbNodesFull) wire.hnF = 1;
+  if (snapshot.removedHerbNodeIds.length > 0) wire.hnR = snapshot.removedHerbNodeIds;
+  if (snapshot.fires.length > 0) wire.f = snapshot.fires;
+  if (snapshot.firesFull) wire.fF = 1;
+  if (snapshot.removedFireIds.length > 0) wire.fR = snapshot.removedFireIds;
+  if (snapshot.events.length > 0) wire.e = snapshot.events;
+  if (snapshot.metrics) wire.x = snapshot.metrics;
   return wire;
 }
 

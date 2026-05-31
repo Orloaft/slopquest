@@ -114,6 +114,13 @@ interval; the client keeps the last frame for the HUD. Load gates assert a
 minimum metrics sample count, preventing telemetry throttling from masking a
 broken metrics path.
 
+State packets now use compact top-level keys on the wire (`p`, `m`, `t`, `x`,
+and matching full/removal flags) and are expanded by shared client/load-test
+wire helpers before normal game logic sees them. This keeps the server's
+authoritative snapshot model readable while removing repeated category key
+overhead from every socket send. The perf gate counts compact state packets
+explicitly, so a regression back to long-form state packets fails loudly.
+
 Worst-case co-located player fanout is bounded by a nearest-player cap. The
 viewer is always included, and other player views are sorted by distance before
 the cap is applied. The perf gate includes a 150-client town-crowd scenario that
@@ -262,6 +269,7 @@ process cannot tick the populated world.
 - [x] Actual socket wire-byte telemetry with compressed crowd gate coverage.
 - [x] Safe JSON wire compaction for empty removed-id/event fields.
 - [x] Throttled metrics frames with minimum telemetry sample gates.
+- [x] Compact top-level state packet keys with compact-packet load gates.
 - [x] Runtime asset budget gate in `npm run check`.
 - [x] Bounded player-save flushes with persistence telemetry and a temp-data
   perf gate.

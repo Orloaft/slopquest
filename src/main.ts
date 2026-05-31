@@ -27,6 +27,7 @@ import {
 import type { ClassSpec } from "./shared.ts";
 import { MAP_OBJECTS } from "./map-objects.ts";
 import { setTrack, unlockAudio, setMusicEnabled, currentTrack } from "./audio.ts";
+import { normalizeServerMessage, type WireServerMessage } from "./wire.ts";
 
 // --- Music: per-zone score with a crossfade on transitions -----------------
 // Track names map to /music/<name>.mp3 (see public/music/README.md). The OSRS
@@ -67,7 +68,6 @@ import type {
   NpcView,
   PlayerView,
   QuestView,
-  ServerMessage,
   SkillView,
   StateMetrics,
   StateSnapshot,
@@ -891,7 +891,7 @@ function ensureSocket(): void {
     dom.rosterList.textContent = "Choose a character or create a new one.";
   });
   socket.addEventListener("message", (event) => {
-    const message = JSON.parse(event.data as string) as ServerMessage;
+    const message = normalizeServerMessage(JSON.parse(event.data as string) as WireServerMessage);
     if (message.type === "characters") renderRoster(message.characters ?? []);
     if (message.type === "characterDeleted" && !message.ok) dom.rosterList.textContent = "That character is online or no longer exists.";
     if (message.type === "welcome") selfId = message.id;

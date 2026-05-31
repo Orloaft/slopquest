@@ -1,5 +1,6 @@
 import { WebSocket, type RawData } from "ws";
 import type { MonsterView, PlayerView, StateMetrics } from "../src/types.ts";
+import { isCompactStateSnapshot, normalizeServerMessage, type WireServerMessage } from "../src/wire.ts";
 
 interface ParsedArgs {
   [key: string]: string | true;
@@ -90,7 +91,8 @@ const stats = {
   welcomed: 0,
   states: 0,
   errors: 0,
-  closed: 0
+  closed: 0,
+  compactStates: 0
 };
 const observed = {
   tickMs: [] as number[],
@@ -162,7 +164,9 @@ function openClient(index: number): void {
   socket.on("message", (raw: RawData) => {
     let message: LoadMessage;
     try {
-      message = JSON.parse(raw.toString()) as LoadMessage;
+      const parsed = JSON.parse(raw.toString()) as WireServerMessage;
+      if (isCompactStateSnapshot(parsed)) stats.compactStates += 1;
+      message = normalizeServerMessage(parsed) as LoadMessage;
     } catch {
       return;
     }
@@ -365,6 +369,7 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     ["opened", report.opened, optionNumber("min-opened")],
     ["welcomed", report.welcomed, optionNumber("min-welcomed")],
     ["states", report.states, optionNumber("min-states")],
+    ["compactStates", report.compactStates, optionNumber("min-compact-states")],
     ["metricSamples", report.metricSamples, optionNumber("min-metric-samples")],
     ["closed", report.closed, optionNumber("min-closed")],
     ["slowClients.paused", report.slowClients.paused, optionNumber("min-slow-paused")]
@@ -375,6 +380,7 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
 
   const maximums: Array<[string, number, number | null]> = [
     ["errors", report.errors, optionNumber("max-errors")],
+    ["compactStates", report.compactStates, optionNumber("max-compact-states")],
     ["slowClients.paused", report.slowClients.paused, optionNumber("max-slow-paused")],
     ["snapshotFlags.staticFull", report.snapshotFlags.staticFull, optionNumber("max-static-full-snapshots")]
   ];
