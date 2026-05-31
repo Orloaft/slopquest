@@ -677,7 +677,7 @@ function updatePlayers(dt: number, now: number): void {
       player.slowUntil = 0;
     }
 
-    const hasMoveVector = Math.hypot(Number(input.moveX), Number(input.moveY)) > 0.01;
+    const hasMoveVector = input.moveX !== 0 || input.moveY !== 0;
     let dx = hasMoveVector ? Number(input.moveX) : Number(input.right) - Number(input.left);
     let dy = hasMoveVector ? Number(input.moveY) : Number(input.down) - Number(input.up);
     if ((dx || dy) && !isStunned(player)) {
@@ -3422,7 +3422,7 @@ async function flushSaveQueue(): Promise<void> {
 function sanitizeInput(input: Partial<InputPayload> = {}): InputPayload {
   const moveX = clamp(Number(input?.moveX ?? 0), -1, 1);
   const moveY = clamp(Number(input?.moveY ?? 0), -1, 1);
-  const hasMoveVector = Number.isFinite(moveX) && Number.isFinite(moveY) && Math.hypot(moveX, moveY) > 0.01;
+  const hasMoveVector = Number.isFinite(moveX) && Number.isFinite(moveY) && moveX * moveX + moveY * moveY > 0.0001;
   return {
     up: Boolean(input?.up),
     down: Boolean(input?.down),
