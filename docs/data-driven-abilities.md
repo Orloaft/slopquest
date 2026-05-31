@@ -1,7 +1,10 @@
-# Proposal — Data-driven abilities
+# Data-driven abilities
 
-_Status: design proposal. No engine code changed by this document._
-_Companion to `docs/scaling-audit.md` → "Scaling axis 2" (the 100× / many-more-abilities goal)._
+_Status: implemented. Ability data now lives in `content/abilities.yaml`,
+is validated during `npm run content:build`, and is interpreted by
+`useClassAbility()` in `server/index.ts`._
+_Companion to `docs/scaling-audit.md` -> "Scaling axis 2" (the 100x /
+many-more-abilities goal)._
 
 ## Why now
 
