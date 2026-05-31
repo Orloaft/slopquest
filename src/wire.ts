@@ -122,6 +122,43 @@ interface CompactCorpseView {
   it: CorpseView["items"];
 }
 
+interface CompactStateMetrics {
+  c: number;
+  mo: number;
+  z: string;
+  vp: number;
+  vm: number;
+  vc: number;
+  vt: number;
+  vfn: number;
+  vmn: number;
+  vf: number;
+  sc: number;
+  rs: number;
+  de: number;
+  sce: number;
+  scp: number;
+  hu: number;
+  rss: number;
+  tm: number;
+  sm: number;
+  eld: number;
+  elp: number;
+  elm: number;
+  bo: number;
+  wbo: number;
+  ss: number;
+  sb: number;
+  ed: number;
+  cmd: number;
+  cmb: number;
+  sbb: number;
+  sqd: number;
+  sfm: number;
+  sfp: number;
+  sif: number;
+}
+
 export interface CompactStateSnapshot {
   type: "state";
   p?: CompactPlayerView[] | StateSnapshot["players"];
@@ -152,7 +189,7 @@ export interface CompactStateSnapshot {
   fF?: 1 | true;
   fR?: StateSnapshot["removedFireIds"];
   e?: StateSnapshot["events"];
-  x?: StateMetrics;
+  x?: CompactStateMetrics | StateMetrics;
 }
 
 export type WireServerMessage = ServerMessage | CompactStateSnapshot;
@@ -187,7 +224,7 @@ export function compactStateSnapshot(snapshot: StateSnapshot): CompactStateSnaps
   if (snapshot.firesFull) wire.fF = 1;
   if (snapshot.removedFireIds.length > 0) wire.fR = snapshot.removedFireIds;
   if (snapshot.events.length > 0) wire.e = snapshot.events;
-  if (snapshot.metrics) wire.x = snapshot.metrics;
+  if (snapshot.metrics) wire.x = compactStateMetrics(snapshot.metrics);
   return wire;
 }
 
@@ -224,7 +261,7 @@ export function normalizeServerMessage(message: WireServerMessage): ServerMessag
     firesFull: Boolean(compact.fF),
     removedFireIds: compact.fR ?? [],
     events: compact.e ?? [],
-    metrics: compact.x
+    metrics: compact.x ? expandStateMetrics(compact.x) : undefined
   };
 }
 
@@ -460,5 +497,84 @@ function expandCorpseView(corpse: CompactCorpseView | CorpseView): CorpseView {
     label: corpse.l,
     kind: corpse.k,
     items: corpse.it
+  };
+}
+
+function compactStateMetrics(metrics: StateMetrics): CompactStateMetrics {
+  return {
+    c: metrics.clients,
+    mo: metrics.monsters,
+    z: metrics.zone,
+    vp: metrics.visiblePlayers,
+    vm: metrics.visibleMonsters,
+    vc: metrics.visibleCorpses,
+    vt: metrics.visibleTrees,
+    vfn: metrics.visibleFishingNodes,
+    vmn: metrics.visibleMiningNodes,
+    vf: metrics.visibleFires,
+    sc: metrics.spatialCells,
+    rs: metrics.residentStaticResources,
+    de: metrics.dynamicEntities,
+    sce: metrics.snapshotCacheEntries,
+    scp: metrics.snapshotCacheEntriesPeak,
+    hu: metrics.heapUsedMb,
+    rss: metrics.rssMb,
+    tm: metrics.tickMs,
+    sm: metrics.snapshotMs,
+    eld: metrics.eventLoopDelayMs,
+    elp: metrics.eventLoopDelayP95Ms,
+    elm: metrics.eventLoopDelayMaxMs,
+    bo: metrics.bytesOutPerSecond,
+    wbo: metrics.wireBytesOutPerSecond,
+    ss: metrics.snapshotsSentPerSecond,
+    sb: metrics.snapshotsSkippedBackpressurePerSecond,
+    ed: metrics.eventsDroppedPerSecond,
+    cmd: metrics.clientMessagesDroppedPerSecond,
+    cmb: metrics.clientMessageMaxBytes,
+    sbb: metrics.socketBackpressureBytes,
+    sqd: metrics.saveQueueDepth,
+    sfm: metrics.saveFlushMs,
+    sfp: metrics.saveFlushPlayers,
+    sif: metrics.saveInFlight
+  };
+}
+
+function expandStateMetrics(metrics: CompactStateMetrics | StateMetrics): StateMetrics {
+  if ("clients" in metrics) return metrics;
+  return {
+    clients: metrics.c,
+    monsters: metrics.mo,
+    zone: metrics.z,
+    visiblePlayers: metrics.vp,
+    visibleMonsters: metrics.vm,
+    visibleCorpses: metrics.vc,
+    visibleTrees: metrics.vt,
+    visibleFishingNodes: metrics.vfn,
+    visibleMiningNodes: metrics.vmn,
+    visibleFires: metrics.vf,
+    spatialCells: metrics.sc,
+    residentStaticResources: metrics.rs,
+    dynamicEntities: metrics.de,
+    snapshotCacheEntries: metrics.sce,
+    snapshotCacheEntriesPeak: metrics.scp,
+    heapUsedMb: metrics.hu,
+    rssMb: metrics.rss,
+    tickMs: metrics.tm,
+    snapshotMs: metrics.sm,
+    eventLoopDelayMs: metrics.eld,
+    eventLoopDelayP95Ms: metrics.elp,
+    eventLoopDelayMaxMs: metrics.elm,
+    bytesOutPerSecond: metrics.bo,
+    wireBytesOutPerSecond: metrics.wbo,
+    snapshotsSentPerSecond: metrics.ss,
+    snapshotsSkippedBackpressurePerSecond: metrics.sb,
+    eventsDroppedPerSecond: metrics.ed,
+    clientMessagesDroppedPerSecond: metrics.cmd,
+    clientMessageMaxBytes: metrics.cmb,
+    socketBackpressureBytes: metrics.sbb,
+    saveQueueDepth: metrics.sqd,
+    saveFlushMs: metrics.sfm,
+    saveFlushPlayers: metrics.sfp,
+    saveInFlight: metrics.sif
   };
 }

@@ -216,6 +216,9 @@ and combat fanout without making every client see every other client.
 - Metrics frames are now sent at a per-client interval instead of on every state
   packet. The client carries forward the latest frame, and `npm run perf:gate`
   requires minimum metrics sample counts so the telemetry path remains covered.
+- Metrics frames now use compact wire keys and expand back to `StateMetrics`
+  through shared client/load-test normalization, trimming observability overhead
+  without changing HUD or gate code.
 - State packets now use compact top-level and entity keys on the wire and are
   expanded by shared client/load-test helpers. The perf gate requires minimum
   compact-state counts, proving the compact path is active during every load
