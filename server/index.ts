@@ -3342,7 +3342,7 @@ function snapshotDelta<T extends SnapshotEntity>(
   cache.initialized = true;
   cache.nextSignatures = cache.signatures;
   cache.signatures = next;
-  return { items: full ? visible : changed, removedIds, full, visibleCount: visible.length };
+  return { items: full ? visible : changed, removedIds: removedIds.length > 0 ? removedIds : EMPTY_IDS, full, visibleCount: visible.length };
 }
 
 function playerViewSignature(player: PlayerView): number {
@@ -3488,6 +3488,8 @@ function monsterViewSignature(monster: MonsterView): number {
 }
 
 function corpseViewSignature(corpse: CorpseView): number {
+  const cached = resourceViewSignatureCache.get(corpse);
+  if (cached !== undefined) return cached;
   let hash = HASH_INIT;
   hash = hashNumber(hash, corpse.floor);
   hash = hashNumber(hash, corpse.x);
@@ -3498,6 +3500,7 @@ function corpseViewSignature(corpse: CorpseView): number {
     hash = hashString(hash, item.id);
     hash = hashNumber(hash, item.qty);
   }
+  resourceViewSignatureCache.set(corpse, hash);
   return hash;
 }
 

@@ -197,6 +197,7 @@ export type WireServerMessage = ServerMessage | CompactStateSnapshot;
 const compactPlayerViewCache = new WeakMap<PlayerView, CompactPlayerView>();
 const compactMonsterViewCache = new WeakMap<MonsterView, CompactMonsterView>();
 const compactNpcViewCache = new WeakMap<NpcView, CompactNpcView>();
+const compactCorpseViewCache = new WeakMap<CorpseView, CompactCorpseView>();
 const compactTreeViewCache = new WeakMap<TreeView, CompactTreeView>();
 const compactFishingNodeViewCache = new WeakMap<FishingNodeView, CompactFishingNodeView>();
 const compactMiningNodeViewCache = new WeakMap<MiningNodeView, CompactMiningNodeView>();
@@ -505,7 +506,9 @@ function expandFireView(fire: CompactFireView | FireView): FireView {
 }
 
 function compactCorpseView(corpse: CorpseView): CompactCorpseView {
-  return {
+  const cached = compactCorpseViewCache.get(corpse);
+  if (cached) return cached;
+  const compact = {
     i: corpse.id,
     f: corpse.floor,
     x: corpse.x,
@@ -515,6 +518,8 @@ function compactCorpseView(corpse: CorpseView): CompactCorpseView {
     k: corpse.kind,
     it: corpse.items
   };
+  compactCorpseViewCache.set(corpse, compact);
+  return compact;
 }
 
 function expandCorpseView(corpse: CompactCorpseView | CorpseView): CorpseView {
