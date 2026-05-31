@@ -1165,7 +1165,8 @@ function syncEntities(): void {
   const visibleHerbNodes = new Set<string>();
   const visibleFires = new Set<string>();
 
-  for (const player of latestState.players.filter((item) => item.floor === me.floor)) {
+  for (const player of latestState.players) {
+    if (player.floor !== me.floor) continue;
     visiblePlayers.add(player.id);
     let view = playerViews.get(player.id);
     if (!view) {
@@ -1188,7 +1189,8 @@ function syncEntities(): void {
     }
   }
 
-  for (const monster of latestState.monsters.filter((item) => item.floor === me.floor)) {
+  for (const monster of latestState.monsters) {
+    if (monster.floor !== me.floor) continue;
     visibleMonsters.add(monster.id);
     let view = monsterViews.get(monster.id);
     if (!view) {
@@ -1214,7 +1216,8 @@ function syncEntities(): void {
     }
   }
 
-  for (const corpse of latestState.corpses.filter((item) => item.floor === me.floor)) {
+  for (const corpse of latestState.corpses) {
+    if (corpse.floor !== me.floor) continue;
     visibleCorpses.add(corpse.id);
     let view = corpseViews.get(corpse.id);
     if (!view) {
@@ -1241,7 +1244,8 @@ function syncEntities(): void {
     }
   }
 
-  for (const npc of (latestState.npcs ?? []).filter((item) => item.floor === me.floor)) {
+  for (const npc of latestState.npcs ?? []) {
+    if (npc.floor !== me.floor) continue;
     visibleNpcs.add(npc.id);
     let view = npcViews.get(npc.id);
     if (!view) {
@@ -1261,7 +1265,8 @@ function syncEntities(): void {
   }
 
   if (latestState.treesFull) {
-    for (const tree of (latestState.trees ?? []).filter((item) => item.floor === me.floor)) {
+    for (const tree of latestState.trees ?? []) {
+      if (tree.floor !== me.floor) continue;
       visibleTrees.add(tree.id);
       let view = treeViews.get(tree.id);
       if (!view) {
@@ -1285,7 +1290,8 @@ function syncEntities(): void {
     }
   }
 
-  for (const node of (latestState.fishingNodes ?? []).filter((item) => item.floor === me.floor)) {
+  for (const node of latestState.fishingNodes ?? []) {
+    if (node.floor !== me.floor) continue;
     visibleFishingNodes.add(node.id);
     let view = fishingViews.get(node.id);
     if (!view) {
@@ -1303,7 +1309,8 @@ function syncEntities(): void {
     }
   }
 
-  for (const node of (latestState.miningNodes ?? []).filter((item) => item.floor === me.floor)) {
+  for (const node of latestState.miningNodes ?? []) {
+    if (node.floor !== me.floor) continue;
     visibleMiningNodes.add(node.id);
     let view = miningViews.get(node.id);
     if (!view) {
@@ -1320,7 +1327,8 @@ function syncEntities(): void {
     }
   }
 
-  for (const node of (latestState.herbNodes ?? []).filter((item) => item.floor === me.floor)) {
+  for (const node of latestState.herbNodes ?? []) {
+    if (node.floor !== me.floor) continue;
     visibleHerbNodes.add(node.id);
     let view = herbViews.get(node.id);
     if (!view) {
@@ -1339,7 +1347,8 @@ function syncEntities(): void {
     }
   }
 
-  for (const fire of (latestState.fires ?? []).filter((item) => item.floor === me.floor)) {
+  for (const fire of latestState.fires ?? []) {
+    if (fire.floor !== me.floor) continue;
     visibleFires.add(fire.id);
     let view = fireViews.get(fire.id);
     if (!view) {
