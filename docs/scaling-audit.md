@@ -38,6 +38,9 @@ no socket errors and no backpressure skips. See
   queue, with drop telemetry in load gates.
 - Load gates track raw state-message byte sizes to catch protocol bloat before
   aggregate bandwidth becomes the only warning sign.
+- Player save flushes are concurrency-capped and covered by a persistent
+  temp-data load gate, so online-player saves cannot turn into an unbounded
+  filesystem burst.
 - `npm run check` enforces a runtime asset budget so up-front public assets do
   not quietly grow past the point where region streaming becomes urgent.
 - Current content: 10 floors, 77 monsters, roughly 1,385 derivable tree tiles,
@@ -175,10 +178,14 @@ hosting environment.
 
 ### Persistence
 
-Player saves now live in per-player files with legacy migration, which is a
-good step beyond whole-DB rewrites. SQLite/Postgres is still the right move
-before hundreds of accounts, shared world-state persistence, guilds, market
-orders, or multi-process sharding.
+Player saves now live in per-player files with legacy migration, and save
+flushes are bounded by `TIB_SAVE_CONCURRENCY` instead of writing every dirty
+player at once. Snapshot telemetry exposes queue depth, in-flight state, flush
+duration, and written-player count; `npm run perf:gate` includes a persistent
+client scenario using an isolated temp data directory.
+
+SQLite/Postgres is still the right move before hundreds of accounts, shared
+world-state persistence, guilds, market orders, or multi-process sharding.
 
 ### Multi-process sharding
 
@@ -219,6 +226,8 @@ process cannot tick the populated world.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
 - [x] Raw state-message byte telemetry and packet-size thresholds in load gates.
 - [x] Runtime asset budget gate in `npm run check`.
+- [x] Bounded player-save flushes with persistence telemetry and a temp-data
+  perf gate.
 - [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
 - [ ] Chunk-derived fishing/mining/herb resources before those lists grow by an

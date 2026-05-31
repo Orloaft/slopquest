@@ -250,6 +250,10 @@ export interface StateMetrics {
   snapshotsSkippedBackpressurePerSecond: number;
   eventsDroppedPerSecond: number;
   socketBackpressureBytes: number;
+  saveQueueDepth: number;
+  saveFlushMs: number;
+  saveFlushPlayers: number;
+  saveInFlight: number;
 }
 
 // --- Server → client messages ---------------------------------------------

@@ -1,11 +1,15 @@
 import { spawn } from "node:child_process";
 import { once } from "node:events";
+import { mkdtemp, rm } from "node:fs/promises";
 import { createServer } from "node:net";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 interface Scenario {
   name: string;
   args: string[];
   serverEnv?: Record<string, string>;
+  tempDataDir?: boolean;
 }
 
 const PORT = Number(process.env.TIB_PERF_PORT ?? 8790);
@@ -51,6 +55,12 @@ const gateScenarios: Scenario[] = [
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
+      "0",
+      "--max-save-queue-depth-max",
+      "0",
+      "--max-save-flush-ms-max",
+      "0",
+      "--max-save-flush-players-max",
       "0"
     ]
   },
@@ -92,6 +102,12 @@ const gateScenarios: Scenario[] = [
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
+      "0",
+      "--max-save-queue-depth-max",
+      "0",
+      "--max-save-flush-ms-max",
+      "0",
+      "--max-save-flush-players-max",
       "0"
     ]
   },
@@ -138,6 +154,12 @@ const gateScenarios: Scenario[] = [
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
+      "0",
+      "--max-save-queue-depth-max",
+      "0",
+      "--max-save-flush-ms-max",
+      "0",
+      "--max-save-flush-players-max",
       "0"
     ]
   },
@@ -182,6 +204,12 @@ const gateScenarios: Scenario[] = [
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
+      "0",
+      "--max-save-queue-depth-max",
+      "0",
+      "--max-save-flush-ms-max",
+      "0",
+      "--max-save-flush-players-max",
       "0"
     ]
   },
@@ -230,7 +258,59 @@ const gateScenarios: Scenario[] = [
       "--max-state-message-bytes-avg",
       "25000",
       "--max-events-dropped-per-second-max",
+      "0",
+      "--max-save-queue-depth-max",
+      "0",
+      "--max-save-flush-ms-max",
+      "0",
+      "--max-save-flush-players-max",
       "0"
+    ]
+  },
+  {
+    name: "25 persistent clients save flush",
+    tempDataDir: true,
+    serverEnv: {
+      TIB_SAVE_CONCURRENCY: "4"
+    },
+    args: [
+      "--clients",
+      "25",
+      "--duration",
+      "13000",
+      "--persistent",
+      "--combat",
+      "0",
+      "--max-errors",
+      "0",
+      "--min-opened",
+      "25",
+      "--min-welcomed",
+      "25",
+      "--min-closed",
+      "25",
+      "--max-tick-ms-max",
+      "8",
+      "--max-snapshot-ms-max",
+      "18",
+      "--max-heap-used-mb-max",
+      "256",
+      "--max-rss-mb-max",
+      "512",
+      "--max-state-message-bytes-max",
+      "60000",
+      "--max-state-message-bytes-avg",
+      "25000",
+      "--max-snapshots-skipped-backpressure-per-second-max",
+      "0",
+      "--max-events-dropped-per-second-max",
+      "0",
+      "--max-save-queue-depth-max",
+      "25",
+      "--max-save-flush-ms-max",
+      "250",
+      "--max-save-flush-players-max",
+      "25"
     ]
   }
 ];
@@ -298,6 +378,7 @@ try {
 }
 
 async function runWithServer(scenario: Scenario): Promise<void> {
+  const dataDir = scenario.tempDataDir ? await mkdtemp(join(tmpdir(), "tib-perf-data-")) : undefined;
   const server = spawn(process.execPath, ["server/index.ts"], {
     cwd: process.cwd(),
     env: {
@@ -306,6 +387,7 @@ async function runWithServer(scenario: Scenario): Promise<void> {
       E2E_TEST: "1",
       TIB_ALLOW_TRANSIENT_PLAYERS: "1",
       TIB_WS_COMPRESSION: "0",
+      ...(dataDir ? { TIB_DATA_DIR: dataDir } : {}),
       ...scenario.serverEnv
     },
     stdio: ["ignore", "pipe", "pipe"]
@@ -326,6 +408,7 @@ async function runWithServer(scenario: Scenario): Promise<void> {
   } finally {
     server.kill("SIGTERM");
     await once(server, "exit").catch(() => undefined);
+    if (dataDir) await rm(dataDir, { recursive: true, force: true });
   }
 }
 

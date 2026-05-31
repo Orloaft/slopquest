@@ -269,5 +269,9 @@ export interface Metrics {
   snapshotsSkippedBackpressurePerSecond: number;
   eventsDroppedThisSecond: number;
   eventsDroppedPerSecond: number;
+  saveQueueDepth: number;
+  saveFlushMs: number;
+  saveFlushPlayers: number;
+  saveInFlight: number;
   lastBytesAt: number;
 }

@@ -40,8 +40,17 @@ type SummaryMetric =
   | "bytesOutPerSecond"
   | "snapshotsSentPerSecond"
   | "snapshotsSkippedBackpressurePerSecond"
-  | "eventsDroppedPerSecond";
-type GaugeMetric = "heapUsedMb" | "rssMb" | "residentStaticResources" | "dynamicEntities" | "spatialCells";
+  | "eventsDroppedPerSecond"
+  | "saveFlushMs";
+type GaugeMetric =
+  | "heapUsedMb"
+  | "rssMb"
+  | "residentStaticResources"
+  | "dynamicEntities"
+  | "spatialCells"
+  | "saveQueueDepth"
+  | "saveFlushPlayers"
+  | "saveInFlight";
 type SummaryField = "min" | "max" | "avg";
 
 const options = parseArgs(process.argv.slice(2));
@@ -98,6 +107,10 @@ const observed = {
   residentStaticResources: [] as number[],
   dynamicEntities: [] as number[],
   spatialCellsSamples: [] as number[],
+  saveQueueDepth: [] as number[],
+  saveFlushMs: [] as number[],
+  saveFlushPlayers: [] as number[],
+  saveInFlight: [] as number[],
   serverClientsPeak: 0,
   serverMonsters: 0,
   spatialCells: 0,
@@ -279,6 +292,10 @@ function recordMetrics(m: Partial<StateMetrics>): void {
     observed.snapshotsSkippedBackpressurePerSecond.push(m.snapshotsSkippedBackpressurePerSecond);
   }
   if (typeof m.eventsDroppedPerSecond === "number") observed.eventsDroppedPerSecond.push(m.eventsDroppedPerSecond);
+  if (typeof m.saveQueueDepth === "number") observed.saveQueueDepth.push(m.saveQueueDepth);
+  if (typeof m.saveFlushMs === "number") observed.saveFlushMs.push(m.saveFlushMs);
+  if (typeof m.saveFlushPlayers === "number") observed.saveFlushPlayers.push(m.saveFlushPlayers);
+  if (typeof m.saveInFlight === "number") observed.saveInFlight.push(m.saveInFlight);
   if (typeof m.visiblePlayers === "number") observed.visiblePlayers.push(m.visiblePlayers);
   if (typeof m.visibleMonsters === "number") observed.visibleMonsters.push(m.visibleMonsters);
   if (typeof m.visibleTrees === "number") observed.visibleTrees.push(m.visibleTrees);
@@ -364,9 +381,19 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     "bytesOutPerSecond",
     "snapshotsSentPerSecond",
     "snapshotsSkippedBackpressurePerSecond",
-    "eventsDroppedPerSecond"
+    "eventsDroppedPerSecond",
+    "saveFlushMs"
   ];
-  const gaugeNames: GaugeMetric[] = ["heapUsedMb", "rssMb", "residentStaticResources", "dynamicEntities", "spatialCells"];
+  const gaugeNames: GaugeMetric[] = [
+    "heapUsedMb",
+    "rssMb",
+    "residentStaticResources",
+    "dynamicEntities",
+    "spatialCells",
+    "saveQueueDepth",
+    "saveFlushPlayers",
+    "saveInFlight"
+  ];
   const fields: SummaryField[] = ["min", "max", "avg"];
   for (const metric of metricNames) {
     const summary = report.perTick[metric];
@@ -438,11 +465,15 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       snapshotsSentPerSecond: summarize(observed.snapshotsSentPerSecond),
       snapshotsSkippedBackpressurePerSecond: summarize(observed.snapshotsSkippedBackpressurePerSecond),
       eventsDroppedPerSecond: summarize(observed.eventsDroppedPerSecond),
+      saveFlushMs: summarize(observed.saveFlushMs),
       heapUsedMb: summarize(observed.heapUsedMb),
       rssMb: summarize(observed.rssMb),
       residentStaticResources: summarize(observed.residentStaticResources),
       dynamicEntities: summarize(observed.dynamicEntities),
-      spatialCells: summarize(observed.spatialCellsSamples)
+      spatialCells: summarize(observed.spatialCellsSamples),
+      saveQueueDepth: summarize(observed.saveQueueDepth),
+      saveFlushPlayers: summarize(observed.saveFlushPlayers),
+      saveInFlight: summarize(observed.saveInFlight)
     },
     perMessage: {
       stateBytes: summarize(observed.stateMessageBytes)

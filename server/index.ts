@@ -216,6 +216,10 @@ interface SnapshotMetricFrame {
   snapshotsSkippedBackpressurePerSecond: number;
   eventsDroppedPerSecond: number;
   socketBackpressureBytes: number;
+  saveQueueDepth: number;
+  saveFlushMs: number;
+  saveFlushPlayers: number;
+  saveInFlight: number;
 }
 
 interface SnapshotCategoryCache {
@@ -307,7 +311,7 @@ class MinHeap<T> {
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = join(__dirname, "..", "data");
+const DATA_DIR = process.env.TIB_DATA_DIR ?? join(__dirname, "..", "data");
 const SAVE_FILE = join(DATA_DIR, "players.json");
 const PLAYER_DIR = join(DATA_DIR, "players");
 const LEGACY_MIGRATION_MARKER = join(DATA_DIR, "players.v2");
@@ -353,6 +357,7 @@ const RESOURCE_SNAPSHOT_EVERY = positiveIntEnv("TIB_RESOURCE_SNAPSHOT_EVERY", E2
 const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 80);
 const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 1000);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
+const SAVE_CONCURRENCY = positiveIntEnv("TIB_SAVE_CONCURRENCY", 16);
 const GLOBAL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_GLOBAL_EVENT_QUEUE_LIMIT", 128);
 const TARGETED_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_TARGETED_EVENT_QUEUE_LIMIT", 64);
 const CELL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_CELL_EVENT_QUEUE_LIMIT", 256);
@@ -424,6 +429,10 @@ const metrics: Metrics = {
   snapshotsSkippedBackpressurePerSecond: 0,
   eventsDroppedThisSecond: 0,
   eventsDroppedPerSecond: 0,
+  saveQueueDepth: 0,
+  saveFlushMs: 0,
+  saveFlushPlayers: 0,
+  saveInFlight: 0,
   lastBytesAt: performance.now()
 };
 let saveQueued = false;
@@ -2775,7 +2784,11 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
     snapshotsSentPerSecond: metrics.snapshotsSentPerSecond,
     snapshotsSkippedBackpressurePerSecond: metrics.snapshotsSkippedBackpressurePerSecond,
     eventsDroppedPerSecond: metrics.eventsDroppedPerSecond,
-    socketBackpressureBytes: SOCKET_BACKPRESSURE_BYTES
+    socketBackpressureBytes: SOCKET_BACKPRESSURE_BYTES,
+    saveQueueDepth: metrics.saveQueueDepth,
+    saveFlushMs: metrics.saveFlushMs,
+    saveFlushPlayers: metrics.saveFlushPlayers,
+    saveInFlight: metrics.saveInFlight
   };
 }
 
@@ -2938,7 +2951,11 @@ function buildSnapshotFor(
       snapshotsSentPerSecond: metricFrame.snapshotsSentPerSecond,
       snapshotsSkippedBackpressurePerSecond: metricFrame.snapshotsSkippedBackpressurePerSecond,
       eventsDroppedPerSecond: metricFrame.eventsDroppedPerSecond,
-      socketBackpressureBytes: metricFrame.socketBackpressureBytes
+      socketBackpressureBytes: metricFrame.socketBackpressureBytes,
+      saveQueueDepth: metricFrame.saveQueueDepth,
+      saveFlushMs: metricFrame.saveFlushMs,
+      saveFlushPlayers: metricFrame.saveFlushPlayers,
+      saveInFlight: metricFrame.saveInFlight
     }
   };
 }
@@ -3597,6 +3614,7 @@ function persistPlayerToDb(player: ServerPlayer): string {
 
 function persistPlayer(player: ServerPlayer): void {
   dirtyPlayerKeys.add(persistPlayerToDb(player));
+  refreshSaveMetrics();
   queueSave();
 }
 
@@ -3604,6 +3622,7 @@ function persistOnlinePlayers(): void {
   for (const session of clients.values()) {
     if (!session.transient) dirtyPlayerKeys.add(persistPlayerToDb(session.player));
   }
+  refreshSaveMetrics();
   queueSave();
 }
 
@@ -3658,26 +3677,51 @@ function queueSave(): void {
 }
 
 async function flushSaveQueue(): Promise<void> {
-  if (saveInFlight || !saveQueued || dirtyPlayerKeys.size === 0) return;
+  if (saveInFlight || !saveQueued) return;
+  if (dirtyPlayerKeys.size === 0) {
+    saveQueued = false;
+    refreshSaveMetrics();
+    return;
+  }
   saveQueued = false;
   saveInFlight = true;
   const keys = [...dirtyPlayerKeys];
   dirtyPlayerKeys.clear();
+  refreshSaveMetrics();
+  const started = performance.now();
+  let written = 0;
   try {
-    await Promise.all(
-      keys.map((key) => {
-        const player = db.players[key];
-        if (!player) return Promise.resolve();
-        return writeFile(playerFilePath(key), JSON.stringify(player, null, 2));
-      })
-    );
+    for (let i = 0; i < keys.length; i += SAVE_CONCURRENCY) {
+      const batch = keys.slice(i, i + SAVE_CONCURRENCY);
+      const results = await Promise.all(
+        batch.map(async (key) => {
+          const player = db.players[key];
+          if (!player) return false;
+          await writeFile(playerFilePath(key), JSON.stringify(player, null, 2));
+          return true;
+        })
+      );
+      written += results.filter(Boolean).length;
+      metrics.saveFlushPlayers = written;
+      metrics.saveFlushMs = round(performance.now() - started);
+      refreshSaveMetrics();
+    }
   } catch (error) {
     console.error("Failed to save player data:", error);
     for (const key of keys) dirtyPlayerKeys.add(key);
+    refreshSaveMetrics();
   } finally {
     saveInFlight = false;
+    metrics.saveFlushPlayers = written;
+    metrics.saveFlushMs = round(performance.now() - started);
+    refreshSaveMetrics();
     if (saveQueued) void flushSaveQueue();
   }
+}
+
+function refreshSaveMetrics(): void {
+  metrics.saveQueueDepth = dirtyPlayerKeys.size;
+  metrics.saveInFlight = saveInFlight ? 1 : 0;
 }
 
 function sanitizeInput(input: Partial<InputPayload> = {}): InputPayload {

@@ -194,5 +194,9 @@ and combat fanout without making every client see every other client.
   targeted regional sample peaked at roughly `33 KB` and averaged roughly `9 KB`.
 - `npm run check` now includes `npm run assets:budget`, currently guarding
   runtime assets at `100 MiB` total, `5 MiB` per file, and `500` files.
+- Save flush telemetry is now part of snapshots and the load driver. The perf
+  gate includes a 25 persistent-client temp-data scenario with
+  `TIB_SAVE_CONCURRENCY=4`, ensuring player-file saves stay bounded without
+  touching the real `data/players` directory.
 - The next performance work should be longer/slow-client scenarios and eventual
   protocol compaction only if telemetry asks for it.
