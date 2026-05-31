@@ -138,6 +138,11 @@ interface FireExpiration {
   id: string;
 }
 
+interface CorpseExpiration {
+  at: number;
+  id: string;
+}
+
 interface ActiveRegions {
   cells: Set<string>;
 }
@@ -298,6 +303,8 @@ const HERB_RESPAWN_MS = 25000;
 const HERB_GATHER_MS = 2600;
 const FIRE_DURATION_MS = 120000;
 const FIRE_DURATION_OVERRIDE_MS = optionalPositiveIntEnv("TIB_FIRE_DURATION_MS");
+const CORPSE_DECAY_MS = positiveIntEnv("TIB_CORPSE_DECAY_MS", 180000);
+const DROP_DECAY_MS = positiveIntEnv("TIB_DROP_DECAY_MS", 300000);
 const INVENTORY_SIZE = 30;
 const BREW_XP = 30;
 // Encumbrance: at/below the soft cap you move at full speed; past it, speed
@@ -352,6 +359,7 @@ const miningNodeViewCache = new WeakMap<MiningNodeRuntime, ResourceViewCache<Min
 const herbNodeViewCache = new WeakMap<HerbNodeRuntime, ResourceViewCache<HerbNodeView>>();
 const resourceRespawns = new MinHeap<ResourceRespawn>((a, b) => a.at - b.at);
 const fireExpirations = new MinHeap<FireExpiration>((a, b) => a.at - b.at);
+const corpseExpirations = new MinHeap<CorpseExpiration>((a, b) => a.at - b.at);
 const activeRegionsScratch: ActiveRegions = { cells: new Set() };
 const visitedMonsterScratch = new Set<ServerMonster>();
 const visitedNpcScratch = new Set<NpcRuntime>();
@@ -475,6 +483,7 @@ setInterval(() => {
   updateNpcs(dt, now, activeRegions);
   updateResourceRespawns(now);
   updateFires(now);
+  updateCorpseExpirations(now);
   refreshSpatialCellMetric();
   updateMonsters(dt, now, activeRegions);
   recordSample(metrics.tickSamples, performance.now() - started);
@@ -1167,6 +1176,7 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
   corpses.set(corpse.id, corpse);
   addToCellIndex(corpsesByCell, corpse);
   addToSpatial(spatial.corpses, corpse);
+  scheduleCorpseExpiration(corpse, performance.now() + CORPSE_DECAY_MS);
   systemToPlayer(player, `${player.name} defeated ${catalog.name}.`);
 }
 
@@ -1230,9 +1240,7 @@ function collectCorpse(player: ServerPlayer, corpse: Corpse): void {
     }
   }
   player.gold += corpse.gold;
-  corpses.delete(corpse.id);
-  removeFromCellIndex(corpsesByCell, corpse);
-  removeFromSpatial(spatial.corpses, corpse);
+  removeCorpse(corpse);
 }
 
 function nearbyNpcOfRole(player: ServerPlayer, role: string): NpcRuntime | null {
@@ -2063,6 +2071,7 @@ function dropItem(floor: number, x: number, y: number, items: Array<{ id: string
   corpses.set(drop.id, drop);
   addToCellIndex(corpsesByCell, drop);
   addToSpatial(spatial.corpses, drop);
+  scheduleCorpseExpiration(drop, performance.now() + DROP_DECAY_MS);
 }
 
 function spawnNpcs(): void {
@@ -2231,6 +2240,25 @@ function expireFire(fire: Fire): void {
   fires.delete(fire.id);
   removeFromCellIndex(firesByCell, fire);
   removeFromSpatial(spatial.fires, fire);
+}
+
+function scheduleCorpseExpiration(corpse: Corpse, at: number): void {
+  corpseExpirations.push({ id: corpse.id, at });
+}
+
+function updateCorpseExpirations(now: number): void {
+  while (corpseExpirations.size > 0 && (corpseExpirations.peek()?.at ?? Infinity) <= now) {
+    const expiry = corpseExpirations.pop();
+    if (!expiry) break;
+    const corpse = corpses.get(expiry.id);
+    if (corpse) removeCorpse(corpse);
+  }
+}
+
+function removeCorpse(corpse: Corpse): void {
+  corpses.delete(corpse.id);
+  removeFromCellIndex(corpsesByCell, corpse);
+  removeFromSpatial(spatial.corpses, corpse);
 }
 
 function spawnMonster(spawn: MonsterSpawn): void {
