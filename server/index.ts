@@ -792,11 +792,12 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
 
     const frozen = Boolean(monster.freezeUntil && now < monster.freezeUntil);
     const snared = Boolean(monster.snareUntil && now < monster.snareUntil);
-    const dist = distance(monster, target);
+    const distSq = distanceSq(monster, target);
+    const rangeSq = catalog.range * catalog.range;
 
     // Ranged turret (Mire Spitter): anchored, fires a slowing projectile on sight.
     if (catalog.ranged) {
-      if (!frozen && dist <= catalog.range && now - monster.lastAttack >= catalog.attackMs && hasLineOfSight(monster.floor, monster.x, monster.y, target.x, target.y)) {
+      if (!frozen && distSq <= rangeSq && now - monster.lastAttack >= catalog.attackMs && hasLineOfSight(monster.floor, monster.x, monster.y, target.x, target.y)) {
         monster.lastAttack = now;
         monster.attackUntil = now + MONSTER_ATTACK_ANIM_MS;
         monster.dir = facing(monster, target);
@@ -814,14 +815,16 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
       continue; // anchored — never chases or melees
     }
 
-    if (dist > catalog.range && !frozen && !snared) {
+    if (distSq > rangeSq && !frozen && !snared) {
+      const dist = Math.sqrt(distSq);
       const dx = (target.x - monster.x) / dist;
       const dy = (target.y - monster.y) / dist;
       moveEntity(monster, dx * catalog.speed * dt, dy * catalog.speed * dt);
       updateMonsterCell(monster, oldFloor, oldX, oldY);
     }
 
-    if (!frozen && dist <= catalog.range + 0.15 && now - monster.lastAttack >= catalog.attackMs) {
+    const meleeRange = catalog.range + 0.15;
+    if (!frozen && distSq <= meleeRange * meleeRange && now - monster.lastAttack >= catalog.attackMs) {
       monster.lastAttack = now;
       monster.attackUntil = now + MONSTER_ATTACK_ANIM_MS;
       monster.dir = facing(monster, target);
@@ -892,10 +895,10 @@ function autoAttack(player: ServerPlayer, now: number): void {
   if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
   const spec = ADVENTURER;
   const ranged = playerHasCapability(player, "ranged");
-  const dist = distance(player, monster);
+  const distSq = distanceSq(player, monster);
   if (ranged) {
     // Bow attack: fire up to RANGED_RANGE tiles with clear line of sight.
-    if (dist > RANGED_RANGE) return;
+    if (distSq > RANGED_RANGE * RANGED_RANGE) return;
     if (now - player.lastAttack < spec.attackMs) return;
     if (!hasLineOfSight(player.floor, player.x, player.y, monster.x, monster.y)) return;
     player.lastAttack = now;
@@ -904,7 +907,7 @@ function autoAttack(player: ServerPlayer, now: number): void {
     fireProjectile(player, monster, damage, "arrow");
     return;
   }
-  if (dist > spec.range) return;
+  if (distSq > spec.range * spec.range) return;
   if (now - player.lastAttack < spec.attackMs) return;
   player.lastAttack = now;
   const damage = Math.max(1, Math.round((roll(spec.attackDamage) + skillLevel(player, "attack") + player.weaponTier * (SHOP["weapon"]!.damageBonus ?? 0) + wellFedPower(player)) * physicalMult(player)));
@@ -918,7 +921,7 @@ function useAbility(player: ServerPlayer): void {
   const spec = ADVENTURER;
   const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
   if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
-  if (distance(player, monster) > spec.magicRange) return;
+  if (distanceSq(player, monster) > spec.magicRange * spec.magicRange) return;
   if (now < player.cooldowns.ability) return;
   if (player.mana < spec.abilityCost) return;
 
@@ -938,9 +941,12 @@ const DIR_VECTORS: Record<Direction, Vec2> = {
 
 function monstersInRadius(floor: number, cx: number, cy: number, radius: number): ServerMonster[] {
   const hits: ServerMonster[] = [];
+  const radiusSq = radius * radius;
   forEachSpatial(spatial.monsters, floor, cx, cy, radius, (monster) => {
     if (monster.deadUntil || monster.floor !== floor) return;
-    if (Math.hypot(monster.x - cx, monster.y - cy) <= radius) hits.push(monster);
+    const dx = monster.x - cx;
+    const dy = monster.y - cy;
+    if (dx * dx + dy * dy <= radiusSq) hits.push(monster);
   });
   return hits;
 }
@@ -1037,7 +1043,7 @@ function resolveAbilityTargeting(player: ServerPlayer, spec: AbilitySpec): Abili
     const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
     if (!monster || monster.deadUntil || monster.floor !== player.floor) return null;
     const range = spec.targeting.range ?? spec.range ?? classOf(player).range;
-    if (distance(player, monster) > range) return null;
+    if (distanceSq(player, monster) > range * range) return null;
     if (spec.targeting.requiresLineOfSight && !hasLineOfSight(player.floor, player.x, player.y, monster.x, monster.y)) return null;
     return { origin: { x: monster.x, y: monster.y }, targets: [monster], targetId: monster.id, heal: 0 };
   }
@@ -1053,7 +1059,8 @@ function resolveAbilityTargeting(player: ServerPlayer, spec: AbilitySpec): Abili
   }
   if (spec.targeting.mode === "aoe_point") {
     const target = player.targetId == null ? undefined : monsters.get(player.targetId);
-    if (target && !target.deadUntil && target.floor === player.floor && distance(player, target) <= (spec.targeting.range ?? spec.range ?? Infinity)) {
+    const range = spec.targeting.range ?? spec.range ?? Infinity;
+    if (target && !target.deadUntil && target.floor === player.floor && distanceSq(player, target) <= range * range) {
       return {
         origin: { x: target.x, y: target.y },
         targets: monstersInRadius(player.floor, target.x, target.y, spec.targeting.radius),
@@ -1228,7 +1235,7 @@ function lootAdjacent(player: ServerPlayer): void {
   if (player.dead) return;
   let found = 0;
   forEachSpatial(spatial.corpses, player.floor, player.x, player.y, 1.6, (corpse) => {
-    if (corpse.floor !== player.floor || distance(player, corpse) > 1.6) return;
+    if (corpse.floor !== player.floor || distanceSq(player, corpse) > 1.6 * 1.6) return;
     found += 1;
     collectCorpse(player, corpse);
   });
@@ -1238,7 +1245,7 @@ function lootAdjacent(player: ServerPlayer): void {
 function lootCorpse(player: ServerPlayer, id: string): void {
   if (player.dead) return;
   const corpse = corpses.get(id);
-  if (!corpse || corpse.floor !== player.floor || distance(player, corpse) > 2) return;
+  if (!corpse || corpse.floor !== player.floor || distanceSq(player, corpse) > 4) return;
   collectCorpse(player, corpse);
   event("float", `Looted ${corpse.label}.`, player.x, player.y, player.floor, "#ffd166");
 }
@@ -1256,13 +1263,13 @@ function collectCorpse(player: ServerPlayer, corpse: Corpse): void {
 
 function nearbyNpcOfRole(player: ServerPlayer, role: string): NpcRuntime | null {
   let best: NpcRuntime | null = null;
-  let bestDist = Infinity;
+  let bestDistSq = Infinity;
   forEachCellIndex(npcsByCell, player.floor, player.x, player.y, 2, (npc) => {
     if (npc.role !== role || npc.floor !== player.floor) return;
-    const d = distance(player, npc);
-    if (d <= 2 && d < bestDist) {
+    const distSq = distanceSq(player, npc);
+    if (distSq <= 4 && distSq < bestDistSq) {
       best = npc;
-      bestDist = d;
+      bestDistSq = distSq;
     }
   });
   return best;
@@ -1526,7 +1533,7 @@ function devSetAllSkills(player: ServerPlayer, level: number): void {
 
 function talkNpc(player: ServerPlayer, id: string): void {
   const npc = npcs.get(id);
-  if (!npc || player.dead || npc.floor !== player.floor || distance(player, npc) > 2.4) return;
+  if (!npc || player.dead || npc.floor !== player.floor || distanceSq(player, npc) > 2.4 * 2.4) return;
 
   const quest = questForGiver(npc.id);
   if (quest) {
@@ -1653,7 +1660,7 @@ function renderQuestLine(text: string, ctx: Record<string, unknown>): string {
 
 function cutTree(player: ServerPlayer, id: string): void {
   const tree = treeNodes.get(id);
-  if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distance(player, tree) > 1.8) return;
+  if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distanceSq(player, tree) > 1.8 * 1.8) return;
   if (!playerHasCapability(player, "chop_tree")) {
     event("float", "You need an axe.", player.x, player.y, player.floor, "#f7d486");
     return;
@@ -1671,7 +1678,7 @@ function cutTree(player: ServerPlayer, id: string): void {
 
 function fishNode(player: ServerPlayer, id: string): void {
   const node = fishingNodesById.get(id);
-  if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.45) return;
+  if (!node || player.dead || node.floor !== player.floor || distanceSq(player, fishingApproachPoint(node)) > 1.45 * 1.45) return;
   if (!playerHasCapability(player, "fish")) {
     event("float", "You need a fishing rod.", player.x, player.y, player.floor, "#f7d486");
     return;
@@ -1684,7 +1691,7 @@ function fishNode(player: ServerPlayer, id: string): void {
 
 function mineNode(player: ServerPlayer, id: string): void {
   const node = miningNodesById.get(id);
-  if (!node || player.dead || node.floor !== player.floor || distance(player, miningApproachPoint(node)) > 1.45) return;
+  if (!node || player.dead || node.floor !== player.floor || distanceSq(player, miningApproachPoint(node)) > 1.45 * 1.45) return;
   if (!playerHasCapability(player, "mine")) {
     event("float", "You need a pickaxe.", player.x, player.y, player.floor, "#f7d486");
     return;
@@ -1697,7 +1704,7 @@ function mineNode(player: ServerPlayer, id: string): void {
 
 function gatherHerb(player: ServerPlayer, id: string): void {
   const node = herbNodes.get(id);
-  if (!node || player.dead || !node.active || node.floor !== player.floor || distance(player, herbApproachPoint(node)) > 1.45) return;
+  if (!node || player.dead || !node.active || node.floor !== player.floor || distanceSq(player, herbApproachPoint(node)) > 1.45 * 1.45) return;
   if (node.requiredLevel > 0 && skillLevel(player, "foraging") < node.requiredLevel) {
     event("float", `Requires Foraging ${node.requiredLevel}.`, node.x, node.y, node.floor, "#f7d486");
     return;
@@ -1787,7 +1794,7 @@ function useVerbLightFire(player: ServerPlayer, item: Item, ctx: UseItemCtx): vo
 
 function useVerbCookOnFire(player: ServerPlayer, item: Item, ctx: UseItemCtx): void {
   const fire = ctx.fireId == null ? undefined : fires.get(ctx.fireId);
-  if (!fire || fire.floor !== player.floor || distance(player, fire) > 1.9) return;
+  if (!fire || fire.floor !== player.floor || distanceSq(player, fire) > 1.9 * 1.9) return;
   if (!hasInventoryItem(player, item.id)) return;
   const u = item.use;
   const skill = (u?.kind === "cook_on_fire" ? u.skill : undefined) ?? "cooking";
@@ -1823,7 +1830,7 @@ function updatePlayerAction(player: ServerPlayer, now: number): void {
   if (player.action.type !== "woodcutting") return;
   const action = player.action;
   const tree = treeNodes.get(action.treeId);
-  if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distance(player, tree) > 1.9) {
+  if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distanceSq(player, tree) > 1.9 * 1.9) {
     player.action = null;
     return;
   }
@@ -1854,7 +1861,7 @@ function updateFishingAction(player: ServerPlayer, now: number): void {
   const action = player.action;
   if (action?.type !== "fishing") return;
   const node = fishingNodesById.get(action.nodeId);
-  if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.65 || !playerHasCapability(player, "fish")) {
+  if (!node || player.dead || node.floor !== player.floor || distanceSq(player, fishingApproachPoint(node)) > 1.65 * 1.65 || !playerHasCapability(player, "fish")) {
     player.action = null;
     return;
   }
@@ -1874,7 +1881,7 @@ function updateMiningAction(player: ServerPlayer, now: number): void {
   const action = player.action;
   if (action?.type !== "mining") return;
   const node = miningNodesById.get(action.nodeId);
-  if (!node || player.dead || node.floor !== player.floor || distance(player, miningApproachPoint(node)) > 1.65 || !playerHasCapability(player, "mine")) {
+  if (!node || player.dead || node.floor !== player.floor || distanceSq(player, miningApproachPoint(node)) > 1.65 * 1.65 || !playerHasCapability(player, "mine")) {
     player.action = null;
     return;
   }
@@ -1893,7 +1900,7 @@ function updateHerbingAction(player: ServerPlayer, now: number): void {
   const action = player.action;
   if (action?.type !== "herbing") return;
   const node = herbNodes.get(action.nodeId);
-  if (!node || player.dead || !node.active || node.floor !== player.floor || distance(player, herbApproachPoint(node)) > 1.65) {
+  if (!node || player.dead || !node.active || node.floor !== player.floor || distanceSq(player, herbApproachPoint(node)) > 1.65 * 1.65) {
     player.action = null;
     return;
   }
@@ -1915,7 +1922,7 @@ function updateCookingAction(player: ServerPlayer, now: number): void {
   const action = player.action;
   if (action?.type !== "cooking") return;
   const fire = fires.get(action.fireId);
-  if (!fire || player.dead || fire.floor !== player.floor || distance(player, fire) > 2) {
+  if (!fire || player.dead || fire.floor !== player.floor || distanceSq(player, fire) > 4) {
     player.action = null;
     return;
   }
@@ -3678,7 +3685,11 @@ function firePlacementAtPlayer(player: ServerPlayer): Vec2 | null {
 function fireTooClose(floor: number, x: number, y: number): boolean {
   let tooClose = false;
   forEachCellIndex(firesByCell, floor, x, y, 1.2, (fire) => {
-    if (!tooClose && fire.floor === floor && Math.hypot(fire.x - x, fire.y - y) < 1.2) tooClose = true;
+    if (!tooClose && fire.floor === floor) {
+      const dx = fire.x - x;
+      const dy = fire.y - y;
+      if (dx * dx + dy * dy < 1.2 * 1.2) tooClose = true;
+    }
   });
   return tooClose;
 }
