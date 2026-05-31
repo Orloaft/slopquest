@@ -84,6 +84,7 @@ const stats = {
 const observed = {
   tickMs: [] as number[],
   snapshotMs: [] as number[],
+  stateMessageBytes: [] as number[],
   bytesOutPerSecond: [] as number[],
   snapshotsSentPerSecond: [] as number[],
   snapshotsSkippedBackpressurePerSecond: [] as number[],
@@ -173,6 +174,7 @@ function openClient(index: number): void {
     }
     if (message.type === "state") {
       stats.states += 1;
+      observed.stateMessageBytes.push(rawByteLength(raw));
       if (message.metrics) recordMetrics(message.metrics);
       recordSnapshotFlags(message);
       if (attackTargets) maybeTargetMonster(socket, message);
@@ -235,6 +237,12 @@ function pauseClientSocket(socket: WebSocket): void {
   if (socket.readyState !== WebSocket.OPEN || !rawSocket?.pause) return;
   rawSocket.pause();
   observed.slowClientsPaused += 1;
+}
+
+function rawByteLength(raw: RawData): number {
+  if (typeof raw === "string") return Buffer.byteLength(raw);
+  if (Array.isArray(raw)) return raw.reduce((sum, item) => sum + item.byteLength, 0);
+  return raw.byteLength;
 }
 
 function clampUnit(value: number): number {
@@ -380,6 +388,19 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
       if (minimum != null && summary[field] < minimum) failures.push(`${metric}.${field} ${summary[field]} < ${minimum}`);
     }
   }
+  const stateMessageBytes = report.perMessage.stateBytes;
+  if (stateMessageBytes) {
+    for (const field of fields) {
+      const maximum = optionNumber(`max-state-message-bytes-${field}`);
+      if (maximum != null && stateMessageBytes[field] > maximum) {
+        failures.push(`stateMessageBytes.${field} ${stateMessageBytes[field]} > ${maximum}`);
+      }
+      const minimum = optionNumber(`min-state-message-bytes-${field}`);
+      if (minimum != null && stateMessageBytes[field] < minimum) {
+        failures.push(`stateMessageBytes.${field} ${stateMessageBytes[field]} < ${minimum}`);
+      }
+    }
+  }
   return failures;
 }
 
@@ -422,6 +443,9 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       residentStaticResources: summarize(observed.residentStaticResources),
       dynamicEntities: summarize(observed.dynamicEntities),
       spatialCells: summarize(observed.spatialCellsSamples)
+    },
+    perMessage: {
+      stateBytes: summarize(observed.stateMessageBytes)
     },
     perClient: {
       visiblePlayers: summarize(observed.visiblePlayers),

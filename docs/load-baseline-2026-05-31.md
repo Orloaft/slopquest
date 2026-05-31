@@ -189,5 +189,8 @@ and combat fanout without making every client see every other client.
 - Transient event queues now expose `eventsDroppedPerSecond`; the local perf
   gate requires it to remain `0` for normal clustered, mixed, combat, and
   slow-reader scenarios.
+- The load driver now records raw state message byte sizes. The perf gate caps
+  state packets at `60 KB` max and `25 KB` average; the latest 100-client
+  targeted regional sample peaked at roughly `33 KB` and averaged roughly `9 KB`.
 - The next performance work should be longer/slow-client scenarios and eventual
   protocol compaction only if telemetry asks for it.

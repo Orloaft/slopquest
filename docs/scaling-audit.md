@@ -36,6 +36,8 @@ no socket errors and no backpressure skips. See
   players are nearby.
 - Transient event queues are bounded per global, targeted, and spatial-cell
   queue, with drop telemetry in load gates.
+- Load gates track raw state-message byte sizes to catch protocol bloat before
+  aggregate bandwidth becomes the only warning sign.
 - Current content: 10 floors, 77 monsters, roughly 1,385 derivable tree tiles,
   NPCs, gathering resources, fires, corpses, and per-player persistence.
 
@@ -79,6 +81,10 @@ Transient combat/UI events are also bounded before snapshot fan-out. Normal
 50-client load gates assert `eventsDroppedPerSecond.max` stays at `0`, while
 pathological bursts degrade by dropping excess float/projectile/chat events
 instead of building unbounded packets.
+
+The load driver also records raw state message sizes. `npm run perf:gate` caps
+state packets at 60 KB max and 25 KB average across its clustered, combat,
+regional, and slow-reader scenarios.
 
 ### Spatial indexing and active regions
 
@@ -207,6 +213,7 @@ process cannot tick the populated world.
 - [x] Chunk-derived tree resources with active-cell pruning and resident
   resource load gates.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
+- [x] Raw state-message byte telemetry and packet-size thresholds in load gates.
 - [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
 - [ ] Chunk-derived fishing/mining/herb resources before those lists grow by an
