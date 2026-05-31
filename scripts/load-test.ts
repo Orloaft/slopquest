@@ -34,6 +34,7 @@ const durationMs = Number(options.duration ?? 10000);
 const slowClients = Math.max(0, Math.floor(Number(options["slow-clients"] ?? 0)));
 const slowAfterMs = Math.max(0, Math.floor(Number(options["slow-after"] ?? 1500)));
 const combatRatio = clampUnit(Number(options.combat ?? 0));
+const persistent = Boolean(options.persistent);
 const combatZones = String(options.zones ?? "cemetery,crypt,woods")
   .split(",")
   .map((z) => z.trim())
@@ -99,7 +100,15 @@ function openClient(index: number): void {
 
   socket.on("open", () => {
     stats.opened += 1;
-    socket.send(JSON.stringify({ type: "join", name: `load_${index}`, class: index % 3 === 0 ? "caster" : "knight", fresh: true }));
+    socket.send(
+      JSON.stringify({
+        type: "join",
+        name: `load_${index}`,
+        class: index % 3 === 0 ? "caster" : "knight",
+        fresh: true,
+        transient: !persistent
+      })
+    );
   });
 
   socket.on("message", (raw: RawData) => {
@@ -245,6 +254,7 @@ function reportAndExit(): void {
       assigned: combatAssignments.size,
       zones: combatZoneCounts
     },
+    transientClients: !persistent,
     ...stats,
     server: {
       clientsPeak: observed.serverClientsPeak,

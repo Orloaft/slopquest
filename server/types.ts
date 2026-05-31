@@ -212,6 +212,7 @@ export interface Session {
   player: ServerPlayer;
   input: InputPayload;
   lastInputAt: number;
+  transient: boolean;
 }
 
 export interface SpatialIndex {

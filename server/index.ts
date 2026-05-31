@@ -291,6 +291,7 @@ const E2E_TEST = process.env.E2E_TEST === "1";
 // Dev/playtest cheats via the `/dev` chat command. On under E2E or `TIB_DEV=1`
 // (see the `dev:tools` npm script). Keep off for normal multiplayer sessions.
 const DEV_TOOLS = E2E_TEST || process.env.TIB_DEV === "1";
+const ALLOW_TRANSIENT_PLAYERS = E2E_TEST || process.env.TIB_ALLOW_TRANSIENT_PLAYERS === "1";
 const SNAPSHOT_RADIUS = 18;
 const SNAPSHOT_RADIUS_SQ = SNAPSHOT_RADIUS ** 2;
 const TREE_SNAPSHOT_RADIUS = 32;
@@ -459,7 +460,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
   socket.on("close", () => {
     const session = clients.get(socket);
     if (session) {
-      if (!E2E_TEST || !session.player.name.startsWith("e2e_")) persistPlayer(session.player);
+      if (!session.transient && (!E2E_TEST || !session.player.name.startsWith("e2e_"))) persistPlayer(session.player);
       clients.delete(socket);
       playersById.delete(session.player.id);
       removeFromSpatial(spatial.players, session.player);
@@ -513,9 +514,10 @@ setInterval(() => {
   }
 }, 15000);
 
-function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; fresh?: boolean }): void {
+function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; fresh?: boolean; transient?: boolean }): void {
   const name = cleanName(message.name);
-  const saved = db.players[name.toLowerCase()];
+  const transient = Boolean(message.transient && ALLOW_TRANSIENT_PLAYERS);
+  const saved = transient ? undefined : db.players[name.toLowerCase()];
   const player = saved && !message.fresh ? hydratePlayer(saved) : createPlayer(name);
   player.id = crypto.randomUUID();
   player.online = true;
@@ -530,7 +532,7 @@ function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; 
   player.wellFedUntil = Number(player.wellFedUntil ?? 0);
   player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
 
-  clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now() });
+  clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now(), transient });
   playersById.set(player.id, player);
   addToSpatial(spatial.players, player);
   socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] }));
@@ -3303,7 +3305,9 @@ function persistPlayer(player: ServerPlayer): void {
 }
 
 function persistOnlinePlayers(): void {
-  for (const session of clients.values()) dirtyPlayerKeys.add(persistPlayerToDb(session.player));
+  for (const session of clients.values()) {
+    if (!session.transient) dirtyPlayerKeys.add(persistPlayerToDb(session.player));
+  }
   queueSave();
 }
 

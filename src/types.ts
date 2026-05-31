@@ -320,7 +320,7 @@ export interface UseItemCtx {
 export type ClientMessage =
   | { type: "characters" }
   | { type: "deleteCharacter"; name: string }
-  | { type: "join"; name: string; fresh?: boolean }
+  | { type: "join"; name: string; fresh?: boolean; transient?: boolean }
   | { type: "input"; input: Partial<InputPayload> }
   | { type: "target"; id: string }
   | { type: "ability"; slot: string | number }
