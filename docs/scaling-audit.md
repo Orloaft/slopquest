@@ -12,8 +12,8 @@ Node/WebSocket process:
 - Snapshots are decoupled to ~13.3 Hz, with interpolation hiding the lower send rate.
 - Player snapshots are split into owner-private and public views.
 - Per-session entity deltas avoid resending unchanged world objects.
-- Static resources are indexed once; moving entities update spatial cells incrementally.
-- High-cardinality trees are chunk-derived and materialized only near players.
+- Static resources are indexed by active cells; moving entities update spatial cells incrementally.
+- High-cardinality trees and gathering nodes are materialized only near players.
 - Monsters/NPCs simulate only in active regions near players.
 - Backpressure skips snapshots for slow sockets instead of piling up writes.
 - The client uses chunked/culled map rendering, heap-based A*, and a throttled minimap.
@@ -32,8 +32,8 @@ no socket errors and no backpressure skips. See
 - Interest radius: 18 tiles for dynamic entities, 32 tiles for trees.
 - Spatial cell size: 8 tiles.
 - Static trees/resources are initial-full per session, then delta/removal only.
-- Tree resource cells are generated lazily around players and pruned when no
-  players are nearby.
+- Static resource cells for trees, fishing spots, ore veins, and herbs are
+  generated lazily around players and pruned when no players are nearby.
 - Transient event queues are bounded per global, targeted, and spatial-cell
   queue, with drop telemetry in load gates.
 - Load gates track raw state-message byte sizes to catch protocol bloat before
@@ -154,11 +154,12 @@ comfortably below the 75 ms broadcast interval without compression.
 
 ### Large-world content residency
 
-The server avoids ticking inactive regions, and tree resources now follow the
-same rule for residency: tree cells are generated only near players and active
-tree runtimes are pruned again when the area goes cold. Remaining static
-resource lists are currently small, but fishing/mining/herb definitions should
-use the same chunk-derived pattern before they become high-cardinality content.
+The server avoids ticking inactive regions, and static resources now follow the
+same rule for runtime residency: tree/resource cells are generated only near
+players and active runtimes are pruned again when the area goes cold. Authored
+fishing, mining, and herb definitions are grouped by spatial cell and only
+entered into the runtime static index for active cells; inactive herb respawn
+state remains resident only until the respawn resolves.
 
 ### Asset streaming
 
@@ -223,6 +224,8 @@ process cannot tick the populated world.
   sync only, then deltas/removals.
 - [x] Chunk-derived tree resources with active-cell pruning and resident
   resource load gates.
+- [x] Lazy runtime residency for fishing, mining, and herb nodes with active
+  cell pruning.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
 - [x] Raw state-message byte telemetry and packet-size thresholds in load gates.
 - [x] Runtime asset budget gate in `npm run check`.
@@ -230,8 +233,6 @@ process cannot tick the populated world.
   perf gate.
 - [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
-- [ ] Chunk-derived fishing/mining/herb resources before those lists grow by an
-  order of magnitude.
 
 ### Stage 3 - Defer until one process is the bottleneck
 

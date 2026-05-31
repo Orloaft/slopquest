@@ -184,8 +184,11 @@ and combat fanout without making every client see every other client.
   resending full static lists again.
 - Tree resources are now chunk-derived instead of spawned whole-world at boot.
   The 50-client gate tightened `residentStaticResources.max` to `1200`; the
-  latest mixed town/combat run peaked at `774` resident static resources while
-  preserving visible-tree density.
+  current 100-client regional gate peaks around `800` resident static resources
+  while preserving visible-tree density.
+- Fishing, mining, and herb nodes now use the same active-cell runtime
+  residency model. Their authored definitions are still source data, but they
+  no longer populate the runtime static spatial index for cold regions.
 - Transient event queues now expose `eventsDroppedPerSecond`; the local perf
   gate requires it to remain `0` for normal clustered, mixed, combat, and
   slow-reader scenarios.

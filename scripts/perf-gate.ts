@@ -142,7 +142,7 @@ const gateScenarios: Scenario[] = [
       "--max-rss-mb-max",
       "768",
       "--max-resident-static-resources-max",
-      "1600",
+      "1200",
       "--max-static-full-snapshots",
       "500",
       "--max-bytes-out-per-second-avg",

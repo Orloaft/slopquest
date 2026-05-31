@@ -92,8 +92,10 @@ import type {
 
 type FishingNodeRuntime = (typeof FISHING_NODES)[number];
 type MiningNodeRuntime = (typeof MINING_NODES)[number];
-const fishingNodesById = new Map<string, FishingNodeRuntime>(FISHING_NODES.map((node) => [node.id, node]));
-const miningNodesById = new Map<string, MiningNodeRuntime>(MINING_NODES.map((node) => [node.id, node]));
+type HerbNodeBase = (typeof HERB_NODES)[number];
+const fishingNodeBasesById = new Map<string, FishingNodeRuntime>(FISHING_NODES.map((node) => [node.id, node]));
+const miningNodeBasesById = new Map<string, MiningNodeRuntime>(MINING_NODES.map((node) => [node.id, node]));
+const herbNodeBasesById = new Map<string, HerbNodeBase>(HERB_NODES.map((node) => [node.id, node]));
 const composedTreeNodesById = new Map<string, (typeof COMPOSED_TREE_NODES)[number]>(
   COMPOSED_TREE_NODES.map((tree) => [composedTreeId(tree), tree])
 );
@@ -328,6 +330,9 @@ const TREE_SNAPSHOT_RADIUS_SQ = TREE_SNAPSHOT_RADIUS ** 2;
 const METRIC_WINDOW = 60;
 const SPATIAL_CELL_SIZE = 8;
 const ACTIVE_REGION_RADIUS = SNAPSHOT_RADIUS + SPATIAL_CELL_SIZE;
+const fishingNodeBasesByCell = buildStaticBaseCellIndex(FISHING_NODES);
+const miningNodeBasesByCell = buildStaticBaseCellIndex(MINING_NODES);
+const herbNodeBasesByCell = buildStaticBaseCellIndex(HERB_NODES);
 const TREE_RESPAWN_MS = 30000;
 const HERB_RESPAWN_MS = 25000;
 const HERB_GATHER_MS = 2600;
@@ -377,6 +382,8 @@ const monstersByCell = new Map<string, Set<ServerMonster>>();
 const corpses = new Map<string, Corpse>();
 const corpsesByCell = new Map<string, Set<Corpse>>();
 const treeNodes = new Map<string, TreeNodeRuntime>();
+const fishingNodesById = new Map<string, FishingNodeRuntime>();
+const miningNodesById = new Map<string, MiningNodeRuntime>();
 const herbNodes = new Map<string, HerbNodeRuntime>();
 const fires = new Map<string, Fire>();
 const firesByCell = new Map<string, Set<Fire>>();
@@ -418,6 +425,7 @@ const EMPTY_HERB_NODE_VIEWS: HerbNodeView[] = [];
 const EMPTY_FIRE_VIEWS: FireView[] = [];
 const eventOrder = new WeakMap<GameEvent, number>();
 const materializedTreeCells = new Set<string>();
+const materializedStaticResourceCells = new Set<string>();
 const metrics: Metrics = {
   tickWindow: createMetricWindow(),
   snapshotWindow: createMetricWindow(),
@@ -446,7 +454,6 @@ for (const spawn of MONSTER_SPAWNS) {
   spawnMonster(spawn);
 }
 spawnNpcs();
-spawnHerbNodes();
 rebuildStaticSpatialIndex();
 
 const wss = new WebSocketServer({
@@ -1744,7 +1751,7 @@ function cutTree(player: ServerPlayer, id: string): void {
 }
 
 function fishNode(player: ServerPlayer, id: string): void {
-  const node = fishingNodesById.get(id);
+  const node = fishingNodeForId(id);
   if (!node || player.dead || node.floor !== player.floor || distanceSq(player, fishingApproachPoint(node)) > 1.45 * 1.45) return;
   if (!playerHasCapability(player, "fish")) {
     event("float", "You need a fishing rod.", player.x, player.y, player.floor, "#f7d486");
@@ -1757,7 +1764,7 @@ function fishNode(player: ServerPlayer, id: string): void {
 }
 
 function mineNode(player: ServerPlayer, id: string): void {
-  const node = miningNodesById.get(id);
+  const node = miningNodeForId(id);
   if (!node || player.dead || node.floor !== player.floor || distanceSq(player, miningApproachPoint(node)) > 1.45 * 1.45) return;
   if (!playerHasCapability(player, "mine")) {
     event("float", "You need a pickaxe.", player.x, player.y, player.floor, "#f7d486");
@@ -1770,8 +1777,8 @@ function mineNode(player: ServerPlayer, id: string): void {
 }
 
 function gatherHerb(player: ServerPlayer, id: string): void {
-  const node = herbNodes.get(id);
-  if (!node || player.dead || !node.active || node.floor !== player.floor || distanceSq(player, herbApproachPoint(node)) > 1.45 * 1.45) return;
+  const node = herbNodeForInteraction(player, id, 1.45 * 1.45);
+  if (!node || !node.active) return;
   if (node.requiredLevel > 0 && skillLevel(player, "foraging") < node.requiredLevel) {
     event("float", `Requires Foraging ${node.requiredLevel}.`, node.x, node.y, node.floor, "#f7d486");
     return;
@@ -1927,7 +1934,7 @@ function updatePlayerAction(player: ServerPlayer, now: number): void {
 function updateFishingAction(player: ServerPlayer, now: number): void {
   const action = player.action;
   if (action?.type !== "fishing") return;
-  const node = fishingNodesById.get(action.nodeId);
+  const node = fishingNodeForId(action.nodeId);
   if (!node || player.dead || node.floor !== player.floor || distanceSq(player, fishingApproachPoint(node)) > 1.65 * 1.65 || !playerHasCapability(player, "fish")) {
     player.action = null;
     return;
@@ -1947,7 +1954,7 @@ function updateFishingAction(player: ServerPlayer, now: number): void {
 function updateMiningAction(player: ServerPlayer, now: number): void {
   const action = player.action;
   if (action?.type !== "mining") return;
-  const node = miningNodesById.get(action.nodeId);
+  const node = miningNodeForId(action.nodeId);
   if (!node || player.dead || node.floor !== player.floor || distanceSq(player, miningApproachPoint(node)) > 1.65 * 1.65 || !playerHasCapability(player, "mine")) {
     player.action = null;
     return;
@@ -2100,7 +2107,7 @@ function miningApproachPoint(node: { floor: number; x: number; y: number; approa
   };
 }
 
-function herbApproachPoint(node: HerbNodeRuntime): Positioned {
+function herbApproachPoint(node: { floor: number; x: number; y: number; approachX: number; approachY: number }): Positioned {
   return {
     floor: node.floor,
     x: node.approachX ?? node.x,
@@ -2197,25 +2204,6 @@ function spawnNpcs(): void {
   }
 }
 
-function spawnHerbNodes(): void {
-  for (const node of HERB_NODES) {
-    herbNodes.set(node.id, {
-      id: node.id,
-      floor: node.floor,
-      x: node.x,
-      y: node.y,
-      approachX: node.approachX,
-      approachY: node.approachY,
-      label: node.label,
-      requiredLevel: node.requiredLevel ?? 0,
-      xp: node.xp ?? FORAGE_XP,
-      item: node.item ?? "herb",
-      active: true,
-      respawnAt: 0
-    });
-  }
-}
-
 function treeRuntimeForId(id: string): TreeNodeRuntime | null {
   const cached = treeNodes.get(id);
   if (cached) return cached;
@@ -2252,6 +2240,64 @@ function materializeTree(base: Omit<TreeNodeRuntime, "active" | "respawnAt">, ad
     refreshStaticSpatialCellMetric();
   }
   return tree;
+}
+
+function fishingNodeForId(id: string): FishingNodeRuntime | null {
+  return fishingNodesById.get(id) ?? fishingNodeBasesById.get(id) ?? null;
+}
+
+function miningNodeForId(id: string): MiningNodeRuntime | null {
+  return miningNodesById.get(id) ?? miningNodeBasesById.get(id) ?? null;
+}
+
+function herbNodeForInteraction(player: ServerPlayer, id: string, maxDistanceSq: number): HerbNodeRuntime | null {
+  const cached = herbNodes.get(id);
+  if (cached) {
+    if (player.dead || cached.floor !== player.floor || distanceSq(player, herbApproachPoint(cached)) > maxDistanceSq) return null;
+    return cached;
+  }
+  const base = herbNodeBasesById.get(id);
+  if (!base || player.dead || base.floor !== player.floor || distanceSq(player, herbApproachPoint(base)) > maxDistanceSq) return null;
+  return materializeHerbNode(base, false);
+}
+
+function materializeFishingNode(node: FishingNodeRuntime): FishingNodeRuntime {
+  const existing = fishingNodesById.get(node.id);
+  if (existing) return existing;
+  fishingNodesById.set(node.id, node);
+  addToSpatial(staticSpatial.fishingNodes, node);
+  return node;
+}
+
+function materializeMiningNode(node: MiningNodeRuntime): MiningNodeRuntime {
+  const existing = miningNodesById.get(node.id);
+  if (existing) return existing;
+  miningNodesById.set(node.id, node);
+  addToSpatial(staticSpatial.miningNodes, node);
+  return node;
+}
+
+function materializeHerbNode(base: HerbNodeBase, addToIndex = true): HerbNodeRuntime {
+  const existing = herbNodes.get(base.id);
+  const node =
+    existing ??
+    ({
+      id: base.id,
+      floor: base.floor,
+      x: base.x,
+      y: base.y,
+      approachX: base.approachX,
+      approachY: base.approachY,
+      label: base.label,
+      requiredLevel: base.requiredLevel ?? 0,
+      xp: base.xp ?? FORAGE_XP,
+      item: base.item ?? "herb",
+      active: true,
+      respawnAt: 0
+    } satisfies HerbNodeRuntime);
+  herbNodes.set(node.id, node);
+  if (addToIndex) addToSpatial(staticSpatial.herbNodes, node);
+  return node;
 }
 
 function materializeTreeCellsNear(floor: number, x: number, y: number, radius: number): void {
@@ -2304,6 +2350,26 @@ function materializeTreeCell(floor: number, cx: number, cy: number): void {
   refreshStaticSpatialCellMetric();
 }
 
+function materializeStaticResourceCellsNear(floor: number, x: number, y: number, radius: number): void {
+  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
+  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
+  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
+  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
+  for (let cy = minCy; cy <= maxCy; cy += 1) {
+    for (let cx = minCx; cx <= maxCx; cx += 1) materializeStaticResourceCell(floor, cx, cy);
+  }
+}
+
+function materializeStaticResourceCell(floor: number, cx: number, cy: number): void {
+  const cellKey = `${floor}:${cx}:${cy}`;
+  if (materializedStaticResourceCells.has(cellKey)) return;
+  for (const node of fishingNodeBasesByCell.get(cellKey) ?? []) materializeFishingNode(node);
+  for (const node of miningNodeBasesByCell.get(cellKey) ?? []) materializeMiningNode(node);
+  for (const node of herbNodeBasesByCell.get(cellKey) ?? []) materializeHerbNode(node);
+  materializedStaticResourceCells.add(cellKey);
+  refreshStaticSpatialCellMetric();
+}
+
 function pruneDistantTreeCells(now: number): void {
   if (materializedTreeCells.size === 0) return;
   const keep = new Set<string>();
@@ -2326,6 +2392,33 @@ function pruneDistantTreeCells(now: number): void {
       staticSpatial.trees.delete(cellKey);
     }
     materializedTreeCells.delete(cellKey);
+  }
+  refreshStaticSpatialCellMetric();
+}
+
+function pruneDistantStaticResourceCells(now: number): void {
+  if (materializedStaticResourceCells.size === 0) return;
+  const keep = new Set<string>();
+  for (const { player } of clients.values()) {
+    const minCx = Math.floor((player.x - SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
+    const maxCx = Math.floor((player.x + SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
+    const minCy = Math.floor((player.y - SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
+    const maxCy = Math.floor((player.y + SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
+    for (let cy = minCy; cy <= maxCy; cy += 1) {
+      for (let cx = minCx; cx <= maxCx; cx += 1) keep.add(`${player.floor}:${cx}:${cy}`);
+    }
+  }
+  for (const cellKey of Array.from(materializedStaticResourceCells)) {
+    if (keep.has(cellKey)) continue;
+    for (const node of staticSpatial.fishingNodes.get(cellKey) ?? []) fishingNodesById.delete(node.id);
+    for (const node of staticSpatial.miningNodes.get(cellKey) ?? []) miningNodesById.delete(node.id);
+    for (const node of staticSpatial.herbNodes.get(cellKey) ?? []) {
+      if (node.active && node.respawnAt <= now) herbNodes.delete(node.id);
+    }
+    staticSpatial.fishingNodes.delete(cellKey);
+    staticSpatial.miningNodes.delete(cellKey);
+    staticSpatial.herbNodes.delete(cellKey);
+    materializedStaticResourceCells.delete(cellKey);
   }
   refreshStaticSpatialCellMetric();
 }
@@ -2424,7 +2517,11 @@ function updateResourceRespawns(now: number): void {
       continue;
     }
     const node = herbNodes.get(respawn.id);
-    if (node && !node.active && node.respawnAt <= now) node.active = true;
+    if (node && !node.active && node.respawnAt <= now) {
+      node.active = true;
+      node.respawnAt = 0;
+      if (!materializedStaticResourceCells.has(spatialKey(node.floor, node.x, node.y))) herbNodes.delete(node.id);
+    }
   }
 }
 
@@ -2728,6 +2825,7 @@ function broadcastState(): void {
     socket.send(raw);
   }
   pruneDistantTreeCells(now);
+  pruneDistantStaticResourceCells(now);
 }
 
 function shouldSendSnapshot(session: Session, snapshot: StateSnapshot, now: number): boolean {
@@ -2807,6 +2905,8 @@ function buildSnapshotFor(
   const includeFishingNodesForSession = includeResources || !cache.fishingNodes.initialized;
   const includeMiningNodesForSession = includeResources || !cache.miningNodes.initialized;
   const includeHerbNodesForSession = includeResources || !cache.herbNodes.initialized;
+  const includeStaticResourcesForSession =
+    includeFishingNodesForSession || includeMiningNodesForSession || includeHerbNodesForSession;
   const players: PlayerView[] = [];
   let includedViewer = false;
   forEachSpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (player) => {
@@ -2847,6 +2947,7 @@ function buildSnapshotFor(
     });
   }
 
+  if (includeStaticResourcesForSession) materializeStaticResourceCellsNear(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS);
   const visibleFishingNodes: FishingNodeView[] = includeFishingNodesForSession ? [] : EMPTY_FISHING_NODE_VIEWS;
   if (includeFishingNodesForSession) {
     forEachSpatial(staticSpatial.fishingNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
@@ -4091,12 +4192,26 @@ function createStaticSpatialIndex(): StaticSpatialIndex {
   return { trees: new Map(), fishingNodes: new Map(), miningNodes: new Map(), herbNodes: new Map(), cellCount: 0 };
 }
 
+function buildStaticBaseCellIndex<T extends Positioned>(nodes: readonly T[]): Map<string, T[]> {
+  const index = new Map<string, T[]>();
+  for (const node of nodes) {
+    const key = spatialKey(node.floor, node.x, node.y);
+    const bucket = index.get(key) ?? [];
+    bucket.push(node);
+    index.set(key, bucket);
+  }
+  return index;
+}
+
 function rebuildStaticSpatialIndex(): void {
   staticSpatial = createStaticSpatialIndex();
   materializedTreeCells.clear();
-  for (const node of fishingNodesById.values()) addToSpatial(staticSpatial.fishingNodes, node);
-  for (const node of miningNodesById.values()) addToSpatial(staticSpatial.miningNodes, node);
-  for (const node of herbNodes.values()) addToSpatial(staticSpatial.herbNodes, node);
+  materializedStaticResourceCells.clear();
+  fishingNodesById.clear();
+  miningNodesById.clear();
+  for (const [id, node] of Array.from(herbNodes)) {
+    if (node.active && node.respawnAt <= 0) herbNodes.delete(id);
+  }
   refreshStaticSpatialCellMetric();
 }
 
