@@ -27,6 +27,9 @@ interface Summary {
   avg: number;
 }
 
+type SummaryMetric = "tickMs" | "snapshotMs" | "bytesOutPerSecond" | "snapshotsSentPerSecond" | "snapshotsSkippedBackpressurePerSecond";
+type SummaryField = "min" | "max" | "avg";
+
 const options = parseArgs(process.argv.slice(2));
 const url = stringOption(options.url) ?? `ws://127.0.0.1:${stringOption(options.port) ?? process.env.PORT ?? 8787}`;
 const clients = Number(options.clients ?? 12);
@@ -240,7 +243,59 @@ function reportAndExit(): void {
   for (const target of combatAssignments.values()) {
     combatZoneCounts[target.zone] = (combatZoneCounts[target.zone] ?? 0) + 1;
   }
-  const report = {
+  const report = buildReportShape(combatZoneCounts);
+  const thresholdFailures = thresholdFailuresFor(report);
+  console.log(JSON.stringify(report, null, 2));
+  if (thresholdFailures.length > 0) {
+    console.error("Load-test thresholds failed:");
+    for (const failure of thresholdFailures) console.error(`  - ${failure}`);
+  }
+  process.exit(stats.errors || thresholdFailures.length > 0 ? 1 : 0);
+}
+
+function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): string[] {
+  const failures: string[] = [];
+  const checks: Array<[string, number, number | null]> = [
+    ["opened", report.opened, optionNumber("min-opened")],
+    ["welcomed", report.welcomed, optionNumber("min-welcomed")],
+    ["states", report.states, optionNumber("min-states")],
+    ["closed", report.closed, optionNumber("min-closed")]
+  ];
+  for (const [label, actual, minimum] of checks) {
+    if (minimum != null && actual < minimum) failures.push(`${label} ${actual} < ${minimum}`);
+  }
+
+  const maximums: Array<[string, number, number | null]> = [
+    ["errors", report.errors, optionNumber("max-errors")],
+    ["slowClients.paused", report.slowClients.paused, optionNumber("max-slow-paused")]
+  ];
+  for (const [label, actual, maximum] of maximums) {
+    if (maximum != null && actual > maximum) failures.push(`${label} ${actual} > ${maximum}`);
+  }
+
+  const metricNames: SummaryMetric[] = [
+    "tickMs",
+    "snapshotMs",
+    "bytesOutPerSecond",
+    "snapshotsSentPerSecond",
+    "snapshotsSkippedBackpressurePerSecond"
+  ];
+  const fields: SummaryField[] = ["min", "max", "avg"];
+  for (const metric of metricNames) {
+    const summary = report.perTick[metric];
+    if (!summary) continue;
+    for (const field of fields) {
+      const maximum = optionNumber(`max-${kebab(metric)}-${field}`);
+      if (maximum != null && summary[field] > maximum) failures.push(`${metric}.${field} ${summary[field]} > ${maximum}`);
+      const minimum = optionNumber(`min-${kebab(metric)}-${field}`);
+      if (minimum != null && summary[field] < minimum) failures.push(`${metric}.${field} ${summary[field]} < ${minimum}`);
+    }
+  }
+  return failures;
+}
+
+function buildReportShape(combatZoneCounts: Record<string, number>) {
+  return {
     url,
     clients,
     durationMs,
@@ -276,6 +331,15 @@ function reportAndExit(): void {
       visibleFires: summarize(observed.visibleFires)
     }
   };
-  console.log(JSON.stringify(report, null, 2));
-  process.exit(stats.errors ? 1 : 0);
+}
+
+function optionNumber(name: string): number | null {
+  const raw = options[name];
+  if (raw == null || raw === true) return null;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : null;
+}
+
+function kebab(value: string): string {
+  return value.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 }

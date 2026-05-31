@@ -173,7 +173,7 @@ process cannot tick the populated world.
 
 ### Stage 2 - Add when telemetry asks for it
 
-- [ ] Automated load-test gates with thresholds in CI/local checks.
+- [x] Local automated load-test gate with thresholds (`npm run perf:gate`).
 - [ ] Better load-test scenarios for co-located combat, slow clients, and long sessions.
 - [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
