@@ -168,6 +168,26 @@ test("map renderer uses culled chunks instead of one floor-sized texture", async
   expect(stats.maxChunkTextureEdge).toBe(16 * TILE_SIZE);
 });
 
+test("lazy tree snapshots render after traveling into Northwood", async ({ page }) => {
+  await page.goto("/?e2e");
+  await joinFreshCharacter(page);
+
+  await page.waitForFunction(() => {
+    const me = window.__TIB_E2E__?.self();
+    const stateTrees = (window.__TIB_E2E__?.getState()?.trees ?? []).filter((tree) => tree.floor === me?.floor);
+    return stateTrees.length > 0 && (window.__TIB_E2E__?.viewCounts?.().trees ?? 0) === stateTrees.length;
+  });
+
+  await teleportTo(page, 3, 45.5, 30.5);
+  await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 3);
+  await page.waitForFunction(() => {
+    const me = window.__TIB_E2E__?.self();
+    const stateTrees = (window.__TIB_E2E__?.getState()?.trees ?? []).filter((tree) => tree.floor === me?.floor);
+    const renderedTrees = window.__TIB_E2E__?.viewCounts?.().trees ?? 0;
+    return stateTrees.length >= 20 && renderedTrees === stateTrees.length;
+  });
+});
+
 test("Northwood spawn table covers every enemy type and renders 4-direction frames", async ({ page }) => {
   page.on("pageerror", (error) => console.error(error));
   page.on("console", (message) => {

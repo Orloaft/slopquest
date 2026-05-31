@@ -299,6 +299,7 @@ interface E2EHooks {
   fireScreenPoint: (id?: string | null) => { x: number; y: number } | null;
   send: (msg: ClientMessage) => void;
   stateVersion: () => number;
+  viewCounts: () => { trees: number; npcs: number };
   actorFrameAnchorDrift: () => Array<{ family: string; dir: Direction; driftX: number; driftY: number }>;
   monsterTextureCoverage: (
     types?: string[]
@@ -513,6 +514,7 @@ if (E2E_MODE) {
     },
     send,
     stateVersion: () => stateVersion,
+    viewCounts: () => ({ trees: treeViews.size, npcs: npcViews.size }),
     actorFrameAnchorDrift: () => actorFrameAnchorDrift(),
     monsterTextureCoverage: (types?: string[]) =>
       (types ?? []).map((type) => {
@@ -1451,29 +1453,27 @@ function syncEntities(): void {
     }
   }
 
-  if (latestState.treesFull) {
-    for (const tree of latestState.trees ?? []) {
-      if (tree.floor !== me.floor) continue;
-      visibleTrees.add(tree.id);
-      let view = treeViews.get(tree.id);
-      if (!view) {
-        view = createTreeView(tree);
-        treeViews.set(tree.id, view);
-        entityLayer.add(view);
-      }
-      view.setPosition(tree.x * TILE_SIZE, tree.y * TILE_SIZE);
-      if (view.treeType !== tree.type) {
-        updateTreeViewTexture(view, tree);
-      }
-      view.treeSprite.setVisible(tree.active);
-      view.stump.setVisible(false);
-      if (view.zone.input) view.zone.input.enabled = tree.active;
+  for (const tree of latestState.trees ?? []) {
+    if (tree.floor !== me.floor) continue;
+    visibleTrees.add(tree.id);
+    let view = treeViews.get(tree.id);
+    if (!view) {
+      view = createTreeView(tree);
+      treeViews.set(tree.id, view);
+      entityLayer.add(view);
     }
-    for (const [id, view] of treeViews) {
-      if (!visibleTrees.has(id)) {
-        view.destroy();
-        treeViews.delete(id);
-      }
+    view.setPosition(tree.x * TILE_SIZE, tree.y * TILE_SIZE);
+    if (view.treeType !== tree.type) {
+      updateTreeViewTexture(view, tree);
+    }
+    view.treeSprite.setVisible(tree.active);
+    view.stump.setVisible(false);
+    if (view.zone.input) view.zone.input.enabled = tree.active;
+  }
+  for (const [id, view] of treeViews) {
+    if (!visibleTrees.has(id)) {
+      view.destroy();
+      treeViews.delete(id);
     }
   }
 

@@ -404,7 +404,7 @@ const MONSTER_ATTACK_ANIM_MS = 480;
 // recovery; static resources are initial-full + deltas only so dense zones do
 // not resend every visible tree/node just because the recovery clock fired.
 const TREE_SNAPSHOT_EVERY = positiveIntEnv("TIB_TREE_SNAPSHOT_EVERY", E2E_TEST ? 5 : 10);
-const NPC_SNAPSHOT_EVERY = positiveIntEnv("TIB_NPC_SNAPSHOT_EVERY", E2E_TEST ? 1 : 3);
+const NPC_SNAPSHOT_EVERY = positiveIntEnv("TIB_NPC_SNAPSHOT_EVERY", 1);
 const RESOURCE_SNAPSHOT_EVERY = positiveIntEnv("TIB_RESOURCE_SNAPSHOT_EVERY", E2E_TEST ? 1 : 5);
 const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 80);
 const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 1000);
