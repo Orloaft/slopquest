@@ -51,6 +51,7 @@ type GaugeMetric =
   | "saveQueueDepth"
   | "saveFlushPlayers"
   | "saveInFlight";
+type ClientMetric = "visiblePlayers" | "visibleMonsters" | "visibleTrees" | "visibleFires";
 type SummaryField = "min" | "max" | "avg";
 
 const options = parseArgs(process.argv.slice(2));
@@ -407,6 +408,17 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
   }
   for (const metric of gaugeNames) {
     const summary = report.perTick[metric];
+    if (!summary) continue;
+    for (const field of fields) {
+      const maximum = optionNumber(`max-${kebab(metric)}-${field}`);
+      if (maximum != null && summary[field] > maximum) failures.push(`${metric}.${field} ${summary[field]} > ${maximum}`);
+      const minimum = optionNumber(`min-${kebab(metric)}-${field}`);
+      if (minimum != null && summary[field] < minimum) failures.push(`${metric}.${field} ${summary[field]} < ${minimum}`);
+    }
+  }
+  const clientMetricNames: ClientMetric[] = ["visiblePlayers", "visibleMonsters", "visibleTrees", "visibleFires"];
+  for (const metric of clientMetricNames) {
+    const summary = report.perClient[metric];
     if (!summary) continue;
     for (const field of fields) {
       const maximum = optionNumber(`max-${kebab(metric)}-${field}`);

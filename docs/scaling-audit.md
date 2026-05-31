@@ -12,6 +12,7 @@ Node/WebSocket process:
 - Snapshots are decoupled to ~13.3 Hz, with interpolation hiding the lower send rate.
 - Player snapshots are split into owner-private and public views.
 - Per-session entity deltas avoid resending unchanged world objects.
+- Co-located crowd snapshots cap public player fanout to nearest players.
 - Static resources are indexed by active cells; moving entities update spatial cells incrementally.
 - High-cardinality trees and gathering nodes are materialized only near players.
 - Monsters/NPCs simulate only in active regions near players.
@@ -30,6 +31,8 @@ no socket errors and no backpressure skips. See
 - Authoritative sim tick: 50 ms.
 - Snapshot broadcast: 75 ms.
 - Interest radius: 18 tiles for dynamic entities, 32 tiles for trees.
+- Public player views per client are capped by `TIB_MAX_VISIBLE_PLAYERS`
+  (default `50`) so crowded hubs do not create unbounded N-by-N snapshot fanout.
 - Spatial cell size: 8 tiles.
 - Static trees/resources are initial-full per session, then delta/removal only.
 - Static resource cells for trees, fishing spots, ore veins, and herbs are
@@ -91,12 +94,18 @@ The load driver also records raw state message sizes. `npm run perf:gate` caps
 state packets at 60 KB max and 25 KB average across its clustered, combat,
 regional, and slow-reader scenarios.
 
+Worst-case co-located player fanout is bounded by a nearest-player cap. The
+viewer is always included, and other player views are sorted by distance before
+the cap is applied. The perf gate includes a 150-client town-crowd scenario that
+asserts visible player count never exceeds the configured cap while packet-size
+thresholds still hold.
+
 ### Spatial indexing and active regions
 
 The server no longer rebuilds one all-entity spatial index every tick.
 
 - Players, monsters, corpses, NPCs, and fires are in dynamic spatial maps.
-- Fishing nodes, mining nodes, and herb nodes are indexed once at startup.
+- Fishing nodes, mining nodes, and herb nodes are indexed by active cells.
 - Trees are derived from map chunks on demand instead of being instantiated for
   the whole authored world at boot.
 - Movement calls update the old and new cells directly.
@@ -199,6 +208,7 @@ process cannot tick the populated world.
 ### Stage 1 - Complete for current MVP scale
 
 - [x] Public/private player snapshot split.
+- [x] Nearest-player cap for crowded snapshot fanout.
 - [x] Owner-only private state with cache signatures.
 - [x] Per-session snapshot deltas.
 - [x] Static spatial layers and incremental dynamic spatial updates.
@@ -214,6 +224,7 @@ process cannot tick the populated world.
 ### Stage 2 - Add when telemetry asks for it
 
 - [x] Local automated load-test gate with thresholds (`npm run perf:gate`).
+- [x] 150-client co-located crowd gate for capped player fanout.
 - [x] 100-client distributed regional smoke scenario in the local performance
   gate.
 - [x] Slow-reader smoke scenario in the local performance gate.

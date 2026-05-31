@@ -230,6 +230,11 @@ interface SnapshotCategoryCache {
   nextSignatures: Map<string, number>;
 }
 
+interface PlayerSnapshotCandidate {
+  player: ServerPlayer;
+  distSq: number;
+}
+
 type SnapshotCache = Record<SnapshotCategory, SnapshotCategoryCache>;
 
 const QUEST_LIST = Object.values(QUESTS);
@@ -325,6 +330,7 @@ const DEV_TOOLS = E2E_TEST || process.env.TIB_DEV === "1";
 const ALLOW_TRANSIENT_PLAYERS = E2E_TEST || process.env.TIB_ALLOW_TRANSIENT_PLAYERS === "1";
 const SNAPSHOT_RADIUS = 18;
 const SNAPSHOT_RADIUS_SQ = SNAPSHOT_RADIUS ** 2;
+const MAX_VISIBLE_PLAYERS = positiveIntEnv("TIB_MAX_VISIBLE_PLAYERS", 50);
 const TREE_SNAPSHOT_RADIUS = 32;
 const TREE_SNAPSHOT_RADIUS_SQ = TREE_SNAPSHOT_RADIUS ** 2;
 const METRIC_WINDOW = 60;
@@ -2907,14 +2913,18 @@ function buildSnapshotFor(
   const includeHerbNodesForSession = includeResources || !cache.herbNodes.initialized;
   const includeStaticResourcesForSession =
     includeFishingNodesForSession || includeMiningNodesForSession || includeHerbNodesForSession;
-  const players: PlayerView[] = [];
+  const playerCandidates: PlayerSnapshotCandidate[] = [];
   let includedViewer = false;
   forEachSpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (player) => {
     if (player.id !== viewer.id && !inInterestRange(viewer, player)) return;
     if (player.id === viewer.id) includedViewer = true;
-    players.push(player.id === viewer.id ? serializePlayer(player, now) : serializePlayerPublicCached(player));
+    playerCandidates.push({
+      player,
+      distSq: player.id === viewer.id ? -1 : distanceSq(viewer, player)
+    });
   });
-  if (!includedViewer) players.push(serializePlayer(viewer, now));
+  if (!includedViewer) playerCandidates.push({ player: viewer, distSq: -1 });
+  const players = serializeVisiblePlayers(viewer, playerCandidates, now);
 
   const visibleMonsters: MonsterView[] = [];
   forEachSpatial(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (monster) => {
@@ -3067,6 +3077,14 @@ function residentStaticResourceCount(): number {
 
 function dynamicEntityCount(): number {
   return clients.size + monsters.size + corpses.size + npcs.size + fires.size;
+}
+
+function serializeVisiblePlayers(viewer: ServerPlayer, candidates: PlayerSnapshotCandidate[], now: number): PlayerView[] {
+  if (candidates.length > MAX_VISIBLE_PLAYERS) {
+    candidates.sort((a, b) => a.distSq - b.distSq || a.player.id.localeCompare(b.player.id));
+    candidates.length = MAX_VISIBLE_PLAYERS;
+  }
+  return candidates.map(({ player }) => (player.id === viewer.id ? serializePlayer(player, now) : serializePlayerPublicCached(player)));
 }
 
 function snapshotCacheFor(session: Session): SnapshotCache {
