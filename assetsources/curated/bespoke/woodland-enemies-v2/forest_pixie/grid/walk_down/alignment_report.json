@@ -1,0 +1,345 @@
+{
+  "anchor_mode": "bottom_center",
+  "canvas": {
+    "width": 60,
+    "height": 72
+  },
+  "pre_alignment_drift": {
+    "x": 0.0,
+    "y": 12,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_000.png",
+        "x": 30.0,
+        "y": 66,
+        "bbox": [
+          0,
+          0,
+          60,
+          66
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_001.png",
+        "x": 30.0,
+        "y": 66,
+        "bbox": [
+          0,
+          0,
+          60,
+          66
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_002.png",
+        "x": 30.0,
+        "y": 60,
+        "bbox": [
+          0,
+          0,
+          60,
+          60
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_003.png",
+        "x": 30.0,
+        "y": 66,
+        "bbox": [
+          0,
+          0,
+          60,
+          66
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_004.png",
+        "x": 30.0,
+        "y": 66,
+        "bbox": [
+          0,
+          0,
+          60,
+          66
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_005.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          0,
+          60,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_006.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          0,
+          60,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_007.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          0,
+          60,
+          72
+        ]
+      }
+    ]
+  },
+  "post_alignment_drift": {
+    "x": 0.0,
+    "y": 0,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/000_frame_000.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          6,
+          60,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/001_frame_001.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          6,
+          60,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/002_frame_002.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          12,
+          60,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/003_frame_003.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          6,
+          60,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/004_frame_004.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          6,
+          60,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/005_frame_005.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          0,
+          60,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/006_frame_006.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          0,
+          60,
+          72
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/007_frame_007.png",
+        "x": 30.0,
+        "y": 72,
+        "bbox": [
+          0,
+          0,
+          60,
+          72
+        ]
+      }
+    ]
+  },
+  "motion": {
+    "pair_changed_fraction": [
+      0.0083,
+      0.2461,
+      0.2481,
+      0.0063,
+      0.2481,
+      0.0063,
+      0.0083
+    ],
+    "average_changed_fraction": 0.1102
+  },
+  "preview_background": [
+    28,
+    32,
+    38
+  ],
+  "aligned_frames": [
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/000_frame_000.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/001_frame_001.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/002_frame_002.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/003_frame_003.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/004_frame_004.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/005_frame_005.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/006_frame_006.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/aligned/007_frame_007.png"
+  ],
+  "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/walk_down_preview.gif",
+  "offsets": [
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_000.png",
+      "source_bbox": [
+        0,
+        0,
+        60,
+        66
+      ],
+      "anchor": [
+        30.0,
+        66
+      ],
+      "dx": 0,
+      "dy": 6
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_001.png",
+      "source_bbox": [
+        0,
+        0,
+        60,
+        66
+      ],
+      "anchor": [
+        30.0,
+        66
+      ],
+      "dx": 0,
+      "dy": 6
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_002.png",
+      "source_bbox": [
+        0,
+        0,
+        60,
+        60
+      ],
+      "anchor": [
+        30.0,
+        60
+      ],
+      "dx": 0,
+      "dy": 12
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_003.png",
+      "source_bbox": [
+        0,
+        0,
+        60,
+        66
+      ],
+      "anchor": [
+        30.0,
+        66
+      ],
+      "dx": 0,
+      "dy": 6
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_004.png",
+      "source_bbox": [
+        0,
+        0,
+        60,
+        66
+      ],
+      "anchor": [
+        30.0,
+        66
+      ],
+      "dx": 0,
+      "dy": 6
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_005.png",
+      "source_bbox": [
+        0,
+        0,
+        60,
+        72
+      ],
+      "anchor": [
+        30.0,
+        72
+      ],
+      "dx": 0,
+      "dy": 0
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_006.png",
+      "source_bbox": [
+        0,
+        0,
+        60,
+        72
+      ],
+      "anchor": [
+        30.0,
+        72
+      ],
+      "dx": 0,
+      "dy": 0
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/walk_down/frame_007.png",
+      "source_bbox": [
+        0,
+        0,
+        60,
+        72
+      ],
+      "anchor": [
+        30.0,
+        72
+      ],
+      "dx": 0,
+      "dy": 0
+    }
+  ]
+}

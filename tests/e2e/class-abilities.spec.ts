@@ -42,8 +42,22 @@ test("Vanguard Iron Clad applies a mitigation buff", async ({ page }) => {
   await page.goto("/?e2e");
   await join(page);
   await unlockEquip(page, { npcId: "fighter-captain", classKey: "vanguard", floor: 0, x: 42.5, y: 38.5, skills: { attack: HIGH, defense: HIGH } });
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.abilities ?? []).some((a) => a.id === "shield_bash"));
   await cast(page, "iron_clad");
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.ironClad ?? 0) > 0);
+
+  const before = await placeNearMonster(page, 1, 1.2);
+  await page.evaluate((id) => {
+    window.__TIB_E2E__?.send({ type: "target", id });
+    window.__TIB_E2E__?.send({ type: "useClassAbility", id: "shield_bash" });
+  }, before.id);
+  await page.waitForFunction(
+    (target) => {
+      const monster = (window.__TIB_E2E__?.getState()?.monsters ?? []).find((m) => m.id === target.id);
+      return !monster || monster.hp < target.hp;
+    },
+    before
+  );
 });
 
 test("Archer Fleet Foot applies a speed buff", async ({ page }) => {
@@ -64,7 +78,7 @@ test("Mage Frost Nova damages a nearby monster", async ({ page }) => {
   // Confirm the kit swapped to the Mage abilities.
   await page.waitForFunction(() => {
     const ids = (window.__TIB_E2E__?.self()?.abilities ?? []).map((a) => a.id);
-    return ids.includes("flame_burst") && ids.includes("frost_nova");
+    return ids.includes("flame_burst") && ids.includes("frost_nova") && ids.includes("arcane_bolt");
   });
 
   // Drop onto a skeleton on floor 1 and wait for monsters inside the nova radius
@@ -79,6 +93,9 @@ test("Mage Frost Nova damages a nearby monster", async ({ page }) => {
     return inRange.length ? inRange : null;
   });
   const before = (await captured.jsonValue()) as Array<{ id: string; hp: number }>;
+  await page.evaluate((id) => window.__TIB_E2E__?.send({ type: "target", id }), before[0]!.id);
+  await cast(page, "arcane_bolt");
+  await page.waitForFunction((id) => (window.__TIB_E2E__?.recentEvents?.() ?? []).some((e) => e.type === "ability_vfx" && e.text === "impact_ring" && e.target === id), before[0]!.id);
   await cast(page, "frost_nova");
   // At least one in-range monster is wounded or killed outright (high Magic one-shots).
   await page.waitForFunction(
@@ -137,6 +154,24 @@ async function place(page: Page, floor: number, x: number, y: number): Promise<v
     },
     { floor, x: sx, y: sy }
   );
+}
+
+async function placeNearMonster(page: Page, floor: number, range: number): Promise<{ id: string; hp: number }> {
+  await place(page, floor, 13.5, 12.5);
+  const monster = await page.waitForFunction((f) => (window.__TIB_E2E__?.getState()?.monsters ?? []).find((m) => m.floor === f) ?? null, floor);
+  const target = (await monster.jsonValue()) as { id: string; x: number; y: number; hp: number };
+  await page.evaluate(
+    (p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }),
+    { floor, x: target.x, y: target.y + Math.min(0.5, range / 2) }
+  );
+  await page.waitForFunction(
+    (p) => {
+      const me = window.__TIB_E2E__?.self();
+      return Boolean(me && me.floor === p.floor && Math.hypot(me.x - p.x, me.y - p.y) < 0.8);
+    },
+    { floor, x: target.x, y: target.y + Math.min(0.5, range / 2) }
+  );
+  return { id: target.id, hp: target.hp };
 }
 
 async function pos(page: Page): Promise<{ x: number; y: number }> {

@@ -85,6 +85,138 @@
   aggro: 6.5
   range: 1.1
 
+# --- Northwood wilds (floor 3) ---
+- id: wild_boar
+  name: Wild Boar
+  maxHp: 34
+  speed: 2.8
+  damage: [5, 10]
+  attackMs: 920
+  xp: 26
+  gold: [4, 10]
+  aggro: 5.8
+  range: 1
+
+- id: thorn_hedgehog
+  name: Thorn Hedgehog
+  maxHp: 30
+  speed: 2.35
+  damage: [4, 8]
+  attackMs: 1050
+  xp: 24
+  gold: [3, 9]
+  aggro: 5
+  range: 1
+  armor: 2
+
+- id: forest_spider
+  name: Forest Spider
+  maxHp: 42
+  speed: 2.9
+  damage: [6, 11]
+  attackMs: 900
+  xp: 34
+  gold: [5, 12]
+  aggro: 6
+  range: 1
+
+- id: forest_slime
+  name: Forest Slime
+  maxHp: 44
+  speed: 2.1
+  damage: [5, 9]
+  attackMs: 1150
+  xp: 32
+  gold: [5, 12]
+  aggro: 5.5
+  range: 1
+
+- id: sapling_deer
+  name: Sapling Deer
+  maxHp: 50
+  speed: 3.05
+  damage: [7, 12]
+  attackMs: 980
+  xp: 38
+  gold: [6, 15]
+  aggro: 6.2
+  range: 1
+
+- id: mushroom_brute
+  name: Mushroom Brute
+  maxHp: 76
+  speed: 1.9
+  damage: [10, 18]
+  attackMs: 1250
+  xp: 58
+  gold: [10, 22]
+  aggro: 6
+  range: 1.05
+  armor: 3
+
+- id: dire_wolf
+  name: Dire Wolf
+  maxHp: 78
+  speed: 3.15
+  damage: [11, 19]
+  attackMs: 850
+  xp: 60
+  gold: [11, 24]
+  aggro: 7
+  range: 1
+  pack: true
+
+- id: forest_pixie
+  name: Forest Pixie
+  maxHp: 48
+  speed: 3.1
+  damage: [6, 11]
+  attackMs: 1500
+  xp: 46
+  gold: [9, 18]
+  aggro: 6.5
+  range: 5.5
+  ranged: true
+  slowPct: 20
+  slowMs: 1200
+
+- id: bone_druid
+  name: Bone Druid
+  maxHp: 82
+  speed: 2.05
+  damage: [12, 20]
+  attackMs: 1650
+  xp: 72
+  gold: [14, 30]
+  aggro: 7
+  range: 6
+  ranged: true
+  weakenPct: 25
+  weakenMs: 3000
+
+- id: bog_wraith
+  name: Bog Wraith
+  maxHp: 72
+  speed: 2.4
+  damage: [10, 17]
+  attackMs: 1350
+  xp: 66
+  gold: [12, 26]
+  aggro: 6.8
+  range: 1.1
+
+- id: ancient_treant
+  name: Ancient Treant
+  maxHp: 130
+  speed: 1.35
+  damage: [16, 26]
+  attackMs: 1450
+  xp: 96
+  gold: [24, 48]
+  aggro: 7
+  range: 1.15
+  armor: 5
+
 - id: orc
   name: Orc
   maxHp: 84
@@ -120,6 +252,43 @@
   gold: [14, 28]
   aggro: 6.5
   range: 1.05
+
+- id: grave_revenant
+  name: Grave Revenant
+  maxHp: 76
+  speed: 2.55
+  damage: [10, 18]
+  attackMs: 980
+  xp: 66
+  gold: [12, 26]
+  aggro: 7
+  range: 1.05
+
+- id: crypt_sentinel
+  name: Crypt Sentinel
+  maxHp: 118
+  speed: 1.55
+  damage: [14, 24]
+  attackMs: 1350
+  xp: 92
+  gold: [18, 36]
+  aggro: 6.5
+  range: 1.1
+  armor: 4
+
+- id: pale_banshee
+  name: Pale Banshee
+  maxHp: 64
+  speed: 2.25
+  damage: [9, 16]
+  attackMs: 1450
+  xp: 78
+  gold: [15, 32]
+  aggro: 7
+  range: 5.5
+  ranged: true
+  slowPct: 25
+  slowMs: 1600
 
 - id: boss
   name: Ashen Warden

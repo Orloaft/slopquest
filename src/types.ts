@@ -219,6 +219,8 @@ export interface GameEvent {
   fromX?: number;
   fromY?: number;
   angle?: number;
+  scale?: number;
+  durationMs?: number;
   to?: string;
   lines?: DialogueLineView[];
   opensShop?: boolean;

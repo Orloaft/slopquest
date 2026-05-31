@@ -18,10 +18,12 @@
     "client": "vite --host 0.0.0.0",
     "server": "node server/index.ts",
     "load:test": "node scripts/load-test.ts",
+    "assets:enemies": "python3 tools/generate_woodland_enemy_sprites_v2.py && python3 tools/validate_enemy_asset_pipeline.py",
+    "assets:enemies:check": "python3 tools/validate_enemy_asset_pipeline.py",
     "test:e2e": "playwright test",
     "test:visual": "playwright test tests/e2e/tib-features.spec.ts --project=chromium",
     "typecheck": "tsc",
-    "check": "tsc"
+    "check": "tsc && npm run assets:enemies:check"
   },
   "dependencies": {
     "concurrently": "^9.1.2",

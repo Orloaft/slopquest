@@ -11,15 +11,21 @@ monsters:
   # ranged e2e tests drop next to.
   - { type: skeleton,      at: { floor: 1, x: 13, y: 12 }, zone: cemetery }
   - { type: ghoul,         at: { floor: 1, x: 30, y: 22 }, zone: cemetery }
+  - { type: grave_revenant, at: { floor: 1, x: 45, y: 15 }, zone: cemetery }
   - { type: skeleton,      at: { floor: 1, x: 71, y: 24 }, zone: cemetery }
   - { type: ghoul,         at: { floor: 1, x: 18, y: 48 }, zone: cemetery }
+  - { type: pale_banshee,  at: { floor: 1, x: 54, y: 43 }, zone: cemetery }
   - { type: skeleton,      at: { floor: 1, x: 70, y: 49 }, zone: cemetery }
   # The Ashen Crypt (90x60): undead lurk in the chambers; the Ashen Warden boss
   # holds the far-east chamber.
   - { type: skeleton,      at: { floor: 2, x: 10, y: 9  }, zone: crypt }
   - { type: ghoul,         at: { floor: 2, x: 12, y: 34 }, zone: crypt }
+  - { type: grave_revenant, at: { floor: 2, x: 23, y: 42 }, zone: crypt }
   - { type: skeleton,      at: { floor: 2, x: 31, y: 16 }, zone: crypt }
+  - { type: crypt_sentinel, at: { floor: 2, x: 44, y: 18 }, zone: crypt }
   - { type: ghoul,         at: { floor: 2, x: 53, y: 31 }, zone: crypt }
+  - { type: pale_banshee,  at: { floor: 2, x: 65, y: 39 }, zone: crypt }
+  - { type: crypt_sentinel, at: { floor: 2, x: 69, y: 23 }, zone: crypt }
   - { type: boss,          at: { floor: 2, x: 76, y: 29 }, zone: crypt }
   # Northwood (90x60): the same roster spread thin across the expanded wood —
   # gentle critters near the Waystone arrival in the south, tougher greenskins
@@ -33,6 +39,11 @@ monsters:
   - { type: wolf,          at: { floor: 3, x: 74, y: 49 }, zone: woods }
   - { type: wolf,          at: { floor: 3, x: 34, y: 40 }, zone: woods }
   - { type: wolf,          at: { floor: 3, x: 58, y: 34 }, zone: woods }
+  - { type: wild_boar,     at: { floor: 3, x: 13, y: 48 }, zone: woods }
+  - { type: thorn_hedgehog, at: { floor: 3, x: 72, y: 46 }, zone: woods }
+  - { type: forest_slime,  at: { floor: 3, x: 41, y: 50 }, zone: woods }
+  - { type: forest_spider, at: { floor: 3, x: 22, y: 22 }, zone: woods }
+  - { type: sapling_deer,  at: { floor: 3, x: 56, y: 39 }, zone: woods }
   - { type: wisp,          at: { floor: 3, x: 24, y: 52 }, zone: woods }
   - { type: wisp,          at: { floor: 3, x: 54, y: 55 }, zone: woods }
   - { type: wisp,          at: { floor: 3, x: 10, y: 42 }, zone: woods }
@@ -45,6 +56,13 @@ monsters:
   - { type: orc,           at: { floor: 3, x: 42, y: 7  }, zone: woods }
   - { type: orc,           at: { floor: 3, x: 56, y: 12 }, zone: woods }
   - { type: orc,           at: { floor: 3, x: 82, y: 24 }, zone: woods }
+  - { type: mushroom_brute, at: { floor: 3, x: 34, y: 15 }, zone: woods }
+  - { type: dire_wolf,     at: { floor: 3, x: 73, y: 13 }, zone: woods }
+  - { type: dire_wolf,     at: { floor: 3, x: 79, y: 47 }, zone: woods }
+  - { type: forest_pixie,  at: { floor: 3, x: 42, y: 30 }, zone: woods }
+  - { type: bone_druid,    at: { floor: 3, x: 72, y: 11 }, zone: woods }
+  - { type: bog_wraith,    at: { floor: 3, x: 67, y: 22 }, zone: woods }
+  - { type: ancient_treant, at: { floor: 3, x: 45, y: 27 }, zone: woods }
   # The Sunken Marsh (floor 5): skitterers patrol the causeway; mire spitters
   # are anchored on deep water and fire across it.
   - { type: skitterer,     at: { floor: 5, x: 48, y: 20 }, zone: marsh }

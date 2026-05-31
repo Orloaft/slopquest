@@ -8,9 +8,10 @@
     0
   ],
   "tolerance": 40,
+  "remove_green_halo": false,
   "grid": {
     "columns": 8,
-    "rows": 2,
+    "rows": 8,
     "cell_width": 96,
     "cell_height": 96
   },
@@ -29,56 +30,56 @@
   "rows": [
     {
       "row": 0,
-      "name": "walk",
+      "name": "walk_up",
       "frames": 8,
       "source_boxes": [
         [
           12,
-          27,
+          5,
           87,
-          91
+          69
         ],
         [
           108,
-          30,
+          2,
           183,
-          94
+          66
         ],
         [
           204,
-          33,
+          0,
           279,
-          96
+          63
         ],
         [
           300,
-          30,
+          2,
           375,
-          94
+          66
         ],
         [
           396,
-          27,
+          5,
           471,
-          91
+          69
         ],
         [
           492,
-          24,
+          6,
           567,
-          90
+          72
         ],
         [
           588,
-          21,
+          9,
           663,
-          87
+          75
         ],
         [
           684,
-          24,
+          6,
           759,
-          90
+          72
         ]
       ],
       "pre_alignment_drift": {
@@ -86,7 +87,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/frame_000.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/frame_000.png",
             "x": 37.5,
             "y": 64,
             "bbox": [
@@ -97,7 +98,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/frame_001.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/frame_001.png",
             "x": 37.5,
             "y": 64,
             "bbox": [
@@ -108,7 +109,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/frame_002.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/frame_002.png",
             "x": 37.5,
             "y": 63,
             "bbox": [
@@ -119,7 +120,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/frame_003.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/frame_003.png",
             "x": 37.5,
             "y": 64,
             "bbox": [
@@ -130,7 +131,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/frame_004.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/frame_004.png",
             "x": 37.5,
             "y": 64,
             "bbox": [
@@ -141,7 +142,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/frame_005.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/frame_005.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -152,7 +153,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/frame_006.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/frame_006.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -163,7 +164,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/frame_007.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/frame_007.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -180,7 +181,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/aligned/000_frame_000.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/aligned/000_frame_000.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -191,7 +192,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/aligned/001_frame_001.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/aligned/001_frame_001.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -202,7 +203,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/aligned/002_frame_002.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/aligned/002_frame_002.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -213,7 +214,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/aligned/003_frame_003.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/aligned/003_frame_003.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -224,7 +225,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/aligned/004_frame_004.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/aligned/004_frame_004.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -235,7 +236,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/aligned/005_frame_005.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/aligned/005_frame_005.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -246,7 +247,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/aligned/006_frame_006.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/aligned/006_frame_006.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -257,7 +258,265 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/aligned/007_frame_007.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/aligned/007_frame_007.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.0073,
+          0.0057,
+          0.0075,
+          0.0055,
+          0.0073,
+          0.0055,
+          0.0073
+        ],
+        "average_changed_fraction": 0.0066
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/walk_up_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/alignment_report.json"
+    },
+    {
+      "row": 1,
+      "name": "walk_right",
+      "frames": 8,
+      "source_boxes": [
+        [
+          12,
+          123,
+          87,
+          187
+        ],
+        [
+          108,
+          126,
+          183,
+          190
+        ],
+        [
+          204,
+          129,
+          279,
+          192
+        ],
+        [
+          300,
+          126,
+          375,
+          190
+        ],
+        [
+          396,
+          123,
+          471,
+          187
+        ],
+        [
+          492,
+          120,
+          567,
+          186
+        ],
+        [
+          588,
+          117,
+          663,
+          183
+        ],
+        [
+          684,
+          120,
+          759,
+          186
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 3,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/frame_000.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/frame_001.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/frame_002.png",
+            "x": 37.5,
+            "y": 63,
+            "bbox": [
+              0,
+              0,
+              75,
+              63
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/frame_003.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/frame_004.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/frame_005.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/frame_006.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/frame_007.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/aligned/000_frame_000.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/aligned/001_frame_001.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/aligned/002_frame_002.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              3,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/aligned/003_frame_003.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/aligned/004_frame_004.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/aligned/005_frame_005.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/aligned/006_frame_006.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/aligned/007_frame_007.png",
             "x": 37.5,
             "y": 66,
             "bbox": [
@@ -281,62 +540,62 @@
         ],
         "average_changed_fraction": 0.0286
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/walk_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/alignment_report.json"
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/walk_right_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/alignment_report.json"
     },
     {
-      "row": 1,
-      "name": "attack",
+      "row": 2,
+      "name": "walk_down",
       "frames": 8,
       "source_boxes": [
         [
           12,
-          123,
-          96,
-          187
+          219,
+          87,
+          283
         ],
         [
           108,
-          126,
-          192,
-          190
+          222,
+          183,
+          286
         ],
         [
           204,
-          129,
-          288,
-          192
+          225,
+          279,
+          288
         ],
         [
           300,
-          126,
-          384,
-          190
+          222,
+          375,
+          286
         ],
         [
           396,
-          123,
-          480,
-          187
+          219,
+          471,
+          283
         ],
         [
           492,
-          120,
-          576,
-          186
+          216,
+          567,
+          282
         ],
         [
           588,
-          117,
-          672,
-          183
+          213,
+          663,
+          279
         ],
         [
           684,
-          120,
-          768,
-          186
+          216,
+          759,
+          282
         ]
       ],
       "pre_alignment_drift": {
@@ -344,7 +603,523 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/frame_000.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/frame_000.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/frame_001.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/frame_002.png",
+            "x": 37.5,
+            "y": 63,
+            "bbox": [
+              0,
+              0,
+              75,
+              63
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/frame_003.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/frame_004.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/frame_005.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/frame_006.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/frame_007.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/aligned/000_frame_000.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/aligned/001_frame_001.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/aligned/002_frame_002.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              3,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/aligned/003_frame_003.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/aligned/004_frame_004.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/aligned/005_frame_005.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/aligned/006_frame_006.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/aligned/007_frame_007.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.0073,
+          0.0444,
+          0.0455,
+          0.0055,
+          0.0844,
+          0.0055,
+          0.0073
+        ],
+        "average_changed_fraction": 0.0286
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/walk_down_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/alignment_report.json"
+    },
+    {
+      "row": 3,
+      "name": "walk_left",
+      "frames": 8,
+      "source_boxes": [
+        [
+          9,
+          315,
+          84,
+          379
+        ],
+        [
+          105,
+          318,
+          180,
+          382
+        ],
+        [
+          201,
+          321,
+          276,
+          384
+        ],
+        [
+          297,
+          318,
+          372,
+          382
+        ],
+        [
+          393,
+          315,
+          468,
+          379
+        ],
+        [
+          489,
+          312,
+          564,
+          378
+        ],
+        [
+          585,
+          309,
+          660,
+          375
+        ],
+        [
+          681,
+          312,
+          756,
+          378
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 3,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/frame_000.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/frame_001.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/frame_002.png",
+            "x": 37.5,
+            "y": 63,
+            "bbox": [
+              0,
+              0,
+              75,
+              63
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/frame_003.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/frame_004.png",
+            "x": 37.5,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              75,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/frame_005.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/frame_006.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/frame_007.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/aligned/000_frame_000.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/aligned/001_frame_001.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/aligned/002_frame_002.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              3,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/aligned/003_frame_003.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/aligned/004_frame_004.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/aligned/005_frame_005.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/aligned/006_frame_006.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/aligned/007_frame_007.png",
+            "x": 37.5,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              75,
+              66
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.0073,
+          0.0444,
+          0.0455,
+          0.0055,
+          0.0844,
+          0.0055,
+          0.0073
+        ],
+        "average_changed_fraction": 0.0286
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/walk_left_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/alignment_report.json"
+    },
+    {
+      "row": 4,
+      "name": "attack_up",
+      "frames": 8,
+      "source_boxes": [
+        [
+          12,
+          389,
+          96,
+          453
+        ],
+        [
+          108,
+          386,
+          192,
+          450
+        ],
+        [
+          204,
+          384,
+          288,
+          447
+        ],
+        [
+          300,
+          386,
+          384,
+          450
+        ],
+        [
+          396,
+          389,
+          480,
+          453
+        ],
+        [
+          492,
+          390,
+          576,
+          456
+        ],
+        [
+          588,
+          393,
+          672,
+          459
+        ],
+        [
+          684,
+          390,
+          768,
+          456
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 3,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/frame_000.png",
             "x": 42.0,
             "y": 64,
             "bbox": [
@@ -355,7 +1130,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/frame_001.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/frame_001.png",
             "x": 42.0,
             "y": 64,
             "bbox": [
@@ -366,7 +1141,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/frame_002.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/frame_002.png",
             "x": 42.0,
             "y": 63,
             "bbox": [
@@ -377,7 +1152,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/frame_003.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/frame_003.png",
             "x": 42.0,
             "y": 64,
             "bbox": [
@@ -388,7 +1163,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/frame_004.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/frame_004.png",
             "x": 42.0,
             "y": 64,
             "bbox": [
@@ -399,7 +1174,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/frame_005.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/frame_005.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -410,7 +1185,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/frame_006.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/frame_006.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -421,7 +1196,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/frame_007.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/frame_007.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -438,7 +1213,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/aligned/000_frame_000.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/aligned/000_frame_000.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -449,7 +1224,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/aligned/001_frame_001.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/aligned/001_frame_001.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -460,7 +1235,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/aligned/002_frame_002.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/aligned/002_frame_002.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -471,7 +1246,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/aligned/003_frame_003.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/aligned/003_frame_003.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -482,7 +1257,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/aligned/004_frame_004.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/aligned/004_frame_004.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -493,7 +1268,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/aligned/005_frame_005.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/aligned/005_frame_005.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -504,7 +1279,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/aligned/006_frame_006.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/aligned/006_frame_006.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -515,7 +1290,265 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/aligned/007_frame_007.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/aligned/007_frame_007.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.0065,
+          0.1328,
+          0.2192,
+          0.2621,
+          0.2653,
+          0.221,
+          0.1358
+        ],
+        "average_changed_fraction": 0.1775
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/attack_up_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/alignment_report.json"
+    },
+    {
+      "row": 5,
+      "name": "attack_right",
+      "frames": 8,
+      "source_boxes": [
+        [
+          12,
+          507,
+          96,
+          571
+        ],
+        [
+          108,
+          510,
+          192,
+          574
+        ],
+        [
+          204,
+          513,
+          288,
+          576
+        ],
+        [
+          300,
+          510,
+          384,
+          574
+        ],
+        [
+          396,
+          507,
+          480,
+          571
+        ],
+        [
+          492,
+          504,
+          576,
+          570
+        ],
+        [
+          588,
+          501,
+          672,
+          567
+        ],
+        [
+          684,
+          504,
+          768,
+          570
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 3,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/frame_000.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/frame_001.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/frame_002.png",
+            "x": 42.0,
+            "y": 63,
+            "bbox": [
+              0,
+              0,
+              84,
+              63
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/frame_003.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/frame_004.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/frame_005.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/frame_006.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/frame_007.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/aligned/000_frame_000.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/aligned/001_frame_001.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/aligned/002_frame_002.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              3,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/aligned/003_frame_003.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/aligned/004_frame_004.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/aligned/005_frame_005.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/aligned/006_frame_006.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/aligned/007_frame_007.png",
             "x": 42.0,
             "y": 66,
             "bbox": [
@@ -539,13 +1572,535 @@
         ],
         "average_changed_fraction": 0.1882
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/attack_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/alignment_report.json"
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/attack_right_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/alignment_report.json"
+    },
+    {
+      "row": 6,
+      "name": "attack_down",
+      "frames": 8,
+      "source_boxes": [
+        [
+          12,
+          603,
+          96,
+          667
+        ],
+        [
+          108,
+          606,
+          192,
+          670
+        ],
+        [
+          204,
+          609,
+          288,
+          672
+        ],
+        [
+          300,
+          606,
+          384,
+          670
+        ],
+        [
+          396,
+          603,
+          480,
+          667
+        ],
+        [
+          492,
+          600,
+          576,
+          666
+        ],
+        [
+          588,
+          597,
+          672,
+          663
+        ],
+        [
+          684,
+          600,
+          768,
+          666
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 3,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/frame_000.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/frame_001.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/frame_002.png",
+            "x": 42.0,
+            "y": 63,
+            "bbox": [
+              0,
+              0,
+              84,
+              63
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/frame_003.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/frame_004.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/frame_005.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/frame_006.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/frame_007.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/aligned/000_frame_000.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/aligned/001_frame_001.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/aligned/002_frame_002.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              3,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/aligned/003_frame_003.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/aligned/004_frame_004.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/aligned/005_frame_005.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/aligned/006_frame_006.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/aligned/007_frame_007.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.0065,
+          0.1539,
+          0.2363,
+          0.2621,
+          0.3018,
+          0.221,
+          0.1358
+        ],
+        "average_changed_fraction": 0.1882
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/attack_down_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/alignment_report.json"
+    },
+    {
+      "row": 7,
+      "name": "attack_left",
+      "frames": 8,
+      "source_boxes": [
+        [
+          0,
+          699,
+          84,
+          763
+        ],
+        [
+          96,
+          702,
+          180,
+          766
+        ],
+        [
+          192,
+          705,
+          276,
+          768
+        ],
+        [
+          288,
+          702,
+          372,
+          766
+        ],
+        [
+          384,
+          699,
+          468,
+          763
+        ],
+        [
+          480,
+          696,
+          564,
+          762
+        ],
+        [
+          576,
+          693,
+          660,
+          759
+        ],
+        [
+          672,
+          696,
+          756,
+          762
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 3,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/frame_000.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/frame_001.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/frame_002.png",
+            "x": 42.0,
+            "y": 63,
+            "bbox": [
+              0,
+              0,
+              84,
+              63
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/frame_003.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/frame_004.png",
+            "x": 42.0,
+            "y": 64,
+            "bbox": [
+              0,
+              0,
+              84,
+              64
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/frame_005.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/frame_006.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/frame_007.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/aligned/000_frame_000.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/aligned/001_frame_001.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/aligned/002_frame_002.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              3,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/aligned/003_frame_003.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/aligned/004_frame_004.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              2,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/aligned/005_frame_005.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/aligned/006_frame_006.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/aligned/007_frame_007.png",
+            "x": 42.0,
+            "y": 66,
+            "bbox": [
+              0,
+              0,
+              84,
+              66
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.0065,
+          0.1539,
+          0.2363,
+          0.2621,
+          0.3018,
+          0.221,
+          0.1358
+        ],
+        "average_changed_fraction": 0.1882
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/attack_left_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/alignment_report.json"
     }
   ],
   "preview_gifs": [
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk/walk_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack/attack_preview.gif"
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_up/walk_up_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_right/walk_right_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_down/walk_down_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/walk_left/walk_left_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_up/attack_up_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_right/attack_right_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_down/attack_down_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/attack_left/attack_left_preview.gif"
   ]
 }

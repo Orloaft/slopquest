@@ -1048,6 +1048,7 @@ function tryUseComposedAbility(player: ServerPlayer, spec: AbilitySpec, now: num
   let affected = 0;
   for (const effect of spec.effects) affected += applyAbilityEffect(player, resolution, effect, spec, now);
   if (spec.vfx) event("effect", spec.vfx.effectKind, resolution.origin.x, resolution.origin.y, player.floor, spec.vfx.color ?? null, player.id);
+  if (spec.animation) emitAbilityAnimation(player, resolution, spec);
   if (spec.float) {
     const text = (affected === 0 && spec.float.noTargetsText ? spec.float.noTargetsText : spec.float.text)
       .replaceAll("{name}", player.name)
@@ -1055,6 +1056,25 @@ function tryUseComposedAbility(player: ServerPlayer, spec: AbilitySpec, now: num
     event("float", text, resolution.origin.x, resolution.origin.y + (spec.float.yOffset ?? -0.5), player.floor, spec.float.color);
   }
   return true;
+}
+
+function emitAbilityAnimation(player: ServerPlayer, resolution: AbilityResolution, spec: AbilitySpec): void {
+  const animation = spec.animation;
+  if (!animation) return;
+  const target = resolution.targets[0];
+  const point =
+    animation.attach === "self"
+      ? { x: player.x, y: player.y }
+      : animation.attach === "target" && target
+        ? { x: target.x, y: target.y }
+        : resolution.origin;
+  if (animation.attach === "target" && !target) return;
+  event("ability_vfx", animation.kind, point.x, point.y, player.floor, animation.color ?? null, player.id, target?.id ?? resolution.targetId, {
+    fromX: player.x,
+    fromY: player.y,
+    scale: animation.scale,
+    durationMs: animation.durationMs
+  });
 }
 
 function resolveAbilityTargeting(player: ServerPlayer, spec: AbilitySpec): AbilityResolution | null {

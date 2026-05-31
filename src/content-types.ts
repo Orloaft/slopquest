@@ -142,6 +142,7 @@ export interface AbilitySpec {
   effects?: AbilityEffect[];
   projectile?: AbilityProjectile;
   vfx?: AbilityVfx;
+  animation?: AbilityAnimation;
   float?: AbilityFloat;
   speedMultiplier?: number;
   healFraction?: number;
@@ -187,6 +188,14 @@ export interface AbilityProjectile {
 export interface AbilityVfx {
   effectKind: string;
   color?: string;
+}
+
+export interface AbilityAnimation {
+  kind: "slash_arc" | "self_pulse" | "ground_burst" | "projectile_trail" | "impact_ring";
+  attach: "self" | "target" | "origin" | "path";
+  color?: string;
+  scale?: number;
+  durationMs?: number;
 }
 
 export interface AbilityFloat {

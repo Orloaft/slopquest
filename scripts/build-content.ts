@@ -167,6 +167,8 @@ const abilityCleanseStatuses = new Set(["slow"]);
 const abilityDebuffStatuses = new Set(["snare", "burn", "freeze", "inaccurate"]);
 const abilityDamageTypes = new Set(["physical", "magic"]);
 const abilityConditionalBonusWhen = new Set(["behindTarget"]);
+const abilityAnimationKinds = new Set(["slash_arc", "self_pulse", "ground_burst", "projectile_trail", "impact_ring"]);
+const abilityAnimationAttach = new Set(["self", "target", "origin", "path"]);
 const requiredQuestPhases = ["intro", "progress", "turnIn", "claimed"];
 
 function loadQuests(): RawQuest[] {
@@ -268,6 +270,7 @@ function validateAbility(a: RawAbility): void {
   if (!Array.isArray(a.effects) || a.effects.length === 0) fail(where, "missing or empty effects");
   else a.effects.forEach((effect, i) => validateAbilityEffect(effect, `${where}.effects[${i}]`));
   if (a.skill != null && !skillIds.has(a.skill)) fail(where, `unknown skill "${a.skill}"`);
+  if (a.animation) validateAbilityAnimation(a, where);
 }
 
 function validateAbilityTargeting(targeting: AbilityTargeting, where: string): void {
@@ -312,6 +315,17 @@ function validateAbilityEffect(effect: AbilityEffect, where: string): void {
     if (effect.scaleSkill != null && !skillIds.has(effect.scaleSkill)) fail(where, `unknown scaleSkill "${effect.scaleSkill}"`);
   } else if (effect.kind === "heal_over_time") {
     if (!abilityBuffs.has(effect.buff)) fail(where, `unknown buff "${effect.buff}"`);
+  }
+}
+
+function validateAbilityAnimation(a: RawAbility, where: string): void {
+  const animation = a.animation;
+  if (!animation) return;
+  if (!abilityAnimationKinds.has(animation.kind)) fail(where, `unknown animation.kind "${animation.kind}"`);
+  if (!abilityAnimationAttach.has(animation.attach)) fail(where, `unknown animation.attach "${animation.attach}"`);
+  if (animation.scale != null && !positiveNumber(animation.scale)) fail(where, "animation.scale must be positive when present");
+  if (animation.durationMs != null && (!Number.isFinite(animation.durationMs) || animation.durationMs < 0)) {
+    fail(where, "animation.durationMs must be non-negative when present");
   }
 }
 

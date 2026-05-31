@@ -47,6 +47,26 @@
     - { kind: buff_self, buff: ironClad }
   float: { text: Iron Clad, color: "#bcd3e0" }
 
+- id: shield_bash
+  label: Shield Bash
+  description: Slam a nearby enemy, dealing damage and briefly pinning it.
+  cooldownMs: 9000
+  durationMs: 1400
+  manaCost: 7
+  damage: [9, 14]
+  skill: attack
+  range: 1.6
+  effectKind: hit
+  targeting: { mode: enemy, range: 1.6 }
+  effects:
+    - { kind: damage, amount: [9, 14], skill: attack, damageType: physical, xpFactor: 1.3, effectKind: hit }
+    - kind: debuff_enemy
+      status: snare
+      durationMs: 1400
+      float: { text: Staggered!, color: "#d7e4ef", yOffset: -0.65 }
+  animation: { kind: impact_ring, attach: target, color: "#d7e4ef", scale: 1.1, durationMs: 360 }
+  float: { text: Shield Bash, color: "#d7e4ef" }
+
 - id: pinning_shot
   label: Pinning Shot
   description: A ranged shot that snares the target in place.
@@ -141,6 +161,23 @@
     - { kind: debuff_enemy, status: freeze }
   vfx: { effectKind: frost, color: "#a8e6ff" }
   float: { text: Frost Nova, color: "#a8e6ff" }
+
+- id: arcane_bolt
+  label: Arcane Bolt
+  description: Fire a fast single-target magic bolt.
+  cooldownMs: 4500
+  durationMs: 0
+  manaCost: 6
+  damage: [8, 13]
+  skill: magic
+  range: 6
+  effectKind: bolt
+  targeting: { mode: enemy, range: 6, requiresLineOfSight: true }
+  projectile: { kind: arcane, color: "#c8a8ff", targetEnemy: true }
+  effects:
+    - { kind: damage, amount: [8, 13], skill: magic, damageType: magic, xpFactor: 1.2, effectKind: bolt }
+  animation: { kind: impact_ring, attach: target, color: "#c8a8ff", scale: 0.9, durationMs: 300 }
+  float: { text: Arcane Bolt, color: "#c8a8ff" }
 
 - id: healing_poultice
   label: Healing Poultice

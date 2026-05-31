@@ -41,6 +41,18 @@
         "color": { "type": "string" }
       }
     },
+    "animation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "attach"],
+      "properties": {
+        "kind": { "enum": ["slash_arc", "self_pulse", "ground_burst", "projectile_trail", "impact_ring"] },
+        "attach": { "enum": ["self", "target", "origin", "path"] },
+        "color": { "type": "string" },
+        "scale": { "type": "number", "exclusiveMinimum": 0 },
+        "durationMs": { "type": "number", "minimum": 0 }
+      }
+    },
     "targeting": {
       "oneOf": [
         {
@@ -215,6 +227,7 @@
         },
         "projectile": { "$ref": "#/$defs/projectile" },
         "vfx": { "$ref": "#/$defs/vfx" },
+        "animation": { "$ref": "#/$defs/animation" },
         "float": { "$ref": "#/$defs/float" },
         "speedMultiplier": { "type": "number", "exclusiveMinimum": 0 },
         "healFraction": { "type": "number", "minimum": 0 },

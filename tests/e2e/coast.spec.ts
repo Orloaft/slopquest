@@ -4,6 +4,12 @@ import { isBlockedTile, isSightBlocked, scaleX, scaleY } from "../../src/shared.
 test("coast tile semantics: ocean/river block movement not sight; jungle wall blocks both", () => {
   expect(isBlockedTile("I")).toBe(true); // ocean
   expect(isSightBlocked("I")).toBe(false);
+  expect(isBlockedTile("v")).toBe(true); // foamy shore water
+  expect(isSightBlocked("v")).toBe(false);
+  expect(isBlockedTile("x")).toBe(true); // beach cliff
+  expect(isSightBlocked("x")).toBe(true);
+  expect(isBlockedTile("u")).toBe(true); // beach rock cover
+  expect(isSightBlocked("u")).toBe(true);
   expect(isBlockedTile("i")).toBe(true); // jungle river
   expect(isSightBlocked("i")).toBe(false);
   expect(isBlockedTile("E")).toBe(true); // jungle wall

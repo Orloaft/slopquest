@@ -1,0 +1,345 @@
+{
+  "anchor_mode": "bottom_center",
+  "canvas": {
+    "width": 72,
+    "height": 90
+  },
+  "pre_alignment_drift": {
+    "x": 3.0,
+    "y": 15,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_000.png",
+        "x": 36.0,
+        "y": 75,
+        "bbox": [
+          0,
+          0,
+          72,
+          75
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_001.png",
+        "x": 36.0,
+        "y": 75,
+        "bbox": [
+          0,
+          0,
+          72,
+          75
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_002.png",
+        "x": 36.0,
+        "y": 81,
+        "bbox": [
+          0,
+          0,
+          72,
+          81
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_003.png",
+        "x": 36.0,
+        "y": 84,
+        "bbox": [
+          0,
+          0,
+          72,
+          84
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_004.png",
+        "x": 33.0,
+        "y": 90,
+        "bbox": [
+          0,
+          0,
+          66,
+          90
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_005.png",
+        "x": 36.0,
+        "y": 81,
+        "bbox": [
+          0,
+          0,
+          72,
+          81
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_006.png",
+        "x": 36.0,
+        "y": 78,
+        "bbox": [
+          0,
+          0,
+          72,
+          78
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_007.png",
+        "x": 36.0,
+        "y": 75,
+        "bbox": [
+          0,
+          0,
+          72,
+          75
+        ]
+      }
+    ]
+  },
+  "post_alignment_drift": {
+    "x": 0.0,
+    "y": 0,
+    "anchors": [
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/000_frame_000.png",
+        "x": 36.0,
+        "y": 90,
+        "bbox": [
+          0,
+          15,
+          72,
+          90
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/001_frame_001.png",
+        "x": 36.0,
+        "y": 90,
+        "bbox": [
+          0,
+          15,
+          72,
+          90
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/002_frame_002.png",
+        "x": 36.0,
+        "y": 90,
+        "bbox": [
+          0,
+          9,
+          72,
+          90
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/003_frame_003.png",
+        "x": 36.0,
+        "y": 90,
+        "bbox": [
+          0,
+          6,
+          72,
+          90
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/004_frame_004.png",
+        "x": 36.0,
+        "y": 90,
+        "bbox": [
+          3,
+          0,
+          69,
+          90
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/005_frame_005.png",
+        "x": 36.0,
+        "y": 90,
+        "bbox": [
+          0,
+          9,
+          72,
+          90
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/006_frame_006.png",
+        "x": 36.0,
+        "y": 90,
+        "bbox": [
+          0,
+          12,
+          72,
+          90
+        ]
+      },
+      {
+        "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/007_frame_007.png",
+        "x": 36.0,
+        "y": 90,
+        "bbox": [
+          0,
+          15,
+          72,
+          90
+        ]
+      }
+    ]
+  },
+  "motion": {
+    "pair_changed_fraction": [
+      0.0694,
+      0.1333,
+      0.1167,
+      0.2333,
+      0.2722,
+      0.1153,
+      0.1139
+    ],
+    "average_changed_fraction": 0.1506
+  },
+  "preview_background": [
+    28,
+    32,
+    38
+  ],
+  "aligned_frames": [
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/000_frame_000.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/001_frame_001.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/002_frame_002.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/003_frame_003.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/004_frame_004.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/005_frame_005.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/006_frame_006.png",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/aligned/007_frame_007.png"
+  ],
+  "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/attack_down_preview.gif",
+  "offsets": [
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_000.png",
+      "source_bbox": [
+        0,
+        0,
+        72,
+        75
+      ],
+      "anchor": [
+        36.0,
+        75
+      ],
+      "dx": 0,
+      "dy": 15
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_001.png",
+      "source_bbox": [
+        0,
+        0,
+        72,
+        75
+      ],
+      "anchor": [
+        36.0,
+        75
+      ],
+      "dx": 0,
+      "dy": 15
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_002.png",
+      "source_bbox": [
+        0,
+        0,
+        72,
+        81
+      ],
+      "anchor": [
+        36.0,
+        81
+      ],
+      "dx": 0,
+      "dy": 9
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_003.png",
+      "source_bbox": [
+        0,
+        0,
+        72,
+        84
+      ],
+      "anchor": [
+        36.0,
+        84
+      ],
+      "dx": 0,
+      "dy": 6
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_004.png",
+      "source_bbox": [
+        0,
+        0,
+        66,
+        90
+      ],
+      "anchor": [
+        33.0,
+        90
+      ],
+      "dx": 3,
+      "dy": 0
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_005.png",
+      "source_bbox": [
+        0,
+        0,
+        72,
+        81
+      ],
+      "anchor": [
+        36.0,
+        81
+      ],
+      "dx": 0,
+      "dy": 9
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_006.png",
+      "source_bbox": [
+        0,
+        0,
+        72,
+        78
+      ],
+      "anchor": [
+        36.0,
+        78
+      ],
+      "dx": 0,
+      "dy": 12
+    },
+    {
+      "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/attack_down/frame_007.png",
+      "source_bbox": [
+        0,
+        0,
+        72,
+        75
+      ],
+      "anchor": [
+        36.0,
+        75
+      ],
+      "dx": 0,
+      "dy": 15
+    }
+  ]
+}

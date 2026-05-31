@@ -18,6 +18,7 @@ export {
 } from "./generated/catalog.ts";
 export type {
   AbilityConditionalBonus,
+  AbilityAnimation,
   AbilityEffect,
   AbilityFloat,
   AbilityGuard,
@@ -174,11 +175,11 @@ const CLASS_BASE = {
 // dodge profile, and move speed. See CLASS_UNLOCKS for how each is gated.
 export const CLASSES: Record<string, ClassSpec> = {
   adventurer: { ...CLASS_BASE, label: "Adventurer", abilities: ["sprint", "second_wind"], dodgeChance: 0.05 },
-  vanguard: { ...CLASS_BASE, label: "Vanguard", abilities: ["provoke", "iron_clad"], dodgeChance: 0.05 },
+  vanguard: { ...CLASS_BASE, label: "Vanguard", abilities: ["provoke", "iron_clad", "shield_bash"], dodgeChance: 0.05 },
   thief: { ...CLASS_BASE, label: "Thief", speed: 4.65, abilities: ["quick_step", "backstab"], dodgeChance: 0.12 },
   apothecary: { ...CLASS_BASE, label: "Apothecary", abilities: ["healing_poultice", "volatile_flask"], dodgeChance: 0.06 },
   archer: { ...CLASS_BASE, label: "Archer", speed: 4.4, abilities: ["pinning_shot", "fleet_foot"], dodgeChance: 0.08 },
-  mage: { ...CLASS_BASE, label: "Mage", abilities: ["flame_burst", "frost_nova"], dodgeChance: 0.05 }
+  mage: { ...CLASS_BASE, label: "Mage", abilities: ["flame_burst", "frost_nova", "arcane_bolt"], dodgeChance: 0.05 }
 };
 
 export interface ClassUnlock {
@@ -519,22 +520,56 @@ export function makeFloorTiles(floor: number): string[] {
   }
 
   if (floor === 8) {
-    // The Sunken Beach (bespoke 90x60) — a wide open coast of white sand (e) for
-    // kiting reef prowlers, with the sea (I) washing in along an organic coastline
-    // of coves and spits. A driftwood hut + palms sit on the dry sand.
-    fillRect(rows, 0, 0, 90, 60, "e");
-    fillRect(rows, 1, 46, 88, 13, "I"); // open southern sea
-    fillRect(rows, 6, 42, 18, 4, "I"); // west cove
-    fillRect(rows, 10, 39, 9, 3, "I");
-    fillRect(rows, 30, 43, 14, 3, "I"); // central scoop
-    fillRect(rows, 60, 41, 16, 5, "I"); // east bay
-    fillRect(rows, 64, 37, 8, 4, "I");
-    fillRect(rows, 70, 44, 6, 6, "e"); // sandy spit into the bay
-    fillRect(rows, 36, 22, 12, 7, "I"); // tidal lagoon
-    fillRect(rows, 40, 20, 5, 2, "I");
-    fillRect(rows, 8, 1, 7, 6, "I"); // NW cove
-    fillRect(rows, 54, 1, 10, 5, "I"); // NE cove
-    fillRect(rows, 78, 8, 11, 10, "I"); // eastern inlet by the jungle trail
+    // The Sunken Beach (bespoke 90x60) — an island-stage layout, not a sand
+    // rectangle: ocean border, foam shore, wet flats, tiered cliffs, stair
+    // connectors and POI pockets echoing the beach mockup's arrangement.
+    fillRect(rows, 0, 0, 90, 60, "I");
+
+    // Main island mass and sandy spurs.
+    fillRect(rows, 13, 5, 52, 34, "e");
+    fillRect(rows, 8, 12, 16, 22, "e"); // west beach shoulder
+    fillRect(rows, 54, 11, 28, 25, "e"); // east beach shoulder
+    fillRect(rows, 24, 35, 44, 13, "e"); // southern open beach
+    fillRect(rows, 68, 34, 12, 13, "e"); // eastern spit
+    fillRect(rows, 35, 46, 18, 5, "e"); // central sandbar
+    fillRect(rows, 3, 23, 10, 11, "e"); // west cove landing
+
+    // Bite coves back out of the island to avoid straight rectangular beaches.
+    fillRect(rows, 3, 5, 10, 13, "I");
+    fillRect(rows, 7, 6, 10, 5, "I");
+    fillRect(rows, 28, 2, 14, 5, "I");
+    fillRect(rows, 66, 2, 18, 8, "I");
+    fillRect(rows, 76, 10, 11, 11, "I");
+    fillRect(rows, 5, 35, 18, 10, "I");
+    fillRect(rows, 10, 40, 13, 5, "I");
+    fillRect(rows, 45, 40, 16, 8, "I");
+    fillRect(rows, 58, 44, 9, 8, "I");
+    fillRect(rows, 76, 47, 11, 8, "I");
+    fillRect(rows, 35, 20, 12, 7, "I"); // tidal lagoon
+    fillRect(rows, 38, 18, 6, 3, "I");
+
+    // Walkable sand detail: shell flats, trampled paths and wet tide line.
+    fillRect(rows, 23, 2, 5, 10, "z"); // desert gate trail
+    fillRect(rows, 22, 11, 30, 4, "z");
+    fillRect(rows, 49, 12, 19, 5, "z"); // jungle gate trail
+    fillRect(rows, 28, 25, 20, 4, "z"); // hut lane
+    fillRect(rows, 44, 29, 26, 3, "z");
+    for (const [x, y, w, h] of [[14, 14, 8, 4], [18, 30, 10, 4], [28, 38, 12, 4], [58, 36, 10, 4], [70, 39, 7, 5]] as Array<[number, number, number, number]>)
+      fillRect(rows, x, y, w, h, "l");
+
+    // Raised cliff/ledge pockets with stair connectors, giving the stage tiers.
+    fillRect(rows, 18, 16, 14, 7, "x");
+    fillRect(rows, 51, 18, 16, 7, "x");
+    fillRect(rows, 27, 31, 14, 5, "x");
+    fillRect(rows, 20, 22, 4, 2, "2"); // west stairs down
+    fillRect(rows, 56, 24, 4, 2, "2"); // east stairs down
+    fillRect(rows, 34, 30, 4, 2, "2"); // south ledge stairs
+
+    // Rocks/ruins as hard cover and visual anchors around coves/terraces.
+    for (const [x, y] of [[13, 11], [16, 34], [25, 16], [30, 23], [49, 17], [66, 27], [72, 34], [33, 43], [53, 36], [61, 13]] as Array<[number, number]>)
+      setTile(rows, x, y, "u");
+
+    applyShoreEdges(rows);
     setTile(rows, 25, 1, "Y"); // north trail to/from the desert
     setTile(rows, 50, 14, "j"); // east trail to the Untamed Jungle
   }
@@ -714,6 +749,25 @@ function applyCliffEdges(rows: string[][], floorChar = "R", massifChar = "w", fa
   }
 }
 
+function applyShoreEdges(rows: string[][]): void {
+  const land = new Set(["e", "l", "z", "2", "x", "u", "Y", "j"]);
+  const shore: Array<[number, number]> = [];
+  for (let y = 0; y < rows.length; y += 1) {
+    const row = rows[y];
+    if (!row) continue;
+    for (let x = 0; x < row.length; x += 1) {
+      if (row[x] !== "I") continue;
+      const touchesLand =
+        land.has(rows[y - 1]?.[x] ?? "") ||
+        land.has(rows[y + 1]?.[x] ?? "") ||
+        land.has(row[x - 1] ?? "") ||
+        land.has(row[x + 1] ?? "");
+      if (touchesLand) shore.push([x, y]);
+    }
+  }
+  shore.forEach(([x, y]) => setTile(rows, x, y, "v"));
+}
+
 function frameFloorEdge(rows: string[][], floor: number): void {
   const edge = FLOOR_EDGE[floor];
   if (!edge) return;
@@ -740,7 +794,8 @@ export function isBlockedTile(tile: string): boolean {
     tile === "#" || tile === "~" || tile === "W" || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o" ||
     tile === "X" || tile === "P" || tile === "w" || // badlands cliff wall + pit + massif
     tile === "Q" || tile === "V" || tile === "U" || // desert quicksand + oasis + ruin
-    tile === "I" || tile === "E" || tile === "i" // beach sea + jungle wall + jungle river
+    tile === "I" || tile === "v" || tile === "x" || tile === "u" || // beach sea/shore/cliff/rocks
+    tile === "E" || tile === "i" // jungle wall + jungle river
   );
 }
 
@@ -752,7 +807,8 @@ export function isSightBlocked(tile: string): boolean {
   // Open water/quicksand/pits do NOT block sight; solid walls/ruins/jungle do.
   return (
     tile === "#" || tile === "o" || tile === "O" || tile === "f" || tile === "r" || tile === "q" ||
-    tile === "X" || tile === "w" || tile === "U" || tile === "E" // badlands cliff/massif, ruin, jungle wall
+    tile === "X" || tile === "w" || tile === "U" || // badlands cliff/massif, ruin
+    tile === "x" || tile === "u" || tile === "E" // beach cliff/rocks, jungle wall
   );
 }
 

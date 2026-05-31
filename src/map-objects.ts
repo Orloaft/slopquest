@@ -128,11 +128,20 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteObelisk", x: 24.5, y: 5.4, w: 38, h: 60 } // by the north gate
   ],
   8: [
-    { key: "spriteBeachHut", x: 60.5, y: 20.6, w: 116, h: 118 }, // driftwood hut on the dry east sand
-    { key: "spritePalm", x: 20.5, y: 9.4, w: 62, h: 58 },
-    { key: "spritePalm", x: 44.5, y: 12.4, w: 62, h: 58 }, // by the jungle trail
-    { key: "spritePalm", x: 72.5, y: 33.4, w: 62, h: 58 }, // on the eastern spit
-    { key: "spritePalm", x: 30.5, y: 35.4, w: 62, h: 58 }
+    // Sunken Beach: grouped POIs instead of sparse single props. All anchors
+    // sit on the authored sand/path pockets and leave the portal lanes clear.
+    { key: "spriteBeachHut", x: 60.5, y: 20.8, w: 116, h: 118 }, // driftwood hut above the east terrace
+    { key: "spriteBeachDock", x: 39.5, y: 43.2, w: 168, h: 86 }, // central tidal dock
+    { key: "spriteBeachBoat", x: 46.4, y: 45.8, w: 74, h: 48 },
+    { key: "spriteBeachCave", x: 23.5, y: 22.4, w: 104, h: 102 }, // west cliff POI
+    { key: "spriteBeachTent", x: 72.5, y: 39.7, w: 92, h: 70 }, // eastern spit camp
+    { key: "spriteBeachCampfire", x: 70.1, y: 40.9, w: 72, h: 66 },
+    { key: "spriteBeachRocks", x: 31.8, y: 31.7, w: 76, h: 64 },
+    { key: "spriteBeachRocks", x: 66.3, y: 28.2, w: 70, h: 58 },
+    { key: "spriteBeachPalm", x: 17.5, y: 13.4, w: 86, h: 72 },
+    { key: "spriteBeachPalm", x: 44.5, y: 12.4, w: 82, h: 68 }, // by the jungle trail
+    { key: "spriteBeachPalm", x: 72.5, y: 34.4, w: 86, h: 72 }, // on the eastern spit
+    { key: "spriteBeachPalm", x: 30.5, y: 37.4, w: 82, h: 68 }
   ],
   9: [
     // Boulders clustered at the two river fords (the choke ambush points).

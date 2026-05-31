@@ -8,9 +8,10 @@
     0
   ],
   "tolerance": 40,
+  "remove_green_halo": false,
   "grid": {
     "columns": 8,
-    "rows": 2,
+    "rows": 8,
     "cell_width": 96,
     "cell_height": 96
   },
@@ -29,56 +30,56 @@
   "rows": [
     {
       "row": 0,
-      "name": "walk",
+      "name": "walk_up",
       "frames": 8,
       "source_boxes": [
         [
           21,
-          12,
+          0,
           87,
-          96
+          84
         ],
         [
           117,
-          12,
+          0,
           183,
-          96
+          84
         ],
         [
           213,
-          9,
+          3,
           279,
-          93
+          87
         ],
         [
           309,
-          12,
+          0,
           375,
-          96
+          84
         ],
         [
           405,
-          12,
+          0,
           471,
-          96
+          84
         ],
         [
           501,
-          12,
+          0,
           567,
-          96
+          84
         ],
         [
           597,
-          9,
+          3,
           663,
-          93
+          87
         ],
         [
           693,
-          12,
+          0,
           759,
-          96
+          84
         ]
       ],
       "pre_alignment_drift": {
@@ -86,7 +87,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/frame_000.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_000.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -97,7 +98,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/frame_001.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_001.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -108,7 +109,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/frame_002.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_002.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -119,7 +120,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/frame_003.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_003.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -130,7 +131,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/frame_004.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_004.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -141,7 +142,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/frame_005.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_005.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -152,7 +153,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/frame_006.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_006.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -163,7 +164,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/frame_007.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_007.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -180,7 +181,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/aligned/000_frame_000.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -191,7 +192,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/aligned/001_frame_001.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/001_frame_001.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -202,7 +203,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/aligned/002_frame_002.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -213,7 +214,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/aligned/003_frame_003.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -224,7 +225,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/aligned/004_frame_004.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/004_frame_004.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -235,7 +236,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/aligned/005_frame_005.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/005_frame_005.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -246,7 +247,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/aligned/006_frame_006.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/006_frame_006.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -257,7 +258,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/aligned/007_frame_007.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/007_frame_007.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -281,13 +282,13 @@
         ],
         "average_changed_fraction": 0.0348
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/walk_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/alignment_report.json"
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/walk_up_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/alignment_report.json"
     },
     {
       "row": 1,
-      "name": "attack",
+      "name": "walk_right",
       "frames": 8,
       "source_boxes": [
         [
@@ -303,27 +304,27 @@
           192
         ],
         [
-          216,
+          213,
           105,
-          282,
+          279,
           189
         ],
         [
-          321,
+          309,
           108,
-          384,
+          375,
           192
         ],
         [
-          420,
+          405,
           108,
-          480,
+          471,
           192
         ],
         [
-          507,
+          501,
           108,
-          573,
+          567,
           192
         ],
         [
@@ -340,11 +341,785 @@
         ]
       ],
       "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_003.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_004.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/000_frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/001_frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/002_frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/003_frame_003.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/004_frame_004.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/005_frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/006_frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/007_frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.1071,
+          0.0049,
+          0.0065,
+          0.0065,
+          0.1071,
+          0.0049,
+          0.0065
+        ],
+        "average_changed_fraction": 0.0348
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/walk_right_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/alignment_report.json"
+    },
+    {
+      "row": 2,
+      "name": "walk_down",
+      "frames": 8,
+      "source_boxes": [
+        [
+          21,
+          204,
+          87,
+          288
+        ],
+        [
+          117,
+          204,
+          183,
+          288
+        ],
+        [
+          213,
+          201,
+          279,
+          285
+        ],
+        [
+          309,
+          204,
+          375,
+          288
+        ],
+        [
+          405,
+          204,
+          471,
+          288
+        ],
+        [
+          501,
+          204,
+          567,
+          288
+        ],
+        [
+          597,
+          201,
+          663,
+          285
+        ],
+        [
+          693,
+          204,
+          759,
+          288
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_003.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_004.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/000_frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/001_frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/002_frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/003_frame_003.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/004_frame_004.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/005_frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/006_frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/007_frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.1071,
+          0.0049,
+          0.0065,
+          0.0065,
+          0.1071,
+          0.0049,
+          0.0065
+        ],
+        "average_changed_fraction": 0.0348
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/walk_down_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/alignment_report.json"
+    },
+    {
+      "row": 3,
+      "name": "walk_left",
+      "frames": 8,
+      "source_boxes": [
+        [
+          9,
+          300,
+          75,
+          384
+        ],
+        [
+          105,
+          300,
+          171,
+          384
+        ],
+        [
+          201,
+          297,
+          267,
+          381
+        ],
+        [
+          297,
+          300,
+          363,
+          384
+        ],
+        [
+          393,
+          300,
+          459,
+          384
+        ],
+        [
+          489,
+          300,
+          555,
+          384
+        ],
+        [
+          585,
+          297,
+          651,
+          381
+        ],
+        [
+          681,
+          300,
+          747,
+          384
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_003.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_004.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/000_frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/001_frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/002_frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/003_frame_003.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/004_frame_004.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/005_frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/006_frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/007_frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.1071,
+          0.0049,
+          0.0065,
+          0.0065,
+          0.1071,
+          0.0049,
+          0.0065
+        ],
+        "average_changed_fraction": 0.0348
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/walk_left_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/alignment_report.json"
+    },
+    {
+      "row": 4,
+      "name": "attack_up",
+      "frames": 8,
+      "source_boxes": [
+        [
+          21,
+          384,
+          87,
+          468
+        ],
+        [
+          117,
+          384,
+          183,
+          468
+        ],
+        [
+          216,
+          387,
+          282,
+          471
+        ],
+        [
+          321,
+          384,
+          384,
+          468
+        ],
+        [
+          420,
+          384,
+          480,
+          468
+        ],
+        [
+          507,
+          384,
+          573,
+          468
+        ],
+        [
+          597,
+          387,
+          663,
+          471
+        ],
+        [
+          693,
+          384,
+          759,
+          468
+        ]
+      ],
+      "pre_alignment_drift": {
         "x": 3.0,
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/frame_000.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/frame_000.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -355,7 +1130,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/frame_001.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/frame_001.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -366,7 +1141,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/frame_002.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/frame_002.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -377,7 +1152,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/frame_003.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/frame_003.png",
             "x": 31.5,
             "y": 84,
             "bbox": [
@@ -388,7 +1163,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/frame_004.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/frame_004.png",
             "x": 30.0,
             "y": 84,
             "bbox": [
@@ -399,7 +1174,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/frame_005.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/frame_005.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -410,7 +1185,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/frame_006.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/frame_006.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -421,7 +1196,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/frame_007.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/frame_007.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -438,7 +1213,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/aligned/000_frame_000.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -449,7 +1224,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/aligned/001_frame_001.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/aligned/001_frame_001.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -460,7 +1235,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/aligned/002_frame_002.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -471,7 +1246,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/aligned/003_frame_003.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/aligned/003_frame_003.png",
             "x": 33.5,
             "y": 84,
             "bbox": [
@@ -482,7 +1257,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/aligned/004_frame_004.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/aligned/004_frame_004.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -493,7 +1268,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/aligned/005_frame_005.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/aligned/005_frame_005.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -504,7 +1279,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/aligned/006_frame_006.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/aligned/006_frame_006.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -515,7 +1290,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/aligned/007_frame_007.png",
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/aligned/007_frame_007.png",
             "x": 33.0,
             "y": 84,
             "bbox": [
@@ -539,13 +1314,793 @@
         ],
         "average_changed_fraction": 0.0658
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/attack_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/alignment_report.json"
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/attack_up_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/alignment_report.json"
+    },
+    {
+      "row": 5,
+      "name": "attack_right",
+      "frames": 8,
+      "source_boxes": [
+        [
+          21,
+          492,
+          87,
+          576
+        ],
+        [
+          117,
+          492,
+          183,
+          576
+        ],
+        [
+          216,
+          489,
+          282,
+          573
+        ],
+        [
+          321,
+          492,
+          384,
+          576
+        ],
+        [
+          420,
+          492,
+          480,
+          576
+        ],
+        [
+          507,
+          492,
+          573,
+          576
+        ],
+        [
+          597,
+          489,
+          663,
+          573
+        ],
+        [
+          693,
+          492,
+          759,
+          576
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 3.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/frame_003.png",
+            "x": 31.5,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              63,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/frame_004.png",
+            "x": 30.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              60,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.5,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/aligned/000_frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/aligned/001_frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/aligned/002_frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/aligned/003_frame_003.png",
+            "x": 33.5,
+            "y": 84,
+            "bbox": [
+              2,
+              0,
+              65,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/aligned/004_frame_004.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              3,
+              0,
+              63,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/aligned/005_frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/aligned/006_frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/aligned/007_frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.1071,
+          0.0049,
+          0.0963,
+          0.0574,
+          0.1818,
+          0.0065,
+          0.0065
+        ],
+        "average_changed_fraction": 0.0658
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/attack_right_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/alignment_report.json"
+    },
+    {
+      "row": 6,
+      "name": "attack_down",
+      "frames": 8,
+      "source_boxes": [
+        [
+          21,
+          588,
+          87,
+          672
+        ],
+        [
+          117,
+          588,
+          183,
+          672
+        ],
+        [
+          216,
+          585,
+          282,
+          669
+        ],
+        [
+          321,
+          588,
+          384,
+          672
+        ],
+        [
+          420,
+          588,
+          480,
+          672
+        ],
+        [
+          507,
+          588,
+          573,
+          672
+        ],
+        [
+          597,
+          585,
+          663,
+          669
+        ],
+        [
+          693,
+          588,
+          759,
+          672
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 3.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/frame_003.png",
+            "x": 31.5,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              63,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/frame_004.png",
+            "x": 30.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              60,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.5,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/aligned/000_frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/aligned/001_frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/aligned/002_frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/aligned/003_frame_003.png",
+            "x": 33.5,
+            "y": 84,
+            "bbox": [
+              2,
+              0,
+              65,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/aligned/004_frame_004.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              3,
+              0,
+              63,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/aligned/005_frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/aligned/006_frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/aligned/007_frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.1071,
+          0.0049,
+          0.0963,
+          0.0574,
+          0.1818,
+          0.0065,
+          0.0065
+        ],
+        "average_changed_fraction": 0.0658
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/attack_down_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/alignment_report.json"
+    },
+    {
+      "row": 7,
+      "name": "attack_left",
+      "frames": 8,
+      "source_boxes": [
+        [
+          9,
+          684,
+          75,
+          768
+        ],
+        [
+          105,
+          684,
+          171,
+          768
+        ],
+        [
+          198,
+          681,
+          264,
+          765
+        ],
+        [
+          288,
+          684,
+          351,
+          768
+        ],
+        [
+          384,
+          684,
+          444,
+          768
+        ],
+        [
+          483,
+          684,
+          549,
+          768
+        ],
+        [
+          585,
+          681,
+          651,
+          765
+        ],
+        [
+          681,
+          684,
+          747,
+          768
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 3.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/frame_003.png",
+            "x": 31.5,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              63,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/frame_004.png",
+            "x": 30.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              60,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.5,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/aligned/000_frame_000.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/aligned/001_frame_001.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/aligned/002_frame_002.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/aligned/003_frame_003.png",
+            "x": 33.5,
+            "y": 84,
+            "bbox": [
+              2,
+              0,
+              65,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/aligned/004_frame_004.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              3,
+              0,
+              63,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/aligned/005_frame_005.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/aligned/006_frame_006.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          },
+          {
+            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/aligned/007_frame_007.png",
+            "x": 33.0,
+            "y": 84,
+            "bbox": [
+              0,
+              0,
+              66,
+              84
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.1071,
+          0.0049,
+          0.053,
+          0.0952,
+          0.1818,
+          0.0065,
+          0.0065
+        ],
+        "average_changed_fraction": 0.065
+      },
+      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/attack_left_preview.gif",
+      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/aligned",
+      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/alignment_report.json"
     }
   ],
   "preview_gifs": [
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk/walk_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack/attack_preview.gif"
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/walk_up_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/walk_right_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/walk_down_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/walk_left_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_up/attack_up_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_right/attack_right_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_down/attack_down_preview.gif",
+    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/attack_left/attack_left_preview.gif"
   ]
 }

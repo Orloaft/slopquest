@@ -7,16 +7,37 @@ const NORTHWOOD_EXPECTED_TYPES = [
   "spider",
   "goblin_scout",
   "wolf",
+  "wild_boar",
+  "thorn_hedgehog",
+  "forest_slime",
+  "forest_spider",
+  "sapling_deer",
   "wisp",
   "goblin",
   "goblin_shaman",
-  "orc"
+  "orc",
+  "mushroom_brute",
+  "dire_wolf",
+  "forest_pixie",
+  "bone_druid",
+  "bog_wraith",
+  "ancient_treant"
+];
+
+const UNDEAD_BESPOKE_TYPES = [
+  "bone_druid",
+  "bog_wraith",
+  "grave_revenant",
+  "crypt_sentinel",
+  "pale_banshee"
 ];
 
 const NORTHWOOD_SUBZONE_PROBES = [
   { label: "south wood (gentle critters)", x: 47.5, y: 49.5 },
   { label: "north meadow (orcs)", x: 40.5, y: 14.5 },
-  { label: "NW shaman thicket", x: 22.5, y: 12.5 }
+  { label: "NW shaman thicket", x: 22.5, y: 12.5 },
+  { label: "NE elder grove", x: 72.5, y: 12.5 },
+  { label: "central pixie clearing", x: 45.5, y: 29.5 }
 ];
 
 test("skills, firemaking, and cooking are usable and visually present", async ({ page }) => {
@@ -183,9 +204,24 @@ test("Northwood spawn table covers every enemy type and renders 4-direction fram
   );
   expect(coverage).toHaveLength(NORTHWOOD_EXPECTED_TYPES.length);
   for (const entry of coverage) {
-    expect(entry.frames).toHaveLength(16);
+    expect(entry.frames.length).toBeGreaterThanOrEqual(16);
     const missing = entry.frames.filter((frame) => !frame.exists);
     expect(missing, `${entry.type} (${entry.family}) missing frames`).toEqual([]);
+  }
+
+  const undeadCoverage = await page.evaluate(
+    (types) => window.__TIB_E2E__?.monsterTextureCoverage?.(types) ?? [],
+    UNDEAD_BESPOKE_TYPES
+  );
+  expect(undeadCoverage).toHaveLength(UNDEAD_BESPOKE_TYPES.length);
+  for (const entry of undeadCoverage) {
+    expect(entry.frames).toHaveLength(32);
+    const missingWalk = entry.frames.filter((frame) => !frame.exists);
+    expect(missingWalk, `${entry.type} (${entry.family}) missing directional walk frames`).toEqual([]);
+    expect(entry.attackFamily, `${entry.type} should register a bespoke attack family`).toBeTruthy();
+    expect(entry.attackFrames).toHaveLength(32);
+    const missingAttack = entry.attackFrames.filter((frame) => !frame.exists);
+    expect(missingAttack, `${entry.type} (${entry.attackFamily}) missing directional attack frames`).toEqual([]);
   }
 });
 

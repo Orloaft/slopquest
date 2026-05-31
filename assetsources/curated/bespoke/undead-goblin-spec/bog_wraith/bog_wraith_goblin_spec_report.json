@@ -1,0 +1,207 @@
+{
+  "source": "/home/orlovboros/.openclaw/media/tool-image-generation/bog-wraith-goblin-spec-sheet-chroma---5472156f-c9c6-4a29-8a4f-2461308015c0.png",
+  "raw_copy": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/undead-goblin-spec/bog_wraith/bog_wraith_generated_raw.png",
+  "curated_sheet": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/undead-goblin-spec/bog_wraith/bog_wraith_goblin_spec_sheet.png",
+  "public_sheet": "/home/orlovboros/projects/tib/public/bog-wraith-sheet.png",
+  "previews": {
+    "up": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/undead-goblin-spec/bog_wraith/bog_wraith_up_walk_preview.gif",
+    "right": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/undead-goblin-spec/bog_wraith/bog_wraith_right_walk_preview.gif",
+    "down": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/undead-goblin-spec/bog_wraith/bog_wraith_down_walk_preview.gif",
+    "left": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/undead-goblin-spec/bog_wraith/bog_wraith_left_walk_preview.gif"
+  },
+  "validation": {
+    "size": [
+      1124,
+      1172
+    ],
+    "cell": [
+      281,
+      293
+    ],
+    "rows": [
+      "up",
+      "right",
+      "down",
+      "left"
+    ],
+    "frames_per_direction": 4,
+    "cells": [
+      {
+        "direction": "up",
+        "frame": 0,
+        "bbox": [
+          59,
+          40,
+          225,
+          271
+        ],
+        "coverage": 0.2819
+      },
+      {
+        "direction": "up",
+        "frame": 1,
+        "bbox": [
+          64,
+          43,
+          236,
+          271
+        ],
+        "coverage": 0.2809
+      },
+      {
+        "direction": "up",
+        "frame": 2,
+        "bbox": [
+          50,
+          43,
+          221,
+          271
+        ],
+        "coverage": 0.2821
+      },
+      {
+        "direction": "up",
+        "frame": 3,
+        "bbox": [
+          56,
+          43,
+          224,
+          271
+        ],
+        "coverage": 0.2786
+      },
+      {
+        "direction": "right",
+        "frame": 0,
+        "bbox": [
+          64,
+          43,
+          202,
+          259
+        ],
+        "coverage": 0.2278
+      },
+      {
+        "direction": "right",
+        "frame": 1,
+        "bbox": [
+          59,
+          43,
+          205,
+          261
+        ],
+        "coverage": 0.2308
+      },
+      {
+        "direction": "right",
+        "frame": 2,
+        "bbox": [
+          60,
+          45,
+          198,
+          261
+        ],
+        "coverage": 0.2227
+      },
+      {
+        "direction": "right",
+        "frame": 3,
+        "bbox": [
+          45,
+          45,
+          197,
+          259
+        ],
+        "coverage": 0.2309
+      },
+      {
+        "direction": "down",
+        "frame": 0,
+        "bbox": [
+          61,
+          34,
+          221,
+          252
+        ],
+        "coverage": 0.263
+      },
+      {
+        "direction": "down",
+        "frame": 1,
+        "bbox": [
+          65,
+          34,
+          227,
+          255
+        ],
+        "coverage": 0.2653
+      },
+      {
+        "direction": "down",
+        "frame": 2,
+        "bbox": [
+          42,
+          33,
+          212,
+          256
+        ],
+        "coverage": 0.2706
+      },
+      {
+        "direction": "down",
+        "frame": 3,
+        "bbox": [
+          38,
+          35,
+          206,
+          255
+        ],
+        "coverage": 0.2626
+      },
+      {
+        "direction": "left",
+        "frame": 0,
+        "bbox": [
+          0,
+          21,
+          216,
+          293
+        ],
+        "coverage": 0.2215
+      },
+      {
+        "direction": "left",
+        "frame": 1,
+        "bbox": [
+          68,
+          22,
+          210,
+          240
+        ],
+        "coverage": 0.2225
+      },
+      {
+        "direction": "left",
+        "frame": 2,
+        "bbox": [
+          68,
+          22,
+          221,
+          234
+        ],
+        "coverage": 0.2267
+      },
+      {
+        "direction": "left",
+        "frame": 3,
+        "bbox": [
+          65,
+          24,
+          281,
+          293
+        ],
+        "coverage": 0.2179
+      }
+    ]
+  }
+}
