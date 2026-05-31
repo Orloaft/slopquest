@@ -15,7 +15,7 @@ interface Scenario {
 const PORT = Number(process.env.TIB_PERF_PORT ?? 8790);
 const HOST = "127.0.0.1";
 const SERVER_READY_MS = 10000;
-const mode = process.argv.includes("--soak") ? "soak" : "gate";
+const mode = process.argv.includes("--soak") ? "soak" : process.argv.includes("--stress") ? "stress" : "gate";
 const clientDecodeGateArgs = [
   "--max-state-parse-ms-max",
   "4",
@@ -680,13 +680,127 @@ const soakScenarios: Scenario[] = [
     ]
   }
 ];
-const scenarios = mode === "soak" ? soakScenarios : gateScenarios;
+const stressScenarios: Scenario[] = [
+  {
+    name: "250 capped town crowd clients",
+    serverEnv: {
+      TIB_MAX_VISIBLE_PLAYERS: "50",
+      TIB_WS_COMPRESSION: "1"
+    },
+    args: [
+      "--clients",
+      "250",
+      "--duration",
+      "10000",
+      "--combat",
+      "0",
+      "--max-errors",
+      "0",
+      "--min-opened",
+      "250",
+      "--min-welcomed",
+      "250",
+      "--min-closed",
+      "250",
+      "--min-states",
+      "20000",
+      "--min-compact-states",
+      "20000",
+      "--min-metric-samples",
+      "1500",
+      "--min-visible-players-max",
+      "50",
+      "--max-visible-players-max",
+      "50",
+      "--max-tick-ms-max",
+      "24",
+      "--max-snapshot-ms-max",
+      "80",
+      "--max-heap-used-mb-max",
+      "768",
+      "--max-rss-mb-max",
+      "1400",
+      "--max-resident-static-resources-max",
+      "1200",
+      "--max-static-full-snapshots",
+      "1000",
+      "--max-bytes-out-per-second-avg",
+      "50000000",
+      "--max-wire-bytes-out-per-second-avg",
+      "22000000",
+      "--max-state-message-bytes-max",
+      "26000",
+      "--max-state-message-bytes-avg",
+      "13000",
+      "--max-state-decode-ms-avg",
+      "0.35",
+      "--max-state-decode-ms-p95",
+      "1.5",
+      "--max-snapshots-skipped-backpressure-per-second-max",
+      "0",
+      "--max-events-dropped-per-second-max",
+      "0",
+      "--max-client-messages-dropped-per-second-max",
+      "0"
+    ]
+  },
+  {
+    name: "100 distributed regional combat stress clients",
+    args: [
+      "--clients",
+      "100",
+      "--duration",
+      "15000",
+      "--combat",
+      "1",
+      "--zones",
+      "cemetery,crypt,woods,woodsNorth",
+      "--attack-targets",
+      "--max-errors",
+      "0",
+      "--min-opened",
+      "100",
+      "--min-welcomed",
+      "100",
+      "--min-closed",
+      "100",
+      "--min-states",
+      "15000",
+      "--min-compact-states",
+      "15000",
+      "--min-metric-samples",
+      "1200",
+      "--max-tick-ms-max",
+      "12",
+      "--max-snapshot-ms-max",
+      "24",
+      "--max-heap-used-mb-max",
+      "384",
+      "--max-rss-mb-max",
+      "768",
+      "--max-resident-static-resources-max",
+      "1200",
+      "--max-state-message-bytes-max",
+      "30000",
+      "--max-state-message-bytes-avg",
+      "14000",
+      ...snapshotCacheGateArgs,
+      "--max-snapshots-skipped-backpressure-per-second-max",
+      "0",
+      "--max-events-dropped-per-second-max",
+      "0",
+      "--max-client-messages-dropped-per-second-max",
+      "0"
+    ]
+  }
+];
+const scenarios = mode === "soak" ? soakScenarios : mode === "stress" ? stressScenarios : gateScenarios;
 
 await assertPortFree(PORT);
 
 try {
   for (const scenario of scenarios) {
-    console.log(`\n[perf-gate] ${scenario.name}`);
+    console.log(`\n[perf-${mode}] ${scenario.name}`);
     await runWithServer(scenario);
   }
   console.log(`\n[perf-${mode}] all thresholds passed`);

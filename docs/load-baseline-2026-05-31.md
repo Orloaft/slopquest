@@ -188,6 +188,9 @@ and combat fanout without making every client see every other client.
 - `npm run perf:soak` runs a longer 50-client mixed-combat soak gate for
   changes that may leak memory, accumulate stale snapshot cache state, or drift
   over time.
+- `npm run perf:stress` runs heavier optional gates for 250 co-located town
+  clients and 100 distributed combat clients, covering the large-crowd checks
+  used while hardening capped fanout and active-region simulation.
 - Snapshot metrics now include heap/RSS, dynamic entity count, and resident
   static resource count so the gates can catch memory or world-residency
   regressions before the authored world grows.

@@ -200,6 +200,10 @@ reset after each sample, and carried in state metrics. The perf gate caps
 mean/p95/max delay, making long synchronous stalls visible under clustered,
 regional, slow-reader, persistent, and inbound-abuse scenarios.
 
+`npm run perf:stress` runs heavier-but-optional stress scenarios for the
+large-scale foundation: a 250-client capped town crowd and a 100-client
+distributed regional combat pass.
+
 Worst-case co-located player fanout is bounded by a nearest-player cap. The
 viewer is always included, and over-cap crowds switch to a heap-backed retained
 set instead of storing every nearby player candidate. Only the retained
@@ -353,6 +357,7 @@ process cannot tick the populated world.
 - [x] Slow-reader smoke scenario in the local performance gate.
 - [x] Co-located combat scenario in the local performance gate.
 - [x] Optional longer mixed-combat soak gate (`npm run perf:soak`).
+- [x] Optional high-crowd/regional stress gate (`npm run perf:stress`).
 - [x] Memory/entity residency telemetry in server snapshots and load gates.
 - [x] Snapshot-cache residency telemetry and perf thresholds.
 - [x] Event-loop delay telemetry and perf thresholds.
