@@ -46,6 +46,9 @@ no socket errors and no backpressure skips. See
 - Per-client metrics frames are throttled by `TIB_SNAPSHOT_METRICS_MS` (default
   `1000`) and carried forward by the client, so routine deltas do not resend the
   full telemetry object every snapshot.
+- Snapshot metrics expose total per-session delta-cache residency and the peak
+  cache entries held by any one session, so larger-world travel cannot quietly
+  turn interest caches into long-lived world history.
 - Player save flushes are concurrency-capped and covered by a persistent
   temp-data load gate, so online-player saves cannot turn into an unbounded
   filesystem burst.
@@ -149,6 +152,11 @@ The server no longer rebuilds one all-entity spatial index every tick.
 
 This is the main 100x-world foundation already in place on the server side:
 inactive regions do not burn CPU just because they exist.
+
+Snapshot cache residency is also measured. The server reports total snapshot
+cache entries across online sessions and the largest single-session cache; perf
+gates cap both so per-client delta caches stay bounded by current interest
+ranges rather than by total authored world size or where a player has travelled.
 
 ### Client hot paths
 
@@ -266,6 +274,7 @@ process cannot tick the populated world.
 - [x] Co-located combat scenario in the local performance gate.
 - [x] Optional longer mixed-combat soak gate (`npm run perf:soak`).
 - [x] Memory/entity residency telemetry in server snapshots and load gates.
+- [x] Snapshot-cache residency telemetry and perf thresholds.
 - [x] Static resource snapshot regression gate; full static lists are initial
   sync only, then deltas/removals.
 - [x] Chunk-derived tree resources with active-cell pruning and resident

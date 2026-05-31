@@ -241,6 +241,8 @@ export interface StateMetrics {
   spatialCells: number;
   residentStaticResources: number;
   dynamicEntities: number;
+  snapshotCacheEntries: number;
+  snapshotCacheEntriesPeak: number;
   heapUsedMb: number;
   rssMb: number;
   tickMs: number;

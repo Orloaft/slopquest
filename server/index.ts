@@ -197,6 +197,18 @@ type SnapshotCategory =
   | "herbNodes"
   | "fires";
 
+const SNAPSHOT_CATEGORIES: SnapshotCategory[] = [
+  "players",
+  "monsters",
+  "corpses",
+  "npcs",
+  "trees",
+  "fishingNodes",
+  "miningNodes",
+  "herbNodes",
+  "fires"
+];
+
 interface SnapshotDelta<T extends SnapshotEntity> {
   items: T[];
   removedIds: string[];
@@ -210,6 +222,8 @@ interface SnapshotMetricFrame {
   spatialCells: number;
   residentStaticResources: number;
   dynamicEntities: number;
+  snapshotCacheEntries: number;
+  snapshotCacheEntriesPeak: number;
   heapUsedMb: number;
   rssMb: number;
   tickMs: number;
@@ -2901,12 +2915,15 @@ function compactSnapshotForWire(snapshot: StateSnapshot): WireStateSnapshot {
 
 function snapshotMetricFrame(): SnapshotMetricFrame {
   const memory = process.memoryUsage();
+  const cacheEntries = snapshotCacheEntryCounts();
   return {
     clients: clients.size,
     monsters: monsters.size,
     spatialCells: spatial.cellCount + staticSpatial.cellCount,
     residentStaticResources: residentStaticResourceCount(),
     dynamicEntities: dynamicEntityCount(),
+    snapshotCacheEntries: cacheEntries.total,
+    snapshotCacheEntriesPeak: cacheEntries.peak,
     heapUsedMb: round(memory.heapUsed / 1024 / 1024),
     rssMb: round(memory.rss / 1024 / 1024),
     tickMs: round(metricAverage(metrics.tickWindow)),
@@ -3084,6 +3101,8 @@ function buildSnapshotFor(
       spatialCells: metricFrame.spatialCells,
       residentStaticResources: metricFrame.residentStaticResources,
       dynamicEntities: metricFrame.dynamicEntities,
+      snapshotCacheEntries: metricFrame.snapshotCacheEntries,
+      snapshotCacheEntriesPeak: metricFrame.snapshotCacheEntriesPeak,
       heapUsedMb: metricFrame.heapUsedMb,
       rssMb: metricFrame.rssMb,
       tickMs: metricFrame.tickMs,
@@ -3109,6 +3128,25 @@ function residentStaticResourceCount(): number {
 
 function dynamicEntityCount(): number {
   return clients.size + monsters.size + corpses.size + npcs.size + fires.size;
+}
+
+function snapshotCacheEntryCounts(): { total: number; peak: number } {
+  let total = 0;
+  let peak = 0;
+  for (const session of clients.values()) {
+    const cache = snapshotCaches.get(session);
+    if (!cache) continue;
+    const entries = snapshotCacheEntryCount(cache);
+    total += entries;
+    if (entries > peak) peak = entries;
+  }
+  return { total, peak };
+}
+
+function snapshotCacheEntryCount(cache: SnapshotCache): number {
+  let total = 0;
+  for (const category of SNAPSHOT_CATEGORIES) total += cache[category].signatures.size;
+  return total;
 }
 
 function serializeVisiblePlayers(viewer: ServerPlayer, candidates: PlayerSnapshotCandidate[], now: number): PlayerView[] {

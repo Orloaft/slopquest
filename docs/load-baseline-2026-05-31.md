@@ -182,6 +182,11 @@ and combat fanout without making every client see every other client.
 - Snapshot metrics now include heap/RSS, dynamic entity count, and resident
   static resource count so the gates can catch memory or world-residency
   regressions before the authored world grows.
+- Snapshot metrics now include total per-session delta-cache entries and the
+  largest single-session cache. The perf gate caps these so interest caches stay
+  tied to nearby visible entities rather than accumulated travel history. The
+  latest full gate peaked around `22.6k` total cache entries and `349` entries
+  in the largest single-session cache.
 - Static resource full snapshot flags are now counted by the load driver.
   `staticFull: 200` means 50 clients received one initial full sync for each of
   the four static categories; the gate fails if periodic recovery starts

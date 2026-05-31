@@ -36,6 +36,12 @@ const clientDecodeGateArgs = [
   "--max-state-decode-ms-p95",
   "1.2"
 ];
+const snapshotCacheGateArgs = [
+  "--max-snapshot-cache-entries-max",
+  "70000",
+  "--max-snapshot-cache-entries-peak-max",
+  "800"
+];
 const gateScenarios: Scenario[] = [
   {
     name: "50 clustered town clients",
@@ -77,6 +83,7 @@ const gateScenarios: Scenario[] = [
       "--max-state-message-bytes-avg",
       "13000",
       ...clientDecodeGateArgs,
+      ...snapshotCacheGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -141,6 +148,7 @@ const gateScenarios: Scenario[] = [
       "--max-state-message-bytes-avg",
       "13000",
       ...clientDecodeGateArgs,
+      ...snapshotCacheGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -193,6 +201,7 @@ const gateScenarios: Scenario[] = [
       "--max-state-message-bytes-avg",
       "9000",
       ...clientDecodeGateArgs,
+      ...snapshotCacheGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -250,6 +259,7 @@ const gateScenarios: Scenario[] = [
       "--max-state-message-bytes-avg",
       "10000",
       ...clientDecodeGateArgs,
+      ...snapshotCacheGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -305,6 +315,7 @@ const gateScenarios: Scenario[] = [
       "--max-state-message-bytes-avg",
       "12000",
       ...clientDecodeGateArgs,
+      ...snapshotCacheGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -366,6 +377,7 @@ const gateScenarios: Scenario[] = [
       "--max-state-message-bytes-avg",
       "9000",
       ...clientDecodeGateArgs,
+      ...snapshotCacheGateArgs,
       "--max-events-dropped-per-second-max",
       "0",
       "--max-save-queue-depth-max",
@@ -415,6 +427,7 @@ const gateScenarios: Scenario[] = [
       "--max-state-message-bytes-avg",
       "10000",
       ...clientDecodeGateArgs,
+      ...snapshotCacheGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -474,6 +487,7 @@ const soakScenarios: Scenario[] = [
       "--max-state-message-bytes-avg",
       "9000",
       ...clientDecodeGateArgs,
+      ...snapshotCacheGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",

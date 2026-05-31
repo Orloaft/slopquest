@@ -51,6 +51,8 @@ type GaugeMetric =
   | "residentStaticResources"
   | "dynamicEntities"
   | "spatialCells"
+  | "snapshotCacheEntries"
+  | "snapshotCacheEntriesPeak"
   | "saveQueueDepth"
   | "saveFlushPlayers"
   | "saveInFlight";
@@ -117,6 +119,8 @@ const observed = {
   residentStaticResources: [] as number[],
   dynamicEntities: [] as number[],
   spatialCellsSamples: [] as number[],
+  snapshotCacheEntries: [] as number[],
+  snapshotCacheEntriesPeak: [] as number[],
   saveQueueDepth: [] as number[],
   saveFlushMs: [] as number[],
   saveFlushPlayers: [] as number[],
@@ -328,6 +332,8 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   if (typeof m.residentStaticResources === "number") observed.residentStaticResources.push(m.residentStaticResources);
   if (typeof m.dynamicEntities === "number") observed.dynamicEntities.push(m.dynamicEntities);
   if (typeof m.spatialCells === "number") observed.spatialCellsSamples.push(m.spatialCells);
+  if (typeof m.snapshotCacheEntries === "number") observed.snapshotCacheEntries.push(m.snapshotCacheEntries);
+  if (typeof m.snapshotCacheEntriesPeak === "number") observed.snapshotCacheEntriesPeak.push(m.snapshotCacheEntriesPeak);
   if (typeof m.clients === "number" && m.clients > observed.serverClientsPeak) observed.serverClientsPeak = m.clients;
   if (typeof m.monsters === "number") observed.serverMonsters = m.monsters;
   if (typeof m.spatialCells === "number") observed.spatialCells = m.spatialCells;
@@ -421,6 +427,8 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     "residentStaticResources",
     "dynamicEntities",
     "spatialCells",
+    "snapshotCacheEntries",
+    "snapshotCacheEntriesPeak",
     "saveQueueDepth",
     "saveFlushPlayers",
     "saveInFlight"
@@ -526,6 +534,8 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       residentStaticResources: summarize(observed.residentStaticResources),
       dynamicEntities: summarize(observed.dynamicEntities),
       spatialCells: summarize(observed.spatialCellsSamples),
+      snapshotCacheEntries: summarize(observed.snapshotCacheEntries),
+      snapshotCacheEntriesPeak: summarize(observed.snapshotCacheEntriesPeak),
       saveQueueDepth: summarize(observed.saveQueueDepth),
       saveFlushPlayers: summarize(observed.saveFlushPlayers),
       saveInFlight: summarize(observed.saveInFlight)
