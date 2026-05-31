@@ -137,5 +137,9 @@ visible-player density.
   `staticFull: 200` means 50 clients received one initial full sync for each of
   the four static categories; the gate fails if periodic recovery starts
   resending full static lists again.
+- Tree resources are now chunk-derived instead of spawned whole-world at boot.
+  The 50-client gate tightened `residentStaticResources.max` to `1200`; the
+  latest mixed town/combat run peaked at `774` resident static resources while
+  preserving visible-tree density.
 - The next performance work should be longer/slow-client scenarios and eventual
   protocol compaction only if telemetry asks for it.

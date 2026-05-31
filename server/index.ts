@@ -28,7 +28,6 @@ import {
   isBlockedTile,
   isSightBlocked,
   isSafeZone,
-  makeFloorTiles,
   portalFor,
   tileAt,
   xpForLevel,
@@ -95,6 +94,9 @@ type FishingNodeRuntime = (typeof FISHING_NODES)[number];
 type MiningNodeRuntime = (typeof MINING_NODES)[number];
 const fishingNodesById = new Map<string, FishingNodeRuntime>(FISHING_NODES.map((node) => [node.id, node]));
 const miningNodesById = new Map<string, MiningNodeRuntime>(MINING_NODES.map((node) => [node.id, node]));
+const composedTreeNodesById = new Map<string, (typeof COMPOSED_TREE_NODES)[number]>(
+  COMPOSED_TREE_NODES.map((tree) => [composedTreeId(tree), tree])
+);
 
 interface AbilityResolution {
   origin: Vec2;
@@ -406,6 +408,7 @@ const EMPTY_MINING_NODE_VIEWS: MiningNodeView[] = [];
 const EMPTY_HERB_NODE_VIEWS: HerbNodeView[] = [];
 const EMPTY_FIRE_VIEWS: FireView[] = [];
 const eventOrder = new WeakMap<GameEvent, number>();
+const materializedTreeCells = new Set<string>();
 const metrics: Metrics = {
   tickWindow: createMetricWindow(),
   snapshotWindow: createMetricWindow(),
@@ -428,7 +431,6 @@ for (const spawn of MONSTER_SPAWNS) {
   spawnMonster(spawn);
 }
 spawnNpcs();
-spawnTreeNodes();
 spawnHerbNodes();
 rebuildStaticSpatialIndex();
 
@@ -1707,8 +1709,10 @@ function renderQuestLine(text: string, ctx: Record<string, unknown>): string {
 }
 
 function cutTree(player: ServerPlayer, id: string): void {
-  const tree = treeNodes.get(id);
-  if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distanceSq(player, tree) > 1.8 * 1.8) return;
+  const candidate = treeBaseForId(id);
+  if (!candidate || player.dead || candidate.floor !== player.floor || distanceSq(player, candidate) > 1.8 * 1.8) return;
+  const tree = treeRuntimeForId(id);
+  if (!tree || !tree.active) return;
   if (!playerHasCapability(player, "chop_tree")) {
     event("float", "You need an axe.", player.x, player.y, player.floor, "#f7d486");
     return;
@@ -1877,7 +1881,7 @@ function updatePlayerAction(player: ServerPlayer, now: number): void {
   if (player.action.type === "cooking") return updateCookingAction(player, now);
   if (player.action.type !== "woodcutting") return;
   const action = player.action;
-  const tree = treeNodes.get(action.treeId);
+  const tree = treeRuntimeForId(action.treeId);
   if (!tree || player.dead || !tree.active || tree.floor !== player.floor || distanceSq(player, tree) > 1.9 * 1.9) {
     player.action = null;
     return;
@@ -2178,25 +2182,6 @@ function spawnNpcs(): void {
   }
 }
 
-function spawnTreeNodes(): void {
-  for (let floor = 0; floor <= 4; floor += 1) {
-    const rows = makeFloorTiles(floor);
-    for (let y = 0; y < rows.length; y += 1) {
-      const row = rows[y];
-      if (!row) continue;
-      for (let x = 0; x < row.length; x += 1) {
-        if (row[x] !== "f") continue;
-        const id = `tree-${floor}-${x}-${y}`;
-        treeNodes.set(id, { id, floor, tileX: x, tileY: y, x: x + 0.5, y: y + 0.95, type: treeTypeForTile(floor, x, y), active: true, respawnAt: 0 });
-      }
-    }
-  }
-  for (const tree of COMPOSED_TREE_NODES) {
-    const id = `tree-composed-${tree.floor}-${String(tree.x).replace(".", "_")}-${String(tree.y).replace(".", "_")}`;
-    treeNodes.set(id, { id, floor: tree.floor, tileX: Math.floor(tree.x), tileY: Math.floor(tree.y), x: tree.x, y: tree.y, type: tree.type, active: true, respawnAt: 0 });
-  }
-}
-
 function spawnHerbNodes(): void {
   for (const node of HERB_NODES) {
     herbNodes.set(node.id, {
@@ -2214,6 +2199,150 @@ function spawnHerbNodes(): void {
       respawnAt: 0
     });
   }
+}
+
+function treeRuntimeForId(id: string): TreeNodeRuntime | null {
+  const cached = treeNodes.get(id);
+  if (cached) return cached;
+  const base = treeBaseForId(id);
+  return base ? materializeTree(base, false) : null;
+}
+
+function treeBaseForId(id: string): Omit<TreeNodeRuntime, "active" | "respawnAt"> | null {
+  const parsed = parseTileTreeId(id);
+  if (parsed) {
+    const { floor, tileX, tileY } = parsed;
+    if (!isGeneratedTreeTile(floor, tileX, tileY)) return null;
+    return { id, floor, tileX, tileY, x: tileX + 0.5, y: tileY + 0.95, type: treeTypeForTile(floor, tileX, tileY) };
+  }
+  const composed = composedTreeNodesById.get(id);
+  if (!composed) return null;
+  return {
+    id,
+    floor: composed.floor,
+    tileX: Math.floor(composed.x),
+    tileY: Math.floor(composed.y),
+    x: composed.x,
+    y: composed.y,
+    type: composed.type
+  };
+}
+
+function materializeTree(base: Omit<TreeNodeRuntime, "active" | "respawnAt">, addToIndex = true): TreeNodeRuntime {
+  const existing = treeNodes.get(base.id);
+  const tree = existing ?? { ...base, active: true, respawnAt: 0 };
+  treeNodes.set(tree.id, tree);
+  if (addToIndex) {
+    addToSpatial(staticSpatial.trees, tree);
+    refreshStaticSpatialCellMetric();
+  }
+  return tree;
+}
+
+function materializeTreeCellsNear(floor: number, x: number, y: number, radius: number): void {
+  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
+  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
+  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
+  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
+  for (let cy = minCy; cy <= maxCy; cy += 1) {
+    for (let cx = minCx; cx <= maxCx; cx += 1) materializeTreeCell(floor, cx, cy);
+  }
+}
+
+function materializeTreeCell(floor: number, cx: number, cy: number): void {
+  const cellKey = `${floor}:${cx}:${cy}`;
+  if (materializedTreeCells.has(cellKey)) return;
+  const minX = Math.max(0, cx * SPATIAL_CELL_SIZE);
+  const maxX = Math.min(floorCols(floor) - 1, (cx + 1) * SPATIAL_CELL_SIZE - 1);
+  const minY = Math.max(0, cy * SPATIAL_CELL_SIZE);
+  const maxY = Math.min(floorRows(floor) - 1, (cy + 1) * SPATIAL_CELL_SIZE - 1);
+  if (maxX >= minX && maxY >= minY) {
+    for (let tileY = minY; tileY <= maxY; tileY += 1) {
+      for (let tileX = minX; tileX <= maxX; tileX += 1) {
+        if (!isGeneratedTreeTile(floor, tileX, tileY)) continue;
+        const id = tileTreeId(floor, tileX, tileY);
+        materializeTree({
+          id,
+          floor,
+          tileX,
+          tileY,
+          x: tileX + 0.5,
+          y: tileY + 0.95,
+          type: treeTypeForTile(floor, tileX, tileY)
+        });
+      }
+    }
+  }
+  for (const tree of COMPOSED_TREE_NODES) {
+    if (spatialKey(tree.floor, tree.x, tree.y) !== cellKey) continue;
+    materializeTree({
+      id: composedTreeId(tree),
+      floor: tree.floor,
+      tileX: Math.floor(tree.x),
+      tileY: Math.floor(tree.y),
+      x: tree.x,
+      y: tree.y,
+      type: tree.type
+    });
+  }
+  materializedTreeCells.add(cellKey);
+  refreshStaticSpatialCellMetric();
+}
+
+function pruneDistantTreeCells(now: number): void {
+  if (materializedTreeCells.size === 0) return;
+  const keep = new Set<string>();
+  for (const { player } of clients.values()) {
+    const minCx = Math.floor((player.x - TREE_SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
+    const maxCx = Math.floor((player.x + TREE_SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
+    const minCy = Math.floor((player.y - TREE_SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
+    const maxCy = Math.floor((player.y + TREE_SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
+    for (let cy = minCy; cy <= maxCy; cy += 1) {
+      for (let cx = minCx; cx <= maxCx; cx += 1) keep.add(`${player.floor}:${cx}:${cy}`);
+    }
+  }
+  for (const cellKey of Array.from(materializedTreeCells)) {
+    if (keep.has(cellKey)) continue;
+    const bucket = staticSpatial.trees.get(cellKey);
+    if (bucket) {
+      for (const tree of bucket) {
+        if (tree.active && tree.respawnAt <= now) treeNodes.delete(tree.id);
+      }
+      staticSpatial.trees.delete(cellKey);
+    }
+    materializedTreeCells.delete(cellKey);
+  }
+  refreshStaticSpatialCellMetric();
+}
+
+function tileTreeId(floor: number, tileX: number, tileY: number): string {
+  return `tree-${floor}-${tileX}-${tileY}`;
+}
+
+function parseTileTreeId(id: string): { floor: number; tileX: number; tileY: number } | null {
+  const match = /^tree-(\d+)-(\d+)-(\d+)$/.exec(id);
+  if (!match) return null;
+  const floor = Number(match[1]);
+  const tileX = Number(match[2]);
+  const tileY = Number(match[3]);
+  if (!Number.isInteger(floor) || !Number.isInteger(tileX) || !Number.isInteger(tileY)) return null;
+  return { floor, tileX, tileY };
+}
+
+function composedTreeId(tree: (typeof COMPOSED_TREE_NODES)[number]): string {
+  return `tree-composed-${tree.floor}-${String(tree.x).replace(".", "_")}-${String(tree.y).replace(".", "_")}`;
+}
+
+function isGeneratedTreeTile(floor: number, x: number, y: number): boolean {
+  return (
+    floor >= 0 &&
+    floor <= 4 &&
+    x >= 0 &&
+    y >= 0 &&
+    x < floorCols(floor) &&
+    y < floorRows(floor) &&
+    tileAt(floor, x, y) === "f"
+  );
 }
 
 function treeTypeForTile(floor: number, x: number, y: number): string {
@@ -2272,7 +2401,11 @@ function updateResourceRespawns(now: number): void {
     if (!respawn) break;
     if (respawn.kind === "tree") {
       const tree = treeNodes.get(respawn.id);
-      if (tree && !tree.active && tree.respawnAt <= now) tree.active = true;
+      if (tree && !tree.active && tree.respawnAt <= now) {
+        tree.active = true;
+        tree.respawnAt = 0;
+        if (!materializedTreeCells.has(spatialKey(tree.floor, tree.x, tree.y))) treeNodes.delete(tree.id);
+      }
       continue;
     }
     const node = herbNodes.get(respawn.id);
@@ -2579,6 +2712,7 @@ function broadcastState(): void {
     lastSnapshotSentAt.set(session, now);
     socket.send(raw);
   }
+  pruneDistantTreeCells(now);
 }
 
 function shouldSendSnapshot(session: Session, snapshot: StateSnapshot, now: number): boolean {
@@ -2686,6 +2820,7 @@ function buildSnapshotFor(
 
   const visibleTrees: TreeView[] = includeTreesForSession ? [] : EMPTY_TREE_VIEWS;
   if (includeTreesForSession) {
+    materializeTreeCellsNear(viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS);
     forEachSpatial(staticSpatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS, (tree) => {
       if (!inTreeInterestRange(viewer, tree)) return;
       visibleTrees.push(serializeTree(tree));
@@ -3906,15 +4041,11 @@ function createStaticSpatialIndex(): StaticSpatialIndex {
 
 function rebuildStaticSpatialIndex(): void {
   staticSpatial = createStaticSpatialIndex();
-  for (const tree of treeNodes.values()) addToSpatial(staticSpatial.trees, tree);
+  materializedTreeCells.clear();
   for (const node of fishingNodesById.values()) addToSpatial(staticSpatial.fishingNodes, node);
   for (const node of miningNodesById.values()) addToSpatial(staticSpatial.miningNodes, node);
   for (const node of herbNodes.values()) addToSpatial(staticSpatial.herbNodes, node);
-  staticSpatial.cellCount =
-    staticSpatial.trees.size +
-    staticSpatial.fishingNodes.size +
-    staticSpatial.miningNodes.size +
-    staticSpatial.herbNodes.size;
+  refreshStaticSpatialCellMetric();
 }
 
 function refreshSpatialCellMetric(): void {
@@ -3924,6 +4055,14 @@ function refreshSpatialCellMetric(): void {
     spatial.corpses.size +
     spatial.npcs.size +
     spatial.fires.size;
+}
+
+function refreshStaticSpatialCellMetric(): void {
+  staticSpatial.cellCount =
+    staticSpatial.trees.size +
+    staticSpatial.fishingNodes.size +
+    staticSpatial.miningNodes.size +
+    staticSpatial.herbNodes.size;
 }
 
 function addToSpatial<T extends Positioned>(index: Map<string, T[]>, entity: T): void {

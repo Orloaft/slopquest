@@ -13,6 +13,7 @@ Node/WebSocket process:
 - Player snapshots are split into owner-private and public views.
 - Per-session entity deltas avoid resending unchanged world objects.
 - Static resources are indexed once; moving entities update spatial cells incrementally.
+- High-cardinality trees are chunk-derived and materialized only near players.
 - Monsters/NPCs simulate only in active regions near players.
 - Backpressure skips snapshots for slow sockets instead of piling up writes.
 - The client uses chunked/culled map rendering, heap-based A*, and a throttled minimap.
@@ -30,8 +31,10 @@ with no socket errors and no backpressure skips. See
 - Interest radius: 18 tiles for dynamic entities, 32 tiles for trees.
 - Spatial cell size: 8 tiles.
 - Static trees/resources are initial-full per session, then delta/removal only.
-- Current content: 10 floors, 77 monsters, roughly 1,385 tree nodes, NPCs,
-  gathering resources, fires, corpses, and per-player persistence.
+- Tree resource cells are generated lazily around players and pruned when no
+  players are nearby.
+- Current content: 10 floors, 77 monsters, roughly 1,385 derivable tree tiles,
+  NPCs, gathering resources, fires, corpses, and per-player persistence.
 
 ## What Is Resolved
 
@@ -74,7 +77,9 @@ density grows.
 The server no longer rebuilds one all-entity spatial index every tick.
 
 - Players, monsters, corpses, NPCs, and fires are in dynamic spatial maps.
-- Trees, fishing nodes, mining nodes, and herb nodes are indexed once at startup.
+- Fishing nodes, mining nodes, and herb nodes are indexed once at startup.
+- Trees are derived from map chunks on demand instead of being instantiated for
+  the whole authored world at boot.
 - Movement calls update the old and new cells directly.
 - Monsters and NPCs tick only in cells near online players.
 - Tree/herb, fire, and corpse expiry use min-heaps instead of whole-world scans.
@@ -128,11 +133,11 @@ original post-fix estimate of ~9 MB/s uncompressed.
 
 ### Large-world content residency
 
-The server avoids ticking inactive regions, but it still instantiates static
-features such as trees for the whole authored world at startup. That is fine for
-the current MVP. For a 100x world, static features should become chunk-derived
-or chunk-loaded data so RAM scales with active/nearby regions rather than total
-world size.
+The server avoids ticking inactive regions, and tree resources now follow the
+same rule for residency: tree cells are generated only near players and active
+tree runtimes are pruned again when the area goes cold. Remaining static
+resource lists are currently small, but fishing/mining/herb definitions should
+use the same chunk-derived pattern before they become high-cardinality content.
 
 ### Asset streaming
 
@@ -187,9 +192,12 @@ process cannot tick the populated world.
 - [x] Memory/entity residency telemetry in server snapshots and load gates.
 - [x] Static resource snapshot regression gate; full static lists are initial
   sync only, then deltas/removals.
+- [x] Chunk-derived tree resources with active-cell pruning and resident
+  resource load gates.
 - [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
-- [ ] Chunk-derived static resources before the world grows by an order of magnitude.
+- [ ] Chunk-derived fishing/mining/herb resources before those lists grow by an
+  order of magnitude.
 
 ### Stage 3 - Defer until one process is the bottleneck
 
