@@ -314,7 +314,9 @@ const MONSTER_ATTACK_ANIM_MS = 480;
 // rather than the normal data path. Keep them infrequent enough that crowded
 // towns and tree-dense zones stay delta-dominated at scale.
 const TREE_SNAPSHOT_EVERY = positiveIntEnv("TIB_TREE_SNAPSHOT_EVERY", E2E_TEST ? 5 : 10);
+const NPC_SNAPSHOT_EVERY = positiveIntEnv("TIB_NPC_SNAPSHOT_EVERY", E2E_TEST ? 1 : 3);
 const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 80);
+const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 1000);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
 const WS_COMPRESSION = process.env.TIB_WS_COMPRESSION === "1" || (!E2E_TEST && process.env.TIB_WS_COMPRESSION !== "0");
 const WS_COMPRESSION_THRESHOLD = positiveIntEnv("TIB_WS_COMPRESSION_THRESHOLD", 1024);
@@ -353,6 +355,7 @@ const fireExpirations = new MinHeap<FireExpiration>((a, b) => a.at - b.at);
 const activeRegionsScratch: ActiveRegions = { cells: new Set() };
 const visitedMonsterScratch = new Set<ServerMonster>();
 const visitedNpcScratch = new Set<NpcRuntime>();
+const lastSnapshotSentAt = new WeakMap<Session, number>();
 let nextMonsterId = 1;
 let nextCorpseId = 1;
 let nextFireId = 1;
@@ -2453,10 +2456,12 @@ function armorReduction(player: ServerPlayer): number {
 }
 
 function broadcastState(): void {
+  const now = performance.now();
   updateByteMetric();
   publicPlayerViewCache.clear();
   snapshotSequence += 1;
   const includeTrees = snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
+  const includeNpcs = snapshotSequence % NPC_SNAPSHOT_EVERY === 0;
   const forceFull = snapshotSequence % SNAPSHOT_FULL_EVERY === 0;
   const metricFrame = snapshotMetricFrame();
   for (const session of clients.values()) {
@@ -2467,12 +2472,52 @@ function broadcastState(): void {
       continue;
     }
 
-    const snapshot = buildSnapshotFor(session, includeTrees, forceFull, metricFrame);
+    const snapshot = buildSnapshotFor(session, includeTrees, includeNpcs, forceFull, metricFrame);
+    if (!shouldSendSnapshot(session, snapshot, now)) continue;
     const raw = JSON.stringify(snapshot);
     metrics.bytesOutThisSecond += Buffer.byteLength(raw);
     metrics.snapshotsSentThisSecond += 1;
+    lastSnapshotSentAt.set(session, now);
     socket.send(raw);
   }
+}
+
+function shouldSendSnapshot(session: Session, snapshot: StateSnapshot, now: number): boolean {
+  if (!snapshotIsEmptyDelta(snapshot)) return true;
+  return now - (lastSnapshotSentAt.get(session) ?? 0) >= SNAPSHOT_HEARTBEAT_MS;
+}
+
+function snapshotIsEmptyDelta(snapshot: StateSnapshot): boolean {
+  return (
+    !snapshot.playersFull &&
+    !snapshot.monstersFull &&
+    !snapshot.corpsesFull &&
+    !snapshot.npcsFull &&
+    !snapshot.treesFull &&
+    !snapshot.fishingNodesFull &&
+    !snapshot.miningNodesFull &&
+    !snapshot.herbNodesFull &&
+    !snapshot.firesFull &&
+    snapshot.players.length === 0 &&
+    snapshot.monsters.length === 0 &&
+    snapshot.corpses.length === 0 &&
+    snapshot.npcs.length === 0 &&
+    snapshot.trees.length === 0 &&
+    snapshot.fishingNodes.length === 0 &&
+    snapshot.miningNodes.length === 0 &&
+    snapshot.herbNodes.length === 0 &&
+    snapshot.fires.length === 0 &&
+    snapshot.removedPlayerIds.length === 0 &&
+    snapshot.removedMonsterIds.length === 0 &&
+    snapshot.removedCorpseIds.length === 0 &&
+    snapshot.removedNpcIds.length === 0 &&
+    snapshot.removedTreeIds.length === 0 &&
+    snapshot.removedFishingNodeIds.length === 0 &&
+    snapshot.removedMiningNodeIds.length === 0 &&
+    snapshot.removedHerbNodeIds.length === 0 &&
+    snapshot.removedFireIds.length === 0 &&
+    snapshot.events.length === 0
+  );
 }
 
 function snapshotMetricFrame(): SnapshotMetricFrame {
@@ -2489,7 +2534,7 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
   };
 }
 
-function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: boolean, metricFrame: SnapshotMetricFrame): StateSnapshot {
+function buildSnapshotFor(session: Session, includeTrees: boolean, includeNpcs: boolean, forceFull: boolean, metricFrame: SnapshotMetricFrame): StateSnapshot {
   const viewer = session.player;
   const cache = snapshotCacheFor(session);
   const players: PlayerView[] = [];
@@ -2514,10 +2559,12 @@ function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: bo
   });
 
   const visibleNpcs: NpcView[] = [];
-  forEachSpatial(spatial.npcs, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (npc) => {
-    if (!inInterestRange(viewer, npc)) return;
-    visibleNpcs.push(serializeNpc(npc));
-  });
+  if (includeNpcs) {
+    forEachSpatial(spatial.npcs, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (npc) => {
+      if (!inInterestRange(viewer, npc)) return;
+      visibleNpcs.push(serializeNpc(npc));
+    });
+  }
 
   const visibleTrees: TreeView[] = [];
   if (includeTrees) {
@@ -2546,7 +2593,7 @@ function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: bo
   const playersDelta = snapshotDelta(cache.players, players, playerViewSignature, forceFull);
   const monstersDelta = snapshotDelta(cache.monsters, visibleMonsters, monsterViewSignature, forceFull);
   const corpsesDelta = snapshotDelta(cache.corpses, visibleCorpses, corpseViewSignature, forceFull);
-  const npcsDelta = snapshotDelta(cache.npcs, visibleNpcs, npcViewSignature, forceFull);
+  const npcsDelta = snapshotDelta(cache.npcs, visibleNpcs, npcViewSignature, forceFull, !includeNpcs);
   const treesDelta = snapshotDelta(cache.trees, visibleTrees, treeViewSignature, forceFull, !includeTrees);
   const fishingDelta = snapshotDelta(cache.fishingNodes, visibleFishingNodes, fishingNodeViewSignature, forceFull);
   const miningDelta = snapshotDelta(cache.miningNodes, visibleMiningNodes, miningNodeViewSignature, forceFull);
