@@ -386,11 +386,13 @@ const targetedEventsByPlayer = new Map<string, GameEvent[]>();
 const eventsByCell = new Map<string, GameEvent[]>();
 const EMPTY_IDS: string[] = [];
 const EMPTY_EVENTS: GameEvent[] = [];
+const EMPTY_CORPSE_VIEWS: CorpseView[] = [];
 const EMPTY_NPC_VIEWS: NpcView[] = [];
 const EMPTY_TREE_VIEWS: TreeView[] = [];
 const EMPTY_FISHING_NODE_VIEWS: FishingNodeView[] = [];
 const EMPTY_MINING_NODE_VIEWS: MiningNodeView[] = [];
 const EMPTY_HERB_NODE_VIEWS: HerbNodeView[] = [];
+const EMPTY_FIRE_VIEWS: FireView[] = [];
 const eventOrder = new WeakMap<GameEvent, number>();
 const metrics: Metrics = {
   tickWindow: createMetricWindow(),
@@ -2624,11 +2626,13 @@ function buildSnapshotFor(
     visibleMonsters.push(serializeMonster(monster));
   });
 
-  const visibleCorpses: CorpseView[] = [];
-  forEachSpatial(spatial.corpses, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (corpse) => {
-    if (!inInterestRange(viewer, corpse)) return;
-    visibleCorpses.push(corpse);
-  });
+  const visibleCorpses: CorpseView[] = corpses.size === 0 ? EMPTY_CORPSE_VIEWS : [];
+  if (corpses.size !== 0) {
+    forEachSpatial(spatial.corpses, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (corpse) => {
+      if (!inInterestRange(viewer, corpse)) return;
+      visibleCorpses.push(corpse);
+    });
+  }
 
   const visibleNpcs: NpcView[] = includeNpcs ? [] : EMPTY_NPC_VIEWS;
   if (includeNpcs) {
@@ -2664,10 +2668,12 @@ function buildSnapshotFor(
       if (inInterestRange(viewer, node)) visibleHerbNodes.push(serializeHerbNode(node));
     });
   }
-  const visibleFires: FireView[] = [];
-  forEachSpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (fire) => {
-    if (inInterestRange(viewer, fire)) visibleFires.push(serializeFire(fire));
-  });
+  const visibleFires: FireView[] = fires.size === 0 ? EMPTY_FIRE_VIEWS : [];
+  if (fires.size !== 0) {
+    forEachSpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (fire) => {
+      if (inInterestRange(viewer, fire)) visibleFires.push(serializeFire(fire));
+    });
+  }
   const playersDelta = snapshotDelta(cache.players, players, playerViewSignature, forceFull);
   const monstersDelta = snapshotDelta(cache.monsters, visibleMonsters, monsterViewSignature, forceFull);
   const corpsesDelta = snapshotDelta(cache.corpses, visibleCorpses, corpseViewSignature, forceFull);
@@ -2760,6 +2766,11 @@ function snapshotDelta<T extends SnapshotEntity>(
   preserve = false
 ): SnapshotDelta<T> {
   if (preserve) return { items: visible, removedIds: EMPTY_IDS, full: false, visibleCount: cache.signatures.size };
+  if (visible.length === 0 && cache.signatures.size === 0) {
+    const full = forceFull || !cache.initialized;
+    cache.initialized = true;
+    return { items: visible, removedIds: EMPTY_IDS, full, visibleCount: 0 };
+  }
   const next = cache.nextSignatures;
   next.clear();
   const changed: T[] = [];
