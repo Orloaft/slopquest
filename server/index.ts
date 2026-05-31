@@ -114,6 +114,8 @@ interface PlayerPrivateViewCache {
   quests: QuestView[];
   skillsSignature: string;
   skills: SkillView[];
+  abilitiesSignature: string;
+  abilities: AbilityView[];
   classesSignature: string;
   unlockedClasses: string[];
   weight: number;
@@ -2811,10 +2813,10 @@ function buildPlayerSignature(player: ServerPlayer, privateView: PlayerPrivateVi
     hash = hashString(hash, privateView.inventorySignature);
     hash = hashString(hash, privateView.questsSignature);
     hash = hashString(hash, privateView.skillsSignature);
+    hash = hashString(hash, privateView.abilitiesSignature);
     hash = hashString(hash, privateView.classesSignature);
     hash = hashNumber(hash, privateView.weight);
     hash = hashNumber(hash, WEIGHT_SOFT_CAP);
-    hash = hashString(hash, abilityCacheSignature(player));
   }
   return hash;
 }
@@ -3006,7 +3008,7 @@ function serializePlayer(player: ServerPlayer): PlayerView {
     inventory: privateView.inventory,
     quests: privateView.quests,
     skills: privateView.skills,
-    abilities: serializeAbilities(player),
+    abilities: privateView.abilities,
     unlockedClasses: privateView.unlockedClasses,
     weight: privateView.weight,
     maxWeight: WEIGHT_SOFT_CAP
@@ -3019,6 +3021,7 @@ function serializePlayerPrivate(player: ServerPlayer): PlayerPrivateViewCache {
   const inventorySignature = inventoryCacheSignature(player);
   const questsSignature = `${questCacheSignature(player)}|inv:${inventorySignature}`;
   const skillsSignature = skillCacheSignature(player);
+  const abilitiesSignature = abilityCacheSignature(player);
   const classesSignature = String(player.classesRevision);
   const cached = privatePlayerViewCache.get(player);
   if (
@@ -3026,6 +3029,7 @@ function serializePlayerPrivate(player: ServerPlayer): PlayerPrivateViewCache {
     cached.inventorySignature === inventorySignature &&
     cached.questsSignature === questsSignature &&
     cached.skillsSignature === skillsSignature &&
+    cached.abilitiesSignature === abilitiesSignature &&
     cached.classesSignature === classesSignature
   ) {
     return cached;
@@ -3037,6 +3041,8 @@ function serializePlayerPrivate(player: ServerPlayer): PlayerPrivateViewCache {
     quests: cached?.questsSignature === questsSignature ? cached.quests : serializeQuests(player),
     skillsSignature,
     skills: cached?.skillsSignature === skillsSignature ? cached.skills : serializeSkills(player),
+    abilitiesSignature,
+    abilities: cached?.abilitiesSignature === abilitiesSignature ? cached.abilities : serializeAbilities(player),
     classesSignature,
     unlockedClasses: cached?.classesSignature === classesSignature ? cached.unlockedClasses : [...player.unlockedClasses],
     weight: cached?.inventorySignature === inventorySignature ? cached.weight : Math.round(player.carriedWeight)
