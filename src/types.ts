@@ -239,6 +239,10 @@ export interface StateMetrics {
   visibleMiningNodes: number;
   visibleFires: number;
   spatialCells: number;
+  residentStaticResources: number;
+  dynamicEntities: number;
+  heapUsedMb: number;
+  rssMb: number;
   tickMs: number;
   snapshotMs: number;
   bytesOutPerSecond: number;

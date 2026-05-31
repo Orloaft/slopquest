@@ -177,6 +177,7 @@ process cannot tick the populated world.
 - [x] Slow-reader smoke scenario in the local performance gate.
 - [x] Co-located combat scenario in the local performance gate.
 - [x] Optional longer mixed-combat soak gate (`npm run perf:soak`).
+- [x] Memory/entity residency telemetry in server snapshots and load gates.
 - [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
 - [ ] Chunk-derived static resources before the world grows by an order of magnitude.

@@ -31,6 +31,7 @@ interface Summary {
 }
 
 type SummaryMetric = "tickMs" | "snapshotMs" | "bytesOutPerSecond" | "snapshotsSentPerSecond" | "snapshotsSkippedBackpressurePerSecond";
+type GaugeMetric = "heapUsedMb" | "rssMb" | "residentStaticResources" | "dynamicEntities" | "spatialCells";
 type SummaryField = "min" | "max" | "avg";
 
 const options = parseArgs(process.argv.slice(2));
@@ -80,6 +81,11 @@ const observed = {
   visibleMonsters: [] as number[],
   visibleTrees: [] as number[],
   visibleFires: [] as number[],
+  heapUsedMb: [] as number[],
+  rssMb: [] as number[],
+  residentStaticResources: [] as number[],
+  dynamicEntities: [] as number[],
+  spatialCellsSamples: [] as number[],
   serverClientsPeak: 0,
   serverMonsters: 0,
   spatialCells: 0,
@@ -255,6 +261,11 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   if (typeof m.visibleMonsters === "number") observed.visibleMonsters.push(m.visibleMonsters);
   if (typeof m.visibleTrees === "number") observed.visibleTrees.push(m.visibleTrees);
   if (typeof m.visibleFires === "number") observed.visibleFires.push(m.visibleFires);
+  if (typeof m.heapUsedMb === "number") observed.heapUsedMb.push(m.heapUsedMb);
+  if (typeof m.rssMb === "number") observed.rssMb.push(m.rssMb);
+  if (typeof m.residentStaticResources === "number") observed.residentStaticResources.push(m.residentStaticResources);
+  if (typeof m.dynamicEntities === "number") observed.dynamicEntities.push(m.dynamicEntities);
+  if (typeof m.spatialCells === "number") observed.spatialCellsSamples.push(m.spatialCells);
   if (typeof m.clients === "number" && m.clients > observed.serverClientsPeak) observed.serverClientsPeak = m.clients;
   if (typeof m.monsters === "number") observed.serverMonsters = m.monsters;
   if (typeof m.spatialCells === "number") observed.spatialCells = m.spatialCells;
@@ -324,8 +335,19 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     "snapshotsSentPerSecond",
     "snapshotsSkippedBackpressurePerSecond"
   ];
+  const gaugeNames: GaugeMetric[] = ["heapUsedMb", "rssMb", "residentStaticResources", "dynamicEntities", "spatialCells"];
   const fields: SummaryField[] = ["min", "max", "avg"];
   for (const metric of metricNames) {
+    const summary = report.perTick[metric];
+    if (!summary) continue;
+    for (const field of fields) {
+      const maximum = optionNumber(`max-${kebab(metric)}-${field}`);
+      if (maximum != null && summary[field] > maximum) failures.push(`${metric}.${field} ${summary[field]} > ${maximum}`);
+      const minimum = optionNumber(`min-${kebab(metric)}-${field}`);
+      if (minimum != null && summary[field] < minimum) failures.push(`${metric}.${field} ${summary[field]} < ${minimum}`);
+    }
+  }
+  for (const metric of gaugeNames) {
     const summary = report.perTick[metric];
     if (!summary) continue;
     for (const field of fields) {
@@ -367,7 +389,12 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       snapshotMs: summarize(observed.snapshotMs),
       bytesOutPerSecond: summarize(observed.bytesOutPerSecond),
       snapshotsSentPerSecond: summarize(observed.snapshotsSentPerSecond),
-      snapshotsSkippedBackpressurePerSecond: summarize(observed.snapshotsSkippedBackpressurePerSecond)
+      snapshotsSkippedBackpressurePerSecond: summarize(observed.snapshotsSkippedBackpressurePerSecond),
+      heapUsedMb: summarize(observed.heapUsedMb),
+      rssMb: summarize(observed.rssMb),
+      residentStaticResources: summarize(observed.residentStaticResources),
+      dynamicEntities: summarize(observed.dynamicEntities),
+      spatialCells: summarize(observed.spatialCellsSamples)
     },
     perClient: {
       visiblePlayers: summarize(observed.visiblePlayers),

@@ -203,6 +203,10 @@ interface SnapshotMetricFrame {
   clients: number;
   monsters: number;
   spatialCells: number;
+  residentStaticResources: number;
+  dynamicEntities: number;
+  heapUsedMb: number;
+  rssMb: number;
   tickMs: number;
   snapshotMs: number;
   bytesOutPerSecond: number;
@@ -2615,10 +2619,15 @@ function snapshotIsEmptyDelta(snapshot: StateSnapshot): boolean {
 }
 
 function snapshotMetricFrame(): SnapshotMetricFrame {
+  const memory = process.memoryUsage();
   return {
     clients: clients.size,
     monsters: monsters.size,
     spatialCells: spatial.cellCount + staticSpatial.cellCount,
+    residentStaticResources: residentStaticResourceCount(),
+    dynamicEntities: dynamicEntityCount(),
+    heapUsedMb: round(memory.heapUsed / 1024 / 1024),
+    rssMb: round(memory.rss / 1024 / 1024),
     tickMs: round(metricAverage(metrics.tickWindow)),
     snapshotMs: round(metricAverage(metrics.snapshotWindow)),
     bytesOutPerSecond: metrics.bytesOutPerSecond,
@@ -2754,6 +2763,10 @@ function buildSnapshotFor(
       visibleMiningNodes: miningDelta.visibleCount,
       visibleFires: firesDelta.visibleCount,
       spatialCells: metricFrame.spatialCells,
+      residentStaticResources: metricFrame.residentStaticResources,
+      dynamicEntities: metricFrame.dynamicEntities,
+      heapUsedMb: metricFrame.heapUsedMb,
+      rssMb: metricFrame.rssMb,
       tickMs: metricFrame.tickMs,
       snapshotMs: metricFrame.snapshotMs,
       bytesOutPerSecond: metricFrame.bytesOutPerSecond,
@@ -2762,6 +2775,14 @@ function buildSnapshotFor(
       socketBackpressureBytes: metricFrame.socketBackpressureBytes
     }
   };
+}
+
+function residentStaticResourceCount(): number {
+  return treeNodes.size + fishingNodesById.size + miningNodesById.size + herbNodes.size;
+}
+
+function dynamicEntityCount(): number {
+  return clients.size + monsters.size + corpses.size + npcs.size + fires.size;
 }
 
 function snapshotCacheFor(session: Session): SnapshotCache {
