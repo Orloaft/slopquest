@@ -953,6 +953,10 @@ function mergeStateSnapshot(previous: StateSnapshot | null, next: StateSnapshot)
   const snapshot = withSnapshotDefaults(next, false);
   return {
     ...snapshot,
+    // Metrics are only sent ~once a second; carry the last-known readout forward
+    // on the intervening metrics-less snapshots so the net-stats line doesn't
+    // flicker to "net -" between updates.
+    metrics: snapshot.metrics ?? previous.metrics,
     players: mergeEntityViews(previous.players, snapshot.players, snapshot.removedPlayerIds, snapshot.playersFull),
     monsters: mergeEntityViews(previous.monsters, snapshot.monsters, snapshot.removedMonsterIds, snapshot.monstersFull),
     corpses: mergeEntityViews(previous.corpses, snapshot.corpses, snapshot.removedCorpseIds, snapshot.corpsesFull),
