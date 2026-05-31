@@ -571,6 +571,8 @@ const fishingViews = new Map<string, FishingEntityView>();
 const miningViews = new Map<string, MiningEntityView>();
 const herbViews = new Map<string, HerbEntityView>();
 const fireViews = new Map<string, FireEntityView>();
+const interpolatingEntityViews = new Set<EntityView>();
+const animatingActorViews = new Set<EntityView>();
 const visiblePlayerIds = new Set<string>();
 const visibleMonsterIds = new Set<string>();
 const visibleCorpseIds = new Set<string>();
@@ -1244,7 +1246,7 @@ function syncEntities(): void {
 
   for (const [id, view] of playerViews) {
     if (!visiblePlayers.has(id)) {
-      view.destroy();
+      destroyEntityView(view);
       playerViews.delete(id);
     }
   }
@@ -1271,7 +1273,7 @@ function syncEntities(): void {
 
   for (const [id, view] of monsterViews) {
     if (!visibleMonsters.has(id)) {
-      view.destroy();
+      destroyEntityView(view);
       monsterViews.delete(id);
     }
   }
@@ -1319,7 +1321,7 @@ function syncEntities(): void {
   }
   for (const [id, view] of npcViews) {
     if (!visibleNpcs.has(id)) {
-      view.destroy();
+      destroyEntityView(view);
       npcViews.delete(id);
     }
   }
@@ -1656,21 +1658,25 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
 }
 
 function setEntityTarget(view: EntityView, x: number, y: number): void {
-  view.targetX = x;
-  view.targetY = y;
   const dx = view.x - x;
   const dy = view.y - y;
+  const distanceSq = dx * dx + dy * dy;
   const snapDistance = TILE_SIZE * 3;
-  if (dx * dx + dy * dy > snapDistance * snapDistance) {
+  if (distanceSq > snapDistance * snapDistance || distanceSq < 0.01) {
     view.x = x;
     view.y = y;
+    view.targetX = undefined;
+    view.targetY = undefined;
+    interpolatingEntityViews.delete(view);
+    return;
   }
+  view.targetX = x;
+  view.targetY = y;
+  interpolatingEntityViews.add(view);
 }
 
 function interpolateEntities(): void {
-  for (const view of playerViews.values()) easeToTarget(view);
-  for (const view of monsterViews.values()) easeToTarget(view);
-  for (const view of npcViews.values()) easeToTarget(view);
+  for (const view of interpolatingEntityViews) easeToTarget(view);
 }
 
 function easeToTarget(view: EntityView): void {
@@ -1684,6 +1690,7 @@ function easeToTarget(view: EntityView): void {
     view.y = targetY;
     view.targetX = undefined;
     view.targetY = undefined;
+    interpolatingEntityViews.delete(view);
     return;
   }
   view.x += dx * 0.32;
@@ -1691,22 +1698,47 @@ function easeToTarget(view: EntityView): void {
 }
 
 function setActorAnimation(view: EntityView, family: string, dir: Direction = "down", moving = false, width = 40, height = 48, attacking = false): void {
+  const previousFamily = view.animFamily;
+  const previousDir = view.animDir;
+  const previousMoving = view.animMoving;
+  const previousAttacking = view.animAttacking;
+  const previousWidth = view.animWidth;
+  const previousHeight = view.animHeight;
   view.animFamily = family;
   view.animDir = DIRECTIONS.includes(dir) ? dir : "down";
   view.animMoving = Boolean(moving);
   view.animAttacking = Boolean(attacking);
   view.animWidth = width;
   view.animHeight = height;
+  if (view.animMoving || view.animAttacking) {
+    animatingActorViews.add(view);
+    return;
+  }
+  animatingActorViews.delete(view);
+  if (
+    previousFamily !== view.animFamily ||
+    previousDir !== view.animDir ||
+    previousMoving !== view.animMoving ||
+    previousAttacking !== view.animAttacking ||
+    previousWidth !== view.animWidth ||
+    previousHeight !== view.animHeight
+  ) {
+    animateActor(view);
+  }
 }
 
 function animateEntities(): void {
-  for (const view of playerViews.values()) animateActor(view);
-  for (const view of monsterViews.values()) animateActor(view);
-  for (const view of npcViews.values()) animateActor(view);
+  for (const view of animatingActorViews) animateActor(view);
   for (const view of fireViews.values()) {
     if (!view.flame) continue;
     view.flame.setScale(1 + Math.sin(scene.time.now / 95) * 0.08, 1 + Math.cos(scene.time.now / 120) * 0.06);
   }
+}
+
+function destroyEntityView(view: EntityView): void {
+  interpolatingEntityViews.delete(view);
+  animatingActorViews.delete(view);
+  view.destroy();
 }
 
 function animateActor(view: EntityView): void {
