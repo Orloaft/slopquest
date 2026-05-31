@@ -27,6 +27,7 @@ import {
 import type { ClassSpec } from "./shared.ts";
 import { MAP_OBJECTS } from "./map-objects.ts";
 import { setTrack, unlockAudio, setMusicEnabled, currentTrack } from "./audio.ts";
+import { normalizeServerMessage, type WireServerMessage } from "./wire.ts";
 
 // --- Music: per-zone score with a crossfade on transitions -----------------
 // Track names map to /music/<name>.mp3 (see public/music/README.md). The OSRS
@@ -67,7 +68,6 @@ import type {
   NpcView,
   PlayerView,
   QuestView,
-  ServerMessage,
   SkillView,
   StateMetrics,
   StateSnapshot,
@@ -331,6 +331,7 @@ let hudStateVersion = -1;
 let renderedMetricsVersion = -1;
 const chatLines: string[] = [];
 const E2E_MODE = new URLSearchParams(location.search).has("e2e");
+const E2E_SKIP_TITLE = E2E_MODE && !new URLSearchParams(location.search).has("title");
 let renderedHudCoreSignature = "";
 let renderedBuffSignature = "";
 let renderedQuestSignature = "";
@@ -922,7 +923,7 @@ function ensureSocket(): void {
     dom.rosterList.textContent = "Choose a character or create a new one.";
   });
   socket.addEventListener("message", (event) => {
-    const message = JSON.parse(event.data as string) as ServerMessage;
+    const message = normalizeServerMessage(JSON.parse(event.data as string) as WireServerMessage);
     if (message.type === "characters") renderRoster(message.characters ?? []);
     if (message.type === "characterDeleted" && !message.ok) dom.rosterList.textContent = "That character is online or no longer exists.";
     if (message.type === "welcome") selfId = message.id;
@@ -1058,7 +1059,7 @@ function setupTitleScreen(): void {
   // title backdrop, so the "back to title" affordance is irrelevant there). The
   // zone-music mapping still updates currentTrack() for assertions, but audio is
   // never unlocked, so no playback is attempted under test.
-  if (E2E_MODE) {
+  if (E2E_SKIP_TITLE) {
     dom.titleScreen.classList.add("hidden");
     dom.joinBackButton.classList.add("hidden");
     dom.join.classList.remove("hidden");
