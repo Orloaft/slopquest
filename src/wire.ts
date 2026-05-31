@@ -171,6 +171,7 @@ interface CompactStateMetrics {
   wbo: number;
   ss: number;
   sb: number;
+  st: number;
   ed: number;
   cmd: number;
   cmb: number;
@@ -639,6 +640,7 @@ function compactStateMetrics(metrics: StateMetrics): CompactStateMetrics {
     wbo: metrics.wireBytesOutPerSecond,
     ss: metrics.snapshotsSentPerSecond,
     sb: metrics.snapshotsSkippedBackpressurePerSecond,
+    st: metrics.socketsTerminatedBackpressurePerSecond,
     ed: metrics.eventsDroppedPerSecond,
     cmd: metrics.clientMessagesDroppedPerSecond,
     cmb: metrics.clientMessageMaxBytes,
@@ -679,6 +681,7 @@ function expandStateMetrics(metrics: CompactStateMetrics | StateMetrics): StateM
     wireBytesOutPerSecond: metrics.wbo,
     snapshotsSentPerSecond: metrics.ss,
     snapshotsSkippedBackpressurePerSecond: metrics.sb,
+    socketsTerminatedBackpressurePerSecond: metrics.st ?? 0,
     eventsDroppedPerSecond: metrics.ed,
     clientMessagesDroppedPerSecond: metrics.cmd,
     clientMessageMaxBytes: metrics.cmb,

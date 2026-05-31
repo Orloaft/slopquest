@@ -47,6 +47,7 @@ type SummaryMetric =
   | "wireBytesOutPerSecond"
   | "snapshotsSentPerSecond"
   | "snapshotsSkippedBackpressurePerSecond"
+  | "socketsTerminatedBackpressurePerSecond"
   | "eventsDroppedPerSecond"
   | "clientMessagesDroppedPerSecond"
   | "saveFlushMs";
@@ -79,6 +80,8 @@ const eventBurstCount = Math.max(0, Math.floor(Number(options["event-burst"] ?? 
 const eventBurstClients = Math.max(0, Math.floor(Number(options["event-burst-clients"] ?? (eventBurstCount > 0 ? 1 : 0))));
 const eventBurstAfterMs = Math.max(0, Math.floor(Number(options["event-burst-after"] ?? 1500)));
 const eventBurstSpread = Math.max(0, Number(options["event-burst-spread"] ?? 0));
+const simulatedBackpressureClients = Math.max(0, Math.floor(Number(options["simulate-backpressure-clients"] ?? 0)));
+const simulatedBackpressureMs = Math.max(75, Math.floor(Number(options["simulate-backpressure-ms"] ?? 3000)));
 const oversizedClientMessageBytes = Math.max(0, Math.floor(Number(options["oversized-client-message-bytes"] ?? 0)));
 const oversizedClientMessage =
   oversizedClientMessageBytes > 0 ? JSON.stringify({ type: "input", input: randomInput(), pad: "x".repeat(oversizedClientMessageBytes) }) : "";
@@ -125,6 +128,7 @@ const observed = {
   wireBytesOutPerSecond: [] as number[],
   snapshotsSentPerSecond: [] as number[],
   snapshotsSkippedBackpressurePerSecond: [] as number[],
+  socketsTerminatedBackpressurePerSecond: [] as number[],
   eventsDroppedPerSecond: [] as number[],
   clientMessagesDroppedPerSecond: [] as number[],
   visiblePlayers: [] as number[],
@@ -227,6 +231,9 @@ function openClient(index: number): void {
       }
       if (eventBurstCount > 0 && index < eventBurstClients) {
         setTimeout(() => emitEventBurst(socket), eventBurstAfterMs);
+      }
+      if (index < simulatedBackpressureClients) {
+        socket.send(JSON.stringify({ type: "e2eSimulateBackpressure", durationMs: simulatedBackpressureMs }));
       }
     }
     if (message.type === "state") {
@@ -355,6 +362,9 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   if (typeof m.snapshotsSkippedBackpressurePerSecond === "number") {
     observed.snapshotsSkippedBackpressurePerSecond.push(m.snapshotsSkippedBackpressurePerSecond);
   }
+  if (typeof m.socketsTerminatedBackpressurePerSecond === "number") {
+    observed.socketsTerminatedBackpressurePerSecond.push(m.socketsTerminatedBackpressurePerSecond);
+  }
   if (typeof m.eventsDroppedPerSecond === "number") observed.eventsDroppedPerSecond.push(m.eventsDroppedPerSecond);
   if (typeof m.clientMessagesDroppedPerSecond === "number") {
     observed.clientMessagesDroppedPerSecond.push(m.clientMessagesDroppedPerSecond);
@@ -462,6 +472,7 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     "wireBytesOutPerSecond",
     "snapshotsSentPerSecond",
     "snapshotsSkippedBackpressurePerSecond",
+    "socketsTerminatedBackpressurePerSecond",
     "eventsDroppedPerSecond",
     "clientMessagesDroppedPerSecond",
     "saveFlushMs"
@@ -566,6 +577,10 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
         clients: eventBurstClients,
         afterMs: eventBurstAfterMs,
         spread: eventBurstSpread
+      },
+      simulatedBackpressure: {
+        clients: simulatedBackpressureClients,
+        durationMs: simulatedBackpressureMs
       }
     },
     transientClients: !persistent,
@@ -591,6 +606,7 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       wireBytesOutPerSecond: summarize(observed.wireBytesOutPerSecond),
       snapshotsSentPerSecond: summarize(observed.snapshotsSentPerSecond),
       snapshotsSkippedBackpressurePerSecond: summarize(observed.snapshotsSkippedBackpressurePerSecond),
+      socketsTerminatedBackpressurePerSecond: summarize(observed.socketsTerminatedBackpressurePerSecond),
       eventsDroppedPerSecond: summarize(observed.eventsDroppedPerSecond),
       clientMessagesDroppedPerSecond: summarize(observed.clientMessagesDroppedPerSecond),
       saveFlushMs: summarize(observed.saveFlushMs),

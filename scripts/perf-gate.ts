@@ -48,7 +48,9 @@ const eventLoopGateArgs = [
   "--max-event-loop-delay-p95-ms-max",
   "40",
   "--max-event-loop-delay-max-ms-max",
-  "80"
+  "80",
+  "--max-sockets-terminated-backpressure-per-second-max",
+  "0"
 ];
 const gateScenarios: Scenario[] = [
   {
@@ -482,6 +484,50 @@ const gateScenarios: Scenario[] = [
       "--max-save-flush-ms-max",
       "0",
       "--max-save-flush-players-max",
+      "0"
+    ]
+  },
+  {
+    name: "10 clients sustained backpressure tripwire",
+    serverEnv: {
+      TIB_SOCKET_BACKPRESSURE_MAX_SKIPS: "2"
+    },
+    args: [
+      "--clients",
+      "10",
+      "--duration",
+      "7000",
+      "--combat",
+      "0",
+      "--simulate-backpressure-clients",
+      "2",
+      "--simulate-backpressure-ms",
+      "3000",
+      "--max-errors",
+      "0",
+      "--min-opened",
+      "10",
+      "--min-welcomed",
+      "10",
+      "--min-closed",
+      "10",
+      "--min-compact-states",
+      "600",
+      "--min-metric-samples",
+      "40",
+      "--max-tick-ms-max",
+      "8",
+      "--max-snapshot-ms-max",
+      "12",
+      "--min-snapshots-skipped-backpressure-per-second-max",
+      "1",
+      "--min-sockets-terminated-backpressure-per-second-max",
+      "1",
+      "--max-sockets-terminated-backpressure-per-second-max",
+      "20",
+      "--max-events-dropped-per-second-max",
+      "0",
+      "--max-client-messages-dropped-per-second-max",
       "0"
     ]
   },

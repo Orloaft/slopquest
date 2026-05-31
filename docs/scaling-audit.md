@@ -28,6 +28,8 @@ Node/WebSocket process:
 - High-cardinality trees and gathering nodes are materialized only near players.
 - Monsters/NPCs simulate only in active regions near players.
 - Backpressure skips snapshots for slow sockets instead of piling up writes.
+- Sockets that remain backpressured for too many consecutive broadcasts are
+  terminated, so dead/stalled readers cannot stay resident forever.
 - The client uses chunked/culled map rendering, heap-based A*, and a throttled minimap.
 - Class abilities are now data-driven YAML compositions instead of a branch-per-ability monolith.
 
@@ -128,9 +130,16 @@ corpses, NPCs, trees, resource nodes, and fires. It sends:
 - removed ids when items leave interest range,
 - empty heartbeat snapshots only after `TIB_SNAPSHOT_HEARTBEAT_MS`.
 
-Slow sockets are guarded by `socket.bufferedAmount >
-TIB_SOCKET_BACKPRESSURE_BYTES`, which skips that snapshot for the lagging client
-and records the skip in metrics.
+Slow sockets are guarded by the larger of WebSocket buffered bytes and the
+underlying socket write backlog. When that exceeds
+`TIB_SOCKET_BACKPRESSURE_BYTES`, the server skips that snapshot for the lagging
+client and records the skip in metrics. If the same socket stays over the
+threshold for `TIB_SOCKET_BACKPRESSURE_MAX_SKIPS` consecutive snapshot
+broadcasts (default `120`, about nine seconds at the current 75 ms cadence), the
+server terminates the socket and reports
+`socketsTerminatedBackpressurePerSecond`. The normal perf gate requires zero
+terminations, while an E2E sustained-backpressure tripwire proves the
+termination path still fires.
 
 Static trees and gatherable resources no longer participate in periodic full
 snapshot recovery. Each session receives one full sync per static category, and
@@ -370,6 +379,7 @@ process cannot tick the populated world.
 - [x] `playersById` lookup map.
 - [x] Broadcast at 75 ms instead of 50 ms.
 - [x] Socket backpressure skip metric.
+- [x] Sustained-backpressure socket termination with tripwire coverage.
 - [x] Heap A* and throttled minimap.
 - [x] Chunked client map rendering.
 - [x] Data-driven ability effects.
@@ -403,6 +413,7 @@ process cannot tick the populated world.
 - [x] Per-socket inbound command rate limits with drop telemetry in load gates.
 - [x] Raw state-message byte telemetry and packet-size thresholds in load gates.
 - [x] Actual socket wire-byte telemetry with compressed crowd gate coverage.
+- [x] Sustained slow-reader termination telemetry and tripwire gate.
 - [x] Safe JSON wire compaction for empty removed-id/event fields.
 - [x] Throttled metrics frames with minimum telemetry sample gates.
 - [x] Lazy snapshot metric-frame construction between telemetry intervals.

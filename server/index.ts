@@ -244,6 +244,7 @@ interface SnapshotMetricFrame {
   wireBytesOutPerSecond: number;
   snapshotsSentPerSecond: number;
   snapshotsSkippedBackpressurePerSecond: number;
+  socketsTerminatedBackpressurePerSecond: number;
   eventsDroppedPerSecond: number;
   clientMessagesDroppedPerSecond: number;
   clientMessageMaxBytes: number;
@@ -409,6 +410,7 @@ const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ?
 const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 1000);
 const SNAPSHOT_METRICS_MS = positiveIntEnv("TIB_SNAPSHOT_METRICS_MS", 1000);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
+const SOCKET_BACKPRESSURE_MAX_SKIPS = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_MAX_SKIPS", 120);
 const CLIENT_MESSAGE_LIMIT_PER_SECOND = positiveIntEnv("TIB_CLIENT_MESSAGE_LIMIT_PER_SECOND", 40);
 const CLIENT_MESSAGE_BURST = positiveIntEnv("TIB_CLIENT_MESSAGE_BURST", CLIENT_MESSAGE_LIMIT_PER_SECOND * 2);
 const CLIENT_MESSAGE_MAX_BYTES = positiveIntEnv("TIB_CLIENT_MESSAGE_MAX_BYTES", 4096);
@@ -501,6 +503,8 @@ const metrics: Metrics = {
   snapshotsSentPerSecond: 0,
   snapshotsSkippedBackpressureThisSecond: 0,
   snapshotsSkippedBackpressurePerSecond: 0,
+  socketsTerminatedBackpressureThisSecond: 0,
+  socketsTerminatedBackpressurePerSecond: 0,
   eventsDroppedThisSecond: 0,
   eventsDroppedPerSecond: 0,
   clientMessagesDroppedThisSecond: 0,
@@ -591,6 +595,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
     if (message.type === "cookFish") cookFish(session.player, String(message.id ?? ""));
     if (E2E_TEST && message.type === "e2eGrantItems") grantE2EItems(session.player, message);
     if (E2E_TEST && message.type === "e2eEmitEvents") emitE2EEvents(session.player, message);
+    if (E2E_TEST && message.type === "e2eSimulateBackpressure") simulateE2EBackpressure(session, message);
     if (message.type === "eatItem") eatItem(session.player, String(message.item ?? ""));
     if (message.type === "useItem") useItem(session.player, String(message.item ?? ""), message.ctx ?? {});
     if (message.type === "chat") chat(session.player, String(message.text ?? ""));
@@ -673,7 +678,7 @@ function joinWorld(socket: ExtWebSocket, message: { type: "join"; name: string; 
   player.wellFedUntil = Number(player.wellFedUntil ?? 0);
   player.foodRegenUntil = Number(player.foodRegenUntil ?? 0);
 
-  clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now(), transient });
+  clients.set(socket, { socket, player, input: sanitizeInput({}), lastInputAt: performance.now(), transient, backpressureSkips: 0 });
   playersById.set(player.id, player);
   addToSpatial(spatial.players, player);
   socket.send(JSON.stringify({ type: "welcome", id: player.id, maps: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] }));
@@ -2179,6 +2184,12 @@ function emitE2EEvents(
   }
 }
 
+function simulateE2EBackpressure(session: Session, message: { type: "e2eSimulateBackpressure"; durationMs?: number }): void {
+  if (!E2E_TEST) return;
+  const durationMs = clamp(Math.floor(Number(message.durationMs ?? 3000)), 75, 10000);
+  session.forceBackpressureUntil = performance.now() + durationMs;
+}
+
 function findStandableNear(floor: number, x: number, y: number): Positioned | null {
   if (canStand(floor, x, y)) return { floor, x, y };
   const baseX = Math.floor(x);
@@ -2918,10 +2929,16 @@ function broadcastState(): void {
   for (const session of clients.values()) {
     const { socket } = session;
     if (socket.readyState !== socket.OPEN) continue;
-    if (socket.bufferedAmount > SOCKET_BACKPRESSURE_BYTES) {
+    if (isSocketBackpressured(session, now)) {
       metrics.snapshotsSkippedBackpressureThisSecond += 1;
+      session.backpressureSkips += 1;
+      if (session.backpressureSkips >= SOCKET_BACKPRESSURE_MAX_SKIPS) {
+        metrics.socketsTerminatedBackpressureThisSecond += 1;
+        socket.terminate();
+      }
       continue;
     }
+    session.backpressureSkips = 0;
 
     const includeMetrics = shouldIncludeMetrics(session, now);
     if (includeMetrics && !metricFrame) metricFrame = snapshotMetricFrame();
@@ -3035,6 +3052,7 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
     wireBytesOutPerSecond: metrics.wireBytesOutPerSecond,
     snapshotsSentPerSecond: metrics.snapshotsSentPerSecond,
     snapshotsSkippedBackpressurePerSecond: metrics.snapshotsSkippedBackpressurePerSecond,
+    socketsTerminatedBackpressurePerSecond: metrics.socketsTerminatedBackpressurePerSecond,
     eventsDroppedPerSecond: metrics.eventsDroppedPerSecond,
     clientMessagesDroppedPerSecond: metrics.clientMessagesDroppedPerSecond,
     clientMessageMaxBytes: CLIENT_MESSAGE_MAX_BYTES,
@@ -3229,6 +3247,7 @@ function buildSnapshotFor(
       wireBytesOutPerSecond: metricFrame.wireBytesOutPerSecond,
       snapshotsSentPerSecond: metricFrame.snapshotsSentPerSecond,
       snapshotsSkippedBackpressurePerSecond: metricFrame.snapshotsSkippedBackpressurePerSecond,
+      socketsTerminatedBackpressurePerSecond: metricFrame.socketsTerminatedBackpressurePerSecond,
       eventsDroppedPerSecond: metricFrame.eventsDroppedPerSecond,
       clientMessagesDroppedPerSecond: metricFrame.clientMessagesDroppedPerSecond,
       clientMessageMaxBytes: metricFrame.clientMessageMaxBytes,
@@ -4723,6 +4742,7 @@ function updateByteMetric(): void {
   metrics.wireBytesOutPerSecond = sampleWireBytesOut();
   metrics.snapshotsSentPerSecond = metrics.snapshotsSentThisSecond;
   metrics.snapshotsSkippedBackpressurePerSecond = metrics.snapshotsSkippedBackpressureThisSecond;
+  metrics.socketsTerminatedBackpressurePerSecond = metrics.socketsTerminatedBackpressureThisSecond;
   metrics.eventsDroppedPerSecond = metrics.eventsDroppedThisSecond;
   metrics.clientMessagesDroppedPerSecond = metrics.clientMessagesDroppedThisSecond;
   metrics.eventLoopDelayMs = nsToMs(eventLoopDelay.mean);
@@ -4732,6 +4752,7 @@ function updateByteMetric(): void {
   metrics.bytesOutThisSecond = 0;
   metrics.snapshotsSentThisSecond = 0;
   metrics.snapshotsSkippedBackpressureThisSecond = 0;
+  metrics.socketsTerminatedBackpressureThisSecond = 0;
   metrics.eventsDroppedThisSecond = 0;
   metrics.clientMessagesDroppedThisSecond = 0;
   metrics.lastBytesAt = now;
@@ -4751,6 +4772,19 @@ function sampleWireBytesOut(): number {
 function socketBytesWritten(socket: ExtWebSocket): number {
   const rawSocket = (socket as unknown as { _socket?: { bytesWritten?: number } })._socket;
   return Math.max(0, Math.floor(Number(rawSocket?.bytesWritten ?? 0)));
+}
+
+function socketBackpressureAmount(socket: ExtWebSocket): number {
+  const rawSocket = (socket as unknown as { _socket?: { writableLength?: number; bufferSize?: number } })._socket;
+  return Math.max(
+    socket.bufferedAmount,
+    Math.floor(Number(rawSocket?.writableLength ?? 0)),
+    Math.floor(Number(rawSocket?.bufferSize ?? 0))
+  );
+}
+
+function isSocketBackpressured(session: Session, now: number): boolean {
+  return (session.forceBackpressureUntil ?? 0) > now || socketBackpressureAmount(session.socket) > SOCKET_BACKPRESSURE_BYTES;
 }
 
 function nsToMs(value: number): number {

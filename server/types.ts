@@ -213,6 +213,8 @@ export interface Session {
   input: InputPayload;
   lastInputAt: number;
   transient: boolean;
+  backpressureSkips: number;
+  forceBackpressureUntil?: number;
 }
 
 export interface SpatialIndex {
@@ -268,6 +270,8 @@ export interface Metrics {
   snapshotsSentPerSecond: number;
   snapshotsSkippedBackpressureThisSecond: number;
   snapshotsSkippedBackpressurePerSecond: number;
+  socketsTerminatedBackpressureThisSecond: number;
+  socketsTerminatedBackpressurePerSecond: number;
   eventsDroppedThisSecond: number;
   eventsDroppedPerSecond: number;
   clientMessagesDroppedThisSecond: number;

@@ -254,6 +254,7 @@ export interface StateMetrics {
   wireBytesOutPerSecond: number;
   snapshotsSentPerSecond: number;
   snapshotsSkippedBackpressurePerSecond: number;
+  socketsTerminatedBackpressurePerSecond: number;
   eventsDroppedPerSecond: number;
   clientMessagesDroppedPerSecond: number;
   clientMessageMaxBytes: number;
@@ -368,6 +369,7 @@ export type ClientMessage =
       forceDodge?: boolean;
     }
   | { type: "e2eEmitEvents"; count?: number; floor?: number; x?: number; y?: number; spread?: number }
+  | { type: "e2eSimulateBackpressure"; durationMs?: number }
   | { type: "eatItem"; item: string }
   | { type: "useItem"; item: string; ctx?: UseItemCtx }
   | { type: "chat"; text: string }

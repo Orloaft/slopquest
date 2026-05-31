@@ -235,6 +235,10 @@ and combat fanout without making every client see every other client.
   scenarios, proving the guards do not affect expected playtest input rates.
   Low-limit and oversized-payload tripwire scenarios require drops, so both
   guard paths are covered too.
+- Slow-reader protection now has both halves covered: normal gates require
+  `socketsTerminatedBackpressurePerSecond.max` to remain `0`, and an E2E
+  sustained-backpressure tripwire requires snapshot skips and stalled-socket
+  termination.
 - The load driver now records raw state message byte sizes. The perf gate caps
   state packets at `60 KB` max and `25 KB` average; the latest 100-client
   targeted regional sample peaked at roughly `27 KB` and averaged roughly `7 KB`.
