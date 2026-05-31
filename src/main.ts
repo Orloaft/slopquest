@@ -783,7 +783,7 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 70, 82);
   makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 70, 82);
   makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62);
-  makeTileTexture(this, "beachTiles", "tileBeachShore", 1216, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShore", 1200, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1040, 260, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreEast", 1144, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreSouth", 1232, 100, 72, 72);
@@ -793,7 +793,7 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSW", 1216, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSE", 1216, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachLagoon", 1130, 101, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileOcean", 1160, 108, 44, 44);
+  makeTileTexture(this, "beachTiles", "tileOcean", 1052, 101, 72, 72);
   makeSpriteTexture(this, "beachTiles", "spriteBeachHut", 1366, 860, 116, 118);
   makeSpriteTexture(this, "beachTiles", "spriteBeachDock", 642, 650, 168, 86);
   makeSpriteTexture(this, "beachTiles", "spriteBeachBoat", 560, 722, 74, 48);
