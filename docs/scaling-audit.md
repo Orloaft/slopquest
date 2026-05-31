@@ -41,9 +41,9 @@ no socket errors and no backpressure skips. See
 - Interest radius: 18 tiles for dynamic entities, 32 tiles for trees.
 - Public player views per client are capped by `TIB_MAX_VISIBLE_PLAYERS`
   (default `50`) so crowded hubs do not create unbounded N-by-N snapshot fanout.
-- Over-cap player fanout uses bounded nearest-player selection and only sorts
-  the retained cap-sized set, so crowded hubs avoid full nearby-player sorts per
-  observer.
+- Over-cap player fanout uses heap-backed bounded nearest-player selection and
+  only retains/sorts the cap-sized set, so crowded hubs avoid full nearby-player
+  arrays and sorts per observer.
 - Spatial cell size: 8 tiles.
 - Static trees/resources are initial-full per session, then delta/removal only.
 - Static resource cells for trees, fishing spots, ore veins, and herbs are
@@ -198,9 +198,10 @@ mean/p95/max delay, making long synchronous stalls visible under clustered,
 regional, slow-reader, persistent, and inbound-abuse scenarios.
 
 Worst-case co-located player fanout is bounded by a nearest-player cap. The
-viewer is always included, and over-cap crowds keep a bounded nearest-player
-working set before sorting only the retained candidates. The perf gate includes
-a 150-client town-crowd scenario that asserts visible player count never exceeds
+viewer is always included, and over-cap crowds switch to a heap-backed retained
+set instead of storing every nearby player candidate. Only the retained
+cap-sized set is sorted before serialization. The perf gate includes a
+150-client town-crowd scenario that asserts visible player count never exceeds
 the configured cap while packet-size thresholds still hold.
 
 ### Spatial indexing and active regions
@@ -323,6 +324,7 @@ process cannot tick the populated world.
 - [x] Public/private player snapshot split.
 - [x] Nearest-player cap for crowded snapshot fanout.
 - [x] Bounded nearest-player selection for over-cap crowded fanout.
+- [x] Heap-backed capped player fanout for oversized local crowds.
 - [x] Owner-only private state with cache signatures.
 - [x] Per-session snapshot deltas.
 - [x] Static spatial layers and incremental dynamic spatial updates.

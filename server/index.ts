@@ -3058,17 +3058,30 @@ function buildSnapshotFor(
   const includeHerbNodesForSession = includeResources || !cache.herbNodes.initialized;
   const includeStaticResourcesForSession =
     includeFishingNodesForSession || includeMiningNodesForSession || includeHerbNodesForSession;
-  const playerCandidates: PlayerSnapshotCandidate[] = [];
+  let playerCandidates: PlayerSnapshotCandidate[] = [];
+  let playerCandidateHeap: MinHeap<PlayerSnapshotCandidate> | null = null;
+  const keepPlayerCandidate = (candidate: PlayerSnapshotCandidate): void => {
+    if (!playerCandidateHeap && playerCandidates.length < MAX_VISIBLE_PLAYERS) {
+      playerCandidates.push(candidate);
+      return;
+    }
+    if (!playerCandidateHeap) {
+      playerCandidateHeap = playerCandidateMaxHeap(playerCandidates);
+      playerCandidates = EMPTY_PLAYER_SNAPSHOT_CANDIDATES;
+    }
+    keepNearestPlayerCandidate(playerCandidateHeap, candidate, MAX_VISIBLE_PLAYERS);
+  };
   let includedViewer = false;
   forEachSpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (player) => {
     if (player.id !== viewer.id && !inInterestRange(viewer, player)) return;
     if (player.id === viewer.id) includedViewer = true;
-    playerCandidates.push({
+    keepPlayerCandidate({
       player,
       distSq: player.id === viewer.id ? -1 : distanceSq(viewer, player)
     });
   });
-  if (!includedViewer) playerCandidates.push({ player: viewer, distSq: -1 });
+  if (!includedViewer) keepPlayerCandidate({ player: viewer, distSq: -1 });
+  if (playerCandidateHeap) playerCandidates = drainSortedPlayerCandidateHeap(playerCandidateHeap);
   const players = serializeVisiblePlayers(viewer, playerCandidates, now);
 
   const visibleMonsters: MonsterView[] = [];
@@ -3254,40 +3267,45 @@ function snapshotCacheEntryCount(cache: SnapshotCache): number {
   return total;
 }
 
+const EMPTY_PLAYER_SNAPSHOT_CANDIDATES: PlayerSnapshotCandidate[] = [];
+
 function serializeVisiblePlayers(viewer: ServerPlayer, candidates: PlayerSnapshotCandidate[], now: number): PlayerView[] {
-  if (candidates.length > MAX_VISIBLE_PLAYERS) {
-    candidates = selectNearestPlayerCandidates(candidates, MAX_VISIBLE_PLAYERS);
-  }
   return candidates.map(({ player }) => (player.id === viewer.id ? serializePlayer(player, now) : serializePlayerPublicCached(player)));
 }
 
-function selectNearestPlayerCandidates(candidates: PlayerSnapshotCandidate[], limit: number): PlayerSnapshotCandidate[] {
-  const selected = candidates.slice(0, limit);
-  let worstIndex = worstPlayerCandidateIndex(selected);
-  for (let i = limit; i < candidates.length; i += 1) {
-    const candidate = candidates[i];
-    if (!candidate || !isNearerPlayerCandidate(candidate, selected[worstIndex]!)) continue;
-    selected[worstIndex] = candidate;
-    worstIndex = worstPlayerCandidateIndex(selected);
+function playerCandidateMaxHeap(candidates: PlayerSnapshotCandidate[]): MinHeap<PlayerSnapshotCandidate> {
+  const heap = new MinHeap<PlayerSnapshotCandidate>(comparePlayerSnapshotCandidatesWorstFirst);
+  for (const candidate of candidates) heap.push(candidate);
+  return heap;
+}
+
+function keepNearestPlayerCandidate(heap: MinHeap<PlayerSnapshotCandidate>, candidate: PlayerSnapshotCandidate, limit: number): void {
+  if (heap.size < limit) {
+    heap.push(candidate);
+    return;
+  }
+  const worst = heap.peek();
+  if (!worst || comparePlayerSnapshotCandidates(candidate, worst) >= 0) return;
+  heap.pop();
+  heap.push(candidate);
+}
+
+function drainSortedPlayerCandidateHeap(heap: MinHeap<PlayerSnapshotCandidate>): PlayerSnapshotCandidate[] {
+  const selected: PlayerSnapshotCandidate[] = [];
+  while (heap.size > 0) {
+    const candidate = heap.pop();
+    if (candidate) selected.push(candidate);
   }
   selected.sort(comparePlayerSnapshotCandidates);
   return selected;
 }
 
-function worstPlayerCandidateIndex(candidates: PlayerSnapshotCandidate[]): number {
-  let worstIndex = 0;
-  for (let i = 1; i < candidates.length; i += 1) {
-    if (comparePlayerSnapshotCandidates(candidates[worstIndex]!, candidates[i]!) < 0) worstIndex = i;
-  }
-  return worstIndex;
-}
-
-function isNearerPlayerCandidate(a: PlayerSnapshotCandidate, b: PlayerSnapshotCandidate): boolean {
-  return comparePlayerSnapshotCandidates(a, b) < 0;
-}
-
 function comparePlayerSnapshotCandidates(a: PlayerSnapshotCandidate, b: PlayerSnapshotCandidate): number {
   return a.distSq - b.distSq || a.player.id.localeCompare(b.player.id);
+}
+
+function comparePlayerSnapshotCandidatesWorstFirst(a: PlayerSnapshotCandidate, b: PlayerSnapshotCandidate): number {
+  return comparePlayerSnapshotCandidates(b, a);
 }
 
 function snapshotCacheFor(session: Session): SnapshotCache {
