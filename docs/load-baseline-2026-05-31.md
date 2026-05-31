@@ -121,5 +121,8 @@ visible-player density.
   50-client scenarios plus co-located crypt combat and slow-reader smoke
   scenarios with conservative failure thresholds. Use it before risky network,
   spatial, AI, or content-density changes.
+- `npm run perf:soak` runs a longer 50-client mixed-combat soak gate for
+  changes that may leak memory, accumulate stale snapshot cache state, or drift
+  over time.
 - The next performance work should be longer/slow-client scenarios and eventual
   protocol compaction only if telemetry asks for it.

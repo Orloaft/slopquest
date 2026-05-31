@@ -11,7 +11,8 @@ interface Scenario {
 const PORT = Number(process.env.TIB_PERF_PORT ?? 8790);
 const HOST = "127.0.0.1";
 const SERVER_READY_MS = 10000;
-const scenarios: Scenario[] = [
+const mode = process.argv.includes("--soak") ? "soak" : "gate";
+const gateScenarios: Scenario[] = [
   {
     name: "50 clustered town clients",
     args: [
@@ -131,6 +132,41 @@ const scenarios: Scenario[] = [
     ]
   }
 ];
+const soakScenarios: Scenario[] = [
+  {
+    name: "50-client mixed combat soak",
+    args: [
+      "--clients",
+      "50",
+      "--duration",
+      "60000",
+      "--combat",
+      "0.5",
+      "--zones",
+      "cemetery,crypt,woods,woodsNorth",
+      "--attack-targets",
+      "--max-errors",
+      "0",
+      "--min-opened",
+      "50",
+      "--min-welcomed",
+      "50",
+      "--min-closed",
+      "50",
+      "--min-states",
+      "25000",
+      "--max-tick-ms-max",
+      "12",
+      "--max-snapshot-ms-max",
+      "24",
+      "--max-bytes-out-per-second-avg",
+      "12000000",
+      "--max-snapshots-skipped-backpressure-per-second-max",
+      "0"
+    ]
+  }
+];
+const scenarios = mode === "soak" ? soakScenarios : gateScenarios;
 
 await assertPortFree(PORT);
 
@@ -139,7 +175,7 @@ try {
     console.log(`\n[perf-gate] ${scenario.name}`);
     await runWithServer(scenario);
   }
-  console.log("\n[perf-gate] all thresholds passed");
+  console.log(`\n[perf-${mode}] all thresholds passed`);
 } catch (error) {
   console.error(error);
   process.exitCode = 1;
