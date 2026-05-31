@@ -94,6 +94,11 @@ The load driver also records raw state message sizes. `npm run perf:gate` caps
 state packets at 60 KB max and 25 KB average across its clustered, combat,
 regional, and slow-reader scenarios.
 
+Wire snapshots omit empty `removed*Ids` lists and empty `events` arrays. Clients
+already treat those fields as empty when absent, so this trims repeated JSON key
+overhead from ordinary heartbeat/delta packets without changing the authoritative
+snapshot model.
+
 Worst-case co-located player fanout is bounded by a nearest-player cap. The
 viewer is always included, and other player views are sorted by distance before
 the cap is applied. The perf gate includes a 150-client town-crowd scenario that
@@ -239,6 +244,7 @@ process cannot tick the populated world.
   cell pruning.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
 - [x] Raw state-message byte telemetry and packet-size thresholds in load gates.
+- [x] Safe JSON wire compaction for empty removed-id/event fields.
 - [x] Runtime asset budget gate in `npm run check`.
 - [x] Bounded player-save flushes with persistence telemetry and a temp-data
   perf gate.

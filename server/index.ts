@@ -236,6 +236,34 @@ interface PlayerSnapshotCandidate {
 }
 
 type SnapshotCache = Record<SnapshotCategory, SnapshotCategoryCache>;
+type WireStateSnapshot = Omit<
+  StateSnapshot,
+  | "removedPlayerIds"
+  | "removedMonsterIds"
+  | "removedCorpseIds"
+  | "removedNpcIds"
+  | "removedTreeIds"
+  | "removedFishingNodeIds"
+  | "removedMiningNodeIds"
+  | "removedHerbNodeIds"
+  | "removedFireIds"
+  | "events"
+> &
+  Partial<
+    Pick<
+      StateSnapshot,
+      | "removedPlayerIds"
+      | "removedMonsterIds"
+      | "removedCorpseIds"
+      | "removedNpcIds"
+      | "removedTreeIds"
+      | "removedFishingNodeIds"
+      | "removedMiningNodeIds"
+      | "removedHerbNodeIds"
+      | "removedFireIds"
+      | "events"
+    >
+  >;
 
 const QUEST_LIST = Object.values(QUESTS);
 const QUESTS_BY_GIVER = new Map<string, Quest>();
@@ -2824,7 +2852,7 @@ function broadcastState(): void {
 
     const snapshot = buildSnapshotFor(session, includeTrees, includeNpcs, includeResources, forceDynamicFull, metricFrame, now);
     if (!shouldSendSnapshot(session, snapshot, now)) continue;
-    const raw = JSON.stringify(snapshot);
+    const raw = JSON.stringify(compactSnapshotForWire(snapshot));
     metrics.bytesOutThisSecond += Buffer.byteLength(raw);
     metrics.snapshotsSentThisSecond += 1;
     lastSnapshotSentAt.set(session, now);
@@ -2870,6 +2898,21 @@ function snapshotIsEmptyDelta(snapshot: StateSnapshot): boolean {
     snapshot.removedFireIds.length === 0 &&
     snapshot.events.length === 0
   );
+}
+
+function compactSnapshotForWire(snapshot: StateSnapshot): WireStateSnapshot {
+  const wire: WireStateSnapshot = { ...snapshot };
+  if (wire.removedPlayerIds?.length === 0) delete wire.removedPlayerIds;
+  if (wire.removedMonsterIds?.length === 0) delete wire.removedMonsterIds;
+  if (wire.removedCorpseIds?.length === 0) delete wire.removedCorpseIds;
+  if (wire.removedNpcIds?.length === 0) delete wire.removedNpcIds;
+  if (wire.removedTreeIds?.length === 0) delete wire.removedTreeIds;
+  if (wire.removedFishingNodeIds?.length === 0) delete wire.removedFishingNodeIds;
+  if (wire.removedMiningNodeIds?.length === 0) delete wire.removedMiningNodeIds;
+  if (wire.removedHerbNodeIds?.length === 0) delete wire.removedHerbNodeIds;
+  if (wire.removedFireIds?.length === 0) delete wire.removedFireIds;
+  if (wire.events?.length === 0) delete wire.events;
+  return wire;
 }
 
 function snapshotMetricFrame(): SnapshotMetricFrame {

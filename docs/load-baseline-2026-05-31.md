@@ -198,6 +198,9 @@ and combat fanout without making every client see every other client.
 - The load driver now records raw state message byte sizes. The perf gate caps
   state packets at `60 KB` max and `25 KB` average; the latest 100-client
   targeted regional sample peaked at roughly `33 KB` and averaged roughly `9 KB`.
+- State packets now omit empty removed-id lists and empty event arrays on the
+  wire; clients treat absent values as empty, preserving compatibility while
+  trimming repeated JSON key overhead.
 - `npm run check` now includes `npm run assets:budget`, currently guarding
   runtime assets at `100 MiB` total, `5 MiB` per file, and `500` files.
 - Save flush telemetry is now part of snapshots and the load driver. The perf
