@@ -67,6 +67,9 @@ no socket errors and no backpressure skips. See
 - Per-client metrics frames are throttled by `TIB_SNAPSHOT_METRICS_MS` (default
   `1000`) and carried forward by the client, so routine deltas do not resend the
   full telemetry object every snapshot.
+- Snapshot metric frames are built lazily only when at least one session is due
+  for telemetry, so memory sampling and cache-residency scans do not run on
+  every 75 ms broadcast.
 - Metrics frames use compact wire keys and expand back to the normal
   `StateMetrics` shape in shared client/load-test normalization.
 - Snapshot metrics expose total per-session delta-cache residency and the peak
@@ -156,9 +159,12 @@ Metrics are also optional on individual state packets. The server sends the
 first metrics frame and then refreshes per client at the configured metrics
 interval; the client keeps the last frame for the HUD. Load gates assert a
 minimum metrics sample count, preventing telemetry throttling from masking a
-broken metrics path. Those metrics frames are also compacted on the wire and
-expanded by shared normalization, so adding observability does not permanently
-tax every large-crowd packet with long telemetry field names.
+broken metrics path. The server also builds the shared metric frame lazily only
+when a session is due for telemetry, avoiding cache-residency scans and memory
+sampling during ordinary non-metric broadcasts. Those metrics frames are also
+compacted on the wire and expanded by shared normalization, so adding
+observability does not permanently tax every large-crowd packet with long
+telemetry field names.
 
 State packets now use compact top-level keys on the wire (`p`, `m`, `t`, `x`,
 and matching full/removal flags), and snapshot entity objects use compact wire
@@ -356,6 +362,7 @@ process cannot tick the populated world.
 - [x] Actual socket wire-byte telemetry with compressed crowd gate coverage.
 - [x] Safe JSON wire compaction for empty removed-id/event fields.
 - [x] Throttled metrics frames with minimum telemetry sample gates.
+- [x] Lazy snapshot metric-frame construction between telemetry intervals.
 - [x] Compact metrics-frame keys on the wire.
 - [x] Compact top-level state packet keys with compact-packet load gates.
 - [x] Compact entity view keys inside state packets.

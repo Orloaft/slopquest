@@ -228,6 +228,9 @@ and combat fanout without making every client see every other client.
 - Metrics frames are now sent at a per-client interval instead of on every state
   packet. The client carries forward the latest frame, and `npm run perf:gate`
   requires minimum metrics sample counts so the telemetry path remains covered.
+- Snapshot metric frames are now constructed lazily only when a client is due
+  for telemetry, so cache-residency scans and memory sampling do not run during
+  ordinary non-metric broadcasts.
 - Metrics frames now use compact wire keys and expand back to `StateMetrics`
   through shared client/load-test normalization, trimming observability overhead
   without changing HUD or gate code.

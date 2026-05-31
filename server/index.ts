@@ -2909,7 +2909,7 @@ function broadcastState(): void {
   const includeTrees = snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
   const includeNpcs = forceDynamicFull || snapshotSequence % NPC_SNAPSHOT_EVERY === 0;
   const includeResources = snapshotSequence % RESOURCE_SNAPSHOT_EVERY === 0;
-  const metricFrame = snapshotMetricFrame();
+  let metricFrame: SnapshotMetricFrame | null = null;
   for (const session of clients.values()) {
     const { socket } = session;
     if (socket.readyState !== socket.OPEN) continue;
@@ -2919,6 +2919,7 @@ function broadcastState(): void {
     }
 
     const includeMetrics = shouldIncludeMetrics(session, now);
+    if (includeMetrics && !metricFrame) metricFrame = snapshotMetricFrame();
     const snapshot = buildSnapshotFor(
       session,
       includeTrees,
