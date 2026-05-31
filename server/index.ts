@@ -2453,7 +2453,9 @@ function moveEntity(entity: { floor: number; x: number; y: number; dir: Directio
   if (canStand(entity.floor, nextX, entity.y)) entity.x = nextX;
   const nextY = clamp(entity.y + dy, 0.5, floorRows(entity.floor) - 0.5);
   if (canStand(entity.floor, entity.x, nextY)) entity.y = nextY;
-  entity.moving = Math.hypot(entity.x - oldX, entity.y - oldY) > 0.001;
+  const movedX = entity.x - oldX;
+  const movedY = entity.y - oldY;
+  entity.moving = movedX * movedX + movedY * movedY > 0.000001;
 }
 
 function canStand(floor: number, x: number, y: number): boolean {
