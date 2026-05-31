@@ -54,6 +54,7 @@ type GaugeMetric =
   | "saveFlushPlayers"
   | "saveInFlight";
 type ClientMetric = "visiblePlayers" | "visibleMonsters" | "visibleTrees" | "visibleFires";
+type MessageTimingMetric = "stateParseMs" | "stateNormalizeMs" | "stateDecodeMs";
 type SummaryField = "min" | "max" | "avg";
 
 const options = parseArgs(process.argv.slice(2));
@@ -98,6 +99,9 @@ const observed = {
   tickMs: [] as number[],
   snapshotMs: [] as number[],
   stateMessageBytes: [] as number[],
+  stateParseMs: [] as number[],
+  stateNormalizeMs: [] as number[],
+  stateDecodeMs: [] as number[],
   bytesOutPerSecond: [] as number[],
   wireBytesOutPerSecond: [] as number[],
   snapshotsSentPerSecond: [] as number[],
@@ -163,10 +167,15 @@ function openClient(index: number): void {
 
   socket.on("message", (raw: RawData) => {
     let message: LoadMessage;
+    let parsedAt = 0;
+    let normalizedAt = 0;
+    const decodeStartedAt = performance.now();
     try {
       const parsed = JSON.parse(raw.toString()) as WireServerMessage;
+      parsedAt = performance.now();
       if (isCompactStateSnapshot(parsed)) stats.compactStates += 1;
       message = normalizeServerMessage(parsed) as LoadMessage;
+      normalizedAt = performance.now();
     } catch {
       return;
     }
@@ -196,6 +205,9 @@ function openClient(index: number): void {
     if (message.type === "state") {
       stats.states += 1;
       observed.stateMessageBytes.push(rawByteLength(raw));
+      observed.stateParseMs.push(roundTiming(parsedAt - decodeStartedAt));
+      observed.stateNormalizeMs.push(roundTiming(normalizedAt - parsedAt));
+      observed.stateDecodeMs.push(roundTiming(normalizedAt - decodeStartedAt));
       if (message.metrics) recordMetrics(message.metrics);
       recordSnapshotFlags(message);
       if (attackTargets) maybeTargetMonster(socket, message);
@@ -453,6 +465,17 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
       }
     }
   }
+  const messageTimingNames: MessageTimingMetric[] = ["stateParseMs", "stateNormalizeMs", "stateDecodeMs"];
+  for (const metric of messageTimingNames) {
+    const summary = report.perMessage[metric];
+    if (!summary) continue;
+    for (const field of fields) {
+      const maximum = optionNumber(`max-${kebab(metric)}-${field}`);
+      if (maximum != null && summary[field] > maximum) failures.push(`${metric}.${field} ${summary[field]} > ${maximum}`);
+      const minimum = optionNumber(`min-${kebab(metric)}-${field}`);
+      if (minimum != null && summary[field] < minimum) failures.push(`${metric}.${field} ${summary[field]} < ${minimum}`);
+    }
+  }
   return failures;
 }
 
@@ -503,7 +526,10 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       saveInFlight: summarize(observed.saveInFlight)
     },
     perMessage: {
-      stateBytes: summarize(observed.stateMessageBytes)
+      stateBytes: summarize(observed.stateMessageBytes),
+      stateParseMs: summarize(observed.stateParseMs),
+      stateNormalizeMs: summarize(observed.stateNormalizeMs),
+      stateDecodeMs: summarize(observed.stateDecodeMs)
     },
     perClient: {
       visiblePlayers: summarize(observed.visiblePlayers),
@@ -523,4 +549,8 @@ function optionNumber(name: string): number | null {
 
 function kebab(value: string): string {
   return value.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+}
+
+function roundTiming(value: number): number {
+  return Math.round(value * 1000) / 1000;
 }

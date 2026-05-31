@@ -122,6 +122,11 @@ readable while removing repeated category and entity key overhead from every
 socket send. The perf gate counts compact state packets explicitly, so a
 regression back to long-form state packets fails loudly.
 
+The load driver also times client-side JSON parse and compact-snapshot
+normalization per state packet. Perf gates keep average state decode under
+`0.3 ms`, so protocol compaction cannot silently trade lower bandwidth for
+meaningful per-client CPU cost.
+
 Worst-case co-located player fanout is bounded by a nearest-player cap. The
 viewer is always included, and other player views are sorted by distance before
 the cap is applied. The perf gate includes a 150-client town-crowd scenario that
@@ -273,6 +278,7 @@ process cannot tick the populated world.
 - [x] Throttled metrics frames with minimum telemetry sample gates.
 - [x] Compact top-level state packet keys with compact-packet load gates.
 - [x] Compact entity view keys inside state packets.
+- [x] Client-side state decode timing telemetry and perf thresholds.
 - [x] Runtime asset budget gate in `npm run check`.
 - [x] Startup-preload asset budget gate in `npm run check`.
 - [x] Bounded player-save flushes with persistence telemetry and a temp-data

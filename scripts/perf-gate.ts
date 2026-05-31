@@ -16,6 +16,20 @@ const PORT = Number(process.env.TIB_PERF_PORT ?? 8790);
 const HOST = "127.0.0.1";
 const SERVER_READY_MS = 10000;
 const mode = process.argv.includes("--soak") ? "soak" : "gate";
+const clientDecodeGateArgs = [
+  "--max-state-parse-ms-max",
+  "4",
+  "--max-state-parse-ms-avg",
+  "0.25",
+  "--max-state-normalize-ms-max",
+  "8",
+  "--max-state-normalize-ms-avg",
+  "0.1",
+  "--max-state-decode-ms-max",
+  "10",
+  "--max-state-decode-ms-avg",
+  "0.3"
+];
 const gateScenarios: Scenario[] = [
   {
     name: "50 clustered town clients",
@@ -56,6 +70,7 @@ const gateScenarios: Scenario[] = [
       "25000",
       "--max-state-message-bytes-avg",
       "13000",
+      ...clientDecodeGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -119,6 +134,7 @@ const gateScenarios: Scenario[] = [
       "25000",
       "--max-state-message-bytes-avg",
       "13000",
+      ...clientDecodeGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -170,6 +186,7 @@ const gateScenarios: Scenario[] = [
       "30000",
       "--max-state-message-bytes-avg",
       "9000",
+      ...clientDecodeGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -226,6 +243,7 @@ const gateScenarios: Scenario[] = [
       "35000",
       "--max-state-message-bytes-avg",
       "10000",
+      ...clientDecodeGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -280,6 +298,7 @@ const gateScenarios: Scenario[] = [
       "20000",
       "--max-state-message-bytes-avg",
       "12000",
+      ...clientDecodeGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -340,6 +359,7 @@ const gateScenarios: Scenario[] = [
       "30000",
       "--max-state-message-bytes-avg",
       "9000",
+      ...clientDecodeGateArgs,
       "--max-events-dropped-per-second-max",
       "0",
       "--max-save-queue-depth-max",
@@ -388,6 +408,7 @@ const gateScenarios: Scenario[] = [
       "20000",
       "--max-state-message-bytes-avg",
       "10000",
+      ...clientDecodeGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
@@ -446,6 +467,7 @@ const soakScenarios: Scenario[] = [
       "30000",
       "--max-state-message-bytes-avg",
       "9000",
+      ...clientDecodeGateArgs,
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0",
       "--max-events-dropped-per-second-max",
