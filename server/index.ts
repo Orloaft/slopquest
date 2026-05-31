@@ -777,7 +777,7 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
     if (catalog.pack && target && !isSafeZone(target.floor, target.x, target.y)) {
       forEachSpatial(spatial.monsters, monster.floor, monster.x, monster.y, 8, (other) => {
         if (other === monster || other.deadUntil || other.hidden || other.type !== monster.type || other.floor !== monster.floor) return;
-        if (distance(monster, other) <= 8) {
+        if (distanceSq(monster, other) <= 64) {
           other.alertUntil = now + 5000;
           other.alertTarget = target.id;
         }
@@ -2468,13 +2468,13 @@ function canStand(floor: number, x: number, y: number): boolean {
 
 function nearestPlayer(monster: ServerMonster, maxDistance: number): ServerPlayer | null {
   let best: ServerPlayer | null = null;
-  let bestDist = maxDistance;
+  let bestDistSq = maxDistance * maxDistance;
   forEachSpatial(spatial.players, monster.floor, monster.x, monster.y, maxDistance, (player) => {
     if (player.dead || player.floor !== monster.floor) return;
-    const dist = distance(monster, player);
-    if (dist < bestDist) {
+    const distSq = distanceSq(monster, player);
+    if (distSq < bestDistSq) {
       best = player;
-      bestDist = dist;
+      bestDistSq = distSq;
     }
   });
   return best;
