@@ -133,6 +133,11 @@ interface ResourceRespawn {
   id: string;
 }
 
+interface FireExpiration {
+  at: number;
+  id: string;
+}
+
 interface ActiveRegions {
   cells: Set<string>;
 }
@@ -292,6 +297,7 @@ const TREE_RESPAWN_MS = 30000;
 const HERB_RESPAWN_MS = 25000;
 const HERB_GATHER_MS = 2600;
 const FIRE_DURATION_MS = 120000;
+const FIRE_DURATION_OVERRIDE_MS = optionalPositiveIntEnv("TIB_FIRE_DURATION_MS");
 const INVENTORY_SIZE = 30;
 const BREW_XP = 30;
 // Encumbrance: at/below the soft cap you move at full speed; past it, speed
@@ -343,10 +349,10 @@ const fishingNodeViewCache = new WeakMap<FishingNodeRuntime, ResourceViewCache<F
 const miningNodeViewCache = new WeakMap<MiningNodeRuntime, ResourceViewCache<MiningNodeView>>();
 const herbNodeViewCache = new WeakMap<HerbNodeRuntime, ResourceViewCache<HerbNodeView>>();
 const resourceRespawns = new MinHeap<ResourceRespawn>((a, b) => a.at - b.at);
+const fireExpirations = new MinHeap<FireExpiration>((a, b) => a.at - b.at);
 const activeRegionsScratch: ActiveRegions = { cells: new Set() };
 const visitedMonsterScratch = new Set<ServerMonster>();
 const visitedNpcScratch = new Set<NpcRuntime>();
-const visitedFireScratch = new Set<Fire>();
 let nextMonsterId = 1;
 let nextCorpseId = 1;
 let nextFireId = 1;
@@ -465,7 +471,7 @@ setInterval(() => {
   const activeRegions = occupiedRegions();
   updateNpcs(dt, now, activeRegions);
   updateResourceRespawns(now);
-  updateFires(now, activeRegions);
+  updateFires(now);
   refreshSpatialCellMetric();
   updateMonsters(dt, now, activeRegions);
   recordSample(metrics.tickSamples, performance.now() - started);
@@ -1745,12 +1751,13 @@ function useVerbLightFire(player: ServerPlayer, item: Item, ctx: UseItemCtx): vo
     floor: player.floor,
     x: placement.x,
     y: placement.y,
-    expiresAt: performance.now() + (u.durationMs ?? FIRE_DURATION_MS),
+    expiresAt: performance.now() + (FIRE_DURATION_OVERRIDE_MS ?? u.durationMs ?? FIRE_DURATION_MS),
     owner: player.name
   };
   fires.set(fire.id, fire);
   addToCellIndex(firesByCell, fire);
   addToSpatial(spatial.fires, fire);
+  scheduleFireExpiration(fire);
   if (u.skill && choice.xp) addSkillXp(player, u.skill, choice.xp);
   event("effect", "fire", fire.x, fire.y, fire.floor, null, player.id, fire.id);
   event("float", "Fire lit", fire.x, fire.y, fire.floor, "#ffb35c");
@@ -2199,21 +2206,28 @@ function scheduleResourceRespawn(kind: ResourceRespawnKind, id: string, at: numb
   resourceRespawns.push({ kind, id, at });
 }
 
-function updateFires(now: number, activeRegions: ActiveRegions): void {
-  const visited = visitedFireScratch;
-  visited.clear();
-  for (const cell of activeRegions.cells) {
-    const cellFires = firesByCell.get(cell);
-    if (!cellFires) continue;
-    for (const fire of cellFires) {
-      if (visited.has(fire)) continue;
-      visited.add(fire);
-      if (now < fire.expiresAt) continue;
-      fires.delete(fire.id);
-      removeFromCellIndex(firesByCell, fire);
-      removeFromSpatial(spatial.fires, fire);
+function scheduleFireExpiration(fire: Fire): void {
+  fireExpirations.push({ id: fire.id, at: fire.expiresAt });
+}
+
+function updateFires(now: number): void {
+  while (fireExpirations.size > 0 && (fireExpirations.peek()?.at ?? Infinity) <= now) {
+    const expiry = fireExpirations.pop();
+    if (!expiry) break;
+    const fire = fires.get(expiry.id);
+    if (!fire) continue;
+    if (fire.expiresAt > now) {
+      scheduleFireExpiration(fire);
+      continue;
     }
+    expireFire(fire);
   }
+}
+
+function expireFire(fire: Fire): void {
+  fires.delete(fire.id);
+  removeFromCellIndex(firesByCell, fire);
+  removeFromSpatial(spatial.fires, fire);
 }
 
 function spawnMonster(spawn: MonsterSpawn): void {
@@ -3819,6 +3833,13 @@ function clamp(value: number, min: number, max: number): number {
 function positiveIntEnv(name: string, fallback: number): number {
   const value = Math.floor(Number(process.env[name] ?? fallback));
   return Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function optionalPositiveIntEnv(name: string): number | null {
+  const raw = process.env[name];
+  if (raw == null || raw === "") return null;
+  const value = Math.floor(Number(raw));
+  return Number.isFinite(value) && value > 0 ? value : null;
 }
 
 function round(value: number): number {
