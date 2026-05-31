@@ -799,16 +799,31 @@ function applyBeachShoreEdges(rows: string[][]): void {
     const west = land.has(rows[y]?.[x - 1] ?? "");
     const east = land.has(rows[y]?.[x + 1] ?? "");
 
-    if (south && east) setTile(rows, x, y, "{");
-    else if (south && west) setTile(rows, x, y, "}");
-    else if (north && east) setTile(rows, x, y, "(");
-    else if (north && west) setTile(rows, x, y, ")");
+    if (south && east && !north && !west) setTile(rows, x, y, "{");
+    else if (south && west && !north && !east) setTile(rows, x, y, "}");
+    else if (north && east && !south && !west) setTile(rows, x, y, "(");
+    else if (north && west && !south && !east) setTile(rows, x, y, ")");
     else if (south && !north && !west && !east) setTile(rows, x, y, "6");
     else if (north && !south && !west && !east) setTile(rows, x, y, "8");
     else if (west && !east && !north && !south) setTile(rows, x, y, "7");
     else if (east && !west && !north && !south) setTile(rows, x, y, "9");
     else setTile(rows, x, y, "v");
   });
+  smoothBeachShoreCornerClusters(rows);
+}
+
+function smoothBeachShoreCornerClusters(rows: string[][]): void {
+  const corners = new Set(["{", "}", "(", ")"]);
+  for (let y = 0; y < rows.length; y += 1) {
+    const row = rows[y];
+    if (!row) continue;
+    for (let x = 0; x < row.length; x += 1) {
+      if (!corners.has(row[x] ?? "")) continue;
+      if (corners.has(row[x - 1] ?? "") || corners.has(row[x + 1] ?? "") || corners.has(rows[y - 1]?.[x] ?? "") || corners.has(rows[y + 1]?.[x] ?? "")) {
+        row[x] = "v";
+      }
+    }
+  }
 }
 
 function frameFloorEdge(rows: string[][], floor: number): void {

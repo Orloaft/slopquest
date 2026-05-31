@@ -778,11 +778,11 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "beachTiles", "tileBeachRippleSand", 100, 99, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachWoodPlanks", 100, 262, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachPath", 96, 402, 70, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachStairs", 390, 864, 72, 82, 0);
-  makeTileTexture(this, "beachTiles", "tileBeachCliff", 596, 100, 72, 82, 0);
-  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 72, 82, 0);
-  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 72, 82, 0);
-  makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62);
+  makeTileTexture(this, "beachTiles", "tileBeachStairs", 390, 864, 72, 82, 0, true);
+  makeTileTexture(this, "beachTiles", "tileBeachCliff", 596, 100, 72, 82, 0, true);
+  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 72, 82, 0, true);
+  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 72, 82, 0, true);
+  makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62, undefined, true);
   makeTileTexture(this, "beachTiles", "tileBeachShore", 1200, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1040, 260, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreEast", 1144, 100, 72, 72);
@@ -1290,7 +1290,10 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
     const row = state.rows[y];
     if (row === undefined) continue;
     for (let x = tileX; x < tileRight; x += 1) {
-      texture.draw(tileBaseTexture(row[x] ?? ""), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+      const tile = row[x] ?? "";
+      const underlay = tileUnderlayTexture(tile);
+      if (underlay) texture.draw(underlay, (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+      texture.draw(tileBaseTexture(tile), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
     }
   }
   chunk.add(texture);
@@ -4312,7 +4315,17 @@ function addNearestCanvasTexture(scene: Phaser.Scene, key: string, canvas: HTMLC
   scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
 
-function makeTileTexture(scene: Phaser.Scene, sourceKey: string, newKey: string, sx: number, sy: number, sw: number, sh: number, insetOverride?: number): void {
+function makeTileTexture(
+  scene: Phaser.Scene,
+  sourceKey: string,
+  newKey: string,
+  sx: number,
+  sy: number,
+  sw: number,
+  sh: number,
+  insetOverride?: number,
+  preserveTransparency = false
+): void {
   const source = scene.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
   const sourceCanvas = document.createElement("canvas");
   const inset = insetOverride ?? Math.min(10, Math.floor(sw / 5), Math.floor(sh / 5));
@@ -4334,7 +4347,7 @@ function makeTileTexture(scene: Phaser.Scene, sourceKey: string, newKey: string,
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(sourceCanvas, 0, 0, cropW, cropH, 0, 0, TILE_SIZE, TILE_SIZE);
   chromaKeyMagenta(ctx, TILE_SIZE, TILE_SIZE);
-  fillTransparentPixels(ctx, TILE_SIZE, TILE_SIZE);
+  if (!preserveTransparency) fillTransparentPixels(ctx, TILE_SIZE, TILE_SIZE);
   scene.textures.addCanvas(newKey, canvas);
   scene.textures.get(newKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
@@ -5253,8 +5266,20 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     K: "tileJungle"
 };
 
+const TILE_UNDERLAY_TEXTURE: Record<string, string> = {
+    "2": "tileBeachPebbleSand",
+    x: "tileBeachShellSand",
+    "0": "tileBeachShellSand",
+    "1": "tileBeachShellSand",
+    u: "tileBeachSand"
+};
+
 function tileBaseTexture(tile: string): string {
   return TILE_BASE_TEXTURE[tile] ?? "tileGrass";
+}
+
+function tileUnderlayTexture(tile: string): string | null {
+  return TILE_UNDERLAY_TEXTURE[tile] ?? null;
 }
 
 function textStyle(size: number, color: string): Phaser.Types.GameObjects.Text.TextStyle {

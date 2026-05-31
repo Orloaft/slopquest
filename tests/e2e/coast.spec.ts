@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { isBlockedTile, isSightBlocked, scaleX, scaleY } from "../../src/shared.ts";
+import { makeFloorTiles, isBlockedTile, isSightBlocked, scaleX, scaleY } from "../../src/shared.ts";
 
 test("coast tile semantics: ocean/river block movement not sight; jungle wall blocks both", () => {
   expect(isBlockedTile("I")).toBe(true); // ocean
@@ -24,6 +24,20 @@ test("coast tile semantics: ocean/river block movement not sight; jungle wall bl
   expect(isSightBlocked("i")).toBe(false);
   expect(isBlockedTile("E")).toBe(true); // jungle wall
   expect(isSightBlocked("E")).toBe(true);
+});
+
+test("beach shore corners do not cluster into noisy edge blocks", () => {
+  const rows = makeFloorTiles(8);
+  const corners = new Set(["{", "}", "(", ")"]);
+  for (let y = 0; y < rows.length; y += 1) {
+    for (let x = 0; x < rows[y]!.length; x += 1) {
+      if (!corners.has(rows[y]![x]!)) continue;
+      expect(corners.has(rows[y]![x - 1] ?? "")).toBe(false);
+      expect(corners.has(rows[y]![x + 1] ?? "")).toBe(false);
+      expect(corners.has(rows[y - 1]?.[x] ?? "")).toBe(false);
+      expect(corners.has(rows[y + 1]?.[x] ?? "")).toBe(false);
+    }
+  }
 });
 
 test("travel chain: desert -> beach -> jungle, and beach -> desert back", async ({ page }) => {
