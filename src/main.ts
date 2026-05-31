@@ -867,6 +867,8 @@ function withSnapshotDefaults(snapshot: StateSnapshot): StateSnapshot {
 
 function mergeEntityViews<T extends { id: string }>(previous: T[], updates: T[], removedIds: string[] = [], full = true): T[] {
   if (full) return updates;
+  if (updates.length === 0 && removedIds.length === 0) return previous;
+  if (previous.length === 0) return updates;
   const byId = new Map(previous.map((item) => [item.id, item]));
   for (const id of removedIds) byId.delete(id);
   for (const item of updates) byId.set(item.id, item);
