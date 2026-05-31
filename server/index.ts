@@ -341,8 +341,9 @@ const FORAGE_XP = 12;
 // client attack animation for enemies that have one).
 const MONSTER_ATTACK_ANIM_MS = 480;
 // WebSocket delivery is ordered/reliable, so full snapshots are a recovery guard
-// rather than the normal data path. Keep them infrequent enough that crowded
-// towns and tree-dense zones stay delta-dominated at scale.
+// rather than the normal data path. Dynamic entities still get periodic full
+// recovery; static resources are initial-full + deltas only so dense zones do
+// not resend every visible tree/node just because the recovery clock fired.
 const TREE_SNAPSHOT_EVERY = positiveIntEnv("TIB_TREE_SNAPSHOT_EVERY", E2E_TEST ? 5 : 10);
 const NPC_SNAPSHOT_EVERY = positiveIntEnv("TIB_NPC_SNAPSHOT_EVERY", E2E_TEST ? 1 : 3);
 const RESOURCE_SNAPSHOT_EVERY = positiveIntEnv("TIB_RESOURCE_SNAPSHOT_EVERY", E2E_TEST ? 1 : 5);
@@ -2557,10 +2558,10 @@ function broadcastState(): void {
   const now = performance.now();
   updateByteMetric();
   snapshotSequence += 1;
-  const forceFull = snapshotSequence % SNAPSHOT_FULL_EVERY === 0;
-  const includeTrees = forceFull || snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
-  const includeNpcs = forceFull || snapshotSequence % NPC_SNAPSHOT_EVERY === 0;
-  const includeResources = forceFull || snapshotSequence % RESOURCE_SNAPSHOT_EVERY === 0;
+  const forceDynamicFull = snapshotSequence % SNAPSHOT_FULL_EVERY === 0;
+  const includeTrees = snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
+  const includeNpcs = forceDynamicFull || snapshotSequence % NPC_SNAPSHOT_EVERY === 0;
+  const includeResources = snapshotSequence % RESOURCE_SNAPSHOT_EVERY === 0;
   const metricFrame = snapshotMetricFrame();
   for (const session of clients.values()) {
     const { socket } = session;
@@ -2570,7 +2571,7 @@ function broadcastState(): void {
       continue;
     }
 
-    const snapshot = buildSnapshotFor(session, includeTrees, includeNpcs, includeResources, forceFull, metricFrame, now);
+    const snapshot = buildSnapshotFor(session, includeTrees, includeNpcs, includeResources, forceDynamicFull, metricFrame, now);
     if (!shouldSendSnapshot(session, snapshot, now)) continue;
     const raw = JSON.stringify(snapshot);
     metrics.bytesOutThisSecond += Buffer.byteLength(raw);
@@ -2642,12 +2643,16 @@ function buildSnapshotFor(
   includeTrees: boolean,
   includeNpcs: boolean,
   includeResources: boolean,
-  forceFull: boolean,
+  forceDynamicFull: boolean,
   metricFrame: SnapshotMetricFrame,
   now: number
 ): StateSnapshot {
   const viewer = session.player;
   const cache = snapshotCacheFor(session);
+  const includeTreesForSession = includeTrees || !cache.trees.initialized;
+  const includeFishingNodesForSession = includeResources || !cache.fishingNodes.initialized;
+  const includeMiningNodesForSession = includeResources || !cache.miningNodes.initialized;
+  const includeHerbNodesForSession = includeResources || !cache.herbNodes.initialized;
   const players: PlayerView[] = [];
   let includedViewer = false;
   forEachSpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (player) => {
@@ -2679,28 +2684,28 @@ function buildSnapshotFor(
     });
   }
 
-  const visibleTrees: TreeView[] = includeTrees ? [] : EMPTY_TREE_VIEWS;
-  if (includeTrees) {
+  const visibleTrees: TreeView[] = includeTreesForSession ? [] : EMPTY_TREE_VIEWS;
+  if (includeTreesForSession) {
     forEachSpatial(staticSpatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS, (tree) => {
       if (!inTreeInterestRange(viewer, tree)) return;
       visibleTrees.push(serializeTree(tree));
     });
   }
 
-  const visibleFishingNodes: FishingNodeView[] = includeResources ? [] : EMPTY_FISHING_NODE_VIEWS;
-  if (includeResources) {
+  const visibleFishingNodes: FishingNodeView[] = includeFishingNodesForSession ? [] : EMPTY_FISHING_NODE_VIEWS;
+  if (includeFishingNodesForSession) {
     forEachSpatial(staticSpatial.fishingNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
       if (inInterestRange(viewer, node)) visibleFishingNodes.push(serializeFishingNode(node));
     });
   }
-  const visibleMiningNodes: MiningNodeView[] = includeResources ? [] : EMPTY_MINING_NODE_VIEWS;
-  if (includeResources) {
+  const visibleMiningNodes: MiningNodeView[] = includeMiningNodesForSession ? [] : EMPTY_MINING_NODE_VIEWS;
+  if (includeMiningNodesForSession) {
     forEachSpatial(staticSpatial.miningNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
       if (inInterestRange(viewer, node)) visibleMiningNodes.push(serializeMiningNode(node));
     });
   }
-  const visibleHerbNodes: HerbNodeView[] = includeResources ? [] : EMPTY_HERB_NODE_VIEWS;
-  if (includeResources) {
+  const visibleHerbNodes: HerbNodeView[] = includeHerbNodesForSession ? [] : EMPTY_HERB_NODE_VIEWS;
+  if (includeHerbNodesForSession) {
     forEachSpatial(staticSpatial.herbNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
       if (inInterestRange(viewer, node)) visibleHerbNodes.push(serializeHerbNode(node));
     });
@@ -2711,15 +2716,33 @@ function buildSnapshotFor(
       if (inInterestRange(viewer, fire)) visibleFires.push(serializeFire(fire, now));
     });
   }
-  const playersDelta = snapshotDelta(cache.players, players, playerViewSignature, forceFull);
-  const monstersDelta = snapshotDelta(cache.monsters, visibleMonsters, monsterViewSignature, forceFull);
-  const corpsesDelta = snapshotDelta(cache.corpses, visibleCorpses, corpseViewSignature, forceFull);
-  const npcsDelta = snapshotDelta(cache.npcs, visibleNpcs, npcViewSignature, forceFull, !includeNpcs);
-  const treesDelta = snapshotDelta(cache.trees, visibleTrees, treeViewSignature, forceFull, !includeTrees);
-  const fishingDelta = snapshotDelta(cache.fishingNodes, visibleFishingNodes, fishingNodeViewSignature, forceFull, !includeResources);
-  const miningDelta = snapshotDelta(cache.miningNodes, visibleMiningNodes, miningNodeViewSignature, forceFull, !includeResources);
-  const herbDelta = snapshotDelta(cache.herbNodes, visibleHerbNodes, herbNodeViewSignature, forceFull, !includeResources);
-  const firesDelta = snapshotDelta(cache.fires, visibleFires, fireViewSignature, forceFull);
+  const playersDelta = snapshotDelta(cache.players, players, playerViewSignature, forceDynamicFull);
+  const monstersDelta = snapshotDelta(cache.monsters, visibleMonsters, monsterViewSignature, forceDynamicFull);
+  const corpsesDelta = snapshotDelta(cache.corpses, visibleCorpses, corpseViewSignature, forceDynamicFull);
+  const npcsDelta = snapshotDelta(cache.npcs, visibleNpcs, npcViewSignature, forceDynamicFull, !includeNpcs);
+  const treesDelta = snapshotDelta(cache.trees, visibleTrees, treeViewSignature, false, !includeTreesForSession);
+  const fishingDelta = snapshotDelta(
+    cache.fishingNodes,
+    visibleFishingNodes,
+    fishingNodeViewSignature,
+    false,
+    !includeFishingNodesForSession
+  );
+  const miningDelta = snapshotDelta(
+    cache.miningNodes,
+    visibleMiningNodes,
+    miningNodeViewSignature,
+    false,
+    !includeMiningNodesForSession
+  );
+  const herbDelta = snapshotDelta(
+    cache.herbNodes,
+    visibleHerbNodes,
+    herbNodeViewSignature,
+    false,
+    !includeHerbNodesForSession
+  );
+  const firesDelta = snapshotDelta(cache.fires, visibleFires, fireViewSignature, forceDynamicFull);
 
   return {
     type: "state",

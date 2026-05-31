@@ -53,6 +53,9 @@ avoid save-file churn.
     "spatialCells": 367,
     "socketBackpressureBytes": 524288
   },
+  "snapshotFlags": {
+    "staticFull": 200
+  },
   "perTick": {
     "tickMs": { "samples": 9577, "min": 0.01, "max": 0.47, "avg": 0.39 },
     "snapshotMs": { "samples": 9577, "min": 0.01, "max": 5.81, "avg": 4.7 },
@@ -94,6 +97,9 @@ visible-player density.
     "spatialCells": 359,
     "socketBackpressureBytes": 524288
   },
+  "snapshotFlags": {
+    "staticFull": 200
+  },
   "perTick": {
     "tickMs": { "samples": 9592, "min": 0.01, "max": 0.29, "avg": 0.24 },
     "snapshotMs": { "samples": 9592, "min": 0.01, "max": 6.3, "avg": 5.09 },
@@ -127,5 +133,9 @@ visible-player density.
 - Snapshot metrics now include heap/RSS, dynamic entity count, and resident
   static resource count so the gates can catch memory or world-residency
   regressions before the authored world grows.
+- Static resource full snapshot flags are now counted by the load driver.
+  `staticFull: 200` means 50 clients received one initial full sync for each of
+  the four static categories; the gate fails if periodic recovery starts
+  resending full static lists again.
 - The next performance work should be longer/slow-client scenarios and eventual
   protocol compaction only if telemetry asks for it.

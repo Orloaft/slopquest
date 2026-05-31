@@ -21,6 +21,10 @@ interface LoadMessage {
   metrics?: Partial<StateMetrics>;
   players?: PlayerView[];
   monsters?: MonsterView[];
+  treesFull?: boolean;
+  fishingNodesFull?: boolean;
+  miningNodesFull?: boolean;
+  herbNodesFull?: boolean;
 }
 
 interface Summary {
@@ -90,6 +94,7 @@ const observed = {
   serverMonsters: 0,
   spatialCells: 0,
   socketBackpressureBytes: 0,
+  staticFullSnapshots: 0,
   slowClientsPaused: 0
 };
 const clientState = new WeakMap<WebSocket, { selfId: string | null; targetId: string | null; lastTargetAt: number }>();
@@ -162,6 +167,7 @@ function openClient(index: number): void {
     if (message.type === "state") {
       stats.states += 1;
       if (message.metrics) recordMetrics(message.metrics);
+      recordSnapshotFlags(message);
       if (attackTargets) maybeTargetMonster(socket, message);
     }
   });
@@ -272,6 +278,13 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   if (typeof m.socketBackpressureBytes === "number") observed.socketBackpressureBytes = m.socketBackpressureBytes;
 }
 
+function recordSnapshotFlags(message: LoadMessage): void {
+  if (message.treesFull) observed.staticFullSnapshots += 1;
+  if (message.fishingNodesFull) observed.staticFullSnapshots += 1;
+  if (message.miningNodesFull) observed.staticFullSnapshots += 1;
+  if (message.herbNodesFull) observed.staticFullSnapshots += 1;
+}
+
 function summarize(values: number[]): Summary | null {
   const first = values[0];
   if (first === undefined) return null;
@@ -322,7 +335,8 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
 
   const maximums: Array<[string, number, number | null]> = [
     ["errors", report.errors, optionNumber("max-errors")],
-    ["slowClients.paused", report.slowClients.paused, optionNumber("max-slow-paused")]
+    ["slowClients.paused", report.slowClients.paused, optionNumber("max-slow-paused")],
+    ["snapshotFlags.staticFull", report.snapshotFlags.staticFull, optionNumber("max-static-full-snapshots")]
   ];
   for (const [label, actual, maximum] of maximums) {
     if (maximum != null && actual > maximum) failures.push(`${label} ${actual} > ${maximum}`);
@@ -383,6 +397,9 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       monsters: observed.serverMonsters,
       spatialCells: observed.spatialCells,
       socketBackpressureBytes: observed.socketBackpressureBytes
+    },
+    snapshotFlags: {
+      staticFull: observed.staticFullSnapshots
     },
     perTick: {
       tickMs: summarize(observed.tickMs),

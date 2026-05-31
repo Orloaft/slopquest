@@ -29,6 +29,7 @@ with no socket errors and no backpressure skips. See
 - Snapshot broadcast: 75 ms.
 - Interest radius: 18 tiles for dynamic entities, 32 tiles for trees.
 - Spatial cell size: 8 tiles.
+- Static trees/resources are initial-full per session, then delta/removal only.
 - Current content: 10 floors, 77 monsters, roughly 1,385 tree nodes, NPCs,
   gathering resources, fires, corpses, and per-player persistence.
 
@@ -61,6 +62,12 @@ corpses, NPCs, trees, resource nodes, and fires. It sends:
 Slow sockets are guarded by `socket.bufferedAmount >
 TIB_SOCKET_BACKPRESSURE_BYTES`, which skips that snapshot for the lagging client
 and records the skip in metrics.
+
+Static trees and gatherable resources no longer participate in periodic full
+snapshot recovery. Each session receives one full sync per static category, and
+then only signature changes or interest-range removals are sent. This keeps
+tree/resource-heavy regions from producing recurring full-list bursts as world
+density grows.
 
 ### Spatial indexing and active regions
 
@@ -178,6 +185,8 @@ process cannot tick the populated world.
 - [x] Co-located combat scenario in the local performance gate.
 - [x] Optional longer mixed-combat soak gate (`npm run perf:soak`).
 - [x] Memory/entity residency telemetry in server snapshots and load gates.
+- [x] Static resource snapshot regression gate; full static lists are initial
+  sync only, then deltas/removals.
 - [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
 - [ ] Chunk-derived static resources before the world grows by an order of magnitude.
