@@ -779,9 +779,13 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "beachTiles", "tileBeachWoodPlanks", 100, 262, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachPath", 96, 402, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachStairs", 390, 864, 72, 82, 0, true);
+  makeTileTexture(this, "beachTiles", "tileBeachStairsLeft", 390, 864, 72, 82, 0, true);
+  makeTileTexture(this, "beachTiles", "tileBeachStairsMid", 462, 864, 72, 82, 0, true);
+  makeTileTexture(this, "beachTiles", "tileBeachStairsRight", 606, 864, 72, 82, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachCliff", 596, 100, 72, 82, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 72, 82, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 72, 82, 0, true);
+  makeTileTexture(this, "beachTiles", "tileBeachRockWall", 596, 180, 72, 72, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62, undefined, true);
   makeTileTexture(this, "beachTiles", "tileBeachShore", 1200, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1040, 260, 72, 72);
@@ -794,6 +798,8 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSE", 1216, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachLagoon", 1130, 101, 72, 72);
   makeTileTexture(this, "beachTiles", "tileOcean", 1052, 101, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileOceanRipple", 1128, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileOceanRock", 1052, 100, 72, 72);
   makeSpriteTexture(this, "beachTiles", "spriteBeachHut", 1366, 860, 116, 118);
   makeSpriteTexture(this, "beachTiles", "spriteBeachDock", 642, 650, 168, 86);
   makeSpriteTexture(this, "beachTiles", "spriteBeachBoat", 560, 722, 74, 48);
@@ -5242,10 +5248,13 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     "4": "tileBeachMossyStone",
     "5": "tileBeachWoodPlanks",
     z: "tileBeachPebbleSand",
-    "2": "tileBeachStairs",
+    "2": "tileBeachStairsMid",
+    "[": "tileBeachStairsLeft",
+    "]": "tileBeachStairsRight",
     x: "tileBeachCliff",
     "0": "tileBeachCliffLeft",
     "1": "tileBeachCliffRight",
+    "|": "tileBeachRockWall",
     u: "tileBeachRock",
     v: "tileBeachShore",
     "6": "tileBeachShoreNorth",
@@ -5258,6 +5267,8 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     ")": "tileBeachShoreCornerSE",
     "=": "tileBeachLagoon",
     I: "tileOcean",
+    "!": "tileOceanRipple",
+    "?": "tileOceanRock",
     Y: "tileBeachPath",
     j: "tileBeachPath",
     y: "tileJungle",
@@ -5268,9 +5279,12 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
 
 const TILE_UNDERLAY_TEXTURE: Record<string, string> = {
     "2": "tileBeachPebbleSand",
+    "[": "tileBeachPebbleSand",
+    "]": "tileBeachPebbleSand",
     x: "tileBeachShellSand",
     "0": "tileBeachShellSand",
     "1": "tileBeachShellSand",
+    "|": "tileBeachShellSand",
     u: "tileBeachSand"
 };
 

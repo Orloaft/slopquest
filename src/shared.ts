@@ -560,23 +560,11 @@ export function makeFloorTiles(floor: number): string[] {
     for (const [x, y] of [[18, 12], [22, 14], [39, 18], [48, 16], [58, 12], [72, 18], [28, 36], [53, 42], [68, 44]] as Array<[number, number]>)
       setTile(rows, x, y, ";");
 
-    // Raised ledges: walkable tops plus a one-tile cliff face. The earlier
-    // full-rectangle cliffs read as stacked wall wallpaper in the viewport.
-    fillRect(rows, 18, 16, 14, 4, "l");
-    fillRect(rows, 18, 20, 14, 1, "x");
-    setTile(rows, 17, 20, "0");
-    setTile(rows, 32, 20, "1");
-    fillRect(rows, 51, 18, 16, 4, "3");
-    fillRect(rows, 51, 22, 16, 1, "x");
-    setTile(rows, 50, 22, "0");
-    setTile(rows, 67, 22, "1");
-    fillRect(rows, 27, 31, 14, 3, "l");
-    fillRect(rows, 27, 34, 14, 1, "x");
-    setTile(rows, 26, 34, "0");
-    setTile(rows, 41, 34, "1");
-    fillRect(rows, 20, 20, 4, 2, "2"); // west stairs down
-    fillRect(rows, 56, 22, 4, 2, "2"); // east stairs down
-    fillRect(rows, 34, 33, 4, 2, "2"); // south ledge stairs
+    // Raised ledges: walkable tops, connected rock-wall faces under the lip,
+    // and composed stairs that cut through the face as left/middle/right runs.
+    drawBeachLedge(rows, 18, 16, 14, 4, "l", [{ x: 20, w: 4 }]);
+    drawBeachLedge(rows, 51, 18, 16, 4, "3", [{ x: 56, w: 4 }]);
+    drawBeachLedge(rows, 27, 31, 14, 3, "l", [{ x: 34, w: 4 }]);
 
     // Rocks/ruins as hard cover and visual anchors around coves/terraces.
     for (const [x, y] of [[13, 11], [16, 34], [25, 16], [30, 23], [49, 17], [66, 27], [72, 34], [33, 43], [53, 36], [61, 13]] as Array<[number, number]>)
@@ -763,8 +751,8 @@ function applyCliffEdges(rows: string[][], floorChar = "R", massifChar = "w", fa
 }
 
 function applyBeachShoreEdges(rows: string[][]): void {
-  const land = new Set(["e", "l", ",", ";", "3", "4", "5", "z", "2", "x", "0", "1", "u", "Y", "j"]);
-  const water = new Set(["I", "=", "v", "6", "7", "8", "9", "{", "}", "(", ")"]);
+  const land = new Set(["e", "l", ",", ";", "3", "4", "5", "z", "2", "[", "]", "x", "0", "1", "|", "u", "Y", "j"]);
+  const water = new Set(["I", "!", "?", "=", "v", "6", "7", "8", "9", "{", "}", "(", ")"]);
   const shore: Array<[number, number]> = [];
   const landEdge: Array<[number, number]> = [];
   for (let y = 0; y < rows.length; y += 1) {
@@ -780,7 +768,7 @@ function applyBeachShoreEdges(rows: string[][]): void {
         if (touchesWater) landEdge.push([x, y]);
         continue;
       }
-      if (row[x] !== "I") continue;
+      if (!water.has(row[x] ?? "")) continue;
       const touchesLand =
         land.has(rows[y - 1]?.[x] ?? "") ||
         land.has(rows[y + 1]?.[x] ?? "") ||
@@ -810,6 +798,27 @@ function applyBeachShoreEdges(rows: string[][]): void {
     else setTile(rows, x, y, "v");
   });
   smoothBeachShoreCornerClusters(rows);
+  varyBeachOpenWater(rows);
+}
+
+function drawBeachLedge(rows: string[][], x: number, y: number, w: number, topH: number, topTile: string, stairs: Array<{ x: number; w: number }>): void {
+  fillRect(rows, x, y, w, topH, topTile);
+  const faceY = y + topH;
+  setTile(rows, x - 1, faceY, "0");
+  fillRect(rows, x, faceY, w, 1, "x");
+  setTile(rows, x + w, faceY, "1");
+  fillRect(rows, x, faceY + 1, w, 1, "|");
+  for (const stair of stairs) {
+    drawBeachStairs(rows, stair.x, faceY, stair.w);
+    fillRect(rows, stair.x, y + topH - 1, stair.w, 1, "z");
+  }
+}
+
+function drawBeachStairs(rows: string[][], x: number, y: number, w: number): void {
+  if (w < 2) return;
+  setTile(rows, x, y, "[");
+  for (let xx = x + 1; xx < x + w - 1; xx += 1) setTile(rows, xx, y, "2");
+  setTile(rows, x + w - 1, y, "]");
 }
 
 function smoothBeachShoreCornerClusters(rows: string[][]): void {
@@ -822,6 +831,25 @@ function smoothBeachShoreCornerClusters(rows: string[][]): void {
       if (corners.has(row[x - 1] ?? "") || corners.has(row[x + 1] ?? "") || corners.has(rows[y - 1]?.[x] ?? "") || corners.has(rows[y + 1]?.[x] ?? "")) {
         row[x] = "v";
       }
+    }
+  }
+}
+
+function varyBeachOpenWater(rows: string[][]): void {
+  const shore = new Set(["v", "6", "7", "8", "9", "{", "}", "(", ")"]);
+  for (let y = 1; y < rows.length - 1; y += 1) {
+    const row = rows[y];
+    if (!row) continue;
+    for (let x = 1; x < row.length - 1; x += 1) {
+      if (row[x] !== "I") continue;
+      const nearShore =
+        shore.has(rows[y - 1]?.[x] ?? "") ||
+        shore.has(rows[y + 1]?.[x] ?? "") ||
+        shore.has(row[x - 1] ?? "") ||
+        shore.has(row[x + 1] ?? "");
+      if (nearShore) continue;
+      if ((x * 17 + y * 31) % 41 === 0) row[x] = "?";
+      else if ((x * 11 + y * 19) % 7 === 0) row[x] = "!";
     }
   }
 }
@@ -852,9 +880,9 @@ export function isBlockedTile(tile: string): boolean {
     tile === "#" || tile === "~" || tile === "W" || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o" ||
     tile === "X" || tile === "P" || tile === "w" || // badlands cliff wall + pit + massif
     tile === "Q" || tile === "V" || tile === "U" || // desert quicksand + oasis + ruin
-    tile === "I" || tile === "=" || tile === "v" || tile === "6" || tile === "7" || tile === "8" || tile === "9" ||
+    tile === "I" || tile === "!" || tile === "?" || tile === "=" || tile === "v" || tile === "6" || tile === "7" || tile === "8" || tile === "9" ||
     tile === "{" || tile === "}" || tile === "(" || tile === ")" ||
-    tile === "x" || tile === "0" || tile === "1" || tile === "u" || // beach sea/shore/cliff/rocks
+    tile === "x" || tile === "0" || tile === "1" || tile === "|" || tile === "u" || // beach sea/shore/cliff/rocks
     tile === "E" || tile === "i" // jungle wall + jungle river
   );
 }
@@ -868,7 +896,7 @@ export function isSightBlocked(tile: string): boolean {
   return (
     tile === "#" || tile === "o" || tile === "O" || tile === "f" || tile === "r" || tile === "q" ||
     tile === "X" || tile === "w" || tile === "U" || // badlands cliff/massif, ruin
-    tile === "x" || tile === "0" || tile === "1" || tile === "u" || tile === "E" // beach cliff/rocks, jungle wall
+    tile === "x" || tile === "0" || tile === "1" || tile === "|" || tile === "u" || tile === "E" // beach cliff/rocks, jungle wall
   );
 }
 

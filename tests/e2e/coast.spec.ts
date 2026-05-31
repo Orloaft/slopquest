@@ -4,6 +4,10 @@ import { makeFloorTiles, isBlockedTile, isSightBlocked, scaleX, scaleY } from ".
 test("coast tile semantics: ocean/river block movement not sight; jungle wall blocks both", () => {
   expect(isBlockedTile("I")).toBe(true); // ocean
   expect(isSightBlocked("I")).toBe(false);
+  for (const ocean of ["!", "?"]) {
+    expect(isBlockedTile(ocean)).toBe(true);
+    expect(isSightBlocked(ocean)).toBe(false);
+  }
   expect(isBlockedTile("=")).toBe(true); // shallow lagoon water
   expect(isSightBlocked("=")).toBe(false);
   expect(isBlockedTile("v")).toBe(true); // foamy shore water
@@ -14,7 +18,7 @@ test("coast tile semantics: ocean/river block movement not sight; jungle wall bl
   }
   expect(isBlockedTile("x")).toBe(true); // beach cliff
   expect(isSightBlocked("x")).toBe(true);
-  for (const cliff of ["0", "1"]) {
+  for (const cliff of ["0", "1", "|"]) {
     expect(isBlockedTile(cliff)).toBe(true);
     expect(isSightBlocked(cliff)).toBe(true);
   }
@@ -24,6 +28,24 @@ test("coast tile semantics: ocean/river block movement not sight; jungle wall bl
   expect(isSightBlocked("i")).toBe(false);
   expect(isBlockedTile("E")).toBe(true); // jungle wall
   expect(isSightBlocked("E")).toBe(true);
+});
+
+test("beach ledges use composed stairs and rock-wall faces", () => {
+  const rows = makeFloorTiles(8);
+  const stairRuns = [[20, 20], [56, 22], [34, 34]] as Array<[number, number]>;
+  for (const [x, y] of stairRuns) {
+    expect(rows[y]?.slice(x, x + 4)).toBe("[22]");
+  }
+  expect(rows[21]?.slice(18, 32)).toContain("|");
+  expect(rows[23]?.slice(51, 67)).toContain("|");
+  expect(rows[35]?.slice(27, 41)).toContain("|");
+});
+
+test("beach ocean uses interior water variants beyond repeated edge tiles", () => {
+  const rows = makeFloorTiles(8);
+  const water = rows.join("");
+  expect(water.includes("!")).toBe(true);
+  expect(water.includes("?")).toBe(true);
 });
 
 test("beach shore corners do not cluster into noisy edge blocks", () => {
