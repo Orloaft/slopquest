@@ -210,7 +210,9 @@ and combat fanout without making every client see every other client.
   compact-state counts, proving the compact path is active during every load
   scenario.
 - `npm run check` now includes `npm run assets:budget`, currently guarding
-  runtime assets at `100 MiB` total, `5 MiB` per file, and `500` files.
+  runtime assets at `100 MiB` total, `5 MiB` per file, and `500` files. The
+  same gate now tracks Phaser startup preload separately; current preload is
+  `44` files / `42.06 MiB` against a `55 MiB` / `60` file budget.
 - Save flush telemetry is now part of snapshots and the load driver. The perf
   gate includes a 25 persistent-client temp-data scenario with
   `TIB_SAVE_CONCURRENCY=4`, ensuring player-file saves stay bounded without

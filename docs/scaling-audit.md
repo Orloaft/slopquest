@@ -204,8 +204,9 @@ Map rendering is chunked, but asset loading is still mostly up-front. A much
 larger world with many more enemy/item/biome textures will need region-streamed
 assets and unload policies. Until that volume exists, `npm run assets:budget`
 keeps current runtime assets below 100 MiB total, below 5 MiB per file, and
-below 500 files so growth becomes visible before load time or VRAM pressure
-surprises us.
+below 500 files. It also measures Phaser startup preload separately from total
+`public/` size and caps it at 55 MiB / 60 files, so first-load network and VRAM
+pressure become visible before content growth surprises us.
 
 ### Protocol size
 
@@ -273,6 +274,7 @@ process cannot tick the populated world.
 - [x] Compact top-level state packet keys with compact-packet load gates.
 - [x] Compact entity view keys inside state packets.
 - [x] Runtime asset budget gate in `npm run check`.
+- [x] Startup-preload asset budget gate in `npm run check`.
 - [x] Bounded player-save flushes with persistence telemetry and a temp-data
   perf gate.
 - [ ] Binary/delta protocol if JSON bytes/sec becomes a real hosting limit.
