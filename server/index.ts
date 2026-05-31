@@ -247,9 +247,9 @@ interface SnapshotCategoryCache {
   nextSignatures: Map<string, number>;
 }
 
-interface ClientMessageWindow {
-  startsAt: number;
-  count: number;
+interface ClientMessageBucket {
+  updatedAt: number;
+  tokens: number;
 }
 
 interface PlayerSnapshotCandidate {
@@ -393,6 +393,7 @@ const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 1000);
 const SNAPSHOT_METRICS_MS = positiveIntEnv("TIB_SNAPSHOT_METRICS_MS", 1000);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
 const CLIENT_MESSAGE_LIMIT_PER_SECOND = positiveIntEnv("TIB_CLIENT_MESSAGE_LIMIT_PER_SECOND", 40);
+const CLIENT_MESSAGE_BURST = positiveIntEnv("TIB_CLIENT_MESSAGE_BURST", CLIENT_MESSAGE_LIMIT_PER_SECOND * 2);
 const SAVE_CONCURRENCY = positiveIntEnv("TIB_SAVE_CONCURRENCY", 16);
 const GLOBAL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_GLOBAL_EVENT_QUEUE_LIMIT", 128);
 const TARGETED_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_TARGETED_EVENT_QUEUE_LIMIT", 64);
@@ -459,7 +460,7 @@ const eventOrder = new WeakMap<GameEvent, number>();
 const materializedTreeCells = new Set<string>();
 const materializedStaticResourceCells = new Set<string>();
 const socketWireBytes = new WeakMap<ExtWebSocket, number>();
-const clientMessageWindows = new WeakMap<ExtWebSocket, ClientMessageWindow>();
+const clientMessageBuckets = new WeakMap<ExtWebSocket, ClientMessageBucket>();
 const metrics: Metrics = {
   tickWindow: createMetricWindow(),
   snapshotWindow: createMetricWindow(),
@@ -2891,13 +2892,17 @@ function shouldIncludeMetrics(session: Session, now: number): boolean {
 }
 
 function acceptClientMessage(socket: ExtWebSocket, now: number): boolean {
-  const window = clientMessageWindows.get(socket);
-  if (!window || now - window.startsAt >= 1000) {
-    clientMessageWindows.set(socket, { startsAt: now, count: 1 });
+  const bucket = clientMessageBuckets.get(socket);
+  if (!bucket) {
+    clientMessageBuckets.set(socket, { updatedAt: now, tokens: CLIENT_MESSAGE_BURST - 1 });
     return true;
   }
-  window.count += 1;
-  return window.count <= CLIENT_MESSAGE_LIMIT_PER_SECOND;
+  const elapsed = Math.max(0, now - bucket.updatedAt);
+  bucket.tokens = Math.min(CLIENT_MESSAGE_BURST, bucket.tokens + (elapsed * CLIENT_MESSAGE_LIMIT_PER_SECOND) / 1000);
+  bucket.updatedAt = now;
+  if (bucket.tokens < 1) return false;
+  bucket.tokens -= 1;
+  return true;
 }
 
 function snapshotIsEmptyDelta(snapshot: StateSnapshot): boolean {
