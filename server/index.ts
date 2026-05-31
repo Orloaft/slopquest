@@ -2805,7 +2805,7 @@ function playerViewSignature(player: PlayerView): number {
   return hash;
 }
 
-function buildPlayerSignature(player: ServerPlayer, privateView: PlayerPrivateViewCache | null): number {
+function buildPlayerSignature(player: ServerPlayer, privateView: PlayerPrivateViewCache | null, action: ActionView | null, buffs: BuffsView): number {
   let hash = HASH_INIT;
   hash = hashString(hash, player.id);
   hash = hashString(hash, player.name);
@@ -2826,8 +2826,8 @@ function buildPlayerSignature(player: ServerPlayer, privateView: PlayerPrivateVi
   hash = hashNumber(hash, player.armorTier);
   hash = hashString(hash, player.targetId ?? "");
   hash = hashBool(hash, player.dead);
-  hash = hashAction(hash, player.action ? actionView(player.action) : null);
-  hash = hashBuffs(hash, serializeBuffs(player));
+  hash = hashAction(hash, action);
+  hash = hashBuffs(hash, buffs);
   if (privateView) {
     hash = hashString(hash, privateView.inventorySignature);
     hash = hashString(hash, privateView.questsSignature);
@@ -2840,7 +2840,7 @@ function buildPlayerSignature(player: ServerPlayer, privateView: PlayerPrivateVi
   return hash;
 }
 
-function buildPlayerPublicSignature(player: ServerPlayer): number {
+function buildPlayerPublicSignature(player: ServerPlayer, action: ActionView | null): number {
   let hash = HASH_INIT;
   hash = hashString(hash, player.id);
   hash = hashString(hash, player.name);
@@ -2853,7 +2853,7 @@ function buildPlayerPublicSignature(player: ServerPlayer): number {
   hash = hashNumber(hash, Math.round(player.hp));
   hash = hashNumber(hash, player.maxHp);
   hash = hashBool(hash, player.dead);
-  hash = hashAction(hash, player.action ? actionView(player.action) : null);
+  hash = hashAction(hash, action);
   return hash;
 }
 
@@ -3002,6 +3002,8 @@ function actionView(a: PlayerAction): ActionView {
 
 function serializePlayer(player: ServerPlayer): PlayerView {
   const privateView = serializePlayerPrivate(player);
+  const action = player.action ? actionView(player.action) : null;
+  const buffs = serializeBuffs(player);
   const view: PlayerView = {
     id: player.id,
     name: player.name,
@@ -3022,8 +3024,8 @@ function serializePlayer(player: ServerPlayer): PlayerView {
     armorTier: player.armorTier,
     targetId: player.targetId,
     dead: player.dead,
-    action: player.action ? actionView(player.action) : null,
-    buffs: serializeBuffs(player),
+    action,
+    buffs,
     inventory: privateView.inventory,
     quests: privateView.quests,
     skills: privateView.skills,
@@ -3032,7 +3034,7 @@ function serializePlayer(player: ServerPlayer): PlayerView {
     weight: privateView.weight,
     maxWeight: WEIGHT_SOFT_CAP
   };
-  playerViewSignatureCache.set(view, buildPlayerSignature(player, privateView));
+  playerViewSignatureCache.set(view, buildPlayerSignature(player, privateView, action, buffs));
   return view;
 }
 
@@ -3079,6 +3081,7 @@ function serializePlayerPublicCached(player: ServerPlayer): PlayerView {
 }
 
 function serializePlayerPublic(player: ServerPlayer): PlayerView {
+  const action = player.action ? actionView(player.action) : null;
   const view = {
     id: player.id,
     name: player.name,
@@ -3091,9 +3094,9 @@ function serializePlayerPublic(player: ServerPlayer): PlayerView {
     hp: Math.round(player.hp),
     maxHp: player.maxHp,
     dead: player.dead,
-    action: player.action ? actionView(player.action) : null
+    action
   } as PlayerView;
-  playerViewSignatureCache.set(view, buildPlayerPublicSignature(player));
+  playerViewSignatureCache.set(view, buildPlayerPublicSignature(player, action));
   return view;
 }
 
