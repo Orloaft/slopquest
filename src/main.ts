@@ -1658,7 +1658,10 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
 function setEntityTarget(view: EntityView, x: number, y: number): void {
   view.targetX = x;
   view.targetY = y;
-  if (Math.hypot(view.x - x, view.y - y) > TILE_SIZE * 3) {
+  const dx = view.x - x;
+  const dy = view.y - y;
+  const snapDistance = TILE_SIZE * 3;
+  if (dx * dx + dy * dy > snapDistance * snapDistance) {
     view.x = x;
     view.y = y;
   }
@@ -1671,9 +1674,20 @@ function interpolateEntities(): void {
 }
 
 function easeToTarget(view: EntityView): void {
-  if (view.targetX === undefined || view.targetY === undefined) return;
-  view.x += (view.targetX - view.x) * 0.32;
-  view.y += (view.targetY - view.y) * 0.32;
+  const targetX = view.targetX;
+  const targetY = view.targetY;
+  if (targetX === undefined || targetY === undefined) return;
+  const dx = targetX - view.x;
+  const dy = targetY - view.y;
+  if (dx * dx + dy * dy < 0.01) {
+    view.x = targetX;
+    view.y = targetY;
+    view.targetX = undefined;
+    view.targetY = undefined;
+    return;
+  }
+  view.x += dx * 0.32;
+  view.y += dy * 0.32;
 }
 
 function setActorAnimation(view: EntityView, family: string, dir: Direction = "down", moving = false, width = 40, height = 48, attacking = false): void {
