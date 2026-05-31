@@ -123,9 +123,10 @@ socket send. The perf gate counts compact state packets explicitly, so a
 regression back to long-form state packets fails loudly.
 
 The load driver also times client-side JSON parse and compact-snapshot
-normalization per state packet. Perf gates keep average state decode under
-`0.3 ms`, so protocol compaction cannot silently trade lower bandwidth for
-meaningful per-client CPU cost.
+normalization per state packet. Summaries include p95 values as well as min,
+max, and average, and perf gates keep average state decode under `0.3 ms` with
+p95 under `1.2 ms`. Protocol compaction cannot silently trade lower bandwidth
+for meaningful per-client CPU cost.
 
 Worst-case co-located player fanout is bounded by a nearest-player cap. The
 viewer is always included, and other player views are sorted by distance before

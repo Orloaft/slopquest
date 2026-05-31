@@ -21,14 +21,20 @@ const clientDecodeGateArgs = [
   "4",
   "--max-state-parse-ms-avg",
   "0.25",
+  "--max-state-parse-ms-p95",
+  "1",
   "--max-state-normalize-ms-max",
   "8",
   "--max-state-normalize-ms-avg",
   "0.1",
+  "--max-state-normalize-ms-p95",
+  "0.5",
   "--max-state-decode-ms-max",
   "10",
   "--max-state-decode-ms-avg",
-  "0.3"
+  "0.3",
+  "--max-state-decode-ms-p95",
+  "1.2"
 ];
 const gateScenarios: Scenario[] = [
   {

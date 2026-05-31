@@ -33,6 +33,7 @@ interface Summary {
   min: number;
   max: number;
   avg: number;
+  p95: number;
 }
 
 type SummaryMetric =
@@ -55,7 +56,7 @@ type GaugeMetric =
   | "saveInFlight";
 type ClientMetric = "visiblePlayers" | "visibleMonsters" | "visibleTrees" | "visibleFires";
 type MessageTimingMetric = "stateParseMs" | "stateNormalizeMs" | "stateDecodeMs";
-type SummaryField = "min" | "max" | "avg";
+type SummaryField = "min" | "max" | "avg" | "p95";
 
 const options = parseArgs(process.argv.slice(2));
 const url = stringOption(options.url) ?? `ws://127.0.0.1:${stringOption(options.port) ?? process.env.PORT ?? 8787}`;
@@ -352,11 +353,15 @@ function summarize(values: number[]): Summary | null {
     sum += v;
   }
   const avg = sum / values.length;
+  const sorted = [...values].sort((a, b) => a - b);
+  const p95Index = Math.min(sorted.length - 1, Math.ceil(sorted.length * 0.95) - 1);
+  const p95 = sorted[p95Index] ?? max;
   return {
     samples: values.length,
     min,
     max,
-    avg: Math.round(avg * 100) / 100
+    avg: Math.round(avg * 100) / 100,
+    p95: Math.round(p95 * 100) / 100
   };
 }
 
@@ -420,7 +425,7 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     "saveFlushPlayers",
     "saveInFlight"
   ];
-  const fields: SummaryField[] = ["min", "max", "avg"];
+  const fields: SummaryField[] = ["min", "max", "avg", "p95"];
   for (const metric of metricNames) {
     const summary = report.perTick[metric];
     if (!summary) continue;

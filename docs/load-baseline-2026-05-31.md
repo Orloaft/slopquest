@@ -210,8 +210,9 @@ and combat fanout without making every client see every other client.
   compact-state counts, proving the compact path is active during every load
   scenario.
 - The load driver tracks state-packet parse, compact-normalize, and total decode
-  timing. The latest full gate kept state decode averages at or below `0.07 ms`
-  per packet, with worst single-sample decode around `3.16 ms`.
+  timing with p95 summaries. The latest full gate kept state decode averages at
+  or below `0.07 ms` per packet, with worst single-sample decode around
+  `3.16 ms`.
 - `npm run check` now includes `npm run assets:budget`, currently guarding
   runtime assets at `100 MiB` total, `5 MiB` per file, and `500` files. The
   same gate now tracks Phaser startup preload separately; current preload is
