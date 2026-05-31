@@ -31,6 +31,8 @@ const options = parseArgs(process.argv.slice(2));
 const url = stringOption(options.url) ?? `ws://127.0.0.1:${stringOption(options.port) ?? process.env.PORT ?? 8787}`;
 const clients = Number(options.clients ?? 12);
 const durationMs = Number(options.duration ?? 10000);
+const slowClients = Math.max(0, Math.floor(Number(options["slow-clients"] ?? 0)));
+const slowAfterMs = Math.max(0, Math.floor(Number(options["slow-after"] ?? 1500)));
 const combatRatio = clampUnit(Number(options.combat ?? 0));
 const combatZones = String(options.zones ?? "cemetery,crypt,woods")
   .split(",")
@@ -61,13 +63,17 @@ const observed = {
   tickMs: [] as number[],
   snapshotMs: [] as number[],
   bytesOutPerSecond: [] as number[],
+  snapshotsSentPerSecond: [] as number[],
+  snapshotsSkippedBackpressurePerSecond: [] as number[],
   visiblePlayers: [] as number[],
   visibleMonsters: [] as number[],
   visibleTrees: [] as number[],
   visibleFires: [] as number[],
   serverClientsPeak: 0,
   serverMonsters: 0,
-  spatialCells: 0
+  spatialCells: 0,
+  socketBackpressureBytes: 0,
+  slowClientsPaused: 0
 };
 
 for (let i = 0; i < clients; i += 1) {
@@ -120,6 +126,9 @@ function openClient(index: number): void {
           );
         }, 100);
       }
+      if (index < slowClients) {
+        setTimeout(() => pauseClientSocket(socket), slowAfterMs);
+      }
     }
     if (message.type === "state") {
       stats.states += 1;
@@ -145,6 +154,13 @@ function randomInput(): { up: boolean; down: boolean; left: boolean; right: bool
     left: roll === 2,
     right: roll === 3
   };
+}
+
+function pauseClientSocket(socket: WebSocket): void {
+  const rawSocket = (socket as unknown as { _socket?: { pause?: () => void } })._socket;
+  if (socket.readyState !== WebSocket.OPEN || !rawSocket?.pause) return;
+  rawSocket.pause();
+  observed.slowClientsPaused += 1;
 }
 
 function clampUnit(value: number): number {
@@ -176,6 +192,10 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   if (typeof m.tickMs === "number") observed.tickMs.push(m.tickMs);
   if (typeof m.snapshotMs === "number") observed.snapshotMs.push(m.snapshotMs);
   if (typeof m.bytesOutPerSecond === "number") observed.bytesOutPerSecond.push(m.bytesOutPerSecond);
+  if (typeof m.snapshotsSentPerSecond === "number") observed.snapshotsSentPerSecond.push(m.snapshotsSentPerSecond);
+  if (typeof m.snapshotsSkippedBackpressurePerSecond === "number") {
+    observed.snapshotsSkippedBackpressurePerSecond.push(m.snapshotsSkippedBackpressurePerSecond);
+  }
   if (typeof m.visiblePlayers === "number") observed.visiblePlayers.push(m.visiblePlayers);
   if (typeof m.visibleMonsters === "number") observed.visibleMonsters.push(m.visibleMonsters);
   if (typeof m.visibleTrees === "number") observed.visibleTrees.push(m.visibleTrees);
@@ -183,6 +203,7 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   if (typeof m.clients === "number" && m.clients > observed.serverClientsPeak) observed.serverClientsPeak = m.clients;
   if (typeof m.monsters === "number") observed.serverMonsters = m.monsters;
   if (typeof m.spatialCells === "number") observed.spatialCells = m.spatialCells;
+  if (typeof m.socketBackpressureBytes === "number") observed.socketBackpressureBytes = m.socketBackpressureBytes;
 }
 
 function summarize(values: number[]): Summary | null {
@@ -214,6 +235,11 @@ function reportAndExit(): void {
     url,
     clients,
     durationMs,
+    slowClients: {
+      requested: slowClients,
+      paused: observed.slowClientsPaused,
+      slowAfterMs
+    },
     combat: {
       ratio: combatRatio,
       assigned: combatAssignments.size,
@@ -223,12 +249,15 @@ function reportAndExit(): void {
     server: {
       clientsPeak: observed.serverClientsPeak,
       monsters: observed.serverMonsters,
-      spatialCells: observed.spatialCells
+      spatialCells: observed.spatialCells,
+      socketBackpressureBytes: observed.socketBackpressureBytes
     },
     perTick: {
       tickMs: summarize(observed.tickMs),
       snapshotMs: summarize(observed.snapshotMs),
-      bytesOutPerSecond: summarize(observed.bytesOutPerSecond)
+      bytesOutPerSecond: summarize(observed.bytesOutPerSecond),
+      snapshotsSentPerSecond: summarize(observed.snapshotsSentPerSecond),
+      snapshotsSkippedBackpressurePerSecond: summarize(observed.snapshotsSkippedBackpressurePerSecond)
     },
     perClient: {
       visiblePlayers: summarize(observed.visiblePlayers),

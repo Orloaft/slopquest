@@ -240,6 +240,9 @@ export interface StateMetrics {
   tickMs: number;
   snapshotMs: number;
   bytesOutPerSecond: number;
+  snapshotsSentPerSecond: number;
+  snapshotsSkippedBackpressurePerSecond: number;
+  socketBackpressureBytes: number;
 }
 
 // --- Server → client messages ---------------------------------------------

@@ -255,5 +255,9 @@ export interface Metrics {
   snapshotSamples: number[];
   bytesOutThisSecond: number;
   bytesOutPerSecond: number;
+  snapshotsSentThisSecond: number;
+  snapshotsSentPerSecond: number;
+  snapshotsSkippedBackpressureThisSecond: number;
+  snapshotsSkippedBackpressurePerSecond: number;
   lastBytesAt: number;
 }

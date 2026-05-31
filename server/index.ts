@@ -178,6 +178,9 @@ interface SnapshotMetricFrame {
   tickMs: number;
   snapshotMs: number;
   bytesOutPerSecond: number;
+  snapshotsSentPerSecond: number;
+  snapshotsSkippedBackpressurePerSecond: number;
+  socketBackpressureBytes: number;
 }
 
 interface SnapshotCategoryCache {
@@ -306,7 +309,7 @@ const MONSTER_ATTACK_ANIM_MS = 480;
 // towns and tree-dense zones stay delta-dominated at scale.
 const TREE_SNAPSHOT_EVERY = positiveIntEnv("TIB_TREE_SNAPSHOT_EVERY", E2E_TEST ? 5 : 10);
 const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 80);
-const SOCKET_BACKPRESSURE_BYTES = 512 * 1024;
+const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
 const WS_COMPRESSION = process.env.TIB_WS_COMPRESSION === "1" || (!E2E_TEST && process.env.TIB_WS_COMPRESSION !== "0");
 const WS_COMPRESSION_THRESHOLD = positiveIntEnv("TIB_WS_COMPRESSION_THRESHOLD", 1024);
 mkdirSync(DATA_DIR, { recursive: true });
@@ -356,6 +359,10 @@ const metrics: Metrics = {
   snapshotSamples: [],
   bytesOutThisSecond: 0,
   bytesOutPerSecond: 0,
+  snapshotsSentThisSecond: 0,
+  snapshotsSentPerSecond: 0,
+  snapshotsSkippedBackpressureThisSecond: 0,
+  snapshotsSkippedBackpressurePerSecond: 0,
   lastBytesAt: performance.now()
 };
 let saveQueued = false;
@@ -2441,11 +2448,15 @@ function broadcastState(): void {
   for (const session of clients.values()) {
     const { socket } = session;
     if (socket.readyState !== socket.OPEN) continue;
-    if (socket.bufferedAmount > SOCKET_BACKPRESSURE_BYTES) continue;
+    if (socket.bufferedAmount > SOCKET_BACKPRESSURE_BYTES) {
+      metrics.snapshotsSkippedBackpressureThisSecond += 1;
+      continue;
+    }
 
     const snapshot = buildSnapshotFor(session, includeTrees, forceFull, metricFrame);
     const raw = JSON.stringify(snapshot);
     metrics.bytesOutThisSecond += Buffer.byteLength(raw);
+    metrics.snapshotsSentThisSecond += 1;
     socket.send(raw);
   }
 }
@@ -2457,7 +2468,10 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
     spatialCells: spatial.cellCount + staticSpatial.cellCount,
     tickMs: round(avg(metrics.tickSamples)),
     snapshotMs: round(avg(metrics.snapshotSamples)),
-    bytesOutPerSecond: metrics.bytesOutPerSecond
+    bytesOutPerSecond: metrics.bytesOutPerSecond,
+    snapshotsSentPerSecond: metrics.snapshotsSentPerSecond,
+    snapshotsSkippedBackpressurePerSecond: metrics.snapshotsSkippedBackpressurePerSecond,
+    socketBackpressureBytes: SOCKET_BACKPRESSURE_BYTES
   };
 }
 
@@ -2569,7 +2583,10 @@ function buildSnapshotFor(session: Session, includeTrees: boolean, forceFull: bo
       spatialCells: metricFrame.spatialCells,
       tickMs: metricFrame.tickMs,
       snapshotMs: metricFrame.snapshotMs,
-      bytesOutPerSecond: metricFrame.bytesOutPerSecond
+      bytesOutPerSecond: metricFrame.bytesOutPerSecond,
+      snapshotsSentPerSecond: metricFrame.snapshotsSentPerSecond,
+      snapshotsSkippedBackpressurePerSecond: metricFrame.snapshotsSkippedBackpressurePerSecond,
+      socketBackpressureBytes: metricFrame.socketBackpressureBytes
     }
   };
 }
@@ -3783,7 +3800,11 @@ function updateByteMetric(): void {
   const now = performance.now();
   if (now - metrics.lastBytesAt < 1000) return;
   metrics.bytesOutPerSecond = metrics.bytesOutThisSecond;
+  metrics.snapshotsSentPerSecond = metrics.snapshotsSentThisSecond;
+  metrics.snapshotsSkippedBackpressurePerSecond = metrics.snapshotsSkippedBackpressureThisSecond;
   metrics.bytesOutThisSecond = 0;
+  metrics.snapshotsSentThisSecond = 0;
+  metrics.snapshotsSkippedBackpressureThisSecond = 0;
   metrics.lastBytesAt = now;
 }
 
