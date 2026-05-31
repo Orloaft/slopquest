@@ -98,6 +98,7 @@ const gateScenarios: Scenario[] = [
       "1",
       "--zones",
       "cemetery,crypt,woods,woodsNorth",
+      "--attack-targets",
       "--max-errors",
       "0",
       "--min-opened",

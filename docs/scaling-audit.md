@@ -132,12 +132,12 @@ Headline results:
 |---|---:|---:|---:|---:|---:|
 | 50 mixed town/combat | 0 | 0 | 0.39 / 0.47 ms | 4.70 / 5.81 ms | 5.83 / 6.54 MB/s |
 | 50 clustered town | 0 | 0 | 0.24 / 0.29 ms | 5.09 / 6.30 ms | 9.42 / 10.60 MB/s |
-| 100 distributed regional | 0 | 0 | 0.63 / 0.74 ms | 10.38 / 12.22 ms | 11.92 / 12.94 MB/s |
+| 100 distributed regional combat | 0 | 0 | 0.64 / 0.81 ms | 10.06 / 11.81 ms | 12.06 / 13.23 MB/s |
 
 This validates the original target: 50 co-located clients are no longer near the
 50 ms snapshot budget. It also gives the project a larger regional smoke gate:
-100 clients spread across four active zones stay comfortably below the 75 ms
-broadcast interval without compression.
+100 clients spread across four active zones with active target churn stay
+comfortably below the 75 ms broadcast interval without compression.
 
 ## Remaining Risks
 
