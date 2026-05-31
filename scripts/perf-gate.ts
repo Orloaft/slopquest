@@ -45,6 +45,8 @@ const gateScenarios: Scenario[] = [
       "--max-bytes-out-per-second-avg",
       "14000000",
       "--max-snapshots-skipped-backpressure-per-second-max",
+      "0",
+      "--max-events-dropped-per-second-max",
       "0"
     ]
   },
@@ -80,6 +82,8 @@ const gateScenarios: Scenario[] = [
       "--max-bytes-out-per-second-avg",
       "10000000",
       "--max-snapshots-skipped-backpressure-per-second-max",
+      "0",
+      "--max-events-dropped-per-second-max",
       "0"
     ]
   },
@@ -118,6 +122,8 @@ const gateScenarios: Scenario[] = [
       "--max-bytes-out-per-second-avg",
       "12000000",
       "--max-snapshots-skipped-backpressure-per-second-max",
+      "0",
+      "--max-events-dropped-per-second-max",
       "0"
     ]
   },
@@ -160,7 +166,9 @@ const gateScenarios: Scenario[] = [
       "--max-static-full-snapshots",
       "250",
       "--max-bytes-out-per-second-avg",
-      "10000000"
+      "10000000",
+      "--max-events-dropped-per-second-max",
+      "0"
     ]
   }
 ];
@@ -202,6 +210,8 @@ const soakScenarios: Scenario[] = [
       "--max-bytes-out-per-second-avg",
       "12000000",
       "--max-snapshots-skipped-backpressure-per-second-max",
+      "0",
+      "--max-events-dropped-per-second-max",
       "0"
     ]
   }

@@ -214,6 +214,7 @@ interface SnapshotMetricFrame {
   bytesOutPerSecond: number;
   snapshotsSentPerSecond: number;
   snapshotsSkippedBackpressurePerSecond: number;
+  eventsDroppedPerSecond: number;
   socketBackpressureBytes: number;
 }
 
@@ -352,6 +353,9 @@ const RESOURCE_SNAPSHOT_EVERY = positiveIntEnv("TIB_RESOURCE_SNAPSHOT_EVERY", E2
 const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 80);
 const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 1000);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
+const GLOBAL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_GLOBAL_EVENT_QUEUE_LIMIT", 128);
+const TARGETED_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_TARGETED_EVENT_QUEUE_LIMIT", 64);
+const CELL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_CELL_EVENT_QUEUE_LIMIT", 256);
 const WS_COMPRESSION = process.env.TIB_WS_COMPRESSION === "1" || (!E2E_TEST && process.env.TIB_WS_COMPRESSION !== "0");
 const WS_COMPRESSION_THRESHOLD = positiveIntEnv("TIB_WS_COMPRESSION_THRESHOLD", 1024);
 mkdirSync(DATA_DIR, { recursive: true });
@@ -418,6 +422,8 @@ const metrics: Metrics = {
   snapshotsSentPerSecond: 0,
   snapshotsSkippedBackpressureThisSecond: 0,
   snapshotsSkippedBackpressurePerSecond: 0,
+  eventsDroppedThisSecond: 0,
+  eventsDroppedPerSecond: 0,
   lastBytesAt: performance.now()
 };
 let saveQueued = false;
@@ -2768,6 +2774,7 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
     bytesOutPerSecond: metrics.bytesOutPerSecond,
     snapshotsSentPerSecond: metrics.snapshotsSentPerSecond,
     snapshotsSkippedBackpressurePerSecond: metrics.snapshotsSkippedBackpressurePerSecond,
+    eventsDroppedPerSecond: metrics.eventsDroppedPerSecond,
     socketBackpressureBytes: SOCKET_BACKPRESSURE_BYTES
   };
 }
@@ -2930,6 +2937,7 @@ function buildSnapshotFor(
       bytesOutPerSecond: metricFrame.bytesOutPerSecond,
       snapshotsSentPerSecond: metricFrame.snapshotsSentPerSecond,
       snapshotsSkippedBackpressurePerSecond: metricFrame.snapshotsSkippedBackpressurePerSecond,
+      eventsDroppedPerSecond: metricFrame.eventsDroppedPerSecond,
       socketBackpressureBytes: metricFrame.socketBackpressureBytes
     }
   };
@@ -4132,16 +4140,28 @@ function event(
   eventOrder.set(item, nextEventOrder++);
   if (item.to) {
     const bucket = targetedEventsByPlayer.get(item.to) ?? [];
+    if (bucket.length >= TARGETED_EVENT_QUEUE_LIMIT) {
+      metrics.eventsDroppedThisSecond += 1;
+      return;
+    }
     bucket.push(item);
     targetedEventsByPlayer.set(item.to, bucket);
     return;
   }
   if (eventIsBroadcastGlobal(item)) {
+    if (globalEvents.length >= GLOBAL_EVENT_QUEUE_LIMIT) {
+      metrics.eventsDroppedThisSecond += 1;
+      return;
+    }
     globalEvents.push(item);
     return;
   }
   const key = spatialKey(item.floor!, item.x!, item.y!);
   const bucket = eventsByCell.get(key) ?? [];
+  if (bucket.length >= CELL_EVENT_QUEUE_LIMIT) {
+    metrics.eventsDroppedThisSecond += 1;
+    return;
+  }
   bucket.push(item);
   eventsByCell.set(key, bucket);
 }
@@ -4199,9 +4219,11 @@ function updateByteMetric(): void {
   metrics.bytesOutPerSecond = metrics.bytesOutThisSecond;
   metrics.snapshotsSentPerSecond = metrics.snapshotsSentThisSecond;
   metrics.snapshotsSkippedBackpressurePerSecond = metrics.snapshotsSkippedBackpressureThisSecond;
+  metrics.eventsDroppedPerSecond = metrics.eventsDroppedThisSecond;
   metrics.bytesOutThisSecond = 0;
   metrics.snapshotsSentThisSecond = 0;
   metrics.snapshotsSkippedBackpressureThisSecond = 0;
+  metrics.eventsDroppedThisSecond = 0;
   metrics.lastBytesAt = now;
 }
 

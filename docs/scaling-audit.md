@@ -33,6 +33,8 @@ with no socket errors and no backpressure skips. See
 - Static trees/resources are initial-full per session, then delta/removal only.
 - Tree resource cells are generated lazily around players and pruned when no
   players are nearby.
+- Transient event queues are bounded per global, targeted, and spatial-cell
+  queue, with drop telemetry in load gates.
 - Current content: 10 floors, 77 monsters, roughly 1,385 derivable tree tiles,
   NPCs, gathering resources, fires, corpses, and per-player persistence.
 
@@ -71,6 +73,11 @@ snapshot recovery. Each session receives one full sync per static category, and
 then only signature changes or interest-range removals are sent. This keeps
 tree/resource-heavy regions from producing recurring full-list bursts as world
 density grows.
+
+Transient combat/UI events are also bounded before snapshot fan-out. Normal
+50-client load gates assert `eventsDroppedPerSecond.max` stays at `0`, while
+pathological bursts degrade by dropping excess float/projectile/chat events
+instead of building unbounded packets.
 
 ### Spatial indexing and active regions
 
@@ -194,6 +201,7 @@ process cannot tick the populated world.
   sync only, then deltas/removals.
 - [x] Chunk-derived tree resources with active-cell pruning and resident
   resource load gates.
+- [x] Bounded transient event queues with event-drop telemetry in load gates.
 - [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
 - [ ] Chunk-derived fishing/mining/herb resources before those lists grow by an

@@ -248,6 +248,7 @@ export interface StateMetrics {
   bytesOutPerSecond: number;
   snapshotsSentPerSecond: number;
   snapshotsSkippedBackpressurePerSecond: number;
+  eventsDroppedPerSecond: number;
   socketBackpressureBytes: number;
 }
 

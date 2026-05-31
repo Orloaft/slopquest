@@ -267,5 +267,7 @@ export interface Metrics {
   snapshotsSentPerSecond: number;
   snapshotsSkippedBackpressureThisSecond: number;
   snapshotsSkippedBackpressurePerSecond: number;
+  eventsDroppedThisSecond: number;
+  eventsDroppedPerSecond: number;
   lastBytesAt: number;
 }

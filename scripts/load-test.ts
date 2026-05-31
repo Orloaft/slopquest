@@ -34,7 +34,13 @@ interface Summary {
   avg: number;
 }
 
-type SummaryMetric = "tickMs" | "snapshotMs" | "bytesOutPerSecond" | "snapshotsSentPerSecond" | "snapshotsSkippedBackpressurePerSecond";
+type SummaryMetric =
+  | "tickMs"
+  | "snapshotMs"
+  | "bytesOutPerSecond"
+  | "snapshotsSentPerSecond"
+  | "snapshotsSkippedBackpressurePerSecond"
+  | "eventsDroppedPerSecond";
 type GaugeMetric = "heapUsedMb" | "rssMb" | "residentStaticResources" | "dynamicEntities" | "spatialCells";
 type SummaryField = "min" | "max" | "avg";
 
@@ -81,6 +87,7 @@ const observed = {
   bytesOutPerSecond: [] as number[],
   snapshotsSentPerSecond: [] as number[],
   snapshotsSkippedBackpressurePerSecond: [] as number[],
+  eventsDroppedPerSecond: [] as number[],
   visiblePlayers: [] as number[],
   visibleMonsters: [] as number[],
   visibleTrees: [] as number[],
@@ -263,6 +270,7 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   if (typeof m.snapshotsSkippedBackpressurePerSecond === "number") {
     observed.snapshotsSkippedBackpressurePerSecond.push(m.snapshotsSkippedBackpressurePerSecond);
   }
+  if (typeof m.eventsDroppedPerSecond === "number") observed.eventsDroppedPerSecond.push(m.eventsDroppedPerSecond);
   if (typeof m.visiblePlayers === "number") observed.visiblePlayers.push(m.visiblePlayers);
   if (typeof m.visibleMonsters === "number") observed.visibleMonsters.push(m.visibleMonsters);
   if (typeof m.visibleTrees === "number") observed.visibleTrees.push(m.visibleTrees);
@@ -347,7 +355,8 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     "snapshotMs",
     "bytesOutPerSecond",
     "snapshotsSentPerSecond",
-    "snapshotsSkippedBackpressurePerSecond"
+    "snapshotsSkippedBackpressurePerSecond",
+    "eventsDroppedPerSecond"
   ];
   const gaugeNames: GaugeMetric[] = ["heapUsedMb", "rssMb", "residentStaticResources", "dynamicEntities", "spatialCells"];
   const fields: SummaryField[] = ["min", "max", "avg"];
@@ -407,6 +416,7 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       bytesOutPerSecond: summarize(observed.bytesOutPerSecond),
       snapshotsSentPerSecond: summarize(observed.snapshotsSentPerSecond),
       snapshotsSkippedBackpressurePerSecond: summarize(observed.snapshotsSkippedBackpressurePerSecond),
+      eventsDroppedPerSecond: summarize(observed.eventsDroppedPerSecond),
       heapUsedMb: summarize(observed.heapUsedMb),
       rssMb: summarize(observed.rssMb),
       residentStaticResources: summarize(observed.residentStaticResources),

@@ -141,5 +141,8 @@ visible-player density.
   The 50-client gate tightened `residentStaticResources.max` to `1200`; the
   latest mixed town/combat run peaked at `774` resident static resources while
   preserving visible-tree density.
+- Transient event queues now expose `eventsDroppedPerSecond`; the local perf
+  gate requires it to remain `0` for normal clustered, mixed, combat, and
+  slow-reader scenarios.
 - The next performance work should be longer/slow-client scenarios and eventual
   protocol compaction only if telemetry asks for it.
