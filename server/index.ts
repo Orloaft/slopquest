@@ -373,6 +373,8 @@ const METRIC_WINDOW = 60;
 const SPATIAL_CELL_SIZE = 8;
 const ACTIVE_REGION_RADIUS = SNAPSHOT_RADIUS + SPATIAL_CELL_SIZE;
 const ACTIVE_REGION_CELL_MARGIN = Math.ceil(ACTIVE_REGION_RADIUS / SPATIAL_CELL_SIZE);
+const TREE_STATIC_PRUNE_CELL_MARGIN = Math.ceil(TREE_SNAPSHOT_RADIUS / SPATIAL_CELL_SIZE);
+const RESOURCE_STATIC_PRUNE_CELL_MARGIN = Math.ceil(SNAPSHOT_RADIUS / SPATIAL_CELL_SIZE);
 const composedTreeNodesByCell = buildStaticBaseCellIndex(COMPOSED_TREE_NODES);
 const fishingNodeBasesByCell = buildStaticBaseCellIndex(FISHING_NODES);
 const miningNodeBasesByCell = buildStaticBaseCellIndex(MINING_NODES);
@@ -447,7 +449,7 @@ const playerViewSignatureCache = new WeakMap<PlayerView, number>();
 const resourceViewSignatureCache = new WeakMap<SnapshotEntity, number>();
 const privatePlayerViewCache = new WeakMap<ServerPlayer, PlayerPrivateViewCache>();
 const selfPlayerViewCache = new WeakMap<ServerPlayer, PlayerSelfViewCache>();
-const activeRegionCellsByPlayerCell = new Map<string, string[]>();
+const expandedCellKeysByCellAndMargin = new Map<string, string[]>();
 const monsterViewCache = new WeakMap<ServerMonster, EntityViewCache<MonsterView>>();
 const npcViewCache = new WeakMap<NpcRuntime, EntityViewCache<NpcView>>();
 const treeViewCache = new WeakMap<TreeNodeRuntime, ResourceViewCache<TreeView>>();
@@ -979,28 +981,29 @@ function occupiedRegions(): ActiveRegions {
   const regions = activeRegionsScratch;
   regions.cells.clear();
   for (const cellKey of spatial.players.keys()) {
-    for (const cell of activeRegionCellsForPlayerCell(cellKey)) regions.cells.add(cell);
+    for (const cell of expandedCellKeysForCell(cellKey, ACTIVE_REGION_CELL_MARGIN)) regions.cells.add(cell);
   }
   return regions;
 }
 
-function activeRegionCellsForPlayerCell(playerCellKey: string): string[] {
-  const cached = activeRegionCellsByPlayerCell.get(playerCellKey);
+function expandedCellKeysForCell(cellKey: string, margin: number): string[] {
+  const cacheKey = `${margin}:${cellKey}`;
+  const cached = expandedCellKeysByCellAndMargin.get(cacheKey);
   if (cached) return cached;
-  const [floorText, cxText, cyText] = playerCellKey.split(":");
+  const [floorText, cxText, cyText] = cellKey.split(":");
   const floor = Number(floorText);
   const playerCx = Number(cxText);
   const playerCy = Number(cyText);
   const cells: string[] = [];
-  for (let cy = playerCy - ACTIVE_REGION_CELL_MARGIN; cy <= playerCy + ACTIVE_REGION_CELL_MARGIN; cy += 1) {
-    for (let cx = playerCx - ACTIVE_REGION_CELL_MARGIN; cx <= playerCx + ACTIVE_REGION_CELL_MARGIN; cx += 1) {
+  for (let cy = playerCy - margin; cy <= playerCy + margin; cy += 1) {
+    for (let cx = playerCx - margin; cx <= playerCx + margin; cx += 1) {
       cells.push(`${floor}:${cx}:${cy}`);
     }
   }
-  activeRegionCellsByPlayerCell.set(playerCellKey, cells);
-  if (activeRegionCellsByPlayerCell.size > SPATIAL_QUERY_CACHE_ENTRIES) {
-    const oldest = activeRegionCellsByPlayerCell.keys().next().value;
-    if (oldest) activeRegionCellsByPlayerCell.delete(oldest);
+  expandedCellKeysByCellAndMargin.set(cacheKey, cells);
+  if (expandedCellKeysByCellAndMargin.size > SPATIAL_QUERY_CACHE_ENTRIES) {
+    const oldest = expandedCellKeysByCellAndMargin.keys().next().value;
+    if (oldest) expandedCellKeysByCellAndMargin.delete(oldest);
   }
   return cells;
 }
@@ -2474,8 +2477,8 @@ function pruneDistantTreeCells(now: number): void {
   const stale = staticPruneStaleCellsScratch;
   keep.clear();
   stale.length = 0;
-  for (const { player } of clients.values()) {
-    for (const cell of spatialQueryCells(player.floor, player.x, player.y, TREE_SNAPSHOT_RADIUS)) keep.add(cell.key);
+  for (const cellKey of spatial.players.keys()) {
+    for (const keepCell of expandedCellKeysForCell(cellKey, TREE_STATIC_PRUNE_CELL_MARGIN)) keep.add(keepCell);
   }
   for (const cellKey of materializedTreeCells) {
     if (!keep.has(cellKey)) stale.push(cellKey);
@@ -2501,8 +2504,8 @@ function pruneDistantStaticResourceCells(now: number): void {
   const stale = staticPruneStaleCellsScratch;
   keep.clear();
   stale.length = 0;
-  for (const { player } of clients.values()) {
-    for (const cell of spatialQueryCells(player.floor, player.x, player.y, SNAPSHOT_RADIUS)) keep.add(cell.key);
+  for (const cellKey of spatial.players.keys()) {
+    for (const keepCell of expandedCellKeysForCell(cellKey, RESOURCE_STATIC_PRUNE_CELL_MARGIN)) keep.add(keepCell);
   }
   for (const cellKey of materializedStaticResourceCells) {
     if (!keep.has(cellKey)) stale.push(cellKey);

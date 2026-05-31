@@ -178,6 +178,9 @@ and combat fanout without making every client see every other client.
   spatial effects than the configured cap and asserts packets stay at the cap.
 - Static tree/resource pruning now runs on a throttled maintenance cadence with
   reusable scratch storage instead of rebuilding prune sets every snapshot.
+- Static prune keep ranges now derive from occupied player cells rather than
+  every player session, so co-located crowds share the same cached keep-cell
+  expansion work.
 - Composed tree props now use the same spatial cell grouping as other static
   resources, so materializing one active tree cell no longer scans total
   authored composed-tree count.

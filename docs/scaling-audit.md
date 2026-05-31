@@ -57,6 +57,9 @@ no socket errors and no backpressure skips. See
 - Static tree/resource pruning is throttled by `TIB_STATIC_RESOURCE_PRUNE_MS`
   (default `1000`) and reuses scratch storage, so cleanup work is bounded by a
   maintenance cadence instead of every snapshot broadcast.
+- Static prune keep-cells are derived from occupied player spatial cells with
+  cached expanded cell lists, so co-located crowds do not rebuild the same
+  tree/resource keep ranges once per connected player.
 - Transient event queues are bounded per global, targeted, and spatial-cell
   queue, with drop telemetry in load gates.
 - Per-viewer transient event payloads are capped by `TIB_VISIBLE_EVENT_LIMIT`
@@ -233,7 +236,8 @@ The server no longer rebuilds one all-entity spatial index every tick.
 - Movement calls update the old and new cells directly.
 - Monsters and NPCs tick only in cells near online players.
 - Static tree/resource cold-cell pruning runs on a maintenance interval rather
-  than every 75 ms snapshot broadcast.
+  than every 75 ms snapshot broadcast, and it builds keep ranges from occupied
+  player cells instead of every player session.
 - Tree/herb, fire, and corpse expiry use min-heaps instead of whole-world scans.
 - `playersById` makes taunt/alert/burn owner lookup O(1).
 
@@ -376,6 +380,7 @@ process cannot tick the populated world.
 - [x] Lazy runtime residency for fishing, mining, and herb nodes with active
   cell pruning.
 - [x] Throttled static-resource pruning cadence with scratch reuse.
+- [x] Occupied-cell static-resource prune keep ranges.
 - [x] Bounded spatial query cell-key cache for snapshot/event/static lookups.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
 - [x] Per-viewer transient event cap with localized burst gate coverage.
