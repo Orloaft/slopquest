@@ -2457,13 +2457,16 @@ function moveEntity(entity: { floor: number; x: number; y: number; dir: Directio
 }
 
 function canStand(floor: number, x: number, y: number): boolean {
-  const checks: Array<[number, number]> = [
-    [x - 0.28, y - 0.28],
-    [x + 0.28, y - 0.28],
-    [x - 0.28, y + 0.28],
-    [x + 0.28, y + 0.28]
-  ];
-  return checks.every(([cx, cy]) => !isBlockedTile(tileAt(floor, Math.floor(cx), Math.floor(cy))));
+  const left = Math.floor(x - 0.28);
+  const right = Math.floor(x + 0.28);
+  const top = Math.floor(y - 0.28);
+  const bottom = Math.floor(y + 0.28);
+  return (
+    !isBlockedTile(tileAt(floor, left, top)) &&
+    !isBlockedTile(tileAt(floor, right, top)) &&
+    !isBlockedTile(tileAt(floor, left, bottom)) &&
+    !isBlockedTile(tileAt(floor, right, bottom))
+  );
 }
 
 function nearestPlayer(monster: ServerMonster, maxDistance: number): ServerPlayer | null {
