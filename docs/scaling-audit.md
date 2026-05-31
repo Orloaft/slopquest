@@ -19,8 +19,9 @@ Node/WebSocket process:
 - The client uses chunked/culled map rendering, heap-based A*, and a throttled minimap.
 - Class abilities are now data-driven YAML compositions instead of a branch-per-ability monolith.
 
-Fresh load checks on 2026-05-31 show the current build handles 50 simulated clients
-with no socket errors and no backpressure skips. See
+Fresh load checks on 2026-05-31 show the current build handles 50 simulated
+clients in clustered/combat scenarios and 100 distributed regional clients with
+no socket errors and no backpressure skips. See
 `docs/load-baseline-2026-05-31.md`.
 
 ## Current Runtime Shape
@@ -131,10 +132,12 @@ Headline results:
 |---|---:|---:|---:|---:|---:|
 | 50 mixed town/combat | 0 | 0 | 0.39 / 0.47 ms | 4.70 / 5.81 ms | 5.83 / 6.54 MB/s |
 | 50 clustered town | 0 | 0 | 0.24 / 0.29 ms | 5.09 / 6.30 ms | 9.42 / 10.60 MB/s |
+| 100 distributed regional | 0 | 0 | 0.63 / 0.74 ms | 10.38 / 12.22 ms | 11.92 / 12.94 MB/s |
 
 This validates the original target: 50 co-located clients are no longer near the
-50 ms snapshot budget. The clustered-town outbound result is also close to the
-original post-fix estimate of ~9 MB/s uncompressed.
+50 ms snapshot budget. It also gives the project a larger regional smoke gate:
+100 clients spread across four active zones stay comfortably below the 75 ms
+broadcast interval without compression.
 
 ## Remaining Risks
 
@@ -193,6 +196,8 @@ process cannot tick the populated world.
 ### Stage 2 - Add when telemetry asks for it
 
 - [x] Local automated load-test gate with thresholds (`npm run perf:gate`).
+- [x] 100-client distributed regional smoke scenario in the local performance
+  gate.
 - [x] Slow-reader smoke scenario in the local performance gate.
 - [x] Co-located combat scenario in the local performance gate.
 - [x] Optional longer mixed-combat soak gate (`npm run perf:soak`).

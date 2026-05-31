@@ -116,9 +116,54 @@ visible-player density.
 }
 ```
 
+## 100 Clients - Distributed Regional
+
+100 clients were distributed evenly across cemetery, crypt, woods, and
+woodsNorth. This exercises active-region scaling without making every client
+see every other client.
+
+```json
+{
+  "clients": 100,
+  "durationMs": 20000,
+  "opened": 100,
+  "welcomed": 100,
+  "states": 24980,
+  "errors": 0,
+  "closed": 100,
+  "server": {
+    "clientsPeak": 100,
+    "monsters": 77,
+    "spatialCells": 223,
+    "socketBackpressureBytes": 524288
+  },
+  "snapshotFlags": {
+    "staticFull": 400
+  },
+  "perTick": {
+    "tickMs": { "samples": 24980, "min": 0.06, "max": 0.74, "avg": 0.63 },
+    "snapshotMs": { "samples": 24980, "min": 0.11, "max": 12.22, "avg": 10.38 },
+    "bytesOutPerSecond": { "samples": 24980, "min": 0, "max": 12943841, "avg": 11918011.13 },
+    "snapshotsSentPerSecond": { "samples": 24980, "min": 0, "max": 1400, "avg": 1313.75 },
+    "snapshotsSkippedBackpressurePerSecond": { "samples": 24980, "min": 0, "max": 0, "avg": 0 },
+    "eventsDroppedPerSecond": { "samples": 24980, "min": 0, "max": 0, "avg": 0 },
+    "heapUsedMb": { "samples": 24980, "min": 11.1, "max": 29.15, "avg": 20.03 },
+    "rssMb": { "samples": 24980, "min": 96.75, "max": 139.28, "avg": 129.76 },
+    "residentStaticResources": { "samples": 24980, "min": 29, "max": 824, "avg": 674.42 }
+  },
+  "perClient": {
+    "visiblePlayers": { "samples": 24980, "min": 1, "max": 25, "avg": 24.33 },
+    "visibleMonsters": { "samples": 24980, "min": 0, "max": 9, "avg": 3.53 },
+    "visibleTrees": { "samples": 24980, "min": 0, "max": 323, "avg": 128.02 }
+  }
+}
+```
+
 ## Interpretation
 
 - Both 50-client scenarios completed with `0` socket errors and `0` backpressure skips.
+- The 100-client distributed scenario also completed with `0` socket errors,
+  `0` backpressure skips, and `0` event drops.
 - The clustered-town run validates the original post-fix bandwidth estimate:
   roughly 9 MB/s raw outbound for 50 co-located players.
 - Snapshot build stayed under 6.3 ms max, well below the 75 ms broadcast interval.
