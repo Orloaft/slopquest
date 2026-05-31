@@ -92,6 +92,9 @@ import type {
 
 type FishingNodeRuntime = (typeof FISHING_NODES)[number];
 type MiningNodeRuntime = (typeof MINING_NODES)[number];
+const fishingNodesById = new Map<string, FishingNodeRuntime>(FISHING_NODES.map((node) => [node.id, node]));
+const miningNodesById = new Map<string, MiningNodeRuntime>(MINING_NODES.map((node) => [node.id, node]));
+
 interface AbilityResolution {
   origin: Vec2;
   targets: ServerMonster[];
@@ -1664,7 +1667,7 @@ function cutTree(player: ServerPlayer, id: string): void {
 }
 
 function fishNode(player: ServerPlayer, id: string): void {
-  const node = FISHING_NODES.find((item) => item.id === id);
+  const node = fishingNodesById.get(id);
   if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.45) return;
   if (!playerHasCapability(player, "fish")) {
     event("float", "You need a fishing rod.", player.x, player.y, player.floor, "#f7d486");
@@ -1677,7 +1680,7 @@ function fishNode(player: ServerPlayer, id: string): void {
 }
 
 function mineNode(player: ServerPlayer, id: string): void {
-  const node = MINING_NODES.find((item) => item.id === id);
+  const node = miningNodesById.get(id);
   if (!node || player.dead || node.floor !== player.floor || distance(player, miningApproachPoint(node)) > 1.45) return;
   if (!playerHasCapability(player, "mine")) {
     event("float", "You need a pickaxe.", player.x, player.y, player.floor, "#f7d486");
@@ -1847,7 +1850,7 @@ function updatePlayerAction(player: ServerPlayer, now: number): void {
 function updateFishingAction(player: ServerPlayer, now: number): void {
   const action = player.action;
   if (action?.type !== "fishing") return;
-  const node = FISHING_NODES.find((item) => item.id === action.nodeId);
+  const node = fishingNodesById.get(action.nodeId);
   if (!node || player.dead || node.floor !== player.floor || distance(player, fishingApproachPoint(node)) > 1.65 || !playerHasCapability(player, "fish")) {
     player.action = null;
     return;
@@ -1867,7 +1870,7 @@ function updateFishingAction(player: ServerPlayer, now: number): void {
 function updateMiningAction(player: ServerPlayer, now: number): void {
   const action = player.action;
   if (action?.type !== "mining") return;
-  const node = MINING_NODES.find((item) => item.id === action.nodeId);
+  const node = miningNodesById.get(action.nodeId);
   if (!node || player.dead || node.floor !== player.floor || distance(player, miningApproachPoint(node)) > 1.65 || !playerHasCapability(player, "mine")) {
     player.action = null;
     return;
@@ -3771,8 +3774,8 @@ function createStaticSpatialIndex(): StaticSpatialIndex {
 function rebuildStaticSpatialIndex(): void {
   staticSpatial = createStaticSpatialIndex();
   for (const tree of treeNodes.values()) addToSpatial(staticSpatial.trees, tree);
-  for (const node of FISHING_NODES) addToSpatial(staticSpatial.fishingNodes, node);
-  for (const node of MINING_NODES) addToSpatial(staticSpatial.miningNodes, node);
+  for (const node of fishingNodesById.values()) addToSpatial(staticSpatial.fishingNodes, node);
+  for (const node of miningNodesById.values()) addToSpatial(staticSpatial.miningNodes, node);
   for (const node of herbNodes.values()) addToSpatial(staticSpatial.herbNodes, node);
   staticSpatial.cellCount =
     staticSpatial.trees.size +
