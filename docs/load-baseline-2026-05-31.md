@@ -202,6 +202,9 @@ and combat fanout without making every client see every other client.
 - State packets now omit empty removed-id lists and empty event arrays on the
   wire; clients treat absent values as empty, preserving compatibility while
   trimming repeated JSON key overhead.
+- Metrics frames are now sent at a per-client interval instead of on every state
+  packet. The client carries forward the latest frame, and `npm run perf:gate`
+  requires minimum metrics sample counts so the telemetry path remains covered.
 - `npm run check` now includes `npm run assets:budget`, currently guarding
   runtime assets at `100 MiB` total, `5 MiB` per file, and `500` files.
 - Save flush telemetry is now part of snapshots and the load driver. The perf
@@ -210,3 +213,19 @@ and combat fanout without making every client see every other client.
   touching the real `data/players` directory.
 - The next performance work should be longer/slow-client scenarios and eventual
   protocol compaction only if telemetry asks for it.
+
+## Same-Day Protocol Compaction Gate
+
+After throttling metrics frames to the per-client `TIB_SNAPSHOT_METRICS_MS`
+interval, `npm run perf:gate` passed all scenarios with explicit minimum
+metrics-sample thresholds. Headline state-packet averages:
+
+| Scenario | Metric samples | State bytes avg/max | Wire bytes avg/max |
+|---|---:|---:|---:|
+| 50 clustered town | 709 | 13.52 / 23.19 KB | 8.22 / 9.84 MB/s |
+| 150 capped town, compressed | 1,512 | 13.90 / 23.53 KB | 5.54 / 7.01 MB/s |
+| 50 mixed town/combat | 709 | 8.05 / 29.57 KB | 4.84 / 5.80 MB/s |
+| 100 distributed regional combat | 1,826 | 8.43 / 33.00 KB | 10.52 / 12.06 MB/s |
+| 50 co-located crypt combat | 708 | 12.77 / 15.43 KB | 7.74 / 9.18 MB/s |
+| 50 mixed slow readers | 639 | 8.42 / 29.32 KB | 4.84 / 5.83 MB/s |
+| 25 persistent save flush | 315 | 9.17 / 18.32 KB | 2.71 / 3.37 MB/s |

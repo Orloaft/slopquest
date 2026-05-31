@@ -396,6 +396,7 @@ const NPC_SNAPSHOT_EVERY = positiveIntEnv("TIB_NPC_SNAPSHOT_EVERY", E2E_TEST ? 1
 const RESOURCE_SNAPSHOT_EVERY = positiveIntEnv("TIB_RESOURCE_SNAPSHOT_EVERY", E2E_TEST ? 1 : 5);
 const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 80);
 const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 1000);
+const SNAPSHOT_METRICS_MS = positiveIntEnv("TIB_SNAPSHOT_METRICS_MS", 1000);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
 const SAVE_CONCURRENCY = positiveIntEnv("TIB_SAVE_CONCURRENCY", 16);
 const GLOBAL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_GLOBAL_EVENT_QUEUE_LIMIT", 128);
@@ -443,6 +444,7 @@ const activeRegionsScratch: ActiveRegions = { cells: new Set() };
 const visitedMonsterScratch = new Set<ServerMonster>();
 const visitedNpcScratch = new Set<NpcRuntime>();
 const lastSnapshotSentAt = new WeakMap<Session, number>();
+const lastMetricsSentAt = new WeakMap<Session, number>();
 let nextMonsterId = 1;
 let nextCorpseId = 1;
 let nextFireId = 1;
@@ -2853,12 +2855,22 @@ function broadcastState(): void {
       continue;
     }
 
-    const snapshot = buildSnapshotFor(session, includeTrees, includeNpcs, includeResources, forceDynamicFull, metricFrame, now);
+    const includeMetrics = shouldIncludeMetrics(session, now);
+    const snapshot = buildSnapshotFor(
+      session,
+      includeTrees,
+      includeNpcs,
+      includeResources,
+      forceDynamicFull,
+      includeMetrics ? metricFrame : null,
+      now
+    );
     if (!shouldSendSnapshot(session, snapshot, now)) continue;
     const raw = JSON.stringify(compactSnapshotForWire(snapshot));
     metrics.bytesOutThisSecond += Buffer.byteLength(raw);
     metrics.snapshotsSentThisSecond += 1;
     lastSnapshotSentAt.set(session, now);
+    if (snapshot.metrics) lastMetricsSentAt.set(session, now);
     socket.send(raw);
   }
   pruneDistantTreeCells(now);
@@ -2868,6 +2880,11 @@ function broadcastState(): void {
 function shouldSendSnapshot(session: Session, snapshot: StateSnapshot, now: number): boolean {
   if (!snapshotIsEmptyDelta(snapshot)) return true;
   return now - (lastSnapshotSentAt.get(session) ?? 0) >= SNAPSHOT_HEARTBEAT_MS;
+}
+
+function shouldIncludeMetrics(session: Session, now: number): boolean {
+  const lastSentAt = lastMetricsSentAt.get(session);
+  return lastSentAt === undefined || now - lastSentAt >= SNAPSHOT_METRICS_MS;
 }
 
 function snapshotIsEmptyDelta(snapshot: StateSnapshot): boolean {
@@ -2899,7 +2916,8 @@ function snapshotIsEmptyDelta(snapshot: StateSnapshot): boolean {
     snapshot.removedMiningNodeIds.length === 0 &&
     snapshot.removedHerbNodeIds.length === 0 &&
     snapshot.removedFireIds.length === 0 &&
-    snapshot.events.length === 0
+    snapshot.events.length === 0 &&
+    !snapshot.metrics
   );
 }
 
@@ -2949,7 +2967,7 @@ function buildSnapshotFor(
   includeNpcs: boolean,
   includeResources: boolean,
   forceDynamicFull: boolean,
-  metricFrame: SnapshotMetricFrame,
+  metricFrame: SnapshotMetricFrame | null,
   now: number
 ): StateSnapshot {
   const viewer = session.player;
@@ -3057,7 +3075,7 @@ function buildSnapshotFor(
   );
   const firesDelta = snapshotDelta(cache.fires, visibleFires, fireViewSignature, forceDynamicFull);
 
-  return {
+  const snapshot: StateSnapshot = {
     type: "state",
     players: playersDelta.items,
     playersFull: playersDelta.full,
@@ -3086,8 +3104,10 @@ function buildSnapshotFor(
     fires: firesDelta.items,
     firesFull: firesDelta.full,
     removedFireIds: firesDelta.removedIds,
-    events: visibleEventsFor(viewer),
-    metrics: {
+    events: visibleEventsFor(viewer)
+  };
+  if (metricFrame) {
+    snapshot.metrics = {
       clients: metricFrame.clients,
       monsters: metricFrame.monsters,
       zone: zoneAt(viewer.floor, viewer.x, viewer.y),
@@ -3115,8 +3135,9 @@ function buildSnapshotFor(
       saveFlushMs: metricFrame.saveFlushMs,
       saveFlushPlayers: metricFrame.saveFlushPlayers,
       saveInFlight: metricFrame.saveInFlight
-    }
-  };
+    };
+  }
+  return snapshot;
 }
 
 function residentStaticResourceCount(): number {

@@ -289,7 +289,7 @@ export interface StateSnapshot {
   firesFull: boolean;
   removedFireIds: string[];
   events: GameEvent[];
-  metrics: StateMetrics;
+  metrics?: StateMetrics;
 }
 
 export interface WelcomeMessage {

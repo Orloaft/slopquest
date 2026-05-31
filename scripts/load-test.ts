@@ -118,6 +118,7 @@ const observed = {
   serverMonsters: 0,
   spatialCells: 0,
   socketBackpressureBytes: 0,
+  metricSamples: 0,
   staticFullSnapshots: 0,
   slowClientsPaused: 0
 };
@@ -287,6 +288,7 @@ function parseArgs(args: string[]): ParsedArgs {
 }
 
 function recordMetrics(m: Partial<StateMetrics>): void {
+  observed.metricSamples += 1;
   if (typeof m.tickMs === "number") observed.tickMs.push(m.tickMs);
   if (typeof m.snapshotMs === "number") observed.snapshotMs.push(m.snapshotMs);
   if (typeof m.bytesOutPerSecond === "number") observed.bytesOutPerSecond.push(m.bytesOutPerSecond);
@@ -363,6 +365,7 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     ["opened", report.opened, optionNumber("min-opened")],
     ["welcomed", report.welcomed, optionNumber("min-welcomed")],
     ["states", report.states, optionNumber("min-states")],
+    ["metricSamples", report.metricSamples, optionNumber("min-metric-samples")],
     ["closed", report.closed, optionNumber("min-closed")],
     ["slowClients.paused", report.slowClients.paused, optionNumber("min-slow-paused")]
   ];
@@ -465,6 +468,7 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
     },
     transientClients: !persistent,
     ...stats,
+    metricSamples: observed.metricSamples,
     server: {
       clientsPeak: observed.serverClientsPeak,
       monsters: observed.serverMonsters,

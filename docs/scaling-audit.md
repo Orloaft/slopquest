@@ -43,6 +43,9 @@ no socket errors and no backpressure skips. See
   aggregate bandwidth becomes the only warning sign.
 - Snapshot metrics track raw JSON bytes and actual socket wire bytes separately,
   so compression can be tuned against host/network pressure instead of inferred.
+- Per-client metrics frames are throttled by `TIB_SNAPSHOT_METRICS_MS` (default
+  `1000`) and carried forward by the client, so routine deltas do not resend the
+  full telemetry object every snapshot.
 - Player save flushes are concurrency-capped and covered by a persistent
   temp-data load gate, so online-player saves cannot turn into an unbounded
   filesystem burst.
@@ -104,6 +107,12 @@ Wire snapshots omit empty `removed*Ids` lists and empty `events` arrays. Clients
 already treat those fields as empty when absent, so this trims repeated JSON key
 overhead from ordinary heartbeat/delta packets without changing the authoritative
 snapshot model.
+
+Metrics are also optional on individual state packets. The server sends the
+first metrics frame and then refreshes per client at the configured metrics
+interval; the client keeps the last frame for the HUD. Load gates assert a
+minimum metrics sample count, preventing telemetry throttling from masking a
+broken metrics path.
 
 Worst-case co-located player fanout is bounded by a nearest-player cap. The
 viewer is always included, and other player views are sorted by distance before
@@ -252,6 +261,7 @@ process cannot tick the populated world.
 - [x] Raw state-message byte telemetry and packet-size thresholds in load gates.
 - [x] Actual socket wire-byte telemetry with compressed crowd gate coverage.
 - [x] Safe JSON wire compaction for empty removed-id/event fields.
+- [x] Throttled metrics frames with minimum telemetry sample gates.
 - [x] Runtime asset budget gate in `npm run check`.
 - [x] Bounded player-save flushes with persistence telemetry and a temp-data
   perf gate.

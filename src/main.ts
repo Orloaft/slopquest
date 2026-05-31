@@ -900,7 +900,7 @@ function ensureSocket(): void {
       latestState = mergeStateSnapshot(latestState, message);
       selfView = resolveSelfView(latestState);
       if (!hadState || snapshotHasEntityChanges(message)) stateVersion += 1;
-      metricsVersion += 1;
+      if (message.metrics) metricsVersion += 1;
       if ((message.events ?? []).length > 0) consumeEvents(message.events ?? []);
     }
   });
@@ -923,7 +923,8 @@ function mergeStateSnapshot(previous: StateSnapshot | null, next: StateSnapshot)
     fishingNodes: mergeEntityViews(previous.fishingNodes, next.fishingNodes, next.removedFishingNodeIds, next.fishingNodesFull),
     miningNodes: mergeEntityViews(previous.miningNodes, next.miningNodes, next.removedMiningNodeIds, next.miningNodesFull),
     herbNodes: mergeEntityViews(previous.herbNodes, next.herbNodes, next.removedHerbNodeIds, next.herbNodesFull),
-    fires: mergeEntityViews(previous.fires, next.fires, next.removedFireIds, next.firesFull)
+    fires: mergeEntityViews(previous.fires, next.fires, next.removedFireIds, next.firesFull),
+    metrics: next.metrics ?? previous.metrics
   };
 }
 
