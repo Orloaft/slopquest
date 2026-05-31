@@ -52,6 +52,8 @@ no socket errors and no backpressure skips. See
 - Static trees/resources are initial-full per session, then delta/removal only.
 - Static resource cells for trees, fishing spots, ore veins, and herbs are
   generated lazily around players and pruned when no players are nearby.
+- Composed/static tree props are indexed by spatial cell, so materializing one
+  active tree cell does not scan every authored composed tree in a larger world.
 - Static tree/resource pruning is throttled by `TIB_STATIC_RESOURCE_PRUNE_MS`
   (default `1000`) and reuses scratch storage, so cleanup work is bounded by a
   maintenance cadence instead of every snapshot broadcast.
@@ -219,6 +221,8 @@ The server no longer rebuilds one all-entity spatial index every tick.
 
 - Players, monsters, corpses, NPCs, and fires are in dynamic spatial maps.
 - Fishing nodes, mining nodes, and herb nodes are indexed by active cells.
+- Composed tree props are pre-grouped by spatial cell and materialized through
+  the same lazy cell path as generated trees.
 - Repeated interest queries share cached cell-key ranges, capped by
   `TIB_SPATIAL_QUERY_CACHE_ENTRIES` (default `4096`).
 - Active monster/NPC regions are assembled from occupied player spatial cells
@@ -368,6 +372,7 @@ process cannot tick the populated world.
   sync only, then deltas/removals.
 - [x] Chunk-derived tree resources with active-cell pruning and resident
   resource load gates.
+- [x] Cell-indexed composed tree props for lazy materialization.
 - [x] Lazy runtime residency for fishing, mining, and herb nodes with active
   cell pruning.
 - [x] Throttled static-resource pruning cadence with scratch reuse.

@@ -373,6 +373,7 @@ const METRIC_WINDOW = 60;
 const SPATIAL_CELL_SIZE = 8;
 const ACTIVE_REGION_RADIUS = SNAPSHOT_RADIUS + SPATIAL_CELL_SIZE;
 const ACTIVE_REGION_CELL_MARGIN = Math.ceil(ACTIVE_REGION_RADIUS / SPATIAL_CELL_SIZE);
+const composedTreeNodesByCell = buildStaticBaseCellIndex(COMPOSED_TREE_NODES);
 const fishingNodeBasesByCell = buildStaticBaseCellIndex(FISHING_NODES);
 const miningNodeBasesByCell = buildStaticBaseCellIndex(MINING_NODES);
 const herbNodeBasesByCell = buildStaticBaseCellIndex(HERB_NODES);
@@ -2431,8 +2432,7 @@ function materializeTreeCell(floor: number, cx: number, cy: number): void {
       }
     }
   }
-  for (const tree of COMPOSED_TREE_NODES) {
-    if (spatialKey(tree.floor, tree.x, tree.y) !== cellKey) continue;
+  for (const tree of composedTreeNodesByCell.get(cellKey) ?? []) {
     materializeTree({
       id: composedTreeId(tree),
       floor: tree.floor,
@@ -2789,16 +2789,10 @@ function updateCellIndex<T extends Positioned>(index: Map<string, Set<T>>, entit
 }
 
 function forEachCellIndex<T extends Positioned>(index: Map<string, Set<T>>, floor: number, x: number, y: number, radius: number, visit: (item: T) => void): void {
-  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
-  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
-  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
-  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
-  for (let cy = minCy; cy <= maxCy; cy += 1) {
-    for (let cx = minCx; cx <= maxCx; cx += 1) {
-      const cellSet = index.get(`${floor}:${cx}:${cy}`);
-      if (!cellSet) continue;
-      for (const item of cellSet) visit(item);
-    }
+  for (const cell of spatialQueryCells(floor, x, y, radius)) {
+    const cellSet = index.get(cell.key);
+    if (!cellSet) continue;
+    for (const item of cellSet) visit(item);
   }
 }
 
