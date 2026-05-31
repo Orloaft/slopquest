@@ -319,8 +319,10 @@ let socket: WebSocket | null = null;
 let selfId: string | null = null;
 let latestState: StateSnapshot | null = null;
 let stateVersion = 0;
+let metricsVersion = 0;
 let syncedStateVersion = -1;
 let hudStateVersion = -1;
+let renderedMetricsVersion = -1;
 const chatLines: string[] = [];
 const E2E_MODE = new URLSearchParams(location.search).has("e2e");
 let renderedSkillSignature = "";
@@ -779,8 +781,11 @@ function update(this: Phaser.Scene, time: number): void {
   animateEntities();
   if (hudStateVersion !== stateVersion) {
     renderHud(me);
-    renderMetrics(latestState.metrics);
     hudStateVersion = stateVersion;
+  }
+  if (renderedMetricsVersion !== metricsVersion) {
+    renderMetrics(latestState.metrics);
+    renderedMetricsVersion = metricsVersion;
   }
   sendInput(time);
   tickHoldMove(time);
@@ -813,9 +818,11 @@ function ensureSocket(): void {
     if (message.type === "characterDeleted" && !message.ok) dom.rosterList.textContent = "That character is online or no longer exists.";
     if (message.type === "welcome") selfId = message.id;
     if (message.type === "state") {
+      const hadState = latestState != null;
       latestState = mergeStateSnapshot(latestState, message);
-      stateVersion += 1;
-      consumeEvents(message.events ?? []);
+      if (!hadState || snapshotHasEntityChanges(message)) stateVersion += 1;
+      metricsVersion += 1;
+      if ((message.events ?? []).length > 0) consumeEvents(message.events ?? []);
     }
   });
   socket.addEventListener("close", () => {
@@ -839,6 +846,38 @@ function mergeStateSnapshot(previous: StateSnapshot | null, next: StateSnapshot)
     herbNodes: mergeEntityViews(previous.herbNodes, next.herbNodes, next.removedHerbNodeIds, next.herbNodesFull),
     fires: mergeEntityViews(previous.fires, next.fires, next.removedFireIds, next.firesFull)
   };
+}
+
+function snapshotHasEntityChanges(snapshot: StateSnapshot): boolean {
+  return Boolean(
+    snapshot.playersFull ||
+      snapshot.monstersFull ||
+      snapshot.corpsesFull ||
+      snapshot.npcsFull ||
+      snapshot.treesFull ||
+      snapshot.fishingNodesFull ||
+      snapshot.miningNodesFull ||
+      snapshot.herbNodesFull ||
+      snapshot.firesFull ||
+      snapshot.players.length > 0 ||
+      snapshot.monsters.length > 0 ||
+      snapshot.corpses.length > 0 ||
+      snapshot.npcs.length > 0 ||
+      snapshot.trees.length > 0 ||
+      snapshot.fishingNodes.length > 0 ||
+      snapshot.miningNodes.length > 0 ||
+      snapshot.herbNodes.length > 0 ||
+      snapshot.fires.length > 0 ||
+      (snapshot.removedPlayerIds?.length ?? 0) > 0 ||
+      (snapshot.removedMonsterIds?.length ?? 0) > 0 ||
+      (snapshot.removedCorpseIds?.length ?? 0) > 0 ||
+      (snapshot.removedNpcIds?.length ?? 0) > 0 ||
+      (snapshot.removedTreeIds?.length ?? 0) > 0 ||
+      (snapshot.removedFishingNodeIds?.length ?? 0) > 0 ||
+      (snapshot.removedMiningNodeIds?.length ?? 0) > 0 ||
+      (snapshot.removedHerbNodeIds?.length ?? 0) > 0 ||
+      (snapshot.removedFireIds?.length ?? 0) > 0
+  );
 }
 
 function withSnapshotDefaults(snapshot: StateSnapshot): StateSnapshot {
