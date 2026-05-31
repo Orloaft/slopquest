@@ -4,6 +4,7 @@ import type {
   CorpseView,
   FireView,
   FishingNodeView,
+  GameEvent,
   HerbNodeView,
   MiningNodeView,
   MonsterView,
@@ -122,6 +123,27 @@ interface CompactCorpseView {
   it: CorpseView["items"];
 }
 
+interface CompactGameEvent {
+  k: string;
+  v: GameEvent["text"];
+  tm: number;
+  x?: number;
+  y?: number;
+  f?: number;
+  c?: string;
+  fr?: string;
+  tg?: string;
+  fx?: number;
+  fy?: number;
+  an?: number;
+  s?: number;
+  du?: number;
+  to?: string;
+  ln?: GameEvent["lines"];
+  os?: 1;
+  oa?: 1;
+}
+
 interface CompactStateMetrics {
   c: number;
   mo: number;
@@ -188,7 +210,7 @@ export interface CompactStateSnapshot {
   f?: CompactFireView[] | StateSnapshot["fires"];
   fF?: 1 | true;
   fR?: StateSnapshot["removedFireIds"];
-  e?: StateSnapshot["events"];
+  e?: CompactGameEvent[] | StateSnapshot["events"];
   x?: CompactStateMetrics | StateMetrics;
 }
 
@@ -202,6 +224,7 @@ const compactTreeViewCache = new WeakMap<TreeView, CompactTreeView>();
 const compactFishingNodeViewCache = new WeakMap<FishingNodeView, CompactFishingNodeView>();
 const compactMiningNodeViewCache = new WeakMap<MiningNodeView, CompactMiningNodeView>();
 const compactHerbNodeViewCache = new WeakMap<HerbNodeView, CompactHerbNodeView>();
+const compactGameEventCache = new WeakMap<GameEvent, CompactGameEvent>();
 
 export function compactStateSnapshot(snapshot: StateSnapshot): CompactStateSnapshot {
   const wire: CompactStateSnapshot = { type: "state" };
@@ -232,7 +255,7 @@ export function compactStateSnapshot(snapshot: StateSnapshot): CompactStateSnaps
   if (snapshot.fires.length > 0) wire.f = snapshot.fires.map(compactFireView);
   if (snapshot.firesFull) wire.fF = 1;
   if (snapshot.removedFireIds.length > 0) wire.fR = snapshot.removedFireIds;
-  if (snapshot.events.length > 0) wire.e = snapshot.events;
+  if (snapshot.events.length > 0) wire.e = snapshot.events.map(compactGameEvent);
   if (snapshot.metrics) wire.x = compactStateMetrics(snapshot.metrics);
   return wire;
 }
@@ -269,7 +292,7 @@ export function normalizeServerMessage(message: WireServerMessage): ServerMessag
     fires: (compact.f ?? []).map(expandFireView),
     firesFull: Boolean(compact.fF),
     removedFireIds: compact.fR ?? [],
-    events: compact.e ?? [],
+    events: (compact.e ?? []).map(expandGameEvent),
     metrics: compact.x ? expandStateMetrics(compact.x) : undefined
   };
 }
@@ -534,6 +557,58 @@ function expandCorpseView(corpse: CompactCorpseView | CorpseView): CorpseView {
     kind: corpse.k,
     items: corpse.it
   };
+}
+
+function compactGameEvent(event: GameEvent): CompactGameEvent {
+  const cached = compactGameEventCache.get(event);
+  if (cached) return cached;
+  const compact: CompactGameEvent = {
+    k: event.type,
+    v: event.text,
+    tm: event.t
+  };
+  if (event.x !== null) compact.x = event.x;
+  if (event.y !== null) compact.y = event.y;
+  if (event.floor !== null) compact.f = event.floor;
+  if (event.color !== null) compact.c = event.color;
+  if (event.from !== null) compact.fr = event.from;
+  if (event.target !== null) compact.tg = event.target;
+  if (event.fromX !== undefined) compact.fx = event.fromX;
+  if (event.fromY !== undefined) compact.fy = event.fromY;
+  if (event.angle !== undefined) compact.an = event.angle;
+  if (event.scale !== undefined) compact.s = event.scale;
+  if (event.durationMs !== undefined) compact.du = event.durationMs;
+  if (event.to !== undefined) compact.to = event.to;
+  if (event.lines !== undefined) compact.ln = event.lines;
+  if (event.opensShop) compact.os = 1;
+  if (event.opensAlchemist) compact.oa = 1;
+  compactGameEventCache.set(event, compact);
+  return compact;
+}
+
+function expandGameEvent(event: CompactGameEvent | GameEvent): GameEvent {
+  if ("type" in event) return event;
+  const expanded: GameEvent = {
+    type: event.k,
+    text: event.v,
+    x: event.x ?? null,
+    y: event.y ?? null,
+    floor: event.f ?? null,
+    color: event.c ?? null,
+    from: event.fr ?? null,
+    target: event.tg ?? null,
+    t: event.tm
+  };
+  if (event.fx !== undefined) expanded.fromX = event.fx;
+  if (event.fy !== undefined) expanded.fromY = event.fy;
+  if (event.an !== undefined) expanded.angle = event.an;
+  if (event.s !== undefined) expanded.scale = event.s;
+  if (event.du !== undefined) expanded.durationMs = event.du;
+  if (event.to !== undefined) expanded.to = event.to;
+  if (event.ln !== undefined) expanded.lines = event.ln;
+  if (event.os) expanded.opensShop = true;
+  if (event.oa) expanded.opensAlchemist = true;
+  return expanded;
 }
 
 function compactStateMetrics(metrics: StateMetrics): CompactStateMetrics {

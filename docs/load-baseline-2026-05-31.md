@@ -241,6 +241,9 @@ and combat fanout without making every client see every other client.
 - State packets now omit empty removed-id lists and empty event arrays on the
   wire; clients treat absent values as empty, preserving compatibility while
   trimming repeated JSON key overhead.
+- Transient combat/UI events now use compact wire keys and expand back to
+  `GameEvent` through shared client/load-test normalization, trimming localized
+  VFX/event-burst packet size without changing client gameplay code.
 - Metrics frames are now sent at a per-client interval instead of on every state
   packet. The client carries forward the latest frame, and `npm run perf:gate`
   requires minimum metrics sample counts so the telemetry path remains covered.
@@ -250,10 +253,10 @@ and combat fanout without making every client see every other client.
 - Metrics frames now use compact wire keys and expand back to `StateMetrics`
   through shared client/load-test normalization, trimming observability overhead
   without changing HUD or gate code.
-- State packets now use compact top-level and entity keys on the wire and are
-  expanded by shared client/load-test helpers. The perf gate requires minimum
-  compact-state counts, proving the compact path is active during every load
-  scenario.
+- State packets now use compact top-level, entity, event, and metrics keys on
+  the wire and are expanded by shared client/load-test helpers. The perf gate
+  requires minimum compact-state counts, proving the compact path is active
+  during every load scenario.
 - Monster and NPC views are now cached per broadcast sequence and reused across
   observing clients, so clustered combat pays for one serialization/signature
   pass per entity per tick rather than one per entity per viewer.

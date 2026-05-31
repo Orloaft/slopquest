@@ -84,6 +84,10 @@ no socket errors and no backpressure skips. See
   every 75 ms broadcast.
 - Metrics frames use compact wire keys and expand back to the normal
   `StateMetrics` shape in shared client/load-test normalization.
+- Transient combat/UI events use compact wire keys and expand back to the
+  normal `GameEvent` shape in shared client/load-test normalization, keeping
+  localized VFX bursts from spending most of their packet budget on repeated
+  JSON field names.
 - Snapshot metrics expose total per-session delta-cache residency and the peak
   cache entries held by any one session, so larger-world travel cannot quietly
   turn interest caches into long-lived world history.
@@ -139,6 +143,11 @@ Transient combat/UI events are also bounded before snapshot fan-out. Normal
 pathological bursts degrade by dropping excess float/projectile/chat events
 instead of building unbounded packets.
 
+Those transient events are compacted on the wire and expanded by shared
+client/load-test normalization. This preserves the readable in-process
+`GameEvent` shape while shrinking the dense combat packets that still need to
+carry many short-lived float, projectile, slash, and dialogue events.
+
 Each viewer also has a final visible-event cap. Targeted and global events are
 included first, then nearby spatial effects fill the remaining budget. The perf
 gate includes a localized event-burst scenario that forces more spatial effects
@@ -162,10 +171,11 @@ Server snapshots also expose `wireBytesOutPerSecond`, sampled from the
 underlying sockets. The 150-client crowd gate runs with WebSocket compression
 enabled and caps actual wire throughput separately from raw JSON throughput.
 
-Wire snapshots omit empty `removed*Ids` lists and empty `events` arrays. Clients
-already treat those fields as empty when absent, so this trims repeated JSON key
-overhead from ordinary heartbeat/delta packets without changing the authoritative
-snapshot model.
+Wire snapshots omit empty `removed*Ids` lists and empty `events` arrays. When
+events are present, they use compact keys on the socket and expand back to
+normal `GameEvent` objects before client game logic sees them. This trims
+repeated JSON key overhead from ordinary heartbeat/delta packets and dense
+combat bursts without changing the authoritative snapshot model.
 
 Metrics are also optional on individual state packets. The server sends the
 first metrics frame and then refreshes per client at the configured metrics
@@ -320,10 +330,10 @@ pressure become visible before content growth surprises us.
 
 ### Protocol size
 
-JSON is acceptable for 50 friends after deltas. If telemetry later shows
-network pressure, the next step is not more gameplay logic optimization; it is a
-wire-format pass: short keys, binary/delta packets, or compression tuned for the
-hosting environment.
+JSON is acceptable for 50 friends after deltas and compact state/entity/metric/
+event keys. If telemetry later shows network pressure, the next step is not more
+gameplay logic optimization; it is a binary/delta packet pass or compression
+tuned for the hosting environment.
 
 ### Persistence
 
@@ -399,6 +409,7 @@ process cannot tick the populated world.
 - [x] Compact metrics-frame keys on the wire.
 - [x] Compact top-level state packet keys with compact-packet load gates.
 - [x] Compact entity view keys inside state packets.
+- [x] Compact transient event keys on the wire.
 - [x] Shared per-broadcast monster/NPC view caches.
 - [x] Cached compact wire views for stable snapshot entities.
 - [x] Cached corpse snapshot signatures and compact corpse wire views.
