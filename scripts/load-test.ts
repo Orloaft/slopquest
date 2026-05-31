@@ -39,6 +39,9 @@ interface Summary {
 type SummaryMetric =
   | "tickMs"
   | "snapshotMs"
+  | "eventLoopDelayMs"
+  | "eventLoopDelayP95Ms"
+  | "eventLoopDelayMaxMs"
   | "bytesOutPerSecond"
   | "wireBytesOutPerSecond"
   | "snapshotsSentPerSecond"
@@ -105,6 +108,9 @@ const stats = {
 const observed = {
   tickMs: [] as number[],
   snapshotMs: [] as number[],
+  eventLoopDelayMs: [] as number[],
+  eventLoopDelayP95Ms: [] as number[],
+  eventLoopDelayMaxMs: [] as number[],
   stateMessageBytes: [] as number[],
   stateParseMs: [] as number[],
   stateNormalizeMs: [] as number[],
@@ -319,6 +325,9 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   observed.metricSamples += 1;
   if (typeof m.tickMs === "number") observed.tickMs.push(m.tickMs);
   if (typeof m.snapshotMs === "number") observed.snapshotMs.push(m.snapshotMs);
+  if (typeof m.eventLoopDelayMs === "number") observed.eventLoopDelayMs.push(m.eventLoopDelayMs);
+  if (typeof m.eventLoopDelayP95Ms === "number") observed.eventLoopDelayP95Ms.push(m.eventLoopDelayP95Ms);
+  if (typeof m.eventLoopDelayMaxMs === "number") observed.eventLoopDelayMaxMs.push(m.eventLoopDelayMaxMs);
   if (typeof m.bytesOutPerSecond === "number") observed.bytesOutPerSecond.push(m.bytesOutPerSecond);
   if (typeof m.wireBytesOutPerSecond === "number") observed.wireBytesOutPerSecond.push(m.wireBytesOutPerSecond);
   if (typeof m.snapshotsSentPerSecond === "number") observed.snapshotsSentPerSecond.push(m.snapshotsSentPerSecond);
@@ -425,6 +434,9 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
   const metricNames: SummaryMetric[] = [
     "tickMs",
     "snapshotMs",
+    "eventLoopDelayMs",
+    "eventLoopDelayP95Ms",
+    "eventLoopDelayMaxMs",
     "bytesOutPerSecond",
     "wireBytesOutPerSecond",
     "snapshotsSentPerSecond",
@@ -536,6 +548,9 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
     perTick: {
       tickMs: summarize(observed.tickMs),
       snapshotMs: summarize(observed.snapshotMs),
+      eventLoopDelayMs: summarize(observed.eventLoopDelayMs),
+      eventLoopDelayP95Ms: summarize(observed.eventLoopDelayP95Ms),
+      eventLoopDelayMaxMs: summarize(observed.eventLoopDelayMaxMs),
       bytesOutPerSecond: summarize(observed.bytesOutPerSecond),
       wireBytesOutPerSecond: summarize(observed.wireBytesOutPerSecond),
       snapshotsSentPerSecond: summarize(observed.snapshotsSentPerSecond),

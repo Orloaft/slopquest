@@ -247,6 +247,9 @@ export interface StateMetrics {
   rssMb: number;
   tickMs: number;
   snapshotMs: number;
+  eventLoopDelayMs: number;
+  eventLoopDelayP95Ms: number;
+  eventLoopDelayMaxMs: number;
   bytesOutPerSecond: number;
   wireBytesOutPerSecond: number;
   snapshotsSentPerSecond: number;

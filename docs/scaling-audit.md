@@ -53,6 +53,9 @@ no socket errors and no backpressure skips. See
 - Snapshot metrics expose total per-session delta-cache residency and the peak
   cache entries held by any one session, so larger-world travel cannot quietly
   turn interest caches into long-lived world history.
+- Server metrics include event-loop delay mean, p95, and max from Node's
+  event-loop histogram, and perf gates cap those values so CPU stalls are
+  visible even when tick/snapshot averages look fine.
 - Player save flushes are concurrency-capped and covered by a persistent
   temp-data load gate, so online-player saves cannot turn into an unbounded
   filesystem burst.
@@ -143,6 +146,11 @@ normalization per state packet. Summaries include p95 values as well as min,
 max, and average, and perf gates keep average state decode under `0.3 ms` with
 p95 under `1.2 ms`. Protocol compaction cannot silently trade lower bandwidth
 for meaningful per-client CPU cost.
+
+Event-loop delay is sampled once per metrics window via `monitorEventLoopDelay`,
+reset after each sample, and carried in state metrics. The perf gate caps
+mean/p95/max delay, making long synchronous stalls visible under clustered,
+regional, slow-reader, persistent, and inbound-abuse scenarios.
 
 Worst-case co-located player fanout is bounded by a nearest-player cap. The
 viewer is always included, and other player views are sorted by distance before
@@ -288,6 +296,7 @@ process cannot tick the populated world.
 - [x] Optional longer mixed-combat soak gate (`npm run perf:soak`).
 - [x] Memory/entity residency telemetry in server snapshots and load gates.
 - [x] Snapshot-cache residency telemetry and perf thresholds.
+- [x] Event-loop delay telemetry and perf thresholds.
 - [x] Static resource snapshot regression gate; full static lists are initial
   sync only, then deltas/removals.
 - [x] Chunk-derived tree resources with active-cell pruning and resident

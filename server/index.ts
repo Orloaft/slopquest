@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { unlink, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { monitorEventLoopDelay } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer } from "ws";
 import type { WebSocket, RawData } from "ws";
@@ -228,6 +229,9 @@ interface SnapshotMetricFrame {
   rssMb: number;
   tickMs: number;
   snapshotMs: number;
+  eventLoopDelayMs: number;
+  eventLoopDelayP95Ms: number;
+  eventLoopDelayMaxMs: number;
   bytesOutPerSecond: number;
   wireBytesOutPerSecond: number;
   snapshotsSentPerSecond: number;
@@ -463,6 +467,8 @@ const materializedTreeCells = new Set<string>();
 const materializedStaticResourceCells = new Set<string>();
 const socketWireBytes = new WeakMap<ExtWebSocket, number>();
 const clientMessageBuckets = new WeakMap<ExtWebSocket, ClientMessageBucket>();
+const eventLoopDelay = monitorEventLoopDelay({ resolution: 10 });
+eventLoopDelay.enable();
 const metrics: Metrics = {
   tickWindow: createMetricWindow(),
   snapshotWindow: createMetricWindow(),
@@ -477,6 +483,9 @@ const metrics: Metrics = {
   eventsDroppedPerSecond: 0,
   clientMessagesDroppedThisSecond: 0,
   clientMessagesDroppedPerSecond: 0,
+  eventLoopDelayMs: 0,
+  eventLoopDelayP95Ms: 0,
+  eventLoopDelayMaxMs: 0,
   saveQueueDepth: 0,
   saveFlushMs: 0,
   saveFlushPlayers: 0,
@@ -2970,6 +2979,9 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
     rssMb: round(memory.rss / 1024 / 1024),
     tickMs: round(metricAverage(metrics.tickWindow)),
     snapshotMs: round(metricAverage(metrics.snapshotWindow)),
+    eventLoopDelayMs: metrics.eventLoopDelayMs,
+    eventLoopDelayP95Ms: metrics.eventLoopDelayP95Ms,
+    eventLoopDelayMaxMs: metrics.eventLoopDelayMaxMs,
     bytesOutPerSecond: metrics.bytesOutPerSecond,
     wireBytesOutPerSecond: metrics.wireBytesOutPerSecond,
     snapshotsSentPerSecond: metrics.snapshotsSentPerSecond,
@@ -3151,6 +3163,9 @@ function buildSnapshotFor(
       rssMb: metricFrame.rssMb,
       tickMs: metricFrame.tickMs,
       snapshotMs: metricFrame.snapshotMs,
+      eventLoopDelayMs: metricFrame.eventLoopDelayMs,
+      eventLoopDelayP95Ms: metricFrame.eventLoopDelayP95Ms,
+      eventLoopDelayMaxMs: metricFrame.eventLoopDelayMaxMs,
       bytesOutPerSecond: metricFrame.bytesOutPerSecond,
       wireBytesOutPerSecond: metricFrame.wireBytesOutPerSecond,
       snapshotsSentPerSecond: metricFrame.snapshotsSentPerSecond,
@@ -4515,6 +4530,10 @@ function updateByteMetric(): void {
   metrics.snapshotsSkippedBackpressurePerSecond = metrics.snapshotsSkippedBackpressureThisSecond;
   metrics.eventsDroppedPerSecond = metrics.eventsDroppedThisSecond;
   metrics.clientMessagesDroppedPerSecond = metrics.clientMessagesDroppedThisSecond;
+  metrics.eventLoopDelayMs = nsToMs(eventLoopDelay.mean);
+  metrics.eventLoopDelayP95Ms = nsToMs(eventLoopDelay.percentile(95));
+  metrics.eventLoopDelayMaxMs = nsToMs(eventLoopDelay.max);
+  eventLoopDelay.reset();
   metrics.bytesOutThisSecond = 0;
   metrics.snapshotsSentThisSecond = 0;
   metrics.snapshotsSkippedBackpressureThisSecond = 0;
@@ -4537,6 +4556,10 @@ function sampleWireBytesOut(): number {
 function socketBytesWritten(socket: ExtWebSocket): number {
   const rawSocket = (socket as unknown as { _socket?: { bytesWritten?: number } })._socket;
   return Math.max(0, Math.floor(Number(rawSocket?.bytesWritten ?? 0)));
+}
+
+function nsToMs(value: number): number {
+  return Number.isFinite(value) ? round(value / 1_000_000) : 0;
 }
 
 function roll([min, max]: Range): number {

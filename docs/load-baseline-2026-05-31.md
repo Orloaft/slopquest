@@ -224,6 +224,9 @@ and combat fanout without making every client see every other client.
   timing with p95 summaries. The latest full gate kept state decode averages at
   or below `0.07 ms` per packet, with worst single-sample decode around
   `3.16 ms`.
+- Event-loop delay metrics now track mean, p95, and max delay per metrics
+  window. The latest full gate's worst scenario stayed around `13.1 ms` mean,
+  `29.1 ms` p95, and `49.2 ms` max.
 - `npm run check` now includes `npm run assets:budget`, currently guarding
   runtime assets at `100 MiB` total, `5 MiB` per file, and `500` files. The
   same gate now tracks Phaser startup preload separately; current preload is

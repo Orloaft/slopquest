@@ -272,6 +272,9 @@ export interface Metrics {
   eventsDroppedPerSecond: number;
   clientMessagesDroppedThisSecond: number;
   clientMessagesDroppedPerSecond: number;
+  eventLoopDelayMs: number;
+  eventLoopDelayP95Ms: number;
+  eventLoopDelayMaxMs: number;
   saveQueueDepth: number;
   saveFlushMs: number;
   saveFlushPlayers: number;
