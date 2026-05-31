@@ -328,8 +328,16 @@ let hudStateVersion = -1;
 let renderedMetricsVersion = -1;
 const chatLines: string[] = [];
 const E2E_MODE = new URLSearchParams(location.search).has("e2e");
+let renderedHudCoreSignature = "";
+let renderedBuffSignature = "";
+let renderedQuestSignature = "";
 let renderedSkillSignature = "";
+let renderedInventoryDataSignature = "";
 let renderedInventorySignature = "";
+let renderedAbilitySignature = "";
+let renderedEquipmentSignature = "";
+let renderedClassesSignature = "";
+let renderedHotbarDataSignature = "";
 
 function el<T extends HTMLElement>(selector: string): T {
   const node = document.querySelector(selector);
@@ -1781,36 +1789,135 @@ function animateActor(view: EntityView): void {
 
 function renderHud(me: PlayerView): void {
   const spec: ClassSpec = CLASSES[me.classKey] ?? CLASSES.adventurer ?? fallbackClassSpec();
-  dom.charName.textContent = me.name;
-  dom.classLabel.textContent = spec.label;
-  setBar(dom.hpBar, dom.hpText, me.hp, me.maxHp, "HP");
-  setBar(dom.manaBar, dom.manaText, me.mana, me.maxMana, "MP");
-  const levelStart = xpForLevel(me.level);
-  const levelEnd = xpForLevel(me.level + 1);
-  setBar(dom.xpBar, dom.xpText, me.xp - levelStart, levelEnd - levelStart, "XP");
-  dom.levelText.textContent = String(me.level);
-  dom.goldText.textContent = String(me.gold);
-  dom.weaponText.textContent = me.weaponTier ? (SHOP.weapon?.knightName ?? "Basic") : "Basic";
-  dom.armorText.textContent = me.armorTier ? (SHOP.armor?.name ?? "Cloth") : "Cloth";
-  dom.weightText.textContent = String(me.weight);
-  dom.weightMax.textContent = String(me.maxWeight);
-  dom.weightText.classList.toggle("over", me.weight > me.maxWeight);
-  renderBuffTracker(me.buffs);
-  renderQuestTracker(me.quests);
+  const coreSignature = [
+    me.name,
+    me.classKey,
+    spec.label,
+    me.hp,
+    me.maxHp,
+    me.mana,
+    me.maxMana,
+    me.level,
+    me.xp,
+    me.gold,
+    me.weaponTier,
+    me.armorTier,
+    me.weight,
+    me.maxWeight,
+    me.dead ? 1 : 0
+  ].join("|");
+  if (coreSignature !== renderedHudCoreSignature) {
+    renderedHudCoreSignature = coreSignature;
+    dom.charName.textContent = me.name;
+    dom.classLabel.textContent = spec.label;
+    setBar(dom.hpBar, dom.hpText, me.hp, me.maxHp, "HP");
+    setBar(dom.manaBar, dom.manaText, me.mana, me.maxMana, "MP");
+    const levelStart = xpForLevel(me.level);
+    const levelEnd = xpForLevel(me.level + 1);
+    setBar(dom.xpBar, dom.xpText, me.xp - levelStart, levelEnd - levelStart, "XP");
+    dom.levelText.textContent = String(me.level);
+    dom.goldText.textContent = String(me.gold);
+    dom.weaponText.textContent = me.weaponTier ? (SHOP.weapon?.knightName ?? "Basic") : "Basic";
+    dom.armorText.textContent = me.armorTier ? (SHOP.armor?.name ?? "Cloth") : "Cloth";
+    dom.weightText.textContent = String(me.weight);
+    dom.weightMax.textContent = String(me.maxWeight);
+    dom.weightText.classList.toggle("over", me.weight > me.maxWeight);
+    dom.death.classList.toggle("hidden", !me.dead);
+  }
+  const buffsSignature = buffHudSignature(me.buffs);
+  if (buffsSignature !== renderedBuffSignature) {
+    renderedBuffSignature = buffsSignature;
+    renderBuffTracker(me.buffs);
+  }
+  const questSignature = questHudSignature(me.quests);
+  if (questSignature !== renderedQuestSignature) {
+    renderedQuestSignature = questSignature;
+    renderQuestTracker(me.quests);
+  }
   renderSkillTracker(me.skills);
-  renderInventory(me.inventory);
-  if (!dom.equipmentPanel.classList.contains("hidden")) renderEquipment(me);
-  renderAbilities(me.abilities);
-  if (!dom.classesPanel.classList.contains("hidden")) renderClasses(me);
+  const inventorySignature = inventoryHudSignature(me.inventory);
+  if (inventorySignature !== renderedInventoryDataSignature) {
+    renderedInventoryDataSignature = inventorySignature;
+    renderInventory(me.inventory);
+  }
+  const equipmentSignature = equipmentHudSignature(me);
+  if (!dom.equipmentPanel.classList.contains("hidden") && equipmentSignature !== renderedEquipmentSignature) {
+    renderedEquipmentSignature = equipmentSignature;
+    renderEquipment(me);
+  }
+  const abilitySignature = abilityHudSignature(me.abilities);
+  if (abilitySignature !== renderedAbilitySignature) {
+    renderedAbilitySignature = abilitySignature;
+    renderAbilities(me.abilities);
+  }
+  const classesSignature = classesHudSignature(me);
+  if (!dom.classesPanel.classList.contains("hidden") && classesSignature !== renderedClassesSignature) {
+    renderedClassesSignature = classesSignature;
+    renderClasses(me);
+  }
   loadHotbarFor(me.name);
-  renderHotbar(me.inventory);
-  dom.death.classList.toggle("hidden", !me.dead);
+  const hotbarDataSignature = `${me.name}|${hotbarLayoutSignature()}|${inventorySignature}|${abilitySignature}`;
+  if (hotbarDataSignature !== renderedHotbarDataSignature) {
+    renderedHotbarDataSignature = hotbarDataSignature;
+    renderHotbar(me.inventory);
+  }
   const vendorNpc = NPCS[0];
   const nearVendor = vendorNpc != null && me.floor === vendorNpc.floor && Phaser.Math.Distance.Between(me.x, me.y, vendorNpc.x, vendorNpc.y) < 2.2;
   if (!nearVendor && !dom.vendor.classList.contains("hidden")) hideCenterPanels();
   const alchemistNpc = NPCS.find((npc) => npc.role === "alchemist");
   const nearAlchemist = alchemistNpc != null && me.floor === alchemistNpc.floor && Phaser.Math.Distance.Between(me.x, me.y, alchemistNpc.x, alchemistNpc.y) < 2.2;
   if (!nearAlchemist && !dom.alchemist.classList.contains("hidden")) hideCenterPanels();
+}
+
+function buffHudSignature(buffs: Partial<BuffsView> = {}): string {
+  return [
+    buffs.wellFed,
+    buffs.foodRegen,
+    buffs.sprint,
+    buffs.secondWind,
+    buffs.ironClad,
+    buffs.fleetFoot,
+    buffs.slowed,
+    buffs.stunned,
+    buffs.weakened
+  ].map((value) => Math.ceil((value ?? 0) / 250)).join("|");
+}
+
+function questHudSignature(quests: QuestView[] = []): string {
+  return quests
+    .map((quest) => `${quest.id}:${quest.accepted ? 1 : 0}:${quest.progress}:${quest.complete ? 1 : 0}:${quest.claimed ? 1 : 0}`)
+    .join("|");
+}
+
+function inventoryHudSignature(inventory: Array<InventoryItemView | null> = []): string {
+  return inventory.map((item) => item ? `${item.id}:${item.qty}:${item.label}:${item.iconUrl}` : "-").join("|");
+}
+
+function abilityHudSignature(abilities: AbilityView[] = []): string {
+  return abilities
+    .map((ability) => {
+      const cooldown = Math.ceil((ability.cooldownRemainingMs ?? 0) / 250);
+      const active = Math.ceil((ability.activeRemainingMs ?? 0) / 250);
+      return `${ability.id}:${ability.label}:${cooldown}:${active}`;
+    })
+    .join("|");
+}
+
+function equipmentHudSignature(me: PlayerView): string {
+  const bow = (me.inventory ?? []).find((item) => item && /bow/.test(item.id));
+  const attack = skillLevelOf(me, "attack");
+  const ranged = skillLevelOf(me, "ranged");
+  const defense = skillLevelOf(me, "defense");
+  return [me.classKey, me.weaponTier, me.armorTier, bow?.id ?? "", bow?.label ?? "", attack, ranged, defense].join("|");
+}
+
+function classesHudSignature(me: PlayerView): string {
+  const skillSignature = (me.skills ?? []).map((skill) => `${skill.id}:${skill.level}`).join("|");
+  return [me.classKey, me.floor, me.unlockedClasses.join(","), skillSignature].join("|");
+}
+
+function hotbarLayoutSignature(): string {
+  return hotbarLayout.map((slot) => slot ? `${slot.kind}:${slot.kind === "item" ? slot.itemId : slot.abilityId}` : "-").join("|");
 }
 
 function fallbackClassSpec(): ClassSpec {
