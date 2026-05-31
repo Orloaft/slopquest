@@ -226,6 +226,9 @@ and combat fanout without making every client see every other client.
 - Monster and NPC views are now cached per broadcast sequence and reused across
   observing clients, so clustered combat pays for one serialization/signature
   pass per entity per tick rather than one per entity per viewer.
+- Stable player, monster, NPC, tree, and gathering-node views now cache their
+  compact wire objects as well, cutting per-observer conversion allocation while
+  leaving fires/corpses uncached because their state can change in place.
 - The load driver tracks state-packet parse, compact-normalize, and total decode
   timing with p95 summaries. The latest full gate kept state decode averages at
   or below `0.07 ms` per packet, with worst single-sample decode around

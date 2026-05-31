@@ -16,6 +16,9 @@ Node/WebSocket process:
 - Monster and NPC views are cached once per broadcast sequence and reused across
   observing clients, reducing repeated serialization in crowded combat/town
   scenes.
+- Stable snapshot views cache their compact wire objects, so public player,
+  monster, NPC, tree, and gathering-node conversions do not allocate again for
+  every observer.
 - Static resources are indexed by active cells; moving entities update spatial cells incrementally.
 - High-cardinality trees and gathering nodes are materialized only near players.
 - Monsters/NPCs simulate only in active regions near players.
@@ -153,6 +156,12 @@ observing session serializes and signatures the entity; later observing sessions
 reuse the same object and cached signature for their own per-session deltas.
 That keeps co-located combat from multiplying identical entity-view allocation
 by viewer count.
+
+Stable view objects also cache their compact wire forms. Public/self player,
+monster, NPC, tree, and gathering-node views are immutable by signature/state, so
+the server can reuse their compact objects across receiving clients. Fires and
+corpses remain uncached because their remaining time or loot state can change
+without replacing the object.
 
 The load driver also times client-side JSON parse and compact-snapshot
 normalization per state packet. Summaries include p95 values as well as min,
@@ -326,6 +335,7 @@ process cannot tick the populated world.
 - [x] Compact top-level state packet keys with compact-packet load gates.
 - [x] Compact entity view keys inside state packets.
 - [x] Shared per-broadcast monster/NPC view caches.
+- [x] Cached compact wire views for stable snapshot entities.
 - [x] Client-side state decode timing telemetry and perf thresholds.
 - [x] Runtime asset budget gate in `npm run check`.
 - [x] Startup-preload asset budget gate in `npm run check`.

@@ -194,6 +194,14 @@ export interface CompactStateSnapshot {
 
 export type WireServerMessage = ServerMessage | CompactStateSnapshot;
 
+const compactPlayerViewCache = new WeakMap<PlayerView, CompactPlayerView>();
+const compactMonsterViewCache = new WeakMap<MonsterView, CompactMonsterView>();
+const compactNpcViewCache = new WeakMap<NpcView, CompactNpcView>();
+const compactTreeViewCache = new WeakMap<TreeView, CompactTreeView>();
+const compactFishingNodeViewCache = new WeakMap<FishingNodeView, CompactFishingNodeView>();
+const compactMiningNodeViewCache = new WeakMap<MiningNodeView, CompactMiningNodeView>();
+const compactHerbNodeViewCache = new WeakMap<HerbNodeView, CompactHerbNodeView>();
+
 export function compactStateSnapshot(snapshot: StateSnapshot): CompactStateSnapshot {
   const wire: CompactStateSnapshot = { type: "state" };
   if (snapshot.players.length > 0) wire.p = snapshot.players.map(compactPlayerView);
@@ -274,6 +282,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function compactPlayerView(player: PlayerView): CompactPlayerView {
+  const cached = compactPlayerViewCache.get(player);
+  if (cached) return cached;
   const compact: CompactPlayerView = {
     i: player.id,
     n: player.name,
@@ -304,6 +314,7 @@ function compactPlayerView(player: PlayerView): CompactPlayerView {
   if (player.unlockedClasses !== undefined) compact.uc = player.unlockedClasses;
   if (player.weight !== undefined) compact.wt = player.weight;
   if (player.maxWeight !== undefined) compact.mw = player.maxWeight;
+  compactPlayerViewCache.set(player, compact);
   return compact;
 }
 
@@ -342,6 +353,8 @@ function expandPlayerView(player: CompactPlayerView | PlayerView): PlayerView {
 }
 
 function compactMonsterView(monster: MonsterView): CompactMonsterView {
+  const cached = compactMonsterViewCache.get(monster);
+  if (cached) return cached;
   const compact: CompactMonsterView = {
     i: monster.id,
     t: monster.type,
@@ -356,6 +369,7 @@ function compactMonsterView(monster: MonsterView): CompactMonsterView {
   };
   if (monster.moving) compact.mo = 1;
   if (monster.attacking) compact.at = 1;
+  compactMonsterViewCache.set(monster, compact);
   return compact;
 }
 
@@ -378,6 +392,8 @@ function expandMonsterView(monster: CompactMonsterView | MonsterView): MonsterVi
 }
 
 function compactNpcView(npc: NpcView): CompactNpcView {
+  const cached = compactNpcViewCache.get(npc);
+  if (cached) return cached;
   const compact: CompactNpcView = {
     i: npc.id,
     n: npc.name,
@@ -389,6 +405,7 @@ function compactNpcView(npc: NpcView): CompactNpcView {
     dl: npc.dialogue
   };
   if (npc.moving) compact.mo = 1;
+  compactNpcViewCache.set(npc, compact);
   return compact;
 }
 
@@ -408,6 +425,8 @@ function expandNpcView(npc: CompactNpcView | NpcView): NpcView {
 }
 
 function compactTreeView(tree: TreeView): CompactTreeView {
+  const cached = compactTreeViewCache.get(tree);
+  if (cached) return cached;
   const compact: CompactTreeView = {
     i: tree.id,
     t: tree.type,
@@ -418,6 +437,7 @@ function compactTreeView(tree: TreeView): CompactTreeView {
     y: tree.y
   };
   if (tree.active) compact.a = 1;
+  compactTreeViewCache.set(tree, compact);
   return compact;
 }
 
@@ -436,7 +456,11 @@ function expandTreeView(tree: CompactTreeView | TreeView): TreeView {
 }
 
 function compactFishingNodeView(node: FishingNodeView): CompactFishingNodeView {
-  return { i: node.id, f: node.floor, x: node.x, y: node.y, ax: node.approachX, ay: node.approachY, l: node.label };
+  const cached = compactFishingNodeViewCache.get(node);
+  if (cached) return cached;
+  const compact = { i: node.id, f: node.floor, x: node.x, y: node.y, ax: node.approachX, ay: node.approachY, l: node.label };
+  compactFishingNodeViewCache.set(node, compact);
+  return compact;
 }
 
 function expandFishingNodeView(node: CompactFishingNodeView | FishingNodeView): FishingNodeView {
@@ -445,7 +469,11 @@ function expandFishingNodeView(node: CompactFishingNodeView | FishingNodeView): 
 }
 
 function compactMiningNodeView(node: MiningNodeView): CompactMiningNodeView {
-  return { ...compactFishingNodeView(node), k: node.kind };
+  const cached = compactMiningNodeViewCache.get(node);
+  if (cached) return cached;
+  const compact = { ...compactFishingNodeView(node), k: node.kind };
+  compactMiningNodeViewCache.set(node, compact);
+  return compact;
 }
 
 function expandMiningNodeView(node: CompactMiningNodeView | MiningNodeView): MiningNodeView {
@@ -454,8 +482,11 @@ function expandMiningNodeView(node: CompactMiningNodeView | MiningNodeView): Min
 }
 
 function compactHerbNodeView(node: HerbNodeView): CompactHerbNodeView {
+  const cached = compactHerbNodeViewCache.get(node);
+  if (cached) return cached;
   const compact: CompactHerbNodeView = { ...compactFishingNodeView(node), rl: node.requiredLevel };
   if (node.active) compact.a = 1;
+  compactHerbNodeViewCache.set(node, compact);
   return compact;
 }
 
