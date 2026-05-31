@@ -246,6 +246,7 @@ export interface StateMetrics {
   tickMs: number;
   snapshotMs: number;
   bytesOutPerSecond: number;
+  wireBytesOutPerSecond: number;
   snapshotsSentPerSecond: number;
   snapshotsSkippedBackpressurePerSecond: number;
   eventsDroppedPerSecond: number;

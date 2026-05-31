@@ -263,6 +263,7 @@ export interface Metrics {
   snapshotWindow: MetricWindow;
   bytesOutThisSecond: number;
   bytesOutPerSecond: number;
+  wireBytesOutPerSecond: number;
   snapshotsSentThisSecond: number;
   snapshotsSentPerSecond: number;
   snapshotsSkippedBackpressureThisSecond: number;

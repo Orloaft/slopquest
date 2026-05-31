@@ -38,6 +38,7 @@ type SummaryMetric =
   | "tickMs"
   | "snapshotMs"
   | "bytesOutPerSecond"
+  | "wireBytesOutPerSecond"
   | "snapshotsSentPerSecond"
   | "snapshotsSkippedBackpressurePerSecond"
   | "eventsDroppedPerSecond"
@@ -96,6 +97,7 @@ const observed = {
   snapshotMs: [] as number[],
   stateMessageBytes: [] as number[],
   bytesOutPerSecond: [] as number[],
+  wireBytesOutPerSecond: [] as number[],
   snapshotsSentPerSecond: [] as number[],
   snapshotsSkippedBackpressurePerSecond: [] as number[],
   eventsDroppedPerSecond: [] as number[],
@@ -288,6 +290,7 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   if (typeof m.tickMs === "number") observed.tickMs.push(m.tickMs);
   if (typeof m.snapshotMs === "number") observed.snapshotMs.push(m.snapshotMs);
   if (typeof m.bytesOutPerSecond === "number") observed.bytesOutPerSecond.push(m.bytesOutPerSecond);
+  if (typeof m.wireBytesOutPerSecond === "number") observed.wireBytesOutPerSecond.push(m.wireBytesOutPerSecond);
   if (typeof m.snapshotsSentPerSecond === "number") observed.snapshotsSentPerSecond.push(m.snapshotsSentPerSecond);
   if (typeof m.snapshotsSkippedBackpressurePerSecond === "number") {
     observed.snapshotsSkippedBackpressurePerSecond.push(m.snapshotsSkippedBackpressurePerSecond);
@@ -380,6 +383,7 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     "tickMs",
     "snapshotMs",
     "bytesOutPerSecond",
+    "wireBytesOutPerSecond",
     "snapshotsSentPerSecond",
     "snapshotsSkippedBackpressurePerSecond",
     "eventsDroppedPerSecond",
@@ -474,6 +478,7 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       tickMs: summarize(observed.tickMs),
       snapshotMs: summarize(observed.snapshotMs),
       bytesOutPerSecond: summarize(observed.bytesOutPerSecond),
+      wireBytesOutPerSecond: summarize(observed.wireBytesOutPerSecond),
       snapshotsSentPerSecond: summarize(observed.snapshotsSentPerSecond),
       snapshotsSkippedBackpressurePerSecond: summarize(observed.snapshotsSkippedBackpressurePerSecond),
       eventsDroppedPerSecond: summarize(observed.eventsDroppedPerSecond),

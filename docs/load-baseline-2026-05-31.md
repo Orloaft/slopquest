@@ -168,7 +168,8 @@ and combat fanout without making every client see every other client.
   roughly 9 MB/s raw outbound for 50 co-located players.
 - The perf gate now includes a 150-client co-located town crowd scenario with
   `TIB_MAX_VISIBLE_PLAYERS=50`, keeping each client at or below 50 visible
-  player views instead of letting crowded hubs grow without bound.
+  player views instead of letting crowded hubs grow without bound. That scenario
+  runs with WebSocket compression enabled and gates actual socket wire bytes.
 - Snapshot build stayed under 6.3 ms max, well below the 75 ms broadcast interval.
 - Tick time stayed under 0.5 ms max in these samples.
 - `npm run perf:gate` now starts isolated E2E servers and re-runs the two

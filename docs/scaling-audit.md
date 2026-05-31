@@ -41,6 +41,8 @@ no socket errors and no backpressure skips. See
   queue, with drop telemetry in load gates.
 - Load gates track raw state-message byte sizes to catch protocol bloat before
   aggregate bandwidth becomes the only warning sign.
+- Snapshot metrics track raw JSON bytes and actual socket wire bytes separately,
+  so compression can be tuned against host/network pressure instead of inferred.
 - Player save flushes are concurrency-capped and covered by a persistent
   temp-data load gate, so online-player saves cannot turn into an unbounded
   filesystem burst.
@@ -93,6 +95,10 @@ instead of building unbounded packets.
 The load driver also records raw state message sizes. `npm run perf:gate` caps
 state packets at 60 KB max and 25 KB average across its clustered, combat,
 regional, and slow-reader scenarios.
+
+Server snapshots also expose `wireBytesOutPerSecond`, sampled from the
+underlying sockets. The 150-client crowd gate runs with WebSocket compression
+enabled and caps actual wire throughput separately from raw JSON throughput.
 
 Wire snapshots omit empty `removed*Ids` lists and empty `events` arrays. Clients
 already treat those fields as empty when absent, so this trims repeated JSON key
@@ -244,6 +250,7 @@ process cannot tick the populated world.
   cell pruning.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
 - [x] Raw state-message byte telemetry and packet-size thresholds in load gates.
+- [x] Actual socket wire-byte telemetry with compressed crowd gate coverage.
 - [x] Safe JSON wire compaction for empty removed-id/event fields.
 - [x] Runtime asset budget gate in `npm run check`.
 - [x] Bounded player-save flushes with persistence telemetry and a temp-data

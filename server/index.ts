@@ -214,6 +214,7 @@ interface SnapshotMetricFrame {
   tickMs: number;
   snapshotMs: number;
   bytesOutPerSecond: number;
+  wireBytesOutPerSecond: number;
   snapshotsSentPerSecond: number;
   snapshotsSkippedBackpressurePerSecond: number;
   eventsDroppedPerSecond: number;
@@ -460,11 +461,13 @@ const EMPTY_FIRE_VIEWS: FireView[] = [];
 const eventOrder = new WeakMap<GameEvent, number>();
 const materializedTreeCells = new Set<string>();
 const materializedStaticResourceCells = new Set<string>();
+const socketWireBytes = new WeakMap<ExtWebSocket, number>();
 const metrics: Metrics = {
   tickWindow: createMetricWindow(),
   snapshotWindow: createMetricWindow(),
   bytesOutThisSecond: 0,
   bytesOutPerSecond: 0,
+  wireBytesOutPerSecond: 0,
   snapshotsSentThisSecond: 0,
   snapshotsSentPerSecond: 0,
   snapshotsSkippedBackpressureThisSecond: 0,
@@ -2928,6 +2931,7 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
     tickMs: round(metricAverage(metrics.tickWindow)),
     snapshotMs: round(metricAverage(metrics.snapshotWindow)),
     bytesOutPerSecond: metrics.bytesOutPerSecond,
+    wireBytesOutPerSecond: metrics.wireBytesOutPerSecond,
     snapshotsSentPerSecond: metrics.snapshotsSentPerSecond,
     snapshotsSkippedBackpressurePerSecond: metrics.snapshotsSkippedBackpressurePerSecond,
     eventsDroppedPerSecond: metrics.eventsDroppedPerSecond,
@@ -3102,6 +3106,7 @@ function buildSnapshotFor(
       tickMs: metricFrame.tickMs,
       snapshotMs: metricFrame.snapshotMs,
       bytesOutPerSecond: metricFrame.bytesOutPerSecond,
+      wireBytesOutPerSecond: metricFrame.wireBytesOutPerSecond,
       snapshotsSentPerSecond: metricFrame.snapshotsSentPerSecond,
       snapshotsSkippedBackpressurePerSecond: metricFrame.snapshotsSkippedBackpressurePerSecond,
       eventsDroppedPerSecond: metricFrame.eventsDroppedPerSecond,
@@ -4437,6 +4442,7 @@ function updateByteMetric(): void {
   const now = performance.now();
   if (now - metrics.lastBytesAt < 1000) return;
   metrics.bytesOutPerSecond = metrics.bytesOutThisSecond;
+  metrics.wireBytesOutPerSecond = sampleWireBytesOut();
   metrics.snapshotsSentPerSecond = metrics.snapshotsSentThisSecond;
   metrics.snapshotsSkippedBackpressurePerSecond = metrics.snapshotsSkippedBackpressureThisSecond;
   metrics.eventsDroppedPerSecond = metrics.eventsDroppedThisSecond;
@@ -4445,6 +4451,22 @@ function updateByteMetric(): void {
   metrics.snapshotsSkippedBackpressureThisSecond = 0;
   metrics.eventsDroppedThisSecond = 0;
   metrics.lastBytesAt = now;
+}
+
+function sampleWireBytesOut(): number {
+  let total = 0;
+  for (const { socket } of clients.values()) {
+    const current = socketBytesWritten(socket);
+    const previous = socketWireBytes.get(socket) ?? current;
+    if (current > previous) total += current - previous;
+    socketWireBytes.set(socket, current);
+  }
+  return total;
+}
+
+function socketBytesWritten(socket: ExtWebSocket): number {
+  const rawSocket = (socket as unknown as { _socket?: { bytesWritten?: number } })._socket;
+  return Math.max(0, Math.floor(Number(rawSocket?.bytesWritten ?? 0)));
 }
 
 function roll([min, max]: Range): number {

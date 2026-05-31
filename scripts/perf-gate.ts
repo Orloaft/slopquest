@@ -67,7 +67,8 @@ const gateScenarios: Scenario[] = [
   {
     name: "150 capped town crowd clients",
     serverEnv: {
-      TIB_MAX_VISIBLE_PLAYERS: "50"
+      TIB_MAX_VISIBLE_PLAYERS: "50",
+      TIB_WS_COMPRESSION: "1"
     },
     args: [
       "--clients",
@@ -104,6 +105,8 @@ const gateScenarios: Scenario[] = [
       "600",
       "--max-bytes-out-per-second-avg",
       "30000000",
+      "--max-wire-bytes-out-per-second-avg",
+      "12000000",
       "--max-state-message-bytes-max",
       "40000",
       "--max-state-message-bytes-avg",
