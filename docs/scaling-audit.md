@@ -50,6 +50,9 @@ no socket errors and no backpressure skips. See
   generated lazily around players and pruned when no players are nearby.
 - Transient event queues are bounded per global, targeted, and spatial-cell
   queue, with drop telemetry in load gates.
+- Per-viewer transient event payloads are capped by `TIB_VISIBLE_EVENT_LIMIT`
+  (default `192`), with targeted/global events preferred ahead of nearby spatial
+  effects, so dense combat VFX cannot make one snapshot packet unbounded.
 - Client command intake is byte-capped and token-bucket rate-limited per socket
   before JSON parsing, with drop telemetry in load gates, so noisy clients
   cannot create unbounded receive-side CPU work while normal short bursts still
@@ -117,6 +120,12 @@ Transient combat/UI events are also bounded before snapshot fan-out. Normal
 50-client load gates assert `eventsDroppedPerSecond.max` stays at `0`, while
 pathological bursts degrade by dropping excess float/projectile/chat events
 instead of building unbounded packets.
+
+Each viewer also has a final visible-event cap. Targeted and global events are
+included first, then nearby spatial effects fill the remaining budget. The perf
+gate includes a localized event-burst scenario that forces more spatial effects
+than the configured per-viewer cap and asserts state packets never exceed that
+event count.
 
 The load driver also records raw state message sizes. `npm run perf:gate` caps
 state packets at 60 KB max and 25 KB average across its clustered, combat,
@@ -335,6 +344,7 @@ process cannot tick the populated world.
   cell pruning.
 - [x] Bounded spatial query cell-key cache for snapshot/event/static lookups.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
+- [x] Per-viewer transient event cap with localized burst gate coverage.
 - [x] Per-socket inbound command rate limits with drop telemetry in load gates.
 - [x] Raw state-message byte telemetry and packet-size thresholds in load gates.
 - [x] Actual socket wire-byte telemetry with compressed crowd gate coverage.

@@ -367,6 +367,7 @@ export type ClientMessage =
       skills?: Record<string, number>;
       forceDodge?: boolean;
     }
+  | { type: "e2eEmitEvents"; count?: number; floor?: number; x?: number; y?: number; spread?: number }
   | { type: "eatItem"; item: string }
   | { type: "useItem"; item: string; ctx?: UseItemCtx }
   | { type: "chat"; text: string }

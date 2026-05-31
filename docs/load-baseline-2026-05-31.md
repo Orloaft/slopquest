@@ -173,6 +173,8 @@ and combat fanout without making every client see every other client.
 - Over-cap player fanout now keeps a bounded nearest-player working set and
   sorts only the retained cap-sized candidates, avoiding full nearby-player
   sorts for every observer in crowded hubs.
+- Per-viewer transient events are now capped; a localized burst gate drives more
+  spatial effects than the configured cap and asserts packets stay at the cap.
 - Snapshot build stayed under 6.3 ms max, well below the 75 ms broadcast interval.
 - Tick time stayed under 0.5 ms max in these samples.
 - `npm run perf:gate` now starts isolated E2E servers and re-runs the two

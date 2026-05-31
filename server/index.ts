@@ -418,6 +418,7 @@ const SAVE_CONCURRENCY = positiveIntEnv("TIB_SAVE_CONCURRENCY", 16);
 const GLOBAL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_GLOBAL_EVENT_QUEUE_LIMIT", 128);
 const TARGETED_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_TARGETED_EVENT_QUEUE_LIMIT", 64);
 const CELL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_CELL_EVENT_QUEUE_LIMIT", 256);
+const VISIBLE_EVENT_LIMIT = positiveIntEnv("TIB_VISIBLE_EVENT_LIMIT", 192);
 const WS_COMPRESSION = process.env.TIB_WS_COMPRESSION === "1" || (!E2E_TEST && process.env.TIB_WS_COMPRESSION !== "0");
 const WS_COMPRESSION_THRESHOLD = positiveIntEnv("TIB_WS_COMPRESSION_THRESHOLD", 1024);
 mkdirSync(DATA_DIR, { recursive: true });
@@ -584,6 +585,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
     if (message.type === "makeFire") makeFire(session.player, String(message.logItem ?? "logs"));
     if (message.type === "cookFish") cookFish(session.player, String(message.id ?? ""));
     if (E2E_TEST && message.type === "e2eGrantItems") grantE2EItems(session.player, message);
+    if (E2E_TEST && message.type === "e2eEmitEvents") emitE2EEvents(session.player, message);
     if (message.type === "eatItem") eatItem(session.player, String(message.item ?? ""));
     if (message.type === "useItem") useItem(session.player, String(message.item ?? ""), message.ctx ?? {});
     if (message.type === "chat") chat(session.player, String(message.text ?? ""));
@@ -2142,6 +2144,30 @@ function grantE2EItems(
       player.y = spot.y;
       updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
     }
+  }
+}
+
+function emitE2EEvents(
+  player: ServerPlayer,
+  message: {
+    type: "e2eEmitEvents";
+    count?: number;
+    floor?: number;
+    x?: number;
+    y?: number;
+    spread?: number;
+  }
+): void {
+  if (!E2E_TEST) return;
+  const count = clamp(Math.floor(Number(message.count ?? 0)), 0, 1000);
+  const floor = Number.isFinite(message.floor) ? Math.floor(Number(message.floor)) : player.floor;
+  const x = Number.isFinite(message.x) ? Number(message.x) : player.x;
+  const y = Number.isFinite(message.y) ? Number(message.y) : player.y;
+  const spread = clamp(Number(message.spread ?? 0), 0, 12);
+  for (let i = 0; i < count; i += 1) {
+    const angle = i * 2.399963229728653;
+    const radius = spread <= 0 ? 0 : ((i % 17) / 16) * spread;
+    event("effect", "e2e_burst", x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, floor, "#ffffff", player.id);
   }
 }
 
@@ -3893,17 +3919,40 @@ function visibleEventsFor(viewer: ServerPlayer): GameEvent[] {
   const targeted = targetedEventsByPlayer.get(viewer.id);
   if (globalEvents.length === 0 && !targeted && eventsByCell.size === 0) return EMPTY_EVENTS;
   if (eventsByCell.size === 0) {
-    if (globalEvents.length === 0) return targeted ?? EMPTY_EVENTS;
-    if (!targeted) return globalEvents;
+    if (globalEvents.length === 0) return boundedEventList(targeted ?? EMPTY_EVENTS);
+    if (!targeted) return boundedEventList(globalEvents);
+    if (globalEvents.length + targeted.length <= VISIBLE_EVENT_LIMIT) {
+      const visible = [...globalEvents, ...targeted];
+      visible.sort(compareEventsByOrder);
+      return visible;
+    }
   }
   const visible: GameEvent[] = [];
-  visible.push(...globalEvents);
-  if (targeted) visible.push(...targeted);
+  appendEventsUntilLimit(visible, targeted);
+  appendEventsUntilLimit(visible, globalEvents);
   forEachEventCell(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (item) => {
-    if (eventVisibleTo(viewer, item)) visible.push(item);
+    if (visible.length >= VISIBLE_EVENT_LIMIT || !eventVisibleTo(viewer, item)) return;
+    visible.push(item);
   });
-  if (visible.length > 1) visible.sort((a, b) => (eventOrder.get(a) ?? 0) - (eventOrder.get(b) ?? 0));
+  if (visible.length > 1) visible.sort(compareEventsByOrder);
   return visible;
+}
+
+function boundedEventList(events: GameEvent[]): GameEvent[] {
+  if (events.length <= VISIBLE_EVENT_LIMIT) return events;
+  return events.slice(0, VISIBLE_EVENT_LIMIT);
+}
+
+function appendEventsUntilLimit(visible: GameEvent[], events: GameEvent[] | undefined): void {
+  if (!events) return;
+  for (const item of events) {
+    if (visible.length >= VISIBLE_EVENT_LIMIT) return;
+    visible.push(item);
+  }
+}
+
+function compareEventsByOrder(a: GameEvent, b: GameEvent): number {
+  return (eventOrder.get(a) ?? 0) - (eventOrder.get(b) ?? 0);
 }
 
 function persistPlayerToDb(player: ServerPlayer): string {

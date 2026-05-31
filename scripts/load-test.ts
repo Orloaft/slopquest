@@ -1,5 +1,5 @@
 import { WebSocket, type RawData } from "ws";
-import type { MonsterView, PlayerView, StateMetrics } from "../src/types.ts";
+import type { GameEvent, MonsterView, PlayerView, StateMetrics } from "../src/types.ts";
 import { isCompactStateSnapshot, normalizeServerMessage, type WireServerMessage } from "../src/wire.ts";
 
 interface ParsedArgs {
@@ -22,6 +22,7 @@ interface LoadMessage {
   metrics?: Partial<StateMetrics>;
   players?: PlayerView[];
   monsters?: MonsterView[];
+  events?: GameEvent[];
   treesFull?: boolean;
   fishingNodesFull?: boolean;
   miningNodesFull?: boolean;
@@ -74,6 +75,10 @@ const combatRatio = clampUnit(Number(options.combat ?? 0));
 const attackTargets = Boolean(options["attack-targets"]);
 const targetIntervalMs = Math.max(100, Math.floor(Number(options["target-interval"] ?? 500)));
 const persistent = Boolean(options.persistent);
+const eventBurstCount = Math.max(0, Math.floor(Number(options["event-burst"] ?? 0)));
+const eventBurstClients = Math.max(0, Math.floor(Number(options["event-burst-clients"] ?? (eventBurstCount > 0 ? 1 : 0))));
+const eventBurstAfterMs = Math.max(0, Math.floor(Number(options["event-burst-after"] ?? 1500)));
+const eventBurstSpread = Math.max(0, Number(options["event-burst-spread"] ?? 0));
 const oversizedClientMessageBytes = Math.max(0, Math.floor(Number(options["oversized-client-message-bytes"] ?? 0)));
 const oversizedClientMessage =
   oversizedClientMessageBytes > 0 ? JSON.stringify({ type: "input", input: randomInput(), pad: "x".repeat(oversizedClientMessageBytes) }) : "";
@@ -115,6 +120,7 @@ const observed = {
   stateParseMs: [] as number[],
   stateNormalizeMs: [] as number[],
   stateDecodeMs: [] as number[],
+  stateEvents: [] as number[],
   bytesOutPerSecond: [] as number[],
   wireBytesOutPerSecond: [] as number[],
   snapshotsSentPerSecond: [] as number[],
@@ -219,6 +225,9 @@ function openClient(index: number): void {
       if (index < slowClients) {
         setTimeout(() => pauseClientSocket(socket), slowAfterMs);
       }
+      if (eventBurstCount > 0 && index < eventBurstClients) {
+        setTimeout(() => emitEventBurst(socket), eventBurstAfterMs);
+      }
     }
     if (message.type === "state") {
       stats.states += 1;
@@ -226,6 +235,7 @@ function openClient(index: number): void {
       observed.stateParseMs.push(roundTiming(parsedAt - decodeStartedAt));
       observed.stateNormalizeMs.push(roundTiming(normalizedAt - parsedAt));
       observed.stateDecodeMs.push(roundTiming(normalizedAt - decodeStartedAt));
+      observed.stateEvents.push(message.events?.length ?? 0);
       if (message.metrics) recordMetrics(message.metrics);
       recordSnapshotFlags(message);
       if (attackTargets) maybeTargetMonster(socket, message);
@@ -240,6 +250,17 @@ function openClient(index: number): void {
     stats.closed += 1;
     sockets.delete(socket);
   });
+}
+
+function emitEventBurst(socket: WebSocket): void {
+  if (socket.readyState !== WebSocket.OPEN) return;
+  socket.send(
+    JSON.stringify({
+      type: "e2eEmitEvents",
+      count: eventBurstCount,
+      spread: eventBurstSpread
+    })
+  );
 }
 
 function maybeTargetMonster(socket: WebSocket, message: LoadMessage): void {
@@ -502,6 +523,15 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
       }
     }
   }
+  const stateEvents = report.perMessage.stateEvents;
+  if (stateEvents) {
+    for (const field of fields) {
+      const maximum = optionNumber(`max-state-events-${field}`);
+      if (maximum != null && stateEvents[field] > maximum) failures.push(`stateEvents.${field} ${stateEvents[field]} > ${maximum}`);
+      const minimum = optionNumber(`min-state-events-${field}`);
+      if (minimum != null && stateEvents[field] < minimum) failures.push(`stateEvents.${field} ${stateEvents[field]} < ${minimum}`);
+    }
+  }
   const messageTimingNames: MessageTimingMetric[] = ["stateParseMs", "stateNormalizeMs", "stateDecodeMs"];
   for (const metric of messageTimingNames) {
     const summary = report.perMessage[metric];
@@ -530,7 +560,13 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       ratio: combatRatio,
       assigned: combatAssignments.size,
       zones: combatZoneCounts,
-      attackTargets
+      attackTargets,
+      eventBurst: {
+        count: eventBurstCount,
+        clients: eventBurstClients,
+        afterMs: eventBurstAfterMs,
+        spread: eventBurstSpread
+      }
     },
     transientClients: !persistent,
     ...stats,
@@ -573,7 +609,8 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       stateBytes: summarize(observed.stateMessageBytes),
       stateParseMs: summarize(observed.stateParseMs),
       stateNormalizeMs: summarize(observed.stateNormalizeMs),
-      stateDecodeMs: summarize(observed.stateDecodeMs)
+      stateDecodeMs: summarize(observed.stateDecodeMs),
+      stateEvents: summarize(observed.stateEvents)
     },
     perClient: {
       visiblePlayers: summarize(observed.visiblePlayers),
