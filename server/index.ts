@@ -3801,16 +3801,16 @@ function addToSpatial<T extends Positioned>(index: Map<string, T[]>, entity: T):
   index.set(key, bucket);
 }
 
-function hasSpatialEntity<T extends Positioned>(index: Map<string, T[]>, entity: T): boolean {
-  return index.get(spatialKey(entity.floor, entity.x, entity.y))?.includes(entity) ?? false;
-}
-
 function removeFromSpatial<T extends Positioned>(index: Map<string, T[]>, entity: T): void {
   removeFromSpatialAt(index, entity, entity.floor, entity.x, entity.y);
 }
 
 function removeFromSpatialAt<T extends Positioned>(index: Map<string, T[]>, entity: T, floor: number, x: number, y: number): void {
   const key = spatialKey(floor, x, y);
+  removeFromSpatialAtKey(index, entity, key);
+}
+
+function removeFromSpatialAtKey<T extends Positioned>(index: Map<string, T[]>, entity: T, key: string): void {
   const bucket = index.get(key);
   if (!bucket) return;
   const indexInBucket = bucket.indexOf(entity);
@@ -3820,11 +3820,10 @@ function removeFromSpatialAt<T extends Positioned>(index: Map<string, T[]>, enti
 }
 
 function updateSpatialCell<T extends Positioned>(index: Map<string, T[]>, entity: T, oldFloor: number, oldX: number, oldY: number): void {
-  if (spatialKey(oldFloor, oldX, oldY) === spatialKey(entity.floor, entity.x, entity.y)) {
-    if (!hasSpatialEntity(index, entity)) addToSpatial(index, entity);
-    return;
-  }
-  removeFromSpatialAt(index, entity, oldFloor, oldX, oldY);
+  const oldKey = spatialKey(oldFloor, oldX, oldY);
+  const nextKey = spatialKey(entity.floor, entity.x, entity.y);
+  if (oldKey === nextKey) return;
+  removeFromSpatialAtKey(index, entity, oldKey);
   addToSpatial(index, entity);
 }
 
