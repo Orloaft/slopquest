@@ -778,10 +778,10 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "beachTiles", "tileBeachRippleSand", 100, 99, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachWoodPlanks", 100, 262, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachPath", 96, 402, 70, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachStairs", 400, 864, 70, 80);
-  makeTileTexture(this, "beachTiles", "tileBeachCliff", 600, 100, 70, 82);
-  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 70, 82);
-  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 70, 82);
+  makeTileTexture(this, "beachTiles", "tileBeachStairs", 390, 864, 72, 82, 0);
+  makeTileTexture(this, "beachTiles", "tileBeachCliff", 596, 100, 72, 82, 0);
+  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 72, 82, 0);
+  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 72, 82, 0);
   makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62);
   makeTileTexture(this, "beachTiles", "tileBeachShore", 1200, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1040, 260, 72, 72);
@@ -802,8 +802,16 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "beachTiles", "spriteBeachCampfire", 1160, 872, 72, 66);
   makeSpriteTexture(this, "beachTiles", "spriteBeachPalm", 1438, 944, 86, 72);
   makeSpriteTexture(this, "beachTiles", "spriteBeachRocks", 1204, 402, 88, 74);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachBoulder", 1224, 384, 112, 72);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachFlowerYellow", 528, 398, 44, 34);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachFlowerWhite", 672, 398, 46, 34);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachStump", 676, 482, 56, 46);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachBonePile", 528, 482, 70, 34);
   makeSpriteTexture(this, "beachTiles", "spriteBeachLogPile", 910, 476, 92, 54);
   makeSpriteTexture(this, "beachTiles", "spriteBeachBarrel", 438, 732, 46, 58);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachWell", 1200, 674, 64, 92);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachFence", 20, 744, 230, 62);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachStoneWall", 1112, 680, 116, 70);
   makeSpriteTexture(this, "beachTiles", "spriteBeachSign", 340, 650, 62, 72);
   makeSpriteTexture(this, "beachTiles", "spriteBeachRuin", 842, 680, 70, 76);
   // Untamed Jungle (floor 9). Crops from assetsources/rejected/jungle-biome-tiles.png.
@@ -4304,10 +4312,10 @@ function addNearestCanvasTexture(scene: Phaser.Scene, key: string, canvas: HTMLC
   scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
 
-function makeTileTexture(scene: Phaser.Scene, sourceKey: string, newKey: string, sx: number, sy: number, sw: number, sh: number): void {
+function makeTileTexture(scene: Phaser.Scene, sourceKey: string, newKey: string, sx: number, sy: number, sw: number, sh: number, insetOverride?: number): void {
   const source = scene.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
   const sourceCanvas = document.createElement("canvas");
-  const inset = Math.min(10, Math.floor(sw / 5), Math.floor(sh / 5));
+  const inset = insetOverride ?? Math.min(10, Math.floor(sw / 5), Math.floor(sh / 5));
   const cropW = sw - inset * 2;
   const cropH = sh - inset * 2;
   sourceCanvas.width = cropW;

@@ -545,8 +545,8 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 45, 40, 16, 8, "I");
     fillRect(rows, 58, 44, 9, 8, "I");
     fillRect(rows, 76, 47, 11, 8, "I");
-    fillRect(rows, 35, 20, 12, 7, "I"); // tidal inlet
-    fillRect(rows, 38, 18, 6, 3, "I");
+    for (const [x, y, w] of [[39, 18, 4], [37, 19, 8], [35, 20, 12], [34, 21, 14], [34, 22, 13], [35, 23, 11], [36, 24, 8], [38, 25, 5]] as Array<[number, number, number]>)
+      fillRect(rows, x, y, w, 1, "I"); // tidal inlet
     fillRect(rows, 14, 5, 4, 4, "l"); // Coastal Harvest shelf used by foraging tests
 
     // Walkable sand detail: shell flats, trampled paths and wet tide line.
