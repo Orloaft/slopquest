@@ -27,7 +27,6 @@ import {
 import type { ClassSpec } from "./shared.ts";
 import { MAP_OBJECTS } from "./map-objects.ts";
 import { setTrack, unlockAudio, setMusicEnabled, currentTrack } from "./audio.ts";
-import { normalizeServerMessage, type WireServerMessage } from "./wire.ts";
 
 // --- Music: per-zone score with a crossfade on transitions -----------------
 // Track names map to /music/<name>.mp3 (see public/music/README.md). The OSRS
@@ -68,6 +67,7 @@ import type {
   NpcView,
   PlayerView,
   QuestView,
+  ServerMessage,
   SkillView,
   StateMetrics,
   StateSnapshot,
@@ -747,20 +747,28 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "swampTiles", "tileMarsh", 18, 98, 69, 72);
   makeTileTexture(this, "swampTiles", "tileSwampDirt", 97, 98, 67, 72);
   makeTileTexture(this, "swampTiles", "tileSwampWater", 1041, 102, 74, 71);
+  makeTileTexture(this, "swampTiles", "tileSwampWaterMottle", 1129, 102, 74, 71);
+  makeTileTexture(this, "swampTiles", "tileSwampWaterEdge", 1217, 102, 82, 71);
   makeTileTexture(this, "swampTiles", "tileBridge", 95, 744, 68, 66);
   makeSpriteTexture(this, "swampTiles", "spriteSwampBoulder", 1150, 392, 62, 50);
   makeSpriteTexture(this, "swampTiles", "spriteMireLotus", 820, 388, 38, 36);
+  makeSpriteTexture(this, "swampTiles", "spriteSwampReeds", 1448, 944, 72, 72);
+  makeSpriteTexture(this, "swampTiles", "spriteSwampLog", 886, 476, 112, 50);
   makeSpriteTexture(this, "swampTiles", "spriteCliffLedge", 714, 958, 70, 58);
   // Searing Badlands (floor 6). Crops from assetsources/rejected/badlands-biome-tiles-01.png
   // (1536x1024, magenta-keyed) — rust ground/rock/cliff/pit/ramp tiles + a frontier tent.
   makeTileTexture(this, "badlandsTiles", "tileBadlands", 18, 99, 70, 74);
   makeTileTexture(this, "badlandsTiles", "tileBadlandsRock", 180, 99, 73, 74);
+  makeTileTexture(this, "badlandsTiles", "tileBadlandsCracked", 98, 99, 70, 74);
+  makeTileTexture(this, "badlandsTiles", "tileBadlandsGravel", 262, 99, 72, 74);
   makeTileTexture(this, "badlandsTiles", "tileMassif", 180, 180, 72, 74); // dark impassable rock bulk behind cliff faces
   makeTileTexture(this, "badlandsTiles", "tileCliff", 528, 100, 68, 82);
   makeTileTexture(this, "badlandsTiles", "tilePit", 1346, 188, 72, 70);
   makeTileTexture(this, "badlandsTiles", "tileRamp", 392, 864, 68, 80);
   makeSpriteTexture(this, "badlandsTiles", "spriteTent", 1070, 873, 92, 72);
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsLedge", 20, 862, 72, 86);
+  makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsBoulder", 1248, 388, 98, 80);
+  makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsShard", 1368, 392, 104, 70);
   // Sunken Desert (floor 7). Crops from assetsources/rejected/desert-biome-tiles.png
   // (1536x1024, magenta-keyed) — sand/quicksand/oasis tiles + palm, market tent, ledge.
   makeTileTexture(this, "desertTiles", "tileSand", 25, 101, 71, 73);
@@ -771,12 +779,10 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "desertTiles", "spriteDesertLedge", 22, 856, 66, 86);
   // Sunken Beach (floor 8). Crops from assetsources/rejected/beach-biome-tiles.png.
   makeTileTexture(this, "beachTiles", "tileBeachSand", 20, 99, 70, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShellSand", 180, 99, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachPebbleSand", 340, 99, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachMossyStone", 180, 180, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachWetSand", 20, 180, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachRippleSand", 100, 99, 70, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachWoodPlanks", 100, 262, 70, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShellSand", 180, 99, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachPebbleSand", 260, 99, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachWetSand", 20, 180, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachPath", 96, 402, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachStairs", 390, 864, 72, 82, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachStairsLeft", 390, 864, 72, 82, 0, true);
@@ -785,21 +791,24 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "beachTiles", "tileBeachCliff", 596, 100, 72, 82, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 72, 82, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 72, 82, 0, true);
-  makeTileTexture(this, "beachTiles", "tileBeachRockWall", 596, 180, 72, 72, 0, true);
+  makeTileTexture(this, "beachTiles", "tileBeachRockWall", 596, 128, 72, 72, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62, undefined, true);
-  makeTileTexture(this, "beachTiles", "tileBeachShore", 1200, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1040, 260, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreEast", 1144, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreSouth", 1232, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreWest", 1056, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerNW", 1216, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerNE", 1216, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSW", 1216, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSE", 1216, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachLagoon", 1130, 101, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileOcean", 1052, 101, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileOceanRipple", 1128, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileOceanRock", 1052, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShore", 1320, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1320, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreEast", 1232, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreSouth", 1056, 260, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreWest", 1408, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerNW", 1232, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerNE", 1320, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSW", 1320, 260, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSE", 1408, 260, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachLagoon", 1040, 92, 72, 72, 18);
+  makeTileTexture(this, "beachTiles", "tileOcean", 1056, 92, 72, 72, 18);
+  makeTileTexture(this, "beachTiles", "tileOceanRipple", 1144, 92, 72, 72, 18);
+  makeTileTexture(this, "beachTiles", "tileOceanRock", 1128, 92, 72, 72, 18);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachCliffLipA", 528, 100, 128, 74);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachCliffLipB", 680, 100, 132, 74);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachStairsRun4", 390, 864, 288, 82);
   makeSpriteTexture(this, "beachTiles", "spriteBeachHut", 1366, 860, 116, 118);
   makeSpriteTexture(this, "beachTiles", "spriteBeachDock", 642, 650, 168, 86);
   makeSpriteTexture(this, "beachTiles", "spriteBeachBoat", 560, 722, 74, 48);
@@ -808,18 +817,6 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "beachTiles", "spriteBeachCampfire", 1160, 872, 72, 66);
   makeSpriteTexture(this, "beachTiles", "spriteBeachPalm", 1438, 944, 86, 72);
   makeSpriteTexture(this, "beachTiles", "spriteBeachRocks", 1204, 402, 88, 74);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachBoulder", 1224, 384, 112, 72);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachFlowerYellow", 528, 398, 44, 34);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachFlowerWhite", 672, 398, 46, 34);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachStump", 676, 482, 56, 46);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachBonePile", 528, 482, 70, 34);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachLogPile", 910, 476, 92, 54);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachBarrel", 438, 732, 46, 58);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachWell", 1200, 674, 64, 92);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachFence", 20, 744, 230, 62);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachStoneWall", 1112, 680, 116, 70);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachSign", 340, 650, 62, 72);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachRuin", 842, 680, 70, 76);
   // Untamed Jungle (floor 9). Crops from assetsources/rejected/jungle-biome-tiles.png.
   makeTileTexture(this, "jungleTiles", "tileJungle", 18, 97, 72, 74);
   makeTileTexture(this, "jungleTiles", "tileJungleWall", 524, 100, 68, 82);
@@ -925,7 +922,7 @@ function ensureSocket(): void {
     dom.rosterList.textContent = "Choose a character or create a new one.";
   });
   socket.addEventListener("message", (event) => {
-    const message = normalizeServerMessage(JSON.parse(event.data as string) as WireServerMessage);
+    const message = JSON.parse(event.data as string) as ServerMessage;
     if (message.type === "characters") renderRoster(message.characters ?? []);
     if (message.type === "characterDeleted" && !message.ok) dom.rosterList.textContent = "That character is online or no longer exists.";
     if (message.type === "welcome") selfId = message.id;
@@ -934,7 +931,7 @@ function ensureSocket(): void {
       latestState = mergeStateSnapshot(latestState, message);
       selfView = resolveSelfView(latestState);
       if (!hadState || snapshotHasEntityChanges(message)) stateVersion += 1;
-      if (message.metrics) metricsVersion += 1;
+      metricsVersion += 1;
       if ((message.events ?? []).length > 0) consumeEvents(message.events ?? []);
     }
   });
@@ -947,23 +944,23 @@ function ensureSocket(): void {
 
 function mergeStateSnapshot(previous: StateSnapshot | null, next: StateSnapshot): StateSnapshot {
   if (!previous) return withSnapshotDefaults(next);
+  const snapshot = withSnapshotDefaults(next, false);
   return {
-    ...next,
-    players: mergeEntityViews(previous.players, next.players, next.removedPlayerIds, next.playersFull),
-    monsters: mergeEntityViews(previous.monsters, next.monsters, next.removedMonsterIds, next.monstersFull),
-    corpses: mergeEntityViews(previous.corpses, next.corpses, next.removedCorpseIds, next.corpsesFull),
-    npcs: mergeEntityViews(previous.npcs, next.npcs, next.removedNpcIds, next.npcsFull),
-    trees: mergeEntityViews(previous.trees, next.trees, next.removedTreeIds, next.treesFull),
-    fishingNodes: mergeEntityViews(previous.fishingNodes, next.fishingNodes, next.removedFishingNodeIds, next.fishingNodesFull),
-    miningNodes: mergeEntityViews(previous.miningNodes, next.miningNodes, next.removedMiningNodeIds, next.miningNodesFull),
-    herbNodes: mergeEntityViews(previous.herbNodes, next.herbNodes, next.removedHerbNodeIds, next.herbNodesFull),
-    fires: mergeEntityViews(previous.fires, next.fires, next.removedFireIds, next.firesFull),
-    metrics: next.metrics ?? previous.metrics
+    ...snapshot,
+    players: mergeEntityViews(previous.players, snapshot.players, snapshot.removedPlayerIds, snapshot.playersFull),
+    monsters: mergeEntityViews(previous.monsters, snapshot.monsters, snapshot.removedMonsterIds, snapshot.monstersFull),
+    corpses: mergeEntityViews(previous.corpses, snapshot.corpses, snapshot.removedCorpseIds, snapshot.corpsesFull),
+    npcs: mergeEntityViews(previous.npcs, snapshot.npcs, snapshot.removedNpcIds, snapshot.npcsFull),
+    trees: mergeEntityViews(previous.trees, snapshot.trees, snapshot.removedTreeIds, snapshot.treesFull),
+    fishingNodes: mergeEntityViews(previous.fishingNodes, snapshot.fishingNodes, snapshot.removedFishingNodeIds, snapshot.fishingNodesFull),
+    miningNodes: mergeEntityViews(previous.miningNodes, snapshot.miningNodes, snapshot.removedMiningNodeIds, snapshot.miningNodesFull),
+    herbNodes: mergeEntityViews(previous.herbNodes, snapshot.herbNodes, snapshot.removedHerbNodeIds, snapshot.herbNodesFull),
+    fires: mergeEntityViews(previous.fires, snapshot.fires, snapshot.removedFireIds, snapshot.firesFull)
   };
 }
 
 function resolveSelfView(state: StateSnapshot | null): PlayerView | undefined {
-  return selfId ? state?.players.find((player) => player.id === selfId) : undefined;
+  return selfId ? state?.players?.find((player) => player.id === selfId) : undefined;
 }
 
 function snapshotHasEntityChanges(snapshot: StateSnapshot): boolean {
@@ -977,15 +974,15 @@ function snapshotHasEntityChanges(snapshot: StateSnapshot): boolean {
       snapshot.miningNodesFull ||
       snapshot.herbNodesFull ||
       snapshot.firesFull ||
-      snapshot.players.length > 0 ||
-      snapshot.monsters.length > 0 ||
-      snapshot.corpses.length > 0 ||
-      snapshot.npcs.length > 0 ||
-      snapshot.trees.length > 0 ||
-      snapshot.fishingNodes.length > 0 ||
-      snapshot.miningNodes.length > 0 ||
-      snapshot.herbNodes.length > 0 ||
-      snapshot.fires.length > 0 ||
+      (snapshot.players?.length ?? 0) > 0 ||
+      (snapshot.monsters?.length ?? 0) > 0 ||
+      (snapshot.corpses?.length ?? 0) > 0 ||
+      (snapshot.npcs?.length ?? 0) > 0 ||
+      (snapshot.trees?.length ?? 0) > 0 ||
+      (snapshot.fishingNodes?.length ?? 0) > 0 ||
+      (snapshot.miningNodes?.length ?? 0) > 0 ||
+      (snapshot.herbNodes?.length ?? 0) > 0 ||
+      (snapshot.fires?.length ?? 0) > 0 ||
       (snapshot.removedPlayerIds?.length ?? 0) > 0 ||
       (snapshot.removedMonsterIds?.length ?? 0) > 0 ||
       (snapshot.removedCorpseIds?.length ?? 0) > 0 ||
@@ -998,26 +995,35 @@ function snapshotHasEntityChanges(snapshot: StateSnapshot): boolean {
   );
 }
 
-function withSnapshotDefaults(snapshot: StateSnapshot): StateSnapshot {
+function withSnapshotDefaults(snapshot: StateSnapshot, defaultFull = true): StateSnapshot {
   return {
     ...snapshot,
-    playersFull: snapshot.playersFull ?? true,
+    players: snapshot.players ?? [],
+    playersFull: snapshot.playersFull ?? defaultFull,
     removedPlayerIds: snapshot.removedPlayerIds ?? [],
-    monstersFull: snapshot.monstersFull ?? true,
+    monsters: snapshot.monsters ?? [],
+    monstersFull: snapshot.monstersFull ?? defaultFull,
     removedMonsterIds: snapshot.removedMonsterIds ?? [],
-    corpsesFull: snapshot.corpsesFull ?? true,
+    corpses: snapshot.corpses ?? [],
+    corpsesFull: snapshot.corpsesFull ?? defaultFull,
     removedCorpseIds: snapshot.removedCorpseIds ?? [],
-    npcsFull: snapshot.npcsFull ?? true,
+    npcs: snapshot.npcs ?? [],
+    npcsFull: snapshot.npcsFull ?? defaultFull,
     removedNpcIds: snapshot.removedNpcIds ?? [],
-    treesFull: snapshot.treesFull ?? true,
+    trees: snapshot.trees ?? [],
+    treesFull: snapshot.treesFull ?? defaultFull,
     removedTreeIds: snapshot.removedTreeIds ?? [],
-    fishingNodesFull: snapshot.fishingNodesFull ?? true,
+    fishingNodes: snapshot.fishingNodes ?? [],
+    fishingNodesFull: snapshot.fishingNodesFull ?? defaultFull,
     removedFishingNodeIds: snapshot.removedFishingNodeIds ?? [],
-    miningNodesFull: snapshot.miningNodesFull ?? true,
+    miningNodes: snapshot.miningNodes ?? [],
+    miningNodesFull: snapshot.miningNodesFull ?? defaultFull,
     removedMiningNodeIds: snapshot.removedMiningNodeIds ?? [],
-    herbNodesFull: snapshot.herbNodesFull ?? true,
+    herbNodes: snapshot.herbNodes ?? [],
+    herbNodesFull: snapshot.herbNodesFull ?? defaultFull,
     removedHerbNodeIds: snapshot.removedHerbNodeIds ?? [],
-    firesFull: snapshot.firesFull ?? true,
+    fires: snapshot.fires ?? [],
+    firesFull: snapshot.firesFull ?? defaultFull,
     removedFireIds: snapshot.removedFireIds ?? []
   };
 }
@@ -1296,10 +1302,7 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
     const row = state.rows[y];
     if (row === undefined) continue;
     for (let x = tileX; x < tileRight; x += 1) {
-      const tile = row[x] ?? "";
-      const underlay = tileUnderlayTexture(tile);
-      if (underlay) texture.draw(underlay, (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
-      texture.draw(tileBaseTexture(tile), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+      texture.draw(tileBaseTexture(row[x] ?? ""), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
     }
   }
   chunk.add(texture);
@@ -4330,7 +4333,7 @@ function makeTileTexture(
   sw: number,
   sh: number,
   insetOverride?: number,
-  preserveTransparency = false
+  preserveTransparentPixels = false
 ): void {
   const source = scene.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
   const sourceCanvas = document.createElement("canvas");
@@ -4353,7 +4356,7 @@ function makeTileTexture(
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(sourceCanvas, 0, 0, cropW, cropH, 0, 0, TILE_SIZE, TILE_SIZE);
   chromaKeyMagenta(ctx, TILE_SIZE, TILE_SIZE);
-  if (!preserveTransparency) fillTransparentPixels(ctx, TILE_SIZE, TILE_SIZE);
+  if (!preserveTransparentPixels) fillTransparentPixels(ctx, TILE_SIZE, TILE_SIZE);
   scene.textures.addCanvas(newKey, canvas);
   scene.textures.get(newKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
@@ -4495,12 +4498,16 @@ function minimapTileColor(tile: string): string {
     m: "#4a5b3a", // marsh ground
     k: "#5a4d33", // swamp dirt
     W: "#2b3b38", // swamp water (blocked)
+    "3": "#334742", // mottled open swamp water
+    "4": "#3f5b4f", // waterline reeds/edge
     B: "#6e5836", // wooden bridge
     o: "#5d6452", // boulder (blocked)
     M: "#d6ad4e", // marsh portal (landmark)
     L: "#c8a86a", // cliff ledge (landmark)
     R: "#b5703a", // badlands ground
     J: "#9a5e30", // badlands rock
+    "6": "#c0763a", // cracked badlands flat
+    "7": "#8f5630", // gravel badlands flat
     w: "#5a3318", // massif (impassable dark rock)
     X: "#5c3320", // cliff wall (blocked)
     P: "#140f0d", // pit chasm (blocked, sight-open)
@@ -4517,26 +4524,24 @@ function minimapTileColor(tile: string): string {
     l: "#d7c28f", // shell-strewn beach flat
     ",": "#cbb987", // wet/shelly tide rim
     ";": "#ead49a", // rippled beach sand
-    "3": "#d5be82", // pebbly dry beach
-    "4": "#8f8f62", // mossy beach stone
-    "5": "#9c6b3e", // wooden planks
     z: "#cda76a", // beach path
     "2": "#b98b52", // beach stairs/ramp
+    "[": "#b98b52", // beach stairs left cap
+    "]": "#b98b52", // beach stairs right cap
     x: "#8d6036", // beach cliff face (blocked)
-    "0": "#8d6036", // beach cliff left cap (blocked)
-    "1": "#8d6036", // beach cliff right cap (blocked)
+    "0": "#8d6036", // beach cliff left cap
+    "1": "#8d6036", // beach cliff right cap
+    "|": "#7d5533", // beach rock-wall face
     u: "#9b8d68", // beach rocks (blocked, sight cover)
-    v: "#68b7bd", // foamy shore water (blocked, sight-open)
-    "6": "#68b7bd", // north-facing foamy shore water
-    "7": "#68b7bd", // east-facing foamy shore water
-    "8": "#68b7bd", // south-facing foamy shore water
-    "9": "#68b7bd", // west-facing foamy shore water
-    "{": "#72c4c4", // foamy shore corner
-    "}": "#72c4c4", // foamy shore corner
-    "(": "#72c4c4", // foamy shore corner
-    ")": "#72c4c4", // foamy shore corner
     "=": "#4aaab4", // shallow lagoon water
+    v: "#68b7bd", // foamy shore water (blocked, sight-open)
+    "{": "#72c4c4",
+    "}": "#72c4c4",
+    "(": "#72c4c4",
+    ")": "#72c4c4",
     I: "#2f9bb0", // ocean (blocked, sight-open)
+    "!": "#3aa5b9", // ocean ripple
+    "?": "#2b8797", // ocean rock/depth variation
     Y: "#d6ad4e", // beach portal (landmark)
     j: "#d6ad4e", // beach<->jungle portal (landmark)
     y: "#3c6b35", // jungle floor
@@ -5222,12 +5227,16 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     m: "tileMarsh",
     k: "tileSwampDirt",
     W: "tileSwampWater",
+    "3": "tileSwampWaterMottle",
+    "4": "tileSwampWaterEdge",
     B: "tileBridge",
     o: "tileMarsh",
     M: "tileSwampDirt",
     L: "tileSwampDirt",
     R: "tileBadlands",
     J: "tileBadlandsRock",
+    "6": "tileBadlandsCracked",
+    "7": "tileBadlandsGravel",
     w: "tileMassif",
     X: "tileCliff",
     P: "tilePit",
@@ -5244,10 +5253,7 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     l: "tileBeachShellSand",
     ",": "tileBeachWetSand",
     ";": "tileBeachRippleSand",
-    "3": "tileBeachPebbleSand",
-    "4": "tileBeachMossyStone",
-    "5": "tileBeachWoodPlanks",
-    z: "tileBeachPebbleSand",
+    z: "tileBeachPath",
     "2": "tileBeachStairsMid",
     "[": "tileBeachStairsLeft",
     "]": "tileBeachStairsRight",
@@ -5256,15 +5262,11 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     "1": "tileBeachCliffRight",
     "|": "tileBeachRockWall",
     u: "tileBeachRock",
-    v: "tileBeachShore",
-    "6": "tileBeachShoreNorth",
-    "7": "tileBeachShoreEast",
-    "8": "tileBeachShoreSouth",
-    "9": "tileBeachShoreWest",
-    "{": "tileBeachShoreCornerNW",
-    "}": "tileBeachShoreCornerNE",
-    "(": "tileBeachShoreCornerSW",
-    ")": "tileBeachShoreCornerSE",
+    v: "tileBeachLagoon",
+    "{": "tileBeachLagoon",
+    "}": "tileBeachLagoon",
+    "(": "tileBeachLagoon",
+    ")": "tileBeachLagoon",
     "=": "tileBeachLagoon",
     I: "tileOcean",
     "!": "tileOceanRipple",
@@ -5285,15 +5287,17 @@ const TILE_UNDERLAY_TEXTURE: Record<string, string> = {
     "0": "tileBeachShellSand",
     "1": "tileBeachShellSand",
     "|": "tileBeachShellSand",
-    u: "tileBeachSand"
+    u: "tileBeachSand",
+    v: "tileOcean",
+    "{": "tileOcean",
+    "}": "tileOcean",
+    "(": "tileOcean",
+    ")": "tileOcean",
+    "?": "tileOcean"
 };
 
 function tileBaseTexture(tile: string): string {
-  return TILE_BASE_TEXTURE[tile] ?? "tileGrass";
-}
-
-function tileUnderlayTexture(tile: string): string | null {
-  return TILE_UNDERLAY_TEXTURE[tile] ?? null;
+  return TILE_UNDERLAY_TEXTURE[tile] ?? TILE_BASE_TEXTURE[tile] ?? "tileGrass";
 }
 
 function textStyle(size: number, color: string): Phaser.Types.GameObjects.Text.TextStyle {

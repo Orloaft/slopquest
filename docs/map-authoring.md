@@ -39,8 +39,8 @@ When a floor is in those sets:
 | Cemetery (1)       | `g` gravedirt `c` gravepath `b` path | `q` fence | — | `h` grave decoration; `T`/`C`/`G` portals |
 | Crypt (2)          | `c` crypt floor `d` dirt `b` floor | `#` wall | — | `T` portal (enclosed dungeon) |
 | Northwatch town (4)| same as Waystone | same | — | buildings via `MAP_OBJECTS` |
-| Sunken Marsh (5)   | `m` marsh `k` swampdirt `B` bridge | `o` boulder | `W` swamp water | `M` portal, `L` cliff ledge |
-| Searing Badlands(6)| `R` canyon floor `J` rock `A` ramp | `w` massif, `X` cliff face | `P` pit | `D`/`Z` portals |
+| Sunken Marsh (5)   | `m` marsh `k` swampdirt `B` bridge | `o` boulder | `W`/`3` open swamp water, `4` waterline edge | `M` portal, `L` cliff ledge |
+| Searing Badlands(6)| `R` canyon floor `J` rock `6` cracked floor `7` gravel floor `A` ramp | `w` massif, `X` cliff face | `P` pit | `D`/`Z` portals |
 | Sunken Desert (7)  | `a` sand | `U` ruin | `Q` quicksand, `V` oasis water | `G`/`H`/`Y` portals |
 | Sunken Beach (8)   | `e` beach sand | — | `I` ocean | `Y` portal, `j` jungle portal |
 | Untamed Jungle (9) | `y` jungle floor | `E` jungle wall | `i` river | `K` vault landmark, `j` portal |

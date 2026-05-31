@@ -55,6 +55,10 @@ const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
 // Floors authored directly at the expanded size (their content is already
 // placed in expanded coordinates, so it must NOT be scaled again).
 const AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+const SWAMP_WATER_TILES = new Set(["W", "3", "4"]);
+const SWAMP_LAND_TILES = new Set(["m", "k", "B", "M", "L", "o"]);
+const BEACH_LAND_TILES = new Set(["e", "l", ",", ";", "z", "2", "[", "]", "x", "0", "1", "|", "u", "Y", "j"]);
+const BEACH_WATER_TILES = new Set(["I", "!", "?", "=", "v", "{", "}", "(", ")"]);
 
 export function floorCols(floor: number): number {
   return FLOOR_DIMS[floor]?.cols ?? MAP_COLS;
@@ -476,6 +480,17 @@ export function makeFloorTiles(floor: number): string[] {
     // Pit hazards in the canyon floors (block movement, not sight).
     setTile(rows, 25, 16, "P");
     setTile(rows, 33, 37, "P");
+    // Floor variants from the badlands sheet: cracked flats and rocky gravel
+    // break up the canyon without changing movement semantics.
+    for (const [x, y, w, h, tile] of [
+      [3, 31, 8, 2, "6"], [13, 18, 4, 12, "7"], [20, 17, 8, 3, "6"],
+      [31, 32, 12, 3, "7"], [48, 32, 8, 4, "6"], [54, 14, 5, 8, "7"],
+      [61, 13, 15, 4, "6"], [65, 18, 12, 3, "7"], [42, 45, 7, 3, "6"],
+      [6, 42, 8, 3, "7"]
+    ] as Array<[number, number, number, number, string]>)
+      fillRect(rows, x, y, w, h, tile);
+    setTile(rows, 24, 18, "R"); // keep the scripted burrower ambush tile plain floor
+    setTile(rows, 35, 33, "R"); // keep the second burrower anchor plain floor too
     // Portals.
     setTile(rows, 1, 33, "D"); // west edge -> the forest
     setTile(rows, 78, 13, "Z"); // cliff ledge -> western Northwatch (one-way)
@@ -525,28 +540,24 @@ export function makeFloorTiles(floor: number): string[] {
     // connectors and POI pockets echoing the beach mockup's arrangement.
     fillRect(rows, 0, 0, 90, 60, "I");
 
-    // Main island mass and sandy spurs.
-    fillRect(rows, 13, 5, 52, 34, "e");
-    fillRect(rows, 8, 12, 16, 22, "e"); // west beach shoulder
-    fillRect(rows, 54, 11, 28, 25, "e"); // east beach shoulder
-    fillRect(rows, 24, 35, 44, 13, "e"); // southern open beach
-    fillRect(rows, 68, 34, 12, 13, "e"); // eastern spit
-    fillRect(rows, 35, 46, 18, 5, "e"); // central sandbar
-    fillRect(rows, 3, 23, 10, 11, "e"); // west cove landing
+    // Main island mass and sandy spurs. Row spans keep the coastline authored
+    // as a sloped silhouette instead of stacked rectangles.
+    drawBeachIsland(rows);
 
     // Bite coves back out of the island to avoid straight rectangular beaches.
-    fillRect(rows, 3, 5, 10, 13, "I");
-    fillRect(rows, 7, 6, 10, 5, "I");
+    fillRect(rows, 5, 6, 7, 4, "I");
+    fillRect(rows, 8, 10, 4, 5, "I");
     fillRect(rows, 28, 2, 14, 5, "I");
-    fillRect(rows, 66, 2, 18, 8, "I");
-    fillRect(rows, 76, 10, 11, 11, "I");
-    fillRect(rows, 5, 35, 18, 10, "I");
-    fillRect(rows, 10, 40, 13, 5, "I");
+    fillRect(rows, 68, 2, 14, 7, "I");
+    fillRect(rows, 78, 9, 7, 9, "I");
+    fillRect(rows, 5, 36, 10, 5, "I");
+    fillRect(rows, 11, 41, 12, 4, "I");
     fillRect(rows, 45, 40, 16, 8, "I");
     fillRect(rows, 58, 44, 9, 8, "I");
-    fillRect(rows, 76, 47, 11, 8, "I");
-    for (const [x, y, w] of [[39, 18, 4], [37, 19, 8], [35, 20, 12], [34, 21, 14], [34, 22, 13], [35, 23, 11], [36, 24, 8], [38, 25, 5]] as Array<[number, number, number]>)
-      fillRect(rows, x, y, w, 1, "I"); // tidal inlet
+    fillRect(rows, 77, 47, 8, 7, "I");
+    // Keep the central route dry like the mockup; water belongs around the
+    // coast, with small coves cut into the island edges rather than a square
+    // lagoon stamped through the middle of the play space.
     fillRect(rows, 14, 5, 4, 4, "l"); // Coastal Harvest shelf used by foraging tests
 
     // Walkable sand detail: shell flats, trampled paths and wet tide line.
@@ -563,7 +574,7 @@ export function makeFloorTiles(floor: number): string[] {
     // Raised ledges: walkable tops, connected rock-wall faces under the lip,
     // and composed stairs that cut through the face as left/middle/right runs.
     drawBeachLedge(rows, 18, 16, 14, 4, "l", [{ x: 20, w: 4 }]);
-    drawBeachLedge(rows, 51, 18, 16, 4, "3", [{ x: 56, w: 4 }]);
+    drawBeachLedge(rows, 51, 18, 16, 4, "l", [{ x: 56, w: 4 }]);
     drawBeachLedge(rows, 27, 31, 14, 3, "l", [{ x: 34, w: 4 }]);
 
     // Rocks/ruins as hard cover and visual anchors around coves/terraces.
@@ -638,6 +649,8 @@ export function makeFloorTiles(floor: number): string[] {
     setTile(rows, 20, 38, "o");
     setTile(rows, 52, 30, "o");
     setTile(rows, 6, 13, "L"); // one-way cliff ledge -> northern Waystone
+    scatter(rows, "W", "3", 180, 55); // open-water interior variation
+    applySwampWaterEdges(rows);
   }
 
   if (floor === 4) {
@@ -751,54 +764,99 @@ function applyCliffEdges(rows: string[][], floorChar = "R", massifChar = "w", fa
 }
 
 function applyBeachShoreEdges(rows: string[][]): void {
-  const land = new Set(["e", "l", ",", ";", "3", "4", "5", "z", "2", "[", "]", "x", "0", "1", "|", "u", "Y", "j"]);
-  const water = new Set(["I", "!", "?", "=", "v", "6", "7", "8", "9", "{", "}", "(", ")"]);
-  const shore: Array<[number, number]> = [];
-  const landEdge: Array<[number, number]> = [];
+  const wetSand: Array<[number, number]> = [];
+  const shore: Array<[number, number, string]> = [];
   for (let y = 0; y < rows.length; y += 1) {
     const row = rows[y];
     if (!row) continue;
     for (let x = 0; x < row.length; x += 1) {
-      if (row[x] === "e" || row[x] === "l" || row[x] === "3" || row[x] === ";") {
-        const touchesWater =
-          water.has(rows[y - 1]?.[x] ?? "") ||
-          water.has(rows[y + 1]?.[x] ?? "") ||
-          water.has(row[x - 1] ?? "") ||
-          water.has(row[x + 1] ?? "");
-        if (touchesWater) landEdge.push([x, y]);
+      const tile = row[x];
+      if (BEACH_LAND_TILES.has(tile ?? "")) {
+        if (
+          BEACH_WATER_TILES.has(rows[y - 1]?.[x] ?? "") ||
+          BEACH_WATER_TILES.has(rows[y + 1]?.[x] ?? "") ||
+          BEACH_WATER_TILES.has(row[x - 1] ?? "") ||
+          BEACH_WATER_TILES.has(row[x + 1] ?? "")
+        ) {
+          wetSand.push([x, y]);
+        }
         continue;
       }
-      if (!water.has(row[x] ?? "")) continue;
-      const touchesLand =
-        land.has(rows[y - 1]?.[x] ?? "") ||
-        land.has(rows[y + 1]?.[x] ?? "") ||
-        land.has(row[x - 1] ?? "") ||
-        land.has(row[x + 1] ?? "");
-      if (touchesLand) shore.push([x, y]);
+      if (!BEACH_WATER_TILES.has(tile ?? "")) continue;
+      const n = BEACH_LAND_TILES.has(rows[y - 1]?.[x] ?? "");
+      const s = BEACH_LAND_TILES.has(rows[y + 1]?.[x] ?? "");
+      const w = BEACH_LAND_TILES.has(row[x - 1] ?? "");
+      const e = BEACH_LAND_TILES.has(row[x + 1] ?? "");
+      if (!n && !s && !w && !e) continue;
+      if (tile === "=") continue;
+      const shoreTile = n && w ? "{" : n && e ? "}" : s && w ? "(" : s && e ? ")" : "v";
+      shore.push([x, y, shoreTile]);
     }
   }
-  landEdge.forEach(([x, y]) => {
+  wetSand.forEach(([x, y]) => {
     const tile = rows[y]?.[x];
-    if (tile === "e" || tile === "l" || tile === "3" || tile === ";") setTile(rows, x, y, ",");
+    if (tile === "e" || tile === "l" || tile === ";") setTile(rows, x, y, ",");
   });
-  shore.forEach(([x, y]) => {
-    const north = land.has(rows[y - 1]?.[x] ?? "");
-    const south = land.has(rows[y + 1]?.[x] ?? "");
-    const west = land.has(rows[y]?.[x - 1] ?? "");
-    const east = land.has(rows[y]?.[x + 1] ?? "");
-
-    if (south && east && !north && !west) setTile(rows, x, y, "{");
-    else if (south && west && !north && !east) setTile(rows, x, y, "}");
-    else if (north && east && !south && !west) setTile(rows, x, y, "(");
-    else if (north && west && !south && !east) setTile(rows, x, y, ")");
-    else if (south && !north && !west && !east) setTile(rows, x, y, "6");
-    else if (north && !south && !west && !east) setTile(rows, x, y, "8");
-    else if (west && !east && !north && !south) setTile(rows, x, y, "7");
-    else if (east && !west && !north && !south) setTile(rows, x, y, "9");
-    else setTile(rows, x, y, "v");
-  });
+  shore.forEach(([x, y, tile]) => setTile(rows, x, y, tile));
   smoothBeachShoreCornerClusters(rows);
+  blendBeachShallowWater(rows);
   varyBeachOpenWater(rows);
+}
+
+function drawBeachIsland(rows: string[][]): void {
+  const spans: Array<[number, number, number]> = [
+    [2, 23, 27], [2, 42, 63],
+    [3, 22, 31], [3, 37, 66],
+    [4, 18, 34], [4, 36, 68],
+    [5, 14, 70],
+    [6, 13, 72],
+    [7, 12, 74],
+    [8, 12, 76],
+    [9, 13, 78],
+    [10, 12, 80],
+    [11, 10, 81],
+    [12, 9, 82],
+    [13, 9, 82],
+    [14, 9, 82],
+    [15, 9, 82],
+    [16, 8, 82],
+    [17, 8, 82],
+    [18, 7, 82],
+    [19, 7, 82],
+    [20, 7, 83],
+    [21, 6, 83],
+    [22, 5, 83],
+    [23, 4, 83],
+    [24, 4, 83],
+    [25, 4, 83],
+    [26, 4, 83],
+    [27, 4, 83],
+    [28, 4, 83],
+    [29, 4, 83],
+    [30, 4, 83],
+    [31, 4, 83],
+    [32, 5, 83],
+    [33, 5, 83],
+    [34, 6, 83],
+    [35, 8, 82],
+    [36, 12, 82],
+    [37, 16, 81],
+    [38, 18, 80],
+    [39, 20, 80],
+    [40, 22, 80],
+    [41, 23, 80],
+    [42, 24, 80],
+    [43, 24, 80],
+    [44, 24, 80],
+    [45, 24, 80],
+    [46, 24, 80],
+    [47, 26, 78],
+    [48, 29, 76],
+    [49, 32, 72],
+    [50, 35, 68],
+    [51, 39, 61]
+  ];
+  for (const [y, x1, x2] of spans) fillRect(rows, x1, y, x2 - x1 + 1, 1, "e");
 }
 
 function drawBeachLedge(rows: string[][], x: number, y: number, w: number, topH: number, topTile: string, stairs: Array<{ x: number; w: number }>): void {
@@ -835,8 +893,25 @@ function smoothBeachShoreCornerClusters(rows: string[][]): void {
   }
 }
 
+function blendBeachShallowWater(rows: string[][]): void {
+  const shore = new Set(["v", "{", "}", "(", ")"]);
+  for (let y = 1; y < rows.length - 1; y += 1) {
+    const row = rows[y];
+    if (!row) continue;
+    for (let x = 1; x < row.length - 1; x += 1) {
+      if (row[x] !== "I") continue;
+      const nearFoam =
+        shore.has(rows[y - 1]?.[x] ?? "") ||
+        shore.has(rows[y + 1]?.[x] ?? "") ||
+        shore.has(row[x - 1] ?? "") ||
+        shore.has(row[x + 1] ?? "");
+      if (nearFoam) row[x] = "=";
+    }
+  }
+}
+
 function varyBeachOpenWater(rows: string[][]): void {
-  const shore = new Set(["v", "6", "7", "8", "9", "{", "}", "(", ")"]);
+  const shore = new Set(["v", "{", "}", "(", ")", "="]);
   for (let y = 1; y < rows.length - 1; y += 1) {
     const row = rows[y];
     if (!row) continue;
@@ -848,10 +923,29 @@ function varyBeachOpenWater(rows: string[][]): void {
         shore.has(row[x - 1] ?? "") ||
         shore.has(row[x + 1] ?? "");
       if (nearShore) continue;
-      if ((x * 17 + y * 31) % 41 === 0) row[x] = "?";
-      else if ((x * 11 + y * 19) % 7 === 0) row[x] = "!";
+      if ((x * 17 + y * 31) % 97 === 0) row[x] = "?";
+      else if ((x * 11 + y * 19) % 23 === 0) row[x] = "!";
     }
   }
+}
+
+function applySwampWaterEdges(rows: string[][]): void {
+  const edge: Array<[number, number]> = [];
+  for (let y = 1; y < rows.length - 1; y += 1) {
+    const row = rows[y];
+    if (!row) continue;
+    for (let x = 1; x < row.length - 1; x += 1) {
+      const tile = row[x] ?? "";
+      if (!SWAMP_WATER_TILES.has(tile)) continue;
+      const touchesLand =
+        SWAMP_LAND_TILES.has(rows[y - 1]?.[x] ?? "") ||
+        SWAMP_LAND_TILES.has(rows[y + 1]?.[x] ?? "") ||
+        SWAMP_LAND_TILES.has(row[x - 1] ?? "") ||
+        SWAMP_LAND_TILES.has(row[x + 1] ?? "");
+      if (touchesLand) edge.push([x, y]);
+    }
+  }
+  edge.forEach(([x, y]) => setTile(rows, x, y, "4"));
 }
 
 function frameFloorEdge(rows: string[][], floor: number): void {
@@ -877,12 +971,10 @@ export function tileAt(floor: number, tx: number, ty: number): string {
 
 export function isBlockedTile(tile: string): boolean {
   return (
-    tile === "#" || tile === "~" || tile === "W" || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o" ||
+    tile === "#" || tile === "~" || SWAMP_WATER_TILES.has(tile) || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o" ||
     tile === "X" || tile === "P" || tile === "w" || // badlands cliff wall + pit + massif
     tile === "Q" || tile === "V" || tile === "U" || // desert quicksand + oasis + ruin
-    tile === "I" || tile === "!" || tile === "?" || tile === "=" || tile === "v" || tile === "6" || tile === "7" || tile === "8" || tile === "9" ||
-    tile === "{" || tile === "}" || tile === "(" || tile === ")" ||
-    tile === "x" || tile === "0" || tile === "1" || tile === "|" || tile === "u" || // beach sea/shore/cliff/rocks
+    BEACH_WATER_TILES.has(tile) || tile === "x" || tile === "0" || tile === "1" || tile === "|" || tile === "u" || // beach sea/shore/cliff/rocks
     tile === "E" || tile === "i" // jungle wall + jungle river
   );
 }

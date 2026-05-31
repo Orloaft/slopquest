@@ -109,17 +109,23 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteDeadTree", x: 5.4, y: 16.6, w: 60, h: 100 },
     { key: "spriteDeadTree", x: 42.5, y: 17.6, w: 56, h: 92 },
     { key: "spriteSwampBoulder", x: 52.5, y: 30.2, w: 44, h: 36 },
-    { key: "spriteSwampBoulder", x: 20.5, y: 38.2, w: 44, h: 36 }
+    { key: "spriteSwampBoulder", x: 20.5, y: 38.2, w: 44, h: 36 },
+    { key: "spriteSwampReeds", x: 30.5, y: 14.7, w: 58, h: 58 },
+    { key: "spriteSwampReeds", x: 18.5, y: 31.7, w: 54, h: 54 },
+    { key: "spriteSwampLog", x: 47.5, y: 27.7, w: 88, h: 40 },
+    { key: "spriteMireLotus", x: 13.5, y: 38.5, w: 34, h: 32 }
   ],
   6: [
     { key: "spriteTent", x: 70.5, y: 17.2, w: 110, h: 86 }, // Frontier Camp (east clearing)
     { key: "spriteCampfire", x: 73.5, y: 19.4, w: 54, h: 54 },
     { key: "spriteBarrels", x: 67.5, y: 14.4, w: 54, h: 42 },
-    // Boulders ringing the terrace pit-gap, so it reads as a tectonic tear.
-    { key: "spriteSwampBoulder", x: 64.5, y: 33.6, w: 44, h: 36 },
-    { key: "spriteSwampBoulder", x: 74.5, y: 33.6, w: 40, h: 34 },
+    // Native badlands rocks ring the terrace pit-gap, so it reads as a tectonic tear.
+    { key: "spriteBadlandsBoulder", x: 64.5, y: 33.9, w: 76, h: 62 },
+    { key: "spriteBadlandsShard", x: 74.5, y: 33.8, w: 74, h: 54 },
     // Cluster against the copper-canyon wall.
-    { key: "spriteSwampBoulder", x: 14.5, y: 44.6, w: 44, h: 36 }
+    { key: "spriteBadlandsBoulder", x: 14.5, y: 44.8, w: 72, h: 58 },
+    { key: "spriteBadlandsShard", x: 51.5, y: 36.9, w: 70, h: 50 },
+    { key: "spriteBadlandsBoulder", x: 58.5, y: 22.4, w: 76, h: 60 }
   ],
   7: [
     { key: "spriteOutpostTent", x: 38.5, y: 53.6, w: 130, h: 104 }, // Oasis Trade Outpost (south)
@@ -130,6 +136,17 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
   8: [
     // Sunken Beach: grouped POIs instead of sparse single props. All anchors
     // sit on the authored sand/path pockets and leave the portal lanes clear.
+    // Ledger-driven terrain overlays: these larger source-sheet pieces break
+    // up repeated tile rows while the underlying grid keeps collision exact.
+    { key: "spriteBeachCliffLipA", x: 19.2, y: 21.45, w: 104, h: 74 },
+    { key: "spriteBeachCliffLipB", x: 28.2, y: 21.45, w: 240, h: 74 },
+    { key: "spriteBeachStairsRun4", x: 22.0, y: 22.55, w: 128, h: 82 },
+    { key: "spriteBeachCliffLipA", x: 53.5, y: 23.45, w: 160, h: 74 },
+    { key: "spriteBeachCliffLipB", x: 63.4, y: 23.45, w: 224, h: 74 },
+    { key: "spriteBeachStairsRun4", x: 58.0, y: 24.55, w: 128, h: 82 },
+    { key: "spriteBeachCliffLipB", x: 30.7, y: 35.45, w: 224, h: 74 },
+    { key: "spriteBeachCliffLipA", x: 39.5, y: 35.45, w: 104, h: 74 },
+    { key: "spriteBeachStairsRun4", x: 36.0, y: 36.55, w: 128, h: 82 },
     { key: "spriteBeachHut", x: 59.5, y: 17.8, w: 116, h: 118 }, // driftwood hut on the high east shelf
     { key: "spriteBeachCave", x: 31.5, y: 25.4, w: 104, h: 102 }, // cliff cave POI
     { key: "spriteBeachRuin", x: 51.6, y: 17.4, w: 62, h: 82 }, // broken arch on the high path

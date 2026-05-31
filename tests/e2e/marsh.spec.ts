@@ -1,5 +1,17 @@
 import { expect, test, type Page } from "@playwright/test";
-import { scaleX, scaleY } from "../../src/shared.ts";
+import { isBlockedTile, isSightBlocked, makeFloorTiles, scaleX, scaleY } from "../../src/shared.ts";
+
+test("marsh tile semantics: water variants block movement but not sight", () => {
+  for (const tile of ["W", "3", "4"]) {
+    expect(isBlockedTile(tile)).toBe(true);
+    expect(isSightBlocked(tile)).toBe(false);
+  }
+
+  const counts = countTiles(makeFloorTiles(5));
+  expect((counts.W ?? 0) + (counts["3"] ?? 0)).toBeGreaterThan(counts["4"] ?? 0);
+  expect(counts["3"] ?? 0).toBeGreaterThan(40);
+  expect(counts["4"] ?? 0).toBeGreaterThan(20);
+});
 
 test("travel loop: forest west portal -> marsh, and the cliff ledge -> Waystone", async ({ page }) => {
   logErrors(page);
@@ -91,4 +103,12 @@ async function place(page: Page, floor: number, x: number, y: number): Promise<v
     },
     { floor, x: sx, y: sy }
   );
+}
+
+function countTiles(rows: string[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const row of rows) {
+    for (const tile of row) counts[tile] = (counts[tile] ?? 0) + 1;
+  }
+  return counts;
 }

@@ -2,25 +2,13 @@ import { expect, test, type Page } from "@playwright/test";
 import { makeFloorTiles, isBlockedTile, isSightBlocked, scaleX, scaleY } from "../../src/shared.ts";
 
 test("coast tile semantics: ocean/river block movement not sight; jungle wall blocks both", () => {
-  expect(isBlockedTile("I")).toBe(true); // ocean
-  expect(isSightBlocked("I")).toBe(false);
-  for (const ocean of ["!", "?"]) {
-    expect(isBlockedTile(ocean)).toBe(true);
-    expect(isSightBlocked(ocean)).toBe(false);
+  for (const tile of ["I", "!", "?", "=", "v", "{", "}", "(", ")"]) {
+    expect(isBlockedTile(tile)).toBe(true); // ocean, lagoon and directional shore water
+    expect(isSightBlocked(tile)).toBe(false);
   }
-  expect(isBlockedTile("=")).toBe(true); // shallow lagoon water
-  expect(isSightBlocked("=")).toBe(false);
-  expect(isBlockedTile("v")).toBe(true); // foamy shore water
-  expect(isSightBlocked("v")).toBe(false);
-  for (const shore of ["6", "7", "8", "9", "{", "}", "(", ")"]) {
-    expect(isBlockedTile(shore)).toBe(true);
-    expect(isSightBlocked(shore)).toBe(false);
-  }
-  expect(isBlockedTile("x")).toBe(true); // beach cliff
-  expect(isSightBlocked("x")).toBe(true);
-  for (const cliff of ["0", "1", "|"]) {
-    expect(isBlockedTile(cliff)).toBe(true);
-    expect(isSightBlocked(cliff)).toBe(true);
+  for (const tile of ["x", "0", "1", "|"]) {
+    expect(isBlockedTile(tile)).toBe(true); // beach cliff bodies, caps and tops
+    expect(isSightBlocked(tile)).toBe(true);
   }
   expect(isBlockedTile("u")).toBe(true); // beach rock cover
   expect(isSightBlocked("u")).toBe(true);
@@ -44,8 +32,13 @@ test("beach ledges use composed stairs and rock-wall faces", () => {
 test("beach ocean uses interior water variants beyond repeated edge tiles", () => {
   const rows = makeFloorTiles(8);
   const water = rows.join("");
+  expect(water.includes("=")).toBe(true);
   expect(water.includes("!")).toBe(true);
   expect(water.includes("?")).toBe(true);
+
+  const interiorWater = countTiles(rows, new Set(["I", "!", "?", "="]));
+  const shoreWater = countTiles(rows, new Set(["v", "{", "}", "(", ")"]));
+  expect(interiorWater).toBeGreaterThan(shoreWater * 4);
 });
 
 test("beach shore corners do not cluster into noisy edge blocks", () => {
@@ -132,6 +125,16 @@ function logErrors(page: Page): void {
   page.on("console", (message) => {
     if (message.type() === "error") console.error(message.text());
   });
+}
+
+function countTiles(rows: string[], tiles: Set<string>): number {
+  let count = 0;
+  for (const row of rows) {
+    for (const tile of row) {
+      if (tiles.has(tile)) count += 1;
+    }
+  }
+  return count;
 }
 
 async function join(page: Page): Promise<void> {
