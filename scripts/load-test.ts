@@ -71,6 +71,9 @@ const combatRatio = clampUnit(Number(options.combat ?? 0));
 const attackTargets = Boolean(options["attack-targets"]);
 const targetIntervalMs = Math.max(100, Math.floor(Number(options["target-interval"] ?? 500)));
 const persistent = Boolean(options.persistent);
+const oversizedClientMessageBytes = Math.max(0, Math.floor(Number(options["oversized-client-message-bytes"] ?? 0)));
+const oversizedClientMessage =
+  oversizedClientMessageBytes > 0 ? JSON.stringify({ type: "input", input: randomInput(), pad: "x".repeat(oversizedClientMessageBytes) }) : "";
 const combatZones = String(options.zones ?? "cemetery,crypt,woods")
   .split(",")
   .map((z) => z.trim())
@@ -131,6 +134,7 @@ const observed = {
   serverMonsters: 0,
   spatialCells: 0,
   socketBackpressureBytes: 0,
+  clientMessageMaxBytes: 0,
   metricSamples: 0,
   staticFullSnapshots: 0,
   slowClientsPaused: 0
@@ -145,6 +149,7 @@ const inputTimer = setInterval(() => {
   for (const socket of sockets) {
     if (socket.readyState !== WebSocket.OPEN) continue;
     socket.send(JSON.stringify({ type: "input", input: randomInput() }));
+    if (oversizedClientMessage) socket.send(oversizedClientMessage);
   }
 }, 90);
 
@@ -343,6 +348,7 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   if (typeof m.monsters === "number") observed.serverMonsters = m.monsters;
   if (typeof m.spatialCells === "number") observed.spatialCells = m.spatialCells;
   if (typeof m.socketBackpressureBytes === "number") observed.socketBackpressureBytes = m.socketBackpressureBytes;
+  if (typeof m.clientMessageMaxBytes === "number") observed.clientMessageMaxBytes = m.clientMessageMaxBytes;
 }
 
 function recordSnapshotFlags(message: LoadMessage): void {
@@ -521,7 +527,8 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       clientsPeak: observed.serverClientsPeak,
       monsters: observed.serverMonsters,
       spatialCells: observed.spatialCells,
-      socketBackpressureBytes: observed.socketBackpressureBytes
+      socketBackpressureBytes: observed.socketBackpressureBytes,
+      clientMessageMaxBytes: observed.clientMessageMaxBytes
     },
     snapshotFlags: {
       staticFull: observed.staticFullSnapshots

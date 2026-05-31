@@ -39,9 +39,10 @@ no socket errors and no backpressure skips. See
   generated lazily around players and pruned when no players are nearby.
 - Transient event queues are bounded per global, targeted, and spatial-cell
   queue, with drop telemetry in load gates.
-- Client command intake is token-bucket rate-limited per socket before JSON
-  parsing, with drop telemetry in load gates, so noisy clients cannot create
-  unbounded receive-side CPU work while normal short bursts still pass.
+- Client command intake is byte-capped and token-bucket rate-limited per socket
+  before JSON parsing, with drop telemetry in load gates, so noisy clients
+  cannot create unbounded receive-side CPU work while normal short bursts still
+  pass.
 - Load gates track raw state-message byte sizes to catch protocol bloat before
   aggregate bandwidth becomes the only warning sign.
 - Snapshot metrics track raw JSON bytes and actual socket wire bytes separately,
@@ -105,13 +106,14 @@ The load driver also records raw state message sizes. `npm run perf:gate` caps
 state packets at 60 KB max and 25 KB average across its clustered, combat,
 regional, and slow-reader scenarios.
 
-Inbound client messages are bounded before parsing. Each socket has a token
+Inbound client messages are bounded before parsing. Each socket has a payload
+cap controlled by `TIB_CLIENT_MESSAGE_MAX_BYTES` (default `4096`) and a token
 bucket controlled by `TIB_CLIENT_MESSAGE_LIMIT_PER_SECOND` (default `40`) and
-`TIB_CLIENT_MESSAGE_BURST` (default `2x` the rate). Excess messages are dropped
-before JSON decode or game logic dispatch. Normal load gates require
-`clientMessagesDroppedPerSecond.max` to stay at `0`, proving the limit does not
-affect expected play traffic. A small low-limit tripwire scenario requires
-drops, proving the guard still fires.
+`TIB_CLIENT_MESSAGE_BURST` (default `2x` the rate). Oversized or excess messages
+are dropped before JSON decode or game logic dispatch. Normal load gates require
+`clientMessagesDroppedPerSecond.max` to stay at `0`, proving the limits do not
+affect expected play traffic. Low-limit and oversized-payload tripwire scenarios
+require drops, proving both guards still fire.
 
 Server snapshots also expose `wireBytesOutPerSecond`, sampled from the
 underlying sockets. The 150-client crowd gate runs with WebSocket compression

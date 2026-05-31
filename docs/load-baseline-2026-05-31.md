@@ -201,11 +201,12 @@ and combat fanout without making every client see every other client.
 - Transient event queues now expose `eventsDroppedPerSecond`; the local perf
   gate requires it to remain `0` for normal clustered, mixed, combat, and
   slow-reader scenarios.
-- Client command intake is now token-bucket rate-limited per socket before JSON
-  parsing. The local perf gate tracks `clientMessagesDroppedPerSecond` and
-  requires it to remain `0` for normal scenarios, proving the guard does not
-  affect expected playtest input rates. A small low-limit tripwire scenario
-  requires drops, so the limiter path is covered too.
+- Client command intake is now byte-capped and token-bucket rate-limited per
+  socket before JSON parsing. The local perf gate tracks
+  `clientMessagesDroppedPerSecond` and requires it to remain `0` for normal
+  scenarios, proving the guards do not affect expected playtest input rates.
+  Low-limit and oversized-payload tripwire scenarios require drops, so both
+  guard paths are covered too.
 - The load driver now records raw state message byte sizes. The perf gate caps
   state packets at `60 KB` max and `25 KB` average; the latest 100-client
   targeted regional sample peaked at roughly `27 KB` and averaged roughly `7 KB`.

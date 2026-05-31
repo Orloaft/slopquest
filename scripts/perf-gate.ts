@@ -491,6 +491,48 @@ const gateScenarios: Scenario[] = [
       "--max-events-dropped-per-second-max",
       "0"
     ]
+  },
+  {
+    name: "10 clients oversized inbound payload tripwire",
+    serverEnv: {
+      TIB_CLIENT_MESSAGE_LIMIT_PER_SECOND: "1000",
+      TIB_CLIENT_MESSAGE_BURST: "1000",
+      TIB_CLIENT_MESSAGE_MAX_BYTES: "128"
+    },
+    args: [
+      "--clients",
+      "10",
+      "--duration",
+      "6000",
+      "--combat",
+      "0",
+      "--oversized-client-message-bytes",
+      "2048",
+      "--max-errors",
+      "0",
+      "--min-opened",
+      "10",
+      "--min-welcomed",
+      "10",
+      "--min-closed",
+      "10",
+      "--min-compact-states",
+      "600",
+      "--min-metric-samples",
+      "40",
+      "--max-tick-ms-max",
+      "8",
+      "--max-snapshot-ms-max",
+      "12",
+      "--min-client-messages-dropped-per-second-max",
+      "1",
+      "--max-client-messages-dropped-per-second-max",
+      "200",
+      "--max-snapshots-skipped-backpressure-per-second-max",
+      "0",
+      "--max-events-dropped-per-second-max",
+      "0"
+    ]
   }
 ];
 const soakScenarios: Scenario[] = [

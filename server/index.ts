@@ -234,6 +234,7 @@ interface SnapshotMetricFrame {
   snapshotsSkippedBackpressurePerSecond: number;
   eventsDroppedPerSecond: number;
   clientMessagesDroppedPerSecond: number;
+  clientMessageMaxBytes: number;
   socketBackpressureBytes: number;
   saveQueueDepth: number;
   saveFlushMs: number;
@@ -394,6 +395,7 @@ const SNAPSHOT_METRICS_MS = positiveIntEnv("TIB_SNAPSHOT_METRICS_MS", 1000);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
 const CLIENT_MESSAGE_LIMIT_PER_SECOND = positiveIntEnv("TIB_CLIENT_MESSAGE_LIMIT_PER_SECOND", 40);
 const CLIENT_MESSAGE_BURST = positiveIntEnv("TIB_CLIENT_MESSAGE_BURST", CLIENT_MESSAGE_LIMIT_PER_SECOND * 2);
+const CLIENT_MESSAGE_MAX_BYTES = positiveIntEnv("TIB_CLIENT_MESSAGE_MAX_BYTES", 4096);
 const SAVE_CONCURRENCY = positiveIntEnv("TIB_SAVE_CONCURRENCY", 16);
 const GLOBAL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_GLOBAL_EVENT_QUEUE_LIMIT", 128);
 const TARGETED_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_TARGETED_EVENT_QUEUE_LIMIT", 64);
@@ -516,6 +518,10 @@ wss.on("connection", (rawSocket: WebSocket) => {
 
   socket.on("message", (raw: RawData) => {
     const now = performance.now();
+    if (rawByteLength(raw) > CLIENT_MESSAGE_MAX_BYTES) {
+      metrics.clientMessagesDroppedThisSecond += 1;
+      return;
+    }
     if (!acceptClientMessage(socket, now)) {
       metrics.clientMessagesDroppedThisSecond += 1;
       return;
@@ -2905,6 +2911,12 @@ function acceptClientMessage(socket: ExtWebSocket, now: number): boolean {
   return true;
 }
 
+function rawByteLength(raw: RawData): number {
+  if (typeof raw === "string") return Buffer.byteLength(raw);
+  if (Array.isArray(raw)) return raw.reduce((sum, item) => sum + item.byteLength, 0);
+  return raw.byteLength;
+}
+
 function snapshotIsEmptyDelta(snapshot: StateSnapshot): boolean {
   return (
     !snapshot.playersFull &&
@@ -2964,6 +2976,7 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
     snapshotsSkippedBackpressurePerSecond: metrics.snapshotsSkippedBackpressurePerSecond,
     eventsDroppedPerSecond: metrics.eventsDroppedPerSecond,
     clientMessagesDroppedPerSecond: metrics.clientMessagesDroppedPerSecond,
+    clientMessageMaxBytes: CLIENT_MESSAGE_MAX_BYTES,
     socketBackpressureBytes: SOCKET_BACKPRESSURE_BYTES,
     saveQueueDepth: metrics.saveQueueDepth,
     saveFlushMs: metrics.saveFlushMs,
@@ -3144,6 +3157,7 @@ function buildSnapshotFor(
       snapshotsSkippedBackpressurePerSecond: metricFrame.snapshotsSkippedBackpressurePerSecond,
       eventsDroppedPerSecond: metricFrame.eventsDroppedPerSecond,
       clientMessagesDroppedPerSecond: metricFrame.clientMessagesDroppedPerSecond,
+      clientMessageMaxBytes: metricFrame.clientMessageMaxBytes,
       socketBackpressureBytes: metricFrame.socketBackpressureBytes,
       saveQueueDepth: metricFrame.saveQueueDepth,
       saveFlushMs: metricFrame.saveFlushMs,
