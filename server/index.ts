@@ -702,7 +702,9 @@ function updatePlayers(dt: number, now: number): void {
       player.portalReadyAt = now + 4000;
       event("float", "The Jungle Vault is sealed... for now.", player.x, player.y - 0.6, player.floor, "#c8e6a0");
     }
-    updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
+    if (player.floor !== oldFloor || player.x !== oldX || player.y !== oldY) {
+      updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
+    }
 
     if (now < player.foodRegenUntil && player.hp < player.maxHp) {
       player.hp = clamp(player.hp + dt * 2.8, 0, player.maxHp);
