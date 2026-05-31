@@ -13,6 +13,9 @@ Node/WebSocket process:
 - Player snapshots are split into owner-private and public views.
 - Per-session entity deltas avoid resending unchanged world objects.
 - Co-located crowd snapshots cap public player fanout to nearest players.
+- Monster and NPC views are cached once per broadcast sequence and reused across
+  observing clients, reducing repeated serialization in crowded combat/town
+  scenes.
 - Static resources are indexed by active cells; moving entities update spatial cells incrementally.
 - High-cardinality trees and gathering nodes are materialized only near players.
 - Monsters/NPCs simulate only in active regions near players.
@@ -140,6 +143,12 @@ game logic sees them. This keeps the server's authoritative snapshot model
 readable while removing repeated category and entity key overhead from every
 socket send. The perf gate counts compact state packets explicitly, so a
 regression back to long-form state packets fails loudly.
+
+Monster and NPC snapshot views are shared per broadcast sequence. The first
+observing session serializes and signatures the entity; later observing sessions
+reuse the same object and cached signature for their own per-session deltas.
+That keeps co-located combat from multiplying identical entity-view allocation
+by viewer count.
 
 The load driver also times client-side JSON parse and compact-snapshot
 normalization per state packet. Summaries include p95 values as well as min,
@@ -311,6 +320,7 @@ process cannot tick the populated world.
 - [x] Throttled metrics frames with minimum telemetry sample gates.
 - [x] Compact top-level state packet keys with compact-packet load gates.
 - [x] Compact entity view keys inside state packets.
+- [x] Shared per-broadcast monster/NPC view caches.
 - [x] Client-side state decode timing telemetry and perf thresholds.
 - [x] Runtime asset budget gate in `npm run check`.
 - [x] Startup-preload asset budget gate in `npm run check`.

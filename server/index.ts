@@ -143,6 +143,12 @@ interface PlayerSelfViewCache {
   view: PlayerView;
 }
 
+interface EntityViewCache<T extends SnapshotEntity> {
+  checkedSequence: number;
+  signature: number;
+  view: T;
+}
+
 interface ResourceViewCache<T extends SnapshotEntity> {
   signature: number;
   stateKey: string;
@@ -435,6 +441,8 @@ const resourceViewSignatureCache = new WeakMap<SnapshotEntity, number>();
 const privatePlayerViewCache = new WeakMap<ServerPlayer, PlayerPrivateViewCache>();
 const selfPlayerViewCache = new WeakMap<ServerPlayer, PlayerSelfViewCache>();
 const activeRegionCache = new WeakMap<ServerPlayer, ActiveRegionCache>();
+const monsterViewCache = new WeakMap<ServerMonster, EntityViewCache<MonsterView>>();
+const npcViewCache = new WeakMap<NpcRuntime, EntityViewCache<NpcView>>();
 const treeViewCache = new WeakMap<TreeNodeRuntime, ResourceViewCache<TreeView>>();
 const fishingNodeViewCache = new WeakMap<FishingNodeRuntime, ResourceViewCache<FishingNodeView>>();
 const miningNodeViewCache = new WeakMap<MiningNodeRuntime, ResourceViewCache<MiningNodeView>>();
@@ -3377,7 +3385,33 @@ function buildPlayerPublicSignature(player: ServerPlayer, action: ActionView | n
   return hash;
 }
 
+function buildMonsterSignature(monster: ServerMonster, attacking: boolean): number {
+  let hash = HASH_INIT;
+  hash = hashNumber(hash, monster.floor);
+  hash = hashNumber(hash, round(monster.x));
+  hash = hashNumber(hash, round(monster.y));
+  hash = hashString(hash, monster.dir);
+  hash = hashBool(hash, monster.moving);
+  hash = hashBool(hash, attacking);
+  hash = hashNumber(hash, Math.round(monster.hp));
+  hash = hashNumber(hash, monster.maxHp);
+  return hash;
+}
+
+function buildNpcSignature(npc: NpcRuntime): number {
+  let hash = HASH_INIT;
+  hash = hashNumber(hash, npc.floor);
+  hash = hashNumber(hash, round(npc.x));
+  hash = hashNumber(hash, round(npc.y));
+  hash = hashString(hash, npc.dir);
+  hash = hashBool(hash, npc.moving);
+  hash = hashString(hash, npc.dialogue);
+  return hash;
+}
+
 function monsterViewSignature(monster: MonsterView): number {
+  const cached = resourceViewSignatureCache.get(monster);
+  if (cached !== undefined) return cached;
   let hash = HASH_INIT;
   hash = hashNumber(hash, monster.floor);
   hash = hashNumber(hash, monster.x);
@@ -3405,6 +3439,8 @@ function corpseViewSignature(corpse: CorpseView): number {
 }
 
 function npcViewSignature(npc: NpcView): number {
+  const cached = resourceViewSignatureCache.get(npc);
+  if (cached !== undefined) return cached;
   let hash = HASH_INIT;
   hash = hashNumber(hash, npc.floor);
   hash = hashNumber(hash, npc.x);
@@ -3665,7 +3701,15 @@ function serializeAbilities(player: ServerPlayer, now: number): AbilityView[] {
 }
 
 function serializeMonster(monster: ServerMonster, now: number): MonsterView {
-  return {
+  const cached = monsterViewCache.get(monster);
+  if (cached?.checkedSequence === snapshotSequence) return cached.view;
+  const attacking = (monster.attackUntil ?? 0) > now;
+  const signature = buildMonsterSignature(monster, attacking);
+  if (cached?.signature === signature) {
+    cached.checkedSequence = snapshotSequence;
+    return cached.view;
+  }
+  const view = {
     id: monster.id,
     type: monster.type,
     name: MONSTERS[monster.type]?.name ?? monster.type,
@@ -3674,15 +3718,25 @@ function serializeMonster(monster: ServerMonster, now: number): MonsterView {
     y: round(monster.y),
     dir: monster.dir,
     moving: monster.moving,
-    attacking: (monster.attackUntil ?? 0) > now,
+    attacking,
     hp: Math.round(monster.hp),
     maxHp: monster.maxHp,
     zone: monster.zone
   };
+  resourceViewSignatureCache.set(view, signature);
+  monsterViewCache.set(monster, { checkedSequence: snapshotSequence, signature, view });
+  return view;
 }
 
 function serializeNpc(npc: NpcRuntime): NpcView {
-  return {
+  const cached = npcViewCache.get(npc);
+  if (cached?.checkedSequence === snapshotSequence) return cached.view;
+  const signature = buildNpcSignature(npc);
+  if (cached?.signature === signature) {
+    cached.checkedSequence = snapshotSequence;
+    return cached.view;
+  }
+  const view = {
     id: npc.id,
     name: npc.name,
     role: npc.role as NpcView["role"],
@@ -3693,6 +3747,9 @@ function serializeNpc(npc: NpcRuntime): NpcView {
     moving: npc.moving,
     dialogue: npc.dialogue
   };
+  resourceViewSignatureCache.set(view, signature);
+  npcViewCache.set(npc, { checkedSequence: snapshotSequence, signature, view });
+  return view;
 }
 
 function serializeTree(tree: TreeNodeRuntime): TreeView {

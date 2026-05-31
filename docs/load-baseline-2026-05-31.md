@@ -220,6 +220,9 @@ and combat fanout without making every client see every other client.
   expanded by shared client/load-test helpers. The perf gate requires minimum
   compact-state counts, proving the compact path is active during every load
   scenario.
+- Monster and NPC views are now cached per broadcast sequence and reused across
+  observing clients, so clustered combat pays for one serialization/signature
+  pass per entity per tick rather than one per entity per viewer.
 - The load driver tracks state-packet parse, compact-normalize, and total decode
   timing with p95 summaries. The latest full gate kept state decode averages at
   or below `0.07 ms` per packet, with worst single-sample decode around
