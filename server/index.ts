@@ -74,6 +74,7 @@ import type {
   ExtWebSocket,
   Fire,
   InventorySlot,
+  MetricWindow,
   Metrics,
   NpcRuntime,
   PlayerAction,
@@ -379,8 +380,8 @@ const targetedEventsByPlayer = new Map<string, GameEvent[]>();
 const eventsByCell = new Map<string, GameEvent[]>();
 const eventOrder = new WeakMap<GameEvent, number>();
 const metrics: Metrics = {
-  tickSamples: [],
-  snapshotSamples: [],
+  tickWindow: createMetricWindow(),
+  snapshotWindow: createMetricWindow(),
   bytesOutThisSecond: 0,
   bytesOutPerSecond: 0,
   snapshotsSentThisSecond: 0,
@@ -493,13 +494,13 @@ setInterval(() => {
   updateCorpseExpirations(now);
   refreshSpatialCellMetric();
   updateMonsters(dt, now, activeRegions);
-  recordSample(metrics.tickSamples, performance.now() - started);
+  recordSample(metrics.tickWindow, performance.now() - started);
 }, 50);
 
 setInterval(() => {
   const started = performance.now();
   broadcastState();
-  recordSample(metrics.snapshotSamples, performance.now() - started);
+  recordSample(metrics.snapshotWindow, performance.now() - started);
   globalEvents.length = 0;
   targetedEventsByPlayer.clear();
   eventsByCell.clear();
@@ -2562,8 +2563,8 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
     clients: clients.size,
     monsters: monsters.size,
     spatialCells: spatial.cellCount + staticSpatial.cellCount,
-    tickMs: round(avg(metrics.tickSamples)),
-    snapshotMs: round(avg(metrics.snapshotSamples)),
+    tickMs: round(metricAverage(metrics.tickWindow)),
+    snapshotMs: round(metricAverage(metrics.snapshotWindow)),
     bytesOutPerSecond: metrics.bytesOutPerSecond,
     snapshotsSentPerSecond: metrics.snapshotsSentPerSecond,
     snapshotsSkippedBackpressurePerSecond: metrics.snapshotsSkippedBackpressurePerSecond,
@@ -3902,14 +3903,23 @@ function distanceSq(a: { x: number; y: number }, b: { x: number; y: number }): n
   return dx * dx + dy * dy;
 }
 
-function recordSample(samples: number[], value: number): void {
-  samples.push(value);
-  while (samples.length > METRIC_WINDOW) samples.shift();
+function createMetricWindow(): MetricWindow {
+  return { values: new Array<number>(METRIC_WINDOW), index: 0, count: 0, sum: 0 };
 }
 
-function avg(samples: number[]): number {
-  if (!samples.length) return 0;
-  return samples.reduce((sum, value) => sum + value, 0) / samples.length;
+function recordSample(window: MetricWindow, value: number): void {
+  if (window.count < METRIC_WINDOW) {
+    window.count += 1;
+  } else {
+    window.sum -= window.values[window.index] ?? 0;
+  }
+  window.values[window.index] = value;
+  window.sum += value;
+  window.index = (window.index + 1) % METRIC_WINDOW;
+}
+
+function metricAverage(window: MetricWindow): number {
+  return window.count ? window.sum / window.count : 0;
 }
 
 function updateByteMetric(): void {

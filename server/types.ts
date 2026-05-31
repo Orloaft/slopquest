@@ -251,9 +251,16 @@ export interface Database {
   players: Record<string, SavedPlayer>;
 }
 
+export interface MetricWindow {
+  values: number[];
+  index: number;
+  count: number;
+  sum: number;
+}
+
 export interface Metrics {
-  tickSamples: number[];
-  snapshotSamples: number[];
+  tickWindow: MetricWindow;
+  snapshotWindow: MetricWindow;
   bytesOutThisSecond: number;
   bytesOutPerSecond: number;
   snapshotsSentThisSecond: number;
