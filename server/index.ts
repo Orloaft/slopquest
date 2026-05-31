@@ -125,6 +125,12 @@ interface PlayerPrivateViewCache {
   weight: number;
 }
 
+interface PlayerPublicViewCache {
+  checkedSequence: number;
+  signature: number;
+  view: PlayerView;
+}
+
 interface ResourceViewCache<T extends SnapshotEntity> {
   signature: number;
   stateKey: string;
@@ -356,7 +362,7 @@ const npcs = new Map<string, NpcRuntime>();
 const npcsByCell = new Map<string, Set<NpcRuntime>>();
 let spatial: SpatialIndex = createSpatialIndex();
 let staticSpatial: StaticSpatialIndex = createStaticSpatialIndex();
-const publicPlayerViewCache = new Map<string, PlayerView>();
+const publicPlayerViewCache = new Map<string, PlayerPublicViewCache>();
 const playerViewSignatureCache = new WeakMap<PlayerView, number>();
 const resourceViewSignatureCache = new WeakMap<SnapshotEntity, number>();
 const privatePlayerViewCache = new WeakMap<ServerPlayer, PlayerPrivateViewCache>();
@@ -470,6 +476,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
       if (!session.transient && (!E2E_TEST || !session.player.name.startsWith("e2e_"))) persistPlayer(session.player);
       clients.delete(socket);
       playersById.delete(session.player.id);
+      publicPlayerViewCache.delete(session.player.id);
       removeFromSpatial(spatial.players, session.player);
       event("system", `${session.player.name} left the world.`);
     }
@@ -2509,7 +2516,6 @@ function armorReduction(player: ServerPlayer): number {
 function broadcastState(): void {
   const now = performance.now();
   updateByteMetric();
-  publicPlayerViewCache.clear();
   snapshotSequence += 1;
   const forceFull = snapshotSequence % SNAPSHOT_FULL_EVERY === 0;
   const includeTrees = forceFull || snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
@@ -3088,14 +3094,19 @@ function serializePlayerPrivate(player: ServerPlayer): PlayerPrivateViewCache {
 
 function serializePlayerPublicCached(player: ServerPlayer): PlayerView {
   const cached = publicPlayerViewCache.get(player.id);
-  if (cached) return cached;
-  const view = serializePlayerPublic(player);
-  publicPlayerViewCache.set(player.id, view);
+  if (cached?.checkedSequence === snapshotSequence) return cached.view;
+  const action = player.action ? actionView(player.action) : null;
+  const signature = buildPlayerPublicSignature(player, action);
+  if (cached?.signature === signature) {
+    cached.checkedSequence = snapshotSequence;
+    return cached.view;
+  }
+  const view = serializePlayerPublic(player, action, signature);
+  publicPlayerViewCache.set(player.id, { checkedSequence: snapshotSequence, signature, view });
   return view;
 }
 
-function serializePlayerPublic(player: ServerPlayer): PlayerView {
-  const action = player.action ? actionView(player.action) : null;
+function serializePlayerPublic(player: ServerPlayer, action: ActionView | null, signature: number): PlayerView {
   const view = {
     id: player.id,
     name: player.name,
@@ -3110,7 +3121,7 @@ function serializePlayerPublic(player: ServerPlayer): PlayerView {
     dead: player.dead,
     action
   } as PlayerView;
-  playerViewSignatureCache.set(view, buildPlayerPublicSignature(player, action));
+  playerViewSignatureCache.set(view, signature);
   return view;
 }
 
