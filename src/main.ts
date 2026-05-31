@@ -320,6 +320,7 @@ declare global {
 let socket: WebSocket | null = null;
 let selfId: string | null = null;
 let latestState: StateSnapshot | null = null;
+let selfView: PlayerView | undefined;
 let stateVersion = 0;
 let metricsVersion = 0;
 let syncedStateVersion = -1;
@@ -826,6 +827,7 @@ function ensureSocket(): void {
     if (message.type === "state") {
       const hadState = latestState != null;
       latestState = mergeStateSnapshot(latestState, message);
+      selfView = resolveSelfView(latestState);
       if (!hadState || snapshotHasEntityChanges(message)) stateVersion += 1;
       metricsVersion += 1;
       if ((message.events ?? []).length > 0) consumeEvents(message.events ?? []);
@@ -852,6 +854,10 @@ function mergeStateSnapshot(previous: StateSnapshot | null, next: StateSnapshot)
     herbNodes: mergeEntityViews(previous.herbNodes, next.herbNodes, next.removedHerbNodeIds, next.herbNodesFull),
     fires: mergeEntityViews(previous.fires, next.fires, next.removedFireIds, next.firesFull)
   };
+}
+
+function resolveSelfView(state: StateSnapshot | null): PlayerView | undefined {
+  return selfId ? state?.players.find((player) => player.id === selfId) : undefined;
 }
 
 function snapshotHasEntityChanges(snapshot: StateSnapshot): boolean {
@@ -4139,7 +4145,7 @@ function send(message: ClientMessage): void {
 }
 
 function self(): PlayerView | undefined {
-  return latestState?.players.find((player) => player.id === selfId);
+  return selfView ?? resolveSelfView(latestState);
 }
 
 function setBar(bar: HTMLElement, label: HTMLElement, value: number, max: number, prefix: string): void {
