@@ -259,7 +259,8 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     ["opened", report.opened, optionNumber("min-opened")],
     ["welcomed", report.welcomed, optionNumber("min-welcomed")],
     ["states", report.states, optionNumber("min-states")],
-    ["closed", report.closed, optionNumber("min-closed")]
+    ["closed", report.closed, optionNumber("min-closed")],
+    ["slowClients.paused", report.slowClients.paused, optionNumber("min-slow-paused")]
   ];
   for (const [label, actual, minimum] of checks) {
     if (minimum != null && actual < minimum) failures.push(`${label} ${actual} < ${minimum}`);

@@ -5,6 +5,7 @@ import { createServer } from "node:net";
 interface Scenario {
   name: string;
   args: string[];
+  serverEnv?: Record<string, string>;
 }
 
 const PORT = Number(process.env.TIB_PERF_PORT ?? 8790);
@@ -64,51 +65,95 @@ const scenarios: Scenario[] = [
       "--max-snapshots-skipped-backpressure-per-second-max",
       "0"
     ]
+  },
+  {
+    name: "50 mixed clients with slow readers",
+    serverEnv: {
+      TIB_SOCKET_BACKPRESSURE_BYTES: "32768"
+    },
+    args: [
+      "--clients",
+      "50",
+      "--duration",
+      "15000",
+      "--combat",
+      "0.4",
+      "--slow-clients",
+      "5",
+      "--slow-after",
+      "1000",
+      "--max-errors",
+      "0",
+      "--min-opened",
+      "50",
+      "--min-welcomed",
+      "50",
+      "--min-states",
+      "7000",
+      "--min-slow-paused",
+      "5",
+      "--max-tick-ms-max",
+      "8",
+      "--max-snapshot-ms-max",
+      "18",
+      "--max-bytes-out-per-second-avg",
+      "10000000"
+    ]
   }
 ];
 
 await assertPortFree(PORT);
 
-const server = spawn(process.execPath, ["server/index.ts"], {
-  cwd: process.cwd(),
-  env: {
-    ...process.env,
-    PORT: String(PORT),
-    E2E_TEST: "1",
-    TIB_ALLOW_TRANSIENT_PLAYERS: "1",
-    TIB_WS_COMPRESSION: "0"
-  },
-  stdio: ["ignore", "pipe", "pipe"]
-});
-
-let serverReady = false;
-server.stdout.setEncoding("utf8");
-server.stderr.setEncoding("utf8");
-server.stdout.on("data", (chunk: string) => {
-  process.stdout.write(`[server] ${chunk}`);
-  if (chunk.includes(`:${PORT}`)) serverReady = true;
-});
-server.stderr.on("data", (chunk: string) => process.stderr.write(`[server] ${chunk}`));
-
 try {
-  await waitForServer();
   for (const scenario of scenarios) {
     console.log(`\n[perf-gate] ${scenario.name}`);
-    await runScenario(scenario);
+    await runWithServer(scenario);
   }
   console.log("\n[perf-gate] all thresholds passed");
-} finally {
-  server.kill("SIGTERM");
-  await once(server, "exit").catch(() => undefined);
+} catch (error) {
+  console.error(error);
+  process.exitCode = 1;
 }
 
-async function waitForServer(): Promise<void> {
+async function runWithServer(scenario: Scenario): Promise<void> {
+  const server = spawn(process.execPath, ["server/index.ts"], {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      PORT: String(PORT),
+      E2E_TEST: "1",
+      TIB_ALLOW_TRANSIENT_PLAYERS: "1",
+      TIB_WS_COMPRESSION: "0",
+      ...scenario.serverEnv
+    },
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+
+  let serverReady = false;
+  server.stdout.setEncoding("utf8");
+  server.stderr.setEncoding("utf8");
+  server.stdout.on("data", (chunk: string) => {
+    process.stdout.write(`[server] ${chunk}`);
+    if (chunk.includes(`:${PORT}`)) serverReady = true;
+  });
+  server.stderr.on("data", (chunk: string) => process.stderr.write(`[server] ${chunk}`));
+
+  try {
+    await waitForServer(server, () => serverReady);
+    await runScenario(scenario);
+  } finally {
+    server.kill("SIGTERM");
+    await once(server, "exit").catch(() => undefined);
+  }
+}
+
+async function waitForServer(server: ReturnType<typeof spawn>, isReady: () => boolean): Promise<void> {
   const started = Date.now();
-  while (!serverReady && Date.now() - started < SERVER_READY_MS) {
+  while (!isReady() && Date.now() - started < SERVER_READY_MS) {
     if (server.exitCode != null) throw new Error(`server exited early with code ${server.exitCode}`);
     await delay(100);
   }
-  if (!serverReady) throw new Error(`server did not report readiness within ${SERVER_READY_MS}ms`);
+  if (!isReady()) throw new Error(`server did not report readiness within ${SERVER_READY_MS}ms`);
 }
 
 async function runScenario(scenario: Scenario): Promise<void> {
