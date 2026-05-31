@@ -1356,6 +1356,18 @@ canvas {
   transform: translateX(-50%);
   padding: 16px;
   text-align: center;
+  /* The HUD is pointer-events:none so the canvas gets game clicks; re-enable it
+     here or the Respawn button's clicks fall through to the canvas (which
+     ignores them while dead) and the button appears dead. */
+  pointer-events: auto;
+}
+
+/* The equipment paperdoll is a fixed-size panel — give it nearly the full
+   viewport height so it fits its content without the scrolling center-panel cap
+   (min(76vh, 640px)) clipping it. overflow:auto stays for a graceful scrollbar
+   only on screens too short to fit it at all. */
+#equipmentPanel {
+  max-height: 94vh;
 }
 
 @media (max-width: 880px) {

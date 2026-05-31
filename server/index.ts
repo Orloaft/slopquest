@@ -906,6 +906,11 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
     tickMonsterStatus(monster, now);
     if (monster.deadUntil) continue; // burn may have killed it this tick
 
+    // Never sit on a player's exact tile — e.g. when a monster respawns on a tile
+    // the player is standing on. Coincident sprites hide behind the player yet can
+    // still hit; nudge out so the monster keeps its own (visible) tile.
+    separateFromPlayer(monster, catalog);
+
     // Taunt (Provoke) overrides aggro to the taunting player while it lasts.
     let target = nearestPlayer(monster, catalog.aggro, ROAD_AGGRO_FACTOR);
     if (monster.tauntUntil && now < monster.tauntUntil && monster.tauntBy) {
@@ -2923,6 +2928,39 @@ function canStand(floor: number, x: number, y: number): boolean {
 // player slip down the middle of a road past most of a zone's wildlife. The
 // spatial sweep still uses the full maxDistance; the per-player threshold is
 // what shrinks, so an on-road player just outside the reduced range is skipped.
+// Minimum gap a (mobile) monster keeps from any player, so it never renders
+// coincident with — and invisible behind — the player while still able to hit.
+const MONSTER_PLAYER_SEPARATION = 0.62;
+function separateFromPlayer(monster: ServerMonster, catalog: { speed: number }): void {
+  if (catalog.speed <= 0) return; // anchored turrets stay put (they sit on water)
+  const victim = nearestPlayer(monster, MONSTER_PLAYER_SEPARATION);
+  if (!victim) return;
+  const oldFloor = monster.floor;
+  const oldX = monster.x;
+  const oldY = monster.y;
+  let dx = monster.x - victim.x;
+  let dy = monster.y - victim.y;
+  let d = Math.hypot(dx, dy);
+  if (d < 1e-4) {
+    dx = 0;
+    dy = 1;
+    d = 1;
+  } // exact overlap — pick a default push direction
+  const push = MONSTER_PLAYER_SEPARATION - d + 0.05;
+  moveEntity(monster, (dx / d) * push, (dy / d) * push);
+  // If a wall blocked the straight push and we're still overlapping, try other
+  // directions away from the player until one clears the separation.
+  if (distance(monster, victim) < MONSTER_PLAYER_SEPARATION - 0.08) {
+    for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]] as Array<[number, number]>) {
+      monster.x = oldX;
+      monster.y = oldY;
+      moveEntity(monster, ox * push, oy * push);
+      if (distance(monster, victim) >= MONSTER_PLAYER_SEPARATION - 0.08) break;
+    }
+  }
+  updateMonsterCell(monster, oldFloor, oldX, oldY);
+}
+
 function nearestPlayer(monster: ServerMonster, maxDistance: number, roadFactor = 1): ServerPlayer | null {
   let best: ServerPlayer | null = null;
   let bestDistSq = maxDistance * maxDistance;
