@@ -1411,7 +1411,9 @@ canvas {
 
 .ts-scene {
   position: absolute;
-  inset: 0;
+  /* Confine the parallax to the top half so the four layers pack together
+     instead of spreading across the full height with gaps between them. */
+  inset: 0 0 50% 0;
 }
 
 .ts-layer {
@@ -1436,12 +1438,8 @@ canvas {
   background-size: 112% auto;
 }
 
-/* Layer 2 — mid-distance valley, bridging the open space before the ruins. */
-.ts-far {
-  inset: -6%;
-  background: url("/parallax/far.png") no-repeat center 48%;
-  background-size: 118% auto;
-}
+/* (Removed: the ts-far valley layer read as out of place; far.png is still in
+   assetsources/public if we want to reintroduce it among more layers later.) */
 
 /* Layer 3 — ruins across the middle distance. */
 .ts-mid {
