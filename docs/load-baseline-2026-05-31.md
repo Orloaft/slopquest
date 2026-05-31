@@ -181,6 +181,9 @@ and combat fanout without making every client see every other client.
 - Static prune keep ranges now derive from occupied player cells rather than
   every player session, so co-located crowds share the same cached keep-cell
   expansion work.
+- Static tree/resource materialization now deduplicates identical warmed ranges
+  within each snapshot broadcast, trimming duplicate cell walks for co-located
+  viewers.
 - Composed tree props now use the same spatial cell grouping as other static
   resources, so materializing one active tree cell no longer scans total
   authored composed-tree count.

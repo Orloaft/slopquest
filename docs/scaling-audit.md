@@ -60,6 +60,9 @@ no socket errors and no backpressure skips. See
 - Static prune keep-cells are derived from occupied player spatial cells with
   cached expanded cell lists, so co-located crowds do not rebuild the same
   tree/resource keep ranges once per connected player.
+- Static cell materialization also tracks warmed tree/resource ranges per
+  broadcast, so co-located viewers do not repeatedly walk the same active-cell
+  ranges before their individual snapshot deltas are built.
 - Transient event queues are bounded per global, targeted, and spatial-cell
   queue, with drop telemetry in load gates.
 - Per-viewer transient event payloads are capped by `TIB_VISIBLE_EVENT_LIMIT`
@@ -233,6 +236,8 @@ The server no longer rebuilds one all-entity spatial index every tick.
   cells instead of connected players.
 - Trees are derived from map chunks on demand instead of being instantiated for
   the whole authored world at boot.
+- Per-broadcast static materialization ranges are deduplicated before per-client
+  tree/resource snapshot scans.
 - Movement calls update the old and new cells directly.
 - Monsters and NPCs tick only in cells near online players.
 - Static tree/resource cold-cell pruning runs on a maintenance interval rather
@@ -381,6 +386,7 @@ process cannot tick the populated world.
   cell pruning.
 - [x] Throttled static-resource pruning cadence with scratch reuse.
 - [x] Occupied-cell static-resource prune keep ranges.
+- [x] Per-broadcast dedupe for static materialization ranges.
 - [x] Bounded spatial query cell-key cache for snapshot/event/static lookups.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
 - [x] Per-viewer transient event cap with localized burst gate coverage.

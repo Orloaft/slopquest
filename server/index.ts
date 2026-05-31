@@ -483,6 +483,8 @@ const eventOrder = new WeakMap<GameEvent, number>();
 const materializedTreeCells = new Set<string>();
 const materializedStaticResourceCells = new Set<string>();
 const spatialQueryCellCache = new Map<string, SpatialCellRef[]>();
+const treeMaterializationRangesThisSnapshot = new Set<string>();
+const staticResourceMaterializationRangesThisSnapshot = new Set<string>();
 const staticPruneKeepCellsScratch = new Set<string>();
 const staticPruneStaleCellsScratch: string[] = [];
 const socketWireBytes = new WeakMap<ExtWebSocket, number>();
@@ -2408,7 +2410,10 @@ function materializeHerbNode(base: HerbNodeBase, addToIndex = true): HerbNodeRun
 }
 
 function materializeTreeCellsNear(floor: number, x: number, y: number, radius: number): void {
+  const rangeKey = spatialQueryRangeKey(floor, x, y, radius);
+  if (treeMaterializationRangesThisSnapshot.has(rangeKey)) return;
   for (const cell of spatialQueryCells(floor, x, y, radius)) materializeTreeCell(cell.floor, cell.cx, cell.cy);
+  treeMaterializationRangesThisSnapshot.add(rangeKey);
 }
 
 function materializeTreeCell(floor: number, cx: number, cy: number): void {
@@ -2451,7 +2456,10 @@ function materializeTreeCell(floor: number, cx: number, cy: number): void {
 }
 
 function materializeStaticResourceCellsNear(floor: number, x: number, y: number, radius: number): void {
+  const rangeKey = spatialQueryRangeKey(floor, x, y, radius);
+  if (staticResourceMaterializationRangesThisSnapshot.has(rangeKey)) return;
   for (const cell of spatialQueryCells(floor, x, y, radius)) materializeStaticResourceCell(cell.floor, cell.cx, cell.cy);
+  staticResourceMaterializationRangesThisSnapshot.add(rangeKey);
 }
 
 function materializeStaticResourceCell(floor: number, cx: number, cy: number): void {
@@ -2900,6 +2908,8 @@ function broadcastState(): void {
   const now = performance.now();
   updateByteMetric();
   snapshotSequence += 1;
+  treeMaterializationRangesThisSnapshot.clear();
+  staticResourceMaterializationRangesThisSnapshot.clear();
   const forceDynamicFull = snapshotSequence % SNAPSHOT_FULL_EVERY === 0;
   const includeTrees = snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
   const includeNpcs = forceDynamicFull || snapshotSequence % NPC_SNAPSHOT_EVERY === 0;
@@ -4581,7 +4591,7 @@ function spatialQueryCells(floor: number, x: number, y: number, radius: number):
   const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
   const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
   const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
-  const cacheKey = `${floor}:${minCx}:${maxCx}:${minCy}:${maxCy}`;
+  const cacheKey = spatialQueryCacheKey(floor, minCx, maxCx, minCy, maxCy);
   const cached = spatialQueryCellCache.get(cacheKey);
   if (cached) return cached;
   const cells: SpatialCellRef[] = [];
@@ -4596,6 +4606,20 @@ function spatialQueryCells(floor: number, x: number, y: number, radius: number):
     if (oldest) spatialQueryCellCache.delete(oldest);
   }
   return cells;
+}
+
+function spatialQueryRangeKey(floor: number, x: number, y: number, radius: number): string {
+  return spatialQueryCacheKey(
+    floor,
+    Math.floor((x - radius) / SPATIAL_CELL_SIZE),
+    Math.floor((x + radius) / SPATIAL_CELL_SIZE),
+    Math.floor((y - radius) / SPATIAL_CELL_SIZE),
+    Math.floor((y + radius) / SPATIAL_CELL_SIZE)
+  );
+}
+
+function spatialQueryCacheKey(floor: number, minCx: number, maxCx: number, minCy: number, maxCy: number): string {
+  return `${floor}:${minCx}:${maxCx}:${minCy}:${maxCy}`;
 }
 
 function forEachSpatial<T>(index: Map<string, T[]>, floor: number, x: number, y: number, radius: number, visit: (item: T) => void): void {
