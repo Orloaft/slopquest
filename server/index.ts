@@ -2624,9 +2624,9 @@ function buildSnapshotFor(
   forEachSpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (player) => {
     if (player.id !== viewer.id && !inInterestRange(viewer, player)) return;
     if (player.id === viewer.id) includedViewer = true;
-    players.push(player.id === viewer.id ? serializePlayer(player) : serializePlayerPublicCached(player));
+    players.push(player.id === viewer.id ? serializePlayer(player, now) : serializePlayerPublicCached(player));
   });
-  if (!includedViewer) players.push(serializePlayer(viewer));
+  if (!includedViewer) players.push(serializePlayer(viewer, now));
 
   const visibleMonsters: MonsterView[] = [];
   forEachSpatial(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (monster) => {
@@ -3046,12 +3046,12 @@ function actionView(a: PlayerAction): ActionView {
   return { type: a.type, fireId: a.fireId };
 }
 
-function serializePlayer(player: ServerPlayer): PlayerView {
+function serializePlayer(player: ServerPlayer, now: number): PlayerView {
   const cached = selfPlayerViewCache.get(player);
   if (cached?.checkedSequence === snapshotSequence) return cached.view;
-  const privateView = serializePlayerPrivate(player);
+  const privateView = serializePlayerPrivate(player, now);
   const action = player.action ? actionView(player.action) : null;
-  const buffs = serializeBuffs(player);
+  const buffs = serializeBuffs(player, now);
   const signature = buildPlayerSignature(player, privateView, action, buffs);
   if (cached?.signature === signature) {
     cached.checkedSequence = snapshotSequence;
@@ -3092,11 +3092,11 @@ function serializePlayer(player: ServerPlayer): PlayerView {
   return view;
 }
 
-function serializePlayerPrivate(player: ServerPlayer): PlayerPrivateViewCache {
+function serializePlayerPrivate(player: ServerPlayer, now: number): PlayerPrivateViewCache {
   const inventorySignature = inventoryCacheSignature(player);
   const questsSignature = `${questCacheSignature(player)}|inv:${inventorySignature}`;
   const skillsSignature = skillCacheSignature(player);
-  const abilitiesSignature = abilityCacheSignature(player);
+  const abilitiesSignature = abilityCacheSignature(player, now);
   const classesSignature = String(player.classesRevision);
   const cached = privatePlayerViewCache.get(player);
   if (
@@ -3117,7 +3117,7 @@ function serializePlayerPrivate(player: ServerPlayer): PlayerPrivateViewCache {
     skillsSignature,
     skills: cached?.skillsSignature === skillsSignature ? cached.skills : serializeSkills(player),
     abilitiesSignature,
-    abilities: cached?.abilitiesSignature === abilitiesSignature ? cached.abilities : serializeAbilities(player),
+    abilities: cached?.abilitiesSignature === abilitiesSignature ? cached.abilities : serializeAbilities(player, now),
     classesSignature,
     unlockedClasses: cached?.classesSignature === classesSignature ? cached.unlockedClasses : [...player.unlockedClasses],
     weight: cached?.inventorySignature === inventorySignature ? cached.weight : Math.round(player.carriedWeight)
@@ -3159,8 +3159,7 @@ function serializePlayerPublic(player: ServerPlayer, action: ActionView | null, 
   return view;
 }
 
-function abilityCacheSignature(player: ServerPlayer): string {
-  const now = performance.now();
+function abilityCacheSignature(player: ServerPlayer, now: number): string {
   const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
   return (classSpec.abilities ?? [])
     .map((id) => {
@@ -3172,8 +3171,7 @@ function abilityCacheSignature(player: ServerPlayer): string {
     .join("|");
 }
 
-function serializeAbilities(player: ServerPlayer): AbilityView[] {
-  const now = performance.now();
+function serializeAbilities(player: ServerPlayer, now: number): AbilityView[] {
   const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
   const ids = classSpec.abilities ?? [];
   return ids.map((id): AbilityView | null => {
@@ -3315,8 +3313,7 @@ function serializeFire(fire: Fire, now: number): FireView {
   };
 }
 
-function serializeBuffs(player: ServerPlayer): BuffsView {
-  const now = performance.now();
+function serializeBuffs(player: ServerPlayer, now: number): BuffsView {
   return {
     wellFed: Math.max(0, Math.round((player.wellFedUntil ?? 0) - now)),
     foodRegen: Math.max(0, Math.round((player.foodRegenUntil ?? 0) - now)),
