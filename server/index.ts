@@ -384,7 +384,13 @@ let nextFireId = 1;
 const globalEvents: GameEvent[] = [];
 const targetedEventsByPlayer = new Map<string, GameEvent[]>();
 const eventsByCell = new Map<string, GameEvent[]>();
+const EMPTY_IDS: string[] = [];
 const EMPTY_EVENTS: GameEvent[] = [];
+const EMPTY_NPC_VIEWS: NpcView[] = [];
+const EMPTY_TREE_VIEWS: TreeView[] = [];
+const EMPTY_FISHING_NODE_VIEWS: FishingNodeView[] = [];
+const EMPTY_MINING_NODE_VIEWS: MiningNodeView[] = [];
+const EMPTY_HERB_NODE_VIEWS: HerbNodeView[] = [];
 const eventOrder = new WeakMap<GameEvent, number>();
 const metrics: Metrics = {
   tickWindow: createMetricWindow(),
@@ -2624,7 +2630,7 @@ function buildSnapshotFor(
     visibleCorpses.push(corpse);
   });
 
-  const visibleNpcs: NpcView[] = [];
+  const visibleNpcs: NpcView[] = includeNpcs ? [] : EMPTY_NPC_VIEWS;
   if (includeNpcs) {
     forEachSpatial(spatial.npcs, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (npc) => {
       if (!inInterestRange(viewer, npc)) return;
@@ -2632,7 +2638,7 @@ function buildSnapshotFor(
     });
   }
 
-  const visibleTrees: TreeView[] = [];
+  const visibleTrees: TreeView[] = includeTrees ? [] : EMPTY_TREE_VIEWS;
   if (includeTrees) {
     forEachSpatial(staticSpatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS, (tree) => {
       if (!inTreeInterestRange(viewer, tree)) return;
@@ -2640,19 +2646,19 @@ function buildSnapshotFor(
     });
   }
 
-  const visibleFishingNodes: FishingNodeView[] = [];
+  const visibleFishingNodes: FishingNodeView[] = includeResources ? [] : EMPTY_FISHING_NODE_VIEWS;
   if (includeResources) {
     forEachSpatial(staticSpatial.fishingNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
       if (inInterestRange(viewer, node)) visibleFishingNodes.push(serializeFishingNode(node));
     });
   }
-  const visibleMiningNodes: MiningNodeView[] = [];
+  const visibleMiningNodes: MiningNodeView[] = includeResources ? [] : EMPTY_MINING_NODE_VIEWS;
   if (includeResources) {
     forEachSpatial(staticSpatial.miningNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
       if (inInterestRange(viewer, node)) visibleMiningNodes.push(serializeMiningNode(node));
     });
   }
-  const visibleHerbNodes: HerbNodeView[] = [];
+  const visibleHerbNodes: HerbNodeView[] = includeResources ? [] : EMPTY_HERB_NODE_VIEWS;
   if (includeResources) {
     forEachSpatial(staticSpatial.herbNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
       if (inInterestRange(viewer, node)) visibleHerbNodes.push(serializeHerbNode(node));
@@ -2753,7 +2759,7 @@ function snapshotDelta<T extends SnapshotEntity>(
   forceFull: boolean,
   preserve = false
 ): SnapshotDelta<T> {
-  if (preserve) return { items: [], removedIds: [], full: false, visibleCount: cache.signatures.size };
+  if (preserve) return { items: visible, removedIds: EMPTY_IDS, full: false, visibleCount: cache.signatures.size };
   const next = cache.nextSignatures;
   next.clear();
   const changed: T[] = [];
