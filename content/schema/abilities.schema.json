@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TIB abilities",
+  "type": "array",
+  "items": { "$ref": "#/$defs/ability" },
+  "$defs": {
+    "range": {
+      "type": "array",
+      "prefixItems": [{ "type": "number" }, { "type": "number" }],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "float": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "color"],
+      "properties": {
+        "text": { "type": "string" },
+        "color": { "type": "string" },
+        "noTargetsText": { "type": "string" },
+        "yOffset": { "type": "number" }
+      }
+    },
+    "projectile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string" },
+        "color": { "type": "string" },
+        "targetEnemy": { "type": "boolean" }
+      }
+    },
+    "vfx": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["effectKind"],
+      "properties": {
+        "effectKind": { "type": "string" },
+        "color": { "type": "string" }
+      }
+    },
+    "targeting": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": { "mode": { "const": "self" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": {
+            "mode": { "const": "enemy" },
+            "range": { "type": "number", "exclusiveMinimum": 0 },
+            "requiresLineOfSight": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "radius"],
+          "properties": {
+            "mode": { "const": "aoe_self" },
+            "radius": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "offset", "radius"],
+          "properties": {
+            "mode": { "const": "aoe_front" },
+            "offset": { "type": "number", "exclusiveMinimum": 0 },
+            "radius": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "offset", "radius"],
+          "properties": {
+            "mode": { "const": "aoe_point" },
+            "offset": { "type": "number", "exclusiveMinimum": 0 },
+            "radius": { "type": "number", "exclusiveMinimum": 0 },
+            "range": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "tiles"],
+          "properties": {
+            "mode": { "const": "dash" },
+            "tiles": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        }
+      ]
+    },
+    "conditionalBonus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["when", "multiply"],
+      "properties": {
+        "when": { "const": "behindTarget" },
+        "multiply": { "type": "number", "exclusiveMinimum": 0 },
+        "float": { "$ref": "#/$defs/float" }
+      }
+    },
+    "effect": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "buff"],
+          "properties": {
+            "kind": { "const": "buff_self" },
+            "buff": { "enum": ["sprint", "ironClad", "fleetFoot"] },
+            "durationMs": { "type": "number", "minimum": 0 },
+            "cleanse": {
+              "type": "array",
+              "items": { "enum": ["slow"] }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": { "const": "damage" },
+            "amount": { "$ref": "#/$defs/range" },
+            "skill": { "type": "string" },
+            "damageType": { "enum": ["physical", "magic"] },
+            "xpFactor": { "type": "number" },
+            "effectKind": { "type": "string" },
+            "conditionalBonus": { "$ref": "#/$defs/conditionalBonus" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "status"],
+          "properties": {
+            "kind": { "const": "debuff_enemy" },
+            "status": { "enum": ["snare", "burn", "freeze", "inaccurate"] },
+            "durationMs": { "type": "number", "minimum": 0 },
+            "perTick": { "type": "number" },
+            "float": { "$ref": "#/$defs/float" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": { "const": "heal" },
+            "fraction": { "type": "number", "minimum": 0 },
+            "scaleSkill": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "buff"],
+          "properties": {
+            "kind": { "const": "heal_over_time" },
+            "buff": { "const": "second_wind" },
+            "fraction": { "type": "number", "minimum": 0 },
+            "durationMs": { "type": "number", "minimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": { "const": "dash" },
+            "tiles": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": { "const": "taunt" },
+            "durationMs": { "type": "number", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "ability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "description", "cooldownMs", "durationMs", "targeting", "effects"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "cooldownMs": { "type": "number", "minimum": 0 },
+        "durationMs": { "type": "number", "minimum": 0 },
+        "guards": {
+          "type": "array",
+          "items": { "enum": ["requireBelowMaxHp"] }
+        },
+        "targeting": { "$ref": "#/$defs/targeting" },
+        "effects": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/effect" }
+        },
+        "projectile": { "$ref": "#/$defs/projectile" },
+        "vfx": { "$ref": "#/$defs/vfx" },
+        "float": { "$ref": "#/$defs/float" },
+        "speedMultiplier": { "type": "number", "exclusiveMinimum": 0 },
+        "healFraction": { "type": "number", "minimum": 0 },
+        "damage": { "$ref": "#/$defs/range" },
+        "manaCost": { "type": "number", "minimum": 0 },
+        "skill": { "type": "string" },
+        "range": { "type": "number", "exclusiveMinimum": 0 },
+        "effectKind": { "type": "string" }
+      }
+    }
+  }
+}

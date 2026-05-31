@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
-import type { DialogueLine, Range } from "../src/content-types.ts";
+import type { AbilityEffect, AbilitySpec, AbilityTargeting, DialogueLine, Range } from "../src/content-types.ts";
 
 // --- Raw YAML shapes (everything optional; validated below) ----------------
 
@@ -98,6 +98,16 @@ interface RawSpawns {
   trees?: Array<{ type?: string; at?: { floor: number; x: number; y: number } }>;
 }
 
+interface RawAbility extends Partial<AbilitySpec> {
+  id?: string;
+  label?: string;
+  description?: string;
+  cooldownMs?: number;
+  durationMs?: number;
+  targeting?: AbilityTargeting;
+  effects?: AbilityEffect[];
+}
+
 interface RawQuest {
   id?: string;
   title?: string;
@@ -136,6 +146,7 @@ const miningNodes = load<RawMiningNode[]>("mining-nodes.yaml") ?? [];
 const herbNodes = load<RawHerbNode[]>("herb-nodes.yaml") ?? [];
 const shop = load<Record<string, unknown>>("shop.yaml") ?? {};
 const spawns = load<RawSpawns>("spawns.yaml") ?? {};
+const abilities = load<RawAbility[]>("abilities.yaml") ?? [];
 const quests = loadQuests();
 
 const itemIds = new Set(items.map((i) => i.id));
@@ -145,8 +156,17 @@ const npcIdsByRole = new Map(npcs.map((n) => [n.id, n.role]));
 const zoneIds = new Set(["southTown", "cemetery", "crypt", "woods", "northTown", "marsh", "badlands", "desert", "beach", "jungle"]);
 const useKinds = new Set(["eat", "light_fire", "cook_on_fire", "drink_potion"]);
 const capabilityIds = new Set(["chop_tree", "fish", "mine", "ranged"]);
+const skillIds = new Set(["attack", "defense", "magic", "woodcutting", "fishing", "mining", "firemaking", "cooking", "agility", "alchemy", "ranged", "foraging"]);
 const questKinds = new Set(["kill", "gather", "fetch"]);
 const oreKinds = new Set(["copper", "tin", "iron"]);
+const abilityGuards = new Set(["requireBelowMaxHp"]);
+const abilityTargetModes = new Set(["self", "enemy", "aoe_self", "aoe_front", "aoe_point", "dash"]);
+const abilityEffectKinds = new Set(["buff_self", "damage", "debuff_enemy", "heal", "heal_over_time", "dash", "taunt"]);
+const abilityBuffs = new Set(["sprint", "ironClad", "fleetFoot", "second_wind"]);
+const abilityCleanseStatuses = new Set(["slow"]);
+const abilityDebuffStatuses = new Set(["snare", "burn", "freeze", "inaccurate"]);
+const abilityDamageTypes = new Set(["physical", "magic"]);
+const abilityConditionalBonusWhen = new Set(["behindTarget"]);
 const requiredQuestPhases = ["intro", "progress", "turnIn", "claimed"];
 
 function loadQuests(): RawQuest[] {
@@ -224,6 +244,79 @@ for (const m of miningNodes) {
 for (const h of herbNodes) {
   if (!h.id) fail("herb-nodes.yaml", "herb node missing id");
   if (!h.at || !h.approach) fail(`herb-nodes.yaml:${h.id ?? "?"}`, "missing at/approach");
+}
+
+const abilityIds = new Set<string>();
+for (const a of abilities) {
+  validateAbility(a);
+}
+
+function validateAbility(a: RawAbility): void {
+  const where = `abilities.yaml:${a.id ?? "?"}`;
+  if (!a.id) { fail("abilities.yaml", "ability missing id"); return; }
+  if (abilityIds.has(a.id)) fail(where, `duplicate ability id "${a.id}"`);
+  abilityIds.add(a.id);
+  if (!a.label) fail(where, "missing label");
+  if (!a.description) fail(where, "missing description");
+  if (!Number.isFinite(a.cooldownMs) || (a.cooldownMs ?? -1) < 0) fail(where, "cooldownMs must be a non-negative number");
+  if (!Number.isFinite(a.durationMs) || (a.durationMs ?? -1) < 0) fail(where, "durationMs must be a non-negative number");
+  for (const guard of a.guards ?? []) {
+    if (!abilityGuards.has(guard)) fail(`${where}.guards`, `unknown guard "${guard}"`);
+  }
+  if (!a.targeting) fail(where, "missing targeting");
+  else validateAbilityTargeting(a.targeting, `${where}.targeting`);
+  if (!Array.isArray(a.effects) || a.effects.length === 0) fail(where, "missing or empty effects");
+  else a.effects.forEach((effect, i) => validateAbilityEffect(effect, `${where}.effects[${i}]`));
+  if (a.skill != null && !skillIds.has(a.skill)) fail(where, `unknown skill "${a.skill}"`);
+}
+
+function validateAbilityTargeting(targeting: AbilityTargeting, where: string): void {
+  if (!abilityTargetModes.has(targeting.mode)) {
+    fail(where, `unknown mode "${targeting.mode}"`);
+    return;
+  }
+  if (targeting.mode === "aoe_self" && !positiveNumber(targeting.radius)) fail(where, "aoe_self requires positive radius");
+  if (targeting.mode === "aoe_front") {
+    if (!positiveNumber(targeting.offset)) fail(where, "aoe_front requires positive offset");
+    if (!positiveNumber(targeting.radius)) fail(where, "aoe_front requires positive radius");
+  }
+  if (targeting.mode === "aoe_point") {
+    if (!positiveNumber(targeting.offset)) fail(where, "aoe_point requires positive offset");
+    if (!positiveNumber(targeting.radius)) fail(where, "aoe_point requires positive radius");
+    if (targeting.range != null && !positiveNumber(targeting.range)) fail(where, "range must be positive when present");
+  }
+  if (targeting.mode === "dash" && !positiveNumber(targeting.tiles)) fail(where, "dash requires positive tiles");
+  if (targeting.mode === "enemy" && targeting.range != null && !positiveNumber(targeting.range)) fail(where, "range must be positive when present");
+}
+
+function validateAbilityEffect(effect: AbilityEffect, where: string): void {
+  if (!abilityEffectKinds.has(effect.kind)) {
+    fail(where, `unknown kind "${effect.kind}"`);
+    return;
+  }
+  if (effect.kind === "buff_self") {
+    if (!abilityBuffs.has(effect.buff)) fail(where, `unknown buff "${effect.buff}"`);
+    for (const status of effect.cleanse ?? []) {
+      if (!abilityCleanseStatuses.has(status)) fail(where, `unknown cleanse status "${status}"`);
+    }
+  } else if (effect.kind === "damage") {
+    if (effect.skill != null && !skillIds.has(effect.skill)) fail(where, `unknown skill "${effect.skill}"`);
+    if (effect.damageType != null && !abilityDamageTypes.has(effect.damageType)) fail(where, `unknown damageType "${effect.damageType}"`);
+    if (effect.conditionalBonus) {
+      if (!abilityConditionalBonusWhen.has(effect.conditionalBonus.when)) fail(where, `unknown conditionalBonus.when "${effect.conditionalBonus.when}"`);
+      if (!positiveNumber(effect.conditionalBonus.multiply)) fail(where, "conditionalBonus.multiply must be positive");
+    }
+  } else if (effect.kind === "debuff_enemy") {
+    if (!abilityDebuffStatuses.has(effect.status)) fail(where, `unknown status "${effect.status}"`);
+  } else if (effect.kind === "heal") {
+    if (effect.scaleSkill != null && !skillIds.has(effect.scaleSkill)) fail(where, `unknown scaleSkill "${effect.scaleSkill}"`);
+  } else if (effect.kind === "heal_over_time") {
+    if (!abilityBuffs.has(effect.buff)) fail(where, `unknown buff "${effect.buff}"`);
+  }
+}
+
+function positiveNumber(value: unknown): boolean {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
 }
 
 const questIds = new Set<string>();
@@ -415,6 +508,7 @@ const HERB_NODES = herbNodes.map((h) => {
   if (h.item != null) entry["item"] = h.item;
   return entry;
 });
+const ABILITIES = Object.fromEntries(abilities.map((a) => [a.id, a]));
 const QUESTS = Object.fromEntries(
   quests.map((q) => [
     q.id,
@@ -435,6 +529,7 @@ const QUESTS = Object.fromEntries(
 );
 
 const TYPE_ANNOTATIONS: Record<string, string> = {
+  ABILITIES: "Record<string, AbilitySpec>",
   ITEMS: "Record<string, Item>",
   MONSTERS: "Record<string, Monster>",
   QUEST_DROPS: "Record<string, QuestDrop>",
@@ -452,6 +547,7 @@ const TYPE_ANNOTATIONS: Record<string, string> = {
 const banner = `// AUTO-GENERATED by scripts/build-content.ts — DO NOT EDIT BY HAND.
 // Edit YAML under content/ and rerun \`npm run content:build\`.
 import type {
+  AbilitySpec,
   FishingNode,
   HerbNode,
   Item,
@@ -469,6 +565,7 @@ import type {
 
 const body = (
   [
+    ["ABILITIES", ABILITIES],
     ["ITEMS", ITEMS],
     ["MONSTERS", MONSTERS],
     ["QUEST_DROPS", QUEST_DROPS],

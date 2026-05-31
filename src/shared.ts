@@ -2,6 +2,7 @@ import type { Range, ZoneId } from "./content-types.ts";
 import { MAP_OBJECTS, BLOCKING_OBJECT_KEYS } from "./map-objects.ts";
 
 export {
+  ABILITIES,
   ITEMS,
   MONSTERS,
   QUEST_DROPS,
@@ -15,6 +16,16 @@ export {
   MINING_NODES,
   HERB_NODES
 } from "./generated/catalog.ts";
+export type {
+  AbilityConditionalBonus,
+  AbilityEffect,
+  AbilityFloat,
+  AbilityGuard,
+  AbilityProjectile,
+  AbilitySpec,
+  AbilityTargeting,
+  AbilityVfx
+} from "./content-types.ts";
 
 export const TILE_SIZE = 32;
 // Default floor footprint. Most floors are this size; a few biomes override it
@@ -122,71 +133,6 @@ export interface ClassSpec {
   dodgeChance: number;
 }
 
-export interface AbilitySpec {
-  id: string;
-  label: string;
-  description: string;
-  cooldownMs: number;
-  durationMs: number;
-  guards?: AbilityGuard[];
-  targeting?: AbilityTargeting;
-  effects?: AbilityEffect[];
-  projectile?: AbilityProjectile;
-  vfx?: AbilityVfx;
-  float?: AbilityFloat;
-  speedMultiplier?: number;
-  healFraction?: number;
-  // Offensive (class "strike") abilities: deal damage to the current target.
-  damage?: Range;
-  manaCost?: number;
-  skill?: string; // skill trained + scaled by (e.g. "attack" | "ranged" | "magic")
-  range?: number; // attack range in tiles (defaults to the class melee range)
-  effectKind?: string; // visual effect kind (e.g. "hit" | "flare" | "frost" | "arrow")
-}
-
-export type AbilityGuard = "requireBelowMaxHp";
-
-export type AbilityTargeting =
-  | { mode: "self" }
-  | { mode: "enemy"; range?: number; requiresLineOfSight?: boolean }
-  | { mode: "aoe_self"; radius: number }
-  | { mode: "aoe_front"; offset: number; radius: number }
-  | { mode: "aoe_point"; offset: number; radius: number; range?: number }
-  | { mode: "dash"; tiles: number };
-
-export type AbilityEffect =
-  | { kind: "buff_self"; buff: "sprint" | "ironClad" | "fleetFoot"; durationMs?: number; cleanse?: Array<"slow"> }
-  | { kind: "damage"; amount?: Range; skill?: string; damageType?: "physical" | "magic"; xpFactor?: number; effectKind?: string; conditionalBonus?: AbilityConditionalBonus }
-  | { kind: "debuff_enemy"; status: "snare" | "burn" | "freeze" | "inaccurate"; durationMs?: number; perTick?: number; float?: AbilityFloat }
-  | { kind: "heal"; fraction?: number; scaleSkill?: string }
-  | { kind: "heal_over_time"; buff: "second_wind"; fraction?: number; durationMs?: number }
-  | { kind: "dash"; tiles?: number }
-  | { kind: "taunt"; durationMs?: number };
-
-export interface AbilityConditionalBonus {
-  when: "behindTarget";
-  multiply: number;
-  float?: AbilityFloat;
-}
-
-export interface AbilityProjectile {
-  kind: string;
-  color?: string;
-  targetEnemy?: boolean;
-}
-
-export interface AbilityVfx {
-  effectKind: string;
-  color?: string;
-}
-
-export interface AbilityFloat {
-  text: string;
-  color: string;
-  noTargetsText?: string;
-  yOffset?: number;
-}
-
 export interface SkillDef {
   label: string;
   iconUrl: string;
@@ -254,195 +200,6 @@ export const CLASS_UNLOCKS: ClassUnlock[] = [
   { key: "archer", label: "Archer", npcId: "scout-leader", npcName: "Ranger Wynn", town: "Northwatch", requires: { ranged: 15, foraging: 10 } },
   { key: "mage", label: "Mage", npcId: "hermit-academic", npcName: "Magister Vael", town: "Northwatch", requires: { magic: 15, alchemy: 10 } }
 ];
-
-export const ABILITIES: Record<string, AbilitySpec> = {
-  sprint: {
-    id: "sprint",
-    label: "Sprint",
-    description: "Move 50% faster for 10s.",
-    cooldownMs: 30000,
-    durationMs: 10000,
-    speedMultiplier: 1.5,
-    targeting: { mode: "self" },
-    effects: [{ kind: "buff_self", buff: "sprint" }],
-    float: { text: "{name} sprints.", color: "#9ae6b4", yOffset: 0 }
-  },
-  second_wind: {
-    id: "second_wind",
-    label: "Second Wind",
-    description: "Regenerate 50% of max HP over 5s.",
-    cooldownMs: 90000,
-    durationMs: 5000,
-    healFraction: 0.5,
-    guards: ["requireBelowMaxHp"],
-    targeting: { mode: "self" },
-    effects: [{ kind: "heal_over_time", buff: "second_wind", fraction: 0.5 }],
-    float: { text: "{name} catches a second wind.", color: "#f7d486", yOffset: 0 }
-  },
-  // --- Vanguard ---
-  provoke: {
-    id: "provoke",
-    label: "Provoke",
-    description: "Taunt all nearby monsters, forcing them to attack you.",
-    cooldownMs: 12000,
-    durationMs: 6000,
-    manaCost: 6,
-    targeting: { mode: "aoe_self", radius: 1.8 },
-    effects: [{ kind: "taunt" }],
-    vfx: { effectKind: "flare", color: "#ffcf6b" },
-    float: { text: "Provoke!", noTargetsText: "Provoke", color: "#ffcf6b" }
-  },
-  iron_clad: {
-    id: "iron_clad",
-    label: "Iron Clad",
-    description: "Take 30% less damage but move 15% slower for 6s.",
-    cooldownMs: 20000,
-    durationMs: 6000,
-    manaCost: 8,
-    targeting: { mode: "self" },
-    effects: [{ kind: "buff_self", buff: "ironClad" }],
-    float: { text: "Iron Clad", color: "#bcd3e0" }
-  },
-  // --- Archer ---
-  pinning_shot: {
-    id: "pinning_shot",
-    label: "Pinning Shot",
-    description: "A ranged shot that snares the target in place.",
-    cooldownMs: 8000,
-    durationMs: 2500,
-    manaCost: 8,
-    damage: [10, 16],
-    skill: "ranged",
-    range: 5,
-    effectKind: "arrow",
-    targeting: { mode: "enemy", range: 5, requiresLineOfSight: true },
-    projectile: { kind: "arrow", targetEnemy: true },
-    effects: [
-      { kind: "damage", amount: [10, 16], skill: "ranged", damageType: "physical", xpFactor: 1.5, effectKind: "hit" },
-      { kind: "debuff_enemy", status: "snare", float: { text: "Pinned!", color: "#cfe8a0", yOffset: -0.6 } }
-    ]
-  },
-  fleet_foot: {
-    id: "fleet_foot",
-    label: "Fleet Foot",
-    description: "Cleanse slows and move 25% faster for 4s.",
-    cooldownMs: 15000,
-    durationMs: 4000,
-    manaCost: 6,
-    targeting: { mode: "self" },
-    effects: [{ kind: "buff_self", buff: "fleetFoot", cleanse: ["slow"] }],
-    float: { text: "Fleet Foot", color: "#9ae6b4" }
-  },
-  // --- Thief ---
-  quick_step: {
-    id: "quick_step",
-    label: "Quick Step",
-    description: "Dash 2 tiles in the direction you face.",
-    cooldownMs: 6000,
-    durationMs: 0,
-    manaCost: 4,
-    targeting: { mode: "dash", tiles: 2 },
-    effects: [{ kind: "dash", tiles: 2 }],
-    float: { text: "Quick Step", color: "#e0c8ff" }
-  },
-  backstab: {
-    id: "backstab",
-    label: "Backstab",
-    description: "Strike from behind for 2.5x damage; otherwise normal.",
-    cooldownMs: 10000,
-    durationMs: 0,
-    manaCost: 8,
-    damage: [12, 18],
-    skill: "attack",
-    range: 1.6,
-    effectKind: "hit",
-    targeting: { mode: "enemy", range: 1.6 },
-    effects: [
-      {
-        kind: "damage",
-        amount: [12, 18],
-        skill: "attack",
-        damageType: "physical",
-        xpFactor: 1.5,
-        effectKind: "hit",
-        conditionalBonus: { when: "behindTarget", multiply: 2.5, float: { text: "Backstab!", color: "#ffd166", yOffset: -0.6 } }
-      }
-    ]
-  },
-  // --- Mage ---
-  flame_burst: {
-    id: "flame_burst",
-    label: "Flame Burst",
-    description: "Ignite a 3x3 area in front of you with a burning DoT.",
-    cooldownMs: 5000,
-    durationMs: 4000,
-    manaCost: 12,
-    damage: [10, 16],
-    skill: "magic",
-    effectKind: "flare",
-    targeting: { mode: "aoe_front", offset: 1.5, radius: 1.6 },
-    effects: [
-      { kind: "damage", amount: [10, 16], skill: "magic", damageType: "magic", xpFactor: 1.2, effectKind: "flare" },
-      { kind: "debuff_enemy", status: "burn", perTick: 3 }
-    ],
-    vfx: { effectKind: "flare", color: "#ff8a3d" },
-    float: { text: "Flame Burst", color: "#ff8a3d", yOffset: 0 }
-  },
-  frost_nova: {
-    id: "frost_nova",
-    label: "Frost Nova",
-    description: "Freeze monsters around you for 3s (damage breaks it).",
-    cooldownMs: 18000,
-    durationMs: 3000,
-    manaCost: 14,
-    damage: [6, 10],
-    skill: "magic",
-    effectKind: "frost",
-    targeting: { mode: "aoe_self", radius: 2.2 },
-    effects: [
-      { kind: "damage", amount: [6, 10], skill: "magic", damageType: "magic", xpFactor: 1.2, effectKind: "frost" },
-      { kind: "debuff_enemy", status: "freeze" }
-    ],
-    vfx: { effectKind: "frost", color: "#a8e6ff" },
-    float: { text: "Frost Nova", color: "#a8e6ff" }
-  },
-  // --- Apothecary ---
-  healing_poultice: {
-    id: "healing_poultice",
-    label: "Healing Poultice",
-    description: "Heal instantly, then regenerate over 5s. Scales with Alchemy.",
-    cooldownMs: 10000,
-    durationMs: 5000,
-    manaCost: 10,
-    healFraction: 0.18,
-    guards: ["requireBelowMaxHp"],
-    targeting: { mode: "self" },
-    effects: [
-      { kind: "heal", fraction: 0.18, scaleSkill: "alchemy" },
-      { kind: "heal_over_time", buff: "second_wind", fraction: 0.12 }
-    ],
-    float: { text: "+{heal} HP", color: "#9ee6b1" }
-  },
-  volatile_flask: {
-    id: "volatile_flask",
-    label: "Volatile Flask",
-    description: "Hurl a flask: 3x3 toxic burst that lowers enemy accuracy.",
-    cooldownMs: 14000,
-    durationMs: 5000,
-    manaCost: 12,
-    damage: [10, 16],
-    skill: "magic",
-    range: 4,
-    effectKind: "flare",
-    targeting: { mode: "aoe_point", offset: 2.5, radius: 1.6, range: 4 },
-    projectile: { kind: "flask", color: "#a6e06b" },
-    effects: [
-      { kind: "damage", amount: [10, 16], skill: "magic", damageType: "magic", xpFactor: 1.2, effectKind: "flare" },
-      { kind: "debuff_enemy", status: "inaccurate" }
-    ],
-    float: { text: "Volatile Flask", color: "#a6e06b", yOffset: 0 }
-  }
-};
 
 export const SKILLS: Record<string, SkillDef> = {
   attack: { label: "Attack", iconUrl: "/icons/skill-attack.png" },

@@ -131,6 +131,71 @@ export interface MonsterSpawn {
   zone: ZoneId;
 }
 
+export interface AbilitySpec {
+  id: string;
+  label: string;
+  description: string;
+  cooldownMs: number;
+  durationMs: number;
+  guards?: AbilityGuard[];
+  targeting?: AbilityTargeting;
+  effects?: AbilityEffect[];
+  projectile?: AbilityProjectile;
+  vfx?: AbilityVfx;
+  float?: AbilityFloat;
+  speedMultiplier?: number;
+  healFraction?: number;
+  // Legacy display/scaling fields retained while clients and save data settle.
+  damage?: Range;
+  manaCost?: number;
+  skill?: string;
+  range?: number;
+  effectKind?: string;
+}
+
+export type AbilityGuard = "requireBelowMaxHp";
+
+export type AbilityTargeting =
+  | { mode: "self" }
+  | { mode: "enemy"; range?: number; requiresLineOfSight?: boolean }
+  | { mode: "aoe_self"; radius: number }
+  | { mode: "aoe_front"; offset: number; radius: number }
+  | { mode: "aoe_point"; offset: number; radius: number; range?: number }
+  | { mode: "dash"; tiles: number };
+
+export type AbilityEffect =
+  | { kind: "buff_self"; buff: "sprint" | "ironClad" | "fleetFoot"; durationMs?: number; cleanse?: Array<"slow"> }
+  | { kind: "damage"; amount?: Range; skill?: string; damageType?: "physical" | "magic"; xpFactor?: number; effectKind?: string; conditionalBonus?: AbilityConditionalBonus }
+  | { kind: "debuff_enemy"; status: "snare" | "burn" | "freeze" | "inaccurate"; durationMs?: number; perTick?: number; float?: AbilityFloat }
+  | { kind: "heal"; fraction?: number; scaleSkill?: string }
+  | { kind: "heal_over_time"; buff: "second_wind"; fraction?: number; durationMs?: number }
+  | { kind: "dash"; tiles?: number }
+  | { kind: "taunt"; durationMs?: number };
+
+export interface AbilityConditionalBonus {
+  when: "behindTarget";
+  multiply: number;
+  float?: AbilityFloat;
+}
+
+export interface AbilityProjectile {
+  kind: string;
+  color?: string;
+  targetEnemy?: boolean;
+}
+
+export interface AbilityVfx {
+  effectKind: string;
+  color?: string;
+}
+
+export interface AbilityFloat {
+  text: string;
+  color: string;
+  noTargetsText?: string;
+  yOffset?: number;
+}
+
 export interface TreeNode {
   type: string;
   floor: number;
