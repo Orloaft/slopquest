@@ -38,6 +38,8 @@ no socket errors and no backpressure skips. See
   queue, with drop telemetry in load gates.
 - Load gates track raw state-message byte sizes to catch protocol bloat before
   aggregate bandwidth becomes the only warning sign.
+- `npm run check` enforces a runtime asset budget so up-front public assets do
+  not quietly grow past the point where region streaming becomes urgent.
 - Current content: 10 floors, 77 monsters, roughly 1,385 derivable tree tiles,
   NPCs, gathering resources, fires, corpses, and per-player persistence.
 
@@ -159,8 +161,10 @@ use the same chunk-derived pattern before they become high-cardinality content.
 
 Map rendering is chunked, but asset loading is still mostly up-front. A much
 larger world with many more enemy/item/biome textures will need region-streamed
-assets and unload policies. Do this when content volume, load time, or VRAM
-starts showing pressure.
+assets and unload policies. Until that volume exists, `npm run assets:budget`
+keeps current runtime assets below 100 MiB total, below 5 MiB per file, and
+below 500 files so growth becomes visible before load time or VRAM pressure
+surprises us.
 
 ### Protocol size
 
@@ -214,6 +218,7 @@ process cannot tick the populated world.
   resource load gates.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
 - [x] Raw state-message byte telemetry and packet-size thresholds in load gates.
+- [x] Runtime asset budget gate in `npm run check`.
 - [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
 - [ ] Chunk-derived fishing/mining/herb resources before those lists grow by an

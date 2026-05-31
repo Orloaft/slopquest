@@ -20,12 +20,13 @@
     "load:test": "node scripts/load-test.ts",
     "perf:gate": "node scripts/perf-gate.ts",
     "perf:soak": "node scripts/perf-gate.ts --soak",
+    "assets:budget": "node scripts/asset-budget.ts",
     "assets:enemies": "python3 tools/generate_woodland_enemy_sprites_v2.py && python3 tools/validate_enemy_asset_pipeline.py",
     "assets:enemies:check": "python3 tools/validate_enemy_asset_pipeline.py",
     "test:e2e": "playwright test",
     "test:visual": "playwright test tests/e2e/tib-features.spec.ts --project=chromium",
     "typecheck": "tsc",
-    "check": "tsc && npm run assets:enemies:check"
+    "check": "tsc && npm run assets:enemies:check && npm run assets:budget"
   },
   "dependencies": {
     "concurrently": "^9.1.2",
