@@ -264,6 +264,7 @@ interface MapRenderState {
   cols: number;
   rowCount: number;
   chunks: Map<string, Phaser.GameObjects.Container>;
+  visibleChunkBoundsKey: string | null;
 }
 
 interface MapChunkStats {
@@ -1123,7 +1124,7 @@ function drawMap(floor: number, center?: TilePoint): void {
   const cols = floorCols(floor);
   const rowCount = floorRows(floor);
   scene.cameras.main.setBounds(0, 0, cols * TILE_SIZE, rowCount * TILE_SIZE);
-  mapRender = { floor, rows, cols, rowCount, chunks: new Map() };
+  mapRender = { floor, rows, cols, rowCount, chunks: new Map(), visibleChunkBoundsKey: null };
   updateVisibleMapChunks(center ? center.x * TILE_SIZE : undefined, center ? center.y * TILE_SIZE : undefined);
 }
 
@@ -1146,6 +1147,9 @@ function updateVisibleMapChunks(centerX?: number, centerY?: number): void {
   const maxChunkX = clampChunk(Math.floor(Math.floor(right / TILE_SIZE) / MAP_CHUNK_TILES) + MAP_CHUNK_PADDING, mapRender.cols);
   const minChunkY = clampChunk(Math.floor(Math.floor(top / TILE_SIZE) / MAP_CHUNK_TILES) - MAP_CHUNK_PADDING, mapRender.rowCount);
   const maxChunkY = clampChunk(Math.floor(Math.floor(bottom / TILE_SIZE) / MAP_CHUNK_TILES) + MAP_CHUNK_PADDING, mapRender.rowCount);
+  const boundsKey = `${minChunkX}:${maxChunkX}:${minChunkY}:${maxChunkY}`;
+  if (boundsKey === mapRender.visibleChunkBoundsKey) return;
+  mapRender.visibleChunkBoundsKey = boundsKey;
   const needed = new Set<string>();
 
   for (let chunkY = minChunkY; chunkY <= maxChunkY; chunkY += 1) {
