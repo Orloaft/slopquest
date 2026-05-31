@@ -5,6 +5,7 @@ data/players/
 data/players.v2
 src/generated/
 test-results/
+stagecraft-screenshots/
 
 # Large unused audio archive — moved off-repo to /mnt/nxt-dev/tib-archive/assetsources/soundtracks
 # (see assetsources/SOUNDTRACKS_MOVED.md). Game streams music from public/music/, not this dir.

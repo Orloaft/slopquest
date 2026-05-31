@@ -772,12 +772,28 @@ function create(this: Phaser.Scene): void {
   // Sunken Beach (floor 8). Crops from assetsources/rejected/beach-biome-tiles.png.
   makeTileTexture(this, "beachTiles", "tileBeachSand", 20, 99, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShellSand", 180, 99, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachPebbleSand", 340, 99, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachMossyStone", 180, 180, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachWetSand", 20, 180, 70, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachRippleSand", 100, 99, 70, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachWoodPlanks", 100, 262, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachPath", 96, 402, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachStairs", 400, 864, 70, 80);
-  makeTileTexture(this, "beachTiles", "tileBeachCliff", 528, 100, 70, 82);
+  makeTileTexture(this, "beachTiles", "tileBeachCliff", 600, 100, 70, 82);
+  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 70, 82);
+  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 70, 82);
   makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62);
-  makeTileTexture(this, "beachTiles", "tileBeachShore", 1200, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileOcean", 1052, 101, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShore", 1216, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1040, 260, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreEast", 1144, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreSouth", 1232, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreWest", 1056, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerNW", 1216, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerNE", 1216, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSW", 1216, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSE", 1216, 100, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileBeachLagoon", 1130, 101, 72, 72);
+  makeTileTexture(this, "beachTiles", "tileOcean", 1160, 108, 44, 44);
   makeSpriteTexture(this, "beachTiles", "spriteBeachHut", 1366, 860, 116, 118);
   makeSpriteTexture(this, "beachTiles", "spriteBeachDock", 642, 650, 168, 86);
   makeSpriteTexture(this, "beachTiles", "spriteBeachBoat", 560, 722, 74, 48);
@@ -786,6 +802,10 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "beachTiles", "spriteBeachCampfire", 1160, 872, 72, 66);
   makeSpriteTexture(this, "beachTiles", "spriteBeachPalm", 1438, 944, 86, 72);
   makeSpriteTexture(this, "beachTiles", "spriteBeachRocks", 1204, 402, 88, 74);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachLogPile", 910, 476, 92, 54);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachBarrel", 438, 732, 46, 58);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachSign", 340, 650, 62, 72);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachRuin", 842, 680, 70, 76);
   // Untamed Jungle (floor 9). Crops from assetsources/rejected/jungle-biome-tiles.png.
   makeTileTexture(this, "jungleTiles", "tileJungle", 18, 97, 72, 74);
   makeTileTexture(this, "jungleTiles", "tileJungleWall", 524, 100, 68, 82);
@@ -4468,11 +4488,27 @@ function minimapTileColor(tile: string): string {
     H: "#e0c070", // oasis passage (landmark)
     e: "#e6d7a8", // beach sand
     l: "#d7c28f", // shell-strewn beach flat
+    ",": "#cbb987", // wet/shelly tide rim
+    ";": "#ead49a", // rippled beach sand
+    "3": "#d5be82", // pebbly dry beach
+    "4": "#8f8f62", // mossy beach stone
+    "5": "#9c6b3e", // wooden planks
     z: "#cda76a", // beach path
     "2": "#b98b52", // beach stairs/ramp
     x: "#8d6036", // beach cliff face (blocked)
+    "0": "#8d6036", // beach cliff left cap (blocked)
+    "1": "#8d6036", // beach cliff right cap (blocked)
     u: "#9b8d68", // beach rocks (blocked, sight cover)
     v: "#68b7bd", // foamy shore water (blocked, sight-open)
+    "6": "#68b7bd", // north-facing foamy shore water
+    "7": "#68b7bd", // east-facing foamy shore water
+    "8": "#68b7bd", // south-facing foamy shore water
+    "9": "#68b7bd", // west-facing foamy shore water
+    "{": "#72c4c4", // foamy shore corner
+    "}": "#72c4c4", // foamy shore corner
+    "(": "#72c4c4", // foamy shore corner
+    ")": "#72c4c4", // foamy shore corner
+    "=": "#4aaab4", // shallow lagoon water
     I: "#2f9bb0", // ocean (blocked, sight-open)
     Y: "#d6ad4e", // beach portal (landmark)
     j: "#d6ad4e", // beach<->jungle portal (landmark)
@@ -5179,11 +5215,27 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     H: "tileSand",
     e: "tileBeachSand",
     l: "tileBeachShellSand",
-    z: "tileBeachPath",
+    ",": "tileBeachWetSand",
+    ";": "tileBeachRippleSand",
+    "3": "tileBeachPebbleSand",
+    "4": "tileBeachMossyStone",
+    "5": "tileBeachWoodPlanks",
+    z: "tileBeachPebbleSand",
     "2": "tileBeachStairs",
     x: "tileBeachCliff",
+    "0": "tileBeachCliffLeft",
+    "1": "tileBeachCliffRight",
     u: "tileBeachRock",
     v: "tileBeachShore",
+    "6": "tileBeachShoreNorth",
+    "7": "tileBeachShoreEast",
+    "8": "tileBeachShoreSouth",
+    "9": "tileBeachShoreWest",
+    "{": "tileBeachShoreCornerNW",
+    "}": "tileBeachShoreCornerNE",
+    "(": "tileBeachShoreCornerSW",
+    ")": "tileBeachShoreCornerSE",
+    "=": "tileBeachLagoon",
     I: "tileOcean",
     Y: "tileBeachPath",
     j: "tileBeachPath",

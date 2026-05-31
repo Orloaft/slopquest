@@ -520,56 +520,95 @@ export function makeFloorTiles(floor: number): string[] {
   }
 
   if (floor === 8) {
-    // The Sunken Beach (bespoke 90x60) — an island-stage layout, not a sand
-    // rectangle: ocean border, foam shore, wet flats, tiered cliffs, stair
-    // connectors and POI pockets echoing the beach mockup's arrangement.
+    // The Sunken Beach (bespoke 90x60) — staged against the blueprint: one
+    // island silhouette, raised cliff shelves, stair connectors, clustered
+    // landmarks and water wrapping every edge.
     fillRect(rows, 0, 0, 90, 60, "I");
 
-    // Main island mass and sandy spurs.
-    fillRect(rows, 13, 5, 52, 34, "e");
-    fillRect(rows, 8, 12, 16, 22, "e"); // west beach shoulder
-    fillRect(rows, 54, 11, 28, 25, "e"); // east beach shoulder
-    fillRect(rows, 24, 35, 44, 13, "e"); // southern open beach
-    fillRect(rows, 68, 34, 12, 13, "e"); // eastern spit
-    fillRect(rows, 35, 46, 18, 5, "e"); // central sandbar
-    fillRect(rows, 3, 23, 10, 11, "e"); // west cove landing
+    // Lower island and connected headlands. Overlapping fills make a hand-placed
+    // silhouette with bays and peninsulas instead of a single oval.
+    fillEllipse(rows, 43, 31, 31, 20, "e");
+    fillEllipse(rows, 28, 18, 16, 13, "e");
+    fillEllipse(rows, 62, 18, 18, 12, "e");
+    fillEllipse(rows, 42, 45, 23, 10, "e");
+    fillEllipse(rows, 67, 40, 15, 9, "e");
+    fillEllipse(rows, 24, 7, 10, 6, "e");
+    fillEllipse(rows, 17, 37, 10, 8, "e");
 
-    // Bite coves back out of the island to avoid straight rectangular beaches.
-    fillRect(rows, 3, 5, 10, 13, "I");
-    fillRect(rows, 7, 6, 10, 5, "I");
-    fillRect(rows, 28, 2, 14, 5, "I");
-    fillRect(rows, 66, 2, 18, 8, "I");
-    fillRect(rows, 76, 10, 11, 11, "I");
-    fillRect(rows, 5, 35, 18, 10, "I");
-    fillRect(rows, 10, 40, 13, 5, "I");
-    fillRect(rows, 45, 40, 16, 8, "I");
-    fillRect(rows, 58, 44, 9, 8, "I");
-    fillRect(rows, 76, 47, 11, 8, "I");
-    fillRect(rows, 35, 20, 12, 7, "I"); // tidal lagoon
-    fillRect(rows, 38, 18, 6, 3, "I");
+    // Raised shelves use variant sand/stone above cliff faces, matching the
+    // mockup's readable elevation without needing a second render layer.
+    fillEllipse(rows, 38, 14, 19, 9, "l");
+    fillEllipse(rows, 60, 14, 15, 8, "3");
+    fillEllipse(rows, 32, 24, 13, 7, "4");
+    fillEllipse(rows, 64, 26, 13, 7, "l");
 
-    // Walkable sand detail: shell flats, trampled paths and wet tide line.
-    fillRect(rows, 23, 2, 5, 10, "z"); // desert gate trail
-    fillRect(rows, 22, 11, 30, 4, "z");
-    fillRect(rows, 49, 12, 19, 5, "z"); // jungle gate trail
-    fillRect(rows, 28, 25, 20, 4, "z"); // hut lane
-    fillRect(rows, 44, 29, 26, 3, "z");
-    for (const [x, y, w, h] of [[14, 14, 8, 4], [18, 30, 10, 4], [28, 38, 12, 4], [58, 36, 10, 4], [70, 39, 7, 5]] as Array<[number, number, number, number]>)
-      fillRect(rows, x, y, w, h, "l");
+    // Cove bites and an inner tide pool force the coast to wrap like the mockup.
+    fillEllipse(rows, 6, 8, 12, 9, "I");
+    fillEllipse(rows, 43, 4, 10, 5, "I");
+    fillEllipse(rows, 81, 7, 12, 8, "I");
+    fillEllipse(rows, 8, 27, 8, 9, "I");
+    fillEllipse(rows, 9, 48, 15, 9, "I");
+    fillEllipse(rows, 58, 53, 13, 7, "I");
+    fillEllipse(rows, 82, 52, 10, 7, "I");
+    fillEllipse(rows, 45, 25, 5, 3, "="); // shallow tide pool below the north shelf
+    fillEllipse(rows, 47, 27, 4, 2, "=");
+    fillEllipse(rows, 21, 51, 5, 4, "I"); // dock water notch
+    fillRect(rows, 14, 5, 4, 4, "l"); // Coastal Harvest shelf used by foraging tests
 
-    // Raised cliff/ledge pockets with stair connectors, giving the stage tiers.
-    fillRect(rows, 18, 16, 14, 7, "x");
-    fillRect(rows, 51, 18, 16, 7, "x");
-    fillRect(rows, 27, 31, 14, 5, "x");
-    fillRect(rows, 20, 22, 4, 2, "2"); // west stairs down
-    fillRect(rows, 56, 24, 4, 2, "2"); // east stairs down
-    fillRect(rows, 34, 30, 4, 2, "2"); // south ledge stairs
+    // Cliff-face shelves with stair breaks. The shape is deliberately long and
+    // stepped, because the mockup's biggest visual signal is elevation.
+    fillRect(rows, 24, 20, 20, 1, "x");
+    setTile(rows, 23, 20, "0");
+    setTile(rows, 44, 20, "1");
+    fillRect(rows, 51, 20, 21, 1, "x");
+    setTile(rows, 50, 20, "0");
+    setTile(rows, 72, 20, "1");
+    fillRect(rows, 21, 30, 20, 1, "x");
+    setTile(rows, 20, 30, "0");
+    setTile(rows, 41, 30, "1");
+    fillRect(rows, 55, 32, 19, 1, "x");
+    setTile(rows, 54, 32, "0");
+    setTile(rows, 74, 32, "1");
+    fillRect(rows, 43, 39, 17, 1, "x");
+    setTile(rows, 42, 39, "0");
+    setTile(rows, 60, 39, "1");
+    fillRect(rows, 32, 20, 4, 2, "2"); // north shelf stairs
+    fillRect(rows, 58, 20, 4, 2, "2"); // east shelf stairs
+    fillRect(rows, 30, 30, 4, 2, "2"); // cave ledge stairs
+    fillRect(rows, 63, 32, 4, 2, "2"); // camp ledge stairs
+    fillRect(rows, 48, 39, 4, 2, "2"); // lower dock stairs
 
-    // Rocks/ruins as hard cover and visual anchors around coves/terraces.
-    for (const [x, y] of [[13, 11], [16, 34], [25, 16], [30, 23], [49, 17], [66, 27], [72, 34], [33, 43], [53, 36], [61, 13]] as Array<[number, number]>)
+    // Narrow trails connect POIs but stay fragmented so they do not read as
+    // carpets. Route intent comes from repeated accents and props.
+    fillRect(rows, 24, 1, 3, 10, "z"); // desert gate trail
+    fillRect(rows, 25, 10, 23, 2, "z");
+    fillRect(rows, 47, 11, 3, 6, "z");
+    fillRect(rows, 50, 13, 18, 2, "z"); // jungle gate trail
+    fillRect(rows, 32, 22, 3, 8, "z");
+    fillRect(rows, 35, 29, 18, 2, "z");
+    fillRect(rows, 60, 22, 3, 10, "z");
+    fillRect(rows, 48, 34, 4, 7, "z");
+    fillRect(rows, 35, 43, 14, 2, "z");
+    fillRect(rows, 62, 38, 10, 2, "z");
+    for (const [x, y, char] of [
+      [13, 16, "l"], [14, 17, "l"], [18, 18, "l"], [20, 16, "l"], [15, 34, "l"], [18, 36, "l"], [22, 35, "l"],
+      [25, 41, "l"], [30, 42, "l"], [35, 44, "l"], [55, 36, "l"], [59, 38, "l"], [64, 37, "l"], [70, 39, "l"], [75, 41, "l"],
+      [25, 6, "l"], [29, 8, "l"], [53, 10, "l"], [57, 12, "l"], [31, 13, "3"], [35, 15, "3"], [47, 21, "3"],
+      [51, 23, "3"], [64, 18, "3"], [69, 21, "3"], [22, 25, "3"], [27, 27, "3"], [50, 45, "3"], [56, 46, "3"],
+      [63, 27, "3"], [67, 30, "3"], [16, 20, "4"], [21, 22, "4"], [60, 23, "4"], [65, 25, "4"], [30, 31, "4"],
+      [36, 33, "4"], [40, 14, "4"], [45, 16, "4"], [18, 12, ";"], [22, 14, ";"], [39, 18, ";"], [48, 16, ";"],
+      [58, 12, ";"], [72, 18, ";"], [28, 36, ";"], [53, 42, ";"], [68, 44, ";"]
+    ] as Array<[number, number, string]>)
+      setTile(rows, x, y, char);
+
+    // Boardwalk/dock planks and hard-cover stones clustered around POIs.
+    fillRect(rows, 29, 46, 12, 1, "5");
+    fillRect(rows, 24, 49, 4, 2, "5");
+    fillRect(rows, 40, 43, 5, 1, "5");
+    for (const [x, y] of [[13, 12], [15, 35], [25, 18], [31, 24], [50, 18], [67, 27], [73, 34], [34, 43], [54, 36], [63, 13], [78, 42], [22, 10], [42, 35], [36, 16], [58, 16], [20, 43], [74, 25], [47, 46], [53, 24]] as Array<[number, number]>)
       setTile(rows, x, y, "u");
 
-    applyShoreEdges(rows);
+    applyBeachShoreEdges(rows);
     setTile(rows, 25, 1, "Y"); // north trail to/from the desert
     setTile(rows, 50, 14, "j"); // east trail to the Untamed Jungle
   }
@@ -749,13 +788,24 @@ function applyCliffEdges(rows: string[][], floorChar = "R", massifChar = "w", fa
   }
 }
 
-function applyShoreEdges(rows: string[][]): void {
-  const land = new Set(["e", "l", "z", "2", "x", "u", "Y", "j"]);
+function applyBeachShoreEdges(rows: string[][]): void {
+  const land = new Set(["e", "l", ",", ";", "3", "4", "5", "z", "2", "x", "0", "1", "u", "Y", "j"]);
+  const water = new Set(["I", "=", "v", "6", "7", "8", "9", "{", "}", "(", ")"]);
   const shore: Array<[number, number]> = [];
+  const landEdge: Array<[number, number]> = [];
   for (let y = 0; y < rows.length; y += 1) {
     const row = rows[y];
     if (!row) continue;
     for (let x = 0; x < row.length; x += 1) {
+      if (row[x] === "e" || row[x] === "l" || row[x] === "3" || row[x] === ";") {
+        const touchesWater =
+          water.has(rows[y - 1]?.[x] ?? "") ||
+          water.has(rows[y + 1]?.[x] ?? "") ||
+          water.has(row[x - 1] ?? "") ||
+          water.has(row[x + 1] ?? "");
+        if (touchesWater) landEdge.push([x, y]);
+        continue;
+      }
       if (row[x] !== "I") continue;
       const touchesLand =
         land.has(rows[y - 1]?.[x] ?? "") ||
@@ -765,7 +815,41 @@ function applyShoreEdges(rows: string[][]): void {
       if (touchesLand) shore.push([x, y]);
     }
   }
-  shore.forEach(([x, y]) => setTile(rows, x, y, "v"));
+  landEdge.forEach(([x, y]) => {
+    const tile = rows[y]?.[x];
+    if (tile === "e" || tile === "l" || tile === "3" || tile === ";") setTile(rows, x, y, ",");
+  });
+  shore.forEach(([x, y]) => {
+    const north = land.has(rows[y - 1]?.[x] ?? "");
+    const south = land.has(rows[y + 1]?.[x] ?? "");
+    const west = land.has(rows[y]?.[x - 1] ?? "");
+    const east = land.has(rows[y]?.[x + 1] ?? "");
+
+    if (south && east) setTile(rows, x, y, "{");
+    else if (south && west) setTile(rows, x, y, "}");
+    else if (north && east) setTile(rows, x, y, "(");
+    else if (north && west) setTile(rows, x, y, ")");
+    else if (south && !north && !west && !east) setTile(rows, x, y, "6");
+    else if (north && !south && !west && !east) setTile(rows, x, y, "8");
+    else if (west && !east && !north && !south) setTile(rows, x, y, "7");
+    else if (east && !west && !north && !south) setTile(rows, x, y, "9");
+    else setTile(rows, x, y, "v");
+  });
+}
+
+function fillEllipse(rows: string[][], cx: number, cy: number, rx: number, ry: number, char: string): void {
+  const minY = Math.floor(cy - ry);
+  const maxY = Math.ceil(cy + ry);
+  for (let y = minY; y <= maxY; y += 1) {
+    const row = rows[y];
+    if (!row) continue;
+    const dy = (y - cy) / ry;
+    if (Math.abs(dy) > 1) continue;
+    const span = Math.floor(rx * Math.sqrt(1 - dy * dy));
+    for (let x = Math.floor(cx - span); x <= Math.ceil(cx + span); x += 1) {
+      if (row[x] !== undefined) row[x] = char;
+    }
+  }
 }
 
 function frameFloorEdge(rows: string[][], floor: number): void {
@@ -794,7 +878,9 @@ export function isBlockedTile(tile: string): boolean {
     tile === "#" || tile === "~" || tile === "W" || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o" ||
     tile === "X" || tile === "P" || tile === "w" || // badlands cliff wall + pit + massif
     tile === "Q" || tile === "V" || tile === "U" || // desert quicksand + oasis + ruin
-    tile === "I" || tile === "v" || tile === "x" || tile === "u" || // beach sea/shore/cliff/rocks
+    tile === "I" || tile === "=" || tile === "v" || tile === "6" || tile === "7" || tile === "8" || tile === "9" ||
+    tile === "{" || tile === "}" || tile === "(" || tile === ")" ||
+    tile === "x" || tile === "0" || tile === "1" || tile === "u" || // beach sea/shore/cliff/rocks
     tile === "E" || tile === "i" // jungle wall + jungle river
   );
 }
@@ -808,7 +894,7 @@ export function isSightBlocked(tile: string): boolean {
   return (
     tile === "#" || tile === "o" || tile === "O" || tile === "f" || tile === "r" || tile === "q" ||
     tile === "X" || tile === "w" || tile === "U" || // badlands cliff/massif, ruin
-    tile === "x" || tile === "u" || tile === "E" // beach cliff/rocks, jungle wall
+    tile === "x" || tile === "0" || tile === "1" || tile === "u" || tile === "E" // beach cliff/rocks, jungle wall
   );
 }
 

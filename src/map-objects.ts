@@ -130,18 +130,28 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
   8: [
     // Sunken Beach: grouped POIs instead of sparse single props. All anchors
     // sit on the authored sand/path pockets and leave the portal lanes clear.
-    { key: "spriteBeachHut", x: 60.5, y: 20.8, w: 116, h: 118 }, // driftwood hut above the east terrace
-    { key: "spriteBeachDock", x: 39.5, y: 43.2, w: 168, h: 86 }, // central tidal dock
-    { key: "spriteBeachBoat", x: 46.4, y: 45.8, w: 74, h: 48 },
-    { key: "spriteBeachCave", x: 23.5, y: 22.4, w: 104, h: 102 }, // west cliff POI
-    { key: "spriteBeachTent", x: 72.5, y: 39.7, w: 92, h: 70 }, // eastern spit camp
-    { key: "spriteBeachCampfire", x: 70.1, y: 40.9, w: 72, h: 66 },
-    { key: "spriteBeachRocks", x: 31.8, y: 31.7, w: 76, h: 64 },
-    { key: "spriteBeachRocks", x: 66.3, y: 28.2, w: 70, h: 58 },
+    { key: "spriteBeachHut", x: 59.5, y: 17.8, w: 116, h: 118 }, // driftwood hut on the high east shelf
+    { key: "spriteBeachCave", x: 31.5, y: 25.4, w: 104, h: 102 }, // cliff cave POI
+    { key: "spriteBeachRuin", x: 51.6, y: 17.4, w: 62, h: 82 }, // broken arch on the high path
+    { key: "spriteBeachDock", x: 33.5, y: 47.2, w: 168, h: 86 }, // southwest tidal dock
+    { key: "spriteBeachBoat", x: 44.2, y: 47.8, w: 74, h: 48 },
+    { key: "spriteBeachTent", x: 69.5, y: 39.7, w: 92, h: 70 }, // eastern spit camp
+    { key: "spriteBeachCampfire", x: 64.9, y: 40.9, w: 72, h: 66 },
+    { key: "spriteBeachSign", x: 40.8, y: 29.4, w: 48, h: 56 },
+    { key: "spriteBeachRocks", x: 30.8, y: 18.6, w: 76, h: 64 },
+    { key: "spriteBeachRocks", x: 66.3, y: 26.8, w: 70, h: 58 },
+    { key: "spriteBeachRocks", x: 42.6, y: 35.8, w: 72, h: 60 },
+    { key: "spriteBeachLogPile", x: 45.2, y: 30.4, w: 76, h: 44 },
+    { key: "spriteBeachLogPile", x: 57.5, y: 37.2, w: 68, h: 40 },
+    { key: "spriteBeachBarrel", x: 29.8, y: 45.8, w: 42, h: 52 },
+    { key: "spriteBeachBarrel", x: 71.8, y: 42.6, w: 38, h: 48 },
     { key: "spriteBeachPalm", x: 17.5, y: 13.4, w: 86, h: 72 },
-    { key: "spriteBeachPalm", x: 44.5, y: 12.4, w: 82, h: 68 }, // by the jungle trail
+    { key: "spriteBeachPalm", x: 38.5, y: 11.4, w: 82, h: 68 },
+    { key: "spriteBeachPalm", x: 54.5, y: 13.2, w: 80, h: 66 }, // high shelf grove
+    { key: "spriteBeachPalm", x: 51.5, y: 32.4, w: 74, h: 62 },
     { key: "spriteBeachPalm", x: 72.5, y: 34.4, w: 86, h: 72 }, // on the eastern spit
-    { key: "spriteBeachPalm", x: 30.5, y: 37.4, w: 82, h: 68 }
+    { key: "spriteBeachPalm", x: 24.5, y: 39.4, w: 82, h: 68 },
+    { key: "spriteBeachPalm", x: 75.5, y: 25.5, w: 72, h: 60 }
   ],
   9: [
     // Boulders clustered at the two river fords (the choke ambush points).
