@@ -170,6 +170,9 @@ and combat fanout without making every client see every other client.
   `TIB_MAX_VISIBLE_PLAYERS=50`, keeping each client at or below 50 visible
   player views instead of letting crowded hubs grow without bound. That scenario
   runs with WebSocket compression enabled and gates actual socket wire bytes.
+- Over-cap player fanout now keeps a bounded nearest-player working set and
+  sorts only the retained cap-sized candidates, avoiding full nearby-player
+  sorts for every observer in crowded hubs.
 - Snapshot build stayed under 6.3 ms max, well below the 75 ms broadcast interval.
 - Tick time stayed under 0.5 ms max in these samples.
 - `npm run perf:gate` now starts isolated E2E servers and re-runs the two
