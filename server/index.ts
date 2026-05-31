@@ -2546,7 +2546,7 @@ function broadcastState(): void {
       continue;
     }
 
-    const snapshot = buildSnapshotFor(session, includeTrees, includeNpcs, includeResources, forceFull, metricFrame);
+    const snapshot = buildSnapshotFor(session, includeTrees, includeNpcs, includeResources, forceFull, metricFrame, now);
     if (!shouldSendSnapshot(session, snapshot, now)) continue;
     const raw = JSON.stringify(snapshot);
     metrics.bytesOutThisSecond += Buffer.byteLength(raw);
@@ -2614,7 +2614,8 @@ function buildSnapshotFor(
   includeNpcs: boolean,
   includeResources: boolean,
   forceFull: boolean,
-  metricFrame: SnapshotMetricFrame
+  metricFrame: SnapshotMetricFrame,
+  now: number
 ): StateSnapshot {
   const viewer = session.player;
   const cache = snapshotCacheFor(session);
@@ -2630,7 +2631,7 @@ function buildSnapshotFor(
   const visibleMonsters: MonsterView[] = [];
   forEachSpatial(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (monster) => {
     if (monster.deadUntil || monster.hidden || !inInterestRange(viewer, monster)) return;
-    visibleMonsters.push(serializeMonster(monster));
+    visibleMonsters.push(serializeMonster(monster, now));
   });
 
   const visibleCorpses: CorpseView[] = corpses.size === 0 ? EMPTY_CORPSE_VIEWS : [];
@@ -2678,7 +2679,7 @@ function buildSnapshotFor(
   const visibleFires: FireView[] = fires.size === 0 ? EMPTY_FIRE_VIEWS : [];
   if (fires.size !== 0) {
     forEachSpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (fire) => {
-      if (inInterestRange(viewer, fire)) visibleFires.push(serializeFire(fire));
+      if (inInterestRange(viewer, fire)) visibleFires.push(serializeFire(fire, now));
     });
   }
   const playersDelta = snapshotDelta(cache.players, players, playerViewSignature, forceFull);
@@ -3191,7 +3192,7 @@ function serializeAbilities(player: ServerPlayer): AbilityView[] {
   }).filter((a): a is AbilityView => a !== null);
 }
 
-function serializeMonster(monster: ServerMonster): MonsterView {
+function serializeMonster(monster: ServerMonster, now: number): MonsterView {
   return {
     id: monster.id,
     type: monster.type,
@@ -3201,7 +3202,7 @@ function serializeMonster(monster: ServerMonster): MonsterView {
     y: round(monster.y),
     dir: monster.dir,
     moving: monster.moving,
-    attacking: (monster.attackUntil ?? 0) > performance.now(),
+    attacking: (monster.attackUntil ?? 0) > now,
     hp: Math.round(monster.hp),
     maxHp: monster.maxHp,
     zone: monster.zone
@@ -3304,13 +3305,13 @@ function serializeHerbNode(node: HerbNodeRuntime): HerbNodeView {
   return view;
 }
 
-function serializeFire(fire: Fire): FireView {
+function serializeFire(fire: Fire, now: number): FireView {
   return {
     id: fire.id,
     floor: fire.floor,
     x: fire.x,
     y: fire.y,
-    remainingMs: Math.max(0, Math.round(fire.expiresAt - performance.now()))
+    remainingMs: Math.max(0, Math.round(fire.expiresAt - now))
   };
 }
 
