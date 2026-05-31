@@ -22,6 +22,9 @@ Node/WebSocket process:
 - Static resources are indexed by active cells; moving entities update spatial cells incrementally.
 - Snapshot/event/static-resource interest queries reuse bounded spatial cell-key
   lists, avoiding repeated key allocation for every category and observer.
+- Active monster/NPC simulation regions are derived from occupied player
+  spatial cells, not from every individual player, so co-located crowds do not
+  rebuild the same active-cell union hundreds of times per tick.
 - High-cardinality trees and gathering nodes are materialized only near players.
 - Monsters/NPCs simulate only in active regions near players.
 - Backpressure skips snapshots for slow sockets instead of piling up writes.
@@ -212,6 +215,9 @@ The server no longer rebuilds one all-entity spatial index every tick.
 - Fishing nodes, mining nodes, and herb nodes are indexed by active cells.
 - Repeated interest queries share cached cell-key ranges, capped by
   `TIB_SPATIAL_QUERY_CACHE_ENTRIES` (default `4096`).
+- Active monster/NPC regions are assembled from occupied player spatial cells
+  with cached expanded cell lists, bounding co-located crowd work by occupied
+  cells instead of connected players.
 - Trees are derived from map chunks on demand instead of being instantiated for
   the whole authored world at boot.
 - Movement calls update the old and new cells directly.
@@ -329,6 +335,7 @@ process cannot tick the populated world.
 - [x] Per-session snapshot deltas.
 - [x] Static spatial layers and incremental dynamic spatial updates.
 - [x] Active-region monster/NPC simulation.
+- [x] Occupied-cell active-region union for crowded player clusters.
 - [x] Event-scheduled resource/fire/corpse expiry.
 - [x] `playersById` lookup map.
 - [x] Broadcast at 75 ms instead of 50 ms.

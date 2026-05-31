@@ -177,11 +177,6 @@ interface ActiveRegions {
   cells: Set<string>;
 }
 
-interface ActiveRegionCache {
-  key: string;
-  cells: string[];
-}
-
 interface SpatialCellRef {
   key: string;
   floor: number;
@@ -377,6 +372,7 @@ const TREE_SNAPSHOT_RADIUS_SQ = TREE_SNAPSHOT_RADIUS ** 2;
 const METRIC_WINDOW = 60;
 const SPATIAL_CELL_SIZE = 8;
 const ACTIVE_REGION_RADIUS = SNAPSHOT_RADIUS + SPATIAL_CELL_SIZE;
+const ACTIVE_REGION_CELL_MARGIN = Math.ceil(ACTIVE_REGION_RADIUS / SPATIAL_CELL_SIZE);
 const fishingNodeBasesByCell = buildStaticBaseCellIndex(FISHING_NODES);
 const miningNodeBasesByCell = buildStaticBaseCellIndex(MINING_NODES);
 const herbNodeBasesByCell = buildStaticBaseCellIndex(HERB_NODES);
@@ -450,7 +446,7 @@ const playerViewSignatureCache = new WeakMap<PlayerView, number>();
 const resourceViewSignatureCache = new WeakMap<SnapshotEntity, number>();
 const privatePlayerViewCache = new WeakMap<ServerPlayer, PlayerPrivateViewCache>();
 const selfPlayerViewCache = new WeakMap<ServerPlayer, PlayerSelfViewCache>();
-const activeRegionCache = new WeakMap<ServerPlayer, ActiveRegionCache>();
+const activeRegionCellsByPlayerCell = new Map<string, string[]>();
 const monsterViewCache = new WeakMap<ServerMonster, EntityViewCache<MonsterView>>();
 const npcViewCache = new WeakMap<NpcRuntime, EntityViewCache<NpcView>>();
 const treeViewCache = new WeakMap<TreeNodeRuntime, ResourceViewCache<TreeView>>();
@@ -981,28 +977,30 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
 function occupiedRegions(): ActiveRegions {
   const regions = activeRegionsScratch;
   regions.cells.clear();
-  for (const { player } of clients.values()) {
-    for (const cell of activeRegionCellsFor(player)) regions.cells.add(cell);
+  for (const cellKey of spatial.players.keys()) {
+    for (const cell of activeRegionCellsForPlayerCell(cellKey)) regions.cells.add(cell);
   }
   return regions;
 }
 
-function activeRegionCellsFor(player: ServerPlayer): string[] {
-  const floor = player.floor;
-  const minCx = Math.floor((player.x - ACTIVE_REGION_RADIUS) / SPATIAL_CELL_SIZE);
-  const maxCx = Math.floor((player.x + ACTIVE_REGION_RADIUS) / SPATIAL_CELL_SIZE);
-  const minCy = Math.floor((player.y - ACTIVE_REGION_RADIUS) / SPATIAL_CELL_SIZE);
-  const maxCy = Math.floor((player.y + ACTIVE_REGION_RADIUS) / SPATIAL_CELL_SIZE);
-  const key = `${floor}:${minCx}:${maxCx}:${minCy}:${maxCy}`;
-  const cached = activeRegionCache.get(player);
-  if (cached?.key === key) return cached.cells;
+function activeRegionCellsForPlayerCell(playerCellKey: string): string[] {
+  const cached = activeRegionCellsByPlayerCell.get(playerCellKey);
+  if (cached) return cached;
+  const [floorText, cxText, cyText] = playerCellKey.split(":");
+  const floor = Number(floorText);
+  const playerCx = Number(cxText);
+  const playerCy = Number(cyText);
   const cells: string[] = [];
-  for (let cy = minCy; cy <= maxCy; cy += 1) {
-    for (let cx = minCx; cx <= maxCx; cx += 1) {
+  for (let cy = playerCy - ACTIVE_REGION_CELL_MARGIN; cy <= playerCy + ACTIVE_REGION_CELL_MARGIN; cy += 1) {
+    for (let cx = playerCx - ACTIVE_REGION_CELL_MARGIN; cx <= playerCx + ACTIVE_REGION_CELL_MARGIN; cx += 1) {
       cells.push(`${floor}:${cx}:${cy}`);
     }
   }
-  activeRegionCache.set(player, { key, cells });
+  activeRegionCellsByPlayerCell.set(playerCellKey, cells);
+  if (activeRegionCellsByPlayerCell.size > SPATIAL_QUERY_CACHE_ENTRIES) {
+    const oldest = activeRegionCellsByPlayerCell.keys().next().value;
+    if (oldest) activeRegionCellsByPlayerCell.delete(oldest);
+  }
   return cells;
 }
 

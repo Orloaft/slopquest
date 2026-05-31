@@ -210,6 +210,9 @@ and combat fanout without making every client see every other client.
 - Snapshot, event, and static-resource lookups now reuse bounded spatial
   cell-key lists via `TIB_SPATIAL_QUERY_CACHE_ENTRIES`, reducing repeated key
   construction across snapshot categories and co-located observers.
+- Active monster/NPC simulation regions are now unioned from occupied player
+  spatial cells with cached expanded cell lists, reducing repeated active-cell
+  construction when many players stand in the same hub.
 - Transient event queues now expose `eventsDroppedPerSecond`; the local perf
   gate requires it to remain `0` for normal clustered, mixed, combat, and
   slow-reader scenarios.
