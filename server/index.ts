@@ -384,6 +384,7 @@ let nextFireId = 1;
 const globalEvents: GameEvent[] = [];
 const targetedEventsByPlayer = new Map<string, GameEvent[]>();
 const eventsByCell = new Map<string, GameEvent[]>();
+const EMPTY_EVENTS: GameEvent[] = [];
 const eventOrder = new WeakMap<GameEvent, number>();
 const metrics: Metrics = {
   tickWindow: createMetricWindow(),
@@ -3315,9 +3316,14 @@ function eventVisibleTo(viewer: ServerPlayer, item: GameEvent): boolean {
 }
 
 function visibleEventsFor(viewer: ServerPlayer): GameEvent[] {
+  const targeted = targetedEventsByPlayer.get(viewer.id);
+  if (globalEvents.length === 0 && !targeted && eventsByCell.size === 0) return EMPTY_EVENTS;
+  if (eventsByCell.size === 0) {
+    if (globalEvents.length === 0) return targeted ?? EMPTY_EVENTS;
+    if (!targeted) return globalEvents;
+  }
   const visible: GameEvent[] = [];
   visible.push(...globalEvents);
-  const targeted = targetedEventsByPlayer.get(viewer.id);
   if (targeted) visible.push(...targeted);
   forEachEventCell(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (item) => {
     if (eventVisibleTo(viewer, item)) visible.push(item);
