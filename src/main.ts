@@ -168,6 +168,7 @@ interface EntityView extends Phaser.GameObjects.Container {
   animWidth?: number;
   animHeight?: number;
   currentFrameKey?: string;
+  currentFlipX?: boolean;
   sprite?: Phaser.GameObjects.Sprite;
 }
 
@@ -1713,7 +1714,11 @@ function animateActor(view: EntityView): void {
     view.sprite.setDisplaySize(view.animWidth ?? 40, view.animHeight ?? 48);
     view.currentFrameKey = key;
   }
-  view.sprite.setFlipX(actorFlipX(family, view.animDir));
+  const flipX = actorFlipX(family, view.animDir);
+  if (view.currentFlipX !== flipX) {
+    view.sprite.setFlipX(flipX);
+    view.currentFlipX = flipX;
+  }
 }
 
 function renderHud(me: PlayerView): void {
