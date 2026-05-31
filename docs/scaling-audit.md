@@ -39,6 +39,9 @@ no socket errors and no backpressure skips. See
   generated lazily around players and pruned when no players are nearby.
 - Transient event queues are bounded per global, targeted, and spatial-cell
   queue, with drop telemetry in load gates.
+- Client command intake is rate-limited per socket before JSON parsing, with
+  drop telemetry in load gates, so noisy clients cannot create unbounded
+  receive-side CPU work.
 - Load gates track raw state-message byte sizes to catch protocol bloat before
   aggregate bandwidth becomes the only warning sign.
 - Snapshot metrics track raw JSON bytes and actual socket wire bytes separately,
@@ -101,6 +104,13 @@ instead of building unbounded packets.
 The load driver also records raw state message sizes. `npm run perf:gate` caps
 state packets at 60 KB max and 25 KB average across its clustered, combat,
 regional, and slow-reader scenarios.
+
+Inbound client messages are bounded before parsing. Each socket has a fixed
+one-second intake window controlled by `TIB_CLIENT_MESSAGE_LIMIT_PER_SECOND`
+(default `40`), and excess messages are dropped before JSON decode or game
+logic dispatch. Normal load gates require `clientMessagesDroppedPerSecond.max`
+to stay at `0`, proving the limit does not affect expected play traffic. A
+small low-limit tripwire scenario requires drops, proving the guard still fires.
 
 Server snapshots also expose `wireBytesOutPerSecond`, sampled from the
 underlying sockets. The 150-client crowd gate runs with WebSocket compression
@@ -282,6 +292,7 @@ process cannot tick the populated world.
 - [x] Lazy runtime residency for fishing, mining, and herb nodes with active
   cell pruning.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
+- [x] Per-socket inbound command rate limits with drop telemetry in load gates.
 - [x] Raw state-message byte telemetry and packet-size thresholds in load gates.
 - [x] Actual socket wire-byte telemetry with compressed crowd gate coverage.
 - [x] Safe JSON wire compaction for empty removed-id/event fields.

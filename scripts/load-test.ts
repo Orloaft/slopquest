@@ -44,6 +44,7 @@ type SummaryMetric =
   | "snapshotsSentPerSecond"
   | "snapshotsSkippedBackpressurePerSecond"
   | "eventsDroppedPerSecond"
+  | "clientMessagesDroppedPerSecond"
   | "saveFlushMs";
 type GaugeMetric =
   | "heapUsedMb"
@@ -110,6 +111,7 @@ const observed = {
   snapshotsSentPerSecond: [] as number[],
   snapshotsSkippedBackpressurePerSecond: [] as number[],
   eventsDroppedPerSecond: [] as number[],
+  clientMessagesDroppedPerSecond: [] as number[],
   visiblePlayers: [] as number[],
   visibleMonsters: [] as number[],
   visibleTrees: [] as number[],
@@ -319,6 +321,9 @@ function recordMetrics(m: Partial<StateMetrics>): void {
     observed.snapshotsSkippedBackpressurePerSecond.push(m.snapshotsSkippedBackpressurePerSecond);
   }
   if (typeof m.eventsDroppedPerSecond === "number") observed.eventsDroppedPerSecond.push(m.eventsDroppedPerSecond);
+  if (typeof m.clientMessagesDroppedPerSecond === "number") {
+    observed.clientMessagesDroppedPerSecond.push(m.clientMessagesDroppedPerSecond);
+  }
   if (typeof m.saveQueueDepth === "number") observed.saveQueueDepth.push(m.saveQueueDepth);
   if (typeof m.saveFlushMs === "number") observed.saveFlushMs.push(m.saveFlushMs);
   if (typeof m.saveFlushPlayers === "number") observed.saveFlushPlayers.push(m.saveFlushPlayers);
@@ -419,6 +424,7 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
     "snapshotsSentPerSecond",
     "snapshotsSkippedBackpressurePerSecond",
     "eventsDroppedPerSecond",
+    "clientMessagesDroppedPerSecond",
     "saveFlushMs"
   ];
   const gaugeNames: GaugeMetric[] = [
@@ -528,6 +534,7 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
       snapshotsSentPerSecond: summarize(observed.snapshotsSentPerSecond),
       snapshotsSkippedBackpressurePerSecond: summarize(observed.snapshotsSkippedBackpressurePerSecond),
       eventsDroppedPerSecond: summarize(observed.eventsDroppedPerSecond),
+      clientMessagesDroppedPerSecond: summarize(observed.clientMessagesDroppedPerSecond),
       saveFlushMs: summarize(observed.saveFlushMs),
       heapUsedMb: summarize(observed.heapUsedMb),
       rssMb: summarize(observed.rssMb),

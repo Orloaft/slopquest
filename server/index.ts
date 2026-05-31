@@ -233,6 +233,7 @@ interface SnapshotMetricFrame {
   snapshotsSentPerSecond: number;
   snapshotsSkippedBackpressurePerSecond: number;
   eventsDroppedPerSecond: number;
+  clientMessagesDroppedPerSecond: number;
   socketBackpressureBytes: number;
   saveQueueDepth: number;
   saveFlushMs: number;
@@ -244,6 +245,11 @@ interface SnapshotCategoryCache {
   initialized: boolean;
   signatures: Map<string, number>;
   nextSignatures: Map<string, number>;
+}
+
+interface ClientMessageWindow {
+  startsAt: number;
+  count: number;
 }
 
 interface PlayerSnapshotCandidate {
@@ -386,6 +392,7 @@ const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ?
 const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 1000);
 const SNAPSHOT_METRICS_MS = positiveIntEnv("TIB_SNAPSHOT_METRICS_MS", 1000);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
+const CLIENT_MESSAGE_LIMIT_PER_SECOND = positiveIntEnv("TIB_CLIENT_MESSAGE_LIMIT_PER_SECOND", 40);
 const SAVE_CONCURRENCY = positiveIntEnv("TIB_SAVE_CONCURRENCY", 16);
 const GLOBAL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_GLOBAL_EVENT_QUEUE_LIMIT", 128);
 const TARGETED_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_TARGETED_EVENT_QUEUE_LIMIT", 64);
@@ -452,6 +459,7 @@ const eventOrder = new WeakMap<GameEvent, number>();
 const materializedTreeCells = new Set<string>();
 const materializedStaticResourceCells = new Set<string>();
 const socketWireBytes = new WeakMap<ExtWebSocket, number>();
+const clientMessageWindows = new WeakMap<ExtWebSocket, ClientMessageWindow>();
 const metrics: Metrics = {
   tickWindow: createMetricWindow(),
   snapshotWindow: createMetricWindow(),
@@ -464,6 +472,8 @@ const metrics: Metrics = {
   snapshotsSkippedBackpressurePerSecond: 0,
   eventsDroppedThisSecond: 0,
   eventsDroppedPerSecond: 0,
+  clientMessagesDroppedThisSecond: 0,
+  clientMessagesDroppedPerSecond: 0,
   saveQueueDepth: 0,
   saveFlushMs: 0,
   saveFlushPlayers: 0,
@@ -504,6 +514,11 @@ wss.on("connection", (rawSocket: WebSocket) => {
   });
 
   socket.on("message", (raw: RawData) => {
+    const now = performance.now();
+    if (!acceptClientMessage(socket, now)) {
+      metrics.clientMessagesDroppedThisSecond += 1;
+      return;
+    }
     let message: ClientMessage;
     try {
       message = JSON.parse(raw.toString()) as ClientMessage;
@@ -518,7 +533,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
 
     if (message.type === "input") {
       session.input = sanitizeInput(message.input);
-      session.lastInputAt = performance.now();
+      session.lastInputAt = now;
     }
     if (message.type === "target") setTarget(session.player, message.id);
     if (message.type === "ability") useAbility(session.player);
@@ -2875,6 +2890,16 @@ function shouldIncludeMetrics(session: Session, now: number): boolean {
   return lastSentAt === undefined || now - lastSentAt >= SNAPSHOT_METRICS_MS;
 }
 
+function acceptClientMessage(socket: ExtWebSocket, now: number): boolean {
+  const window = clientMessageWindows.get(socket);
+  if (!window || now - window.startsAt >= 1000) {
+    clientMessageWindows.set(socket, { startsAt: now, count: 1 });
+    return true;
+  }
+  window.count += 1;
+  return window.count <= CLIENT_MESSAGE_LIMIT_PER_SECOND;
+}
+
 function snapshotIsEmptyDelta(snapshot: StateSnapshot): boolean {
   return (
     !snapshot.playersFull &&
@@ -2933,6 +2958,7 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
     snapshotsSentPerSecond: metrics.snapshotsSentPerSecond,
     snapshotsSkippedBackpressurePerSecond: metrics.snapshotsSkippedBackpressurePerSecond,
     eventsDroppedPerSecond: metrics.eventsDroppedPerSecond,
+    clientMessagesDroppedPerSecond: metrics.clientMessagesDroppedPerSecond,
     socketBackpressureBytes: SOCKET_BACKPRESSURE_BYTES,
     saveQueueDepth: metrics.saveQueueDepth,
     saveFlushMs: metrics.saveFlushMs,
@@ -3112,6 +3138,7 @@ function buildSnapshotFor(
       snapshotsSentPerSecond: metricFrame.snapshotsSentPerSecond,
       snapshotsSkippedBackpressurePerSecond: metricFrame.snapshotsSkippedBackpressurePerSecond,
       eventsDroppedPerSecond: metricFrame.eventsDroppedPerSecond,
+      clientMessagesDroppedPerSecond: metricFrame.clientMessagesDroppedPerSecond,
       socketBackpressureBytes: metricFrame.socketBackpressureBytes,
       saveQueueDepth: metricFrame.saveQueueDepth,
       saveFlushMs: metricFrame.saveFlushMs,
@@ -4468,10 +4495,12 @@ function updateByteMetric(): void {
   metrics.snapshotsSentPerSecond = metrics.snapshotsSentThisSecond;
   metrics.snapshotsSkippedBackpressurePerSecond = metrics.snapshotsSkippedBackpressureThisSecond;
   metrics.eventsDroppedPerSecond = metrics.eventsDroppedThisSecond;
+  metrics.clientMessagesDroppedPerSecond = metrics.clientMessagesDroppedThisSecond;
   metrics.bytesOutThisSecond = 0;
   metrics.snapshotsSentThisSecond = 0;
   metrics.snapshotsSkippedBackpressureThisSecond = 0;
   metrics.eventsDroppedThisSecond = 0;
+  metrics.clientMessagesDroppedThisSecond = 0;
   metrics.lastBytesAt = now;
 }
 
