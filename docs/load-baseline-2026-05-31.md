@@ -172,7 +172,8 @@ and combat fanout without making every client see every other client.
   runs with WebSocket compression enabled and gates actual socket wire bytes.
 - Over-cap player fanout now keeps a heap-backed nearest-player working set and
   sorts only the retained cap-sized candidates, avoiding full nearby-player
-  candidate arrays and sorts for every observer in crowded hubs.
+  candidate arrays, discarded-candidate object allocation, and sorts for every
+  observer in crowded hubs.
 - Per-viewer transient events are now capped; a localized burst gate drives more
   spatial effects than the configured cap and asserts packets stay at the cap.
 - Static tree/resource pruning now runs on a throttled maintenance cadence with
