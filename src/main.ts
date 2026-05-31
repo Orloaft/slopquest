@@ -536,7 +536,9 @@ let scene: Phaser.Scene;
 let cursors: { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key };
 let keys: Record<string, Phaser.Input.Keyboard.Key>;
 let lastInputAt = 0;
-let lastInputSignature = "";
+let lastInputBits = -1;
+let lastInputMoveX = Number.NaN;
+let lastInputMoveY = Number.NaN;
 let lastMinimapDrawAt = 0;
 let currentFloor: number | null = null;
 let clickDestination: PathDestination | null = null;
@@ -2563,19 +2565,33 @@ function sendInput(time: number): void {
     moveX: clickInput?.moveX ?? 0,
     moveY: clickInput?.moveY ?? 0
   };
-  const signature = JSON.stringify(input);
-  if (time - lastInputAt < 50 && signature === lastInputSignature) return;
+  const bits = inputBits(input);
+  if (time - lastInputAt < 50 && inputMatchesLast(bits, input.moveX, input.moveY)) return;
   lastInputAt = time;
-  lastInputSignature = signature;
+  rememberInput(bits, input.moveX, input.moveY);
   send({ type: "input", input });
 }
 
 function sendStopInput(): void {
   const input: InputPayload = { up: false, down: false, left: false, right: false, moveX: 0, moveY: 0 };
-  const signature = JSON.stringify(input);
-  if (signature === lastInputSignature) return;
-  lastInputSignature = signature;
+  const bits = inputBits(input);
+  if (inputMatchesLast(bits, input.moveX, input.moveY)) return;
+  rememberInput(bits, input.moveX, input.moveY);
   send({ type: "input", input });
+}
+
+function inputBits(input: InputPayload): number {
+  return Number(input.up) | (Number(input.down) << 1) | (Number(input.left) << 2) | (Number(input.right) << 3);
+}
+
+function inputMatchesLast(bits: number, moveX: number, moveY: number): boolean {
+  return bits === lastInputBits && moveX === lastInputMoveX && moveY === lastInputMoveY;
+}
+
+function rememberInput(bits: number, moveX: number, moveY: number): void {
+  lastInputBits = bits;
+  lastInputMoveX = moveX;
+  lastInputMoveY = moveY;
 }
 
 function isMenuOpen(): boolean {
