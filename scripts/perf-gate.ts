@@ -67,6 +67,36 @@ const scenarios: Scenario[] = [
     ]
   },
   {
+    name: "50 co-located crypt combat clients",
+    args: [
+      "--clients",
+      "50",
+      "--duration",
+      "15000",
+      "--combat",
+      "1",
+      "--zones",
+      "cryptBoss",
+      "--attack-targets",
+      "--max-errors",
+      "0",
+      "--min-opened",
+      "50",
+      "--min-welcomed",
+      "50",
+      "--min-closed",
+      "50",
+      "--max-tick-ms-max",
+      "10",
+      "--max-snapshot-ms-max",
+      "20",
+      "--max-bytes-out-per-second-avg",
+      "12000000",
+      "--max-snapshots-skipped-backpressure-per-second-max",
+      "0"
+    ]
+  },
+  {
     name: "50 mixed clients with slow readers",
     serverEnv: {
       TIB_SOCKET_BACKPRESSURE_BYTES: "32768"

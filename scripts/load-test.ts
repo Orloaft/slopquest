@@ -1,5 +1,5 @@
 import { WebSocket, type RawData } from "ws";
-import type { StateMetrics } from "../src/types.ts";
+import type { MonsterView, PlayerView, StateMetrics } from "../src/types.ts";
 
 interface ParsedArgs {
   [key: string]: string | true;
@@ -17,7 +17,10 @@ interface CombatAssignment extends CombatTarget {
 
 interface LoadMessage {
   type?: string;
+  id?: string;
   metrics?: Partial<StateMetrics>;
+  players?: PlayerView[];
+  monsters?: MonsterView[];
 }
 
 interface Summary {
@@ -37,6 +40,8 @@ const durationMs = Number(options.duration ?? 10000);
 const slowClients = Math.max(0, Math.floor(Number(options["slow-clients"] ?? 0)));
 const slowAfterMs = Math.max(0, Math.floor(Number(options["slow-after"] ?? 1500)));
 const combatRatio = clampUnit(Number(options.combat ?? 0));
+const attackTargets = Boolean(options["attack-targets"]);
+const targetIntervalMs = Math.max(100, Math.floor(Number(options["target-interval"] ?? 500)));
 const persistent = Boolean(options.persistent);
 const combatZones = String(options.zones ?? "cemetery,crypt,woods")
   .split(",")
@@ -45,7 +50,9 @@ const combatZones = String(options.zones ?? "cemetery,crypt,woods")
 const COMBAT_ZONE_TARGETS: Record<string, CombatTarget> = {
   cemetery: { floor: 1, x: 18.5, y: 12.5 },
   crypt: { floor: 2, x: 22.5, y: 23.5 },
-  woods: { floor: 3, x: 16.5, y: 20.5 }
+  cryptBoss: { floor: 2, x: 75.5, y: 29.5 },
+  woods: { floor: 3, x: 16.5, y: 20.5 },
+  woodsNorth: { floor: 3, x: 56.5, y: 12.5 }
 };
 const combatCount = Math.floor(clients * combatRatio);
 const combatAssignments = new Map<number, CombatAssignment>();
@@ -79,6 +86,7 @@ const observed = {
   socketBackpressureBytes: 0,
   slowClientsPaused: 0
 };
+const clientState = new WeakMap<WebSocket, { selfId: string | null; targetId: string | null; lastTargetAt: number }>();
 
 for (let i = 0; i < clients; i += 1) {
   setTimeout(() => openClient(i), i * 25);
@@ -100,6 +108,7 @@ setTimeout(() => {
 function openClient(index: number): void {
   const socket = new WebSocket(url);
   sockets.add(socket);
+  clientState.set(socket, { selfId: null, targetId: null, lastTargetAt: 0 });
 
   socket.on("open", () => {
     stats.opened += 1;
@@ -123,6 +132,8 @@ function openClient(index: number): void {
     }
     if (message.type === "welcome") {
       stats.welcomed += 1;
+      const state = clientState.get(socket);
+      if (state && typeof message.id === "string") state.selfId = message.id;
       const target = combatAssignments.get(index);
       if (target) {
         setTimeout(() => {
@@ -145,6 +156,7 @@ function openClient(index: number): void {
     if (message.type === "state") {
       stats.states += 1;
       if (message.metrics) recordMetrics(message.metrics);
+      if (attackTargets) maybeTargetMonster(socket, message);
     }
   });
 
@@ -156,6 +168,37 @@ function openClient(index: number): void {
     stats.closed += 1;
     sockets.delete(socket);
   });
+}
+
+function maybeTargetMonster(socket: WebSocket, message: LoadMessage): void {
+  const state = clientState.get(socket);
+  if (!state) return;
+  const now = Date.now();
+  if (now - state.lastTargetAt < targetIntervalMs) return;
+  const monsters = (message.monsters ?? []).filter((monster) => monster.hp > 0);
+  if (monsters.length === 0) return;
+  const self = state.selfId ? message.players?.find((player) => player.id === state.selfId) : undefined;
+  const target = self ? nearestMonster(self, monsters) : monsters[0];
+  if (!target || target.id === state.targetId) return;
+  state.targetId = target.id;
+  state.lastTargetAt = now;
+  socket.send(JSON.stringify({ type: "target", id: target.id }));
+}
+
+function nearestMonster(player: PlayerView, monsters: MonsterView[]): MonsterView | undefined {
+  let best: MonsterView | undefined;
+  let bestDist = Infinity;
+  for (const monster of monsters) {
+    if (monster.floor !== player.floor) continue;
+    const dx = monster.x - player.x;
+    const dy = monster.y - player.y;
+    const dist = dx * dx + dy * dy;
+    if (dist < bestDist) {
+      best = monster;
+      bestDist = dist;
+    }
+  }
+  return best ?? monsters[0];
 }
 
 function randomInput(): { up: boolean; down: boolean; left: boolean; right: boolean } {
@@ -308,7 +351,8 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
     combat: {
       ratio: combatRatio,
       assigned: combatAssignments.size,
-      zones: combatZoneCounts
+      zones: combatZoneCounts,
+      attackTargets
     },
     transientClients: !persistent,
     ...stats,

@@ -118,8 +118,8 @@ visible-player density.
 - Snapshot build stayed under 6.3 ms max, well below the 75 ms broadcast interval.
 - Tick time stayed under 0.5 ms max in these samples.
 - `npm run perf:gate` now starts isolated E2E servers and re-runs the two
-  50-client scenarios plus a slow-reader smoke scenario with conservative
-  failure thresholds. Use it before risky network, spatial, AI, or
-  content-density changes.
+  50-client scenarios plus co-located crypt combat and slow-reader smoke
+  scenarios with conservative failure thresholds. Use it before risky network,
+  spatial, AI, or content-density changes.
 - The next performance work should be longer/slow-client scenarios and eventual
   protocol compaction only if telemetry asks for it.

@@ -175,7 +175,8 @@ process cannot tick the populated world.
 
 - [x] Local automated load-test gate with thresholds (`npm run perf:gate`).
 - [x] Slow-reader smoke scenario in the local performance gate.
-- [ ] Better load-test scenarios for co-located combat and long sessions.
+- [x] Co-located combat scenario in the local performance gate.
+- [ ] Better load-test scenarios for long sessions.
 - [ ] Protocol compaction if bytes/sec becomes a real hosting limit.
 - [ ] Region-streamed client assets once content volume warrants it.
 - [ ] Chunk-derived static resources before the world grows by an order of magnitude.
