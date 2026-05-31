@@ -415,6 +415,7 @@ const CLIENT_MESSAGE_BURST = positiveIntEnv("TIB_CLIENT_MESSAGE_BURST", CLIENT_M
 const CLIENT_MESSAGE_MAX_BYTES = positiveIntEnv("TIB_CLIENT_MESSAGE_MAX_BYTES", 4096);
 const SPATIAL_QUERY_CACHE_ENTRIES = positiveIntEnv("TIB_SPATIAL_QUERY_CACHE_ENTRIES", 4096);
 const SAVE_CONCURRENCY = positiveIntEnv("TIB_SAVE_CONCURRENCY", 16);
+const STATIC_RESOURCE_PRUNE_MS = positiveIntEnv("TIB_STATIC_RESOURCE_PRUNE_MS", 1000);
 const GLOBAL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_GLOBAL_EVENT_QUEUE_LIMIT", 128);
 const TARGETED_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_TARGETED_EVENT_QUEUE_LIMIT", 64);
 const CELL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_CELL_EVENT_QUEUE_LIMIT", 256);
@@ -483,6 +484,8 @@ const eventOrder = new WeakMap<GameEvent, number>();
 const materializedTreeCells = new Set<string>();
 const materializedStaticResourceCells = new Set<string>();
 const spatialQueryCellCache = new Map<string, SpatialCellRef[]>();
+const staticPruneKeepCellsScratch = new Set<string>();
+const staticPruneStaleCellsScratch: string[] = [];
 const socketWireBytes = new WeakMap<ExtWebSocket, number>();
 const clientMessageBuckets = new WeakMap<ExtWebSocket, ClientMessageBucket>();
 const eventLoopDelay = monitorEventLoopDelay({ resolution: 10 });
@@ -515,6 +518,7 @@ let saveInFlight = false;
 const dirtyPlayerKeys = new Set<string>();
 let snapshotSequence = 0;
 let nextEventOrder = 1;
+let lastStaticResourcePruneAt = 0;
 const snapshotCaches = new WeakMap<Session, SnapshotCache>();
 
 for (const spawn of MONSTER_SPAWNS) {
@@ -2459,14 +2463,26 @@ function materializeStaticResourceCell(floor: number, cx: number, cy: number): v
   refreshStaticSpatialCellMetric();
 }
 
+function pruneDistantStaticCells(now: number): void {
+  if (now - lastStaticResourcePruneAt < STATIC_RESOURCE_PRUNE_MS) return;
+  lastStaticResourcePruneAt = now;
+  pruneDistantTreeCells(now);
+  pruneDistantStaticResourceCells(now);
+}
+
 function pruneDistantTreeCells(now: number): void {
   if (materializedTreeCells.size === 0) return;
-  const keep = new Set<string>();
+  const keep = staticPruneKeepCellsScratch;
+  const stale = staticPruneStaleCellsScratch;
+  keep.clear();
+  stale.length = 0;
   for (const { player } of clients.values()) {
     for (const cell of spatialQueryCells(player.floor, player.x, player.y, TREE_SNAPSHOT_RADIUS)) keep.add(cell.key);
   }
-  for (const cellKey of Array.from(materializedTreeCells)) {
-    if (keep.has(cellKey)) continue;
+  for (const cellKey of materializedTreeCells) {
+    if (!keep.has(cellKey)) stale.push(cellKey);
+  }
+  for (const cellKey of stale) {
     const bucket = staticSpatial.trees.get(cellKey);
     if (bucket) {
       for (const tree of bucket) {
@@ -2476,17 +2492,24 @@ function pruneDistantTreeCells(now: number): void {
     }
     materializedTreeCells.delete(cellKey);
   }
+  stale.length = 0;
+  keep.clear();
   refreshStaticSpatialCellMetric();
 }
 
 function pruneDistantStaticResourceCells(now: number): void {
   if (materializedStaticResourceCells.size === 0) return;
-  const keep = new Set<string>();
+  const keep = staticPruneKeepCellsScratch;
+  const stale = staticPruneStaleCellsScratch;
+  keep.clear();
+  stale.length = 0;
   for (const { player } of clients.values()) {
     for (const cell of spatialQueryCells(player.floor, player.x, player.y, SNAPSHOT_RADIUS)) keep.add(cell.key);
   }
-  for (const cellKey of Array.from(materializedStaticResourceCells)) {
-    if (keep.has(cellKey)) continue;
+  for (const cellKey of materializedStaticResourceCells) {
+    if (!keep.has(cellKey)) stale.push(cellKey);
+  }
+  for (const cellKey of stale) {
     for (const node of staticSpatial.fishingNodes.get(cellKey) ?? []) fishingNodesById.delete(node.id);
     for (const node of staticSpatial.miningNodes.get(cellKey) ?? []) miningNodesById.delete(node.id);
     for (const node of staticSpatial.herbNodes.get(cellKey) ?? []) {
@@ -2497,6 +2520,8 @@ function pruneDistantStaticResourceCells(now: number): void {
     staticSpatial.herbNodes.delete(cellKey);
     materializedStaticResourceCells.delete(cellKey);
   }
+  stale.length = 0;
+  keep.clear();
   refreshStaticSpatialCellMetric();
 }
 
@@ -2911,8 +2936,7 @@ function broadcastState(): void {
     if (snapshot.metrics) lastMetricsSentAt.set(session, now);
     socket.send(raw);
   }
-  pruneDistantTreeCells(now);
-  pruneDistantStaticResourceCells(now);
+  pruneDistantStaticCells(now);
 }
 
 function shouldSendSnapshot(session: Session, snapshot: StateSnapshot, now: number): boolean {

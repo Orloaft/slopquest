@@ -175,6 +175,8 @@ and combat fanout without making every client see every other client.
   sorts for every observer in crowded hubs.
 - Per-viewer transient events are now capped; a localized burst gate drives more
   spatial effects than the configured cap and asserts packets stay at the cap.
+- Static tree/resource pruning now runs on a throttled maintenance cadence with
+  reusable scratch storage instead of rebuilding prune sets every snapshot.
 - Snapshot build stayed under 6.3 ms max, well below the 75 ms broadcast interval.
 - Tick time stayed under 0.5 ms max in these samples.
 - `npm run perf:gate` now starts isolated E2E servers and re-runs the two
