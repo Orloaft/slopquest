@@ -20,6 +20,8 @@ Node/WebSocket process:
   monster, NPC, tree, and gathering-node conversions do not allocate again for
   every observer.
 - Static resources are indexed by active cells; moving entities update spatial cells incrementally.
+- Snapshot/event/static-resource interest queries reuse bounded spatial cell-key
+  lists, avoiding repeated key allocation for every category and observer.
 - High-cardinality trees and gathering nodes are materialized only near players.
 - Monsters/NPCs simulate only in active regions near players.
 - Backpressure skips snapshots for slow sockets instead of piling up writes.
@@ -186,6 +188,8 @@ The server no longer rebuilds one all-entity spatial index every tick.
 
 - Players, monsters, corpses, NPCs, and fires are in dynamic spatial maps.
 - Fishing nodes, mining nodes, and herb nodes are indexed by active cells.
+- Repeated interest queries share cached cell-key ranges, capped by
+  `TIB_SPATIAL_QUERY_CACHE_ENTRIES` (default `4096`).
 - Trees are derived from map chunks on demand instead of being instantiated for
   the whole authored world at boot.
 - Movement calls update the old and new cells directly.
@@ -325,6 +329,7 @@ process cannot tick the populated world.
   resource load gates.
 - [x] Lazy runtime residency for fishing, mining, and herb nodes with active
   cell pruning.
+- [x] Bounded spatial query cell-key cache for snapshot/event/static lookups.
 - [x] Bounded transient event queues with event-drop telemetry in load gates.
 - [x] Per-socket inbound command rate limits with drop telemetry in load gates.
 - [x] Raw state-message byte telemetry and packet-size thresholds in load gates.

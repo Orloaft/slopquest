@@ -198,6 +198,9 @@ and combat fanout without making every client see every other client.
 - Fishing, mining, and herb nodes now use the same active-cell runtime
   residency model. Their authored definitions are still source data, but they
   no longer populate the runtime static spatial index for cold regions.
+- Snapshot, event, and static-resource lookups now reuse bounded spatial
+  cell-key lists via `TIB_SPATIAL_QUERY_CACHE_ENTRIES`, reducing repeated key
+  construction across snapshot categories and co-located observers.
 - Transient event queues now expose `eventsDroppedPerSecond`; the local perf
   gate requires it to remain `0` for normal clustered, mixed, combat, and
   slow-reader scenarios.

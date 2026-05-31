@@ -182,6 +182,13 @@ interface ActiveRegionCache {
   cells: string[];
 }
 
+interface SpatialCellRef {
+  key: string;
+  floor: number;
+  cx: number;
+  cy: number;
+}
+
 type SnapshotEntity =
   | PlayerView
   | MonsterView
@@ -406,6 +413,7 @@ const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES"
 const CLIENT_MESSAGE_LIMIT_PER_SECOND = positiveIntEnv("TIB_CLIENT_MESSAGE_LIMIT_PER_SECOND", 40);
 const CLIENT_MESSAGE_BURST = positiveIntEnv("TIB_CLIENT_MESSAGE_BURST", CLIENT_MESSAGE_LIMIT_PER_SECOND * 2);
 const CLIENT_MESSAGE_MAX_BYTES = positiveIntEnv("TIB_CLIENT_MESSAGE_MAX_BYTES", 4096);
+const SPATIAL_QUERY_CACHE_ENTRIES = positiveIntEnv("TIB_SPATIAL_QUERY_CACHE_ENTRIES", 4096);
 const SAVE_CONCURRENCY = positiveIntEnv("TIB_SAVE_CONCURRENCY", 16);
 const GLOBAL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_GLOBAL_EVENT_QUEUE_LIMIT", 128);
 const TARGETED_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_TARGETED_EVENT_QUEUE_LIMIT", 64);
@@ -473,6 +481,7 @@ const EMPTY_FIRE_VIEWS: FireView[] = [];
 const eventOrder = new WeakMap<GameEvent, number>();
 const materializedTreeCells = new Set<string>();
 const materializedStaticResourceCells = new Set<string>();
+const spatialQueryCellCache = new Map<string, SpatialCellRef[]>();
 const socketWireBytes = new WeakMap<ExtWebSocket, number>();
 const clientMessageBuckets = new WeakMap<ExtWebSocket, ClientMessageBucket>();
 const eventLoopDelay = monitorEventLoopDelay({ resolution: 10 });
@@ -2367,13 +2376,7 @@ function materializeHerbNode(base: HerbNodeBase, addToIndex = true): HerbNodeRun
 }
 
 function materializeTreeCellsNear(floor: number, x: number, y: number, radius: number): void {
-  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
-  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
-  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
-  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
-  for (let cy = minCy; cy <= maxCy; cy += 1) {
-    for (let cx = minCx; cx <= maxCx; cx += 1) materializeTreeCell(floor, cx, cy);
-  }
+  for (const cell of spatialQueryCells(floor, x, y, radius)) materializeTreeCell(cell.floor, cell.cx, cell.cy);
 }
 
 function materializeTreeCell(floor: number, cx: number, cy: number): void {
@@ -2417,13 +2420,7 @@ function materializeTreeCell(floor: number, cx: number, cy: number): void {
 }
 
 function materializeStaticResourceCellsNear(floor: number, x: number, y: number, radius: number): void {
-  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
-  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
-  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
-  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
-  for (let cy = minCy; cy <= maxCy; cy += 1) {
-    for (let cx = minCx; cx <= maxCx; cx += 1) materializeStaticResourceCell(floor, cx, cy);
-  }
+  for (const cell of spatialQueryCells(floor, x, y, radius)) materializeStaticResourceCell(cell.floor, cell.cx, cell.cy);
 }
 
 function materializeStaticResourceCell(floor: number, cx: number, cy: number): void {
@@ -2440,13 +2437,7 @@ function pruneDistantTreeCells(now: number): void {
   if (materializedTreeCells.size === 0) return;
   const keep = new Set<string>();
   for (const { player } of clients.values()) {
-    const minCx = Math.floor((player.x - TREE_SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
-    const maxCx = Math.floor((player.x + TREE_SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
-    const minCy = Math.floor((player.y - TREE_SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
-    const maxCy = Math.floor((player.y + TREE_SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
-    for (let cy = minCy; cy <= maxCy; cy += 1) {
-      for (let cx = minCx; cx <= maxCx; cx += 1) keep.add(`${player.floor}:${cx}:${cy}`);
-    }
+    for (const cell of spatialQueryCells(player.floor, player.x, player.y, TREE_SNAPSHOT_RADIUS)) keep.add(cell.key);
   }
   for (const cellKey of Array.from(materializedTreeCells)) {
     if (keep.has(cellKey)) continue;
@@ -2466,13 +2457,7 @@ function pruneDistantStaticResourceCells(now: number): void {
   if (materializedStaticResourceCells.size === 0) return;
   const keep = new Set<string>();
   for (const { player } of clients.values()) {
-    const minCx = Math.floor((player.x - SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
-    const maxCx = Math.floor((player.x + SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
-    const minCy = Math.floor((player.y - SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
-    const maxCy = Math.floor((player.y + SNAPSHOT_RADIUS) / SPATIAL_CELL_SIZE);
-    for (let cy = minCy; cy <= maxCy; cy += 1) {
-      for (let cx = minCx; cx <= maxCx; cx += 1) keep.add(`${player.floor}:${cx}:${cy}`);
-    }
+    for (const cell of spatialQueryCells(player.floor, player.x, player.y, SNAPSHOT_RADIUS)) keep.add(cell.key);
   }
   for (const cellKey of Array.from(materializedStaticResourceCells)) {
     if (keep.has(cellKey)) continue;
@@ -4472,17 +4457,33 @@ function updateSpatialCell<T extends Positioned>(index: Map<string, T[]>, entity
   addToSpatial(index, entity);
 }
 
-function forEachSpatial<T>(index: Map<string, T[]>, floor: number, x: number, y: number, radius: number, visit: (item: T) => void): void {
+function spatialQueryCells(floor: number, x: number, y: number, radius: number): SpatialCellRef[] {
   const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
   const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
   const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
   const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
+  const cacheKey = `${floor}:${minCx}:${maxCx}:${minCy}:${maxCy}`;
+  const cached = spatialQueryCellCache.get(cacheKey);
+  if (cached) return cached;
+  const cells: SpatialCellRef[] = [];
   for (let cy = minCy; cy <= maxCy; cy += 1) {
     for (let cx = minCx; cx <= maxCx; cx += 1) {
-      const bucket = index.get(`${floor}:${cx}:${cy}`);
-      if (!bucket) continue;
-      for (const item of bucket) visit(item);
+      cells.push({ key: `${floor}:${cx}:${cy}`, floor, cx, cy });
     }
+  }
+  spatialQueryCellCache.set(cacheKey, cells);
+  if (spatialQueryCellCache.size > SPATIAL_QUERY_CACHE_ENTRIES) {
+    const oldest = spatialQueryCellCache.keys().next().value;
+    if (oldest) spatialQueryCellCache.delete(oldest);
+  }
+  return cells;
+}
+
+function forEachSpatial<T>(index: Map<string, T[]>, floor: number, x: number, y: number, radius: number, visit: (item: T) => void): void {
+  for (const cell of spatialQueryCells(floor, x, y, radius)) {
+    const bucket = index.get(cell.key);
+    if (!bucket) continue;
+    for (const item of bucket) visit(item);
   }
 }
 
@@ -4536,16 +4537,10 @@ function eventIsBroadcastGlobal(item: GameEvent): boolean {
 }
 
 function forEachEventCell(floor: number, x: number, y: number, radius: number, visit: (event: GameEvent) => void): void {
-  const minCx = Math.floor((x - radius) / SPATIAL_CELL_SIZE);
-  const maxCx = Math.floor((x + radius) / SPATIAL_CELL_SIZE);
-  const minCy = Math.floor((y - radius) / SPATIAL_CELL_SIZE);
-  const maxCy = Math.floor((y + radius) / SPATIAL_CELL_SIZE);
-  for (let cy = minCy; cy <= maxCy; cy += 1) {
-    for (let cx = minCx; cx <= maxCx; cx += 1) {
-      const bucket = eventsByCell.get(`${floor}:${cx}:${cy}`);
-      if (!bucket) continue;
-      for (const item of bucket) visit(item);
-    }
+  for (const cell of spatialQueryCells(floor, x, y, radius)) {
+    const bucket = eventsByCell.get(cell.key);
+    if (!bucket) continue;
+    for (const item of bucket) visit(item);
   }
 }
 
