@@ -40,21 +40,23 @@ export const MAP_ROWS = 34;
 // AND its content coordinates scale by the same factor — which keeps walkable
 // tiles walkable and the map connected.
 const EXPANDED = { cols: 90, rows: 60 };
+const ENLARGED = { cols: 110, rows: 72 }; // Phase C target (~1.5x); floors migrated one at a time
 const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
-  0: EXPANDED,
-  1: EXPANDED,
-  2: EXPANDED,
-  3: EXPANDED,
-  4: EXPANDED,
-  5: EXPANDED,
-  6: EXPANDED,
-  7: EXPANDED,
-  8: EXPANDED,
-  9: EXPANDED
+  0: ENLARGED,
+  1: ENLARGED,
+  2: ENLARGED,
+  3: ENLARGED,
+  4: ENLARGED,
+  5: ENLARGED,
+  6: ENLARGED,
+  7: ENLARGED,
+  8: ENLARGED,
+  9: ENLARGED,
+  10: EXPANDED // Deepdelve Mine (cave floor reached from the Searing Badlands)
 };
 // Floors authored directly at the expanded size (their content is already
 // placed in expanded coordinates, so it must NOT be scaled again).
-const AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+const AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const SWAMP_WATER_TILES = new Set(["W", "3", "4"]);
 const SWAMP_LAND_TILES = new Set(["m", "k", "B", "M", "L", "o"]);
 const BEACH_LAND_TILES = new Set(["e", "l", ",", ";", "z", "2", "[", "]", "x", "0", "1", "|", "u", "Y", "j"]);
@@ -143,7 +145,7 @@ export interface SkillDef {
   iconUrl: string;
 }
 
-export const START: Portal = { floor: 0, x: 45.5, y: 33.5 };
+export const START: Portal = { floor: 0, x: 55.5, y: 40.5 };
 
 export const ZONES: Record<ZoneId, Zone> = {
   southTown: { id: "southTown", label: "Waystone", floor: 0, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
@@ -155,7 +157,8 @@ export const ZONES: Record<ZoneId, Zone> = {
   badlands: { id: "badlands", label: "The Searing Badlands", floor: 6, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   desert: { id: "desert", label: "The Sunken Desert", floor: 7, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   beach: { id: "beach", label: "The Sunken Beach", floor: 8, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
-  jungle: { id: "jungle", label: "The Untamed Jungle", floor: 9, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 }
+  jungle: { id: "jungle", label: "The Untamed Jungle", floor: 9, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
+  deepMine: { id: "deepMine", label: "The Deepdelve Mine", floor: 10, x1: 0, y1: 0, x2: floorCols(10) - 1, y2: floorRows(10) - 1 }
 };
 const FLOOR_TILE_CACHE = new Map<number, string[]>();
 
@@ -218,7 +221,8 @@ export const SKILLS: Record<string, SkillDef> = {
   agility: { label: "Agility", iconUrl: "/icons/skill-agility.png" },
   alchemy: { label: "Alchemy", iconUrl: "/icons/skill-alchemy.png" },
   ranged: { label: "Ranged", iconUrl: "/icons/skill-ranged.png" },
-  foraging: { label: "Foraging", iconUrl: "/icons/skill-foraging.png" }
+  foraging: { label: "Foraging", iconUrl: "/icons/skill-foraging.png" },
+  smithing: { label: "Smithing", iconUrl: "/icons/skill-smithing.png" }
 };
 
 export function xpForLevel(level: number): number {
@@ -245,241 +249,253 @@ export function makeFloorTiles(floor: number): string[] {
   const rows = Array.from({ length: authorRows }, () => Array.from({ length: authorCols }, () => "#"));
 
   if (floor === 0) {
-    // Waystone (bespoke 90x60) — the peaceful starting hub. A townfloor plaza at
+    // Waystone (enlarged 110x72) — the peaceful starting hub. A townfloor plaza at
     // the heart, ringed by a stone apron and clustered houses/well/market, with
     // winding dirt lanes linking them and a willow-shaded river curling down the
     // west bank (fishing spots on its edge). Woodland frames the whole clearing.
-    fillRect(rows, 1, 1, 88, 58, "."); // grass meadow base
+    fillRect(rows, 1, 1, 108, 70, "."); // grass meadow base
 
     // --- River & pond down the west side (blocks movement, not sight). ---
-    fillRect(rows, 7, 8, 5, 9, "~");
-    fillRect(rows, 9, 16, 5, 10, "~");
-    fillRect(rows, 7, 25, 6, 9, "~"); // widens into a fishing pond
-    fillRect(rows, 9, 33, 5, 9, "~");
-    fillRect(rows, 11, 40, 4, 7, "~");
+    fillRect(rows, 9, 10, 6, 10, "~");
+    fillRect(rows, 11, 19, 6, 12, "~");
+    fillRect(rows, 9, 30, 7, 11, "~"); // widens into a fishing pond
+    fillRect(rows, 11, 40, 6, 10, "~");
+    fillRect(rows, 13, 48, 5, 8, "~");
     // Reedy rock bank where the water meets the bog edge.
-    setTile(rows, 6, 12, "r");
-    setTile(rows, 6, 30, "r");
-    setTile(rows, 13, 22, "r");
-    setTile(rows, 14, 38, "r");
+    setTile(rows, 7, 14, "r");
+    setTile(rows, 7, 36, "r");
+    setTile(rows, 16, 26, "r");
+    setTile(rows, 17, 46, "r");
 
     // --- Central plaza (townfloor) on a broad stone apron. ---
-    fillRect(rows, 33, 23, 26, 18, "s"); // stone apron
-    fillRect(rows, 38, 27, 16, 10, "p"); // townfloor plaza
+    fillRect(rows, 40, 28, 32, 21, "s"); // stone apron
+    fillRect(rows, 46, 32, 20, 12, "p"); // townfloor plaza
 
     // --- Winding dirt lanes (no straight central corridor). ---
     // North lane: from the N gate, bending down to the plaza.
-    fillRect(rows, 44, 3, 3, 6, "t");
-    fillRect(rows, 44, 9, 9, 3, "t");
-    fillRect(rows, 50, 12, 3, 8, "t");
-    fillRect(rows, 45, 20, 8, 3, "t");
+    fillRect(rows, 54, 4, 3, 7, "t");
+    fillRect(rows, 54, 11, 11, 3, "t");
+    fillRect(rows, 61, 14, 4, 10, "t");
+    fillRect(rows, 55, 24, 10, 4, "t");
     // South lane: plaza down to the S gate, curving east.
-    fillRect(rows, 44, 41, 3, 6, "d");
-    fillRect(rows, 44, 47, 10, 3, "d");
-    fillRect(rows, 51, 50, 3, 7, "d");
+    fillRect(rows, 54, 49, 3, 7, "d");
+    fillRect(rows, 54, 56, 12, 4, "d");
+    fillRect(rows, 62, 60, 4, 8, "d");
     // West lane: plaza out to the riverside (market/well district).
-    fillRect(rows, 24, 30, 9, 3, "t");
-    fillRect(rows, 21, 24, 3, 9, "t");
-    fillRect(rows, 16, 24, 5, 3, "t");
+    fillRect(rows, 29, 36, 11, 4, "t");
+    fillRect(rows, 26, 29, 3, 11, "t");
+    fillRect(rows, 20, 29, 6, 3, "t");
     // East lane: plaza out to the eastern houses.
-    fillRect(rows, 59, 28, 10, 3, "d");
-    fillRect(rows, 67, 31, 3, 8, "d");
+    fillRect(rows, 72, 34, 12, 3, "d");
+    fillRect(rows, 82, 37, 4, 10, "d");
 
     // --- Garden plot fenced off beside the plaza (decoration only). ---
-    fillRect(rows, 60, 40, 12, 1, "q");
-    fillRect(rows, 60, 47, 12, 1, "q");
-    fillRect(rows, 60, 40, 1, 8, "q");
-    fillRect(rows, 71, 40, 1, 8, "q");
-    fillRect(rows, 64, 47, 3, 1, "d"); // garden gate gap on the path side
+    fillRect(rows, 73, 48, 15, 1, "q");
+    fillRect(rows, 73, 56, 15, 2, "q");
+    fillRect(rows, 73, 48, 2, 10, "q");
+    fillRect(rows, 87, 48, 1, 10, "q");
+    fillRect(rows, 78, 56, 4, 2, "d"); // garden gate gap on the path side
 
     // Portals at the north and south edges.
-    setTile(rows, 45, 2, "N"); // north -> Northwood (floor 3)
-    setTile(rows, 52, 58, "S"); // south -> Southgate Cemetery (floor 1)
+    setTile(rows, 55, 2, "N"); // north -> Northwood (floor 3)
+    setTile(rows, 64, 70, "S"); // south -> Southgate Cemetery (floor 1)
     // Approach stubs so the gates open onto walkable lane, not raw grass/edge.
-    setTile(rows, 45, 3, "t");
-    setTile(rows, 52, 57, "d");
+    setTile(rows, 55, 4, "t");
+    setTile(rows, 64, 68, "d");
 
     // Woodland framing the clearing (kept clear of the lanes/plaza by seed).
-    scatter(rows, ".", "f", 90, 15);
+    scatter(rows, ".", "f", 132, 15);
   }
 
   if (floor === 1) {
-    // Southgate Cemetery (bespoke 90x60) — a soft, melancholy graveyard of grave
+    // Southgate Cemetery (enlarged 110x72) — a soft, melancholy graveyard of grave
     // dirt (g) carved into fenced plots (q) by winding grave paths (c/b). The
     // Crypt building broods at the centre with its entrance (C) on a cleared
     // apron just below it; a mausoleum sits in the east. Headstones (h) and
     // obelisks cluster against the fences. Skeletons/ghouls roam the dirt.
-    fillRect(rows, 1, 1, 88, 58, "g"); // grave-dirt base
+    fillRect(rows, 1, 1, 108, 70, "g"); // grave-dirt base
 
     // --- Fenced grave plots (q blocks; leave gateway gaps onto the paths). ---
     // NW plot
-    fillRect(rows, 10, 9, 26, 1, "q");
-    fillRect(rows, 10, 26, 26, 1, "q");
-    fillRect(rows, 10, 9, 1, 18, "q");
-    fillRect(rows, 35, 9, 1, 18, "q");
-    fillRect(rows, 21, 26, 3, 1, "g"); // south gate
-    fillRect(rows, 35, 16, 1, 3, "g"); // east gate onto the spine
+    fillRect(rows, 12, 11, 32, 1, "q");
+    fillRect(rows, 12, 31, 32, 1, "q");
+    fillRect(rows, 12, 11, 1, 21, "q");
+    fillRect(rows, 43, 11, 1, 21, "q");
+    fillRect(rows, 26, 31, 3, 1, "g"); // south gate
+    fillRect(rows, 43, 19, 1, 4, "g"); // east gate onto the spine
     // NE plot (around the mausoleum)
-    fillRect(rows, 54, 9, 26, 1, "q");
-    fillRect(rows, 54, 27, 26, 1, "q");
-    fillRect(rows, 54, 9, 1, 19, "q");
-    fillRect(rows, 79, 9, 1, 19, "q");
-    fillRect(rows, 54, 16, 1, 3, "g"); // west gate onto the spine
-    fillRect(rows, 64, 27, 3, 1, "g"); // south gate
+    fillRect(rows, 66, 11, 32, 1, "q");
+    fillRect(rows, 66, 32, 32, 2, "q");
+    fillRect(rows, 66, 11, 1, 23, "q");
+    fillRect(rows, 97, 11, 1, 23, "q");
+    fillRect(rows, 66, 19, 1, 4, "g"); // west gate onto the spine
+    fillRect(rows, 78, 32, 4, 2, "g"); // south gate
     // SW plot
-    fillRect(rows, 8, 36, 24, 1, "q");
-    fillRect(rows, 8, 52, 24, 1, "q");
-    fillRect(rows, 8, 36, 1, 17, "q");
-    fillRect(rows, 31, 36, 1, 17, "q");
-    fillRect(rows, 19, 36, 3, 1, "g"); // north gate
-    fillRect(rows, 31, 43, 1, 3, "g"); // east gate
+    fillRect(rows, 10, 43, 29, 1, "q");
+    fillRect(rows, 10, 62, 29, 2, "q");
+    fillRect(rows, 10, 43, 1, 21, "q");
+    fillRect(rows, 38, 43, 1, 21, "q");
+    fillRect(rows, 23, 43, 4, 1, "g"); // north gate
+    fillRect(rows, 38, 52, 1, 3, "g"); // east gate
     // SE plot
-    fillRect(rows, 56, 38, 26, 1, "q");
-    fillRect(rows, 56, 54, 26, 1, "q");
-    fillRect(rows, 56, 38, 1, 17, "q");
-    fillRect(rows, 81, 38, 1, 17, "q");
-    fillRect(rows, 56, 45, 1, 3, "g"); // west gate
-    fillRect(rows, 67, 38, 3, 1, "g"); // north gate
+    fillRect(rows, 68, 46, 32, 1, "q");
+    fillRect(rows, 68, 65, 32, 1, "q");
+    fillRect(rows, 68, 46, 2, 20, "q");
+    fillRect(rows, 99, 46, 1, 20, "q");
+    fillRect(rows, 68, 54, 2, 4, "g"); // west gate
+    fillRect(rows, 82, 46, 4, 1, "g"); // north gate
 
     // --- Winding grave paths (the spine: T north -> crypt -> G south). ---
-    fillRect(rows, 44, 1, 3, 7, "c"); // from the north gate
-    fillRect(rows, 39, 7, 8, 3, "c"); // bend west
-    fillRect(rows, 39, 9, 3, 10, "c"); // drop south
-    fillRect(rows, 39, 16, 18, 3, "c"); // cross east past the crypt's west flank
-    fillRect(rows, 49, 18, 3, 5, "b"); // dip toward the crypt apron
-    fillRect(rows, 41, 29, 12, 3, "c"); // crypt-entrance apron (C sits here, just below the footprint)
-    fillRect(rows, 44, 31, 3, 10, "c"); // drop south from the apron
-    fillRect(rows, 36, 39, 14, 3, "c"); // bend west
-    fillRect(rows, 36, 41, 3, 12, "c"); // continue south
-    fillRect(rows, 36, 50, 12, 3, "b"); // bend back east
-    fillRect(rows, 45, 50, 3, 9, "c"); // down to the south gate (G)
+    fillRect(rows, 54, 1, 3, 9, "c"); // from the north gate
+    fillRect(rows, 48, 8, 9, 4, "c"); // bend west
+    fillRect(rows, 48, 11, 3, 12, "c"); // drop south
+    fillRect(rows, 48, 19, 22, 4, "c"); // cross east past the crypt's west flank
+    fillRect(rows, 60, 22, 4, 6, "b"); // dip toward the crypt apron
+    fillRect(rows, 50, 35, 15, 3, "c"); // crypt-entrance apron (C sits here, just below the footprint)
+    fillRect(rows, 54, 37, 3, 12, "c"); // drop south from the apron
+    fillRect(rows, 44, 47, 17, 3, "c"); // bend west
+    fillRect(rows, 44, 49, 4, 15, "c"); // continue south
+    fillRect(rows, 44, 60, 15, 4, "b"); // bend back east
+    fillRect(rows, 55, 60, 4, 11, "c"); // down to the south gate (G)
 
     // A connecting walk linking the two western plot gates to the spine.
-    fillRect(rows, 22, 28, 3, 9, "b");
-    fillRect(rows, 22, 34, 18, 3, "b");
+    fillRect(rows, 27, 34, 4, 10, "b");
+    fillRect(rows, 27, 41, 22, 3, "b");
 
     // Portals.
-    setTile(rows, 45, 1, "T"); // north edge -> Waystone (floor 0)
-    setTile(rows, 46, 30, "C"); // crypt entrance -> the Ashen Crypt (floor 2)
-    setTile(rows, 46, 58, "G"); // south edge -> the Sunken Desert (floor 7)
+    setTile(rows, 55, 1, "T"); // north edge -> Waystone (floor 0)
+    setTile(rows, 56, 36, "C"); // crypt entrance -> the Ashen Crypt (floor 2)
+    setTile(rows, 56, 70, "G"); // south edge -> the Sunken Desert (floor 7)
 
     // Headstones (decoration) and mossy rocks, scattered across the dirt.
-    scatter(rows, "g", "h", 150, 21);
-    scatter(rows, "g", "r", 22, 22);
+    scatter(rows, "g", "h", 220, 21);
+    scatter(rows, "g", "r", 32, 22);
   }
 
   if (floor === 2) {
-    // The Ashen Crypt (bespoke 90x60) — a claustrophobic enclosed dungeon. Solid
+    // The Ashen Crypt (enlarged 110x72) — a claustrophobic enclosed dungeon. Solid
     // rock (#, blocks move + sight) fills the bulk; tight crypt-stone corridors
     // (c) and chamber floors (b/d) are carved out as a maze of linked chambers.
     // The Ashen Warden boss waits in the far east chamber. T returns to the
     // cemetery from the entry chamber.
-    fillRect(rows, 0, 0, 90, 60, "#"); // solid rock bulk
+    fillRect(rows, 0, 0, 110, 72, "#"); // solid rock bulk
 
     // --- Entry chamber (NW) — T arrives here. ---
-    fillRect(rows, 4, 4, 14, 11, "d");
-    setTile(rows, 6, 6, "T"); // -> back to the cemetery (floor 1)
+    fillRect(rows, 5, 5, 17, 13, "d");
+    setTile(rows, 7, 7, "T"); // -> back to the cemetery (floor 1)
 
     // --- Corridor south out of the entry chamber, then east. ---
-    fillRect(rows, 9, 15, 3, 12, "c"); // drop south
-    fillRect(rows, 9, 24, 20, 3, "c"); // run east
+    fillRect(rows, 11, 18, 4, 14, "c"); // drop south
+    fillRect(rows, 11, 29, 24, 3, "c"); // run east
 
     // --- West-central chamber. ---
-    fillRect(rows, 6, 29, 14, 12, "b");
-    fillRect(rows, 11, 27, 3, 3, "c"); // link up to the east-running corridor
-    fillRect(rows, 10, 41, 3, 10, "c"); // corridor south
-    fillRect(rows, 10, 49, 22, 3, "c"); // run east along the south
+    fillRect(rows, 7, 35, 17, 14, "b");
+    fillRect(rows, 13, 32, 4, 4, "c"); // link up to the east-running corridor
+    fillRect(rows, 12, 49, 4, 12, "c"); // corridor south
+    fillRect(rows, 12, 59, 27, 3, "c"); // run east along the south
 
     // --- Corridor north-east from the east-running corridor into mid chamber. ---
-    fillRect(rows, 26, 18, 3, 9, "c"); // climb north
-    fillRect(rows, 24, 14, 16, 6, "b"); // mid-north chamber
-    fillRect(rows, 37, 19, 3, 10, "c"); // drop south out of the mid chamber
-    fillRect(rows, 37, 28, 16, 3, "c"); // run east
+    fillRect(rows, 32, 22, 3, 10, "c"); // climb north
+    fillRect(rows, 29, 17, 20, 7, "b"); // mid-north chamber
+    fillRect(rows, 45, 23, 4, 12, "c"); // drop south out of the mid chamber
+    fillRect(rows, 45, 34, 20, 3, "c"); // run east
 
     // --- Central junction chamber. ---
-    fillRect(rows, 48, 26, 12, 12, "d");
-    fillRect(rows, 53, 38, 3, 12, "c"); // corridor south
-    fillRect(rows, 30, 49, 26, 3, "c"); // long south corridor links to the SW corridor
-    fillRect(rows, 58, 30, 12, 3, "c"); // corridor east toward the boss
+    fillRect(rows, 59, 31, 14, 15, "d");
+    fillRect(rows, 65, 46, 3, 14, "c"); // corridor south
+    fillRect(rows, 37, 59, 31, 3, "c"); // long south corridor links to the SW corridor
+    fillRect(rows, 71, 36, 15, 4, "c"); // corridor east toward the boss
 
     // --- Boss chamber (far east) — the Ashen Warden. ---
-    fillRect(rows, 68, 22, 18, 16, "b");
-    fillRect(rows, 70, 38, 3, 9, "c"); // a southern back-passage into the chamber
-    fillRect(rows, 56, 45, 16, 3, "c"); // link the back-passage to the south corridor
+    fillRect(rows, 83, 26, 22, 20, "b");
+    fillRect(rows, 86, 46, 3, 10, "c"); // a southern back-passage into the chamber
+    fillRect(rows, 68, 54, 20, 4, "c"); // link the back-passage to the south corridor
 
-    scatter(rows, "c", "r", 30, 4);
-    scatter(rows, "b", "r", 14, 5);
-    scatter(rows, "d", "r", 8, 6);
+    scatter(rows, "c", "r", 44, 4);
+    scatter(rows, "b", "r", 21, 5);
+    scatter(rows, "d", "r", 12, 6);
   }
 
   if (floor === 3) {
-    // Northwood, expanded ~3x (90x60). One open canopy of walkable forest floor
-    // threaded by two broad roads that cross at the heart of the wood, so all
-    // four edge portals stay reachable.
-    fillRect(rows, 1, 1, 88, 58, "F");
-    fillRect(rows, 44, 2, 3, 56, "t"); // north-south spine
-    fillRect(rows, 2, 29, 86, 2, "t"); // east-west road
+    // Northwood, enlarged ~1.5x to 110x72 (Phase C). One open canopy of walkable
+    // forest floor threaded by a wide N-S spine and an E-W road that cross at a
+    // central clearing, so all four edge portals stay reachable. The wood reads
+    // as a danger gradient: gentle critters near the southern Waystone arrival,
+    // tougher greenskins and elites deeper north and out toward the far gates.
+    fillRect(rows, 1, 1, 108, 70, "F");
+    fillRect(rows, 54, 2, 3, 68, "t"); // north-south spine
+    fillRect(rows, 2, 35, 106, 2, "t"); // east-west road
 
     // Glades: open clearings that break up the trees and host gathering.
-    fillRect(rows, 8, 7, 8, 6, "d"); // NW glade
-    fillRect(rows, 70, 9, 9, 6, "d"); // NE glade
-    fillRect(rows, 10, 45, 9, 6, "d"); // SW glade
-    fillRect(rows, 68, 44, 10, 7, "d"); // SE glade
-    fillRect(rows, 30, 13, 7, 5, "d"); // north meadow
-    fillRect(rows, 54, 37, 7, 5, "d"); // south meadow
-    fillRect(rows, 40, 26, 11, 9, "d"); // central crossroads clearing
+    fillRect(rows, 10, 8, 10, 8, "d"); // NW glade
+    fillRect(rows, 86, 11, 11, 7, "d"); // NE glade
+    fillRect(rows, 12, 54, 11, 7, "d"); // SW glade
+    fillRect(rows, 83, 53, 12, 8, "d"); // SE glade
+    fillRect(rows, 37, 16, 8, 6, "d"); // north meadow
+    fillRect(rows, 66, 44, 9, 6, "d"); // south meadow
+    fillRect(rows, 49, 31, 13, 11, "d"); // central crossroads clearing
 
     // Woodland ponds (impassable water; anglers fish from the bank).
-    fillRect(rows, 20, 20, 6, 4, "~");
-    fillRect(rows, 64, 20, 6, 4, "~");
-    fillRect(rows, 38, 48, 7, 4, "~");
+    fillRect(rows, 24, 24, 8, 5, "~");
+    fillRect(rows, 78, 24, 8, 5, "~");
+    fillRect(rows, 46, 58, 9, 4, "~");
 
-    setTile(rows, 45, 58, "S"); // south edge -> Waystone (floor 0)
-    setTile(rows, 45, 1, "N"); // north edge -> Northwatch (floor 4)
-    setTile(rows, 1, 30, "M"); // west edge -> the Sunken Marsh (floor 5)
-    setTile(rows, 88, 29, "D"); // east edge -> the Searing Badlands (floor 6)
+    setTile(rows, 55, 70, "S"); // south edge -> Waystone (floor 0)
+    setTile(rows, 55, 1, "N"); // north edge -> Northwatch (floor 4)
+    setTile(rows, 1, 36, "M"); // west edge -> the Sunken Marsh (floor 5)
+    setTile(rows, 108, 35, "D"); // east edge -> the Searing Badlands (floor 6)
 
-    scatter(rows, "F", "f", 540, 31); // dense canopy
-    scatter(rows, "F", "r", 120, 32); // mossy boulders
+    scatter(rows, "F", "f", 790, 31); // dense canopy
+    scatter(rows, "F", "r", 176, 32); // mossy boulders
 
     // Three ore outcrops, spread across the wood (mining moved out of town).
     // Each sits on rock with a cleared standing spot carved beside it (set
     // after scatter so a stray tree never blocks the approach).
-    for (const [rx, ry] of [[8, 49], [80, 12], [78, 47]] as Array<[number, number]>) {
+    for (const [rx, ry] of [[10, 59], [98, 14], [95, 56]] as Array<[number, number]>) {
       setTile(rows, rx, ry, "r");
       setTile(rows, rx + 1, ry, "d");
     }
+
+    // A surface cave mouth in the north wood — a rock alcove sheltering an iron
+    // vein and a coal seam, open to the south so players duck in off the trail.
+    // (A 'cave pocket': no new floor, just a mineable recess on the forest map.)
+    fillRect(rows, 59, 7, 11, 1, "r"); // rock back-wall
+    fillRect(rows, 59, 7, 1, 6, "r"); // west wall
+    fillRect(rows, 68, 7, 2, 6, "r"); // east wall
+    fillRect(rows, 60, 8, 8, 5, "d"); // alcove floor, open south into the wood
+    setTile(rows, 61, 7, "r"); // coal seam (mine-3-61-7)
+    setTile(rows, 66, 7, "r"); // iron vein (mine-3-66-7)
   }
 
   if (floor === 6) {
-    // The Searing Badlands (bespoke 90x60) — a deep ravine carved through a dark
+    // The Searing Badlands (enlarged 110x72) — a deep ravine carved through a dark
     // rock massif. Pattern: fill massif (w), carve the winding walkable canyon
     // floors (R), then applyCliffEdges() drops a 1-tile south-facing cliff face
     // (X) wherever the massif overhangs a floor, so walls read as layered cliffs
     // instead of a flat-stacked block. Ore clusters against the walls.
-    fillRect(rows, 0, 0, 90, 60, "w");
+    fillRect(rows, 0, 0, 110, 72, "w");
     // Main canyon — an S-curve west mouth -> mid -> Frontier Camp (east).
-    fillRect(rows, 1, 30, 16, 7, "R"); // west mouth (forest portal arrives here)
-    fillRect(rows, 12, 16, 7, 21, "R"); // climb north
-    fillRect(rows, 12, 16, 24, 7, "R"); // upper run east
-    fillRect(rows, 30, 16, 7, 22, "R"); // drop south
-    fillRect(rows, 30, 31, 28, 7, "R"); // mid lower run east
-    fillRect(rows, 52, 14, 7, 24, "R"); // climb to the camp
-    fillRect(rows, 52, 12, 30, 11, "R"); // Frontier Camp clearing
+    fillRect(rows, 1, 36, 20, 8, "R"); // west mouth (forest portal arrives here)
+    fillRect(rows, 15, 19, 8, 25, "R"); // climb north
+    fillRect(rows, 15, 19, 29, 9, "R"); // upper run east
+    fillRect(rows, 37, 19, 8, 27, "R"); // drop south
+    fillRect(rows, 37, 37, 34, 9, "R"); // mid lower run east
+    fillRect(rows, 64, 17, 8, 29, "R"); // climb to the camp
+    fillRect(rows, 64, 14, 36, 14, "R"); // Frontier Camp clearing
     // Dead-end copper canyon off the west mouth.
-    fillRect(rows, 4, 41, 12, 5, "R");
-    fillRect(rows, 8, 36, 4, 6, "R"); // connector
+    fillRect(rows, 5, 49, 15, 6, "R");
+    fillRect(rows, 10, 43, 5, 7, "R"); // connector
     // Iron pocket off the mid lower run.
-    fillRect(rows, 40, 44, 11, 5, "R");
-    fillRect(rows, 44, 37, 4, 8, "R"); // connector
+    fillRect(rows, 49, 53, 13, 6, "R");
+    fillRect(rows, 54, 44, 5, 10, "R"); // connector
     // High terrace (ranged vantage) over a pit gap, reached from the camp.
-    fillRect(rows, 64, 26, 12, 6, "R"); // terrace floor
-    fillRect(rows, 70, 22, 3, 5, "R"); // camp -> terrace connector
-    fillRect(rows, 71, 31, 2, 1, "A"); // ramp lip
-    fillRect(rows, 66, 32, 8, 2, "P"); // pit gap the terrace overlooks (LOS-open)
+    fillRect(rows, 78, 31, 15, 7, "R"); // terrace floor
+    fillRect(rows, 86, 26, 3, 6, "R"); // camp -> terrace connector
+    fillRect(rows, 87, 37, 2, 1, "A"); // ramp lip
+    fillRect(rows, 81, 38, 9, 3, "P"); // pit gap the terrace overlooks (LOS-open)
     // Pit hazards in the canyon floors (block movement, not sight).
-    setTile(rows, 25, 16, "P");
-    setTile(rows, 33, 37, "P");
+    setTile(rows, 31, 19, "P");
+    setTile(rows, 40, 44, "P");
     // Floor variants from the badlands sheet: cracked flats and rocky gravel
     // break up the canyon without changing movement semantics.
     for (const [x, y, w, h, tile] of [
@@ -489,83 +505,84 @@ export function makeFloorTiles(floor: number): string[] {
       [6, 42, 8, 3, "7"]
     ] as Array<[number, number, number, number, string]>)
       fillRect(rows, x, y, w, h, tile);
-    setTile(rows, 24, 18, "R"); // keep the scripted burrower ambush tile plain floor
-    setTile(rows, 35, 33, "R"); // keep the second burrower anchor plain floor too
+    setTile(rows, 29, 22, "R"); // keep the scripted burrower ambush tile plain floor
+    setTile(rows, 43, 40, "R"); // keep the second burrower anchor plain floor too
     // Portals.
-    setTile(rows, 1, 33, "D"); // west edge -> the forest
-    setTile(rows, 78, 13, "Z"); // cliff ledge -> western Northwatch (one-way)
+    setTile(rows, 1, 40, "D"); // west edge -> the forest
+    setTile(rows, 95, 16, "Z"); // cliff ledge -> western Northwatch (one-way)
+    setTile(rows, 11, 53, ">"); // copper dead-end shaft -> the Deepdelve Mine (floor 10)
     // Layered cliff faces where the massif overhangs a canyon floor.
     applyCliffEdges(rows);
   }
 
   if (floor === 7) {
-    // The Sunken Desert (bespoke 90x60) — open sweeping dunes of sand (a) split by
+    // The Sunken Desert (enlarged 110x72) — open sweeping dunes of sand (a) split by
     // sandstone canyons. Mirrors the badlands: fill the canyon bulk with massif
     // (w), carve the winding sand routes, then applyCliffEdges("a","w","X") drops a
     // 1-tile sandstone cliff face wherever the massif overhangs open sand. Ruins
     // (U) give cover, quicksand (Q) and an oasis (V) gate the routes; the Oasis
     // Trade Outpost (safe) nestles against the south wall.
-    fillRect(rows, 0, 0, 90, 60, "a");
-    fillRect(rows, 6, 4, 26, 12, "w");
-    fillRect(rows, 40, 3, 30, 13, "w");
-    fillRect(rows, 30, 22, 20, 10, "w");
-    fillRect(rows, 52, 34, 30, 16, "w");
-    fillRect(rows, 4, 38, 18, 18, "w");
-    fillRect(rows, 22, 3, 5, 16, "a"); // north entry shaft (G at its top)
-    fillRect(rows, 22, 16, 22, 5, "a");
-    fillRect(rows, 12, 20, 18, 14, "a");
-    fillRect(rows, 50, 18, 14, 16, "a");
-    fillRect(rows, 26, 32, 26, 6, "a");
-    fillRect(rows, 1, 30, 12, 5, "a"); // beach trail (west)
-    fillRect(rows, 22, 38, 6, 12, "a"); // route to the outpost
-    fillRect(rows, 18, 46, 30, 10, "a"); // outpost clearing
-    fillRect(rows, 30, 47, 6, 4, "V"); // oasis pool
-    setTile(rows, 25, 49, "H"); // one-way passage to Waystone
-    setTile(rows, 24, 2, "G"); // north gate to/from the cemetery
-    setTile(rows, 1, 32, "Y"); // west trail to the Sunken Beach
-    fillRect(rows, 16, 22, 4, 3, "V");
-    fillRect(rows, 56, 20, 4, 3, "V");
-    fillRect(rows, 38, 17, 3, 2, "Q");
-    fillRect(rows, 24, 24, 2, 3, "Q");
-    fillRect(rows, 40, 34, 3, 2, "Q");
-    fillRect(rows, 24, 42, 2, 3, "Q");
+    fillRect(rows, 0, 0, 110, 72, "a");
+    fillRect(rows, 7, 5, 32, 14, "w");
+    fillRect(rows, 49, 4, 37, 15, "w");
+    fillRect(rows, 37, 26, 24, 12, "w");
+    fillRect(rows, 64, 41, 36, 19, "w");
+    fillRect(rows, 5, 46, 22, 21, "w");
+    fillRect(rows, 27, 4, 6, 19, "a"); // north entry shaft (G at its top)
+    fillRect(rows, 27, 19, 27, 6, "a");
+    fillRect(rows, 15, 24, 22, 17, "a");
+    fillRect(rows, 61, 22, 17, 19, "a");
+    fillRect(rows, 32, 38, 32, 8, "a");
+    fillRect(rows, 1, 36, 15, 6, "a"); // beach trail (west)
+    fillRect(rows, 27, 46, 7, 14, "a"); // route to the outpost
+    fillRect(rows, 22, 55, 37, 12, "a"); // outpost clearing
+    fillRect(rows, 37, 56, 7, 5, "V"); // oasis pool
+    setTile(rows, 31, 59, "H"); // one-way passage to Waystone
+    setTile(rows, 29, 2, "G"); // north gate to/from the cemetery
+    setTile(rows, 1, 38, "Y"); // west trail to the Sunken Beach
+    fillRect(rows, 20, 26, 4, 4, "V");
+    fillRect(rows, 68, 24, 5, 4, "V");
+    fillRect(rows, 46, 20, 4, 3, "Q");
+    fillRect(rows, 29, 29, 3, 3, "Q");
+    fillRect(rows, 49, 41, 4, 2, "Q");
+    fillRect(rows, 29, 50, 3, 4, "Q");
     for (const [rx, ry] of [[13, 19], [29, 19], [44, 16], [49, 21], [31, 33], [49, 33], [20, 34], [27, 45], [40, 45]] as Array<[number, number]>)
       setTile(rows, rx, ry, "U");
     applyCliffEdges(rows, "a", "w", "X");
   }
 
   if (floor === 8) {
-    // The Sunken Beach (bespoke 90x60) — an island-stage layout, not a sand
+    // The Sunken Beach (enlarged 110x72) — an island-stage layout, not a sand
     // rectangle: ocean border, foam shore, wet flats, tiered cliffs, stair
     // connectors and POI pockets echoing the beach mockup's arrangement.
-    fillRect(rows, 0, 0, 90, 60, "I");
+    fillRect(rows, 0, 0, 110, 72, "I");
 
     // Main island mass and sandy spurs. Row spans keep the coastline authored
     // as a sloped silhouette instead of stacked rectangles.
     drawBeachIsland(rows);
 
     // Bite coves back out of the island to avoid straight rectangular beaches.
-    fillRect(rows, 5, 6, 7, 4, "I");
-    fillRect(rows, 8, 10, 4, 5, "I");
-    fillRect(rows, 28, 2, 14, 5, "I");
-    fillRect(rows, 68, 2, 14, 7, "I");
-    fillRect(rows, 78, 9, 7, 9, "I");
-    fillRect(rows, 5, 36, 10, 5, "I");
-    fillRect(rows, 11, 41, 12, 4, "I");
-    fillRect(rows, 45, 40, 16, 8, "I");
-    fillRect(rows, 58, 44, 9, 8, "I");
-    fillRect(rows, 77, 47, 8, 7, "I");
+    fillRect(rows, 6, 7, 9, 5, "I");
+    fillRect(rows, 10, 12, 5, 6, "I");
+    fillRect(rows, 34, 2, 17, 6, "I");
+    fillRect(rows, 83, 2, 17, 9, "I");
+    fillRect(rows, 95, 11, 9, 11, "I");
+    fillRect(rows, 6, 43, 12, 6, "I");
+    fillRect(rows, 13, 49, 15, 5, "I");
+    fillRect(rows, 55, 48, 20, 10, "I");
+    fillRect(rows, 71, 53, 11, 9, "I");
+    fillRect(rows, 94, 56, 10, 9, "I");
     // Keep the central route dry like the mockup; water belongs around the
     // coast, with small coves cut into the island edges rather than a square
     // lagoon stamped through the middle of the play space.
-    fillRect(rows, 14, 5, 4, 4, "l"); // Coastal Harvest shelf used by foraging tests
+    fillRect(rows, 17, 6, 5, 5, "l"); // Coastal Harvest shelf used by foraging tests
 
     // Walkable sand detail: shell flats, trampled paths and wet tide line.
-    fillRect(rows, 23, 2, 5, 10, "z"); // desert gate trail
-    fillRect(rows, 22, 11, 30, 4, "z");
-    fillRect(rows, 49, 12, 19, 5, "z"); // jungle gate trail
-    fillRect(rows, 28, 25, 20, 4, "z"); // hut lane
-    fillRect(rows, 44, 29, 26, 3, "z");
+    fillRect(rows, 28, 2, 6, 12, "z"); // desert gate trail
+    fillRect(rows, 27, 13, 37, 5, "z");
+    fillRect(rows, 60, 14, 23, 6, "z"); // jungle gate trail
+    fillRect(rows, 34, 30, 25, 5, "z"); // hut lane
+    fillRect(rows, 54, 35, 32, 3, "z");
     for (const [x, y, w, h] of [[14, 14, 8, 4], [18, 30, 10, 4], [28, 38, 12, 4], [58, 36, 10, 4], [70, 39, 7, 5]] as Array<[number, number, number, number]>)
       fillRect(rows, x, y, w, h, "l");
     for (const [x, y] of [[18, 12], [22, 14], [39, 18], [48, 16], [58, 12], [72, 18], [28, 36], [53, 42], [68, 44]] as Array<[number, number]>)
@@ -582,114 +599,165 @@ export function makeFloorTiles(floor: number): string[] {
       setTile(rows, x, y, "u");
 
     applyBeachShoreEdges(rows);
-    setTile(rows, 25, 1, "Y"); // north trail to/from the desert
-    setTile(rows, 50, 14, "j"); // east trail to the Untamed Jungle
+    setTile(rows, 31, 1, "Y"); // north trail to/from the desert
+    setTile(rows, 61, 17, "j"); // east trail to the Untamed Jungle
   }
 
   if (floor === 9) {
-    // The Untamed Jungle (bespoke 90x60) — a claustrophobic maze of dense canopy
+    // The Untamed Jungle (enlarged 110x72) — a claustrophobic maze of dense canopy
     // walls (E) threaded by tight 3-wide jungle-floor runs (y). A winding river (i)
     // splits the map, forded only at 1-tile boulder chokepoints where venomous
     // stalkers ambush. The sealed Jungle Vault (K) sits in a dead-end clearing.
-    fillRect(rows, 0, 0, 90, 60, "E");
-    setTile(rows, 1, 15, "j"); // west portal to/from the Sunken Beach
-    fillRect(rows, 1, 14, 11, 4, "y"); // entry run
-    fillRect(rows, 8, 6, 4, 12, "y");
-    fillRect(rows, 8, 6, 22, 4, "y");
-    fillRect(rows, 20, 6, 4, 16, "y");
-    fillRect(rows, 12, 18, 12, 4, "y");
-    fillRect(rows, 12, 18, 4, 18, "y");
-    fillRect(rows, 8, 32, 18, 6, "y"); // vault clearing
-    fillRect(rows, 20, 22, 4, 16, "y");
-    fillRect(rows, 30, 2, 4, 30, "i"); // river trunk
-    fillRect(rows, 30, 28, 26, 4, "i");
-    fillRect(rows, 52, 28, 4, 26, "i");
-    fillRect(rows, 30, 7, 4, 1, "y"); // upper ford
-    fillRect(rows, 30, 30, 4, 1, "y"); // lower ford
-    fillRect(rows, 34, 6, 18, 4, "y");
-    fillRect(rows, 48, 6, 4, 19, "y");
-    fillRect(rows, 36, 21, 16, 4, "y");
-    fillRect(rows, 36, 32, 20, 6, "y");
-    fillRect(rows, 58, 32, 5, 12, "y");
-    setTile(rows, 16, 35, "K"); // sealed Jungle Vault (does not transport)
+    fillRect(rows, 0, 0, 110, 72, "E");
+    fillRect(rows, 1, 17, 14, 5, "y"); // entry run
+    setTile(rows, 1, 18, "j"); // west portal to/from the Sunken Beach (after the fill so it survives)
+    fillRect(rows, 10, 7, 5, 15, "y");
+    fillRect(rows, 10, 7, 27, 5, "y");
+    fillRect(rows, 24, 7, 5, 19, "y");
+    fillRect(rows, 15, 22, 14, 4, "y");
+    fillRect(rows, 15, 22, 5, 21, "y");
+    fillRect(rows, 10, 38, 22, 8, "y"); // vault clearing
+    fillRect(rows, 24, 26, 5, 20, "y");
+    fillRect(rows, 37, 2, 5, 36, "i"); // river trunk
+    fillRect(rows, 37, 34, 31, 4, "i");
+    fillRect(rows, 64, 34, 4, 31, "i");
+    fillRect(rows, 37, 8, 5, 2, "y"); // upper ford
+    fillRect(rows, 37, 36, 5, 1, "y"); // lower ford
+    fillRect(rows, 42, 7, 22, 5, "y");
+    fillRect(rows, 59, 7, 5, 23, "y");
+    fillRect(rows, 44, 25, 20, 5, "y");
+    fillRect(rows, 44, 38, 24, 8, "y");
+    fillRect(rows, 71, 38, 6, 15, "y");
+    setTile(rows, 20, 42, "K"); // sealed Jungle Vault (does not transport)
   }
 
   if (floor === 5) {
-    // The Sunken Marsh (bespoke 90x60) — a drowned basin of deep swamp water (W,
+    // The Sunken Marsh (enlarged 110x72) — a drowned basin of deep swamp water (W,
     // blocks movement not sight) threaded by winding 1-2 tile marsh (m) and
     // swamp-dirt (k) causeways linked by wooden bridges (B). The Alchemist's Hut
     // sits on solid ground in the NW; Mire-Spitter turrets are anchored on the
     // open water and fire across the causeways. Boulders (o) give LOS cover.
-    fillRect(rows, 0, 0, 90, 60, "W");
-    fillRect(rows, 44, 18, 13, 11, "m"); // east entry basin (forest portal arrives)
-    fillRect(rows, 48, 14, 6, 4, "m");
-    setTile(rows, 56, 23, "M"); // east-edge portal back to the forest
-    fillRect(rows, 50, 28, 9, 6, "m"); // SE marsh shelf
-    fillRect(rows, 54, 25, 4, 4, "m");
-    fillRect(rows, 38, 20, 7, 4, "m"); // run west off the entry
-    fillRect(rows, 34, 14, 5, 10, "m"); // climb north
-    fillRect(rows, 31, 14, 3, 3, "B"); // bridge 1 (chokepoint)
-    fillRect(rows, 24, 13, 8, 5, "m");
-    fillRect(rows, 24, 18, 4, 10, "m"); // drop south
-    fillRect(rows, 21, 25, 3, 3, "B"); // bridge 2 (chokepoint)
-    fillRect(rows, 13, 24, 9, 6, "m"); // mid-west shelf
-    fillRect(rows, 13, 16, 5, 9, "m"); // climb to the hut
-    fillRect(rows, 13, 16, 9, 4, "m");
-    fillRect(rows, 4, 12, 12, 10, "k"); // Alchemist's Hut clearing (safe)
-    fillRect(rows, 12, 14, 3, 6, "m");
-    fillRect(rows, 16, 30, 3, 3, "B"); // bridge 3 into the lotus pocket
-    fillRect(rows, 9, 33, 13, 7, "m"); // southern Mire-Lotus pocket
-    fillRect(rows, 18, 36, 8, 4, "m");
-    setTile(rows, 41, 19, "o");
-    setTile(rows, 38, 22, "o");
-    setTile(rows, 27, 14, "o");
-    setTile(rows, 25, 26, "o");
-    setTile(rows, 18, 27, "o");
-    setTile(rows, 11, 35, "o");
-    setTile(rows, 20, 38, "o");
-    setTile(rows, 52, 30, "o");
-    setTile(rows, 6, 13, "L"); // one-way cliff ledge -> northern Waystone
-    scatter(rows, "W", "3", 180, 55); // open-water interior variation
+    fillRect(rows, 0, 0, 110, 72, "W");
+    fillRect(rows, 54, 22, 16, 13, "m"); // east entry basin (forest portal arrives)
+    fillRect(rows, 59, 17, 7, 5, "m");
+    setTile(rows, 68, 28, "M"); // east-edge portal back to the forest
+    fillRect(rows, 61, 34, 11, 7, "m"); // SE marsh shelf
+    fillRect(rows, 66, 30, 5, 5, "m");
+    fillRect(rows, 46, 24, 9, 5, "m"); // run west off the entry
+    fillRect(rows, 42, 17, 6, 12, "m"); // climb north
+    fillRect(rows, 38, 17, 4, 3, "B"); // bridge 1 (chokepoint)
+    fillRect(rows, 29, 16, 10, 6, "m");
+    fillRect(rows, 29, 22, 5, 12, "m"); // drop south
+    fillRect(rows, 26, 30, 3, 4, "B"); // bridge 2 (chokepoint)
+    fillRect(rows, 16, 29, 11, 7, "m"); // mid-west shelf
+    fillRect(rows, 16, 19, 6, 11, "m"); // climb to the hut
+    fillRect(rows, 16, 19, 11, 5, "m");
+    fillRect(rows, 5, 14, 15, 12, "k"); // Alchemist's Hut clearing (safe)
+    fillRect(rows, 15, 17, 3, 7, "m");
+    fillRect(rows, 20, 36, 3, 4, "B"); // bridge 3 into the lotus pocket
+    fillRect(rows, 11, 40, 16, 8, "m"); // southern Mire-Lotus pocket
+    fillRect(rows, 22, 43, 10, 5, "m");
+    setTile(rows, 50, 23, "o");
+    setTile(rows, 46, 26, "o");
+    setTile(rows, 33, 17, "o");
+    setTile(rows, 31, 31, "o");
+    setTile(rows, 22, 32, "o");
+    setTile(rows, 13, 42, "o");
+    setTile(rows, 24, 46, "o");
+    setTile(rows, 64, 36, "o");
+    setTile(rows, 7, 16, "L"); // one-way cliff ledge -> northern Waystone
+    scatter(rows, "W", "3", 264, 55); // open-water interior variation
     applySwampWaterEdges(rows);
   }
 
   if (floor === 4) {
-    // Northwatch (bespoke 90x60) — a rugged frontier garrison ringed by a timber
+    // Northwatch (enlarged 110x72) — a rugged frontier garrison ringed by a timber
     // palisade. A stone parade ground musters at its heart, barracks/quarters and
     // a quartermaster's market cluster inside the walls, and gates pierce the
     // palisade to the south (forest road) and west (the badlands cliff drop).
-    fillRect(rows, 1, 1, 88, 58, "."); // open ground base
-    scatter(rows, ".", "r", 70, 42); // scattered rubble/boulders on the frontier
+    fillRect(rows, 1, 1, 108, 70, "."); // open ground base
+    scatter(rows, ".", "r", 103, 42); // scattered rubble/boulders on the frontier
 
     // --- Timber palisade enclosing the garrison core. ---
-    fillRect(rows, 20, 12, 51, 1, "q"); // north wall
-    fillRect(rows, 20, 47, 51, 1, "q"); // south wall
-    fillRect(rows, 20, 12, 1, 36, "q"); // west wall
-    fillRect(rows, 70, 12, 1, 36, "q"); // east wall
+    fillRect(rows, 24, 14, 63, 2, "q"); // north wall
+    fillRect(rows, 24, 56, 63, 2, "q"); // south wall
+    fillRect(rows, 24, 14, 2, 44, "q"); // west wall
+    fillRect(rows, 86, 14, 1, 44, "q"); // east wall
     // Gate gaps (kept walkable by laying path over the wall line).
-    fillRect(rows, 44, 47, 4, 1, "d"); // south gate
-    fillRect(rows, 20, 29, 1, 4, "d"); // west gate (badlands drop arrives here)
+    fillRect(rows, 54, 56, 5, 2, "d"); // south gate
+    fillRect(rows, 24, 35, 2, 5, "d"); // west gate (badlands drop arrives here)
 
     // --- Stone parade ground with a townfloor muster square. ---
-    fillRect(rows, 32, 20, 28, 20, "s"); // parade ground
-    fillRect(rows, 40, 25, 12, 10, "p"); // muster square
+    fillRect(rows, 39, 24, 34, 24, "s"); // parade ground
+    fillRect(rows, 49, 30, 15, 12, "p"); // muster square
 
     // --- Roads (winding, hugging the buildings). ---
     // South road: muster square down to the south gate and out to the forest.
-    fillRect(rows, 44, 35, 3, 13, "d");
-    fillRect(rows, 44, 48, 3, 10, "d");
+    fillRect(rows, 54, 42, 3, 16, "d");
+    fillRect(rows, 54, 58, 3, 12, "d");
     // West road: muster square out to the west gate (the drop-in lands here).
-    fillRect(rows, 21, 29, 12, 3, "d");
+    fillRect(rows, 26, 35, 14, 3, "d");
     // North spur to the barracks.
-    fillRect(rows, 45, 13, 3, 8, "d");
+    fillRect(rows, 55, 16, 4, 9, "d");
     // East spur to the quartermaster's market.
-    fillRect(rows, 59, 28, 9, 3, "d");
+    fillRect(rows, 72, 34, 11, 3, "d");
 
     // South-edge portal to the forest, with an approach stub past the gate.
-    setTile(rows, 45, 58, "S"); // south -> Northwood (floor 3)
-    setTile(rows, 45, 57, "d");
+    setTile(rows, 55, 70, "S"); // south -> Northwood (floor 3)
+    setTile(rows, 55, 68, "d");
 
-    scatter(rows, ".", "f", 80, 41); // woodland framing the clearing
+    scatter(rows, ".", "f", 117, 41); // woodland framing the clearing
+  }
+
+  if (floor === 10) {
+    // The Deepdelve Mine (bespoke 90x60) — an enclosed cave reached from the
+    // Searing Badlands' copper dead-end (>). Solid rock (#) fills the bulk; a
+    // winding crypt-stone spine (c) links six worked-out chambers (b) that
+    // descend in ore tier: a SAFE entry chamber (d, copper/tin) -> iron -> coal
+    // -> silver -> gold -> a deepest mithril/adamant pocket. Veins sit on rock
+    // outcrops (r) with a cleared standing tile beside them; danger rises with
+    // depth. < returns to the badlands.
+    fillRect(rows, 0, 0, 90, 60, "#"); // solid rock bulk
+
+    // --- Winding main spine (c), entry (NW) -> deepest (S-centre). ---
+    fillRect(rows, 9, 14, 3, 16, "c"); // drop south from the entry
+    fillRect(rows, 9, 27, 20, 3, "c"); // run east
+    fillRect(rows, 26, 14, 3, 16, "c"); // climb north
+    fillRect(rows, 26, 14, 22, 3, "c"); // run east along the top
+    fillRect(rows, 45, 14, 3, 20, "c"); // drop south
+    fillRect(rows, 45, 31, 22, 3, "c"); // run east
+    fillRect(rows, 64, 31, 3, 18, "c"); // drop south toward the deep
+    fillRect(rows, 48, 46, 19, 3, "c"); // run west into the deep pocket
+
+    // --- Entry chamber (safe), copper + tin starter veins. ---
+    fillRect(rows, 4, 5, 16, 11, "d"); // x4..19, y5..15
+    setTile(rows, 6, 8, "<"); // -> back up to the Searing Badlands (floor 6)
+
+    // --- Worked chambers hung off the spine, each overlapping it. ---
+    fillRect(rows, 30, 5, 14, 11, "b"); // B: iron (top, off the east-top run)
+    fillRect(rows, 12, 29, 14, 12, "b"); // C: coal (SW, off the lower run)
+    fillRect(rows, 47, 18, 16, 12, "b"); // D: silver (mid-east, off the south drop)
+    fillRect(rows, 66, 31, 18, 14, "b"); // E: gold (deep east)
+    fillRect(rows, 40, 48, 16, 11, "b"); // F: mithril/adamant (deepest pocket)
+
+    scatter(rows, "c", "r", 14, 71); // loose rubble along the corridors
+    scatter(rows, "b", "r", 10, 72); // and in the chambers
+
+    // --- Ore veins: outcrop tile (r) with a cleared approach floor beside it.
+    // Placed AFTER scatter so stray rubble never seals an approach. Coordinates
+    // mirror content/mining-nodes.yaml floor-10 entries (at -> approach).
+    for (const [ax, ay, px, py, floorCh] of [
+      [6, 6, 6, 7, "d"], [17, 6, 17, 7, "d"], // entry: copper, tin
+      [32, 6, 32, 7, "b"], [41, 14, 40, 14, "b"], // B: iron
+      [14, 31, 14, 32, "b"], [23, 39, 23, 38, "b"], // C: coal
+      [50, 19, 50, 20, "b"], [60, 28, 60, 27, "b"], // D: silver
+      [70, 32, 70, 33, "b"], [81, 43, 81, 42, "b"], // E: gold
+      [42, 50, 42, 51, "b"], [53, 57, 53, 56, "b"], // F: mithril
+      [47, 57, 47, 56, "b"], [44, 49, 44, 50, "b"] // F: adamant
+    ] as Array<[number, number, number, number, string]>) {
+      setTile(rows, ax, ay, "r"); // the vein outcrop (blocker)
+      setTile(rows, px, py, floorCh); // its standing tile, guaranteed walkable
+    }
   }
 
   const sized = authored || !FLOOR_DIMS[floor] ? rows : scaleFloorTiles(rows, floorCols(floor), floorRows(floor));
@@ -992,6 +1060,40 @@ export function isSightBlocked(tile: string): boolean {
   );
 }
 
+// "Beaten path" tiles. A player standing on a road is harder for wandering
+// monsters to notice (see ROAD_AGGRO_FACTOR in server/index.ts), so a weak
+// player can stick to the main road and slip past most of a zone's wildlife.
+// `t` is the dirt road/lane used by the Waystone and Northwood arteries; other
+// biomes' paths (cemetery `b`/`c`, etc.) can be added here as roads are tuned.
+const ROAD_TILES = new Set(["t"]);
+export function isRoadTile(tile: string): boolean {
+  return ROAD_TILES.has(tile);
+}
+
+// Mining ore ladder. A node's `kind` (content/mining-nodes.yaml) selects the ore
+// it yields, the Mining level required to work the vein, and the XP per swing.
+// A new ore needs only: a tier here, an item in items.yaml, an icon, and the
+// `kind` added to the mining-nodes schema enum.
+export interface OreTier {
+  item: string;
+  reqLevel: number;
+  xp: number;
+  label: string;
+}
+export const ORE_TIERS: Record<string, OreTier> = {
+  copper: { item: "copper_ore", reqLevel: 1, xp: 20, label: "Copper" },
+  tin: { item: "tin_ore", reqLevel: 1, xp: 25, label: "Tin" },
+  iron: { item: "iron_ore", reqLevel: 10, xp: 35, label: "Iron" },
+  coal: { item: "coal", reqLevel: 15, xp: 40, label: "Coal" },
+  silver: { item: "silver_ore", reqLevel: 20, xp: 45, label: "Silver" },
+  gold: { item: "gold_ore", reqLevel: 30, xp: 65, label: "Gold" },
+  mithril: { item: "mithril_ore", reqLevel: 40, xp: 80, label: "Mithril" },
+  adamant: { item: "adamant_ore", reqLevel: 50, xp: 95, label: "Adamant" }
+};
+export function oreTierFor(kind: string): OreTier {
+  return ORE_TIERS[kind] ?? ORE_TIERS.copper!;
+}
+
 export function isSafeZone(floor: number, x: number, y: number): boolean {
   if (floor === 0 || floor === 4) return true;
   // Outpost clearings are authored in native coords; scale the rect to match
@@ -999,11 +1101,13 @@ export function isSafeZone(floor: number, x: number, y: number): boolean {
   const inRect = (f: number, x1: number, y1: number, x2: number, y2: number): boolean =>
     floor === f && x >= scaleX(f, x1) && x <= scaleX(f, x2) && y >= scaleY(f, y1) && y <= scaleY(f, y2);
   // The Alchemist's Hut clearing in the Sunken Marsh is a safe rest spot.
-  if (inRect(5, 3, 11, 17, 22)) return true;
+  if (inRect(5, 4, 13, 21, 26)) return true;
   // The Frontier Camp clearing in the Searing Badlands (bespoke 90x60 coords).
-  if (inRect(6, 52, 12, 81, 22)) return true;
+  if (inRect(6, 64, 14, 99, 26)) return true;
   // The Oasis Trade Outpost in the Sunken Desert (bespoke 90x60 coords).
-  if (inRect(7, 18, 46, 47, 55)) return true;
+  if (inRect(7, 22, 55, 57, 66)) return true;
+  // The Deepdelve Mine entry chamber — a lit, safe staging cave by the stair up.
+  if (inRect(10, 3, 4, 20, 16)) return true;
   return false;
 }
 
@@ -1027,27 +1131,29 @@ function portalForRaw(floor: number, x: number, y: number): Portal | null {
   const tx = Math.floor(x);
   const ty = Math.floor(y);
   const tile = tileAt(floor, tx, ty);
-  if (floor === 0 && tile === "N") return { floor: 3, x: 45.5, y: 57.5 };
-  if (floor === 0 && tile === "S") return { floor: 1, x: 45.5, y: 2.5 }; // arrive just inside the cemetery's north gate
-  if (floor === 1 && tile === "T") return { floor: 0, x: 52.5, y: 55.5 }; // arrive at Waystone's south gate
-  if (floor === 1 && tile === "C") return { floor: 2, x: 7.5, y: 6.5 }; // arrive in the crypt's entry chamber
-  if (floor === 2 && tile === "T") return { floor: 1, x: 46.5, y: 31.5 }; // arrive on the cemetery's crypt-entrance apron
-  if (floor === 3 && tile === "S") return { floor: 0, x: 45.5, y: 4.5 }; // arrive at Waystone's north gate
-  if (floor === 3 && tile === "N") return { floor: 4, x: 45.5, y: 50.5 }; // arrive at Northwatch's south gate
-  if (floor === 3 && tile === "M") return { floor: 5, x: 48.5, y: 16.5 };
-  if (floor === 4 && tile === "S") return { floor: 3, x: 45.5, y: 2.5 };
-  if (floor === 5 && tile === "M") return { floor: 3, x: 2.5, y: 30.5 };
-  if (floor === 5 && tile === "L") return { floor: 0, x: 45.5, y: 7.5 }; // one-way drop into northern Waystone
-  if (floor === 3 && tile === "D") return { floor: 6, x: 3.5, y: 33.5 };
-  if (floor === 6 && tile === "D") return { floor: 3, x: 87.5, y: 29.5 };
-  if (floor === 6 && tile === "Z") return { floor: 4, x: 22.5, y: 30.5 }; // one-way drop just inside Northwatch's west gate
-  if (floor === 1 && tile === "G") return { floor: 7, x: 24.5, y: 3.5 };
-  if (floor === 7 && tile === "G") return { floor: 1, x: 46.5, y: 57.5 }; // arrive just inside the cemetery's south gate
-  if (floor === 7 && tile === "H") return { floor: 0, x: 62.5, y: 29.5 }; // one-way passage into eastern Waystone
-  if (floor === 7 && tile === "Y") return { floor: 8, x: 25.5, y: 2.5 };
-  if (floor === 8 && tile === "Y") return { floor: 7, x: 2.5, y: 32.5 };
-  if (floor === 8 && tile === "j") return { floor: 9, x: 2.5, y: 15.5 };
-  if (floor === 9 && tile === "j") return { floor: 8, x: 49.5, y: 14.5 };
+  if (floor === 0 && tile === "N") return { floor: 3, x: 55.5, y: 68.5 };
+  if (floor === 0 && tile === "S") return { floor: 1, x: 55.5, y: 2.5 }; // arrive just inside the cemetery's north gate
+  if (floor === 1 && tile === "T") return { floor: 0, x: 64.5, y: 66.5 }; // arrive at Waystone's south gate
+  if (floor === 1 && tile === "C") return { floor: 2, x: 9.5, y: 7.5 }; // arrive in the crypt's entry chamber
+  if (floor === 2 && tile === "T") return { floor: 1, x: 56.5, y: 37.5 }; // arrive on the cemetery's crypt-entrance apron
+  if (floor === 3 && tile === "S") return { floor: 0, x: 55.5, y: 5.5 }; // arrive at Waystone's north gate
+  if (floor === 3 && tile === "N") return { floor: 4, x: 55.5, y: 60.5 }; // arrive at Northwatch's south gate
+  if (floor === 3 && tile === "M") return { floor: 5, x: 59.5, y: 19.5 };
+  if (floor === 4 && tile === "S") return { floor: 3, x: 55.5, y: 2.5 };
+  if (floor === 5 && tile === "M") return { floor: 3, x: 2.5, y: 36.5 };
+  if (floor === 5 && tile === "L") return { floor: 0, x: 55.5, y: 8.5 }; // one-way drop into northern Waystone
+  if (floor === 3 && tile === "D") return { floor: 6, x: 4.5, y: 40.5 };
+  if (floor === 6 && tile === "D") return { floor: 3, x: 106.5, y: 35.5 };
+  if (floor === 6 && tile === "Z") return { floor: 4, x: 27.5, y: 36.5 }; // one-way drop just inside Northwatch's west gate
+  if (floor === 1 && tile === "G") return { floor: 7, x: 29.5, y: 4.5 };
+  if (floor === 7 && tile === "G") return { floor: 1, x: 56.5, y: 68.5 }; // arrive just inside the cemetery's south gate
+  if (floor === 7 && tile === "H") return { floor: 0, x: 76.5, y: 35.5 }; // one-way passage into eastern Waystone
+  if (floor === 7 && tile === "Y") return { floor: 8, x: 31.5, y: 2.5 };
+  if (floor === 8 && tile === "Y") return { floor: 7, x: 2.5, y: 38.5 };
+  if (floor === 8 && tile === "j") return { floor: 9, x: 2.5, y: 18.5 };
+  if (floor === 9 && tile === "j") return { floor: 8, x: 60.5, y: 17.5 };
+  if (floor === 6 && tile === ">") return { floor: 10, x: 8.5, y: 11.5 }; // down into the Deepdelve Mine entry chamber
+  if (floor === 10 && tile === "<") return { floor: 6, x: 11.5, y: 52.5 }; // back up to the badlands copper dead-end
   return null;
 }
 

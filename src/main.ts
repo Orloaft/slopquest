@@ -578,6 +578,9 @@ let pendingFishingNode: string | null = null;
 let pendingMiningNode: string | null = null;
 let pendingHerbNode: string | null = null;
 let pendingCookingFire: string | null = null;
+// Which cook_on_fire item the player is bringing to the fire (raw_fish to cook,
+// an ore to smelt). Null falls back to raw_fish for the legacy cook path.
+let pendingCookingItem: string | null = null;
 let dynamicPathTarget: DynamicPathTarget | null = null;
 let lastDynamicPathRefreshAt = 0;
 let clickMarker: Phaser.GameObjects.Ellipse | null = null;
@@ -1650,10 +1653,23 @@ const ORE_VEIN_TEXTURES: Record<string, string> = {
   iron: "spriteIronVein"
 };
 
+// Deeper ores reuse the copper vein crop (no dedicated sheet rows yet) but are
+// tinted to their ore colour so the tier reads at a glance until bespoke vein
+// art lands. copper/tin/iron use their own sprites untinted.
+const ORE_VEIN_TINTS: Record<string, number> = {
+  coal: 0x4a4a52,
+  silver: 0xc8cdd4,
+  gold: 0xd4af37,
+  mithril: 0x4a6fa5,
+  adamant: 0x3f7d5a
+};
+
 function createMiningNodeView(node: MiningNodeView): MiningEntityView {
   const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE) as MiningEntityView;
   const texture = ORE_VEIN_TEXTURES[node.kind] ?? "spriteCopperVein";
   const sprite = scene.add.image(0, -2, texture).setOrigin(0.5, 1).setDisplaySize(46, 30);
+  const tint = ORE_VEIN_TINTS[node.kind];
+  if (tint !== undefined) sprite.setTint(tint);
   const zone = scene.add.zone(0, -12, 48, 36).setInteractive({ cursor: "pointer" });
   zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
@@ -3002,7 +3018,8 @@ function inputTowardDestination(me: PlayerView): MovementInput | null {
       const fireId = pendingCookingFire;
       clearClickDestination();
       sendStopInput();
-      send({ type: "cookFish", id: fireId });
+      send({ type: "useItem", item: pendingCookingItem ?? "raw_fish", ctx: { fireId } });
+      pendingCookingItem = null;
       return null;
     }
   }
@@ -3273,9 +3290,11 @@ function startCookingPath(fire: FireView, itemId: string | null = selectedInvent
     renderInventory(me.inventory ?? []);
     return;
   }
+  pendingCookingItem = itemId;
   if (Phaser.Math.Distance.Between(me.x, me.y, fire.x, fire.y) <= 1.8) {
     pendingCookingFire = null;
-    send({ type: "cookFish", id: fire.id });
+    send({ type: "useItem", item: itemId ?? "raw_fish", ctx: { fireId: fire.id } });
+    pendingCookingItem = null;
     return;
   }
   if (!refreshCookingPath(me, fire)) pendingCookingFire = null;

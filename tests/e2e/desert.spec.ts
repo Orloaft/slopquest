@@ -15,10 +15,10 @@ test("travel loop: cemetery south portal -> desert, and the oasis passage -> Way
   await page.goto("/?e2e");
   await join(page);
 
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: p.x, y: p.y }), { x: scaleX(1, 46.5), y: scaleY(1, 58.5) });
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: p.x, y: p.y }), { x: scaleX(1, 56.5), y: scaleY(1, 70.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 7, null, { timeout: 8000 });
 
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: p.x, y: p.y }), { x: scaleX(7, 25.5), y: scaleY(7, 49.5) });
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: p.x, y: p.y }), { x: scaleX(7, 31.5), y: scaleY(7, 59.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 0, null, { timeout: 8000 });
 });
 
@@ -27,7 +27,7 @@ test("Glass-Sand Quartz is gatherable and trains Foraging", async ({ page }) => 
   await page.goto("/?e2e");
   await join(page);
 
-  await place(page, 7, 28.5, 20.5);
+  await place(page, 7, 34.5, 24.5);
   const before = await page.evaluate(() => window.__TIB_E2E__?.self()?.skills.find((s) => s.id === "foraging")?.xp ?? 0);
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "gatherHerb", id: "quartz-7-10-12" }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.action?.type === "herbing");
@@ -47,7 +47,7 @@ test("a Sun-Scorched Wraith weakens the player's physical damage from range", as
   await page.goto("/?e2e");
   await join(page);
 
-  await place(page, 7, 30.5, 18.5);
+  await place(page, 7, 37.5, 19.5);
   await page.waitForFunction(() => (window.__TIB_E2E__?.getState()?.monsters ?? []).some((m) => m.type === "sun_wraith" && m.floor === 7));
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.weakened ?? 0) > 0, null, { timeout: 15000 });
 });

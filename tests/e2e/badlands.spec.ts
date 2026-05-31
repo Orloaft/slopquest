@@ -26,10 +26,10 @@ test("travel loop: forest east portal -> badlands, and the ledge -> Northwatch",
   await page.goto("/?e2e");
   await join(page);
 
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 88.5, y: 29.5 }));
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 108.5, y: 35.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 6, null, { timeout: 8000 });
 
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 78.5), y: scaleY(6, 13.5) });
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 95.5), y: scaleY(6, 16.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 4, null, { timeout: 8000 });
 });
 
@@ -39,7 +39,7 @@ test("a Dust Burrower ambushes from hiding, stunning the player", async ({ page 
   await join(page);
 
   // The upper-run burrower is hidden (not in the snapshot) until stepped on.
-  await place(page, 6, 24.5, 18.5);
+  await place(page, 6, 29.5, 22.5);
   // Stepping onto it triggers the ambush: it emerges and stuns. If the burst
   // damage rolls high enough, death also proves the ambush fired.
   await page.waitForFunction(() => {
@@ -54,7 +54,7 @@ test("copper ore is minable in the badlands dead-end canyon", async ({ page }) =
   await page.goto("/?e2e");
   await join(page);
 
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "pickaxe", qty: 1 }], floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 5.5), y: scaleY(6, 41.5) });
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "pickaxe", qty: 1 }], floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 6.5), y: scaleY(6, 49.5) });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
     return Boolean(me && me.floor === 6 && (me.inventory ?? []).some((i) => i?.id === "pickaxe"));

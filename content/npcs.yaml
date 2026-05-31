@@ -13,43 +13,43 @@
 - id: trader
   name: Wayfarer Trader
   role: vendor
-  at: { floor: 0, x: 40.5, y: 31.5 }
+  at: { floor: 0, x: 49.5, y: 37.5 }
   idleDialogue: "Need supplies? Stand close and open the shop."
 
 - id: northwatch
   name: Northwatch Guide
   role: guide
-  at: { floor: 4, x: 45.5, y: 36.5 }
+  at: { floor: 4, x: 55.5, y: 43.5 }
   idleDialogue: "Northwatch is quiet for now."
 
 - id: cemetery-warden
   name: Mira Gravewatch
   role: quest
-  at: { floor: 0, x: 50.5, y: 49.5 }
+  at: { floor: 0, x: 61.5, y: 59.5 }
   idleDialogue: "Southgate Cemetery is restless."
 
 - id: lumberjack
   name: Brann Splitlog
   role: quest
-  at: { floor: 0, x: 61.5, y: 29.5 }
+  at: { floor: 0, x: 75.5, y: 35.5 }
   idleDialogue: "Pine yards are short on stock."
 
 - id: hunter
   name: Kael Brookfoot
   role: quest
-  at: { floor: 0, x: 47.5, y: 22.5 }
+  at: { floor: 0, x: 57.5, y: 26.5 }
   idleDialogue: "The shamans in Northwood worry me."
 
 - id: merchant
   name: Marda Vell
   role: quest
-  at: { floor: 0, x: 47.5, y: 48.5 }
+  at: { floor: 0, x: 57.5, y: 58.5 }
   idleDialogue: "Orcs raided my cart on the north road."
 
 - id: alchemist
   name: Sage Ellwyn
   role: alchemist
-  at: { floor: 0, x: 48.5, y: 31.5 }
+  at: { floor: 0, x: 59.5, y: 37.5 }
   idleDialogue: "Bring me wild herbs and a flask, and I'll show you how to brew."
 
 # Class trainers (role: trainer) — gate the Tier-1 classes once skill
@@ -57,78 +57,78 @@
 - id: fighter-captain
   name: Captain Doran
   role: trainer
-  at: { floor: 0, x: 42.5, y: 38.5 }
+  at: { floor: 0, x: 51.5, y: 46.5 }
   idleDialogue: "Hold the line, recruit. Earn your steel and I'll make you a Vanguard."
 
 - id: shady-contact
   name: Sly Nessa
   role: trainer
-  at: { floor: 0, x: 35.5, y: 30.5 }
+  at: { floor: 0, x: 43.5, y: 36.5 }
   idleDialogue: "Quick hands and quicker feet. Show me, and the Thief's trade is yours."
 
 - id: cleric-monk
   name: Brother Aldric
   role: trainer
-  at: { floor: 0, x: 51.5, y: 34.5 }
+  at: { floor: 0, x: 62.5, y: 41.5 }
   idleDialogue: "Patience and poultices. An Apothecary mends what blades break."
 
 - id: scout-leader
   name: Ranger Wynn
   role: trainer
-  at: { floor: 4, x: 41.5, y: 30.5 }
+  at: { floor: 4, x: 50.5, y: 36.5 }
   idleDialogue: "A steady draw and a forager's eye. That's how an Archer is made."
 
 - id: hermit-academic
   name: Magister Vael
   role: trainer
-  at: { floor: 4, x: 50.5, y: 30.5 }
+  at: { floor: 4, x: 61.5, y: 36.5 }
   idleDialogue: "Power answers study. Master the arcane and become a Mage."
 
 - id: marsh-alchemist
   name: Bogwarden Yssa
   role: alchemist
-  at: { floor: 5, x: 5.5, y: 17.5 }
+  at: { floor: 5, x: 6.7, y: 21 }
   idleDialogue: "The marsh gives freely to those who know where to look. Brew well."
 
 - id: frontier-trader
   name: Quartermaster Hale
   role: vendor
-  at: { floor: 6, x: 66.5, y: 18.5 }
+  at: { floor: 6, x: 81.3, y: 22.2 }
   idleDialogue: "Frontier Camp's the last stop before the deep canyons. Stock up."
 
 - id: oasis-trader
   name: Caravan Master Zafira
   role: vendor
-  at: { floor: 7, x: 22.5, y: 52.5 }
+  at: { floor: 7, x: 27.5, y: 63 }
   idleDialogue: "The Oasis Outpost trades in glass and water. Rest, then trek on."
 
 # --- Faction quest-givers (tie the biomes together) ---
 - id: iron-census-officer
   name: Sergeant Vex
   role: quest
-  at: { floor: 0, x: 50.5, y: 38.5 }
+  at: { floor: 0, x: 61.5, y: 46.5 }
   idleDialogue: "The Iron Census holds the line. Broken gear doesn't fortify a frontier."
 
 - id: syndicate-contact
   name: Fence Corbin
   role: quest
-  at: { floor: 0, x: 35.5, y: 34.5 }
+  at: { floor: 0, x: 43.5, y: 41.5 }
   idleDialogue: "Keep your voice down. The Syndicate has work for quiet hands."
 
 - id: faith-monk
   name: Brother Tidewell
   role: quest
-  at: { floor: 5, x: 13.5, y: 14.5 }
+  at: { floor: 5, x: 16.5, y: 17.4 }
   idleDialogue: "The tides rise to cleanse us. The Sunken Faith only helps the willing adapt."
 
 - id: ranger-scout
   name: Ranger Sable
   role: quest
-  at: { floor: 8, x: 25.5, y: 5.5 }
+  at: { floor: 8, x: 31.2, y: 6.6 }
   idleDialogue: "The Borderland Rangers cull what the wild overflows. Prove your aim."
 
 - id: cartographer-adept
   name: Adept Lyra
   role: quest
-  at: { floor: 7, x: 44.5, y: 52.5 }
+  at: { floor: 7, x: 54.4, y: 63 }
   idleDialogue: "The Arcane Cartographers chart the ley-bleed. The desert hums with loose power."

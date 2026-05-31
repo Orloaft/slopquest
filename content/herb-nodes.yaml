@@ -9,90 +9,90 @@
 # Forest Herbs — wild patches in Northwood's glades (floor 3). Foraging moved
 # out of the Waystone town; the wood's clearings now hold all the early herbs.
 - id: herb-3-11-9
-  at: { floor: 3, x: 11.5, y: 9.5 }
-  approach: { x: 12.5, y: 9.5 }
+  at: { floor: 3, x: 13.5, y: 11.5 }
+  approach: { x: 14.5, y: 11.5 }
   label: Forest Herbs
 
 - id: herb-3-74-11
-  at: { floor: 3, x: 74.5, y: 11.5 }
-  approach: { x: 73.5, y: 11.5 }
+  at: { floor: 3, x: 90.5, y: 13.5 }
+  approach: { x: 89.5, y: 13.5 }
   label: Forest Herbs
 
 - id: herb-3-33-15
-  at: { floor: 3, x: 33.5, y: 15.5 }
-  approach: { x: 34.5, y: 15.5 }
+  at: { floor: 3, x: 40.5, y: 18.5 }
+  approach: { x: 41.5, y: 18.5 }
   label: Forest Herbs
 
 - id: herb-3-13-47
-  at: { floor: 3, x: 13.5, y: 47.5 }
-  approach: { x: 14.5, y: 47.5 }
+  at: { floor: 3, x: 16.5, y: 56.5 }
+  approach: { x: 17.5, y: 56.5 }
   label: Forest Herbs
 
 - id: herb-3-72-46
-  at: { floor: 3, x: 72.5, y: 46.5 }
-  approach: { x: 73.5, y: 46.5 }
+  at: { floor: 3, x: 88.5, y: 55.5 }
+  approach: { x: 89.5, y: 55.5 }
   label: Forest Herbs
 
 - id: herb-3-57-39
-  at: { floor: 3, x: 57.5, y: 39.5 }
-  approach: { x: 56.5, y: 39.5 }
+  at: { floor: 3, x: 70.5, y: 47.5 }
+  approach: { x: 69.5, y: 47.5 }
   label: Forest Herbs
 
 # Mire-Lotus — Sunken Marsh (floor 5). Gated behind Foraging 5; richer XP.
 - id: lotus-5-36-16
-  at: { floor: 5, x: 36.5, y: 16.5 }
-  approach: { x: 36.5, y: 15.5 }
+  at: { floor: 5, x: 44.5, y: 19.5 }
+  approach: { x: 44.5, y: 20.5 }
   label: Mire-Lotus
   requiredLevel: 5
   xp: 26
 
 - id: lotus-5-20-21
-  at: { floor: 5, x: 14.5, y: 35.5 }
-  approach: { x: 14.5, y: 34.5 }
+  at: { floor: 5, x: 17.5, y: 42.5 }
+  approach: { x: 17.5, y: 43.5 }
   label: Mire-Lotus
   requiredLevel: 5
   xp: 26
 
 - id: lotus-5-12-22
-  at: { floor: 5, x: 21.5, y: 38.5 }
-  approach: { x: 21.5, y: 37.5 }
+  at: { floor: 5, x: 26.5, y: 46.5 }
+  approach: { x: 26.5, y: 47.5 }
   label: Mire-Lotus
   requiredLevel: 5
   xp: 26
 
 # Glass-Sand Quartz — Sunken Desert (floor 7). Yields quartz; trains Foraging.
 - id: quartz-7-10-12
-  at: { floor: 7, x: 28.5, y: 19.5 }
-  approach: { x: 28.5, y: 20.5 }
+  at: { floor: 7, x: 34.8, y: 23.4 }
+  approach: { x: 34.5, y: 24.5 }
   label: Glass-Sand Quartz
   item: quartz
   xp: 16
 - id: quartz-7-40-14
-  at: { floor: 7, x: 50.5, y: 21.5 }
-  approach: { x: 51.5, y: 21.5 }
+  at: { floor: 7, x: 61.7, y: 25.8 }
+  approach: { x: 61.5, y: 26.5 }
   label: Glass-Sand Quartz
   item: quartz
   xp: 16
 - id: quartz-7-18-24
-  at: { floor: 7, x: 19.5, y: 34.5 }
-  approach: { x: 19.5, y: 33.5 }
+  at: { floor: 7, x: 23.8, y: 41.4 }
+  approach: { x: 23.5, y: 42.5 }
   label: Glass-Sand Quartz
   item: quartz
   xp: 16
 
 # Coastal Harvest — Sunken Beach (floor 8). Advanced alchemy reagents (herb).
 - id: shore-8-15-5
-  at: { floor: 8, x: 15.5, y: 5.5 }
-  approach: { x: 15.5, y: 6.5 }
+  at: { floor: 8, x: 18.9, y: 6.6 }
+  approach: { x: 18.5, y: 7.5 }
   label: Tidal Bloom
   xp: 18
 - id: shore-8-35-20
-  at: { floor: 8, x: 35.5, y: 21.5 }
-  approach: { x: 34.5, y: 21.5 }
+  at: { floor: 8, x: 43.4, y: 25.8 }
+  approach: { x: 43.5, y: 26.5 }
   label: Tidal Bloom
   xp: 18
 - id: shore-8-66-35
-  at: { floor: 8, x: 66.5, y: 35.5 }
-  approach: { x: 66.5, y: 34.5 }
+  at: { floor: 8, x: 81.3, y: 42.6 }
+  approach: { x: 80.5, y: 42.5 }
   label: Tidal Bloom
   xp: 18

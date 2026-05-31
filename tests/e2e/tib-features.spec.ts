@@ -32,12 +32,17 @@ const UNDEAD_BESPOKE_TYPES = [
   "pale_banshee"
 ];
 
+// Probes blanket the enlarged 110x72 wood so every spawn falls within snapshot
+// radius (18) of at least one waypoint (incl. the SW/SE corners).
 const NORTHWOOD_SUBZONE_PROBES = [
-  { label: "south wood (gentle critters)", x: 47.5, y: 49.5 },
-  { label: "north meadow (orcs)", x: 40.5, y: 14.5 },
-  { label: "NW shaman thicket", x: 22.5, y: 12.5 },
-  { label: "NE elder grove", x: 72.5, y: 12.5 },
-  { label: "central pixie clearing", x: 45.5, y: 29.5 }
+  { label: "SW wood (boar/wolves)", x: 25.5, y: 57.5 },
+  { label: "south arrival road", x: 55.5, y: 60.5 },
+  { label: "SE wood (hedgehog/dire wolf)", x: 85.5, y: 55.5 },
+  { label: "NW shaman thicket", x: 19.5, y: 19.5 },
+  { label: "north meadow (orcs)", x: 45.5, y: 18.5 },
+  { label: "NE elder grove", x: 78.5, y: 18.5 },
+  { label: "east frontier", x: 100.5, y: 30.5 },
+  { label: "central pixie clearing", x: 55.5, y: 40.5 }
 ];
 
 test("skills, firemaking, and cooking are usable and visually present", async ({ page }) => {
@@ -101,20 +106,21 @@ test("mining a vein yields ore and Mining XP, and Northwood veins carry distinct
       type: "e2eGrantItems",
       items: [{ id: "pickaxe", qty: 1 }],
       floor: 3,
-      x: 9.5,
-      y: 49.5,
+      x: 11.5,
+      y: 59.5,
       gold: 0
     });
   });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
-    if (!me || me.floor !== 3 || Math.hypot(me.x - 9.5, me.y - 49.5) > 0.5) return false;
+    if (!me || me.floor !== 3 || Math.hypot(me.x - 11.5, me.y - 59.5) > 0.5) return false;
     return (me.inventory ?? []).some((item) => item?.id === "pickaxe");
   });
 
-  // The three Northwood veins (spread across the wood) carry distinct ore kinds.
-  const forestKinds = MINING_NODES.filter((node) => node.floor === 3).map((node) => node.kind).sort();
-  expect(forestKinds).toEqual(["copper", "iron", "tin"]);
+  // The Northwood veins carry distinct ore kinds: copper/tin/iron outcrops spread
+  // across the wood, plus the coal seam in the north-wood surface cave pocket.
+  const forestKinds = [...new Set(MINING_NODES.filter((node) => node.floor === 3).map((node) => node.kind))].sort();
+  expect(forestKinds).toEqual(["coal", "copper", "iron", "tin"]);
 
   // The nearby copper vein is in view from its approach tile.
   await page.waitForFunction(() =>
@@ -178,7 +184,7 @@ test("lazy tree snapshots render after traveling into Northwood", async ({ page 
     return stateTrees.length > 0 && (window.__TIB_E2E__?.viewCounts?.().trees ?? 0) === stateTrees.length;
   });
 
-  await teleportTo(page, 3, 45.5, 30.5);
+  await teleportTo(page, 3, 55.5, 36.5);
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 3);
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
@@ -275,7 +281,7 @@ async function grantFeatureItems(page: Page): Promise<void> {
       y: p.y,
       gold: 0
     });
-  }, { x: scaleX(0, 45.5), y: scaleY(0, 33.5) });
+  }, { x: scaleX(0, 55.5), y: scaleY(0, 40.5) });
   await page.waitForFunction(() => {
     const ids = (window.__TIB_E2E__?.self()?.inventory ?? []).filter(Boolean).map((item) => item!.id);
     return ids.includes("flint_steel") && ids.includes("logs") && ids.includes("raw_fish");

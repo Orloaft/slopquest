@@ -35,7 +35,7 @@ test("Agility: a forced dodge negates a monster hit and grants Agility XP", asyn
   // next to a skeleton spawn so it aggros and swings.
   await page.evaluate((p) => {
     window.__TIB_E2E__?.send({ type: "e2eGrantItems", forceDodge: true, floor: 1, x: p.x, y: p.y });
-  }, { x: scaleX(1, 13), y: scaleY(1, 12) });
+  }, { x: scaleX(1, 16), y: scaleY(1, 14) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 1);
 
   const maxHp = await page.evaluate(() => window.__TIB_E2E__?.self()?.maxHp ?? 0);

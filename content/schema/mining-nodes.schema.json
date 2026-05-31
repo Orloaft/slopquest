@@ -14,8 +14,8 @@
         "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
         "kind": {
           "type": "string",
-          "enum": ["copper", "tin", "iron"],
-          "description": "Ore type; selects the vein sprite and label. Defaults to copper."
+          "enum": ["copper", "tin", "iron", "coal", "silver", "gold", "mithril", "adamant"],
+          "description": "Ore type; selects the ore yielded, the vein sprite/label, the Mining level required, and XP. See ORE_TIERS in src/shared.ts. Defaults to copper."
         },
         "at": {
           "type": "object",

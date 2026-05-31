@@ -95,6 +95,8 @@
   tags: [material]
   weight: 1
 
+# Ores smelt on a fire into bars (use.kind cook_on_fire, skill: smithing). A
+# botched smelt yields slag. XP rises with tier so the deep cave ores matter.
 - id: copper_ore
   label: Copper Ore
   icon: Cu
@@ -102,6 +104,169 @@
   stackable: true
   tags: [material]
   weight: 2
+  use:
+    kind: cook_on_fire
+    produces: copper_bar
+    burns: slag
+    skill: smithing
+    xp: 12
+
+- id: tin_ore
+  label: Tin Ore
+  icon: Sn
+  iconUrl: /icons/item-tin-ore.png
+  stackable: true
+  tags: [material]
+  weight: 2
+  use:
+    kind: cook_on_fire
+    produces: tin_bar
+    burns: slag
+    skill: smithing
+    xp: 14
+
+- id: iron_ore
+  label: Iron Ore
+  icon: Fe
+  iconUrl: /icons/item-iron-ore.png
+  stackable: true
+  tags: [material]
+  weight: 3
+  use:
+    kind: cook_on_fire
+    produces: iron_bar
+    burns: slag
+    skill: smithing
+    xp: 22
+
+- id: coal
+  label: Coal
+  icon: C
+  iconUrl: /icons/item-coal.png
+  stackable: true
+  tags: [material]
+  weight: 2
+
+- id: silver_ore
+  label: Silver Ore
+  icon: Ag
+  iconUrl: /icons/item-silver-ore.png
+  stackable: true
+  tags: [material]
+  weight: 3
+  use:
+    kind: cook_on_fire
+    produces: silver_bar
+    burns: slag
+    skill: smithing
+    xp: 30
+
+- id: gold_ore
+  label: Gold Ore
+  icon: Au
+  iconUrl: /icons/item-gold-ore.png
+  stackable: true
+  tags: [material]
+  weight: 3
+  use:
+    kind: cook_on_fire
+    produces: gold_bar
+    burns: slag
+    skill: smithing
+    xp: 45
+
+- id: mithril_ore
+  label: Mithril Ore
+  icon: Mi
+  iconUrl: /icons/item-mithril-ore.png
+  stackable: true
+  tags: [material]
+  weight: 4
+  use:
+    kind: cook_on_fire
+    produces: mithril_bar
+    burns: slag
+    skill: smithing
+    xp: 60
+
+- id: adamant_ore
+  label: Adamant Ore
+  icon: Ad
+  iconUrl: /icons/item-adamant-ore.png
+  stackable: true
+  tags: [material]
+  weight: 5
+  use:
+    kind: cook_on_fire
+    produces: adamant_bar
+    burns: slag
+    skill: smithing
+    xp: 75
+
+# Smelted metal bars — smithing stock (a future smith turns these into gear).
+- id: copper_bar
+  label: Copper Bar
+  icon: Cu
+  iconUrl: /icons/item-copper-bar.png
+  stackable: true
+  tags: [material]
+  weight: 2
+
+- id: tin_bar
+  label: Tin Bar
+  icon: Sn
+  iconUrl: /icons/item-tin-bar.png
+  stackable: true
+  tags: [material]
+  weight: 2
+
+- id: iron_bar
+  label: Iron Bar
+  icon: Fe
+  iconUrl: /icons/item-iron-bar.png
+  stackable: true
+  tags: [material]
+  weight: 3
+
+- id: silver_bar
+  label: Silver Bar
+  icon: Ag
+  iconUrl: /icons/item-silver-bar.png
+  stackable: true
+  tags: [material]
+  weight: 3
+
+- id: gold_bar
+  label: Gold Bar
+  icon: Au
+  iconUrl: /icons/item-gold-bar.png
+  stackable: true
+  tags: [material]
+  weight: 3
+
+- id: mithril_bar
+  label: Mithril Bar
+  icon: Mi
+  iconUrl: /icons/item-mithril-bar.png
+  stackable: true
+  tags: [material]
+  weight: 4
+
+- id: adamant_bar
+  label: Adamant Bar
+  icon: Ad
+  iconUrl: /icons/item-adamant-bar.png
+  stackable: true
+  tags: [material]
+  weight: 5
+
+- id: slag
+  label: Slag
+  icon: sl
+  iconUrl: /icons/item-slag.png
+  stackable: true
+  tags: [material]
+  weight: 1
 
 - id: raw_fish
   label: Raw Fish

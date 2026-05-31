@@ -370,6 +370,7 @@ export type ClientMessage =
     }
   | { type: "e2eEmitEvents"; count?: number; floor?: number; x?: number; y?: number; spread?: number }
   | { type: "e2eSimulateBackpressure"; durationMs?: number }
+  | { type: "e2eSpawnMonster"; monster?: string; floor?: number; x?: number; y?: number; zone?: string }
   | { type: "eatItem"; item: string }
   | { type: "useItem"; item: string; ctx?: UseItemCtx }
   | { type: "chat"; text: string }

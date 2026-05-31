@@ -27,7 +27,9 @@ import {
   floorCols,
   floorRows,
   isBlockedTile,
+  isRoadTile,
   isSightBlocked,
+  oreTierFor,
   isSafeZone,
   portalFor,
   tileAt,
@@ -367,6 +369,10 @@ const DEV_TOOLS = E2E_TEST || process.env.TIB_DEV === "1";
 const ALLOW_TRANSIENT_PLAYERS = E2E_TEST || process.env.TIB_ALLOW_TRANSIENT_PLAYERS === "1";
 const SNAPSHOT_RADIUS = 18;
 const SNAPSHOT_RADIUS_SQ = SNAPSHOT_RADIUS ** 2;
+// Fraction of normal aggro range at which a monster notices a player standing on
+// a road tile. Lets a weak player hug the main road and slip past most wildlife
+// while a monster that has wandered right up to the verge can still strike.
+const ROAD_AGGRO_FACTOR = 0.45;
 const MAX_VISIBLE_PLAYERS = positiveIntEnv("TIB_MAX_VISIBLE_PLAYERS", 50);
 const TREE_SNAPSHOT_RADIUS = 32;
 const TREE_SNAPSHOT_RADIUS_SQ = TREE_SNAPSHOT_RADIUS ** 2;
@@ -595,6 +601,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
     if (message.type === "cookFish") cookFish(session.player, String(message.id ?? ""));
     if (E2E_TEST && message.type === "e2eGrantItems") grantE2EItems(session.player, message);
     if (E2E_TEST && message.type === "e2eEmitEvents") emitE2EEvents(session.player, message);
+    if (E2E_TEST && message.type === "e2eSpawnMonster") spawnE2EMonster(message);
     if (E2E_TEST && message.type === "e2eSimulateBackpressure") simulateE2EBackpressure(session, message);
     if (message.type === "eatItem") eatItem(session.player, String(message.item ?? ""));
     if (message.type === "useItem") useItem(session.player, String(message.item ?? ""), message.ctx ?? {});
@@ -900,7 +907,7 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
     if (monster.deadUntil) continue; // burn may have killed it this tick
 
     // Taunt (Provoke) overrides aggro to the taunting player while it lasts.
-    let target = nearestPlayer(monster, catalog.aggro);
+    let target = nearestPlayer(monster, catalog.aggro, ROAD_AGGRO_FACTOR);
     if (monster.tauntUntil && now < monster.tauntUntil && monster.tauntBy) {
       const taunter = playerById(monster.tauntBy);
       if (taunter && !taunter.dead && taunter.floor === monster.floor && !isSafeZone(taunter.floor, taunter.x, taunter.y)) {
@@ -1860,8 +1867,13 @@ function mineNode(player: ServerPlayer, id: string): void {
     event("float", "You need a pickaxe.", player.x, player.y, player.floor, "#f7d486");
     return;
   }
-  player.targetId = null;
   const level = skillLevel(player, "mining");
+  const tier = oreTierFor(node.kind);
+  if (level < tier.reqLevel) {
+    event("float", `Requires Mining ${tier.reqLevel}.`, node.x, node.y, node.floor, "#f7d486");
+    return;
+  }
+  player.targetId = null;
   player.action = { type: "mining", nodeId: node.id, nextAt: performance.now() + miningSwingMs(level), startedAt: performance.now() };
   event("float", "You swing your pickaxe.", node.x, node.y, node.floor, "#d8a86a");
 }
@@ -2051,13 +2063,13 @@ function updateMiningAction(player: ServerPlayer, now: number): void {
   }
   if (now < action.nextAt) return;
   player.action = null;
-  if (!addInventoryItem(player, "copper_ore", 1)) {
+  const tier = oreTierFor(node.kind);
+  if (!addInventoryItem(player, tier.item, 1)) {
     systemToPlayer(player, "Your inventory is full.");
     return;
   }
-  const xp = 20;
-  addSkillXp(player, "mining", xp);
-  event("float", `+${xp} Mining`, node.x, node.y, node.floor, "#d8a86a");
+  addSkillXp(player, "mining", tier.xp);
+  event("float", `+${tier.xp} Mining`, node.x, node.y, node.floor, "#d8a86a");
 }
 
 function updateHerbingAction(player: ServerPlayer, now: number): void {
@@ -2723,6 +2735,23 @@ function spawnMonster(spawn: MonsterSpawn): void {
   addToSpatial(spatial.monsters, monster);
 }
 
+// E2E-only: drop a single monster at an exact tile and keep it from wandering
+// (wanderNextAt pushed to +Infinity), so tests get deterministic geometry for
+// aggro/road checks. It still aggros and chases normally once it has a target.
+function spawnE2EMonster(message: { type: "e2eSpawnMonster"; monster?: string; floor?: number; x?: number; y?: number; zone?: string }): void {
+  if (!E2E_TEST) return;
+  const type = String(message.monster ?? "");
+  if (!MONSTERS[type]) return;
+  if (!Number.isFinite(message.floor) || !Number.isFinite(message.x) || !Number.isFinite(message.y)) return;
+  const floor = Math.floor(Number(message.floor));
+  const x = Math.floor(Number(message.x));
+  const y = Math.floor(Number(message.y));
+  spawnMonster({ type, floor, x, y, zone: (message.zone ?? zoneAt(floor, x + 0.5, y + 0.5)) as MonsterSpawn["zone"] });
+  // The just-spawned monster is the highest id; pin it in place.
+  const monster = monsters.get(`m${nextMonsterId - 1}`);
+  if (monster) monster.wanderNextAt = Number.POSITIVE_INFINITY;
+}
+
 function respawnMonster(monster: ServerMonster): void {
   const catalog = MONSTERS[monster.type];
   if (!catalog) return;
@@ -2847,6 +2876,8 @@ function pickWanderTarget(monster: ServerMonster): Vec2 | null {
     const x = clamp(monster.homeX + Math.cos(angle) * radius, 1.5, floorCols(monster.floor) - 1.5);
     const y = clamp(monster.homeY + Math.sin(angle) * radius, 1.5, floorRows(monster.floor) - 1.5);
     if (zoneAt(monster.floor, x, y) !== monster.zone) continue;
+    // Don't loiter on the road — keeps the beaten path clearer for travellers.
+    if (isRoadTile(tileAt(monster.floor, Math.floor(x), Math.floor(y)))) continue;
     if (canStand(monster.floor, x, y)) return { x, y };
   }
   return null;
@@ -2887,16 +2918,23 @@ function canStand(floor: number, x: number, y: number): boolean {
   );
 }
 
-function nearestPlayer(monster: ServerMonster, maxDistance: number): ServerPlayer | null {
+// A player on a road tile is noticed at `roadFactor` of the monster's normal
+// aggro range — the "beaten path" stays risky near the verge but lets a weak
+// player slip down the middle of a road past most of a zone's wildlife. The
+// spatial sweep still uses the full maxDistance; the per-player threshold is
+// what shrinks, so an on-road player just outside the reduced range is skipped.
+function nearestPlayer(monster: ServerMonster, maxDistance: number, roadFactor = 1): ServerPlayer | null {
   let best: ServerPlayer | null = null;
   let bestDistSq = maxDistance * maxDistance;
+  const roadDistSq = (maxDistance * roadFactor) ** 2;
   forEachSpatial(spatial.players, monster.floor, monster.x, monster.y, maxDistance, (player) => {
     if (player.dead || player.floor !== monster.floor) return;
     const distSq = distanceSq(monster, player);
-    if (distSq < bestDistSq) {
-      best = player;
-      bestDistSq = distSq;
-    }
+    if (distSq >= bestDistSq) return; // out of aggro, or not closer than the current pick
+    // On-road players are only noticed inside the reduced road range.
+    if (roadFactor < 1 && distSq > roadDistSq && isRoadTile(tileAt(player.floor, Math.floor(player.x), Math.floor(player.y)))) return;
+    best = player;
+    bestDistSq = distSq;
   });
   return best;
 }

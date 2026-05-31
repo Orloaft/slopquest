@@ -17,7 +17,7 @@ export type SkillId =
   | "ranged"
   | "foraging";
 
-export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown" | "marsh" | "badlands" | "desert" | "beach" | "jungle";
+export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown" | "marsh" | "badlands" | "desert" | "beach" | "jungle" | "deepMine";
 
 export type Capability = "chop_tree" | "fish" | "mine" | "ranged";
 

@@ -22,7 +22,7 @@ test("buying the survey unlocks fog-of-war reveal and the [M] map screen", async
   // stand in the marsh so the walk-reveal perk inks tiles around the player.
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "broken_reach_map", qty: 1 }] }));
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.inventory ?? []).some((i) => i?.id === "broken_reach_map"));
-  await place(page, 5, 34.5, 15.5);
+  await place(page, 5, 42.5, 18.5);
   await page.waitForTimeout(600); // let a few update ticks ink the fog
 
   await focusGame(page);

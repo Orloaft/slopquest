@@ -3,38 +3,126 @@
 #
 # at        — the rock tile coordinates (sits on an impassable rock tile).
 # approach  — the standing tile next to the rock (player walks here to mine).
-# kind      — ore type (copper | tin | iron); picks the vein sprite. Defaults to copper.
+# kind      — ore tier: copper | tin | iron | coal | silver | gold | mithril | adamant.
+#             Selects the ore yielded, the Mining level required, and XP (see
+#             ORE_TIERS in src/shared.ts). Defaults to copper. Higher tiers live
+#             in the caves; surface veins stay copper/tin/iron.
 
-# Ore outcrops scattered through Northwood (floor 3) — the starter veins,
-# moved out of the Waystone town and spread across the wood.
+# Ore outcrops scattered through Northwood (floor 3, enlarged 110x72) — the
+# starter veins, spread across the wood. (Node ids keep their original tags.)
 - id: mine-3-8-49
   kind: copper
-  at: { floor: 3, x: 8.5, y: 49.5 }
-  approach: { x: 9.5, y: 49.5 }
+  at: { floor: 3, x: 10.5, y: 59.5 }
+  approach: { x: 11.5, y: 59.5 }
 
 - id: mine-3-80-12
   kind: tin
-  at: { floor: 3, x: 80.5, y: 12.5 }
-  approach: { x: 81.5, y: 12.5 }
+  at: { floor: 3, x: 98.5, y: 14.5 }
+  approach: { x: 99.5, y: 14.5 }
 
 - id: mine-3-78-47
   kind: iron
-  at: { floor: 3, x: 78.5, y: 47.5 }
-  approach: { x: 79.5, y: 47.5 }
+  at: { floor: 3, x: 95.5, y: 56.5 }
+  approach: { x: 96.5, y: 56.5 }
+
+# Surface cave pocket in the north wood (floor 3): a mid-tier recess off the trail.
+- id: mine-3-54-6
+  kind: iron
+  at: { floor: 3, x: 66.5, y: 7.5 }
+  approach: { x: 66.5, y: 8.5 }
+
+- id: mine-3-50-6
+  kind: coal
+  at: { floor: 3, x: 61.5, y: 7.5 }
+  approach: { x: 61.5, y: 8.5 }
 
 # Ore veins embedded in the Searing Badlands canyon walls (floor 6, 90x60):
 # the vein sits on the cliff face, mined from the floor below it.
 - id: mine-6-5-40
   kind: copper
-  at: { floor: 6, x: 5.5, y: 40.5 }
-  approach: { x: 5.5, y: 41.5 }
+  at: { floor: 6, x: 6.5, y: 48.5 }
+  approach: { x: 6.5, y: 49.5 }
 
 - id: mine-6-13-40
   kind: copper
-  at: { floor: 6, x: 13.5, y: 40.5 }
-  approach: { x: 13.5, y: 41.5 }
+  at: { floor: 6, x: 16.5, y: 48.5 }
+  approach: { x: 16.5, y: 49.5 }
 
 - id: mine-6-41-43
   kind: iron
-  at: { floor: 6, x: 41.5, y: 43.5 }
-  approach: { x: 41.5, y: 44.5 }
+  at: { floor: 6, x: 50.5, y: 52.5 }
+  approach: { x: 50.5, y: 53.5 }
+
+# The Deepdelve Mine (floor 10, 90x60): veins descend in tier as you go deeper.
+# Entry chamber (safe) holds copper/tin; iron/coal/silver/gold sit in the worked
+# chambers; mithril & adamant wait in the deepest pocket. Each `at` is an outcrop
+# (r) carved in src/shared.ts floor-10 block; `approach` is the cleared tile beside it.
+- id: mine-10-6-6
+  kind: copper
+  at: { floor: 10, x: 6.5, y: 6.5 }
+  approach: { x: 6.5, y: 7.5 }
+
+- id: mine-10-17-6
+  kind: tin
+  at: { floor: 10, x: 17.5, y: 6.5 }
+  approach: { x: 17.5, y: 7.5 }
+
+- id: mine-10-32-6
+  kind: iron
+  at: { floor: 10, x: 32.5, y: 6.5 }
+  approach: { x: 32.5, y: 7.5 }
+
+- id: mine-10-41-14
+  kind: iron
+  at: { floor: 10, x: 41.5, y: 14.5 }
+  approach: { x: 40.5, y: 14.5 }
+
+- id: mine-10-14-31
+  kind: coal
+  at: { floor: 10, x: 14.5, y: 31.5 }
+  approach: { x: 14.5, y: 32.5 }
+
+- id: mine-10-23-39
+  kind: coal
+  at: { floor: 10, x: 23.5, y: 39.5 }
+  approach: { x: 23.5, y: 38.5 }
+
+- id: mine-10-50-19
+  kind: silver
+  at: { floor: 10, x: 50.5, y: 19.5 }
+  approach: { x: 50.5, y: 20.5 }
+
+- id: mine-10-60-28
+  kind: silver
+  at: { floor: 10, x: 60.5, y: 28.5 }
+  approach: { x: 60.5, y: 27.5 }
+
+- id: mine-10-70-32
+  kind: gold
+  at: { floor: 10, x: 70.5, y: 32.5 }
+  approach: { x: 70.5, y: 33.5 }
+
+- id: mine-10-81-43
+  kind: gold
+  at: { floor: 10, x: 81.5, y: 43.5 }
+  approach: { x: 81.5, y: 42.5 }
+
+- id: mine-10-42-50
+  kind: mithril
+  at: { floor: 10, x: 42.5, y: 50.5 }
+  approach: { x: 42.5, y: 51.5 }
+
+- id: mine-10-53-57
+  kind: mithril
+  at: { floor: 10, x: 53.5, y: 57.5 }
+  approach: { x: 53.5, y: 56.5 }
+
+- id: mine-10-47-57
+  kind: adamant
+  at: { floor: 10, x: 47.5, y: 57.5 }
+  approach: { x: 47.5, y: 56.5 }
+
+- id: mine-10-44-49
+  kind: adamant
+  at: { floor: 10, x: 44.5, y: 49.5 }
+  approach: { x: 44.5, y: 50.5 }

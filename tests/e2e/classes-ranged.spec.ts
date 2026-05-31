@@ -14,7 +14,7 @@ test("a hunting bow fires ranged attacks that train the Ranged skill", async ({ 
   // Nova test one-shots the NW one, so target a skeleton it never touches.
   await page.evaluate((p) => {
     window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "hunting_bow", qty: 1 }], floor: 1, x: p.x, y: p.y });
-  }, { x: scaleX(1, 69.5), y: scaleY(1, 24.5) });
+  }, { x: scaleX(1, 84.5), y: scaleY(1, 29.5) });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
     return Boolean(me && me.floor === 1 && (me.inventory ?? []).some((i) => i?.id === "hunting_bow"));
@@ -60,7 +60,7 @@ test("a class unlocks at its trainer, equips in town, and is blocked outside tow
   // Meet the Vanguard thresholds (Melee 15 / Defense 15) and stand by Captain Doran.
   await page.evaluate((p) => {
     window.__TIB_E2E__?.send({ type: "e2eGrantItems", skills: { attack: 99999, defense: 99999 }, floor: 0, x: p.x, y: p.y });
-  }, { x: scaleX(0, 42.5), y: scaleY(0, 38.5) });
+  }, { x: scaleX(0, 51.5), y: scaleY(0, 46.5) });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
     return Boolean(me && me.floor === 0 && (me.skills.find((s) => s.id === "attack")?.level ?? 0) >= 15);
@@ -76,7 +76,7 @@ test("a class unlocks at its trainer, equips in town, and is blocked outside tow
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.abilities ?? []).some((a) => a.id === "provoke"));
 
   // Leaving town blocks class changes: the toggle is rejected and the stance holds.
-  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: p.x, y: p.y }), { x: scaleX(1, 13), y: scaleY(1, 12) });
+  await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: p.x, y: p.y }), { x: scaleX(1, 16), y: scaleY(1, 14) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 1);
   const version = await page.evaluate(() => window.__TIB_E2E__?.stateVersion() ?? 0);
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "setClass", classKey: "adventurer" }));
@@ -94,10 +94,10 @@ test("gathering trains Foraging and heavy loads register as weight", async ({ pa
   await joinFreshCharacter(page);
 
   // Foraging XP from a herb patch.
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 12.5, y: 9.5 }));
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 14.5, y: 11.5 }));
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();
-    return Boolean(me && me.floor === 3 && Math.hypot(me.x - 12.5, me.y - 9.5) < 0.6);
+    return Boolean(me && me.floor === 3 && Math.hypot(me.x - 14.5, me.y - 11.5) < 0.6);
   });
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "gatherHerb", id: "herb-3-11-9" }));
   await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.skills.find((s) => s.id === "foraging")?.xp ?? 0) > 0);

@@ -9,108 +9,127 @@ monsters:
   # Southgate Cemetery (90x60): skeletons/ghouls roam the fenced grave plots and
   # the winding paths between them. (13,12) is the NW-plot skeleton the dodge/
   # ranged e2e tests drop next to.
-  - { type: skeleton,      at: { floor: 1, x: 13, y: 12 }, zone: cemetery }
-  - { type: ghoul,         at: { floor: 1, x: 30, y: 22 }, zone: cemetery }
-  - { type: grave_revenant, at: { floor: 1, x: 45, y: 15 }, zone: cemetery }
-  - { type: skeleton,      at: { floor: 1, x: 71, y: 24 }, zone: cemetery }
-  - { type: ghoul,         at: { floor: 1, x: 18, y: 48 }, zone: cemetery }
-  - { type: pale_banshee,  at: { floor: 1, x: 54, y: 43 }, zone: cemetery }
-  - { type: skeleton,      at: { floor: 1, x: 70, y: 49 }, zone: cemetery }
+  - { type: skeleton,      at: { floor: 1, x: 16, y: 14 }, zone: cemetery }
+  - { type: ghoul,         at: { floor: 1, x: 37, y: 26 }, zone: cemetery }
+  - { type: grave_revenant, at: { floor: 1, x: 55, y: 18 }, zone: cemetery }
+  - { type: skeleton,      at: { floor: 1, x: 87, y: 29 }, zone: cemetery }
+  - { type: ghoul,         at: { floor: 1, x: 22, y: 58 }, zone: cemetery }
+  - { type: pale_banshee,  at: { floor: 1, x: 66, y: 52 }, zone: cemetery }
+  - { type: skeleton,      at: { floor: 1, x: 86, y: 59 }, zone: cemetery }
   # The Ashen Crypt (90x60): undead lurk in the chambers; the Ashen Warden boss
   # holds the far-east chamber.
-  - { type: skeleton,      at: { floor: 2, x: 10, y: 9  }, zone: crypt }
-  - { type: ghoul,         at: { floor: 2, x: 12, y: 34 }, zone: crypt }
-  - { type: grave_revenant, at: { floor: 2, x: 23, y: 42 }, zone: crypt }
-  - { type: skeleton,      at: { floor: 2, x: 31, y: 16 }, zone: crypt }
-  - { type: crypt_sentinel, at: { floor: 2, x: 44, y: 18 }, zone: crypt }
-  - { type: ghoul,         at: { floor: 2, x: 53, y: 31 }, zone: crypt }
-  - { type: pale_banshee,  at: { floor: 2, x: 65, y: 39 }, zone: crypt }
-  - { type: crypt_sentinel, at: { floor: 2, x: 69, y: 23 }, zone: crypt }
-  - { type: boss,          at: { floor: 2, x: 76, y: 29 }, zone: crypt }
-  # Northwood (90x60): the same roster spread thin across the expanded wood —
-  # gentle critters near the Waystone arrival in the south, tougher greenskins
-  # deeper north and out toward the marsh/badlands gates.
-  - { type: rat,           at: { floor: 3, x: 38, y: 52 }, zone: woods }
-  - { type: spider,        at: { floor: 3, x: 52, y: 52 }, zone: woods }
-  - { type: goblin_scout,  at: { floor: 3, x: 28, y: 46 }, zone: woods }
-  - { type: goblin_scout,  at: { floor: 3, x: 60, y: 47 }, zone: woods }
-  - { type: goblin_scout,  at: { floor: 3, x: 16, y: 38 }, zone: woods }
-  - { type: wolf,          at: { floor: 3, x: 12, y: 50 }, zone: woods }
-  - { type: wolf,          at: { floor: 3, x: 74, y: 49 }, zone: woods }
-  - { type: wolf,          at: { floor: 3, x: 34, y: 40 }, zone: woods }
-  - { type: wolf,          at: { floor: 3, x: 58, y: 34 }, zone: woods }
-  - { type: wild_boar,     at: { floor: 3, x: 13, y: 48 }, zone: woods }
-  - { type: thorn_hedgehog, at: { floor: 3, x: 72, y: 46 }, zone: woods }
-  - { type: forest_slime,  at: { floor: 3, x: 41, y: 50 }, zone: woods }
-  - { type: forest_spider, at: { floor: 3, x: 22, y: 22 }, zone: woods }
-  - { type: sapling_deer,  at: { floor: 3, x: 56, y: 39 }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 24, y: 52 }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 54, y: 55 }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 10, y: 42 }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 77, y: 40 }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 47, y: 44 }, zone: woods }
-  - { type: goblin,        at: { floor: 3, x: 29, y: 22 }, zone: woods }
-  - { type: goblin,        at: { floor: 3, x: 60, y: 24 }, zone: woods }
-  - { type: goblin_shaman, at: { floor: 3, x: 18, y: 9  }, zone: woods }
-  - { type: goblin_shaman, at: { floor: 3, x: 74, y: 10 }, zone: woods }
-  - { type: orc,           at: { floor: 3, x: 42, y: 7  }, zone: woods }
-  - { type: orc,           at: { floor: 3, x: 56, y: 12 }, zone: woods }
-  - { type: orc,           at: { floor: 3, x: 82, y: 24 }, zone: woods }
-  - { type: mushroom_brute, at: { floor: 3, x: 34, y: 15 }, zone: woods }
-  - { type: dire_wolf,     at: { floor: 3, x: 73, y: 13 }, zone: woods }
-  - { type: dire_wolf,     at: { floor: 3, x: 79, y: 47 }, zone: woods }
-  - { type: forest_pixie,  at: { floor: 3, x: 42, y: 30 }, zone: woods }
-  - { type: bone_druid,    at: { floor: 3, x: 72, y: 11 }, zone: woods }
-  - { type: bog_wraith,    at: { floor: 3, x: 67, y: 22 }, zone: woods }
-  - { type: ancient_treant, at: { floor: 3, x: 45, y: 27 }, zone: woods }
+  - { type: skeleton,      at: { floor: 2, x: 12, y: 11 }, zone: crypt }
+  - { type: ghoul,         at: { floor: 2, x: 15, y: 41 }, zone: crypt }
+  - { type: grave_revenant, at: { floor: 2, x: 23, y: 45 }, zone: crypt }
+  - { type: skeleton,      at: { floor: 2, x: 38, y: 19 }, zone: crypt }
+  - { type: crypt_sentinel, at: { floor: 2, x: 48, y: 17 }, zone: crypt }
+  - { type: ghoul,         at: { floor: 2, x: 65, y: 37 }, zone: crypt }
+  - { type: pale_banshee,  at: { floor: 2, x: 83, y: 43 }, zone: crypt }
+  - { type: crypt_sentinel, at: { floor: 2, x: 84, y: 28 }, zone: crypt }
+  - { type: boss,          at: { floor: 2, x: 93, y: 35 }, zone: crypt }
+  # Northwood (enlarged 110x72): the roster spread across the larger wood as a
+  # danger gradient — gentle critters near the southern Waystone arrival, tougher
+  # greenskins deeper north and out toward the marsh/badlands gates.
+  - { type: rat,           at: { floor: 3, x: 46, y: 62 }, zone: woods }
+  - { type: spider,        at: { floor: 3, x: 64, y: 62 }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 34, y: 55 }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 73, y: 56 }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 20, y: 46 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 15, y: 60 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 90, y: 59 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 42, y: 48 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 71, y: 41 }, zone: woods }
+  - { type: wild_boar,     at: { floor: 3, x: 16, y: 58 }, zone: woods }
+  - { type: thorn_hedgehog, at: { floor: 3, x: 88, y: 55 }, zone: woods }
+  - { type: forest_slime,  at: { floor: 3, x: 48, y: 62 }, zone: woods }
+  - { type: forest_spider, at: { floor: 3, x: 24, y: 23 }, zone: woods }
+  - { type: sapling_deer,  at: { floor: 3, x: 68, y: 47 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 29, y: 62 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 66, y: 66 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 12, y: 50 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 93, y: 47 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 57, y: 53 }, zone: woods }
+  - { type: goblin,        at: { floor: 3, x: 34, y: 25 }, zone: woods }
+  - { type: goblin,        at: { floor: 3, x: 73, y: 29 }, zone: woods }
+  - { type: goblin_shaman, at: { floor: 3, x: 22, y: 10 }, zone: woods }
+  - { type: goblin_shaman, at: { floor: 3, x: 90, y: 12 }, zone: woods }
+  - { type: orc,           at: { floor: 3, x: 51, y: 8  }, zone: woods }
+  - { type: orc,           at: { floor: 3, x: 68, y: 14 }, zone: woods }
+  - { type: orc,           at: { floor: 3, x: 100, y: 29 }, zone: woods }
+  - { type: mushroom_brute, at: { floor: 3, x: 42, y: 18 }, zone: woods }
+  - { type: dire_wolf,     at: { floor: 3, x: 89, y: 16 }, zone: woods }
+  - { type: dire_wolf,     at: { floor: 3, x: 97, y: 56 }, zone: woods }
+  # Pixie drifts in the crossroads clearing but off the road tile itself.
+  - { type: forest_pixie,  at: { floor: 3, x: 51, y: 40 }, zone: woods }
+  - { type: bone_druid,    at: { floor: 3, x: 88, y: 13 }, zone: woods }
+  - { type: bog_wraith,    at: { floor: 3, x: 79, y: 23 }, zone: woods }
+  # Deep-wood elite — pulled off the central spine into the NE groves so it
+  # guards the wood rather than camping the safe artery.
+  - { type: ancient_treant, at: { floor: 3, x: 81, y: 19 }, zone: woods }
   # The Sunken Marsh (floor 5): skitterers patrol the causeway; mire spitters
   # are anchored on deep water and fire across it.
-  - { type: skitterer,     at: { floor: 5, x: 48, y: 20 }, zone: marsh }
-  - { type: skitterer,     at: { floor: 5, x: 35, y: 18 }, zone: marsh }
-  - { type: skitterer,     at: { floor: 5, x: 26, y: 22 }, zone: marsh }
-  - { type: skitterer,     at: { floor: 5, x: 15, y: 26 }, zone: marsh }
-  - { type: skitterer,     at: { floor: 5, x: 14, y: 35 }, zone: marsh }
-  - { type: mire_spitter,  at: { floor: 5, x: 58, y: 26 }, zone: marsh }
-  - { type: mire_spitter,  at: { floor: 5, x: 30, y: 20 }, zone: marsh }
-  - { type: mire_spitter,  at: { floor: 5, x: 20, y: 32 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 59, y: 24 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 43, y: 22 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 32, y: 26 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 18, y: 31 }, zone: marsh }
+  - { type: skitterer,     at: { floor: 5, x: 17, y: 42 }, zone: marsh }
+  - { type: mire_spitter,  at: { floor: 5, x: 71, y: 31 }, zone: marsh }
+  - { type: mire_spitter,  at: { floor: 5, x: 37, y: 24 }, zone: marsh }
+  - { type: mire_spitter,  at: { floor: 5, x: 24, y: 38 }, zone: marsh }
   # The Searing Badlands (floor 6): scavengers patrol in pairs (pack aggro);
   # dust burrowers lie hidden until a player steps on them.
-  - { type: canyon_scavenger, at: { floor: 6, x: 8,  y: 33 }, zone: badlands }
-  - { type: canyon_scavenger, at: { floor: 6, x: 11, y: 33 }, zone: badlands }
-  - { type: canyon_scavenger, at: { floor: 6, x: 41, y: 34 }, zone: badlands }
-  - { type: canyon_scavenger, at: { floor: 6, x: 44, y: 34 }, zone: badlands }
-  - { type: dust_burrower,    at: { floor: 6, x: 24, y: 18 }, zone: badlands }
-  - { type: dust_burrower,    at: { floor: 6, x: 35, y: 33 }, zone: badlands }
+  - { type: canyon_scavenger, at: { floor: 6, x: 10,  y: 40 }, zone: badlands }
+  - { type: canyon_scavenger, at: { floor: 6, x: 13, y: 40 }, zone: badlands }
+  - { type: canyon_scavenger, at: { floor: 6, x: 50, y: 41 }, zone: badlands }
+  - { type: canyon_scavenger, at: { floor: 6, x: 54, y: 41 }, zone: badlands }
+  - { type: dust_burrower,    at: { floor: 6, x: 29, y: 22 }, zone: badlands }
+  - { type: dust_burrower,    at: { floor: 6, x: 43, y: 40 }, zone: badlands }
   # The Sunken Desert (floor 7): fast dune skitterers + ruin-bound sun wraiths.
-  - { type: dune_skitterer, at: { floor: 7, x: 24, y: 12 }, zone: desert }
-  - { type: dune_skitterer, at: { floor: 7, x: 36, y: 18 }, zone: desert }
-  - { type: dune_skitterer, at: { floor: 7, x: 20, y: 27 }, zone: desert }
-  - { type: dune_skitterer, at: { floor: 7, x: 56, y: 27 }, zone: desert }
-  - { type: sun_wraith,     at: { floor: 7, x: 30, y: 18 }, zone: desert }
-  - { type: sun_wraith,     at: { floor: 7, x: 52, y: 22 }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 29, y: 14 }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 44, y: 22 }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 24, y: 32 }, zone: desert }
+  - { type: dune_skitterer, at: { floor: 7, x: 68, y: 32 }, zone: desert }
+  - { type: sun_wraith,     at: { floor: 7, x: 37, y: 22 }, zone: desert }
+  - { type: sun_wraith,     at: { floor: 7, x: 64, y: 26 }, zone: desert }
   # The Sunken Beach (floor 8): fast reef prowlers in the open sand.
-  - { type: reef_prowler, at: { floor: 8, x: 16, y: 20 }, zone: beach }
-  - { type: reef_prowler, at: { floor: 8, x: 34, y: 12 }, zone: beach }
-  - { type: reef_prowler, at: { floor: 8, x: 58, y: 24 }, zone: beach }
-  - { type: reef_prowler, at: { floor: 8, x: 70, y: 28 }, zone: beach }
+  - { type: reef_prowler, at: { floor: 8, x: 20, y: 24 }, zone: beach }
+  - { type: reef_prowler, at: { floor: 8, x: 42, y: 14 }, zone: beach }
+  - { type: reef_prowler, at: { floor: 8, x: 71, y: 29 }, zone: beach }
+  - { type: reef_prowler, at: { floor: 8, x: 85, y: 35 }, zone: beach }
   # The Untamed Jungle (floor 9): hidden stalkers ambush; totem wraiths fire down paths.
-  - { type: venomous_stalker, at: { floor: 9, x: 14, y: 20 }, zone: jungle }
-  - { type: venomous_stalker, at: { floor: 9, x: 38, y: 9  }, zone: jungle }
-  - { type: totem_wraith,     at: { floor: 9, x: 21, y: 8  }, zone: jungle }
-  - { type: totem_wraith,     at: { floor: 9, x: 49, y: 22 }, zone: jungle }
+  - { type: venomous_stalker, at: { floor: 9, x: 17, y: 24 }, zone: jungle }
+  - { type: venomous_stalker, at: { floor: 9, x: 46, y: 11  }, zone: jungle }
+  - { type: totem_wraith,     at: { floor: 9, x: 26, y: 10  }, zone: jungle }
+  - { type: totem_wraith,     at: { floor: 9, x: 60, y: 26 }, zone: jungle }
+  # The Deepdelve Mine (floor 10): danger rises with depth. Cave scavengers
+  # patrol the iron/coal chambers in pairs; burrowers ambush the mid corridors;
+  # undead haunt the silver/gold deeps; crypt sentinels guard the mithril/adamant
+  # pocket. The entry chamber (safe zone) stays clear.
+  - { type: canyon_scavenger, at: { floor: 10, x: 34, y: 9  }, zone: deepMine }
+  - { type: canyon_scavenger, at: { floor: 10, x: 37, y: 9  }, zone: deepMine }
+  - { type: canyon_scavenger, at: { floor: 10, x: 16, y: 34 }, zone: deepMine }
+  - { type: canyon_scavenger, at: { floor: 10, x: 19, y: 34 }, zone: deepMine }
+  - { type: dust_burrower,    at: { floor: 10, x: 20, y: 31 }, zone: deepMine }
+  - { type: dust_burrower,    at: { floor: 10, x: 46, y: 32 }, zone: deepMine }
+  - { type: skeleton,         at: { floor: 10, x: 52, y: 24 }, zone: deepMine }
+  - { type: skeleton,         at: { floor: 10, x: 58, y: 22 }, zone: deepMine }
+  - { type: ghoul,            at: { floor: 10, x: 72, y: 38 }, zone: deepMine }
+  - { type: skeleton,         at: { floor: 10, x: 78, y: 40 }, zone: deepMine }
+  - { type: crypt_sentinel,   at: { floor: 10, x: 45, y: 53 }, zone: deepMine }
+  - { type: crypt_sentinel,   at: { floor: 10, x: 51, y: 55 }, zone: deepMine }
 
 trees:
-  - { type: oak,  at: { floor: 0, x: 20.5, y: 47.5 } }
-  - { type: oak,  at: { floor: 0, x: 76.5, y: 50.5 } }
-  - { type: pine, at: { floor: 0, x: 78.5, y: 14.5 } }
-  - { type: oak,  at: { floor: 3, x: 18.5, y: 6.4  } }
-  - { type: pine, at: { floor: 3, x: 35.4, y: 12.2 } }
-  - { type: pine, at: { floor: 3, x: 64.3, y: 7.8  } }
-  - { type: oak,  at: { floor: 3, x: 6.5,  y: 36.4 } }
-  - { type: pine, at: { floor: 3, x: 50.4, y: 33.2 } }
-  - { type: pine, at: { floor: 3, x: 83.8, y: 38.6 } }
-  - { type: pine, at: { floor: 3, x: 22.3, y: 54.8 } }
-  - { type: pine, at: { floor: 3, x: 66.6, y: 53.8 } }
-  - { type: oak,  at: { floor: 3, x: 52.2, y: 46.3 } }
-  - { type: oak,  at: { floor: 4, x: 12.5, y: 52.5 } }
-  - { type: pine, at: { floor: 4, x: 78.5, y: 18.5 } }
+  - { type: oak,  at: { floor: 0, x: 25.1, y: 57.0 } }
+  - { type: oak,  at: { floor: 0, x: 93.5, y: 60.6 } }
+  - { type: pine, at: { floor: 0, x: 95.9, y: 17.4 } }
+  - { type: oak,  at: { floor: 3, x: 22.6, y: 7.7  } }
+  - { type: pine, at: { floor: 3, x: 43.3, y: 14.6 } }
+  - { type: pine, at: { floor: 3, x: 78.6, y: 9.4  } }
+  - { type: oak,  at: { floor: 3, x: 7.9,  y: 43.7 } }
+  - { type: pine, at: { floor: 3, x: 61.6, y: 39.8 } }
+  - { type: pine, at: { floor: 3, x: 102.4, y: 46.3 } }
+  - { type: pine, at: { floor: 3, x: 27.3, y: 65.8 } }
+  - { type: pine, at: { floor: 3, x: 81.4, y: 64.6 } }
+  - { type: oak,  at: { floor: 3, x: 63.8, y: 55.6 } }
+  - { type: oak,  at: { floor: 4, x: 15.3, y: 63.0 } }
+  - { type: pine, at: { floor: 4, x: 95.9, y: 22.2 } }

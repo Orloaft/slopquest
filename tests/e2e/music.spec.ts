@@ -10,13 +10,13 @@ test("zone music: each floor + safe outpost selects its track", async ({ page })
 
   await expectTrack(page, "garden"); // Waystone
 
-  await teleport(page, 3, 45.5, 30.5); // forest already in expanded coords
+  await teleport(page, 3, 55.5, 36.5); // forest crossroads (110x72)
   await expectTrack(page, "harmony");
 
   await teleport(page, 5, 55.5, 25.5); // marsh causeway (not the safe hut)
   await expectTrack(page, "swamp-fever");
 
-  await teleport(page, 5, scaleX(5, 8), scaleY(5, 10)); // Alchemist's Hut outpost
+  await teleport(page, 5, scaleX(5, 5.5), scaleY(5, 14.5)); // Alchemist's Hut outpost
   await expectTrack(page, "serenade");
 
   await teleport(page, 6, scaleX(6, 20), scaleY(6, 18)); // badlands canyon
