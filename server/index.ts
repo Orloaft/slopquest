@@ -92,17 +92,11 @@ import type {
 
 type FishingNodeRuntime = (typeof FISHING_NODES)[number];
 type MiningNodeRuntime = (typeof MINING_NODES)[number];
-type ClassAbilityHandler = (
-  player: ServerPlayer,
-  id: string,
-  spec: AbilitySpec,
-  now: number,
-  manaCost: number
-) => void;
-
 interface AbilityResolution {
   origin: Vec2;
   targets: ServerMonster[];
+  targetId: string | null;
+  heal: number;
 }
 
 interface StaticSpatialIndex {
@@ -959,62 +953,40 @@ function useClassAbility(player: ServerPlayer, id: string): void {
   if (now < (player.abilityCooldowns[id] ?? 0)) return;
   const manaCost = spec.manaCost ?? 0;
 
-  if (tryUseComposedAbility(player, id, spec, now, manaCost)) return;
-
-  const handler = CLASS_ABILITY_HANDLERS[id];
-  if (handler) {
-    handler(player, id, spec, now, manaCost);
-    return;
-  }
-
-  // Offensive single-target abilities: damage the current target.
-  if (spec.damage) {
-    const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
-    if (!monster || monster.deadUntil || monster.floor !== player.floor) return;
-    const range = spec.range ?? classOf(player).range;
-    if (distance(player, monster) > range) return;
-    if (player.mana < manaCost) return;
-    const skill = spec.skill ?? "attack";
-    const isRanged = skill === "ranged";
-    if (isRanged && !hasLineOfSight(player.floor, player.x, player.y, monster.x, monster.y)) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    let damage = roll(spec.damage) + skillLevel(player, skill) + wellFedPower(player);
-    // Weaken (Sun-Scorched Wraith) saps physical strikes, not magic.
-    if (skill !== "magic") damage = Math.max(1, Math.round(damage * physicalMult(player)));
-    // Backstab: 2.5x when striking from behind (player faces the monster's back).
-    if (id === "backstab" && player.dir === monster.dir) {
-      damage = Math.round(damage * 2.5);
-      event("float", "Backstab!", monster.x, monster.y - 0.6, monster.floor, "#ffd166");
-    }
-    addSkillXp(player, skill, Math.max(1, Math.floor(damage * 1.5)));
-    if (isRanged) fireProjectile(player, monster, damage, spec.effectKind ?? "arrow");
-    else damageMonster(player, monster, damage, spec.effectKind ?? "flare");
-    // Pinning Shot: snare the struck target in place.
-    if (id === "pinning_shot" && !monster.deadUntil) {
-      monster.snareUntil = now + spec.durationMs;
-      event("float", "Pinned!", monster.x, monster.y - 0.6, monster.floor, "#cfe8a0");
-    }
-    return;
-  }
-
+  tryUseComposedAbility(player, spec, now, manaCost);
 }
 
-function tryUseComposedAbility(player: ServerPlayer, id: string, spec: AbilitySpec, now: number, manaCost: number): boolean {
+function tryUseComposedAbility(player: ServerPlayer, spec: AbilitySpec, now: number, manaCost: number): boolean {
   if (!spec.targeting || !spec.effects) return false;
   const resolution = resolveAbilityTargeting(player, spec);
   if (!resolution) return true;
   if (!abilityGuardsPass(player, spec)) return true;
   if (player.mana < manaCost) return true;
 
-  player.abilityCooldowns[id] = now + spec.cooldownMs;
+  player.abilityCooldowns[spec.id] = now + spec.cooldownMs;
   player.mana -= manaCost;
+
+  if (spec.projectile) {
+    event(
+      "projectile",
+      spec.projectile.kind,
+      resolution.origin.x,
+      resolution.origin.y,
+      player.floor,
+      spec.projectile.color ?? null,
+      player.id,
+      spec.projectile.targetEnemy ? resolution.targetId : null,
+      { fromX: player.x, fromY: player.y }
+    );
+  }
 
   let affected = 0;
   for (const effect of spec.effects) affected += applyAbilityEffect(player, resolution, effect, spec, now);
   if (spec.vfx) event("effect", spec.vfx.effectKind, resolution.origin.x, resolution.origin.y, player.floor, spec.vfx.color ?? null, player.id);
   if (spec.float) {
-    const text = (affected === 0 && spec.float.noTargetsText ? spec.float.noTargetsText : spec.float.text).replaceAll("{name}", player.name);
+    const text = (affected === 0 && spec.float.noTargetsText ? spec.float.noTargetsText : spec.float.text)
+      .replaceAll("{name}", player.name)
+      .replaceAll("{heal}", String(resolution.heal));
     event("float", text, resolution.origin.x, resolution.origin.y + (spec.float.yOffset ?? -0.5), player.floor, spec.float.color);
   }
   return true;
@@ -1023,11 +995,40 @@ function tryUseComposedAbility(player: ServerPlayer, id: string, spec: AbilitySp
 function resolveAbilityTargeting(player: ServerPlayer, spec: AbilitySpec): AbilityResolution | null {
   if (!spec.targeting) return null;
   if (spec.targeting.mode === "self" || spec.targeting.mode === "dash") {
-    return { origin: { x: player.x, y: player.y }, targets: [] };
+    return { origin: { x: player.x, y: player.y }, targets: [], targetId: null, heal: 0 };
+  }
+  if (spec.targeting.mode === "enemy") {
+    const monster = player.targetId == null ? undefined : monsters.get(player.targetId);
+    if (!monster || monster.deadUntil || monster.floor !== player.floor) return null;
+    const range = spec.targeting.range ?? spec.range ?? classOf(player).range;
+    if (distance(player, monster) > range) return null;
+    if (spec.targeting.requiresLineOfSight && !hasLineOfSight(player.floor, player.x, player.y, monster.x, monster.y)) return null;
+    return { origin: { x: monster.x, y: monster.y }, targets: [monster], targetId: monster.id, heal: 0 };
   }
   if (spec.targeting.mode === "aoe_self") {
     const targets = monstersInRadius(player.floor, player.x, player.y, spec.targeting.radius);
-    return { origin: { x: player.x, y: player.y }, targets };
+    return { origin: { x: player.x, y: player.y }, targets, targetId: null, heal: 0 };
+  }
+  if (spec.targeting.mode === "aoe_front") {
+    const dir = DIR_VECTORS[player.dir];
+    const x = player.x + dir.x * spec.targeting.offset;
+    const y = player.y + dir.y * spec.targeting.offset;
+    return { origin: { x, y }, targets: monstersInRadius(player.floor, x, y, spec.targeting.radius), targetId: null, heal: 0 };
+  }
+  if (spec.targeting.mode === "aoe_point") {
+    const target = player.targetId == null ? undefined : monsters.get(player.targetId);
+    if (target && !target.deadUntil && target.floor === player.floor && distance(player, target) <= (spec.targeting.range ?? spec.range ?? Infinity)) {
+      return {
+        origin: { x: target.x, y: target.y },
+        targets: monstersInRadius(player.floor, target.x, target.y, spec.targeting.radius),
+        targetId: target.id,
+        heal: 0
+      };
+    }
+    const dir = DIR_VECTORS[player.dir];
+    const x = player.x + dir.x * spec.targeting.offset;
+    const y = player.y + dir.y * spec.targeting.offset;
+    return { origin: { x, y }, targets: monstersInRadius(player.floor, x, y, spec.targeting.radius), targetId: null, heal: 0 };
   }
   return null;
 }
@@ -1046,10 +1047,53 @@ function applyAbilityEffect(
   spec: AbilitySpec,
   now: number
 ): number {
+  if (effect.kind === "damage") {
+    let hits = 0;
+    for (const monster of resolution.targets) {
+      const damageRange = effect.amount ?? spec.damage;
+      if (!damageRange) continue;
+      const skill = effect.skill ?? spec.skill ?? "attack";
+      let damage = roll(damageRange) + skillLevel(player, skill) + wellFedPower(player);
+      const damageType = effect.damageType ?? (skill === "magic" ? "magic" : "physical");
+      if (damageType !== "magic") damage = Math.max(1, Math.round(damage * physicalMult(player)));
+      const bonus = effect.conditionalBonus;
+      if (bonus?.when === "behindTarget" && player.dir === monster.dir) {
+        damage = Math.round(damage * bonus.multiply);
+        if (bonus.float) event("float", bonus.float.text, monster.x, monster.y + (bonus.float.yOffset ?? -0.5), monster.floor, bonus.float.color);
+      }
+      addSkillXp(player, skill, Math.max(1, Math.floor(damage * (effect.xpFactor ?? 1.5))));
+      damageMonster(player, monster, damage, effect.effectKind ?? spec.effectKind ?? "flare");
+      hits += 1;
+    }
+    return hits;
+  }
+
+  if (effect.kind === "debuff_enemy") {
+    const durationMs = effect.durationMs ?? spec.durationMs;
+    let affected = 0;
+    for (const monster of resolution.targets) {
+      if (monster.deadUntil) continue;
+      if (effect.status === "snare") monster.snareUntil = now + durationMs;
+      if (effect.status === "freeze") monster.freezeUntil = now + durationMs;
+      if (effect.status === "inaccurate") monster.inaccurateUntil = now + durationMs;
+      if (effect.status === "burn") applyBurn(player, monster, durationMs, effect.perTick ?? 1);
+      if (effect.float) event("float", effect.float.text, monster.x, monster.y + (effect.float.yOffset ?? -0.5), monster.floor, effect.float.color);
+      affected += 1;
+    }
+    return affected;
+  }
+
   if (effect.kind === "buff_self") {
     const durationMs = effect.durationMs ?? spec.durationMs;
     if (effect.cleanse?.includes("slow")) player.slowUntil = 0;
     player.abilityBuffs[effect.buff] = { until: now + durationMs };
+    return 1;
+  }
+  if (effect.kind === "heal") {
+    const instant = Math.max(1, Math.round(player.maxHp * (effect.fraction ?? spec.healFraction ?? 0)) + (effect.scaleSkill ? skillLevel(player, effect.scaleSkill) : 0));
+    player.hp = clamp(player.hp + instant, 0, player.maxHp);
+    resolution.heal += instant;
+    if (effect.scaleSkill === "alchemy") addSkillXp(player, "alchemy", 4);
     return 1;
   }
   if (effect.kind === "heal_over_time") {
@@ -1075,76 +1119,6 @@ function applyAbilityEffect(
   }
   return 0;
 }
-
-const CLASS_ABILITY_HANDLERS: Record<string, ClassAbilityHandler> = {
-  healing_poultice(player, id, spec, now, manaCost) {
-    if (player.mana < manaCost || player.hp >= player.maxHp) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    const instant = Math.max(1, Math.round(player.maxHp * (spec.healFraction ?? 0)) + skillLevel(player, "alchemy"));
-    player.hp = clamp(player.hp + instant, 0, player.maxHp);
-    const overTime = Math.max(1, Math.round(player.maxHp * 0.12));
-    player.abilityBuffs.second_wind = { until: now + spec.durationMs, healPerMs: overTime / spec.durationMs };
-    addSkillXp(player, "alchemy", 4);
-    event("float", `+${instant} HP`, player.x, player.y - 0.5, player.floor, "#9ee6b1");
-  },
-
-  flame_burst(player, id, spec, now, manaCost) {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    const dir = DIR_VECTORS[player.dir];
-    const cx = player.x + dir.x * 1.5;
-    const cy = player.y + dir.y * 1.5;
-    for (const monster of monstersInRadius(player.floor, cx, cy, 1.6)) {
-      const damage = roll(spec.damage ?? [10, 16]) + skillLevel(player, "magic") + wellFedPower(player);
-      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
-      damageMonster(player, monster, damage, "flare");
-      if (!monster.deadUntil) applyBurn(player, monster, spec.durationMs, 3);
-    }
-    event("effect", "flare", cx, cy, player.floor, "#ff8a3d", player.id);
-    event("float", "Flame Burst", cx, cy, player.floor, "#ff8a3d");
-  },
-
-  frost_nova(player, id, spec, now, manaCost) {
-    if (player.mana < manaCost) return;
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    for (const monster of monstersInRadius(player.floor, player.x, player.y, 2.2)) {
-      const damage = roll(spec.damage ?? [6, 10]) + skillLevel(player, "magic") + wellFedPower(player);
-      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
-      damageMonster(player, monster, damage, "frost");
-      if (!monster.deadUntil) monster.freezeUntil = now + spec.durationMs;
-    }
-    event("effect", "frost", player.x, player.y, player.floor, "#a8e6ff", player.id);
-    event("float", "Frost Nova", player.x, player.y - 0.5, player.floor, "#a8e6ff");
-  },
-
-  volatile_flask(player, id, spec, now, manaCost) {
-    if (player.mana < manaCost) return;
-    const target = player.targetId == null ? undefined : monsters.get(player.targetId);
-    let tx: number;
-    let ty: number;
-    if (target && !target.deadUntil && target.floor === player.floor && distance(player, target) <= (spec.range ?? 4)) {
-      tx = target.x;
-      ty = target.y;
-    } else {
-      const dir = DIR_VECTORS[player.dir];
-      tx = player.x + dir.x * 2.5;
-      ty = player.y + dir.y * 2.5;
-    }
-    player.abilityCooldowns[id] = now + spec.cooldownMs;
-    player.mana -= manaCost;
-    event("projectile", "flask", tx, ty, player.floor, "#a6e06b", player.id, null, { fromX: player.x, fromY: player.y });
-    for (const monster of monstersInRadius(player.floor, tx, ty, 1.6)) {
-      const damage = roll(spec.damage ?? [10, 16]) + skillLevel(player, "magic") + wellFedPower(player);
-      addSkillXp(player, "magic", Math.max(1, Math.floor(damage * 1.2)));
-      damageMonster(player, monster, damage, "flare");
-      if (!monster.deadUntil) monster.inaccurateUntil = now + spec.durationMs;
-    }
-    event("float", "Volatile Flask", tx, ty, player.floor, "#a6e06b");
-  }
-};
 
 function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: number, kind: string): void {
   const armor = MONSTERS[monster.type]?.armor ?? 0;

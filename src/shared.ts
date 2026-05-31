@@ -131,6 +131,7 @@ export interface AbilitySpec {
   guards?: AbilityGuard[];
   targeting?: AbilityTargeting;
   effects?: AbilityEffect[];
+  projectile?: AbilityProjectile;
   vfx?: AbilityVfx;
   float?: AbilityFloat;
   speedMultiplier?: number;
@@ -147,14 +148,32 @@ export type AbilityGuard = "requireBelowMaxHp";
 
 export type AbilityTargeting =
   | { mode: "self" }
+  | { mode: "enemy"; range?: number; requiresLineOfSight?: boolean }
   | { mode: "aoe_self"; radius: number }
+  | { mode: "aoe_front"; offset: number; radius: number }
+  | { mode: "aoe_point"; offset: number; radius: number; range?: number }
   | { mode: "dash"; tiles: number };
 
 export type AbilityEffect =
   | { kind: "buff_self"; buff: "sprint" | "ironClad" | "fleetFoot"; durationMs?: number; cleanse?: Array<"slow"> }
+  | { kind: "damage"; amount?: Range; skill?: string; damageType?: "physical" | "magic"; xpFactor?: number; effectKind?: string; conditionalBonus?: AbilityConditionalBonus }
+  | { kind: "debuff_enemy"; status: "snare" | "burn" | "freeze" | "inaccurate"; durationMs?: number; perTick?: number; float?: AbilityFloat }
+  | { kind: "heal"; fraction?: number; scaleSkill?: string }
   | { kind: "heal_over_time"; buff: "second_wind"; fraction?: number; durationMs?: number }
   | { kind: "dash"; tiles?: number }
   | { kind: "taunt"; durationMs?: number };
+
+export interface AbilityConditionalBonus {
+  when: "behindTarget";
+  multiply: number;
+  float?: AbilityFloat;
+}
+
+export interface AbilityProjectile {
+  kind: string;
+  color?: string;
+  targetEnemy?: boolean;
+}
 
 export interface AbilityVfx {
   effectKind: string;
@@ -295,7 +314,13 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     damage: [10, 16],
     skill: "ranged",
     range: 5,
-    effectKind: "arrow"
+    effectKind: "arrow",
+    targeting: { mode: "enemy", range: 5, requiresLineOfSight: true },
+    projectile: { kind: "arrow", targetEnemy: true },
+    effects: [
+      { kind: "damage", amount: [10, 16], skill: "ranged", damageType: "physical", xpFactor: 1.5, effectKind: "hit" },
+      { kind: "debuff_enemy", status: "snare", float: { text: "Pinned!", color: "#cfe8a0", yOffset: -0.6 } }
+    ]
   },
   fleet_foot: {
     id: "fleet_foot",
@@ -330,7 +355,19 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     damage: [12, 18],
     skill: "attack",
     range: 1.6,
-    effectKind: "hit"
+    effectKind: "hit",
+    targeting: { mode: "enemy", range: 1.6 },
+    effects: [
+      {
+        kind: "damage",
+        amount: [12, 18],
+        skill: "attack",
+        damageType: "physical",
+        xpFactor: 1.5,
+        effectKind: "hit",
+        conditionalBonus: { when: "behindTarget", multiply: 2.5, float: { text: "Backstab!", color: "#ffd166", yOffset: -0.6 } }
+      }
+    ]
   },
   // --- Mage ---
   flame_burst: {
@@ -342,7 +379,14 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     manaCost: 12,
     damage: [10, 16],
     skill: "magic",
-    effectKind: "flare"
+    effectKind: "flare",
+    targeting: { mode: "aoe_front", offset: 1.5, radius: 1.6 },
+    effects: [
+      { kind: "damage", amount: [10, 16], skill: "magic", damageType: "magic", xpFactor: 1.2, effectKind: "flare" },
+      { kind: "debuff_enemy", status: "burn", perTick: 3 }
+    ],
+    vfx: { effectKind: "flare", color: "#ff8a3d" },
+    float: { text: "Flame Burst", color: "#ff8a3d", yOffset: 0 }
   },
   frost_nova: {
     id: "frost_nova",
@@ -353,7 +397,14 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     manaCost: 14,
     damage: [6, 10],
     skill: "magic",
-    effectKind: "frost"
+    effectKind: "frost",
+    targeting: { mode: "aoe_self", radius: 2.2 },
+    effects: [
+      { kind: "damage", amount: [6, 10], skill: "magic", damageType: "magic", xpFactor: 1.2, effectKind: "frost" },
+      { kind: "debuff_enemy", status: "freeze" }
+    ],
+    vfx: { effectKind: "frost", color: "#a8e6ff" },
+    float: { text: "Frost Nova", color: "#a8e6ff" }
   },
   // --- Apothecary ---
   healing_poultice: {
@@ -363,7 +414,14 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     cooldownMs: 10000,
     durationMs: 5000,
     manaCost: 10,
-    healFraction: 0.18
+    healFraction: 0.18,
+    guards: ["requireBelowMaxHp"],
+    targeting: { mode: "self" },
+    effects: [
+      { kind: "heal", fraction: 0.18, scaleSkill: "alchemy" },
+      { kind: "heal_over_time", buff: "second_wind", fraction: 0.12 }
+    ],
+    float: { text: "+{heal} HP", color: "#9ee6b1" }
   },
   volatile_flask: {
     id: "volatile_flask",
@@ -375,7 +433,14 @@ export const ABILITIES: Record<string, AbilitySpec> = {
     damage: [10, 16],
     skill: "magic",
     range: 4,
-    effectKind: "flare"
+    effectKind: "flare",
+    targeting: { mode: "aoe_point", offset: 2.5, radius: 1.6, range: 4 },
+    projectile: { kind: "flask", color: "#a6e06b" },
+    effects: [
+      { kind: "damage", amount: [10, 16], skill: "magic", damageType: "magic", xpFactor: 1.2, effectKind: "flare" },
+      { kind: "debuff_enemy", status: "inaccurate" }
+    ],
+    float: { text: "Volatile Flask", color: "#a6e06b", yOffset: 0 }
   }
 };
 
