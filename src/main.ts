@@ -298,6 +298,7 @@ interface E2EHooks {
   self: () => PlayerView | undefined;
   fireScreenPoint: (id?: string | null) => { x: number; y: number } | null;
   npcScreenPoint: (id: string) => { x: number; y: number } | null;
+  monsterScreenPoint: (id: string) => { x: number; y: number } | null;
   send: (msg: ClientMessage) => void;
   stateVersion: () => number;
   viewCounts: () => { trees: number; npcs: number };
@@ -540,6 +541,15 @@ if (E2E_MODE) {
       return {
         x: (npc.x * TILE_SIZE - camera.worldView.x) * camera.zoom,
         y: (npc.y * TILE_SIZE - camera.worldView.y) * camera.zoom
+      };
+    },
+    monsterScreenPoint: (id: string) => {
+      const monster = (latestState?.monsters ?? []).find((item) => item.id === id);
+      const camera = scene?.cameras?.main;
+      if (!monster || !camera) return null;
+      return {
+        x: (monster.x * TILE_SIZE - camera.worldView.x) * camera.zoom,
+        y: (monster.y * TILE_SIZE - camera.worldView.y) * camera.zoom
       };
     },
     send,
@@ -1458,9 +1468,15 @@ function syncEntities(): void {
       else view.add(scene.add.rectangle(0, -5, 18, 12, 0x8a5d32).setStrokeStyle(2, 0x2c1b10));
       view.add(scene.add.text(0, -20, lootLabel(corpse), textStyle(10, isDrop ? "#9ee6b1" : "#ffd166")).setOrigin(0.5));
       const zone = scene.add.zone(0, -4, 44, 34).setInteractive({ cursor: "pointer" });
-      zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      zone.on("pointerdown", (pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
         event.stopPropagation();
-        startLootPath(corpse);
+        if (pointer.rightButtonDown()) {
+          const s = pointerScreen(pointer);
+          showContextMenu(lootLabel(corpse), corpseMenuActions(corpse), s.x, s.y);
+        } else {
+          hideNpcMenu();
+          startLootPath(corpse);
+        }
       });
       view.add(zone);
       corpseViews.set(corpse.id, view);
@@ -1633,8 +1649,8 @@ function createNpcView(npc: NpcView): NpcEntityView {
   zone.on("pointerdown", (pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
     if (pointer.rightButtonDown()) {
-      // Right-click: bespoke quick-action menu (Talk / Trade / Alchemy).
-      showNpcMenu(npc, pointer.event instanceof MouseEvent ? pointer.event.clientX : pointer.x, pointer.event instanceof MouseEvent ? pointer.event.clientY : pointer.y);
+      const s = pointerScreen(pointer);
+      showContextMenu(npc.name, npcMenuActions(npc), s.x, s.y);
     } else {
       hideNpcMenu();
       pendingNpcIntent = "talk";
@@ -1806,9 +1822,15 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
   const hpBack = scene.add.rectangle(-18, -32, 36, 4, 0x191d1a).setOrigin(0, 0.5);
   const hp = scene.add.rectangle(-18, -32, 36, 4, 0xef4444).setOrigin(0, 0.5);
   const zone = scene.add.zone(0, 0, 54, 56).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+  zone.on("pointerdown", (pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
-    startAttackPath(monster.id);
+    if (pointer.rightButtonDown()) {
+      const s = pointerScreen(pointer);
+      showContextMenu(monster.name, monsterMenuActions(monster), s.x, s.y);
+    } else {
+      hideNpcMenu();
+      startAttackPath(monster.id);
+    }
   });
   view.add([targetRing, shadow, sprite, nameText, hpBack, hp, zone]);
   view.nameText = nameText;
@@ -2892,13 +2914,25 @@ function isMenuOpen(): boolean {
 }
 
 function handleWorldClick(pointer: Phaser.Input.Pointer): void {
-  if (!latestState || !self() || pointer.leftButtonDown() === false) return;
-  // A center panel / dialogue is open: don't let clicks fall through to world movement.
+  if (!latestState || !self()) return;
+  const me = self();
+  if (!me) return;
+  // Right-click on empty ground: a "Walk here" menu (entities stop propagation).
+  if (pointer.rightButtonDown()) {
+    if (isMenuOpen()) return;
+    const tx = Math.floor(pointer.worldX / TILE_SIZE);
+    const ty = Math.floor(pointer.worldY / TILE_SIZE);
+    const s = pointerScreen(pointer);
+    showContextMenu(null, [{ label: "Walk here", run: () => walkToTile(me.floor, tx, ty) }], s.x, s.y);
+    return;
+  }
+  if (pointer.leftButtonDown() === false) return;
+  // A left-click closes an open context menu (via the document listener) without
+  // also moving; otherwise don't fall through to movement while a panel is open.
+  if (!dom.npcMenu.classList.contains("hidden")) return;
   if (isMenuOpen()) return;
   const tx = Math.floor(pointer.worldX / TILE_SIZE);
   const ty = Math.floor(pointer.worldY / TILE_SIZE);
-  const me = self();
-  if (!me) return;
   if (startPathToTile(me.floor, tx, ty)) {
     holdMoveActive = true;
     holdMoveTile = { x: tx, y: ty };
@@ -3181,21 +3215,22 @@ function openAlchemist(): void {
   showCenterPanel(dom.alchemist);
 }
 
-// Actions offered by the right-click menu for an NPC, by role.
-function npcMenuActions(npc: NpcView): Array<{ label: string; intent: NpcIntent }> {
-  const actions: Array<{ label: string; intent: NpcIntent }> = [{ label: "Talk", intent: "talk" }];
-  if (npc.role === "vendor") actions.push({ label: "Trade", intent: "trade" });
-  if (npc.role === "alchemist") actions.push({ label: "Alchemy", intent: "alchemy" });
-  return actions;
+// --- Bespoke right-click context menu (NPCs, monsters, corpses, ground) --------
+interface MenuAction {
+  label: string;
+  run: () => void;
 }
 
-function showNpcMenu(npc: NpcView, screenX: number, screenY: number): void {
+function showContextMenu(title: string | null, actions: MenuAction[], screenX: number, screenY: number): void {
+  if (!actions.length) return;
   dom.npcMenu.innerHTML = "";
-  const title = document.createElement("div");
-  title.className = "npc-menu-title";
-  title.textContent = npc.name;
-  dom.npcMenu.appendChild(title);
-  for (const action of npcMenuActions(npc)) {
+  if (title) {
+    const heading = document.createElement("div");
+    heading.className = "npc-menu-title";
+    heading.textContent = title;
+    dom.npcMenu.appendChild(heading);
+  }
+  for (const action of actions) {
     const btn = document.createElement("button");
     btn.className = "npc-menu-item";
     btn.type = "button";
@@ -3203,8 +3238,7 @@ function showNpcMenu(npc: NpcView, screenX: number, screenY: number): void {
     btn.addEventListener("click", (event) => {
       event.stopPropagation();
       hideNpcMenu();
-      pendingNpcIntent = action.intent;
-      startNpcTalkPath(npc.id);
+      action.run();
     });
     dom.npcMenu.appendChild(btn);
   }
@@ -3216,6 +3250,75 @@ function showNpcMenu(npc: NpcView, screenX: number, screenY: number): void {
   const y = Math.max(8, Math.min(screenY, window.innerHeight - mh - 8));
   dom.npcMenu.style.left = `${x}px`;
   dom.npcMenu.style.top = `${y}px`;
+}
+
+// Screen coords of a Phaser pointer (prefer the native event when present).
+function pointerScreen(pointer: Phaser.Input.Pointer): { x: number; y: number } {
+  const ev = pointer.event;
+  if (ev instanceof MouseEvent) return { x: ev.clientX, y: ev.clientY };
+  return { x: pointer.x, y: pointer.y };
+}
+
+function runNpcIntent(npcId: string, intent: NpcIntent): void {
+  pendingNpcIntent = intent;
+  startNpcTalkPath(npcId);
+}
+
+function npcMenuActions(npc: NpcView): MenuAction[] {
+  const actions: MenuAction[] = [{ label: "Talk", run: () => runNpcIntent(npc.id, "talk") }];
+  if (npc.role === "vendor") actions.push({ label: "Trade", run: () => runNpcIntent(npc.id, "trade") });
+  if (npc.role === "alchemist") actions.push({ label: "Alchemy", run: () => runNpcIntent(npc.id, "alchemy") });
+  if (npc.role === "quest") actions.push({ label: "Quest", run: () => runNpcIntent(npc.id, "talk") });
+  if (npc.role === "trainer") actions.push({ label: "Train", run: () => runNpcIntent(npc.id, "talk") });
+  actions.push({ label: "Examine", run: () => examineNpc(npc) });
+  return actions;
+}
+
+function monsterMenuActions(monster: MonsterView): MenuAction[] {
+  return [
+    { label: "Attack", run: () => startAttackPath(monster.id) },
+    { label: "Examine", run: () => examineMonster(monster) }
+  ];
+}
+
+function corpseMenuActions(corpse: CorpseView): MenuAction[] {
+  return [{ label: corpse.kind === "drop" ? "Take" : "Loot", run: () => startLootPath(corpse) }];
+}
+
+function walkToTile(floor: number, tx: number, ty: number): void {
+  if (isMenuOpen()) return;
+  if (startPathToTile(floor, tx, ty)) {
+    holdMoveActive = true;
+    holdMoveTile = { x: tx, y: ty };
+    holdMoveLastRepathAt = scene?.time?.now ?? 0;
+  } else {
+    clearClickDestination();
+  }
+}
+
+function examineMonster(monster: MonsterView): void {
+  addSystemLine(`${monster.name} — ${Math.max(0, Math.ceil(monster.hp))}/${monster.maxHp} HP.`);
+}
+
+function examineNpc(npc: NpcView): void {
+  addSystemLine(`${npc.name} — ${npcRoleFlavor(npc.role)}.`);
+}
+
+function npcRoleFlavor(role: string): string {
+  switch (role) {
+    case "vendor":
+      return "a travelling merchant";
+    case "alchemist":
+      return "an alchemist of the wilds";
+    case "quest":
+      return "has work that needs doing";
+    case "trainer":
+      return "a seasoned trainer";
+    case "guide":
+      return "a guide to these lands";
+    default:
+      return "a wayfarer";
+  }
 }
 
 function hideNpcMenu(): void {

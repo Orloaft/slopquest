@@ -31,6 +31,62 @@ test("right-clicking a merchant opens a quick menu; Trade goes straight to the s
   await expect(page.locator("#npcMenu")).toBeHidden();
 });
 
+test("right-clicking a monster offers Attack and Examine", async ({ page }) => {
+  logErrors(page);
+  await page.goto("/?e2e");
+  await join(page);
+
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 60.5, y: 40.5 }));
+  await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.self() && window.__TIB_E2E__.self()!.floor === 3));
+  await page.waitForTimeout(300); // camera settle
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eSpawnMonster", monster: "wolf", floor: 3, x: 57, y: 40 }));
+  const wolfId = await page
+    .waitForFunction(() => (window.__TIB_E2E__?.getState()?.monsters ?? []).find((m) => m.type === "wolf" && m.floor === 3)?.id ?? null)
+    .then((h) => h.jsonValue() as Promise<string>);
+
+  const pt = await page.evaluate((id) => window.__TIB_E2E__?.monsterScreenPoint?.(id) ?? null, wolfId);
+  expect(pt).not.toBeNull();
+  await page.mouse.click(pt!.x, pt!.y, { button: "right" });
+  await expect(page.locator("#npcMenu")).toBeVisible();
+  await expect(page.locator("#npcMenu .npc-menu-item", { hasText: "Attack" })).toBeVisible();
+  await expect(page.locator("#npcMenu .npc-menu-item", { hasText: "Examine" })).toBeVisible();
+  await page.locator("#npcMenu .npc-menu-item", { hasText: "Examine" }).click();
+  await expect(page.locator("#systemFeed")).toContainText("Wolf");
+});
+
+test("right-clicking empty ground offers Walk here, which moves the player", async ({ page }) => {
+  logErrors(page);
+  await page.goto("/?e2e");
+  await join(page);
+
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 55.5, y: 40.5 }));
+  await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.self() && window.__TIB_E2E__.self()!.floor === 3));
+  await page.waitForTimeout(300);
+  const before = await page.evaluate(() => ({ x: window.__TIB_E2E__?.self()?.x ?? 0 }));
+
+  // Right-click open ground to the right of the (centered) player.
+  await page.mouse.click(820, 400, { button: "right" });
+  await expect(page.locator("#npcMenu .npc-menu-item", { hasText: "Walk here" })).toBeVisible();
+  await page.locator("#npcMenu .npc-menu-item", { hasText: "Walk here" }).click();
+  await page.waitForFunction((b) => (window.__TIB_E2E__?.self()?.x ?? 0) > b.x + 0.6, before, { timeout: 6000 });
+});
+
+test("a quest-giver's menu surfaces a Quest verb and Examine", async ({ page }) => {
+  logErrors(page);
+  await page.goto("/?e2e");
+  await join(page);
+
+  // The cemetery warden (role: quest) — target wherever it currently is.
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 0, x: 61.5, y: 57.5 }));
+  await page.waitForFunction(() => (window.__TIB_E2E__?.getState()?.npcs ?? []).some((n) => n.id === "cemetery-warden"));
+  await page.waitForTimeout(300);
+  const pt = await page.evaluate(() => window.__TIB_E2E__?.npcScreenPoint?.("cemetery-warden") ?? null);
+  expect(pt).not.toBeNull();
+  await page.mouse.click(pt!.x, pt!.y, { button: "right" });
+  await expect(page.locator("#npcMenu .npc-menu-item", { hasText: "Quest" })).toBeVisible();
+  await expect(page.locator("#npcMenu .npc-menu-item", { hasText: "Examine" })).toBeVisible();
+});
+
 function logErrors(page: Page): void {
   page.on("pageerror", (error) => console.error(error));
   page.on("console", (message) => {
