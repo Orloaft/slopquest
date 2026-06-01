@@ -16,7 +16,8 @@ export type SkillId =
   | "alchemy"
   | "ranged"
   | "foraging"
-  | "smithing";
+  | "smithing"
+  | "faith";
 
 export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown" | "marsh" | "badlands" | "desert" | "beach" | "jungle" | "deepMine";
 
@@ -77,6 +78,10 @@ export interface Monster {
   projectileAnimation?: string;
   // Flat damage reduction on incoming hits (armored monsters).
   armor?: number;
+  // Unholy monsters grant dedicated Faith XP on death and interact with Holy
+  // damage / Acolyte Favor generation.
+  isUnholy?: boolean;
+  faithXp?: number;
   // Pack hunters: aggroing alerts nearby same-type monsters to the same target.
   pack?: boolean;
   // Ambushers: hidden underground until a player steps adjacent, then burst for
@@ -138,8 +143,9 @@ export interface AbilitySpec {
   id: string;
   label: string;
   description: string;
-  category?: "class" | "spell";
+  category?: "class" | "spell" | "miracle";
   magicLevel?: number;
+  faithLevel?: number;
   cooldownMs: number;
   durationMs: number;
   guards?: AbilityGuard[];
@@ -154,6 +160,7 @@ export interface AbilitySpec {
   // Legacy display/scaling fields retained while clients and save data settle.
   damage?: Range;
   manaCost?: number;
+  favorCost?: number;
   skill?: string;
   range?: number;
   effectKind?: string;
@@ -172,8 +179,8 @@ export type AbilityTargeting =
   | { mode: "dash"; tiles: number };
 
 export type AbilityEffect =
-  | { kind: "buff_self"; buff: "sprint" | "ironClad" | "fleetFoot" | "luminescence" | "zephyrStep" | "earthSense"; durationMs?: number; cleanse?: Array<"slow" | "weaken"> }
-  | { kind: "damage"; amount?: Range; skill?: string; damageType?: "physical" | "magic"; xpFactor?: number; effectKind?: string; conditionalBonus?: AbilityConditionalBonus }
+  | { kind: "buff_self"; buff: "sprint" | "ironClad" | "fleetFoot" | "luminescence" | "zephyrStep" | "earthSense" | "conviction"; durationMs?: number; cleanse?: Array<"slow" | "weaken"> }
+  | { kind: "damage"; amount?: Range; skill?: string; damageType?: "physical" | "magic" | "holy"; xpFactor?: number; effectKind?: string; conditionalBonus?: AbilityConditionalBonus }
   | { kind: "debuff_enemy"; status: "snare" | "slow" | "burn" | "freeze" | "inaccurate"; durationMs?: number; perTick?: number; slowMultiplier?: number; float?: AbilityFloat }
   | { kind: "heal"; fraction?: number; scaleSkill?: string }
   | { kind: "heal_over_time"; buff: "second_wind"; fraction?: number; durationMs?: number }
@@ -181,6 +188,7 @@ export type AbilityEffect =
   | { kind: "cleanse_self"; statuses?: Array<"slow" | "weaken" | "stun"> }
   | { kind: "shield_self"; base: number; maxManaScale?: number; durationMs?: number }
   | { kind: "knockback"; tiles: number }
+  | { kind: "gain_favor"; amount: number; unholyBonus?: number }
   | { kind: "teleport"; destination: "waystone" }
   | { kind: "taunt"; durationMs?: number };
 

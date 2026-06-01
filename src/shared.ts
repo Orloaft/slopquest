@@ -143,6 +143,7 @@ export interface ClassSpec {
   abilityMs: number;
   hpPerDefense: number;
   manaPerMagic: number;
+  maxFavor: number;
   abilities: string[];
   // Passive chance (0..1) to fully dodge an incoming hit. Class-differentiated;
   // Agility level raises it further (see dodgeChanceFor).
@@ -183,7 +184,8 @@ const CLASS_BASE = {
   attackMs: 820,
   abilityMs: 2800,
   hpPerDefense: 10,
-  manaPerMagic: 8
+  manaPerMagic: 8,
+  maxFavor: 0
 };
 
 // Tier-1 classes are stances layered over the blank-slate Adventurer. Core stats
@@ -195,7 +197,8 @@ export const CLASSES: Record<string, ClassSpec> = {
   thief: { ...CLASS_BASE, label: "Thief", speed: 4.65, abilities: ["quick_step", "backstab"], dodgeChance: 0.12 },
   apothecary: { ...CLASS_BASE, label: "Apothecary", abilities: ["healing_poultice", "volatile_flask"], dodgeChance: 0.06 },
   archer: { ...CLASS_BASE, label: "Archer", speed: 4.4, abilities: ["pinning_shot", "fleet_foot"], dodgeChance: 0.08 },
-  mage: { ...CLASS_BASE, label: "Mage", abilities: ["flame_burst", "frost_nova", "arcane_bolt"], dodgeChance: 0.05 }
+  mage: { ...CLASS_BASE, label: "Mage", abilities: ["flame_burst", "frost_nova", "arcane_bolt"], dodgeChance: 0.05 },
+  acolyte: { ...CLASS_BASE, label: "Acolyte", abilities: ["zealots_strike", "cleansing_flash", "conviction"], dodgeChance: 0.05 }
 };
 
 export interface ClassUnlock {
@@ -215,7 +218,8 @@ export const CLASS_UNLOCKS: ClassUnlock[] = [
   { key: "thief", label: "Thief", npcId: "shady-contact", npcName: "Sly Nessa", town: "Waystone", requires: { agility: 15, attack: 10 } },
   { key: "apothecary", label: "Apothecary", npcId: "cleric-monk", npcName: "Brother Aldric", town: "Waystone", requires: { defense: 10, alchemy: 15 } },
   { key: "archer", label: "Archer", npcId: "scout-leader", npcName: "Ranger Wynn", town: "Northwatch", requires: { ranged: 15, foraging: 10 } },
-  { key: "mage", label: "Mage", npcId: "hermit-academic", npcName: "Magister Vael", town: "Northwatch", requires: { magic: 15, alchemy: 10 } }
+  { key: "mage", label: "Mage", npcId: "hermit-academic", npcName: "Magister Vael", town: "Northwatch", requires: { magic: 15, alchemy: 10 } },
+  { key: "acolyte", label: "Acolyte", npcId: "acolyte-prior", npcName: "Prior Elian", town: "Waystone", requires: { attack: 10, faith: 10 } }
 ];
 
 export const SKILLS: Record<string, SkillDef> = {
@@ -231,7 +235,8 @@ export const SKILLS: Record<string, SkillDef> = {
   alchemy: { label: "Alchemy", iconUrl: "/icons/skill-alchemy.png" },
   ranged: { label: "Ranged", iconUrl: "/icons/skill-ranged.png" },
   foraging: { label: "Foraging", iconUrl: "/icons/skill-foraging.png" },
-  smithing: { label: "Smithing", iconUrl: "/icons/skill-smithing.png" }
+  smithing: { label: "Smithing", iconUrl: "/icons/skill-smithing.png" },
+  faith: { label: "Faith", iconUrl: "/icons/skill-magic.png" }
 };
 
 export function xpForLevel(level: number): number {

@@ -508,6 +508,10 @@ canvas {
   background: #3d7bdd;
 }
 
+.favor span {
+  background: #d9b84f;
+}
+
 .xp span {
   background: #d0a64d;
 }
@@ -1502,13 +1506,15 @@ canvas {
   box-shadow: inset 0 0 0 2px rgba(154, 230, 180, 0.5);
 }
 
-.hotbar-slot.ability.mana-locked {
+.hotbar-slot.ability.mana-locked,
+.hotbar-slot.ability.favor-locked {
   border-color: rgba(255, 112, 112, 0.8);
   background: rgba(61, 12, 12, 0.72);
   box-shadow: inset 0 0 0 2px rgba(255, 112, 112, 0.32);
 }
 
-.hotbar-slot.ability.mana-locked .hotbar-ability {
+.hotbar-slot.ability.mana-locked .hotbar-ability,
+.hotbar-slot.ability.favor-locked .hotbar-ability {
   color: #ff9b9b;
 }
 

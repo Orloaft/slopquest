@@ -210,6 +210,51 @@
     - { kind: debuff_enemy, status: inaccurate }
   float: { text: Volatile Flask, color: "#a6e06b", yOffset: 0 }
 
+- id: zealots_strike
+  label: "Zealot's Strike"
+  description: Melee holy strike that generates Favor, with extra Favor against Unholy foes.
+  cooldownMs: 4500
+  durationMs: 0
+  damage: [10, 16]
+  skill: attack
+  range: 1.6
+  effectKind: holy
+  targeting: { mode: enemy, range: 1.6 }
+  effects:
+    - { kind: damage, amount: [10, 16], skill: attack, damageType: holy, xpFactor: 1.2, effectKind: holy }
+    - { kind: gain_favor, amount: 8, unholyBonus: 4 }
+  animation: { id: impact.holy_ring, kind: impact_ring, attach: target, color: "#f5d778", scale: 1.0, durationMs: 320 }
+  float: { text: "Zealot's Strike", color: "#f5d778" }
+
+- id: cleansing_flash
+  label: Cleansing Flash
+  description: Spend Favor in a 2-tile holy burst, damaging foes while cleansing and healing yourself.
+  cooldownMs: 14000
+  durationMs: 0
+  favorCost: 20
+  damage: [8, 13]
+  skill: faith
+  effectKind: holy
+  targeting: { mode: aoe_self, radius: 2 }
+  effects:
+    - { kind: damage, amount: [8, 13], skill: faith, damageType: holy, xpFactor: 1.4, effectKind: holy }
+    - { kind: cleanse_self, statuses: [slow, weaken, stun] }
+    - { kind: heal, fraction: 0.08, scaleSkill: faith }
+  animation: { id: aura.self_pulse, kind: self_pulse, attach: self, color: "#f5d778", scale: 1.25, durationMs: 460 }
+  float: { text: Cleansing Flash, color: "#f5d778", noTargetsText: Cleansing Flash }
+
+- id: conviction
+  label: Conviction
+  description: Spend Favor for 6s of +25% armor, converting 20% of incoming damage into Favor.
+  cooldownMs: 24000
+  durationMs: 6000
+  favorCost: 30
+  targeting: { mode: self }
+  effects:
+    - { kind: buff_self, buff: conviction }
+  animation: { id: impact.shield_ring, kind: impact_ring, attach: self, color: "#f5d778", scale: 1.1, durationMs: 500 }
+  float: { text: Conviction, color: "#f5d778" }
+
 # Generic Spellbook — class-agnostic spells unlocked by Magic level.
 
 - id: spell_spark
@@ -386,3 +431,68 @@
     - { kind: teleport, destination: waystone }
   animation: { id: aura.self_pulse, kind: self_pulse, attach: self, color: "#c7a7ff", scale: 1.25, durationMs: 700 }
   float: { text: Waystone, color: "#c7a7ff" }
+
+# Generic Miracles — class-agnostic Faith prayers unlocked by Faith level.
+
+- id: miracle_minor_mend
+  label: Minor Mend
+  description: Spend Favor for a small self heal that scales with Faith.
+  category: miracle
+  faithLevel: 1
+  cooldownMs: 12000
+  durationMs: 0
+  favorCost: 10
+  targeting: { mode: self }
+  effects:
+    - { kind: heal, fraction: 0.12, scaleSkill: faith }
+  animation: { id: aura.self_pulse, kind: self_pulse, attach: self, color: "#f5d778", scale: 0.8, durationMs: 420 }
+  float: { text: Minor Mend, color: "#f5d778" }
+
+- id: miracle_sanctify
+  label: Sanctify
+  description: Cleanse basic debuffs and earn a small burst of Favor through prayer.
+  category: miracle
+  faithLevel: 5
+  cooldownMs: 20000
+  durationMs: 0
+  favorCost: 8
+  targeting: { mode: self }
+  effects:
+    - { kind: cleanse_self, statuses: [slow, weaken, stun] }
+    - { kind: gain_favor, amount: 4 }
+  animation: { id: aura.self_pulse, kind: self_pulse, attach: self, color: "#fff0a8", scale: 0.9, durationMs: 420 }
+  float: { text: Sanctified, color: "#fff0a8" }
+
+- id: miracle_smite
+  label: Smite
+  description: Call down Holy damage at range.
+  category: miracle
+  faithLevel: 10
+  cooldownMs: 6500
+  durationMs: 0
+  favorCost: 14
+  damage: [10, 16]
+  skill: faith
+  range: 5
+  effectKind: holy
+  targeting: { mode: enemy, range: 5, requiresLineOfSight: true }
+  projectile: { id: projectile.bolt.arcane_lance, kind: arcane, color: "#f5d778", targetEnemy: true }
+  effects:
+    - { kind: damage, amount: [10, 16], skill: faith, damageType: holy, xpFactor: 1.3, effectKind: holy }
+  animation: { id: impact.holy_ring, kind: impact_ring, attach: target, color: "#f5d778", scale: 1.0, durationMs: 320 }
+  float: { text: Smite, color: "#f5d778" }
+
+- id: miracle_resurrection
+  label: Resurrection
+  description: A high Faith miracle reserved for future ally revival hooks; currently restores you from the brink.
+  category: miracle
+  faithLevel: 15
+  cooldownMs: 120000
+  durationMs: 0
+  favorCost: 45
+  targeting: { mode: self }
+  effects:
+    - { kind: heal, fraction: 0.35, scaleSkill: faith }
+    - { kind: cleanse_self, statuses: [slow, weaken, stun] }
+  animation: { id: aura.self_pulse, kind: self_pulse, attach: self, color: "#fff0a8", scale: 1.35, durationMs: 700 }
+  float: { text: Resurrection, color: "#fff0a8" }

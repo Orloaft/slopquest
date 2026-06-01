@@ -35,6 +35,8 @@
         "weakenMs": { "type": "number", "description": "Duration of the weaken debuff in ms." },
         "projectileAnimation": { "type": "string", "description": "Combat animation id for ranged monster attacks." },
         "armor": { "type": "number", "description": "Flat damage reduction on incoming hits." },
+        "isUnholy": { "type": "boolean", "description": "Unholy targets grant Faith XP and take Acolyte holy synergies." },
+        "faithXp": { "type": "number", "minimum": 0, "description": "Dedicated Faith XP awarded on slaying this unholy monster." },
         "pack": { "type": "boolean", "description": "Aggroing alerts nearby same-type monsters." },
         "burrow": { "type": "boolean", "description": "Hidden until a player steps adjacent, then bursts." },
         "stunMs": { "type": "number", "description": "Stun applied on the burrow ambush, in ms." },

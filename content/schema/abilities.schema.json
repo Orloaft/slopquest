@@ -142,7 +142,7 @@
           "required": ["kind", "buff"],
           "properties": {
             "kind": { "const": "buff_self" },
-            "buff": { "enum": ["sprint", "ironClad", "fleetFoot", "luminescence", "zephyrStep", "earthSense"] },
+            "buff": { "enum": ["sprint", "ironClad", "fleetFoot", "luminescence", "zephyrStep", "earthSense", "conviction"] },
             "durationMs": { "type": "number", "minimum": 0 },
             "cleanse": {
               "type": "array",
@@ -158,7 +158,7 @@
             "kind": { "const": "damage" },
             "amount": { "$ref": "#/$defs/range" },
             "skill": { "type": "string" },
-            "damageType": { "enum": ["physical", "magic"] },
+            "damageType": { "enum": ["physical", "magic", "holy"] },
             "xpFactor": { "type": "number" },
             "effectKind": { "type": "string" },
             "conditionalBonus": { "$ref": "#/$defs/conditionalBonus" }
@@ -242,6 +242,16 @@
         {
           "type": "object",
           "additionalProperties": false,
+          "required": ["kind", "amount"],
+          "properties": {
+            "kind": { "const": "gain_favor" },
+            "amount": { "type": "number", "minimum": 0 },
+            "unholyBonus": { "type": "number", "minimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
           "required": ["kind", "destination"],
           "properties": {
             "kind": { "const": "teleport" },
@@ -267,8 +277,9 @@
         "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
         "label": { "type": "string" },
         "description": { "type": "string" },
-        "category": { "enum": ["class", "spell"] },
+        "category": { "enum": ["class", "spell", "miracle"] },
         "magicLevel": { "type": "integer", "minimum": 1 },
+        "faithLevel": { "type": "integer", "minimum": 1 },
         "cooldownMs": { "type": "number", "minimum": 0 },
         "durationMs": { "type": "number", "minimum": 0 },
         "guards": {
@@ -289,6 +300,7 @@
         "healFraction": { "type": "number", "minimum": 0 },
         "damage": { "$ref": "#/$defs/range" },
         "manaCost": { "type": "number", "minimum": 0 },
+        "favorCost": { "type": "number", "minimum": 0 },
         "skill": { "type": "string" },
         "range": { "type": "number", "exclusiveMinimum": 0 },
         "effectKind": { "type": "string" },

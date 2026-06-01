@@ -207,6 +207,18 @@
   scale: 1
   hitFrame: 0
 
+- id: impact.holy_ring
+  kind: impact
+  renderer: impact_ring
+  source: primitive
+  frames: 1
+  frameMs: 300
+  anchor: target
+  orientation: screen_fixed
+  z: above_actor
+  scale: 1
+  hitFrame: 0
+
 - id: impact.fire.burst
   kind: impact
   renderer: fire_burst

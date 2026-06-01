@@ -399,9 +399,11 @@ const dom = {
   classLabel: el<HTMLElement>("#classLabel"),
   hpBar: el<HTMLElement>("#hpBar"),
   manaBar: el<HTMLElement>("#manaBar"),
+  favorBar: el<HTMLElement>("#favorBar"),
   xpBar: el<HTMLElement>("#xpBar"),
   hpText: el<HTMLElement>("#hpText"),
   manaText: el<HTMLElement>("#manaText"),
+  favorText: el<HTMLElement>("#favorText"),
   xpText: el<HTMLElement>("#xpText"),
   levelText: el<HTMLElement>("#levelText"),
   goldText: el<HTMLElement>("#goldText"),
@@ -2183,6 +2185,8 @@ function renderHud(me: PlayerView): void {
     me.maxHp,
     me.mana,
     me.maxMana,
+    me.favor,
+    me.maxFavor,
     me.level,
     me.xp,
     me.gold,
@@ -2198,6 +2202,7 @@ function renderHud(me: PlayerView): void {
     dom.classLabel.textContent = spec.label;
     setBar(dom.hpBar, dom.hpText, me.hp, me.maxHp, "HP");
     setBar(dom.manaBar, dom.manaText, me.mana, me.maxMana, "MP");
+    setBar(dom.favorBar, dom.favorText, me.favor, me.maxFavor, "FP");
     const levelStart = xpForLevel(me.level);
     const levelEnd = xpForLevel(me.level + 1);
     setBar(dom.xpBar, dom.xpText, me.xp - levelStart, levelEnd - levelStart, "XP");
@@ -2326,6 +2331,7 @@ function fallbackClassSpec(): ClassSpec {
     abilityMs: 2800,
     hpPerDefense: 10,
     manaPerMagic: 8,
+    maxFavor: 0,
     abilities: ["sprint", "second_wind"],
     dodgeChance: 0.05
   };
@@ -2367,6 +2373,7 @@ function renderBuffTracker(buffs: Partial<BuffsView> = {}): void {
   if ((buffs.zephyrStep ?? 0) > 0) active.push(`Zephyr Step ${Math.ceil((buffs.zephyrStep ?? 0) / 1000)}s`);
   if ((buffs.earthSense ?? 0) > 0) active.push(`Earth-Sense ${Math.ceil((buffs.earthSense ?? 0) / 1000)}s`);
   if ((buffs.arcaneAegis ?? 0) > 0) active.push(`Arcane Aegis ${Math.ceil((buffs.arcaneAegis ?? 0) / 1000)}s`);
+  if ((buffs.conviction ?? 0) > 0) active.push(`Conviction ${Math.ceil((buffs.conviction ?? 0) / 1000)}s`);
   if ((buffs.slowed ?? 0) > 0) active.push(`Slowed ${Math.ceil((buffs.slowed ?? 0) / 1000)}s`);
   if ((buffs.stunned ?? 0) > 0) active.push(`Stunned ${Math.ceil((buffs.stunned ?? 0) / 1000)}s`);
   if ((buffs.weakened ?? 0) > 0) active.push(`Weakened ${Math.ceil((buffs.weakened ?? 0) / 1000)}s`);
@@ -2634,7 +2641,7 @@ function renderAbilities(abilities: AbilityView[] = []): void {
 
   const shownAbilities = abilities.filter((ability) => {
     const spec = ABILITIES[ability.id];
-    return activeAbilityTab === "spellbook" ? spec?.category === "spell" : spec?.category !== "spell";
+    return activeAbilityTab === "spellbook" ? spec?.category === "spell" || spec?.category === "miracle" : spec?.category !== "spell" && spec?.category !== "miracle";
   });
 
   if (!shownAbilities.length) {
@@ -2643,7 +2650,7 @@ function renderAbilities(abilities: AbilityView[] = []): void {
     if (!abilityEmptyEl) {
       abilityEmptyEl = document.createElement("div");
       abilityEmptyEl.className = "ability-empty";
-      abilityEmptyEl.textContent = activeAbilityTab === "spellbook" ? "No spells unlocked yet." : "No class abilities yet.";
+      abilityEmptyEl.textContent = activeAbilityTab === "spellbook" ? "No spells or miracles unlocked yet." : "No class abilities yet.";
       dom.abilitiesList.appendChild(abilityEmptyEl);
     }
     return;
@@ -2728,7 +2735,8 @@ function createAbilityRow(ability: AbilityView): AbilityRowEntry {
 function updateAbilityRow(entry: AbilityRowEntry, ability: AbilityView): void {
   entry.nameEl.textContent = ability.label;
   const spec = ABILITIES[ability.id];
-  const costText = spec?.category === "spell" && spec.manaCost ? ` Mana ${spec.manaCost}.` : "";
+  const costParts = [spec?.manaCost ? `Mana ${spec.manaCost}` : "", spec?.favorCost ? `Favor ${spec.favorCost}` : ""].filter(Boolean);
+  const costText = costParts.length ? ` ${costParts.join(". ")}.` : "";
   entry.descEl.textContent = `${ability.description}${costText}`;
 
   const onCooldown = ability.cooldownRemainingMs > 0;
@@ -2896,9 +2904,15 @@ function abilityManaLocked(abilityId: string, maxMana: number): boolean {
   return Boolean(spec?.manaCost && maxMana < spec.manaCost);
 }
 
+function abilityFavorLocked(abilityId: string, maxFavor: number): boolean {
+  const spec = ABILITIES[abilityId];
+  return Boolean(spec?.favorCost && maxFavor < spec.favorCost);
+}
+
 function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
   const abilities = self()?.abilities ?? [];
   const maxMana = self()?.maxMana ?? 0;
+  const maxFavor = self()?.maxFavor ?? 0;
   const sig = hotbarLayout
     .map((slot, i) => {
       if (!slot) return `${i}:-`;
@@ -2907,7 +2921,8 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
       const onCooldown = (live?.cooldownRemainingMs ?? 0) > 0 ? 1 : 0;
       const isActive = (live?.activeRemainingMs ?? 0) > 0 ? 1 : 0;
       const manaLocked = abilityManaLocked(slot.abilityId, maxMana) ? 1 : 0;
-      return `${i}:a:${slot.abilityId}:${onCooldown}:${isActive}:${manaLocked}`;
+      const favorLocked = abilityFavorLocked(slot.abilityId, maxFavor) ? 1 : 0;
+      return `${i}:a:${slot.abilityId}:${onCooldown}:${isActive}:${manaLocked}:${favorLocked}`;
     })
     .join("|");
   if (sig === hotbarRenderedSig) return;
@@ -2935,9 +2950,10 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
       const isActive = (live?.activeRemainingMs ?? 0) > 0;
       const onCooldown = (live?.cooldownRemainingMs ?? 0) > 0;
       const manaLocked = abilityManaLocked(slot.abilityId, maxMana);
-      const stateClass = `${isActive ? " ability-active" : onCooldown ? " ability-cooldown" : ""}${manaLocked ? " mana-locked" : ""}`;
+      const favorLocked = abilityFavorLocked(slot.abilityId, maxFavor);
+      const stateClass = `${isActive ? " ability-active" : onCooldown ? " ability-cooldown" : ""}${manaLocked ? " mana-locked" : ""}${favorLocked ? " favor-locked" : ""}`;
       const label = ability?.label ?? slot.abilityId;
-      const tooltip = manaLocked ? `${label} - Insufficient Mana` : label;
+      const tooltip = manaLocked ? `${label} - Insufficient Mana` : favorLocked ? `${label} - Insufficient Favor` : label;
       const glyph = abilityGlyph(label);
       return `<button class="hotbar-slot ability${stateClass}${classSlot}" type="button" draggable="true" data-slot="${i}" data-ability="${escapeHtml(slot.abilityId)}" data-label="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}"><b class="hotbar-key">${key}</b><span class="hotbar-ability">${escapeHtml(glyph)}</span></button>`;
     })
@@ -4365,6 +4381,14 @@ function consumeEvents(events: GameEvent[]): void {
     if (event.type === "system") addSystemLine(String(event.text));
     if (event.type === "chat") addChat(String(event.text));
     if (event.type === "dialogue") openDialogue(event);
+    if (event.type === "faith_deed" && self()?.floor === event.floor) {
+      playHolyChime();
+      const floater = scene.add.text((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, String(event.text), textStyle(14, event.color ?? "#f5d778")).setOrigin(0.5) as Floater;
+      floater.life = 1300;
+      floaters.push(floater);
+      fxLayer.add(floater);
+      continue;
+    }
     if (event.type === "effect" && self()?.floor === event.floor) playCombatEffect(event);
     if (event.type === "ability_vfx" && self()?.floor === event.floor) playAbilityVfx(event);
     if (event.type === "projectile" && self()?.floor === event.floor) playProjectile(event);
@@ -4374,6 +4398,30 @@ function consumeEvents(events: GameEvent[]): void {
       floaters.push(floater);
       fxLayer.add(floater);
     }
+  }
+}
+
+function playHolyChime(): void {
+  if (!titleSoundOn) return;
+  try {
+    if (!titleAudioCtx) titleAudioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const ctx = titleAudioCtx;
+    if (ctx.state === "suspended") void ctx.resume();
+    const now = ctx.currentTime;
+    for (const [i, hz] of [660, 880, 1320].entries()) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(hz, now + i * 0.045);
+      gain.gain.setValueAtTime(0.0001, now + i * 0.045);
+      gain.gain.exponentialRampToValueAtTime(0.035, now + i * 0.045 + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.045 + 0.22);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + i * 0.045);
+      osc.stop(now + i * 0.045 + 0.24);
+    }
+  } catch {
+    // Audio is a nicety; never let it break event rendering.
   }
 }
 

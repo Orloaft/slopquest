@@ -117,9 +117,11 @@ function abilityIdsForPlayer(player: ServerPlayer): string[] {
   const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
   const ids = [...(classSpec.abilities ?? [])];
   const magicLevel = skillLevel(player, "magic");
+  const faithLevel = skillLevel(player, "faith");
   for (const ability of Object.values(ABILITIES)) {
-    if (ability.category !== "spell") continue;
-    if ((ability.magicLevel ?? 1) > magicLevel) continue;
+    if (ability.category === "spell" && (ability.magicLevel ?? 1) > magicLevel) continue;
+    else if (ability.category === "miracle" && (ability.faithLevel ?? 1) > faithLevel) continue;
+    else if (ability.category !== "spell" && ability.category !== "miracle") continue;
     if (!ids.includes(ability.id)) ids.push(ability.id);
   }
   return ids;
@@ -811,8 +813,10 @@ function createPlayer(name: string): ServerPlayer {
     xp: 0,
     hp: spec.maxHp,
     mana: spec.maxMana,
+    favor: 0,
     maxHp: spec.maxHp,
     maxMana: spec.maxMana,
+    maxFavor: 30,
     gold: 30,
     weaponTier: 0,
     armorTier: 0,
@@ -854,6 +858,8 @@ function hydratePlayer(saved: SavedPlayer): ServerPlayer {
   recalculateVitals(player);
   player.hp = clamp(player.hp, 1, player.maxHp);
   player.mana = clamp(player.mana, 0, player.maxMana);
+  player.favor = clamp(player.favor, 0, player.maxFavor);
+  player.favor = clamp(Number(player.favor ?? 0), 0, player.maxFavor);
   player.quests = normalizeQuestState(player.quests);
   player.reputation = normalizeReputationState(player.reputation);
   player.inventory = normalizeInventory(player.inventory);
@@ -907,6 +913,9 @@ function updatePlayers(dt: number, now: number): void {
     }
     if (player.abilityBuffs?.arcaneAegis && now >= player.abilityBuffs.arcaneAegis.until) {
       delete player.abilityBuffs.arcaneAegis;
+    }
+    if (player.abilityBuffs?.conviction && now >= player.abilityBuffs.conviction.until) {
+      delete player.abilityBuffs.conviction;
     }
     if (player.slowUntil && now < player.slowUntil) {
       speed *= player.slowMult ?? 1;
@@ -964,6 +973,7 @@ function updatePlayers(dt: number, now: number): void {
       delete player.abilityBuffs.second_wind;
     }
     player.mana = clamp(player.mana + dt * 2.5, 0, player.maxMana);
+    player.favor = clamp(player.favor, 0, player.maxFavor);
     autoAttack(player, now);
     updatePlayerAction(player, now);
   }
@@ -1180,6 +1190,7 @@ function autoAttack(player: ServerPlayer, now: number): void {
   const damage = Math.max(1, Math.round((roll(spec.attackDamage) + skillLevel(player, "attack") + player.weaponTier * (SHOP["weapon"]!.damageBonus ?? 0) + wellFedPower(player)) * physicalMult(player)));
   addSkillXp(player, "attack", Math.max(1, Math.floor(damage * 1.5)));
   damageMonster(player, monster, damage, "hit");
+  if (player.classKey === "acolyte") gainFavor(player, 2);
 }
 
 function useAbility(player: ServerPlayer): void {
@@ -1285,19 +1296,22 @@ function useClassAbility(player: ServerPlayer, id: string): void {
   if (!player.abilityBuffs) player.abilityBuffs = {};
   if (now < (player.abilityCooldowns[id] ?? 0)) return;
   const manaCost = spec.manaCost ?? 0;
+  const favorCost = spec.favorCost ?? 0;
 
-  tryUseComposedAbility(player, spec, now, manaCost);
+  tryUseComposedAbility(player, spec, now, manaCost, favorCost);
 }
 
-function tryUseComposedAbility(player: ServerPlayer, spec: AbilitySpec, now: number, manaCost: number): boolean {
+function tryUseComposedAbility(player: ServerPlayer, spec: AbilitySpec, now: number, manaCost: number, favorCost = 0): boolean {
   if (!spec.targeting || !spec.effects) return false;
   const resolution = resolveAbilityTargeting(player, spec);
   if (!resolution) return true;
   if (!abilityGuardsPass(player, spec)) return true;
   if (player.maxMana < manaCost || player.mana < manaCost) return true;
+  if (player.maxFavor < favorCost || player.favor < favorCost) return true;
 
   player.abilityCooldowns[spec.id] = now + spec.cooldownMs;
   player.mana -= manaCost;
+  player.favor -= favorCost;
   const castTimeMs = spec.castTimeMs ?? 0;
   if (castTimeMs > 0) {
     player.stunUntil = Math.max(player.stunUntil ?? 0, now + castTimeMs);
@@ -1444,7 +1458,8 @@ function applyAbilityEffect(
       const skill = effect.skill ?? spec.skill ?? "attack";
       let damage = roll(damageRange) + skillLevel(player, skill) + wellFedPower(player);
       const damageType = effect.damageType ?? (skill === "magic" ? "magic" : "physical");
-      if (damageType !== "magic") damage = Math.max(1, Math.round(damage * physicalMult(player)));
+      if (damageType === "physical") damage = Math.max(1, Math.round(damage * physicalMult(player)));
+      if (damageType === "holy" && player.classKey === "acolyte") damage = Math.max(1, Math.round(damage * 1.15));
       const bonus = effect.conditionalBonus;
       if (bonus?.when === "behindTarget" && player.dir === monster.dir) {
         damage = Math.round(damage * bonus.multiply);
@@ -1494,12 +1509,18 @@ function applyAbilityEffect(
     player.abilityBuffs[effect.buff] = { until: now + durationMs };
     return 1;
   }
+  if (effect.kind === "gain_favor") {
+    const target = resolution.targets[0];
+    const targetUnholy = target ? MONSTERS[target.type]?.isUnholy === true : false;
+    gainFavor(player, effect.amount + (targetUnholy ? effect.unholyBonus ?? 0 : 0));
+    return 1;
+  }
   if (effect.kind === "cleanse_self") {
     const statuses = effect.statuses ?? ["slow", "weaken"];
     if (statuses.includes("slow")) player.slowUntil = 0;
     if (statuses.includes("weaken")) player.weakUntil = 0;
     if (statuses.includes("stun")) player.stunUntil = 0;
-    addSkillXp(player, "magic", 4);
+    addSkillXp(player, spec.skill ?? "magic", 4);
     return 1;
   }
   if (effect.kind === "shield_self") {
@@ -1566,7 +1587,7 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
     fromY: player.y,
     animationId: combatAnimationIdForEffectKind(kind)
   });
-  event("hit", dealt, monster.x, monster.y - 0.45, monster.floor, kind === "flare" ? "#8fd8ff" : "#ffd166", player.id, monster.id);
+  event("hit", dealt, monster.x, monster.y - 0.45, monster.floor, kind === "holy" ? "#f5d778" : kind === "flare" ? "#8fd8ff" : "#ffd166", player.id, monster.id);
   if (monster.hp > 0) return;
 
   const catalog = MONSTERS[monster.type];
@@ -1574,6 +1595,7 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
   monster.deadUntil = performance.now() + (monster.type === "boss" ? 45000 : 18000);
   removeFromSpatial(spatial.monsters, monster);
   player.xp += catalog.xp;
+  if (catalog.isUnholy) completeFaithDeed(player, "unholy_slay", catalog.faithXp ?? Math.max(4, Math.floor(catalog.xp * 0.45)));
   updateQuestProgress(player, monster);
   awardLevels(player);
 
@@ -1594,8 +1616,22 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
   systemToPlayer(player, `${player.name} defeated ${catalog.name}.`);
 }
 
+function gainFavor(player: ServerPlayer, amount: number): void {
+  const before = player.favor ?? 0;
+  player.favor = clamp(before + amount, 0, player.maxFavor);
+  if (player.favor > before) event("float", `+${Math.round(player.favor - before)} Favor`, player.x, player.y - 0.75, player.floor, "#f5d778", player.id);
+}
+
+function completeFaithDeed(player: ServerPlayer, deedType: string, xp: number): void {
+  const amount = Math.max(1, Math.floor(xp));
+  addSkillXp(player, "faith", amount);
+  gainFavor(player, Math.max(1, Math.floor(amount / 8)));
+  event("faith_deed", `+${amount} Faith XP`, player.x, player.y - 0.85, player.floor, "#f5d778", player.id, null, { deedType });
+}
+
 function combatAnimationIdForEffectKind(kind: string): string | undefined {
   if (kind === "hit") return "melee.slash.light";
+  if (kind === "holy") return "impact.holy_ring";
   if (kind === "flare") return "projectile.orb.fire";
   if (kind === "bolt") return "projectile.bolt.arcane_lance";
   if (kind === "frost") return "projectile.shard.frost";
@@ -1634,6 +1670,11 @@ function damagePlayer(player: ServerPlayer, damage: number, source: string): voi
   // Iron Clad mitigates incoming damage.
   if (player.abilityBuffs?.ironClad && performance.now() < player.abilityBuffs.ironClad.until) {
     damage = Math.max(1, Math.round(damage * 0.7));
+  }
+  if (player.abilityBuffs?.conviction && performance.now() < player.abilityBuffs.conviction.until) {
+    const original = damage;
+    damage = Math.max(1, Math.round(damage * 0.75));
+    gainFavor(player, Math.max(1, Math.floor(original * 0.2)));
   }
   const aegis = player.abilityBuffs?.arcaneAegis;
   if (aegis && performance.now() < aegis.until && aegis.shield > 0) {
@@ -1904,6 +1945,7 @@ function respawn(player: ServerPlayer): void {
   player.portalReadyAt = performance.now() + 650;
   player.hp = player.maxHp;
   player.mana = player.maxMana;
+  player.favor = 0;
   player.dead = false;
   systemToPlayer(player, `${player.name} returns to the temple.`);
 }
@@ -2532,6 +2574,7 @@ function grantE2EItems(
     items?: Array<{ id: string; qty: number }>;
     gold?: number;
     hp?: number;
+    favor?: number;
     floor?: number;
     x?: number;
     y?: number;
@@ -2547,6 +2590,7 @@ function grantE2EItems(
   }
   if (Number.isFinite(message.gold)) player.gold = Math.max(0, Math.floor(Number(message.gold)));
   if (Number.isFinite(message.hp)) player.hp = clamp(Number(message.hp), 0, player.maxHp);
+  if (Number.isFinite(message.favor)) player.favor = clamp(Number(message.favor), 0, player.maxFavor);
   if (message.skills) {
     let changed = false;
     for (const [id, xp] of Object.entries(message.skills)) {
@@ -2556,6 +2600,10 @@ function grantE2EItems(
       }
     }
     if (changed) markSkillChanged(player);
+    recalculateVitals(player);
+    player.hp = clamp(player.hp, 1, player.maxHp);
+    player.mana = clamp(player.mana, 0, player.maxMana);
+    player.favor = clamp(player.favor, 0, player.maxFavor);
   }
   if (typeof message.forceDodge === "boolean") player.forceDodge = message.forceDodge;
   if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y)) {
@@ -3916,6 +3964,8 @@ function playerViewSignature(player: PlayerView): number {
   hash = hashNumber(hash, player.maxHp);
   hash = hashNumber(hash, player.mana ?? 0);
   hash = hashNumber(hash, player.maxMana ?? 0);
+  hash = hashNumber(hash, player.favor ?? 0);
+  hash = hashNumber(hash, player.maxFavor ?? 0);
   hash = hashNumber(hash, player.level ?? 0);
   hash = hashNumber(hash, player.xp ?? 0);
   hash = hashNumber(hash, player.gold ?? 0);
@@ -3965,6 +4015,8 @@ function buildPlayerSignature(player: ServerPlayer, privateView: PlayerPrivateVi
   hash = hashNumber(hash, player.maxHp);
   hash = hashNumber(hash, Math.round(player.mana));
   hash = hashNumber(hash, player.maxMana);
+  hash = hashNumber(hash, Math.round(player.favor));
+  hash = hashNumber(hash, player.maxFavor);
   hash = hashNumber(hash, player.level);
   hash = hashNumber(hash, player.xp);
   hash = hashNumber(hash, player.gold);
@@ -4159,6 +4211,11 @@ function hashBuffs(hash: number, buffs: BuffsView | undefined): number {
   hash = hashNumber(hash, Math.ceil(buffs.secondWind / 100));
   hash = hashNumber(hash, Math.ceil(buffs.ironClad / 100));
   hash = hashNumber(hash, Math.ceil(buffs.fleetFoot / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.luminescence / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.zephyrStep / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.earthSense / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.arcaneAegis / 100));
+  hash = hashNumber(hash, Math.ceil(buffs.conviction / 100));
   hash = hashNumber(hash, Math.ceil(buffs.slowed / 100));
   hash = hashNumber(hash, Math.ceil(buffs.stunned / 100));
   hash = hashNumber(hash, Math.ceil(buffs.weakened / 100));
@@ -4201,6 +4258,8 @@ function serializePlayer(player: ServerPlayer, now: number): PlayerView {
     maxHp: player.maxHp,
     mana: Math.round(player.mana),
     maxMana: player.maxMana,
+    favor: Math.round(player.favor),
+    maxFavor: player.maxFavor,
     level: player.level,
     xp: player.xp,
     gold: player.gold,
@@ -4283,6 +4342,8 @@ function serializePlayerPublic(player: ServerPlayer, action: ActionView | null, 
     moving: player.moving,
     hp: Math.round(player.hp),
     maxHp: player.maxHp,
+    favor: Math.round(player.favor),
+    maxFavor: player.maxFavor,
     dead: player.dead,
     action
   } as PlayerView;
@@ -4475,6 +4536,7 @@ function serializeBuffs(player: ServerPlayer, now: number): BuffsView {
     zephyrStep: Math.max(0, Math.round((player.abilityBuffs?.zephyrStep?.until ?? 0) - now)),
     earthSense: Math.max(0, Math.round((player.abilityBuffs?.earthSense?.until ?? 0) - now)),
     arcaneAegis: Math.max(0, Math.round((player.abilityBuffs?.arcaneAegis?.until ?? 0) - now)),
+    conviction: Math.max(0, Math.round((player.abilityBuffs?.conviction?.until ?? 0) - now)),
     slowed: Math.max(0, Math.round((player.slowUntil ?? 0) - now)),
     stunned: Math.max(0, Math.round((player.stunUntil ?? 0) - now)),
     weakened: Math.max(0, Math.round((player.weakUntil ?? 0) - now))
@@ -4551,6 +4613,7 @@ function persistPlayerToDb(player: ServerPlayer): string {
     xp: player.xp,
     hp: player.hp,
     mana: player.mana,
+    favor: player.favor,
     gold: player.gold,
     weaponTier: player.weaponTier,
     armorTier: player.armorTier,
@@ -4949,7 +5012,7 @@ function addSkillXp(player: ServerPlayer, id: string, amount: number): void {
   markSkillChanged(player);
   const after = skillLevel(player, id);
   if (after > before) systemToPlayer(player, `${player.name} reached ${SKILLS[id]?.label ?? id} ${after}.`);
-  if (id === "defense" || id === "magic") recalculateVitals(player);
+  if (id === "defense" || id === "magic" || id === "faith") recalculateVitals(player);
 }
 
 function fishingCatchMs(level: number): number {
@@ -5001,6 +5064,8 @@ function recalculateVitals(player: ServerPlayer): void {
   const spec = ADVENTURER;
   player.maxHp = spec.maxHp + (skillLevel(player, "defense") - 1) * spec.hpPerDefense;
   player.maxMana = spec.maxMana + (skillLevel(player, "magic") - 1) * spec.manaPerMagic;
+  const baseFavor = Math.min(100, 30 + (skillLevel(player, "faith") - 1) * 5);
+  player.maxFavor = Math.floor(baseFavor * (player.classKey === "acolyte" ? 1.1 : 1)) + (classOf(player).maxFavor ?? 0);
 }
 
 function classOf(player: ServerPlayer): ClassSpec {

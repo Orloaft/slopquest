@@ -30,7 +30,7 @@ editor feedback plus a hard gate at build time.
 
 | File                  | What it holds                                              |
 | --------------------- | ---------------------------------------------------------- |
-| `abilities.yaml`      | Class abilities, generic spells, targeting rules, effects, VFX hints |
+| `abilities.yaml`      | Class abilities, generic spells, Faith miracles, targeting rules, effects, VFX hints |
 | `combat-animations.yaml` | Named attack, projectile, impact, trail, and ground VFX |
 | `items.yaml`          | Every item that can exist in a player's inventory          |
 | `monsters.yaml`       | Stats for every monster type + what they drop              |

@@ -29,6 +29,8 @@ interface CompactPlayerView {
   mh: number;
   ma?: number;
   mma?: number;
+  fa?: number;
+  mfa?: number;
   l?: number;
   xp?: number;
   g?: number;
@@ -138,6 +140,7 @@ interface CompactGameEvent {
   an?: number;
   s?: number;
   du?: number;
+  dt?: string;
   to?: string;
   ln?: GameEvent["lines"];
   os?: 1;
@@ -324,6 +327,8 @@ function compactPlayerView(player: PlayerView): CompactPlayerView {
   if (player.moving) compact.mo = 1;
   if (player.mana !== undefined) compact.ma = player.mana;
   if (player.maxMana !== undefined) compact.mma = player.maxMana;
+  if (player.favor !== undefined) compact.fa = player.favor;
+  if (player.maxFavor !== undefined) compact.mfa = player.maxFavor;
   if (player.level !== undefined) compact.l = player.level;
   if (player.xp !== undefined) compact.xp = player.xp;
   if (player.gold !== undefined) compact.g = player.gold;
@@ -359,6 +364,8 @@ function expandPlayerView(player: CompactPlayerView | PlayerView): PlayerView {
     maxHp: player.mh,
     mana: player.ma,
     maxMana: player.mma,
+    favor: player.fa,
+    maxFavor: player.mfa,
     level: player.l,
     xp: player.xp,
     gold: player.g,
@@ -580,6 +587,7 @@ function compactGameEvent(event: GameEvent): CompactGameEvent {
   if (event.angle !== undefined) compact.an = event.angle;
   if (event.scale !== undefined) compact.s = event.scale;
   if (event.durationMs !== undefined) compact.du = event.durationMs;
+  if (event.deedType !== undefined) compact.dt = event.deedType;
   if (event.to !== undefined) compact.to = event.to;
   if (event.lines !== undefined) compact.ln = event.lines;
   if (event.opensShop) compact.os = 1;
@@ -607,6 +615,7 @@ function expandGameEvent(event: CompactGameEvent | GameEvent): GameEvent {
   if (event.an !== undefined) expanded.angle = event.an;
   if (event.s !== undefined) expanded.scale = event.s;
   if (event.du !== undefined) expanded.durationMs = event.du;
+  if (event.dt !== undefined) expanded.deedType = event.dt;
   if (event.to !== undefined) expanded.to = event.to;
   if (event.ln !== undefined) expanded.lines = event.ln;
   if (event.os) expanded.opensShop = true;

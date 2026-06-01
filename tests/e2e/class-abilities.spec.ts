@@ -110,6 +110,35 @@ test("Mage Frost Nova damages a nearby monster", async ({ page }) => {
   );
 });
 
+test("Acolyte uses Favor abilities and earns Faith XP from Unholy kills", async ({ page }) => {
+  logErrors(page);
+  await page.goto("/?e2e");
+  await join(page);
+  await unlockEquip(page, { npcId: "acolyte-prior", classKey: "acolyte", floor: 0, x: 64.5, y: 39.5, skills: { attack: HIGH, faith: HIGH } });
+
+  await page.waitForFunction(() => {
+    const me = window.__TIB_E2E__?.self();
+    const ids = (me?.abilities ?? []).map((a) => a.id);
+    return Boolean(me && me.maxFavor >= 100 && ids.includes("zealots_strike") && ids.includes("cleansing_flash") && ids.includes("miracle_resurrection"));
+  });
+
+  const beforeFavor = await page.evaluate(() => window.__TIB_E2E__?.self()?.favor ?? 0);
+  const target = await placeNearMonster(page, 1, 1.2);
+  await page.evaluate((id) => window.__TIB_E2E__?.send({ type: "target", id }), target.id);
+  await cast(page, "zealots_strike");
+  await page.waitForFunction((favor) => (window.__TIB_E2E__?.self()?.favor ?? 0) >= favor + 12, beforeFavor);
+  await page.waitForFunction(
+    () => (window.__TIB_E2E__?.recentEvents?.() ?? []).some((event) => event.type === "faith_deed" && event.deedType === "unholy_slay")
+  );
+
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", favor: 35, hp: 40 }));
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.favor ?? 0) >= 30);
+  await cast(page, "conviction");
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.buffs?.conviction ?? 0) > 0);
+  await cast(page, "cleansing_flash");
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.favor ?? 999) <= 15);
+});
+
 // --- helpers ---------------------------------------------------------------
 
 function logErrors(page: Page): void {

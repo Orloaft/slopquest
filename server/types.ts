@@ -33,6 +33,7 @@ export interface AbilityBuffs {
   zephyrStep?: { until: number };
   earthSense?: { until: number };
   arcaneAegis?: { until: number; shield: number };
+  conviction?: { until: number };
 }
 
 export interface QuestState {
@@ -70,8 +71,10 @@ export interface ServerPlayer {
   xp: number;
   hp: number;
   mana: number;
+  favor: number;
   maxHp: number;
   maxMana: number;
+  maxFavor: number;
   gold: number;
   weaponTier: number;
   armorTier: number;
@@ -252,6 +255,7 @@ export interface SavedPlayer {
   xp?: number;
   hp?: number;
   mana?: number;
+  favor?: number;
   gold?: number;
   weaponTier?: number;
   armorTier?: number;

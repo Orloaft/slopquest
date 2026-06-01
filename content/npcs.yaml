@@ -91,6 +91,12 @@
   at: { floor: 4, x: 61.5, y: 36.5 }
   idleDialogue: "Power answers study. Master the arcane and become a Mage."
 
+- id: acolyte-prior
+  name: Prior Elian
+  role: trainer
+  at: { floor: 0, x: 64.5, y: 39.5 }
+  idleDialogue: "Faith is earned in deed, then carried into danger. Return when your hand and heart are steady."
+
 - id: marsh-alchemist
   name: Bogwarden Yssa
   role: alchemist

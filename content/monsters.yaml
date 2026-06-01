@@ -260,6 +260,8 @@
   damage: [11, 18]
   attackMs: 1250
   xp: 52
+  isUnholy: true
+  faithXp: 24
   gold: [9, 20]
   aggro: 6
   range: 1.05
@@ -275,6 +277,8 @@
   damage: [12, 21]
   attackMs: 1200
   xp: 70
+  isUnholy: true
+  faithXp: 32
   gold: [14, 28]
   aggro: 6.5
   range: 1.05
@@ -287,6 +291,8 @@
   damage: [10, 18]
   attackMs: 980
   xp: 66
+  isUnholy: true
+  faithXp: 30
   gold: [12, 26]
   aggro: 7
   range: 1.05
@@ -299,6 +305,8 @@
   damage: [14, 24]
   attackMs: 1350
   xp: 92
+  isUnholy: true
+  faithXp: 42
   gold: [18, 36]
   aggro: 6.5
   range: 1.1
@@ -312,6 +320,8 @@
   damage: [9, 16]
   attackMs: 1450
   xp: 78
+  isUnholy: true
+  faithXp: 36
   gold: [15, 32]
   aggro: 7
   range: 5.5
@@ -429,6 +439,8 @@
   damage: [4, 8]
   attackMs: 2000
   xp: 52
+  isUnholy: true
+  faithXp: 24
   gold: [12, 22]
   aggro: 7
   range: 6
@@ -473,6 +485,8 @@
   damage: [6, 11]
   attackMs: 1800
   xp: 60
+  isUnholy: true
+  faithXp: 28
   gold: [12, 24]
   aggro: 7
   range: 6

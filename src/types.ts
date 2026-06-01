@@ -36,6 +36,7 @@ export interface BuffsView {
   zephyrStep: number;
   earthSense: number;
   arcaneAegis: number;
+  conviction: number;
   slowed: number;
   stunned: number;
   weakened: number;
@@ -95,6 +96,8 @@ export interface PlayerView {
   maxHp: number;
   mana: number;
   maxMana: number;
+  favor: number;
+  maxFavor: number;
   level: number;
   xp: number;
   gold: number;
@@ -226,6 +229,7 @@ export interface GameEvent {
   scale?: number;
   durationMs?: number;
   animationId?: string;
+  deedType?: string;
   to?: string;
   lines?: DialogueLineView[];
   opensShop?: boolean;
@@ -369,6 +373,7 @@ export type ClientMessage =
       items?: Array<{ id: string; qty: number }>;
       gold?: number;
       hp?: number;
+      favor?: number;
       floor?: number;
       x?: number;
       y?: number;
