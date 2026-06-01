@@ -1238,6 +1238,46 @@ canvas {
   }
 }
 
+/* Bespoke right-click entity menu (replaces the browser context menu). */
+.npc-menu {
+  position: fixed;
+  z-index: 22;
+  min-width: 134px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: auto;
+  border: 1px solid rgba(247, 212, 134, 0.5);
+  border-radius: 8px;
+  background: rgba(16, 13, 22, 0.97);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+  user-select: none;
+}
+.npc-menu-title {
+  padding: 4px 10px 6px;
+  color: #f7d486;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 2px;
+}
+.npc-menu-item {
+  text-align: left;
+  padding: 7px 12px;
+  font-size: 13px;
+  color: #eef3ed;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.npc-menu-item:hover {
+  background: rgba(247, 212, 134, 0.16);
+  color: #fff;
+}
+
 .item-popover {
   position: fixed;
   z-index: 20;

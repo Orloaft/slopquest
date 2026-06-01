@@ -297,6 +297,7 @@ interface E2EHooks {
   getState: () => StateSnapshot | null;
   self: () => PlayerView | undefined;
   fireScreenPoint: (id?: string | null) => { x: number; y: number } | null;
+  npcScreenPoint: (id: string) => { x: number; y: number } | null;
   send: (msg: ClientMessage) => void;
   stateVersion: () => number;
   viewCounts: () => { trees: number; npcs: number };
@@ -410,6 +411,7 @@ const dom = {
   brewButton: el<HTMLButtonElement>("#brewButton"),
   dialogue: el<HTMLElement>("#dialogue"),
   dialogueDim: el<HTMLElement>("#dialogueDim"),
+  npcMenu: el<HTMLElement>("#npcMenu"),
   dialogueSpeaker: el<HTMLElement>("#dialogueSpeaker"),
   dialogueLine: el<HTMLElement>("#dialogueLine"),
   dialogueNextButton: el<HTMLButtonElement>("#dialogueNextButton"),
@@ -473,6 +475,22 @@ dom.menuBackdrop.addEventListener("click", () => hideCenterPanels());
 // Click anywhere on the box (including the Continue/Done button, which bubbles)
 // to advance — first click completes the typewriter, the next moves on.
 dom.dialogue.addEventListener("click", advanceDialogue);
+
+// Replace the browser context menu with our own over the game (keep it on real
+// text inputs). Close the NPC menu on an outside click or Escape.
+document.addEventListener("contextmenu", (event) => {
+  const target = event.target as HTMLElement | null;
+  if (target?.closest("input, textarea")) return;
+  event.preventDefault();
+});
+document.addEventListener("click", (event) => {
+  const target = event.target as HTMLElement | null;
+  if (!dom.npcMenu.classList.contains("hidden") && !target?.closest("#npcMenu")) hideNpcMenu();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") hideNpcMenu();
+});
+
 [dom.vendor, dom.alchemist].forEach((panel) => {
   panel.querySelectorAll<HTMLElement>("[data-buy]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -513,6 +531,15 @@ if (E2E_MODE) {
       return {
         x: (fire.x * TILE_SIZE - camera.worldView.x) * camera.zoom,
         y: (fire.y * TILE_SIZE - camera.worldView.y) * camera.zoom
+      };
+    },
+    npcScreenPoint: (id: string) => {
+      const npc = (latestState?.npcs ?? []).find((item) => item.id === id);
+      const camera = scene?.cameras?.main;
+      if (!npc || !camera) return null;
+      return {
+        x: (npc.x * TILE_SIZE - camera.worldView.x) * camera.zoom,
+        y: (npc.y * TILE_SIZE - camera.worldView.y) * camera.zoom
       };
     },
     send,
@@ -577,6 +604,10 @@ let pendingTreeCut: string | null = null;
 let pendingAttackTarget: string | null = null;
 let pendingLootTarget: string | null = null;
 let pendingNpcTalk: string | null = null;
+// Which action the player picked from the right-click NPC menu; consumed on
+// arrival (talk = full conversation, trade/alchemy = open the service directly).
+type NpcIntent = "talk" | "trade" | "alchemy";
+let pendingNpcIntent: NpcIntent = "talk";
 let pendingFishingNode: string | null = null;
 let pendingMiningNode: string | null = null;
 let pendingHerbNode: string | null = null;
@@ -1599,9 +1630,16 @@ function createNpcView(npc: NpcView): NpcEntityView {
   const sprite = scene.add.sprite(0, -10, actorTextureKey(family, npc.dir, 0)).setDisplaySize(40, 48);
   const nameText = scene.add.text(0, -45, npc.name, textStyle(11, npc.role === "quest" ? "#f7d486" : "#f5ddb1")).setOrigin(0.5);
   const zone = scene.add.zone(0, 0, 50, 58).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+  zone.on("pointerdown", (pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
-    startNpcTalkPath(npc.id);
+    if (pointer.rightButtonDown()) {
+      // Right-click: bespoke quick-action menu (Talk / Trade / Alchemy).
+      showNpcMenu(npc, pointer.event instanceof MouseEvent ? pointer.event.clientX : pointer.x, pointer.event instanceof MouseEvent ? pointer.event.clientY : pointer.y);
+    } else {
+      hideNpcMenu();
+      pendingNpcIntent = "talk";
+      startNpcTalkPath(npc.id);
+    }
   });
   view.add([shadow, sprite, nameText, zone]);
   view.nameText = nameText;
@@ -2003,8 +2041,7 @@ function renderHud(me: PlayerView): void {
     renderedHotbarDataSignature = hotbarDataSignature;
     renderHotbar(me.inventory);
   }
-  const vendorNpc = NPCS[0];
-  const nearVendor = vendorNpc != null && me.floor === vendorNpc.floor && Phaser.Math.Distance.Between(me.x, me.y, vendorNpc.x, vendorNpc.y) < 2.2;
+  const nearVendor = NPCS.some((npc) => npc.role === "vendor" && me.floor === npc.floor && Phaser.Math.Distance.Between(me.x, me.y, npc.x, npc.y) < 2.2);
   if (!nearVendor && !dom.vendor.classList.contains("hidden")) hideCenterPanels();
   const alchemistNpc = NPCS.find((npc) => npc.role === "alchemist");
   const nearAlchemist = alchemistNpc != null && me.floor === alchemistNpc.floor && Phaser.Math.Distance.Between(me.x, me.y, alchemistNpc.x, alchemistNpc.y) < 2.2;
@@ -2962,12 +2999,9 @@ function inputTowardDestination(me: PlayerView): MovementInput | null {
       return null;
     }
     if (Phaser.Math.Distance.Between(me.x, me.y, npc.x, npc.y) <= 2.25) {
-      const npcId = pendingNpcTalk;
       clearClickDestination();
       sendStopInput();
-      if (npc.role === "vendor") openVendor();
-      lastTalkNpcId = npcId;
-      send({ type: "talkNpc", id: npcId });
+      arriveAtNpc(npc);
       return null;
     }
     if (shouldRefreshDynamicPath("npc", npc)) {
@@ -3143,6 +3177,69 @@ function refreshLootPath(me: PlayerView, corpse: CorpseView | null = null): bool
   return Boolean(destination && startPathToTile(me.floor, destination.x, destination.y, null, null, target.id));
 }
 
+function openAlchemist(): void {
+  showCenterPanel(dom.alchemist);
+}
+
+// Actions offered by the right-click menu for an NPC, by role.
+function npcMenuActions(npc: NpcView): Array<{ label: string; intent: NpcIntent }> {
+  const actions: Array<{ label: string; intent: NpcIntent }> = [{ label: "Talk", intent: "talk" }];
+  if (npc.role === "vendor") actions.push({ label: "Trade", intent: "trade" });
+  if (npc.role === "alchemist") actions.push({ label: "Alchemy", intent: "alchemy" });
+  return actions;
+}
+
+function showNpcMenu(npc: NpcView, screenX: number, screenY: number): void {
+  dom.npcMenu.innerHTML = "";
+  const title = document.createElement("div");
+  title.className = "npc-menu-title";
+  title.textContent = npc.name;
+  dom.npcMenu.appendChild(title);
+  for (const action of npcMenuActions(npc)) {
+    const btn = document.createElement("button");
+    btn.className = "npc-menu-item";
+    btn.type = "button";
+    btn.textContent = action.label;
+    btn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      hideNpcMenu();
+      pendingNpcIntent = action.intent;
+      startNpcTalkPath(npc.id);
+    });
+    dom.npcMenu.appendChild(btn);
+  }
+  dom.npcMenu.classList.remove("hidden");
+  // Clamp the menu to the viewport near the cursor.
+  const mw = dom.npcMenu.offsetWidth;
+  const mh = dom.npcMenu.offsetHeight;
+  const x = Math.max(8, Math.min(screenX, window.innerWidth - mw - 8));
+  const y = Math.max(8, Math.min(screenY, window.innerHeight - mh - 8));
+  dom.npcMenu.style.left = `${x}px`;
+  dom.npcMenu.style.top = `${y}px`;
+}
+
+function hideNpcMenu(): void {
+  dom.npcMenu.classList.add("hidden");
+}
+
+// Reached the NPC: run the chosen action. talk = full dialogue (vendors also pop
+// the shop after); trade/alchemy skip straight to the service for fast UX.
+function arriveAtNpc(npc: NpcView): void {
+  const intent = pendingNpcIntent;
+  pendingNpcIntent = "talk";
+  if (intent === "trade") {
+    openVendor();
+    return;
+  }
+  if (intent === "alchemy") {
+    openAlchemist();
+    return;
+  }
+  if (npc.role === "vendor") openVendor();
+  lastTalkNpcId = npc.id;
+  send({ type: "talkNpc", id: npc.id });
+}
+
 function startNpcTalkPath(npcOrId: string | NpcView): void {
   const npc = resolveNpc(npcOrId);
   const me = self();
@@ -3151,9 +3248,7 @@ function startNpcTalkPath(npcOrId: string | NpcView): void {
   pendingNpcTalk = npc.id;
   if (Phaser.Math.Distance.Between(me.x, me.y, npc.x, npc.y) <= 2.25) {
     pendingNpcTalk = null;
-    if (npc.role === "vendor") openVendor();
-    lastTalkNpcId = npc.id;
-    send({ type: "talkNpc", id: npc.id });
+    arriveAtNpc(npc);
     return;
   }
 

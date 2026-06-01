@@ -7,10 +7,24 @@ test("an NPC freezes in place while in dialogue and resumes after it ends", asyn
   await page.goto("/?e2e");
   await join(page);
 
-  // Stand by the cemetery warden (a wandering quest-giver) and talk.
-  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 0, x: 61.5, y: 60.5 }));
+  // Teleport onto the cemetery warden (a wandering quest-giver) — its position
+  // drifts across the suite, so target wherever it currently is — and talk.
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 0, x: 61.5, y: 57.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 0);
-  await page.waitForTimeout(300);
+  await page.waitForFunction(() => (window.__TIB_E2E__?.getState()?.npcs ?? []).some((n) => n.id === "cemetery-warden"));
+  const warden = await page.evaluate(() => {
+    const n = (window.__TIB_E2E__?.getState()?.npcs ?? []).find((x) => x.id === "cemetery-warden");
+    return n ? { x: n.x, y: n.y } : null;
+  });
+  expect(warden).not.toBeNull();
+  await page.evaluate((w) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 0, x: w.x, y: w.y }), warden!);
+  await page.waitForFunction(
+    (w) => {
+      const me = window.__TIB_E2E__?.self();
+      return Boolean(me && me.floor === 0 && Math.hypot(me.x - w.x, me.y - w.y) < 1.5);
+    },
+    warden!
+  );
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "talkNpc", id: "cemetery-warden" }));
   await page.locator("#dialogue").waitFor({ state: "visible", timeout: 4000 });
 
