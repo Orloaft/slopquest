@@ -746,6 +746,28 @@ canvas {
   gap: 10px;
 }
 
+.ability-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.ability-tab {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  background: rgba(7, 10, 8, 0.55);
+  color: #c8d3c9;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 10px;
+}
+
+.ability-tab.active {
+  border-color: rgba(247, 212, 134, 0.65);
+  color: #f7d486;
+  box-shadow: inset 0 0 0 1px rgba(247, 212, 134, 0.18);
+}
+
 .ability-empty {
   color: #8b9b8d;
   font-size: 12px;
@@ -1478,6 +1500,16 @@ canvas {
 .hotbar-slot.ability.ability-active {
   border-color: rgba(154, 230, 180, 0.85);
   box-shadow: inset 0 0 0 2px rgba(154, 230, 180, 0.5);
+}
+
+.hotbar-slot.ability.mana-locked {
+  border-color: rgba(255, 112, 112, 0.8);
+  background: rgba(61, 12, 12, 0.72);
+  box-shadow: inset 0 0 0 2px rgba(255, 112, 112, 0.32);
+}
+
+.hotbar-slot.ability.mana-locked .hotbar-ability {
+  color: #ff9b9b;
 }
 
 /* Minimap framed in a rugged stone border. */

@@ -32,6 +32,10 @@ export interface BuffsView {
   secondWind: number;
   ironClad: number;
   fleetFoot: number;
+  luminescence: number;
+  zephyrStep: number;
+  earthSense: number;
+  arcaneAegis: number;
   slowed: number;
   stunned: number;
   weakened: number;

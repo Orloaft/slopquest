@@ -113,6 +113,25 @@ interface AbilityResolution {
   heal: number;
 }
 
+function abilityIdsForPlayer(player: ServerPlayer): string[] {
+  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
+  const ids = [...(classSpec.abilities ?? [])];
+  const magicLevel = skillLevel(player, "magic");
+  for (const ability of Object.values(ABILITIES)) {
+    if (ability.category !== "spell") continue;
+    if ((ability.magicLevel ?? 1) > magicLevel) continue;
+    if (!ids.includes(ability.id)) ids.push(ability.id);
+  }
+  return ids;
+}
+
+function activeBuffForAbility(player: ServerPlayer, spec: AbilitySpec): { until: number } | undefined {
+  const effectBuff = spec.effects?.find((effect) => effect.kind === "buff_self" || effect.kind === "heal_over_time")?.buff;
+  if (effectBuff) return player.abilityBuffs?.[effectBuff as keyof typeof player.abilityBuffs];
+  if (spec.effects?.some((effect) => effect.kind === "shield_self")) return player.abilityBuffs?.arcaneAegis;
+  return player.abilityBuffs?.[spec.id as keyof typeof player.abilityBuffs];
+}
+
 interface StaticSpatialIndex {
   trees: Map<string, TreeNodeRuntime[]>;
   fishingNodes: Map<string, FishingNodeRuntime[]>;
@@ -870,10 +889,24 @@ function updatePlayers(dt: number, now: number): void {
     } else if (player.abilityBuffs?.fleetFoot) {
       delete player.abilityBuffs.fleetFoot;
     }
+    if (now < (player.abilityBuffs?.zephyrStep?.until ?? 0)) {
+      speed *= ABILITIES["spell_zephyr_step"]?.speedMultiplier ?? 1.15;
+    } else if (player.abilityBuffs?.zephyrStep) {
+      delete player.abilityBuffs.zephyrStep;
+    }
     if (now < (player.abilityBuffs?.ironClad?.until ?? 0)) {
       speed *= 0.85;
     } else if (player.abilityBuffs?.ironClad) {
       delete player.abilityBuffs.ironClad;
+    }
+    if (player.abilityBuffs?.luminescence && now >= player.abilityBuffs.luminescence.until) {
+      delete player.abilityBuffs.luminescence;
+    }
+    if (player.abilityBuffs?.earthSense && now >= player.abilityBuffs.earthSense.until) {
+      delete player.abilityBuffs.earthSense;
+    }
+    if (player.abilityBuffs?.arcaneAegis && now >= player.abilityBuffs.arcaneAegis.until) {
+      delete player.abilityBuffs.arcaneAegis;
     }
     if (player.slowUntil && now < player.slowUntil) {
       speed *= player.slowMult ?? 1;
@@ -1012,6 +1045,11 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
 
     const frozen = Boolean(monster.freezeUntil && now < monster.freezeUntil);
     const snared = Boolean(monster.snareUntil && now < monster.snareUntil);
+    const slowed = Boolean(monster.slowUntil && now < monster.slowUntil);
+    if (monster.slowUntil && !slowed) {
+      monster.slowUntil = 0;
+      monster.slowMult = 1;
+    }
     const distSq = distanceSq(monster, target);
     const rangeSq = catalog.range * catalog.range;
 
@@ -1044,7 +1082,8 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
       const dist = Math.sqrt(distSq);
       const dx = (target.x - monster.x) / dist;
       const dy = (target.y - monster.y) / dist;
-      moveEntity(monster, dx * catalog.speed * dt, dy * catalog.speed * dt);
+      const speedMult = slowed ? monster.slowMult ?? 0.6 : 1;
+      moveEntity(monster, dx * catalog.speed * speedMult * dt, dy * catalog.speed * speedMult * dt);
       updateMonsterCell(monster, oldFloor, oldX, oldY);
     }
 
@@ -1211,12 +1250,36 @@ function dashPlayer(player: ServerPlayer, tiles: number): void {
   player.y = destY;
 }
 
+function pushMonsterAway(monster: ServerMonster, player: ServerPlayer, tiles: number): void {
+  const dx = monster.x - player.x;
+  const dy = monster.y - player.y;
+  const primaryX = Math.abs(dx) >= Math.abs(dy);
+  const stepX = primaryX ? Math.sign(dx || 1) : 0;
+  const stepY = primaryX ? 0 : Math.sign(dy || 1);
+  let destX = monster.x;
+  let destY = monster.y;
+  const steps = Math.max(1, Math.floor(tiles));
+  for (let step = 1; step <= steps; step += 1) {
+    const tx = Math.floor(monster.x) + stepX * step;
+    const ty = Math.floor(monster.y) + stepY * step;
+    if (isBlockedTile(tileAt(monster.floor, tx, ty))) break;
+    destX = tx + 0.5;
+    destY = ty + 0.5;
+  }
+  if (destX === monster.x && destY === monster.y) return;
+  const oldFloor = monster.floor;
+  const oldX = monster.x;
+  const oldY = monster.y;
+  monster.x = destX;
+  monster.y = destY;
+  updateMonsterCell(monster, oldFloor, oldX, oldY);
+}
+
 function useClassAbility(player: ServerPlayer, id: string): void {
   if (player.dead || isStunned(player)) return;
   const spec = ABILITIES[id];
   if (!spec) return;
-  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
-  if (!classSpec.abilities?.includes(id)) return;
+  if (!abilityIdsForPlayer(player).includes(id)) return;
   const now = performance.now();
   if (!player.abilityCooldowns) player.abilityCooldowns = {};
   if (!player.abilityBuffs) player.abilityBuffs = {};
@@ -1231,11 +1294,29 @@ function tryUseComposedAbility(player: ServerPlayer, spec: AbilitySpec, now: num
   const resolution = resolveAbilityTargeting(player, spec);
   if (!resolution) return true;
   if (!abilityGuardsPass(player, spec)) return true;
-  if (player.mana < manaCost) return true;
+  if (player.maxMana < manaCost || player.mana < manaCost) return true;
 
   player.abilityCooldowns[spec.id] = now + spec.cooldownMs;
   player.mana -= manaCost;
+  const castTimeMs = spec.castTimeMs ?? 0;
+  if (castTimeMs > 0) {
+    player.stunUntil = Math.max(player.stunUntil ?? 0, now + castTimeMs);
+    event("float", "Casting...", player.x, player.y - 0.6, player.floor, "#c7a7ff");
+    setTimeout(() => {
+      if (player.dead) return;
+      if (!playersById.has(player.id)) return;
+      applyResolvedAbility(player, spec, resolution, performance.now());
+      broadcastState();
+    }, castTimeMs);
+    return true;
+  }
 
+  applyResolvedAbility(player, spec, resolution, now);
+  return true;
+}
+
+function applyResolvedAbility(player: ServerPlayer, spec: AbilitySpec, resolution: AbilityResolution, now: number): void {
+  if (!spec.effects) return;
   if (spec.projectile) {
     event(
       "projectile",
@@ -1260,7 +1341,6 @@ function tryUseComposedAbility(player: ServerPlayer, spec: AbilitySpec, now: num
       .replaceAll("{heal}", String(resolution.heal));
     event("float", text, resolution.origin.x, resolution.origin.y + (spec.float.yOffset ?? -0.5), player.floor, spec.float.color);
   }
-  return true;
 }
 
 function emitAbilityAnimation(player: ServerPlayer, resolution: AbilityResolution, spec: AbilitySpec): void {
@@ -1322,6 +1402,23 @@ function resolveAbilityTargeting(player: ServerPlayer, spec: AbilitySpec): Abili
     const y = player.y + dir.y * spec.targeting.offset;
     return { origin: { x, y }, targets: monstersInRadius(player.floor, x, y, spec.targeting.radius), targetId: null, heal: 0 };
   }
+  if (spec.targeting.mode === "line_front") {
+    const dir = DIR_VECTORS[player.dir];
+    const width = spec.targeting.width ?? 0.65;
+    const tiles = spec.targeting.tiles;
+    const endX = player.x + dir.x * tiles;
+    const endY = player.y + dir.y * tiles;
+    const targets = [...monsters.values()].filter((monster) => {
+      if (monster.deadUntil || monster.floor !== player.floor) return false;
+      const relX = monster.x - player.x;
+      const relY = monster.y - player.y;
+      const forward = relX * dir.x + relY * dir.y;
+      if (forward <= 0 || forward > tiles) return false;
+      const lateral = Math.abs(relX * -dir.y + relY * dir.x);
+      return lateral <= width;
+    });
+    return { origin: { x: endX, y: endY }, targets, targetId: null, heal: 0 };
+  }
   return null;
 }
 
@@ -1357,6 +1454,17 @@ function applyAbilityEffect(
       damageMonster(player, monster, damage, effect.effectKind ?? spec.effectKind ?? "flare");
       hits += 1;
     }
+    if (spec.id === "spell_spark" && player.classKey === "mage" && resolution.targets[0] && Math.random() < 0.1) {
+      const origin = resolution.targets[0];
+      const chained = monstersInRadius(player.floor, origin.x, origin.y, 1.5).find((monster) => monster.id !== origin.id);
+      if (chained) {
+        const amount = Math.max(1, Math.round((roll(effect.amount ?? spec.damage ?? [1, 2]) + skillLevel(player, "magic")) * 0.6));
+        addSkillXp(player, "magic", Math.max(1, Math.floor(amount * 0.8)));
+        damageMonster(player, chained, amount, "bolt");
+        event("float", "Chain!", chained.x, chained.y - 0.65, chained.floor, "#ffe066");
+        hits += 1;
+      }
+    }
     return hits;
   }
 
@@ -1366,6 +1474,10 @@ function applyAbilityEffect(
     for (const monster of resolution.targets) {
       if (monster.deadUntil) continue;
       if (effect.status === "snare") monster.snareUntil = now + durationMs;
+      if (effect.status === "slow") {
+        monster.slowUntil = now + durationMs;
+        monster.slowMult = effect.slowMultiplier ?? 0.6;
+      }
       if (effect.status === "freeze") monster.freezeUntil = now + durationMs;
       if (effect.status === "inaccurate") monster.inaccurateUntil = now + durationMs;
       if (effect.status === "burn") applyBurn(player, monster, durationMs, effect.perTick ?? 1);
@@ -1378,7 +1490,24 @@ function applyAbilityEffect(
   if (effect.kind === "buff_self") {
     const durationMs = effect.durationMs ?? spec.durationMs;
     if (effect.cleanse?.includes("slow")) player.slowUntil = 0;
+    if (effect.cleanse?.includes("weaken")) player.weakUntil = 0;
     player.abilityBuffs[effect.buff] = { until: now + durationMs };
+    return 1;
+  }
+  if (effect.kind === "cleanse_self") {
+    const statuses = effect.statuses ?? ["slow", "weaken"];
+    if (statuses.includes("slow")) player.slowUntil = 0;
+    if (statuses.includes("weaken")) player.weakUntil = 0;
+    if (statuses.includes("stun")) player.stunUntil = 0;
+    addSkillXp(player, "magic", 4);
+    return 1;
+  }
+  if (effect.kind === "shield_self") {
+    const durationMs = effect.durationMs ?? spec.durationMs;
+    const shield = Math.max(1, Math.round(effect.base + player.maxMana * (effect.maxManaScale ?? 0)));
+    player.abilityBuffs.arcaneAegis = { until: now + durationMs, shield };
+    event("float", `Aegis ${shield}`, player.x, player.y - 0.6, player.floor, "#a8d8ff");
+    addSkillXp(player, "magic", Math.max(2, Math.floor(shield * 0.25)));
     return 1;
   }
   if (effect.kind === "heal") {
@@ -1400,6 +1529,20 @@ function applyAbilityEffect(
     resolution.origin.x = player.x;
     resolution.origin.y = player.y;
     return 1;
+  }
+  if (effect.kind === "knockback") {
+    for (const monster of resolution.targets) pushMonsterAway(monster, player, effect.tiles);
+    if (resolution.targets.length) addSkillXp(player, "magic", resolution.targets.length * 3);
+    return resolution.targets.length;
+  }
+  if (effect.kind === "teleport") {
+    if (effect.destination === "waystone") {
+      teleportPlayer(player, START.floor, START.x, START.y);
+      addSkillXp(player, "magic", 12);
+      event("effect", "pulse", player.x, player.y, player.floor, "#c7a7ff", player.id, null, { animationId: "aura.self_pulse" });
+      event("float", "Waystone", player.x, player.y - 0.6, player.floor, "#c7a7ff");
+      return 1;
+    }
   }
   if (effect.kind === "taunt") {
     const durationMs = effect.durationMs ?? spec.durationMs;
@@ -1492,6 +1635,15 @@ function damagePlayer(player: ServerPlayer, damage: number, source: string): voi
   if (player.abilityBuffs?.ironClad && performance.now() < player.abilityBuffs.ironClad.until) {
     damage = Math.max(1, Math.round(damage * 0.7));
   }
+  const aegis = player.abilityBuffs?.arcaneAegis;
+  if (aegis && performance.now() < aegis.until && aegis.shield > 0) {
+    const absorbed = Math.min(aegis.shield, damage);
+    aegis.shield -= absorbed;
+    damage -= absorbed;
+    event("float", `-${absorbed} Aegis`, player.x, player.y - 0.75, player.floor, "#a8d8ff", source);
+    if (aegis.shield <= 0) delete player.abilityBuffs.arcaneAegis;
+  }
+  if (damage <= 0) return;
   player.hp = clamp(player.hp - damage, 0, player.maxHp);
   addSkillXp(player, "defense", Math.max(1, damage));
   event("hit", damage, player.x, player.y - 0.55, player.floor, "#ff6b6b", source);
@@ -1748,18 +1900,26 @@ function trainWithNpc(player: ServerPlayer, npc: NpcRuntime): void {
 
 function respawn(player: ServerPlayer): void {
   if (!player.dead) return;
-  const oldFloor = player.floor;
-  const oldX = player.x;
-  const oldY = player.y;
-  player.floor = START.floor;
-  player.x = START.x;
-  player.y = START.y;
-  updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
+  teleportPlayer(player, START.floor, START.x, START.y);
   player.portalReadyAt = performance.now() + 650;
   player.hp = player.maxHp;
   player.mana = player.maxMana;
   player.dead = false;
   systemToPlayer(player, `${player.name} returns to the temple.`);
+}
+
+function teleportPlayer(player: ServerPlayer, floor: number, x: number, y: number): void {
+  const oldFloor = player.floor;
+  const oldX = player.x;
+  const oldY = player.y;
+  const spot = findStandableNear(floor, x, y) ?? { floor, x, y };
+  player.floor = spot.floor;
+  player.x = spot.x;
+  player.y = spot.y;
+  player.portalReadyAt = performance.now() + 650;
+  player.targetId = null;
+  player.action = null;
+  updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
 }
 
 function setTarget(player: ServerPlayer, id: string): void {
@@ -3050,6 +3210,8 @@ function respawnMonster(monster: ServerMonster): void {
   monster.freezeUntil = 0;
   monster.burnUntil = 0;
   monster.inaccurateUntil = 0;
+  monster.slowUntil = 0;
+  monster.slowMult = 1;
   monster.alertUntil = 0;
   monster.alertTarget = undefined;
   monster.hidden = catalog.burrow === true; // re-bury ambushers
@@ -4129,10 +4291,10 @@ function serializePlayerPublic(player: ServerPlayer, action: ActionView | null, 
 }
 
 function abilityCacheSignature(player: ServerPlayer, now: number): string {
-  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
-  return (classSpec.abilities ?? [])
+  return abilityIdsForPlayer(player)
     .map((id) => {
-      const buff = player.abilityBuffs?.[id as keyof typeof player.abilityBuffs];
+      const spec = ABILITIES[id];
+      const buff = spec ? activeBuffForAbility(player, spec) : undefined;
       const cooldown = Math.ceil(Math.max(0, (player.abilityCooldowns?.[id] ?? 0) - now) / 100);
       const active = Math.ceil(Math.max(0, (buff?.until ?? 0) - now) / 100);
       return `${id}:${cooldown}:${active}`;
@@ -4141,12 +4303,10 @@ function abilityCacheSignature(player: ServerPlayer, now: number): string {
 }
 
 function serializeAbilities(player: ServerPlayer, now: number): AbilityView[] {
-  const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
-  const ids = classSpec.abilities ?? [];
-  return ids.map((id): AbilityView | null => {
+  return abilityIdsForPlayer(player).map((id): AbilityView | null => {
     const spec = ABILITIES[id];
     if (!spec) return null;
-    const buff = player.abilityBuffs?.[id as keyof typeof player.abilityBuffs];
+    const buff = activeBuffForAbility(player, spec);
     return {
       id,
       label: spec.label,
@@ -4311,6 +4471,10 @@ function serializeBuffs(player: ServerPlayer, now: number): BuffsView {
     secondWind: Math.max(0, Math.round((player.abilityBuffs?.second_wind?.until ?? 0) - now)),
     ironClad: Math.max(0, Math.round((player.abilityBuffs?.ironClad?.until ?? 0) - now)),
     fleetFoot: Math.max(0, Math.round((player.abilityBuffs?.fleetFoot?.until ?? 0) - now)),
+    luminescence: Math.max(0, Math.round((player.abilityBuffs?.luminescence?.until ?? 0) - now)),
+    zephyrStep: Math.max(0, Math.round((player.abilityBuffs?.zephyrStep?.until ?? 0) - now)),
+    earthSense: Math.max(0, Math.round((player.abilityBuffs?.earthSense?.until ?? 0) - now)),
+    arcaneAegis: Math.max(0, Math.round((player.abilityBuffs?.arcaneAegis?.until ?? 0) - now)),
     slowed: Math.max(0, Math.round((player.slowUntil ?? 0) - now)),
     stunned: Math.max(0, Math.round((player.stunUntil ?? 0) - now)),
     weakened: Math.max(0, Math.round((player.weakUntil ?? 0) - now))

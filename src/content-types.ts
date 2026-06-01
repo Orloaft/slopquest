@@ -138,6 +138,8 @@ export interface AbilitySpec {
   id: string;
   label: string;
   description: string;
+  category?: "class" | "spell";
+  magicLevel?: number;
   cooldownMs: number;
   durationMs: number;
   guards?: AbilityGuard[];
@@ -155,6 +157,7 @@ export interface AbilitySpec {
   skill?: string;
   range?: number;
   effectKind?: string;
+  castTimeMs?: number;
 }
 
 export type AbilityGuard = "requireBelowMaxHp";
@@ -165,15 +168,20 @@ export type AbilityTargeting =
   | { mode: "aoe_self"; radius: number }
   | { mode: "aoe_front"; offset: number; radius: number }
   | { mode: "aoe_point"; offset: number; radius: number; range?: number }
+  | { mode: "line_front"; tiles: number; width?: number }
   | { mode: "dash"; tiles: number };
 
 export type AbilityEffect =
-  | { kind: "buff_self"; buff: "sprint" | "ironClad" | "fleetFoot"; durationMs?: number; cleanse?: Array<"slow"> }
+  | { kind: "buff_self"; buff: "sprint" | "ironClad" | "fleetFoot" | "luminescence" | "zephyrStep" | "earthSense"; durationMs?: number; cleanse?: Array<"slow" | "weaken"> }
   | { kind: "damage"; amount?: Range; skill?: string; damageType?: "physical" | "magic"; xpFactor?: number; effectKind?: string; conditionalBonus?: AbilityConditionalBonus }
-  | { kind: "debuff_enemy"; status: "snare" | "burn" | "freeze" | "inaccurate"; durationMs?: number; perTick?: number; float?: AbilityFloat }
+  | { kind: "debuff_enemy"; status: "snare" | "slow" | "burn" | "freeze" | "inaccurate"; durationMs?: number; perTick?: number; slowMultiplier?: number; float?: AbilityFloat }
   | { kind: "heal"; fraction?: number; scaleSkill?: string }
   | { kind: "heal_over_time"; buff: "second_wind"; fraction?: number; durationMs?: number }
   | { kind: "dash"; tiles?: number }
+  | { kind: "cleanse_self"; statuses?: Array<"slow" | "weaken" | "stun"> }
+  | { kind: "shield_self"; base: number; maxManaScale?: number; durationMs?: number }
+  | { kind: "knockback"; tiles: number }
+  | { kind: "teleport"; destination: "waystone" }
   | { kind: "taunt"; durationMs?: number };
 
 export interface AbilityConditionalBonus {

@@ -29,6 +29,10 @@ export interface AbilityBuffs {
   second_wind?: { until: number; healPerMs: number };
   ironClad?: { until: number };
   fleetFoot?: { until: number };
+  luminescence?: { until: number };
+  zephyrStep?: { until: number };
+  earthSense?: { until: number };
+  arcaneAegis?: { until: number; shield: number };
 }
 
 export interface QuestState {
@@ -139,6 +143,8 @@ export interface ServerMonster {
   burnNextAt?: number;
   burnBy?: string;
   inaccurateUntil?: number;
+  slowUntil?: number;
+  slowMult?: number;
   // Badlands: hidden burrower (invisible until it ambushes) and pack-alert state.
   hidden?: boolean;
   alertUntil?: number;

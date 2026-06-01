@@ -265,6 +265,17 @@
   z: below_actor
   scale: 1
 
+- id: ground.burst.earth
+  kind: ground
+  renderer: ground_burst
+  source: primitive
+  frames: 1
+  frameMs: 420
+  anchor: ground
+  orientation: directional_4
+  z: below_actor
+  scale: 1.2
+
 - id: trail.path.arcane
   kind: trail
   renderer: projectile_trail

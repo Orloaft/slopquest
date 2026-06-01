@@ -167,11 +167,13 @@ const skillIds = new Set(["attack", "defense", "magic", "woodcutting", "fishing"
 const questKinds = new Set(["kill", "gather", "fetch"]);
 const oreKinds = new Set(["copper", "tin", "iron", "coal", "silver", "gold", "mithril", "adamant"]);
 const abilityGuards = new Set(["requireBelowMaxHp"]);
-const abilityTargetModes = new Set(["self", "enemy", "aoe_self", "aoe_front", "aoe_point", "dash"]);
-const abilityEffectKinds = new Set(["buff_self", "damage", "debuff_enemy", "heal", "heal_over_time", "dash", "taunt"]);
-const abilityBuffs = new Set(["sprint", "ironClad", "fleetFoot", "second_wind"]);
-const abilityCleanseStatuses = new Set(["slow"]);
-const abilityDebuffStatuses = new Set(["snare", "burn", "freeze", "inaccurate"]);
+const abilityTargetModes = new Set(["self", "enemy", "aoe_self", "aoe_front", "aoe_point", "line_front", "dash"]);
+const abilityCategories = new Set(["class", "spell"]);
+const abilityEffectKinds = new Set(["buff_self", "damage", "debuff_enemy", "heal", "heal_over_time", "dash", "cleanse_self", "shield_self", "knockback", "teleport", "taunt"]);
+const abilityBuffs = new Set(["sprint", "ironClad", "fleetFoot", "second_wind", "luminescence", "zephyrStep", "earthSense"]);
+const abilityCleanseStatuses = new Set(["slow", "weaken"]);
+const abilitySelfCleanseStatuses = new Set(["slow", "weaken", "stun"]);
+const abilityDebuffStatuses = new Set(["snare", "slow", "burn", "freeze", "inaccurate"]);
 const abilityDamageTypes = new Set(["physical", "magic"]);
 const abilityConditionalBonusWhen = new Set(["behindTarget"]);
 const abilityAnimationKinds = new Set(["slash_arc", "self_pulse", "ground_burst", "projectile_trail", "impact_ring"]);
@@ -326,6 +328,9 @@ function validateAbility(a: RawAbility): void {
   abilityIds.add(a.id);
   if (!a.label) fail(where, "missing label");
   if (!a.description) fail(where, "missing description");
+  if (a.category != null && !abilityCategories.has(a.category)) fail(where, `unknown category "${a.category}"`);
+  if (a.magicLevel != null && (!Number.isInteger(a.magicLevel) || a.magicLevel < 1)) fail(where, "magicLevel must be a positive integer when present");
+  if (a.category === "spell" && a.magicLevel == null) fail(where, "spell abilities require magicLevel");
   if (!Number.isFinite(a.cooldownMs) || (a.cooldownMs ?? -1) < 0) fail(where, "cooldownMs must be a non-negative number");
   if (!Number.isFinite(a.durationMs) || (a.durationMs ?? -1) < 0) fail(where, "durationMs must be a non-negative number");
   for (const guard of a.guards ?? []) {
@@ -357,6 +362,10 @@ function validateAbilityTargeting(targeting: AbilityTargeting, where: string): v
     if (!positiveNumber(targeting.radius)) fail(where, "aoe_point requires positive radius");
     if (targeting.range != null && !positiveNumber(targeting.range)) fail(where, "range must be positive when present");
   }
+  if (targeting.mode === "line_front") {
+    if (!positiveNumber(targeting.tiles)) fail(where, "line_front requires positive tiles");
+    if (targeting.width != null && !positiveNumber(targeting.width)) fail(where, "line_front width must be positive when present");
+  }
   if (targeting.mode === "dash" && !positiveNumber(targeting.tiles)) fail(where, "dash requires positive tiles");
   if (targeting.mode === "enemy" && targeting.range != null && !positiveNumber(targeting.range)) fail(where, "range must be positive when present");
 }
@@ -380,10 +389,22 @@ function validateAbilityEffect(effect: AbilityEffect, where: string): void {
     }
   } else if (effect.kind === "debuff_enemy") {
     if (!abilityDebuffStatuses.has(effect.status)) fail(where, `unknown status "${effect.status}"`);
+    if (effect.slowMultiplier != null && !positiveNumber(effect.slowMultiplier)) fail(where, "slowMultiplier must be positive when present");
   } else if (effect.kind === "heal") {
     if (effect.scaleSkill != null && !skillIds.has(effect.scaleSkill)) fail(where, `unknown scaleSkill "${effect.scaleSkill}"`);
   } else if (effect.kind === "heal_over_time") {
     if (!abilityBuffs.has(effect.buff)) fail(where, `unknown buff "${effect.buff}"`);
+  } else if (effect.kind === "cleanse_self") {
+    for (const status of effect.statuses ?? []) {
+      if (!abilitySelfCleanseStatuses.has(status)) fail(where, `unknown cleanse_self status "${status}"`);
+    }
+  } else if (effect.kind === "shield_self") {
+    if (!Number.isFinite(effect.base) || effect.base < 0) fail(where, "shield_self.base must be non-negative");
+    if (effect.maxManaScale != null && !positiveNumber(effect.maxManaScale)) fail(where, "shield_self.maxManaScale must be positive when present");
+  } else if (effect.kind === "knockback") {
+    if (!positiveNumber(effect.tiles)) fail(where, "knockback.tiles must be positive");
+  } else if (effect.kind === "teleport") {
+    if (effect.destination !== "waystone") fail(where, `unknown teleport destination "${effect.destination}"`);
   }
 }
 

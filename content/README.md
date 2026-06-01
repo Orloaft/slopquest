@@ -1,6 +1,6 @@
 # Authoring TIB content
 
-This folder is where game content lives. You can add or change items, monsters, NPCs, shop entries, class abilities, combat animation references, fishing spots, trees, monster spawns, **and quests** by editing the YAML files here. **No JavaScript required.**
+This folder is where game content lives. You can add or change items, monsters, NPCs, shop entries, class abilities, generic spellbook spells, combat animation references, fishing spots, trees, monster spawns, **and quests** by editing the YAML files here. **No JavaScript required.**
 
 ## How it works
 
@@ -30,7 +30,7 @@ editor feedback plus a hard gate at build time.
 
 | File                  | What it holds                                              |
 | --------------------- | ---------------------------------------------------------- |
-| `abilities.yaml`      | Class abilities, targeting rules, effects, VFX hints       |
+| `abilities.yaml`      | Class abilities, generic spells, targeting rules, effects, VFX hints |
 | `combat-animations.yaml` | Named attack, projectile, impact, trail, and ground VFX |
 | `items.yaml`          | Every item that can exist in a player's inventory          |
 | `monsters.yaml`       | Stats for every monster type + what they drop              |

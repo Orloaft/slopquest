@@ -108,6 +108,16 @@
           "additionalProperties": false,
           "required": ["mode", "tiles"],
           "properties": {
+            "mode": { "const": "line_front" },
+            "tiles": { "type": "number", "exclusiveMinimum": 0 },
+            "width": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "tiles"],
+          "properties": {
             "mode": { "const": "dash" },
             "tiles": { "type": "number", "exclusiveMinimum": 0 }
           }
@@ -132,11 +142,11 @@
           "required": ["kind", "buff"],
           "properties": {
             "kind": { "const": "buff_self" },
-            "buff": { "enum": ["sprint", "ironClad", "fleetFoot"] },
+            "buff": { "enum": ["sprint", "ironClad", "fleetFoot", "luminescence", "zephyrStep", "earthSense"] },
             "durationMs": { "type": "number", "minimum": 0 },
             "cleanse": {
               "type": "array",
-              "items": { "enum": ["slow"] }
+              "items": { "enum": ["slow", "weaken"] }
             }
           }
         },
@@ -160,9 +170,10 @@
           "required": ["kind", "status"],
           "properties": {
             "kind": { "const": "debuff_enemy" },
-            "status": { "enum": ["snare", "burn", "freeze", "inaccurate"] },
+            "status": { "enum": ["snare", "slow", "burn", "freeze", "inaccurate"] },
             "durationMs": { "type": "number", "minimum": 0 },
             "perTick": { "type": "number" },
+            "slowMultiplier": { "type": "number", "exclusiveMinimum": 0 },
             "float": { "$ref": "#/$defs/float" }
           }
         },
@@ -201,6 +212,47 @@
           "additionalProperties": false,
           "required": ["kind"],
           "properties": {
+            "kind": { "const": "cleanse_self" },
+            "statuses": {
+              "type": "array",
+              "items": { "enum": ["slow", "weaken", "stun"] }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "base"],
+          "properties": {
+            "kind": { "const": "shield_self" },
+            "base": { "type": "number", "minimum": 0 },
+            "maxManaScale": { "type": "number", "exclusiveMinimum": 0 },
+            "durationMs": { "type": "number", "minimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "tiles"],
+          "properties": {
+            "kind": { "const": "knockback" },
+            "tiles": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "destination"],
+          "properties": {
+            "kind": { "const": "teleport" },
+            "destination": { "enum": ["waystone"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
             "kind": { "const": "taunt" },
             "durationMs": { "type": "number", "minimum": 0 }
           }
@@ -215,6 +267,8 @@
         "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
         "label": { "type": "string" },
         "description": { "type": "string" },
+        "category": { "enum": ["class", "spell"] },
+        "magicLevel": { "type": "integer", "minimum": 1 },
         "cooldownMs": { "type": "number", "minimum": 0 },
         "durationMs": { "type": "number", "minimum": 0 },
         "guards": {
@@ -237,7 +291,8 @@
         "manaCost": { "type": "number", "minimum": 0 },
         "skill": { "type": "string" },
         "range": { "type": "number", "exclusiveMinimum": 0 },
-        "effectKind": { "type": "string" }
+        "effectKind": { "type": "string" },
+        "castTimeMs": { "type": "number", "minimum": 0 }
       }
     }
   }

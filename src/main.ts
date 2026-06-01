@@ -7,8 +7,10 @@ import {
   CLASS_UNLOCKS,
   COMBAT_ANIMATIONS,
   ITEMS,
+  HERB_NODES,
   MAP_COLS,
   MAP_ROWS,
+  MINING_NODES,
   MONSTERS,
   NPCS,
   ORE_TIERS,
@@ -2262,6 +2264,10 @@ function buffHudSignature(buffs: Partial<BuffsView> = {}): string {
     buffs.secondWind,
     buffs.ironClad,
     buffs.fleetFoot,
+    buffs.luminescence,
+    buffs.zephyrStep,
+    buffs.earthSense,
+    buffs.arcaneAegis,
     buffs.slowed,
     buffs.stunned,
     buffs.weakened
@@ -2357,6 +2363,10 @@ function renderBuffTracker(buffs: Partial<BuffsView> = {}): void {
   if ((buffs.secondWind ?? 0) > 0) active.push(`Second wind ${Math.ceil((buffs.secondWind ?? 0) / 1000)}s`);
   if ((buffs.ironClad ?? 0) > 0) active.push(`Iron Clad ${Math.ceil((buffs.ironClad ?? 0) / 1000)}s`);
   if ((buffs.fleetFoot ?? 0) > 0) active.push(`Fleet Foot ${Math.ceil((buffs.fleetFoot ?? 0) / 1000)}s`);
+  if ((buffs.luminescence ?? 0) > 0) active.push(`Luminescence ${Math.ceil((buffs.luminescence ?? 0) / 1000)}s`);
+  if ((buffs.zephyrStep ?? 0) > 0) active.push(`Zephyr Step ${Math.ceil((buffs.zephyrStep ?? 0) / 1000)}s`);
+  if ((buffs.earthSense ?? 0) > 0) active.push(`Earth-Sense ${Math.ceil((buffs.earthSense ?? 0) / 1000)}s`);
+  if ((buffs.arcaneAegis ?? 0) > 0) active.push(`Arcane Aegis ${Math.ceil((buffs.arcaneAegis ?? 0) / 1000)}s`);
   if ((buffs.slowed ?? 0) > 0) active.push(`Slowed ${Math.ceil((buffs.slowed ?? 0) / 1000)}s`);
   if ((buffs.stunned ?? 0) > 0) active.push(`Stunned ${Math.ceil((buffs.stunned ?? 0) / 1000)}s`);
   if ((buffs.weakened ?? 0) > 0) active.push(`Weakened ${Math.ceil((buffs.weakened ?? 0) / 1000)}s`);
@@ -2598,6 +2608,7 @@ function renderClasses(me: PlayerView | undefined): void {
 let abilitiesClickBound = false;
 const abilityRows = new Map<string, AbilityRowEntry>();
 let abilityEmptyEl: HTMLDivElement | null = null;
+let activeAbilityTab: "class" | "spellbook" = "class";
 
 function renderAbilities(abilities: AbilityView[] = []): void {
   if (!abilitiesClickBound) {
@@ -2607,16 +2618,32 @@ function renderAbilities(abilities: AbilityView[] = []): void {
       const id = target.dataset.ability;
       if (id) send({ type: "useClassAbility", id });
     });
+    dom.abilitiesPanel.querySelectorAll<HTMLButtonElement>(".ability-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        activeAbilityTab = tab.dataset.abilityTab === "spellbook" ? "spellbook" : "class";
+        renderedAbilitySignature = "";
+        renderAbilities(self()?.abilities ?? []);
+      });
+    });
     abilitiesClickBound = true;
   }
 
-  if (!abilities.length) {
+  dom.abilitiesPanel.querySelectorAll<HTMLButtonElement>(".ability-tab").forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.abilityTab === activeAbilityTab);
+  });
+
+  const shownAbilities = abilities.filter((ability) => {
+    const spec = ABILITIES[ability.id];
+    return activeAbilityTab === "spellbook" ? spec?.category === "spell" : spec?.category !== "spell";
+  });
+
+  if (!shownAbilities.length) {
     for (const { row } of abilityRows.values()) row.remove();
     abilityRows.clear();
     if (!abilityEmptyEl) {
       abilityEmptyEl = document.createElement("div");
       abilityEmptyEl.className = "ability-empty";
-      abilityEmptyEl.textContent = "No abilities yet.";
+      abilityEmptyEl.textContent = activeAbilityTab === "spellbook" ? "No spells unlocked yet." : "No class abilities yet.";
       dom.abilitiesList.appendChild(abilityEmptyEl);
     }
     return;
@@ -2628,7 +2655,7 @@ function renderAbilities(abilities: AbilityView[] = []): void {
   }
 
   const seen = new Set<string>();
-  abilities.forEach((ability, index) => {
+  shownAbilities.forEach((ability, index) => {
     seen.add(ability.id);
     let entry = abilityRows.get(ability.id);
     if (!entry) {
@@ -2700,7 +2727,9 @@ function createAbilityRow(ability: AbilityView): AbilityRowEntry {
 
 function updateAbilityRow(entry: AbilityRowEntry, ability: AbilityView): void {
   entry.nameEl.textContent = ability.label;
-  entry.descEl.textContent = ability.description;
+  const spec = ABILITIES[ability.id];
+  const costText = spec?.category === "spell" && spec.manaCost ? ` Mana ${spec.manaCost}.` : "";
+  entry.descEl.textContent = `${ability.description}${costText}`;
 
   const onCooldown = ability.cooldownRemainingMs > 0;
   const isActive = ability.activeRemainingMs > 0;
@@ -2862,8 +2891,14 @@ function isAbilitySlottable(abilityId: string | null): boolean {
   return Boolean(ABILITIES[abilityId]);
 }
 
+function abilityManaLocked(abilityId: string, maxMana: number): boolean {
+  const spec = ABILITIES[abilityId];
+  return Boolean(spec?.manaCost && maxMana < spec.manaCost);
+}
+
 function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
   const abilities = self()?.abilities ?? [];
+  const maxMana = self()?.maxMana ?? 0;
   const sig = hotbarLayout
     .map((slot, i) => {
       if (!slot) return `${i}:-`;
@@ -2871,7 +2906,8 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
       const live = abilities.find((a) => a.id === slot.abilityId);
       const onCooldown = (live?.cooldownRemainingMs ?? 0) > 0 ? 1 : 0;
       const isActive = (live?.activeRemainingMs ?? 0) > 0 ? 1 : 0;
-      return `${i}:a:${slot.abilityId}:${onCooldown}:${isActive}`;
+      const manaLocked = abilityManaLocked(slot.abilityId, maxMana) ? 1 : 0;
+      return `${i}:a:${slot.abilityId}:${onCooldown}:${isActive}:${manaLocked}`;
     })
     .join("|");
   if (sig === hotbarRenderedSig) return;
@@ -2898,10 +2934,12 @@ function renderHotbar(inventory: Array<InventoryItemView | null> = []): void {
       const live = abilities.find((a) => a.id === slot.abilityId);
       const isActive = (live?.activeRemainingMs ?? 0) > 0;
       const onCooldown = (live?.cooldownRemainingMs ?? 0) > 0;
-      const stateClass = isActive ? " ability-active" : onCooldown ? " ability-cooldown" : "";
+      const manaLocked = abilityManaLocked(slot.abilityId, maxMana);
+      const stateClass = `${isActive ? " ability-active" : onCooldown ? " ability-cooldown" : ""}${manaLocked ? " mana-locked" : ""}`;
       const label = ability?.label ?? slot.abilityId;
+      const tooltip = manaLocked ? `${label} - Insufficient Mana` : label;
       const glyph = abilityGlyph(label);
-      return `<button class="hotbar-slot ability${stateClass}${classSlot}" type="button" draggable="true" data-slot="${i}" data-ability="${escapeHtml(slot.abilityId)}" data-label="${escapeHtml(label)}"><b class="hotbar-key">${key}</b><span class="hotbar-ability">${escapeHtml(glyph)}</span></button>`;
+      return `<button class="hotbar-slot ability${stateClass}${classSlot}" type="button" draggable="true" data-slot="${i}" data-ability="${escapeHtml(slot.abilityId)}" data-label="${escapeHtml(tooltip)}" title="${escapeHtml(tooltip)}"><b class="hotbar-key">${key}</b><span class="hotbar-ability">${escapeHtml(glyph)}</span></button>`;
     })
     .join("");
 
@@ -5436,6 +5474,15 @@ function drawMinimap(me: PlayerView): void {
     }
   }
 
+  if ((me.buffs.earthSense ?? 0) > 0) {
+    for (const node of MINING_NODES) {
+      if (node.floor === me.floor && Phaser.Math.Distance.Between(me.x, me.y, node.x, node.y) <= 18) dot(node.x, node.y, 2.2, "#b8d8ff");
+    }
+    for (const node of HERB_NODES) {
+      if (node.floor === me.floor && Phaser.Math.Distance.Between(me.x, me.y, node.x, node.y) <= 18) dot(node.x, node.y, 2.2, "#8fe388");
+    }
+  }
+
   // Self marker: white dot with a dark outline plus a tick in the facing dir.
   const sx = me.x * scaleX;
   const sy = me.y * scaleY;
@@ -5556,7 +5603,7 @@ function ownsSurveyMap(me: PlayerView): boolean {
 }
 
 function updateFog(me: PlayerView, time: number): void {
-  if (!ownsSurveyMap(me)) return;
+  if (!ownsSurveyMap(me) && (me.buffs.luminescence ?? 0) <= 0) return;
   if (fogName !== me.name || fogFloor !== me.floor) {
     saveFog();
     loadFog(me.name, me.floor);
@@ -5565,8 +5612,9 @@ function updateFog(me: PlayerView, time: number): void {
   const rowCount = floorRows(me.floor);
   const cx = Math.floor(me.x);
   const cy = Math.floor(me.y);
-  for (let dy = -FOG_RADIUS; dy <= FOG_RADIUS; dy += 1) {
-    for (let dx = -FOG_RADIUS; dx <= FOG_RADIUS; dx += 1) {
+  const radius = (me.buffs.luminescence ?? 0) > 0 ? FOG_RADIUS + 2 : FOG_RADIUS;
+  for (let dy = -radius; dy <= radius; dy += 1) {
+    for (let dx = -radius; dx <= radius; dx += 1) {
       const x = cx + dx;
       const y = cy + dy;
       if (x < 0 || y < 0 || x >= cols || y >= rowCount) continue;

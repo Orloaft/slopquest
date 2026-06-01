@@ -209,3 +209,180 @@
     - { kind: damage, amount: [10, 16], skill: magic, damageType: magic, xpFactor: 1.2, effectKind: flare }
     - { kind: debuff_enemy, status: inaccurate }
   float: { text: Volatile Flask, color: "#a6e06b", yOffset: 0 }
+
+# Generic Spellbook — class-agnostic spells unlocked by Magic level.
+
+- id: spell_spark
+  label: Spark
+  description: Zap a target up to 3 tiles away for minor lightning damage.
+  category: spell
+  magicLevel: 1
+  cooldownMs: 2500
+  durationMs: 0
+  manaCost: 3
+  damage: [3, 6]
+  skill: magic
+  range: 3
+  effectKind: bolt
+  targeting: { mode: enemy, range: 3, requiresLineOfSight: true }
+  projectile: { id: projectile.bolt.arcane_lance, kind: arcane, color: "#ffe066", targetEnemy: true }
+  effects:
+    - { kind: damage, amount: [3, 6], skill: magic, damageType: magic, xpFactor: 1.1, effectKind: bolt }
+  animation: { id: impact.arcane.ring, kind: impact_ring, attach: target, color: "#ffe066", scale: 0.65, durationMs: 220 }
+  float: { text: Spark, color: "#ffe066" }
+
+- id: spell_luminescence
+  label: Luminescence
+  description: Conjure a following light that expands map reveal for 3 minutes.
+  category: spell
+  magicLevel: 1
+  cooldownMs: 20000
+  durationMs: 180000
+  manaCost: 4
+  targeting: { mode: self }
+  effects:
+    - { kind: buff_self, buff: luminescence }
+  animation: { id: aura.self_pulse, kind: self_pulse, attach: self, color: "#f7f1a1", scale: 0.8, durationMs: 500 }
+  float: { text: Luminescence, color: "#f7f1a1" }
+
+- id: spell_purify_water
+  label: Purify Water
+  description: Cleanse basic slowing, weakening, and stun effects.
+  category: spell
+  magicLevel: 1
+  cooldownMs: 12000
+  durationMs: 0
+  manaCost: 3
+  targeting: { mode: self }
+  effects:
+    - { kind: cleanse_self, statuses: [slow, weaken, stun] }
+  animation: { id: aura.self_pulse, kind: self_pulse, attach: self, color: "#8fd8ff", scale: 0.75, durationMs: 420 }
+  float: { text: Purified, color: "#8fd8ff" }
+
+- id: spell_ember_shot
+  label: Ember Shot
+  description: Launch a fire mote that burns the target.
+  category: spell
+  magicLevel: 5
+  cooldownMs: 4000
+  durationMs: 3000
+  manaCost: 6
+  damage: [6, 10]
+  skill: magic
+  range: 5
+  effectKind: flare
+  targeting: { mode: enemy, range: 5, requiresLineOfSight: true }
+  projectile: { id: projectile.orb.fire, kind: flare, color: "#ff8a3d", targetEnemy: true }
+  effects:
+    - { kind: damage, amount: [6, 10], skill: magic, damageType: magic, xpFactor: 1.2, effectKind: flare }
+    - { kind: debuff_enemy, status: burn, durationMs: 3000, perTick: 2, float: { text: Burning, color: "#ff8a3d", yOffset: -0.6 } }
+  float: { text: Ember Shot, color: "#ff8a3d" }
+
+- id: spell_zephyr_step
+  label: Zephyr Step
+  description: Move 15% faster for 6s.
+  category: spell
+  magicLevel: 5
+  cooldownMs: 18000
+  durationMs: 6000
+  speedMultiplier: 1.15
+  manaCost: 5
+  targeting: { mode: self }
+  effects:
+    - { kind: buff_self, buff: zephyrStep }
+  float: { text: Zephyr Step, color: "#b8f7d4" }
+
+- id: spell_earth_sense
+  label: Earth-Sense
+  description: Mark nearby ore veins and forage nodes on the minimap for 30s.
+  category: spell
+  magicLevel: 5
+  cooldownMs: 45000
+  durationMs: 30000
+  manaCost: 7
+  targeting: { mode: self }
+  effects:
+    - { kind: buff_self, buff: earthSense }
+  animation: { id: aura.self_pulse, kind: self_pulse, attach: self, color: "#9ee6b1", scale: 1.0, durationMs: 520 }
+  float: { text: Earth-Sense, color: "#9ee6b1" }
+
+- id: spell_frost_shard
+  label: Frost Shard
+  description: Deal ice damage and slow the target by 40% for 3s.
+  category: spell
+  magicLevel: 10
+  cooldownMs: 5500
+  durationMs: 3000
+  manaCost: 9
+  damage: [9, 14]
+  skill: magic
+  range: 6
+  effectKind: frost
+  targeting: { mode: enemy, range: 6, requiresLineOfSight: true }
+  projectile: { id: projectile.shard.frost, kind: frost, color: "#a8e6ff", targetEnemy: true }
+  effects:
+    - { kind: damage, amount: [9, 14], skill: magic, damageType: magic, xpFactor: 1.2, effectKind: frost }
+    - { kind: debuff_enemy, status: slow, durationMs: 3000, slowMultiplier: 0.6, float: { text: Chilled, color: "#a8e6ff", yOffset: -0.6 } }
+  float: { text: Frost Shard, color: "#a8e6ff" }
+
+- id: spell_kinetic_push
+  label: Kinetic Push
+  description: Blast adjacent enemies back by 2 tiles.
+  category: spell
+  magicLevel: 10
+  cooldownMs: 14000
+  durationMs: 0
+  manaCost: 10
+  targeting: { mode: aoe_self, radius: 1.5 }
+  effects:
+    - { kind: knockback, tiles: 2 }
+  animation: { id: aura.self_pulse, kind: self_pulse, attach: self, color: "#d7e4ef", scale: 1.2, durationMs: 380 }
+  float: { text: Kinetic Push, noTargetsText: Kinetic Push, color: "#d7e4ef" }
+
+- id: spell_arcane_aegis
+  label: Arcane Aegis
+  description: Raise a barrier that absorbs damage and scales with max Mana.
+  category: spell
+  magicLevel: 10
+  cooldownMs: 30000
+  durationMs: 12000
+  manaCost: 12
+  targeting: { mode: self }
+  effects:
+    - { kind: shield_self, base: 8, maxManaScale: 0.25 }
+  animation: { id: impact.shield_ring, kind: impact_ring, attach: self, color: "#a8d8ff", scale: 1.15, durationMs: 520 }
+  float: { text: Arcane Aegis, color: "#a8d8ff" }
+
+- id: spell_fissure
+  label: Fissure
+  description: Channel for 1.5s, then crack the earth in a 4-tile line.
+  category: spell
+  magicLevel: 15
+  cooldownMs: 18000
+  durationMs: 0
+  castTimeMs: 1500
+  manaCost: 22
+  damage: [16, 24]
+  skill: magic
+  range: 4
+  effectKind: hit
+  targeting: { mode: line_front, tiles: 4, width: 0.7 }
+  effects:
+    - { kind: damage, amount: [16, 24], skill: magic, damageType: magic, xpFactor: 1.25, effectKind: hit }
+  animation: { id: ground.burst.earth, kind: ground_burst, attach: origin, color: "#c98f53", scale: 1.35, durationMs: 560 }
+  float: { text: Fissure, color: "#c98f53", noTargetsText: Fissure }
+
+- id: spell_teleport_waystone
+  label: "Teleport: Waystone"
+  description: Channel for 5s, then return to Waystone City.
+  category: spell
+  magicLevel: 15
+  cooldownMs: 90000
+  durationMs: 0
+  castTimeMs: 5000
+  manaCost: 48
+  targeting: { mode: self }
+  effects:
+    - { kind: teleport, destination: waystone }
+  animation: { id: aura.self_pulse, kind: self_pulse, attach: self, color: "#c7a7ff", scale: 1.25, durationMs: 700 }
+  float: { text: Waystone, color: "#c7a7ff" }
