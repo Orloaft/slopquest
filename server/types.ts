@@ -174,6 +174,10 @@ export interface NpcRuntime {
   homeY?: number;
   wanderTarget?: Vec2 | null;
   wanderNextAt?: number;
+  // Conversation: while talkingTo is set (and talkUntil not elapsed) the NPC
+  // stops wandering and faces the player it is speaking with.
+  talkingTo?: string;
+  talkUntil?: number;
 }
 
 export interface TreeNodeRuntime {

@@ -374,4 +374,5 @@ export type ClientMessage =
   | { type: "eatItem"; item: string }
   | { type: "useItem"; item: string; ctx?: UseItemCtx }
   | { type: "chat"; text: string }
+  | { type: "endDialogue" }
   | { type: "respawn" };

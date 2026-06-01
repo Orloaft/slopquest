@@ -591,6 +591,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
     if (message.type === "lootCorpse") lootCorpse(session.player, String(message.id ?? ""));
     if (message.type === "buy") buyItem(session.player, String(message.item ?? ""));
     if (message.type === "talkNpc") talkNpc(session.player, String(message.id ?? ""));
+    if (message.type === "endDialogue") endConversation(session.player);
     if (message.type === "cutTree") cutTree(session.player, String(message.id ?? ""));
     if (message.type === "fishNode") fishNode(session.player, String(message.id ?? ""));
     if (message.type === "mineNode") mineNode(session.player, String(message.id ?? ""));
@@ -1705,9 +1706,36 @@ function devSetAllSkills(player: ServerPlayer, level: number): void {
   player.mana = clamp(player.mana, 0, player.maxMana);
 }
 
+// While a player is in dialogue the NPC holds still and both turn to face each
+// other; released by endConversation (client endDialogue) or the safety checks
+// in updateNpcs.
+const CONVERSATION_MS = 60000;
+function beginConversation(player: ServerPlayer, npc: NpcRuntime): void {
+  npc.talkingTo = player.id;
+  npc.talkUntil = performance.now() + CONVERSATION_MS;
+  npc.wanderTarget = null;
+  npc.moving = false;
+  // Turn to face each other — but only when not standing on the same tile (a
+  // real player talks from an adjacent tile; coincident has no meaningful facing).
+  if (distanceSq(player, npc) > 0.04) {
+    npc.dir = facing(npc, player);
+    player.dir = facing(player, npc);
+  }
+}
+
+function endConversation(player: ServerPlayer): void {
+  for (const npc of npcs.values()) {
+    if (npc.talkingTo === player.id) {
+      npc.talkingTo = undefined;
+      npc.talkUntil = undefined;
+    }
+  }
+}
+
 function talkNpc(player: ServerPlayer, id: string): void {
   const npc = npcs.get(id);
   if (!npc || player.dead || npc.floor !== player.floor || distanceSq(player, npc) > 2.4 * 2.4) return;
+  beginConversation(player, npc);
 
   const quest = questForGiver(npc.id);
   if (quest) {
@@ -2610,6 +2638,21 @@ function updateNpcs(dt: number, now: number, activeRegions: ActiveRegions): void
       visited.add(npc);
       const { homeX, homeY } = npc;
       if (homeX == null || homeY == null) continue;
+      // In conversation: hold position and face the player until it ends, the
+      // player leaves/dies, or the window lapses (a safety net if endDialogue is
+      // never received, e.g. a disconnect).
+      if (npc.talkingTo) {
+        const partner = playerById(npc.talkingTo);
+        if (!partner || partner.dead || partner.floor !== npc.floor || now > (npc.talkUntil ?? 0) || distanceSq(npc, partner) > 16) {
+          npc.talkingTo = undefined;
+          npc.talkUntil = undefined;
+        } else {
+          npc.moving = false;
+          npc.dir = facing(npc, partner);
+          npc.wanderTarget = null;
+          continue;
+        }
+      }
       npc.moving = false;
       if (now >= (npc.wanderNextAt ?? 0) && !npc.wanderTarget) {
         npc.wanderTarget = pickNpcWanderTarget(npc);

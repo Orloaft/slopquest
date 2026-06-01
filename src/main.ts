@@ -469,7 +469,9 @@ dom.mapBackButton.addEventListener("click", () => {
 });
 dom.mapCanvas.addEventListener("click", (event) => handleMapClick(event));
 dom.menuBackdrop.addEventListener("click", () => hideCenterPanels());
-dom.dialogueNextButton.addEventListener("click", advanceDialogue);
+// Click anywhere on the box (including the Continue/Done button, which bubbles)
+// to advance — first click completes the typewriter, the next moves on.
+dom.dialogue.addEventListener("click", advanceDialogue);
 [dom.vendor, dom.alchemist].forEach((panel) => {
   panel.querySelectorAll<HTMLElement>("[data-buy]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -2801,7 +2803,8 @@ function lootLabel(corpse: CorpseView): string {
 }
 
 function sendInput(time: number): void {
-  if (isTextEntryFocused()) {
+  if (isTextEntryFocused() || activeDialogue) {
+    // Hold still while talking to an NPC (both sides freeze for the conversation).
     sendStopInput();
     return;
   }
@@ -3783,12 +3786,20 @@ function consumeEvents(events: GameEvent[]): void {
   }
 }
 
+// Typewriter reveal state for the active dialogue line.
+let typewriterTimer: number | null = null;
+let typewriterFull = "";
+let typewriterDone = true;
+
 function openDialogue(event: GameEvent): void {
   const lines: DialogueLine[] = Array.isArray(event.lines) ? event.lines : [];
   if (!lines.length) return;
   hideCenterPanels();
   activeDialogue = { lines, index: 0, opensShop: Boolean(event.opensShop), opensAlchemist: Boolean(event.opensAlchemist) };
-  dom.menuBackdrop.classList.remove("hidden");
+  // The dialogue box floats over the world (no menu backdrop) for immersion; the
+  // player is frozen (see sendInput) so stop any in-progress movement now.
+  clearClickDestination();
+  sendStopInput();
   dom.dialogue.classList.remove("hidden");
   renderDialogueLine();
 }
@@ -3800,12 +3811,49 @@ function renderDialogueLine(): void {
     return;
   }
   dom.dialogueSpeaker.textContent = line.speaker ?? "";
-  dom.dialogueLine.textContent = line.text ?? "";
   dom.dialogueNextButton.textContent = activeDialogue.index >= activeDialogue.lines.length - 1 ? "Done" : "Continue";
+  startTypewriter(line.text ?? "");
+}
+
+function startTypewriter(text: string): void {
+  stopTypewriter();
+  typewriterFull = text;
+  if (E2E_MODE) {
+    dom.dialogueLine.textContent = text;
+    finishTypewriter();
+    return;
+  }
+  dom.dialogueLine.textContent = "";
+  typewriterDone = false;
+  dom.dialogue.classList.remove("ready");
+  let i = 0;
+  typewriterTimer = window.setInterval(() => {
+    i += 1;
+    dom.dialogueLine.textContent = typewriterFull.slice(0, i);
+    if (i >= typewriterFull.length) finishTypewriter();
+  }, 18);
+}
+
+function stopTypewriter(): void {
+  if (typewriterTimer != null) {
+    clearInterval(typewriterTimer);
+    typewriterTimer = null;
+  }
+}
+
+function finishTypewriter(): void {
+  stopTypewriter();
+  dom.dialogueLine.textContent = typewriterFull;
+  typewriterDone = true;
+  dom.dialogue.classList.add("ready"); // shows the ▾ advance indicator
 }
 
 function advanceDialogue(): void {
   if (!activeDialogue) return;
+  if (!typewriterDone) {
+    finishTypewriter(); // first click completes the reveal
+    return;
+  }
   activeDialogue.index += 1;
   renderDialogueLine();
 }
@@ -3813,8 +3861,12 @@ function advanceDialogue(): void {
 function closeDialogue(openFollowup = true): void {
   const opensShop = Boolean(activeDialogue?.opensShop);
   const opensAlchemist = Boolean(activeDialogue?.opensAlchemist);
+  const wasOpen = activeDialogue != null;
+  stopTypewriter();
   activeDialogue = null;
   dom.dialogue.classList.add("hidden");
+  dom.dialogue.classList.remove("ready");
+  if (wasOpen) send({ type: "endDialogue" }); // release the NPC to wander again
   if (openFollowup && (opensShop || opensAlchemist)) {
     dom.menuBackdrop.classList.remove("hidden");
     (opensAlchemist ? dom.alchemist : dom.vendor).classList.remove("hidden");

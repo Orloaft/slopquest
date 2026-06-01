@@ -1139,27 +1139,86 @@ canvas {
   opacity: 0.7;
 }
 
+/* Octopath/Pokémon-style dialogue box: anchored to the bottom over the live
+   world (no menu backdrop), clicked through one line at a time. Overrides the
+   centered .center-panel positioning. */
 .dialogue {
+  top: auto;
+  bottom: clamp(16px, 4vh, 44px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(840px, calc(100vw - 36px));
+  max-height: none;
+  overflow: visible;
   display: grid;
-  gap: 12px;
-  width: min(560px, calc(100vw - 32px));
+  gap: 6px;
+  padding: 22px 26px 26px;
+  border: 2px solid rgba(247, 212, 134, 0.5);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(24, 19, 34, 0.97), rgba(13, 11, 20, 0.98));
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.62), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  cursor: pointer;
 }
 
+/* Speaker name on a gilded plate hanging off the top-left of the box. */
 .dialogue-speaker {
-  color: #f7d486;
+  position: absolute;
+  top: -14px;
+  left: 22px;
+  padding: 3px 13px;
+  color: #1b1410;
   font-size: 13px;
   font-weight: 800;
+  letter-spacing: 0.3px;
+  background: linear-gradient(180deg, #f7d486, #d9a441);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.dialogue-speaker:empty {
+  display: none;
 }
 
 .dialogue-line {
-  min-height: 76px;
+  min-height: 62px;
   color: #eef3ed;
-  font-size: 17px;
-  line-height: 1.45;
+  font-size: 18px;
+  line-height: 1.5;
 }
 
+/* The whole box advances on click; keep the labelled button as a subtle
+   bottom-right affordance (and for a11y / e2e). */
 .dialogue button {
   justify-self: end;
+  margin-top: 2px;
+  padding: 4px 14px;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: #f7d486;
+  background: rgba(247, 212, 134, 0.1);
+  border: 1px solid rgba(247, 212, 134, 0.38);
+  border-radius: 6px;
+}
+
+/* Blinking advance chevron once the line has fully typed out. */
+.dialogue.ready::after {
+  content: "\25BE";
+  position: absolute;
+  right: 18px;
+  bottom: 8px;
+  color: #f7d486;
+  font-size: 16px;
+  animation: dialogue-chevron 0.9s ease-in-out infinite;
+}
+@keyframes dialogue-chevron {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
 }
 
 .item-popover {
