@@ -11,6 +11,13 @@ export interface MapObject {
   h: number;
 }
 
+export interface BuildingBounds {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
 // Sprites that are solid structures: their footprint blocks movement. Scenery
 // (lamps, signs, barrels, trees, boulders, palms, totems) stays walk-through.
 export const BLOCKING_OBJECT_KEYS = new Set<string>([
@@ -23,6 +30,128 @@ export const BLOCKING_OBJECT_KEYS = new Set<string>([
   "spriteCrypt",
   "spriteMausoleum"
 ]);
+
+// Buildings that should behave like same-map cutaways: the exterior sprite
+// stays on the world map, but the footprint is carved into a small room and the
+// sprite is hidden while the local player stands inside.
+export const CUTAWAY_BUILDING_KEYS = new Set<string>([
+  "spriteRedHouse",
+  "spriteBlueHouse",
+  "spriteGreenHouse",
+  "spriteThatchHouse"
+]);
+
+interface CutawayBuildingProfile {
+  footprintLeft: number;
+  footprintRight: number;
+  footprintTop: number;
+  roomLeft: number;
+  roomRight: number;
+  roomTop: number;
+  roomBottom: number;
+  doorOffset: number;
+}
+
+const DEFAULT_CUTAWAY_PROFILE: CutawayBuildingProfile = {
+  footprintLeft: 0.42,
+  footprintRight: 0.42,
+  footprintTop: 0.8,
+  roomLeft: 0.3,
+  roomRight: 0.3,
+  roomTop: 0.54,
+  roomBottom: 0.14,
+  doorOffset: 0
+};
+
+const CUTAWAY_BUILDING_PROFILES: Record<string, CutawayBuildingProfile> = {
+  spriteRedHouse: {
+    footprintLeft: 0.46,
+    footprintRight: 0.46,
+    footprintTop: 0.82,
+    roomLeft: 0.35,
+    roomRight: 0.27,
+    roomTop: 0.5,
+    roomBottom: 0.13,
+    doorOffset: -0.9
+  },
+  spriteBlueHouse: {
+    footprintLeft: 0.48,
+    footprintRight: 0.48,
+    footprintTop: 0.82,
+    roomLeft: 0.36,
+    roomRight: 0.22,
+    roomTop: 0.52,
+    roomBottom: 0.13,
+    doorOffset: 0.35
+  },
+  spriteGreenHouse: {
+    footprintLeft: 0.45,
+    footprintRight: 0.45,
+    footprintTop: 0.82,
+    roomLeft: 0.27,
+    roomRight: 0.27,
+    roomTop: 0.5,
+    roomBottom: 0.13,
+    doorOffset: 0
+  },
+  spriteThatchHouse: {
+    footprintLeft: 0.42,
+    footprintRight: 0.42,
+    footprintTop: 0.8,
+    roomLeft: 0.27,
+    roomRight: 0.24,
+    roomTop: 0.48,
+    roomBottom: 0.13,
+    doorOffset: -0.55
+  }
+};
+
+function cutawayProfile(obj: MapObject): CutawayBuildingProfile {
+  return CUTAWAY_BUILDING_PROFILES[obj.key] ?? DEFAULT_CUTAWAY_PROFILE;
+}
+
+export function buildingFootprintBounds(obj: MapObject): BuildingBounds {
+  const profile = isCutawayBuilding(obj) ? cutawayProfile(obj) : DEFAULT_CUTAWAY_PROFILE;
+  const tileW = obj.w / 32;
+  return {
+    left: Math.round(obj.x - tileW * profile.footprintLeft),
+    right: Math.round(obj.x + tileW * profile.footprintRight),
+    bottom: Math.round(obj.y - 0.6),
+    top: Math.round(obj.y - (obj.h / 32) * profile.footprintTop)
+  };
+}
+
+export function buildingInteriorBounds(obj: MapObject): BuildingBounds {
+  const footprint = buildingFootprintBounds(obj);
+  const profile = cutawayProfile(obj);
+  const tileW = obj.w / 32;
+  const tileH = obj.h / 32;
+  return {
+    left: Math.max(footprint.left + 1, Math.round(obj.x - tileW * profile.roomLeft)),
+    right: Math.min(footprint.right - 1, Math.round(obj.x + tileW * profile.roomRight)),
+    top: Math.max(footprint.top + 1, Math.round(obj.y - tileH * profile.roomTop)),
+    bottom: Math.min(footprint.bottom - 1, Math.round(obj.y - tileH * profile.roomBottom))
+  };
+}
+
+export function buildingDoorX(obj: MapObject): number {
+  return Math.round(obj.x + cutawayProfile(obj).doorOffset);
+}
+
+export function isCutawayBuilding(obj: MapObject): boolean {
+  return CUTAWAY_BUILDING_KEYS.has(obj.key);
+}
+
+export function isInsideCutawayBuilding(obj: MapObject, x: number, y: number): boolean {
+  if (!isCutawayBuilding(obj)) return false;
+  const interior = buildingInteriorBounds(obj);
+  const doorX = buildingDoorX(obj);
+  const footprint = buildingFootprintBounds(obj);
+  return (
+    (x >= interior.left && x <= interior.right && y >= interior.top && y <= interior.bottom) ||
+    (Math.floor(x) === doorX && Math.floor(y) === footprint.bottom)
+  );
+}
 
 export const MAP_OBJECTS: Record<number, MapObject[]> = {
   0: [

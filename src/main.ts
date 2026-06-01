@@ -26,7 +26,7 @@ import {
   xpForLevel
 } from "./shared.ts";
 import type { ClassSpec } from "./shared.ts";
-import { MAP_OBJECTS } from "./map-objects.ts";
+import { MAP_OBJECTS, isCutawayBuilding, isInsideCutawayBuilding } from "./map-objects.ts";
 import { setTrack, unlockAudio, setMusicEnabled, currentTrack } from "./audio.ts";
 import { normalizeServerMessage, type WireServerMessage } from "./wire.ts";
 
@@ -316,6 +316,7 @@ interface E2EHooks {
     attackFrames: Array<{ dir: Direction; frame: number; key: string; exists: boolean }>;
   }>;
   mapChunkStats: () => MapChunkStats;
+  cutawayRoofAlphas: () => Array<{ floor: number; key: string; x: number; y: number; alpha: number }>;
   currentTrack: () => string | null;
   recentEvents: () => GameEvent[];
 }
@@ -672,6 +673,10 @@ if (E2E_MODE) {
         return { type, family: spec.family, frames, attackFamily, attackFrames };
       }),
     mapChunkStats: () => mapChunkStats(),
+    cutawayRoofAlphas: () =>
+      cutawayBuildingSprites
+        .filter((entry) => entry.sprite.active)
+        .map((entry) => ({ floor: entry.floor, key: entry.object.key, x: entry.object.x, y: entry.object.y, alpha: entry.sprite.alpha })),
     currentTrack: () => currentTrack(),
     recentEvents: () => observedEvents.slice(-80)
   };
@@ -754,6 +759,7 @@ let mapLayer: Phaser.GameObjects.Container;
 let entityLayer: Phaser.GameObjects.Container;
 let fxLayer: Phaser.GameObjects.Container;
 let mapRender: MapRenderState | null = null;
+const cutawayBuildingSprites: Array<{ floor: number; object: DecorationSprite; sprite: Phaser.GameObjects.Image }> = [];
 const playerViews = new Map<string, PlayerEntityView>();
 const monsterViews = new Map<string, MonsterEntityView>();
 const corpseViews = new Map<string, Phaser.GameObjects.Container>();
@@ -1083,6 +1089,7 @@ function update(this: Phaser.Scene, time: number): void {
     updateDialogueCamera(ownView.x, ownView.y);
     updateVisibleMapChunks();
   }
+  updateCutawayBuildingRoofs(me);
   if (time - lastMinimapDrawAt >= MINIMAP_DRAW_MS) {
     drawMinimap(me);
     lastMinimapDrawAt = time;
@@ -1421,6 +1428,7 @@ function renderRoster(characters: CharacterRosterEntry[]): void {
 
 function drawMap(floor: number, center?: TilePoint): void {
   currentFloor = floor;
+  cutawayBuildingSprites.length = 0;
   mapLayer.removeAll(true);
   const rows = makeFloorTiles(floor);
   const cols = floorCols(floor);
@@ -4251,7 +4259,10 @@ function addComposedMapObjects(
     .map((item) => ({ ...item, x: item.x * fx, y: item.y * fy }))
     .filter((item) => item.x >= fromX - 2 && item.x < toX + 2 && item.y >= fromY - 3 && item.y < toY + 1)
     .sort((a, b) => a.y - b.y)
-    .forEach((item) => placeMapSprite(item, parent));
+    .forEach((item) => {
+      const sprite = placeMapSprite(item, parent);
+      if (isCutawayBuilding(item)) cutawayBuildingSprites.push({ floor, object: item, sprite });
+    });
 }
 
 function placeMapSprite(item: DecorationSprite, parent: Phaser.GameObjects.Container): Phaser.GameObjects.Image {
@@ -4259,6 +4270,25 @@ function placeMapSprite(item: DecorationSprite, parent: Phaser.GameObjects.Conta
   sprite.setDisplaySize(item.w, item.h);
   parent.add(sprite);
   return sprite;
+}
+
+function updateCutawayBuildingRoofs(me: PlayerView): void {
+  if (!cutawayBuildingSprites.length) return;
+  for (let i = cutawayBuildingSprites.length - 1; i >= 0; i -= 1) {
+    const entry = cutawayBuildingSprites[i];
+    if (!entry || !entry.sprite.active) {
+      cutawayBuildingSprites.splice(i, 1);
+      continue;
+    }
+    const inside = entry.floor === me.floor && isInsideCutawayBuilding(entry.object, me.x, me.y);
+    if (inside) {
+      entry.sprite.setCrop();
+      entry.sprite.setAlpha(0);
+    } else {
+      entry.sprite.setCrop();
+      entry.sprite.setAlpha(1);
+    }
+  }
 }
 
 function consumeEvents(events: GameEvent[]): void {
@@ -5127,6 +5157,7 @@ function minimapTileColor(tile: string): string {
     c: "#5b574e", // grave path
     h: "#454139", // grave dirt
     O: "#7a6a52", // building
+    "*": "#6e6e62", // cutaway interior wall/foundation
     "~": "#2f5d7a", // water
     ">": "#5a4530",
     "<": "#5a4530",
@@ -5856,6 +5887,7 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     c: "tileGravePath",
     h: "tileGraveDirt",
     O: "tileGrass",
+    "*": "tileStone",
     "~": "tileWater",
     ">": "tileDirt",
     "<": "tileDirt",

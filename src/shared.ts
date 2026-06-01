@@ -1,5 +1,12 @@
 import type { Range, ZoneId } from "./content-types.ts";
-import { MAP_OBJECTS, BLOCKING_OBJECT_KEYS } from "./map-objects.ts";
+import {
+  MAP_OBJECTS,
+  BLOCKING_OBJECT_KEYS,
+  buildingDoorX,
+  buildingFootprintBounds,
+  buildingInteriorBounds,
+  isCutawayBuilding
+} from "./map-objects.ts";
 
 export {
   ABILITIES,
@@ -816,20 +823,28 @@ function stampBuildingCollision(rows: string[][], floor: number): void {
   const sy = contentScaleY(floor);
   for (const obj of objects) {
     if (!BLOCKING_OBJECT_KEYS.has(obj.key)) continue;
-    const cx = obj.x * sx;
-    const baseY = obj.y * sy; // sprite bottom-centre anchor, scaled position
-    const halfW = (obj.w / TILE_SIZE) * 0.42;
-    const left = Math.round(cx - halfW);
-    const right = Math.round(cx + halfW);
-    const bottom = Math.round(baseY - 0.6); // leave the doorstep row walkable
-    const top = Math.round(baseY - (obj.h / TILE_SIZE) * 0.8);
-    for (let y = top; y <= bottom; y += 1) {
+    const placed = { ...obj, x: obj.x * sx, y: obj.y * sy };
+    const footprint = buildingFootprintBounds(placed);
+    const interior = buildingInteriorBounds(placed);
+    const doorX = buildingDoorX(placed);
+    for (let y = footprint.top; y <= footprint.bottom; y += 1) {
       const row = rows[y];
       if (!row) continue;
-      for (let x = left; x <= right; x += 1) {
+      for (let x = footprint.left; x <= footprint.right; x += 1) {
         const tile = row[x];
-        if (tile === undefined || isBlockedTile(tile) || FOOTPRINT_SKIP.has(tile)) continue;
-        row[x] = "O";
+        if (tile === undefined || FOOTPRINT_SKIP.has(tile)) continue;
+        if (isCutawayBuilding(obj)) {
+          const insideRoom = x >= interior.left && x <= interior.right && y >= interior.top && y <= interior.bottom;
+          const doorway = x === doorX && y === footprint.bottom;
+          if (insideRoom || doorway) {
+            if (!isBlockedTile(tile)) row[x] = "n";
+            continue;
+          }
+          const cutawayEdge = x >= interior.left - 1 && x <= interior.right + 1 && y >= interior.top - 1 && y <= interior.bottom + 1;
+          if (!isBlockedTile(tile)) row[x] = cutawayEdge ? "*" : "O";
+          continue;
+        }
+        if (!isBlockedTile(tile)) row[x] = "O";
       }
     }
   }
@@ -1059,6 +1074,7 @@ export function tileAt(floor: number, tx: number, ty: number): string {
 export function isBlockedTile(tile: string): boolean {
   return (
     tile === "#" || tile === "~" || SWAMP_WATER_TILES.has(tile) || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o" ||
+    tile === "*" ||
     tile === "X" || tile === "P" || tile === "w" || // badlands cliff wall + pit + massif
     tile === "Q" || tile === "V" || tile === "U" || // desert quicksand + oasis + ruin
     BEACH_WATER_TILES.has(tile) || tile === "x" || tile === "0" || tile === "1" || tile === "|" || tile === "u" || // beach sea/shore/cliff/rocks
@@ -1073,7 +1089,7 @@ export function isBlockedTile(tile: string): boolean {
 export function isSightBlocked(tile: string): boolean {
   // Open water/quicksand/pits do NOT block sight; solid walls/ruins/jungle do.
   return (
-    tile === "#" || tile === "o" || tile === "O" || tile === "f" || tile === "r" || tile === "q" ||
+    tile === "#" || tile === "o" || tile === "O" || tile === "*" || tile === "f" || tile === "r" || tile === "q" ||
     tile === "X" || tile === "w" || tile === "U" || // badlands cliff/massif, ruin
     tile === "x" || tile === "0" || tile === "1" || tile === "|" || tile === "u" || tile === "E" // beach cliff/rocks, jungle wall
   );
