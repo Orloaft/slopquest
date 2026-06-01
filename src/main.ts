@@ -10,6 +10,7 @@ import {
   MAP_ROWS,
   MONSTERS,
   NPCS,
+  ORE_TIERS,
   SHOP,
   TILE_SIZE,
   TREE_TYPES,
@@ -299,6 +300,7 @@ interface E2EHooks {
   fireScreenPoint: (id?: string | null) => { x: number; y: number } | null;
   npcScreenPoint: (id: string) => { x: number; y: number } | null;
   monsterScreenPoint: (id: string) => { x: number; y: number } | null;
+  worldScreenPoint: (tileX: number, tileY: number) => { x: number; y: number } | null;
   send: (msg: ClientMessage) => void;
   stateVersion: () => number;
   viewCounts: () => { trees: number; npcs: number };
@@ -550,6 +552,14 @@ if (E2E_MODE) {
       return {
         x: (monster.x * TILE_SIZE - camera.worldView.x) * camera.zoom,
         y: (monster.y * TILE_SIZE - camera.worldView.y) * camera.zoom
+      };
+    },
+    worldScreenPoint: (tileX: number, tileY: number) => {
+      const camera = scene?.cameras?.main;
+      if (!camera) return null;
+      return {
+        x: (tileX * TILE_SIZE - camera.worldView.x) * camera.zoom,
+        y: (tileY * TILE_SIZE - camera.worldView.y) * camera.zoom
       };
     },
     send,
@@ -1657,6 +1667,7 @@ function createNpcView(npc: NpcView): NpcEntityView {
       startNpcTalkPath(npc.id);
     }
   });
+  attachHoverTint(zone, sprite);
   view.add([shadow, sprite, nameText, zone]);
   view.nameText = nameText;
   view.sprite = sprite;
@@ -1670,10 +1681,8 @@ function createTreeView(tree: TreeView): TreeEntityView {
   const treeSprite = scene.add.image(0, 4, spec.textureKey).setOrigin(0.5, 1).setDisplaySize(spec.width, spec.height);
   const stump = scene.add.rectangle(0, 12, 20, 12, 0x705036).setStrokeStyle(2, 0x2d1f14).setVisible(false);
   const zone = scene.add.zone(0, -18, spec.zoneWidth, spec.zoneHeight).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-    event.stopPropagation();
-    startTreeCutPath(tree);
-  });
+  attachZoneMenu(zone, () => startTreeCutPath(tree), `${titleCase(tree.type)} Tree`, () => treeMenuActions(tree));
+  attachHoverTint(zone, treeSprite);
   view.add([treeSprite, stump, zone]);
   view.treeSprite = treeSprite;
   view.stump = stump;
@@ -1699,10 +1708,8 @@ function createFishingNodeView(node: FishingNodeView): FishingEntityView {
   const ring = scene.add.ellipse(0, 2, 34, 14, 0x4db6d8, 0.16).setStrokeStyle(1, 0xbbeeff, 0.55);
   const sprite = scene.add.image(0, 0, "spriteFishingRipple").setDisplaySize(34, 34);
   const zone = scene.add.zone(0, 0, 48, 42).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-    event.stopPropagation();
-    startFishingPath(node);
-  });
+  attachZoneMenu(zone, () => startFishingPath(node), "Fishing Spot", () => fishingMenuActions(node));
+  attachHoverTint(zone, sprite);
   view.add([ring, sprite, zone]);
   view.sprite = sprite;
   return view;
@@ -1732,10 +1739,8 @@ function createMiningNodeView(node: MiningNodeView): MiningEntityView {
   const tint = ORE_VEIN_TINTS[node.kind];
   if (tint !== undefined) sprite.setTint(tint);
   const zone = scene.add.zone(0, -12, 48, 36).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-    event.stopPropagation();
-    startMiningPath(node);
-  });
+  attachZoneMenu(zone, () => startMiningPath(node), `${titleCase(node.kind)} Vein`, () => miningMenuActions(node));
+  attachHoverTint(zone, sprite);
   view.add([sprite, zone]);
   view.sprite = sprite;
   return view;
@@ -1764,14 +1769,12 @@ function createHerbNodeView(node: HerbNodeView): HerbEntityView {
   const base = scene.add.ellipse(0, 7, 26, 12, 0x3a5a2a, 0.4);
   view.add(base);
   const zone = scene.add.zone(0, -4, 40, 40).setInteractive({ cursor: "pointer" });
-  zone.on("pointerdown", (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-    event.stopPropagation();
-    startHerbPath(node);
-  });
+  attachZoneMenu(zone, () => startHerbPath(node), node.label, () => herbMenuActions(node));
 
   if (node.requiredLevel > 0) {
     // Mire-Lotus keeps its bespoke swamp-lotus sprite.
     const lotus = scene.add.image(0, 8, "spriteMireLotus").setOrigin(0.5, 1).setDisplaySize(36, 34);
+    attachHoverTint(zone, lotus);
     view.add([lotus, zone]);
     view.bloom = lotus;
     return view;
@@ -1780,6 +1783,7 @@ function createHerbNodeView(node: HerbNodeView): HerbEntityView {
   const plant = herbPlantSprite(node);
   if (plant) {
     const sprite = scene.add.image(0, 9, plant.key).setOrigin(0.5, 1).setDisplaySize(plant.w, plant.h);
+    attachHoverTint(zone, sprite);
     view.add([sprite, zone]);
     view.bloom = sprite;
     return view;
@@ -1832,6 +1836,7 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
       startAttackPath(monster.id);
     }
   });
+  attachHoverTint(zone, sprite);
   view.add([targetRing, shadow, sprite, nameText, hpBack, hp, zone]);
   view.nameText = nameText;
   view.hp = hp;
@@ -2328,6 +2333,14 @@ function renderInventory(inventory: Array<InventoryItemView | null> = []): void 
     slot.addEventListener("mouseleave", hideItemPopover);
     slot.addEventListener("dblclick", () => {
       if (itemId && itemUseKind(itemId) === "eat") send({ type: "eatItem", item: itemId });
+    });
+    slot.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (itemId) {
+        hideItemPopover();
+        showContextMenu(slot.dataset.label ?? "Item", itemMenuActions(itemId), event.clientX, event.clientY);
+      }
     });
   });
   dom.inventoryGrid.querySelectorAll<HTMLElement>(".inventory-slot.empty").forEach((slot) => {
@@ -3252,11 +3265,96 @@ function showContextMenu(title: string | null, actions: MenuAction[], screenX: n
   dom.npcMenu.style.top = `${y}px`;
 }
 
+// Hover feedback: warm-tint the entity's sprite while the cursor is over it,
+// restoring any pre-existing tint (e.g. ore-vein colours) on the way out.
+function attachHoverTint(zone: Phaser.GameObjects.Zone, sprite: Phaser.GameObjects.Image | Phaser.GameObjects.Sprite): void {
+  zone.on("pointerover", () => {
+    sprite.setData("baseTint", sprite.isTinted ? sprite.tintTopLeft : -1);
+    sprite.setTint(0xffe6a8);
+  });
+  zone.on("pointerout", () => {
+    const base = sprite.getData("baseTint") as number | undefined;
+    if (base == null || base === -1) sprite.clearTint();
+    else sprite.setTint(base);
+  });
+}
+
+// Right-click an entity zone -> bespoke menu; left-click runs the primary action.
+function attachZoneMenu(
+  zone: Phaser.GameObjects.Zone,
+  primary: () => void,
+  title: string | null,
+  actions: () => MenuAction[]
+): void {
+  zone.on("pointerdown", (pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+    event.stopPropagation();
+    if (pointer.rightButtonDown()) {
+      const s = pointerScreen(pointer);
+      showContextMenu(title, actions(), s.x, s.y);
+    } else {
+      hideNpcMenu();
+      primary();
+    }
+  });
+}
+
+function treeMenuActions(tree: TreeView): MenuAction[] {
+  return [
+    { label: "Chop", run: () => startTreeCutPath(tree) },
+    { label: "Examine", run: () => addSystemLine(`A ${tree.type} tree — fell it for logs.`) }
+  ];
+}
+
+function fishingMenuActions(node: FishingNodeView): MenuAction[] {
+  return [
+    { label: "Fish", run: () => startFishingPath(node) },
+    { label: "Examine", run: () => addSystemLine("A fishing spot — cast a line from the bank.") }
+  ];
+}
+
+function miningMenuActions(node: MiningNodeView): MenuAction[] {
+  const tier = ORE_TIERS[node.kind];
+  return [
+    { label: "Mine", run: () => startMiningPath(node) },
+    { label: "Examine", run: () => addSystemLine(`A ${node.kind} vein${tier ? ` — needs Mining ${tier.reqLevel}` : ""}.`) }
+  ];
+}
+
+function itemMenuActions(itemId: string): MenuAction[] {
+  const item = ITEMS[itemId];
+  const actions: MenuAction[] = [];
+  const kind = item?.use?.kind;
+  if (kind === "eat") actions.push({ label: "Eat", run: () => send({ type: "eatItem", item: itemId }) });
+  else if (kind === "drink_potion") actions.push({ label: "Drink", run: () => send({ type: "useItem", item: itemId, ctx: {} }) });
+  actions.push({ label: "Examine", run: () => examineItem(itemId) });
+  return actions;
+}
+
+function examineItem(itemId: string): void {
+  const item = ITEMS[itemId];
+  if (!item) return;
+  const tags = (item.tags ?? []).join(", ");
+  const weight = item.weight != null ? `${item.weight} wt` : "";
+  const detail = [tags, weight].filter(Boolean).join(" · ");
+  addSystemLine(`${item.label}${detail ? ` — ${detail}` : ""}.`);
+}
+
+function herbMenuActions(node: HerbNodeView): MenuAction[] {
+  return [
+    { label: "Gather", run: () => startHerbPath(node) },
+    { label: "Examine", run: () => addSystemLine(`${node.label}${node.requiredLevel > 0 ? ` — requires Foraging ${node.requiredLevel}` : ""}.`) }
+  ];
+}
+
 // Screen coords of a Phaser pointer (prefer the native event when present).
 function pointerScreen(pointer: Phaser.Input.Pointer): { x: number; y: number } {
   const ev = pointer.event;
   if (ev instanceof MouseEvent) return { x: ev.clientX, y: ev.clientY };
   return { x: pointer.x, y: pointer.y };
+}
+
+function titleCase(value: string): string {
+  return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
 }
 
 function runNpcIntent(npcId: string, intent: NpcIntent): void {
@@ -3297,7 +3395,9 @@ function walkToTile(floor: number, tx: number, ty: number): void {
 }
 
 function examineMonster(monster: MonsterView): void {
-  addSystemLine(`${monster.name} — ${Math.max(0, Math.ceil(monster.hp))}/${monster.maxHp} HP.`);
+  const desc = MONSTERS[monster.type]?.description;
+  const hp = `${Math.max(0, Math.ceil(monster.hp))}/${monster.maxHp} HP`;
+  addSystemLine(desc ? `${monster.name} — ${desc}. (${hp})` : `${monster.name} — ${hp}.`);
 }
 
 function examineNpc(npc: NpcView): void {

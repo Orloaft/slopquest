@@ -51,7 +51,39 @@ test("right-clicking a monster offers Attack and Examine", async ({ page }) => {
   await expect(page.locator("#npcMenu .npc-menu-item", { hasText: "Attack" })).toBeVisible();
   await expect(page.locator("#npcMenu .npc-menu-item", { hasText: "Examine" })).toBeVisible();
   await page.locator("#npcMenu .npc-menu-item", { hasText: "Examine" }).click();
-  await expect(page.locator("#systemFeed")).toContainText("Wolf");
+  await expect(page.locator("#systemFeed")).toContainText("predator"); // the bestiary description
+});
+
+test("right-clicking an ore vein offers Mine and Examine", async ({ page }) => {
+  logErrors(page);
+  await page.goto("/?e2e");
+  await join(page);
+
+  // Stand by the Northwood copper vein (at 10.5,59.5).
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 11.5, y: 59.5 }));
+  await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.self() && window.__TIB_E2E__.self()!.floor === 3));
+  await page.waitForFunction(() => (window.__TIB_E2E__?.getState()?.miningNodes ?? []).some((n) => n.id === "mine-3-8-49"));
+  await page.waitForTimeout(300);
+  const pt = await page.evaluate(() => window.__TIB_E2E__?.worldScreenPoint?.(10.5, 59.5) ?? null);
+  expect(pt).not.toBeNull();
+  await page.mouse.click(pt!.x, pt!.y, { button: "right" });
+  await expect(page.locator("#npcMenu .npc-menu-item").filter({ hasText: /^Mine$/ })).toBeVisible();
+  await page.locator("#npcMenu .npc-menu-item", { hasText: "Examine" }).click();
+  await expect(page.locator("#systemFeed")).toContainText("copper vein");
+});
+
+test("right-clicking an inventory item shows Eat and Examine", async ({ page }) => {
+  logErrors(page);
+  await page.goto("/?e2e");
+  await join(page);
+
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "cooked_fish", qty: 2 }] }));
+  await page.locator("#inventoryButton").click();
+  await expect(page.locator("#inventoryPanel")).toBeVisible();
+  await page.locator("[data-item='cooked_fish']").click({ button: "right" });
+  await expect(page.locator("#npcMenu .npc-menu-item", { hasText: "Eat" })).toBeVisible();
+  await page.locator("#npcMenu .npc-menu-item", { hasText: "Examine" }).click();
+  await expect(page.locator("#systemFeed")).toContainText("Cooked Fish");
 });
 
 test("right-clicking empty ground offers Walk here, which moves the player", async ({ page }) => {

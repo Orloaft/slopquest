@@ -10,6 +10,7 @@
 
 - id: rat
   name: Rat
+  description: "a mangy scavenger, bold only in numbers"
   maxHp: 28
   speed: 2.4
   damage: [3, 7]
@@ -21,6 +22,7 @@
 
 - id: spider
   name: Spider
+  description: "a skittering hunter with a venomous nip"
   maxHp: 36
   speed: 2.7
   damage: [4, 9]
@@ -32,6 +34,7 @@
 
 - id: wisp
   name: Forest Wisp
+  description: "a drifting mote of wild magic"
   maxHp: 32
   speed: 2.9
   damage: [4, 9]
@@ -43,6 +46,7 @@
 
 - id: wolf
   name: Grey Wolf
+  description: "a lean grey predator of the treeline"
   maxHp: 58
   speed: 3.2
   damage: [7, 13]
@@ -54,6 +58,7 @@
 
 - id: goblin
   name: Goblin
+  description: "a snarling greenskin raider, quick to swarm"
   maxHp: 46
   speed: 2.7
   damage: [6, 12]
@@ -65,6 +70,7 @@
 
 - id: goblin_scout
   name: Goblin Scout
+  description: "a wiry goblin outrider, fast and wary"
   maxHp: 42
   speed: 3.05
   damage: [6, 11]
@@ -76,6 +82,7 @@
 
 - id: goblin_shaman
   name: Goblin Shaman
+  description: "a goblin spellcaster wreathed in foul smoke"
   maxHp: 54
   speed: 2.35
   damage: [9, 17]
@@ -88,6 +95,7 @@
 # --- Northwood wilds (floor 3) ---
 - id: wild_boar
   name: Wild Boar
+  description: "a bristling tusker that charges when cornered"
   maxHp: 34
   speed: 2.8
   damage: [5, 10]
@@ -99,6 +107,7 @@
 
 - id: thorn_hedgehog
   name: Thorn Hedgehog
+  description: "a spiny forager that rolls into a barbed ball"
   maxHp: 30
   speed: 2.35
   damage: [4, 8]
@@ -111,6 +120,7 @@
 
 - id: forest_spider
   name: Forest Spider
+  description: "a fat woodland weaver thick with web"
   maxHp: 42
   speed: 2.9
   damage: [6, 11]
@@ -122,6 +132,7 @@
 
 - id: forest_slime
   name: Forest Slime
+  description: "a quivering ooze that digests the fallen"
   maxHp: 44
   speed: 2.1
   damage: [5, 9]
@@ -133,6 +144,7 @@
 
 - id: sapling_deer
   name: Sapling Deer
+  description: "a timid spirit-deer crowned with new growth"
   maxHp: 50
   speed: 3.05
   damage: [7, 12]
@@ -144,6 +156,7 @@
 
 - id: mushroom_brute
   name: Mushroom Brute
+  description: "a lumbering fungal hulk that spreads spores"
   maxHp: 76
   speed: 1.9
   damage: [10, 18]
@@ -156,6 +169,7 @@
 
 - id: dire_wolf
   name: Dire Wolf
+  description: "a massive alpha wolf; its pack answers its howl"
   maxHp: 78
   speed: 3.15
   damage: [11, 19]
@@ -168,6 +182,7 @@
 
 - id: forest_pixie
   name: Forest Pixie
+  description: "a mischievous sprite flitting through the glades"
   maxHp: 48
   speed: 3.1
   damage: [6, 11]
@@ -182,6 +197,7 @@
 
 - id: bone_druid
   name: Bone Druid
+  description: "a withered druid bound to rotting roots"
   maxHp: 82
   speed: 2.05
   damage: [12, 20]
@@ -196,6 +212,7 @@
 
 - id: bog_wraith
   name: Bog Wraith
+  description: "a drowned spirit dripping with marsh-rot"
   maxHp: 72
   speed: 2.4
   damage: [10, 17]
@@ -207,6 +224,7 @@
 
 - id: ancient_treant
   name: Ancient Treant
+  description: "an age-old tree-lord, slow but terribly strong"
   maxHp: 130
   speed: 1.35
   damage: [16, 26]
@@ -219,6 +237,7 @@
 
 - id: orc
   name: Orc
+  description: "a hulking warbrute clad in scavenged iron"
   maxHp: 84
   speed: 2.25
   damage: [10, 18]
@@ -233,6 +252,7 @@
 
 - id: skeleton
   name: Skeleton
+  description: "a clattering grave-walker, tireless and cold"
   maxHp: 68
   speed: 2.05
   damage: [11, 18]
@@ -244,6 +264,7 @@
 
 - id: ghoul
   name: Ghoul
+  description: "a famished corpse that hungers for the living"
   maxHp: 92
   speed: 1.9
   damage: [12, 21]
@@ -255,6 +276,7 @@
 
 - id: grave_revenant
   name: Grave Revenant
+  description: "a vengeful dead thing risen from a broken tomb"
   maxHp: 76
   speed: 2.55
   damage: [10, 18]
@@ -266,6 +288,7 @@
 
 - id: crypt_sentinel
   name: Crypt Sentinel
+  description: "an armoured guardian sworn to the crypt's dead"
   maxHp: 118
   speed: 1.55
   damage: [14, 24]
@@ -278,6 +301,7 @@
 
 - id: pale_banshee
   name: Pale Banshee
+  description: "a wailing spectre whose cry chills the blood"
   maxHp: 64
   speed: 2.25
   damage: [9, 16]
@@ -292,6 +316,7 @@
 
 - id: boss
   name: Ashen Warden
+  description: "keeper of the crypt's deepest, dust-choked vault"
   maxHp: 420
   speed: 1.85
   damage: [18, 30]
@@ -304,6 +329,7 @@
 # --- The Sunken Marsh (floor 5) ---
 - id: skitterer
   name: Skitterer
+  description: "a chittering marsh-crawler that darts through reeds"
   maxHp: 24
   speed: 3.6
   damage: [4, 8]
@@ -315,6 +341,7 @@
 
 - id: mire_spitter
   name: Mire Spitter
+  description: "an anchored bog-turret that spits slowing bile"
   maxHp: 70
   speed: 0
   damage: [5, 9]
@@ -330,6 +357,7 @@
 # --- The Searing Badlands (floor 6) ---
 - id: canyon_scavenger
   name: Canyon Scavenger
+  description: "a pack-hunting carrion beast of the badlands"
   maxHp: 90
   speed: 2.2
   damage: [9, 14]
@@ -343,6 +371,7 @@
 
 - id: dust_burrower
   name: Dust Burrower
+  description: "a buried ambusher that erupts underfoot"
   maxHp: 60
   speed: 2.0
   damage: [16, 26]
@@ -357,6 +386,7 @@
 # --- The Sunken Desert (floor 7) ---
 - id: dune_skitterer
   name: Dune Skitterer
+  description: "a sand-swift skitterer of the deep desert"
   maxHp: 30
   speed: 4.1
   damage: [5, 9]
@@ -368,6 +398,7 @@
 
 - id: sun_wraith
   name: Sun-Scorched Wraith
+  description: "a heat-warped spectre that saps a warrior's strength"
   maxHp: 64
   speed: 0
   damage: [4, 8]
@@ -383,6 +414,7 @@
 # --- The Sunken Beach (floor 8) ---
 - id: reef_prowler
   name: Reef Prowler
+  description: "a fast coastal predator stalking the tideline"
   maxHp: 34
   speed: 4.0
   damage: [6, 11]
@@ -395,6 +427,7 @@
 # --- The Untamed Jungle (floor 9) ---
 - id: venomous_stalker
   name: Venomous Stalker
+  description: "a cloaked jungle hunter that strikes from cover"
   maxHp: 80
   speed: 2.8
   damage: [18, 28]
@@ -408,6 +441,7 @@
 
 - id: totem_wraith
   name: Ancient Totem Wraith
+  description: "a bound spirit that fires curses down the trail"
   maxHp: 80
   speed: 0
   damage: [6, 11]

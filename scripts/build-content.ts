@@ -37,6 +37,7 @@ interface RawItem {
 interface RawMonster {
   id?: string;
   name?: string;
+  description?: string;
   maxHp?: number;
   speed?: number;
   damage?: Range;
@@ -427,6 +428,7 @@ const MONSTERS = Object.fromEntries(
       name: m.name, maxHp: m.maxHp, speed: m.speed, damage: m.damage, attackMs: m.attackMs,
       xp: m.xp, gold: m.gold, aggro: m.aggro, range: m.range
     };
+    if (m.description) entry["description"] = m.description;
     if (m.ranged) entry["ranged"] = true;
     if (m.slowPct != null) entry["slowPct"] = m.slowPct;
     if (m.slowMs != null) entry["slowMs"] = m.slowMs;

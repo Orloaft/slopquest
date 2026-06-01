@@ -56,6 +56,7 @@ export interface Item {
 
 export interface Monster {
   name: string;
+  description?: string;
   maxHp: number;
   speed: number;
   damage: Range;
