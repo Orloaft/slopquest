@@ -618,6 +618,13 @@ let lastInputMoveX = Number.NaN;
 let lastInputMoveY = Number.NaN;
 let lastMinimapDrawAt = 0;
 let currentFloor: number | null = null;
+// Floor-transition loading screen: shown on a floor change, hidden only once the
+// new map + entities have actually painted (a min display time + a few frames).
+let loadingFloor: number | null = null;
+let loadingStartedAt = 0;
+let loadingFrames = 0;
+const LOADING_MIN_MS = E2E_MODE ? 180 : 450;
+const LOADING_MIN_FRAMES = E2E_MODE ? 3 : 5;
 let clickDestination: PathDestination | null = null;
 let clickPath: PathDestination[] = [];
 let pendingTreeCut: string | null = null;
@@ -937,6 +944,11 @@ function update(this: Phaser.Scene, time: number): void {
   if (!me) return;
   applyZoneMusic(me);
   if (currentFloor !== me.floor) {
+    // Cover the transition until the destination is built and rendered.
+    showLoadingScreen(zoneTitleForFloor(me.floor));
+    loadingFloor = me.floor;
+    loadingStartedAt = performance.now();
+    loadingFrames = 0;
     clearResourceViews();
     drawMap(me.floor, { x: me.x, y: me.y });
     syncedStateVersion = -1;
@@ -945,6 +957,15 @@ function update(this: Phaser.Scene, time: number): void {
   if (syncedStateVersion !== stateVersion) {
     syncEntities();
     syncedStateVersion = stateVersion;
+  }
+  // Reveal once the new floor's map + entities have had a few frames to paint
+  // (and the screen has been up a minimum beat so it doesn't just flash).
+  if (loadingFloor !== null && currentFloor === loadingFloor) {
+    loadingFrames += 1;
+    if (loadingFrames >= LOADING_MIN_FRAMES && performance.now() - loadingStartedAt >= LOADING_MIN_MS) {
+      hideLoadingScreen();
+      loadingFloor = null;
+    }
   }
   interpolateEntities();
   animateEntities();
@@ -1302,7 +1323,6 @@ function renderRoster(characters: CharacterRosterEntry[]): void {
 
 function drawMap(floor: number, center?: TilePoint): void {
   currentFloor = floor;
-  hideLoadingScreen();
   mapLayer.removeAll(true);
   const rows = makeFloorTiles(floor);
   const cols = floorCols(floor);
@@ -1312,8 +1332,18 @@ function drawMap(floor: number, center?: TilePoint): void {
   updateVisibleMapChunks(center ? center.x * TILE_SIZE : undefined, center ? center.y * TILE_SIZE : undefined);
 }
 
+function showLoadingScreen(title?: string): void {
+  if (title) dom.loadingTitle.textContent = title;
+  dom.loadingScreen.classList.remove("hidden");
+}
+
 function hideLoadingScreen(): void {
   dom.loadingScreen.classList.add("hidden");
+}
+
+function zoneTitleForFloor(floor: number): string {
+  const zone = Object.values(ZONES).find((z) => z.floor === floor);
+  return zone ? `Entering ${zone.label}…` : "Entering the wild…";
 }
 
 function updateVisibleMapChunks(centerX?: number, centerY?: number): void {
