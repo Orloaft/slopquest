@@ -426,6 +426,8 @@ const dom = {
   mapBackButton: el<HTMLButtonElement>("#mapBackButton"),
   itemPopover: el<HTMLElement>("#itemPopover"),
   death: el<HTMLElement>("#death"),
+  chatPanel: el<HTMLElement>("#chatPanel"),
+  chatToggle: el<HTMLButtonElement>("#chatToggle"),
   chatLog: el<HTMLElement>("#chatLog"),
   chatForm: el<HTMLFormElement>("#chatForm"),
   chatInput: el<HTMLInputElement>("#chatInput"),
@@ -442,6 +444,8 @@ const dom = {
   settingSound: el<HTMLInputElement>("#settingSound"),
   settingParallax: el<HTMLInputElement>("#settingParallax"),
   settingMusic: el<HTMLInputElement>("#settingMusic"),
+  settingUIScale: el<HTMLInputElement>("#settingUIScale"),
+  settingUIScaleValue: el<HTMLElement>("#settingUIScaleValue"),
   joinBackdrop: el<HTMLElement>("#joinBackdrop"),
   joinBackButton: el<HTMLButtonElement>("#joinBackButton")
 };
@@ -521,7 +525,77 @@ window.addEventListener("blur", () => sendStopInput());
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) sendStopInput();
 });
+// ---- Interface preferences: HUD scale + chat minimized, persisted locally. ----
+// Declared here (not beside addChat) so the `uiPrefs` const is initialized before
+// initUiPreferences() runs during module evaluation — avoids a TDZ access error.
+const UI_PREFS_KEY = "tib:ui";
+const UI_SCALE_MIN = 0.8;
+const UI_SCALE_MAX = 1.8;
+
+interface UiPrefs {
+  scale: number;
+  chatMinimized: boolean;
+}
+
+function clampScale(value: number): number {
+  if (!Number.isFinite(value)) return 1;
+  return Math.min(UI_SCALE_MAX, Math.max(UI_SCALE_MIN, value));
+}
+
+const uiPrefs: UiPrefs = ((): UiPrefs => {
+  try {
+    const raw = localStorage.getItem(UI_PREFS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<UiPrefs>;
+      return {
+        scale: typeof parsed.scale === "number" ? clampScale(parsed.scale) : 1,
+        chatMinimized: Boolean(parsed.chatMinimized)
+      };
+    }
+  } catch {
+    /* corrupt/blocked storage — fall through to defaults. */
+  }
+  return { scale: 1, chatMinimized: false };
+})();
+
+function saveUiPrefs(): void {
+  try {
+    localStorage.setItem(UI_PREFS_KEY, JSON.stringify(uiPrefs));
+  } catch {
+    /* storage unavailable (private mode) — preferences stay session-only. */
+  }
+}
+
+function applyUiScale(scale: number): void {
+  uiPrefs.scale = clampScale(scale);
+  document.documentElement.style.setProperty("--ui-scale", String(uiPrefs.scale));
+  dom.settingUIScale.value = String(uiPrefs.scale);
+  dom.settingUIScaleValue.textContent = `${Math.round(uiPrefs.scale * 100)}%`;
+}
+
+function setChatMinimized(minimized: boolean): void {
+  uiPrefs.chatMinimized = minimized;
+  dom.chatPanel.classList.toggle("minimized", minimized);
+  dom.chatToggle.textContent = minimized ? "+" : "−"; // + / −
+  dom.chatToggle.title = minimized ? "Expand chat" : "Minimize chat";
+  dom.chatToggle.setAttribute("aria-label", dom.chatToggle.title);
+}
+
+function initUiPreferences(): void {
+  applyUiScale(uiPrefs.scale);
+  setChatMinimized(uiPrefs.chatMinimized);
+  dom.chatToggle.addEventListener("click", () => {
+    setChatMinimized(!uiPrefs.chatMinimized);
+    saveUiPrefs();
+  });
+  dom.settingUIScale.addEventListener("input", () => {
+    applyUiScale(Number(dom.settingUIScale.value));
+    saveUiPrefs();
+  });
+}
+
 setupTitleScreen();
+initUiPreferences();
 ensureSocket();
 if (E2E_MODE) {
   window.__TIB_E2E__ = {
