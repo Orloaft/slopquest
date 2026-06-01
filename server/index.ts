@@ -613,7 +613,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
   socket.on("close", () => {
     const session = clients.get(socket);
     if (session) {
-      if (!session.transient && (!E2E_TEST || !session.player.name.startsWith("e2e_"))) persistPlayer(session.player);
+      if (!session.transient) persistPlayer(session.player);
       clients.delete(socket);
       playersById.delete(session.player.id);
       publicPlayerViewCache.delete(session.player.id);
@@ -4171,7 +4171,17 @@ function persistPlayerToDb(player: ServerPlayer): string {
   return key;
 }
 
+// e2e specs join as throwaway characters (`e2e_*`, `titleflow_*`); never write
+// them to disk so they don't pile up in the (shared) character roster. Kept
+// dependency-free (no module-level const) since loadDb() calls this during
+// module evaluation, before later const declarations initialize.
+function isEphemeralName(name: string): boolean {
+  const lower = name.toLowerCase();
+  return lower.startsWith("e2e_") || lower.startsWith("titleflow_");
+}
+
 function persistPlayer(player: ServerPlayer): void {
+  if (E2E_TEST && isEphemeralName(player.name)) return;
   dirtyPlayerKeys.add(persistPlayerToDb(player));
   refreshSaveMetrics();
   queueSave();
@@ -4179,16 +4189,30 @@ function persistPlayer(player: ServerPlayer): void {
 
 function persistOnlinePlayers(): void {
   for (const session of clients.values()) {
-    if (!session.transient) dirtyPlayerKeys.add(persistPlayerToDb(session.player));
+    if (session.transient || (E2E_TEST && isEphemeralName(session.player.name))) continue;
+    dirtyPlayerKeys.add(persistPlayerToDb(session.player));
   }
   refreshSaveMetrics();
   queueSave();
+}
+
+// Sweep any throwaway e2e characters that leaked to disk (from before the guards
+// above, or a crashed run). Runs on every startup so the roster stays clean.
+function purgeEphemeralCharacters(players: Record<string, SavedPlayer>): void {
+  for (const key of Object.keys(players)) {
+    if (!isEphemeralName(key)) continue;
+    delete players[key];
+    void unlink(playerFilePath(key)).catch((error: NodeJS.ErrnoException) => {
+      if (error.code !== "ENOENT") console.error(`Failed to purge e2e character ${key}:`, error);
+    });
+  }
 }
 
 function loadDb(): Database {
   const players: Record<string, SavedPlayer> = {};
   loadLegacyDb(players);
   loadPlayerFiles(players);
+  purgeEphemeralCharacters(players);
   return { players };
 }
 
