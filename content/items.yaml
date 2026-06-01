@@ -321,6 +321,13 @@
   stackable: true
   tags: [herb, raw]
 
+- id: mushroom
+  label: Marsh Mushroom
+  icon: M
+  iconUrl: /icons/item-herb.png
+  stackable: true
+  tags: [herb, mushroom, raw]
+
 - id: empty_flask
   label: Empty Flask
   icon: eF
@@ -366,6 +373,46 @@
   iconUrl: /icons/item-quartz.png
   stackable: true
   tags: [quest]
+
+- id: marsh_lily
+  label: Glowing Marsh Lily
+  icon: ML
+  iconUrl: /icons/item-herb.png
+  stackable: true
+  tags: [herb, quest, raw]
+  weight: 1
+
+- id: searing_core_shard
+  label: Searing Core Shard
+  icon: SC
+  iconUrl: /icons/item-quartz.png
+  stackable: true
+  tags: [quest, crystal]
+  weight: 1
+
+- id: vault_key_tooth
+  label: Vault Key Tooth
+  icon: VK
+  iconUrl: /icons/item-quartz.png
+  stackable: true
+  tags: [quest, key]
+  weight: 1
+
+- id: reach_keystone
+  label: Reach Keystone
+  icon: RK
+  iconUrl: /icons/item-quartz.png
+  stackable: false
+  tags: [quest, key]
+  weight: 1
+
+- id: tier2_route_map
+  label: Mountain Route Map
+  icon: M2
+  iconUrl: /icons/item-map.png
+  stackable: false
+  tags: [quest, map]
+  weight: 1
 
 - id: broken_reach_map
   label: Inked Survey of The Broken Reach

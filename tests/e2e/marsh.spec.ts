@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { isBlockedTile, isSightBlocked, makeFloorTiles, scaleX, scaleY } from "../../src/shared.ts";
+import { HERB_NODES, isBlockedTile, isSightBlocked, makeFloorTiles, scaleX, scaleY } from "../../src/shared.ts";
 
 test("marsh tile semantics: water variants block movement but not sight", () => {
   for (const tile of ["W", "3", "4"]) {
@@ -11,6 +11,22 @@ test("marsh tile semantics: water variants block movement but not sight", () => 
   expect((counts.W ?? 0) + (counts["3"] ?? 0)).toBeGreaterThan(counts["4"] ?? 0);
   expect(counts["3"] ?? 0).toBeGreaterThan(40);
   expect(counts["4"] ?? 0).toBeGreaterThan(20);
+  expect(counts.m ?? 0).toBeGreaterThan(500);
+  expect(counts.k ?? 0).toBeGreaterThan(250);
+});
+
+test("marsh foraging includes lotus and mushroom pockets on walkable approaches", () => {
+  const labels = new Set(HERB_NODES.filter((node) => node.floor === 5).map((node) => node.label));
+  expect(labels.has("Mire-Lotus")).toBe(true);
+  expect(labels.has("Glowcap Mushrooms")).toBe(true);
+  expect(labels.has("Marsh Mushrooms")).toBe(true);
+
+  const rows = makeFloorTiles(5);
+  for (const node of HERB_NODES.filter((entry) => entry.floor === 5)) {
+    const x = Math.floor(node.approachX);
+    const y = Math.floor(node.approachY);
+    expect(isBlockedTile(rows[y]?.[x] ?? "#"), `${node.id} approach should be walkable`).toBe(false);
+  }
 });
 
 test("travel loop: forest west portal -> marsh, and the cliff ledge -> Waystone", async ({ page }) => {
@@ -51,6 +67,32 @@ test("Mire-Lotus is gated behind Foraging 5, then gatherable", async ({ page }) 
       if (!me) return false;
       const hasHerb = (me.inventory ?? []).some((i) => i?.id === "herb");
       return hasHerb && (me.skills.find((s) => s.id === "foraging")?.xp ?? 0) > b;
+    },
+    before
+  );
+});
+
+test("marsh mushrooms are gated then gather into mushroom items", async ({ page }) => {
+  logErrors(page);
+  await page.goto("/?e2e");
+  await join(page);
+
+  await place(page, 5, 55.5, 53.5);
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "gatherHerb", id: "mushroom-5-55-52" }));
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => window.__TIB_E2E__?.self()?.action?.type ?? null)).not.toBe("herbing");
+
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "chat", text: "/dev skills 8" }));
+  await page.waitForFunction(() => (window.__TIB_E2E__?.self()?.skills.find((s) => s.id === "foraging")?.level ?? 0) >= 8);
+  const before = await page.evaluate(() => window.__TIB_E2E__?.self()?.skills.find((s) => s.id === "foraging")?.xp ?? 0);
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "gatherHerb", id: "mushroom-5-55-52" }));
+  await page.waitForFunction(() => window.__TIB_E2E__?.self()?.action?.type === "herbing");
+  await page.waitForFunction(
+    (b) => {
+      const me = window.__TIB_E2E__?.self();
+      if (!me) return false;
+      const hasMushroom = (me.inventory ?? []).some((i) => i?.id === "mushroom");
+      return hasMushroom && (me.skills.find((s) => s.id === "foraging")?.xp ?? 0) > b;
     },
     before
   );

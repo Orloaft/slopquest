@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: badlands_truce
+title: Raiders with Empty Bellies
+giver: kael-brookfoot
+objective:
+  kind: kill
+  monsters: [dust_burrower]
+  in: badlands
+  count: 3
+reward:
+  gold: 125
+  xp: 155
+dialogue:
+  intro:
+    - npc: "Corbin calls us raiders because it is cleaner than admitting refugees scare him."
+    - player: "Then prove you are running from something real."
+    - npc: "Cull {target.count} Dust Burrowers near Cinderjaw. Crack one open and you will see the crimson rot for yourself."
+  progress:
+    - npc: "{progress}/{target.count} burrowers down. Hear the ground still chewing? That is why we ran."
+  turnIn:
+    - npc: "You saw it, then. The mine is poisoning everything below us."
+    - player: "And the Scavengers?"
+    - npc: "Can be useful, if someone teaches both sides where to step quietly."
+  claimed:
+    - npc: "Quiet feet, quick hands, open eyes. That is how you live when the road hates you."

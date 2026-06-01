@@ -111,12 +111,15 @@ monsters:
   - { type: canyon_scavenger, at: { floor: 10, x: 19, y: 34 }, zone: deepMine }
   - { type: dust_burrower,    at: { floor: 10, x: 20, y: 31 }, zone: deepMine }
   - { type: dust_burrower,    at: { floor: 10, x: 46, y: 32 }, zone: deepMine }
+  - { type: crimson_burrower,  at: { floor: 10, x: 34, y: 38 }, zone: deepMine }
+  - { type: crimson_burrower,  at: { floor: 10, x: 64, y: 36 }, zone: deepMine }
   - { type: skeleton,         at: { floor: 10, x: 52, y: 24 }, zone: deepMine }
   - { type: skeleton,         at: { floor: 10, x: 58, y: 22 }, zone: deepMine }
   - { type: ghoul,            at: { floor: 10, x: 72, y: 38 }, zone: deepMine }
   - { type: skeleton,         at: { floor: 10, x: 78, y: 40 }, zone: deepMine }
   - { type: crypt_sentinel,   at: { floor: 10, x: 45, y: 53 }, zone: deepMine }
   - { type: crypt_sentinel,   at: { floor: 10, x: 51, y: 55 }, zone: deepMine }
+  - { type: verdant_faultwarden, at: { floor: 9, x: 85, y: 44 }, zone: jungle }
 
 trees:
   - { type: oak,  at: { floor: 0, x: 25.1, y: 57.0 } }

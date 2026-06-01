@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: jungle_vault_faultwarden
+title: The Verdant Faultwarden
+giver: vault-echo
+objective:
+  kind: kill
+  monsters: [verdant_faultwarden]
+  in: jungle
+  count: 1
+reward:
+  gold: 260
+  xp: 350
+dialogue:
+  intro:
+    - npc: "The vault recognizes a living class-bearer. Apothecary, Thief, Vanguard — any earned path will do."
+    - player: "What is waiting inside?"
+    - npc: "The Verdant Faultwarden. Break its corrupted seal and claim the route beyond the mountains."
+  progress:
+    - npc: "The Faultwarden still widens the tear."
+  turnIn:
+    - npc: "Seal pressure falling. Waystone lattice stabilizing. Route imprint released."
+    - player: "The Reach holds?"
+    - npc: "For now. Carry the Keystone and map north when you are ready."
+  claimed:
+    - npc: "The Waystones breathe easier around you."

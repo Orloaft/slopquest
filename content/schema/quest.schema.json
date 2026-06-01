@@ -54,7 +54,7 @@
         "kind": { "enum": ["kill", "gather", "fetch"] },
         "count": { "type": "integer", "minimum": 1 },
         "in": {
-          "enum": ["southTown", "cemetery", "crypt", "woods", "northTown"],
+          "enum": ["southTown", "cemetery", "crypt", "woods", "northTown", "marsh", "badlands", "desert", "beach", "jungle", "deepMine"],
           "description": "Zone the kill objective is scoped to (kill quests)."
         },
         "monsters": {

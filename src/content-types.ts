@@ -15,13 +15,14 @@ export type SkillId =
   | "agility"
   | "alchemy"
   | "ranged"
-  | "foraging";
+  | "foraging"
+  | "smithing";
 
 export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown" | "marsh" | "badlands" | "desert" | "beach" | "jungle" | "deepMine";
 
 export type Capability = "chop_tree" | "fish" | "mine" | "ranged";
 
-export type NpcRole = "vendor" | "quest" | "guide" | "alchemist" | "trainer";
+export type NpcRole = "vendor" | "quest" | "guide" | "alchemist" | "trainer" | "smith";
 
 export type QuestKind = "kill" | "gather" | "fetch";
 

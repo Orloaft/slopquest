@@ -38,6 +38,10 @@ export interface QuestState {
   claimed: boolean;
 }
 
+export type ReputationKey = "waystone" | "northwatch" | "marsh" | "scavenger";
+
+export type ReputationState = Record<ReputationKey, number>;
+
 export interface SkillStateEntry {
   xp: number;
 }
@@ -74,6 +78,7 @@ export interface ServerPlayer {
   inventoryRevision: number;
   quests: Record<string, QuestState>;
   questRevision: number;
+  reputation: ReputationState;
   skills: Record<string, SkillStateEntry>;
   skillRevision: number;
   online: boolean;
@@ -248,6 +253,7 @@ export interface SavedPlayer {
   foodRegenUntil?: number;
   inventory?: unknown;
   quests?: unknown;
+  reputation?: unknown;
   skills?: unknown;
   unlockedClasses?: string[];
   updatedAt?: string;

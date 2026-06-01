@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: deepdelve_vault_key
+title: Teeth of the Buried Seal
+giver: deepdelve-surveyor
+objective:
+  kind: fetch
+  item: vault_key_tooth
+  count: 3
+reward:
+  gold: 180
+  xp: 220
+dialogue:
+  intro:
+    - npc: "Those crimson burrowers have been chewing through the old lockwork."
+    - player: "You need the pieces back."
+    - npc: "Bring me {target.count} {target.item.label}. Mine if you must, fight if you must, but the vault will not answer without them."
+  progress:
+    - npc: "{progress}/{target.count} key teeth recovered. I can hear the lock stuttering."
+  missingItems:
+    - npc: "The key is still incomplete. The crimson burrowers in Deepdelve carry the missing teeth."
+  turnIn:
+    - npc: "There. The teeth bite together again. Take the rejoined key south through the jungle."
+    - player: "And after the vault?"
+    - npc: "After the vault, either the Reach holds or it splits wider."
+  claimed:
+    - npc: "The vault key is set. The jungle seal will know your hand."

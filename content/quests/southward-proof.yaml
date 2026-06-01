@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: southward_proof
+title: The Road Opens South
+giver: southward-scout
+objective:
+  kind: kill
+  monsters: [dune_skitterer]
+  in: desert
+  count: 3
+reward:
+  gold: 150
+  xp: 175
+dialogue:
+  intro:
+    - npc: "Corbin finally read Ellwyn's shard notes beside Mira's cure records. The sickness is climbing from the south."
+    - player: "So the grave road opens?"
+    - npc: "Only if you can survive it. Clear {target.count} Dune Skitterers past Mourner's Gate and mark a road for the wagons."
+  progress:
+    - npc: "{progress}/{target.count} skitterers cleared. The drowned road still moves underfoot."
+  turnIn:
+    - npc: "Good. Northwatch has a southern line now, thin as it is."
+    - player: "Where does it lead?"
+    - npc: "Past the beach, into old jungle machinery. The vault key is below the desert."
+  claimed:
+    - npc: "The southern road is yours. Do not mistake open for safe."

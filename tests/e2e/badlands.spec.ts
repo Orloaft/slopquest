@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { isBlockedTile, isSightBlocked, makeFloorTiles, scaleX, scaleY } from "../../src/shared.ts";
+import { MINING_NODES, isBlockedTile, isSightBlocked, makeFloorTiles, scaleX, scaleY } from "../../src/shared.ts";
 
 test("badlands tile semantics: cliffs block sight, pits don't", () => {
   // Cliff (X) blocks movement AND sight; pit (P) blocks movement only.
@@ -15,10 +15,22 @@ test("badlands tile semantics: cliffs block sight, pits don't", () => {
 
 test("badlands canyon uses floor variants without replacing the cliff vocabulary", () => {
   const counts = countTiles(makeFloorTiles(6));
-  expect(counts["6"] ?? 0).toBeGreaterThan(25);
-  expect(counts["7"] ?? 0).toBeGreaterThan(25);
+  expect(counts["6"] ?? 0).toBeGreaterThan(50);
+  expect(counts["7"] ?? 0).toBeGreaterThan(50);
   expect(counts.X ?? 0).toBeGreaterThan(40);
   expect(counts.w ?? 0).toBeGreaterThan(1000);
+});
+
+test("badlands canyon now exposes a broader surface ore ladder", () => {
+  const kinds = [...new Set(MINING_NODES.filter((node) => node.floor === 6).map((node) => node.kind))].sort();
+  expect(kinds).toEqual(["coal", "copper", "gold", "iron", "mithril", "silver", "tin"]);
+
+  const rows = makeFloorTiles(6);
+  for (const node of MINING_NODES.filter((entry) => entry.floor === 6)) {
+    const x = Math.floor(node.approachX);
+    const y = Math.floor(node.approachY);
+    expect(isBlockedTile(rows[y]?.[x] ?? "#"), `${node.id} approach should be walkable`).toBe(false);
+  }
 });
 
 test("travel loop: forest east portal -> badlands, and the ledge -> Northwatch", async ({ page }) => {

@@ -15,6 +15,7 @@
         "label": { "type": "string", "description": "Hover label shown on the node." },
         "requiredLevel": { "type": "number", "description": "Foraging level required to gather (default none)." },
         "xp": { "type": "number", "description": "Foraging XP granted (default base)." },
+        "item": { "type": "string", "description": "Inventory item yielded by the node. Defaults to herb." },
         "at": {
           "type": "object",
           "additionalProperties": false,

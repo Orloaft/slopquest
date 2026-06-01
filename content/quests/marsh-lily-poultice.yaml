@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: marsh_lily_poultice
+title: A Poultice for Northwatch
+giver: mira-marsh
+objective:
+  kind: gather
+  item: marsh_lily
+  count: 3
+reward:
+  gold: 120
+  xp: 150
+dialogue:
+  intro:
+    - npc: "Northwatch wants walls. Walls rot. People rot faster if we pretend this is ordinary marsh-sickness."
+    - player: "What do you need?"
+    - npc: "Bring me {target.count} {target.item.label}. The lilies grow where the blight drinks deepest."
+  progress:
+    - npc: "{progress}/{target.count} {target.item.label}. Enough for a tonic, not enough for a palisade."
+  missingItems:
+    - npc: "The Lilyfen has not marked your hands yet. Gather the glowing blooms and return."
+  turnIn:
+    - npc: "Good. Crush the stem, spare the glow, bind it with ash. Watch closely. This is how an Apothecary starts."
+    - player: "That cure is going to Northwatch?"
+    - npc: "And the method is going with you."
+  claimed:
+    - npc: "Keep the field kit close. A cure is just a weapon aimed at the right wound."

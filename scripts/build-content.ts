@@ -247,6 +247,7 @@ for (const m of miningNodes) {
 for (const h of herbNodes) {
   if (!h.id) fail("herb-nodes.yaml", "herb node missing id");
   if (!h.at || !h.approach) fail(`herb-nodes.yaml:${h.id ?? "?"}`, "missing at/approach");
+  if (h.item != null && !itemIds.has(h.item)) fail(`herb-nodes.yaml:${h.id ?? "?"}`, `item refs unknown item "${h.item}"`);
 }
 
 const abilityIds = new Set<string>();

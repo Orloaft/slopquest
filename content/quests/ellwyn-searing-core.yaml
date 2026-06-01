@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: ellwyn_searing_core
+title: Graves That Point North
+giver: ellwyn-waystone
+objective:
+  kind: fetch
+  item: searing_core_shard
+  count: 1
+reward:
+  gold: 80
+  xp: 100
+dialogue:
+  intro:
+    - npc: "The grave markers have shifted three degrees north since my last survey."
+    - player: "Graves move now?"
+    - npc: "Not graves. Anchors. Bring me a Searing Core shard from Southgate and I can prove the old maps were warning us."
+  progress:
+    - npc: "No {target.item.label} yet. Check the oldest dead first; they were buried closest to the seal."
+  missingItems:
+    - npc: "I need the shard in hand, not a rumor of red stone."
+  turnIn:
+    - npc: "This is not ore. It is a clot in the Waystone lattice."
+    - player: "Meaning?"
+    - npc: "Meaning the roads are not fading. They are being unsealed."
+  claimed:
+    - npc: "The Pilgrim's Ring will answer when the outer anchors do."

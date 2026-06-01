@@ -482,12 +482,18 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 37, 37, 34, 9, "R"); // mid lower run east
     fillRect(rows, 64, 17, 8, 29, "R"); // climb to the camp
     fillRect(rows, 64, 14, 36, 14, "R"); // Frontier Camp clearing
+    // North prospect shelf: a wider optional mining route above the upper run.
+    fillRect(rows, 24, 8, 24, 7, "R");
+    fillRect(rows, 31, 15, 6, 5, "R");
     // Dead-end copper canyon off the west mouth.
     fillRect(rows, 5, 49, 15, 6, "R");
     fillRect(rows, 10, 43, 5, 7, "R"); // connector
     // Iron pocket off the mid lower run.
     fillRect(rows, 49, 53, 13, 6, "R");
     fillRect(rows, 54, 44, 5, 10, "R"); // connector
+    // South prospect shelf: a broad ore pocket off the lower run.
+    fillRect(rows, 69, 49, 27, 9, "R");
+    fillRect(rows, 78, 44, 7, 6, "R");
     // High terrace (ranged vantage) over a pit gap, reached from the camp.
     fillRect(rows, 78, 31, 15, 7, "R"); // terrace floor
     fillRect(rows, 86, 26, 3, 6, "R"); // camp -> terrace connector
@@ -500,9 +506,10 @@ export function makeFloorTiles(floor: number): string[] {
     // break up the canyon without changing movement semantics.
     for (const [x, y, w, h, tile] of [
       [3, 31, 8, 2, "6"], [13, 18, 4, 12, "7"], [20, 17, 8, 3, "6"],
-      [31, 32, 12, 3, "7"], [48, 32, 8, 4, "6"], [54, 14, 5, 8, "7"],
-      [61, 13, 15, 4, "6"], [65, 18, 12, 3, "7"], [42, 45, 7, 3, "6"],
-      [6, 42, 8, 3, "7"]
+      [28, 9, 8, 3, "6"], [39, 10, 7, 3, "7"], [31, 32, 12, 3, "7"],
+      [48, 32, 8, 4, "6"], [54, 14, 5, 8, "7"], [61, 13, 15, 4, "6"],
+      [65, 18, 12, 3, "7"], [42, 45, 7, 3, "6"], [72, 50, 9, 3, "7"],
+      [84, 52, 8, 3, "6"], [6, 42, 8, 3, "7"]
     ] as Array<[number, number, number, number, string]>)
       fillRect(rows, x, y, w, h, tile);
     setTile(rows, 29, 22, "R"); // keep the scripted burrower ambush tile plain floor
@@ -628,6 +635,7 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 44, 25, 20, 5, "y");
     fillRect(rows, 44, 38, 24, 8, "y");
     fillRect(rows, 71, 38, 6, 15, "y");
+    fillRect(rows, 80, 38, 17, 14, "y"); // Jungle Vault arena, reached by the sealed K gate
     setTile(rows, 20, 42, "K"); // sealed Jungle Vault (does not transport)
   }
 
@@ -641,6 +649,9 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 54, 22, 16, 13, "m"); // east entry basin (forest portal arrives)
     fillRect(rows, 59, 17, 7, 5, "m");
     setTile(rows, 68, 28, "M"); // east-edge portal back to the forest
+    fillRect(rows, 68, 12, 9, 7, "m"); // northern reed loop
+    fillRect(rows, 72, 18, 5, 17, "m");
+    fillRect(rows, 76, 31, 12, 6, "m");
     fillRect(rows, 61, 34, 11, 7, "m"); // SE marsh shelf
     fillRect(rows, 66, 30, 5, 5, "m");
     fillRect(rows, 46, 24, 9, 5, "m"); // run west off the entry
@@ -654,9 +665,13 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 16, 19, 11, 5, "m");
     fillRect(rows, 5, 14, 15, 12, "k"); // Alchemist's Hut clearing (safe)
     fillRect(rows, 15, 17, 3, 7, "m");
+    fillRect(rows, 25, 9, 22, 7, "k"); // glowcap shelf above the hut route
+    fillRect(rows, 30, 15, 6, 3, "B");
     fillRect(rows, 20, 36, 3, 4, "B"); // bridge 3 into the lotus pocket
     fillRect(rows, 11, 40, 16, 8, "m"); // southern Mire-Lotus pocket
     fillRect(rows, 22, 43, 10, 5, "m");
+    fillRect(rows, 36, 48, 30, 10, "m"); // southern mushroom bog
+    fillRect(rows, 31, 45, 7, 5, "B");
     setTile(rows, 50, 23, "o");
     setTile(rows, 46, 26, "o");
     setTile(rows, 33, 17, "o");
@@ -665,6 +680,10 @@ export function makeFloorTiles(floor: number): string[] {
     setTile(rows, 13, 42, "o");
     setTile(rows, 24, 46, "o");
     setTile(rows, 64, 36, "o");
+    setTile(rows, 43, 52, "o");
+    setTile(rows, 59, 55, "o");
+    setTile(rows, 74, 14, "o");
+    setTile(rows, 83, 34, "o");
     setTile(rows, 7, 16, "L"); // one-way cliff ledge -> northern Waystone
     scatter(rows, "W", "3", 264, 55); // open-water interior variation
     applySwampWaterEdges(rows);

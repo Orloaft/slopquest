@@ -83,6 +83,7 @@ import type {
   PlayerAction,
   Positioned,
   QuestState,
+  ReputationState,
   SavedPlayer,
   HerbNodeRuntime,
   ServerMonster,
@@ -279,6 +280,46 @@ type WireStateSnapshot = CompactStateSnapshot;
 const QUEST_LIST = Object.values(QUESTS);
 const QUESTS_BY_GIVER = new Map<string, Quest>();
 const KILL_QUESTS_BY_ZONE_AND_TARGET = new Map<string, Quest[]>();
+const QUEST_CLASS_UNLOCKS = new Map<string, string>([
+  ["marsh_lily_poultice", "apothecary"],
+  ["badlands_truce", "thief"],
+  ["northwatch_vanguard", "vanguard"]
+]);
+const QUEST_CLASS_UNLOCK_REQUIREMENTS = new Map<string, string>(
+  [...QUEST_CLASS_UNLOCKS.entries()].map(([questId, classKey]) => [classKey, questId])
+);
+const QUEST_REPUTATION: Record<string, Partial<ReputationState>> = {
+  ellwyn_searing_core: { waystone: 1 },
+  marsh_lily_poultice: { marsh: 2, northwatch: 1 },
+  badlands_truce: { scavenger: 2 },
+  northwatch_vanguard: { northwatch: 2 },
+  southward_proof: { waystone: 1, northwatch: 1 },
+  deepdelve_vault_key: { waystone: 1 },
+  jungle_vault_faultwarden: { waystone: 3, northwatch: 2, marsh: 1, scavenger: 1 }
+};
+const QUEST_PREREQUISITES: Record<string, (player: ServerPlayer) => boolean> = {
+  southward_proof: hasOuterBranchEvidence,
+  deepdelve_vault_key: (player) => questClaimed(player, "southward_proof"),
+  jungle_vault_faultwarden: (player) => questClaimed(player, "deepdelve_vault_key")
+};
+const QUEST_PREREQUISITE_DIALOGUE: Record<string, string> = {
+  southward_proof: "Northwatch still needs proof from the marsh and one eastern front before Mourner's Gate opens.",
+  deepdelve_vault_key: "Mark the southern road from Mourner's Gate before you ask Deepdelve for vault-work.",
+  jungle_vault_faultwarden: "The Jungle Vault will not answer until the Deepdelve key is rejoined."
+};
+const SPECIAL_QUEST_REWARDS: Record<string, Array<{ id: string; qty: number }>> = {
+  jungle_vault_faultwarden: [
+    { id: "reach_keystone", qty: 1 },
+    { id: "tier2_route_map", qty: 1 }
+  ]
+};
+const BRANCH_RETURN_POINTS: Record<string, { floor: number; x: number; y: number; label: string }> = {
+  marsh_lily_poultice: { floor: 4, x: 55.5, y: 60.5, label: "Northwatch" },
+  badlands_truce: { floor: 4, x: 55.5, y: 60.5, label: "Northwatch" },
+  northwatch_vanguard: { floor: 4, x: 55.5, y: 60.5, label: "Northwatch" },
+  southward_proof: { floor: 4, x: 55.5, y: 60.5, label: "Northwatch" },
+  jungle_vault_faultwarden: { floor: 0, x: 55.5, y: 8.5, label: "Waystone" }
+};
 for (const quest of QUEST_LIST) {
   if (!QUESTS_BY_GIVER.has(quest.giverId)) QUESTS_BY_GIVER.set(quest.giverId, quest);
   if (quest.kind !== "kill" || !quest.zone) continue;
@@ -395,6 +436,18 @@ const CORPSE_DECAY_MS = positiveIntEnv("TIB_CORPSE_DECAY_MS", 180000);
 const DROP_DECAY_MS = positiveIntEnv("TIB_DROP_DECAY_MS", 300000);
 const INVENTORY_SIZE = 30;
 const BREW_XP = 30;
+const SMITHING_RECIPES = {
+  weapon: [
+    { tier: 1, bar: "copper_bar", qty: 1, level: 1, xp: 35, label: "Copper Edge" },
+    { tier: 2, bar: "iron_bar", qty: 2, level: 10, xp: 80, label: "Iron Edge" },
+    { tier: 3, bar: "mithril_bar", qty: 2, level: 40, xp: 150, label: "Mithril Edge" }
+  ],
+  armor: [
+    { tier: 1, bar: "tin_bar", qty: 1, level: 1, xp: 35, label: "Tin-Riveted Mail" },
+    { tier: 2, bar: "silver_bar", qty: 2, level: 20, xp: 95, label: "Silvered Mail" },
+    { tier: 3, bar: "adamant_bar", qty: 2, level: 50, xp: 175, label: "Adamant Mail" }
+  ]
+} as const;
 // Encumbrance: at/below the soft cap you move at full speed; past it, speed
 // falls off linearly to MIN_ENCUMBRANCE_MULT at the hard cap.
 const WEIGHT_SOFT_CAP = 40;
@@ -597,6 +650,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
     if (message.type === "mineNode") mineNode(session.player, String(message.id ?? ""));
     if (message.type === "gatherHerb") gatherHerb(session.player, String(message.id ?? ""));
     if (message.type === "brewPotion") brewPotion(session.player);
+    if (message.type === "smithGear") smithGear(session.player, message.slot);
     if (message.type === "setClass") setClass(session.player, String(message.classKey ?? ""));
     if (message.type === "makeFire") makeFire(session.player, String(message.logItem ?? "logs"));
     if (message.type === "cookFish") cookFish(session.player, String(message.id ?? ""));
@@ -749,6 +803,7 @@ function createPlayer(name: string): ServerPlayer {
     inventoryRevision: 0,
     quests: createQuestState(),
     questRevision: 0,
+    reputation: createReputationState(),
     skills: createSkillState(),
     skillRevision: 0,
     online: false,
@@ -780,6 +835,7 @@ function hydratePlayer(saved: SavedPlayer): ServerPlayer {
   player.hp = clamp(player.hp, 1, player.maxHp);
   player.mana = clamp(player.mana, 0, player.maxMana);
   player.quests = normalizeQuestState(player.quests);
+  player.reputation = normalizeReputationState(player.reputation);
   player.inventory = normalizeInventory(player.inventory);
   refreshCarriedWeight(player);
   player.inventoryRevision = 0;
@@ -838,6 +894,10 @@ function updatePlayers(dt: number, now: number): void {
 
     const portal = now >= player.portalReadyAt ? portalFor(player.floor, player.x, player.y) : null;
     if (portal) {
+      if (!canUsePortal(player, portal)) {
+        player.portalReadyAt = now + 1200;
+        continue;
+      }
       player.floor = portal.floor;
       player.x = portal.x;
       player.y = portal.y;
@@ -845,9 +905,16 @@ function updatePlayers(dt: number, now: number): void {
       player.targetId = null;
       systemToPlayer(player, `${player.name} changes depth.`);
     } else if (now >= player.portalReadyAt && tileAt(player.floor, Math.floor(player.x), Math.floor(player.y)) === "K") {
-      // The sealed Jungle Vault — a Tier-1 dungeon hook (no instance yet).
-      player.portalReadyAt = now + 4000;
-      event("float", "The Jungle Vault is sealed... for now.", player.x, player.y - 0.6, player.floor, "#c8e6a0");
+      if (canEnterJungleVault(player)) {
+        player.x = 84.5;
+        player.y = 44.5;
+        player.portalReadyAt = now + 650;
+        player.targetId = null;
+        systemToPlayer(player, `${player.name} enters the Jungle Vault.`);
+      } else {
+        player.portalReadyAt = now + 4000;
+        event("float", "The Jungle Vault needs Deepdelve's key.", player.x, player.y - 0.6, player.floor, "#c8e6a0");
+      }
     }
     if (player.floor !== oldFloor || player.x !== oldX || player.y !== oldY) {
       updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
@@ -1552,6 +1619,38 @@ function brewPotion(player: ServerPlayer): void {
   event("float", `+${BREW_XP} Alchemy`, player.x, player.y - 0.55, player.floor, "#c8a8ff");
 }
 
+function smithGear(player: ServerPlayer, slot: unknown): void {
+  if (player.dead) return;
+  if (!nearbyNpcOfRole(player, "smith")) return;
+  if (slot !== "weapon" && slot !== "armor") return;
+  const currentTier = slot === "weapon" ? player.weaponTier : player.armorTier;
+  const recipe = SMITHING_RECIPES[slot].find((entry) => entry.tier === currentTier + 1);
+  if (!recipe) {
+    event("float", "Already fully forged.", player.x, player.y, player.floor, "#f7d486");
+    systemToPlayer(player, "That gear is already fully forged.");
+    return;
+  }
+  const level = skillLevel(player, "smithing");
+  if (level < recipe.level) {
+    event("float", `Requires Smithing ${recipe.level}.`, player.x, player.y, player.floor, "#f7d486");
+    systemToPlayer(player, `${recipe.label} requires Smithing ${recipe.level}.`);
+    return;
+  }
+  if (inventoryCount(player, recipe.bar) < recipe.qty) {
+    const label = ITEMS[recipe.bar]?.label ?? recipe.bar;
+    event("float", `Need ${recipe.qty} ${label}.`, player.x, player.y, player.floor, "#f7d486");
+    systemToPlayer(player, `Bring ${recipe.qty} ${label} for ${recipe.label}.`);
+    return;
+  }
+  if (!removeInventoryItem(player, recipe.bar, recipe.qty)) return;
+  if (slot === "weapon") player.weaponTier = recipe.tier;
+  else player.armorTier = recipe.tier;
+  addSkillXp(player, "smithing", recipe.xp);
+  systemToPlayer(player, `Forged ${recipe.label}.`);
+  event("effect", "smith", player.x, player.y - 0.3, player.floor, "#d8a86a", player.id);
+  event("float", `Forged ${recipe.label} · +${recipe.xp} Smithing`, player.x, player.y - 0.55, player.floor, "#f7d486");
+}
+
 // --- Tier-1 classes --------------------------------------------------------
 
 // Class switching is a safe-zone activity (Waystone floor 0 / Northwatch floor 4).
@@ -1587,6 +1686,14 @@ function setClass(player: ServerPlayer, classKey: string): void {
 function trainWithNpc(player: ServerPlayer, npc: NpcRuntime): void {
   const unlock = CLASS_UNLOCKS.find((entry) => entry.npcId === npc.id);
   if (!unlock) return;
+  const requiredQuestId = QUEST_CLASS_UNLOCK_REQUIREMENTS.get(unlock.key);
+  if (requiredQuestId && !questClaimed(player, requiredQuestId)) {
+    const questTitle = QUESTS[requiredQuestId]?.title ?? requiredQuestId;
+    eventDialogue(player, [
+      { speaker: npc.name, text: `${unlock.label} training now follows field proof. Complete "${questTitle}" first, then equip the stance from town.` }
+    ]);
+    return;
+  }
   if (player.unlockedClasses.includes(unlock.key)) {
     eventDialogue(player, [
       { speaker: npc.name, text: `You already walk the ${unlock.label}'s path. Equip it from your Classes panel in town.` }
@@ -1752,6 +1859,7 @@ function talkNpc(player: ServerPlayer, id: string): void {
   if (!dialogue) return;
   if (npc.role === "vendor") eventDialogue(player, dialogue, { opensShop: true });
   else if (npc.role === "alchemist") eventDialogue(player, dialogue, { opensAlchemist: true });
+  else if (npc.role === "smith") eventDialogue(player, dialogue, { opensSmith: true });
   else eventDialogue(player, dialogue, {});
 }
 
@@ -1769,6 +1877,11 @@ function handleQuestDialogue(player: ServerPlayer, npc: NpcRuntime, quest: Quest
   }
 
   if (!state.accepted) {
+    const prereq = QUEST_PREREQUISITES[quest.id];
+    if (prereq && !prereq(player)) {
+      eventDialogue(player, [{ speaker: npc.name, text: QUEST_PREREQUISITE_DIALOGUE[quest.id] ?? "The Reach is not ready for that step yet." }]);
+      return;
+    }
     state.accepted = true;
     markQuestChanged(player);
     eventDialogue(player, questDialogue(npc, player, quest, "intro"));
@@ -1789,13 +1902,79 @@ function handleQuestDialogue(player: ServerPlayer, npc: NpcRuntime, quest: Quest
     player.gold += quest.rewardGold;
     player.xp += quest.rewardXp;
     awardLevels(player);
+    unlockClassFromQuest(player, quest.id);
+    applyQuestReputation(player, quest.id);
+    awardSpecialQuestRewards(player, quest.id);
     systemToPlayer(player, `${player.name} completed ${quest.title} and earned ${quest.rewardGold} gold.`);
     event("float", `+${quest.rewardGold}g`, player.x, player.y, player.floor, "#ffd166");
     eventDialogue(player, questDialogue(npc, player, quest, "turnIn"));
+    returnAfterBranchQuest(player, quest.id);
     return;
   }
 
   eventDialogue(player, questDialogue(npc, player, quest, "progress", progress));
+}
+
+function unlockClassFromQuest(player: ServerPlayer, questId: string): void {
+  const classKey = QUEST_CLASS_UNLOCKS.get(questId);
+  if (!classKey || !CLASSES[classKey] || player.unlockedClasses.includes(classKey)) return;
+  player.unlockedClasses.push(classKey);
+  markClassesChanged(player);
+  systemToPlayer(player, `${player.name} unlocked the ${CLASSES[classKey]!.label} class.`);
+}
+
+function questClaimed(player: ServerPlayer, questId: string): boolean {
+  return player.quests[questId]?.claimed === true;
+}
+
+function hasOuterBranchEvidence(player: ServerPlayer): boolean {
+  return questClaimed(player, "marsh_lily_poultice") && (questClaimed(player, "badlands_truce") || questClaimed(player, "northwatch_vanguard"));
+}
+
+function canUsePortal(player: ServerPlayer, portal: { floor: number }): boolean {
+  if (player.floor === 1 && portal.floor === 7 && !hasOuterBranchEvidence(player)) {
+    event("float", "Bring Northwatch proof from west and east first.", player.x, player.y - 0.6, player.floor, "#f7d486");
+    return false;
+  }
+  return true;
+}
+
+function canEnterJungleVault(player: ServerPlayer): boolean {
+  if (!questClaimed(player, "deepdelve_vault_key")) return false;
+  return ["apothecary", "thief", "vanguard"].some((classKey) => player.unlockedClasses.includes(classKey));
+}
+
+function applyQuestReputation(player: ServerPlayer, questId: string): void {
+  const delta = QUEST_REPUTATION[questId];
+  if (!delta) return;
+  player.reputation = normalizeReputationState(player.reputation);
+  for (const [key, amount] of Object.entries(delta) as Array<[keyof ReputationState, number | undefined]>) {
+    player.reputation[key] = Math.max(0, (player.reputation[key] ?? 0) + (amount ?? 0));
+  }
+}
+
+function awardSpecialQuestRewards(player: ServerPlayer, questId: string): void {
+  for (const item of SPECIAL_QUEST_REWARDS[questId] ?? []) {
+    if (hasInventoryItem(player, item.id)) continue;
+    if (addInventoryItem(player, item.id, item.qty)) {
+      systemToPlayer(player, `${player.name} received ${ITEMS[item.id]?.label ?? item.id}.`);
+    }
+  }
+}
+
+function returnAfterBranchQuest(player: ServerPlayer, questId: string): void {
+  const dest = BRANCH_RETURN_POINTS[questId];
+  if (!dest) return;
+  const oldFloor = player.floor;
+  const oldX = player.x;
+  const oldY = player.y;
+  player.floor = dest.floor;
+  player.x = dest.x;
+  player.y = dest.y;
+  player.portalReadyAt = performance.now() + 650;
+  player.targetId = null;
+  updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
+  systemToPlayer(player, `${player.name} returns to ${dest.label}.`);
 }
 
 function consumeQuestTurnIn(player: ServerPlayer, quest: Quest): boolean {
@@ -2281,6 +2460,8 @@ function herbApproachPoint(node: { floor: number; x: number; y: number; approach
 }
 
 function npcDialogueLines(player: ServerPlayer, npc: NpcRuntime): DialogueLineView[] {
+  const reactive = reactiveNpcDialogue(player, npc);
+  if (reactive) return reactive;
   if (npc.role === "vendor") {
     return [
       { speaker: npc.name, text: "Fresh supplies, sharp edges, and the little things that keep you alive." },
@@ -2299,6 +2480,27 @@ function npcDialogueLines(player: ServerPlayer, npc: NpcRuntime): DialogueLineVi
     { speaker: npc.name, text: npc.dialogue },
     { speaker: player.name, text: "I will remember that." }
   ];
+}
+
+function reactiveNpcDialogue(player: ServerPlayer, npc: NpcRuntime): DialogueLineView[] | null {
+  if (npc.id === "northwatch") {
+    if (questClaimed(player, "jungle_vault_faultwarden")) {
+      return [{ speaker: npc.name, text: "The Waystone hum has steadied. Northwatch has an actual road south again." }];
+    }
+    if (hasOuterBranchEvidence(player)) {
+      return [{ speaker: npc.name, text: "Corbin has the proof he wanted. Mourner's Gate is the next pressure point." }];
+    }
+    if (questClaimed(player, "marsh_lily_poultice")) {
+      return [{ speaker: npc.name, text: "Mira's poultice is already slowing the timber rot. Now we need the badlands truth." }];
+    }
+  }
+  if (npc.id === "ellwyn-waystone" && questClaimed(player, "jungle_vault_faultwarden")) {
+    return [{ speaker: npc.name, text: "The Keystone is warm instead of fevered. That is the first kind thing the lattice has said in years." }];
+  }
+  if (npc.id === "frontier-trader" && hasOuterBranchEvidence(player)) {
+    return [{ speaker: npc.name, text: "Northwatch finally opened the southern contracts. Buy what you need before you chase them." }];
+  }
+  return null;
 }
 
 function eventDialogue(player: ServerPlayer, lines: DialogueLineView[], extra: Partial<GameEvent> = {}): void {
@@ -4164,6 +4366,7 @@ function persistPlayerToDb(player: ServerPlayer): string {
     foodRegenUntil: player.foodRegenUntil ?? 0,
     inventory: serializeInventory(player.inventory),
     quests: normalizeQuestState(player.quests),
+    reputation: normalizeReputationState(player.reputation),
     skills: normalizeSkillState(player.skills),
     unlockedClasses: [...player.unlockedClasses],
     updatedAt: new Date().toISOString()
@@ -4331,6 +4534,10 @@ function createQuestState(): Record<string, QuestState> {
   );
 }
 
+function createReputationState(): ReputationState {
+  return { waystone: 0, northwatch: 0, marsh: 0, scavenger: 0 };
+}
+
 function normalizeQuestState(saved: unknown): Record<string, QuestState> {
   const quests = createQuestState();
   const src = (saved ?? {}) as Record<string, Partial<QuestState> | undefined>;
@@ -4344,6 +4551,15 @@ function normalizeQuestState(saved: unknown): Record<string, QuestState> {
     };
   }
   return quests;
+}
+
+function normalizeReputationState(saved: unknown): ReputationState {
+  const reputation = createReputationState();
+  const src = (saved ?? {}) as Partial<Record<keyof ReputationState, unknown>>;
+  for (const key of Object.keys(reputation) as Array<keyof ReputationState>) {
+    reputation[key] = Math.max(0, Math.floor(Number(src[key] ?? reputation[key])));
+  }
+  return reputation;
 }
 
 function updateQuestProgress(player: ServerPlayer, monster: ServerMonster): void {

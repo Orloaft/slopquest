@@ -36,7 +36,7 @@
   at: { floor: 3, x: 61.5, y: 7.5 }
   approach: { x: 61.5, y: 8.5 }
 
-# Ore veins embedded in the Searing Badlands canyon walls (floor 6, 90x60):
+# Ore veins embedded in the Searing Badlands canyon walls (floor 6, 110x72):
 # the vein sits on the cliff face, mined from the floor below it.
 - id: mine-6-5-40
   kind: copper
@@ -52,6 +52,31 @@
   kind: iron
   at: { floor: 6, x: 50.5, y: 52.5 }
   approach: { x: 50.5, y: 53.5 }
+
+- id: mine-6-31-8
+  kind: tin
+  at: { floor: 6, x: 31.5, y: 8.5 }
+  approach: { x: 31.5, y: 9.5 }
+
+- id: mine-6-43-8
+  kind: silver
+  at: { floor: 6, x: 43.5, y: 8.5 }
+  approach: { x: 43.5, y: 9.5 }
+
+- id: mine-6-71-49
+  kind: coal
+  at: { floor: 6, x: 71.5, y: 49.5 }
+  approach: { x: 71.5, y: 50.5 }
+
+- id: mine-6-88-49
+  kind: gold
+  at: { floor: 6, x: 88.5, y: 49.5 }
+  approach: { x: 88.5, y: 50.5 }
+
+- id: mine-6-96-22
+  kind: mithril
+  at: { floor: 6, x: 96.5, y: 22.5 }
+  approach: { x: 95.5, y: 22.5 }
 
 # The Deepdelve Mine (floor 10, 90x60): veins descend in tier as you go deeper.
 # Entry chamber (safe) holds copper/tin; iron/coal/silver/gold sit in the worked

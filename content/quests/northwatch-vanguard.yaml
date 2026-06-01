@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: northwatch_vanguard
+title: Hold the Splinter Road
+giver: fence-corbin
+objective:
+  kind: kill
+  monsters: [canyon_scavenger]
+  in: badlands
+  count: 4
+reward:
+  gold: 140
+  xp: 165
+dialogue:
+  intro:
+    - npc: "The Splinter Road feeds Northwatch. Every cart lost there is another plank we do not have."
+    - player: "You want the Scavengers cleared."
+    - npc: "I want the road held. Drive off {target.count} canyon raiders and show me you can stand where others break."
+  progress:
+    - npc: "{progress}/{target.count} raiders broken. The road is not held until the next wagon makes it through."
+  turnIn:
+    - npc: "You held. Not charged, not postured, held. That is Vanguard work."
+    - player: "Then teach me the stance."
+    - npc: "Shield high, feet set, fear behind you."
+  claimed:
+    - npc: "Northwatch remembers who stood the line."

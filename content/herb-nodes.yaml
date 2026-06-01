@@ -60,6 +60,53 @@
   requiredLevel: 5
   xp: 26
 
+- id: lotus-5-78-34
+  at: { floor: 5, x: 80.5, y: 34.5 }
+  approach: { x: 80.5, y: 35.5 }
+  label: Mire-Lotus
+  requiredLevel: 5
+  xp: 26
+
+- id: lily-5-49-27
+  at: { floor: 5, x: 49.5, y: 27.5 }
+  approach: { x: 49.5, y: 28.5 }
+  label: Glowing Marsh Lily
+  item: marsh_lily
+  requiredLevel: 5
+  xp: 30
+
+- id: lily-5-62-37
+  at: { floor: 5, x: 62.5, y: 37.5 }
+  approach: { x: 62.5, y: 38.5 }
+  label: Glowing Marsh Lily
+  item: marsh_lily
+  requiredLevel: 5
+  xp: 30
+
+- id: lily-5-28-34
+  at: { floor: 5, x: 28.5, y: 34.5 }
+  approach: { x: 26.5, y: 34.5 }
+  label: Glowing Marsh Lily
+  item: marsh_lily
+  requiredLevel: 5
+  xp: 30
+
+- id: mushroom-5-31-11
+  at: { floor: 5, x: 31.5, y: 11.5 }
+  approach: { x: 31.5, y: 12.5 }
+  label: Glowcap Mushrooms
+  item: mushroom
+  requiredLevel: 3
+  xp: 22
+
+- id: mushroom-5-55-52
+  at: { floor: 5, x: 55.5, y: 52.5 }
+  approach: { x: 55.5, y: 53.5 }
+  label: Marsh Mushrooms
+  item: mushroom
+  requiredLevel: 8
+  xp: 32
+
 # Glass-Sand Quartz — Sunken Desert (floor 7). Yields quartz; trains Foraging.
 - id: quartz-7-10-12
   at: { floor: 7, x: 34.8, y: 23.4 }

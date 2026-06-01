@@ -225,6 +225,7 @@ export interface GameEvent {
   lines?: DialogueLineView[];
   opensShop?: boolean;
   opensAlchemist?: boolean;
+  opensSmith?: boolean;
 }
 
 export interface StateMetrics {
@@ -354,6 +355,7 @@ export type ClientMessage =
   | { type: "mineNode"; id: string }
   | { type: "gatherHerb"; id: string }
   | { type: "brewPotion" }
+  | { type: "smithGear"; slot: "weapon" | "armor" }
   | { type: "setClass"; classKey: string }
   | { type: "makeFire"; logItem?: string }
   | { type: "cookFish"; id: string }

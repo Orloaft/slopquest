@@ -1,11 +1,12 @@
 # yaml-language-server: $schema=./schema/npcs.schema.json
 # All non-player characters. Vendors, quest givers, guides — all in one place.
 #
-# role: vendor | quest | guide | alchemist
+# role: vendor | quest | guide | alchemist | trainer | smith
 #   vendor    — opens the shop UI when interacted with.
 #   quest     — drives a quest dialogue. The id must match a quest's `giver` field.
 #   guide     — speaks idleDialogue. Currently used for flavor NPCs.
 #   alchemist — opens the alchemist craft menu (buy flasks/kit, brew potions).
+#   smith     — opens the forge menu for bar-to-gear upgrades.
 #
 # at: { floor, x, y }  — tile-coordinate placement.
 # idleDialogue          — what they say when they have nothing quest-specific to share.
@@ -21,6 +22,12 @@
   role: guide
   at: { floor: 4, x: 55.5, y: 43.5 }
   idleDialogue: "Northwatch is quiet for now."
+
+- id: northwatch-smith
+  name: Master Harlowe
+  role: smith
+  at: { floor: 4, x: 71.5, y: 48.5 }
+  idleDialogue: "Bars on the anvil, steady heat, clean hammer. I can turn ore-work into real kit."
 
 - id: cemetery-warden
   name: Mira Gravewatch
@@ -132,3 +139,45 @@
   role: quest
   at: { floor: 7, x: 54.4, y: 63 }
   idleDialogue: "The Arcane Cartographers chart the ley-bleed. The desert hums with loose power."
+
+- id: mira-marsh
+  name: Mira Gravewatch
+  role: quest
+  at: { floor: 5, x: 6.7, y: 24.0 }
+  idleDialogue: "The lilies glow brightest where the blight is closest. Step carefully."
+
+- id: kael-brookfoot
+  name: Kael Brookfoot
+  role: quest
+  at: { floor: 6, x: 82.5, y: 22.5 }
+  idleDialogue: "The Scavengers are hungry, not stupid. Something worse drove us out of the mine."
+
+- id: fence-corbin
+  name: Fence Corbin
+  role: quest
+  at: { floor: 4, x: 58.5, y: 47.5 }
+  idleDialogue: "Bring me proof, not campfire horror stories. Northwatch runs on evidence and timber."
+
+- id: ellwyn-waystone
+  name: Sage Ellwyn
+  role: quest
+  at: { floor: 0, x: 63.5, y: 37.5 }
+  idleDialogue: "The old maps describe anchors, not roads. That distinction may save us."
+
+- id: southward-scout
+  name: Scout Ilyen
+  role: quest
+  at: { floor: 7, x: 30.5, y: 7.5 }
+  idleDialogue: "Mourner's Gate only opens cleanly after Northwatch has proof from both fronts."
+
+- id: deepdelve-surveyor
+  name: Surveyor Pell
+  role: quest
+  at: { floor: 10, x: 9.5, y: 13.5 }
+  idleDialogue: "Deepdelve's crimson seams are old sealwork, not ordinary ore."
+
+- id: vault-echo
+  name: Vault Echo
+  role: quest
+  at: { floor: 9, x: 82.5, y: 42.5 }
+  idleDialogue: "The Jungle Vault waits for the rejoined key and a proven class path."

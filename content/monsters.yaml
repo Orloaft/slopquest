@@ -261,6 +261,9 @@
   gold: [9, 20]
   aggro: 6
   range: 1.05
+  drops:
+    - item: searing_core_shard
+      chance: 0.20
 
 - id: ghoul
   name: Ghoul
@@ -383,6 +386,24 @@
   burrow: true
   stunMs: 1200
 
+- id: crimson_burrower
+  name: Crimson Burrower
+  description: "a shard-fed burrower with Searing Core crystal fused through its shell"
+  maxHp: 125
+  speed: 2.25
+  damage: [18, 30]
+  attackMs: 1050
+  xp: 95
+  gold: [20, 42]
+  aggro: 6
+  range: 1.05
+  armor: 3
+  burrow: true
+  stunMs: 1400
+  drops:
+    - item: vault_key_tooth
+      chance: 0.35
+
 # --- The Sunken Desert (floor 7) ---
 - id: dune_skitterer
   name: Dune Skitterer
@@ -456,3 +477,16 @@
   drops:
     - item: black_ledger
       chance: 0.5
+
+- id: verdant_faultwarden
+  name: Verdant Faultwarden
+  description: "an overgrown Waystone guardian widening the tectonic tears it was made to seal"
+  maxHp: 520
+  speed: 1.75
+  damage: [22, 36]
+  attackMs: 1150
+  xp: 260
+  gold: [110, 180]
+  aggro: 9
+  range: 1.2
+  armor: 6

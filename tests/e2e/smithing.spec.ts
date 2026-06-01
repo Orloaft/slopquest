@@ -63,6 +63,54 @@ test("smelting a copper ore on a fire yields a copper bar and Smithing XP", asyn
   );
 });
 
+test("a smith turns bars into weapon and armour tiers for Smithing XP", async ({ page }) => {
+  logErrors(page);
+  await page.goto("/?e2e");
+  await join(page);
+
+  await page.evaluate(() =>
+    window.__TIB_E2E__?.send({
+      type: "e2eGrantItems",
+      floor: 4,
+      x: 71.5,
+      y: 48.5,
+      items: [
+        { id: "copper_bar", qty: 1 },
+        { id: "tin_bar", qty: 1 }
+      ]
+    })
+  );
+  await page.waitForFunction(() => {
+    const me = window.__TIB_E2E__?.self();
+    const inv = me?.inventory ?? [];
+    return Boolean(me && me.floor === 4 && inv.some((i) => i?.id === "copper_bar") && inv.some((i) => i?.id === "tin_bar"));
+  });
+
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "talkNpc", id: "northwatch-smith" }));
+  await expect(page.locator("#dialogue")).toBeVisible();
+  for (let i = 0; i < 6 && (await page.locator("#dialogue").isVisible()); i += 1) {
+    await page.locator("#dialogueNextButton").click();
+  }
+  await expect(page.locator("#smith")).toBeVisible();
+
+  const before = await page.evaluate(() => window.__TIB_E2E__?.self()?.skills.find((s) => s.id === "smithing")?.xp ?? 0);
+  await page.locator("#forgeWeaponButton").click();
+  await page.waitForFunction(
+    (xp) => {
+      const me = window.__TIB_E2E__?.self();
+      return Boolean(me && me.weaponTier === 1 && (me.skills.find((s) => s.id === "smithing")?.xp ?? 0) > xp);
+    },
+    before
+  );
+
+  await page.locator("#forgeArmorButton").click();
+  await page.waitForFunction(() => window.__TIB_E2E__?.self()?.armorTier === 1);
+  await page.waitForFunction(() => {
+    const inv = window.__TIB_E2E__?.self()?.inventory ?? [];
+    return !inv.some((i) => i?.id === "copper_bar") && !inv.some((i) => i?.id === "tin_bar");
+  });
+});
+
 // --- helpers ---------------------------------------------------------------
 
 function logErrors(page: Page): void {

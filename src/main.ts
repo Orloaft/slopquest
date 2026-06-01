@@ -150,6 +150,7 @@ interface ActiveDialogue {
   index: number;
   opensShop: boolean;
   opensAlchemist: boolean;
+  opensSmith: boolean;
 }
 
 interface DialogueLine {
@@ -412,6 +413,12 @@ const dom = {
   alchemist: el<HTMLElement>("#alchemist"),
   alchemistCloseButton: el<HTMLButtonElement>("#alchemistCloseButton"),
   brewButton: el<HTMLButtonElement>("#brewButton"),
+  smith: el<HTMLElement>("#smith"),
+  smithCloseButton: el<HTMLButtonElement>("#smithCloseButton"),
+  forgeWeaponButton: el<HTMLButtonElement>("#forgeWeaponButton"),
+  forgeArmorButton: el<HTMLButtonElement>("#forgeArmorButton"),
+  forgeWeaponHint: el<HTMLElement>("#forgeWeaponHint"),
+  forgeArmorHint: el<HTMLElement>("#forgeArmorHint"),
   dialogue: el<HTMLElement>("#dialogue"),
   dialogueDim: el<HTMLElement>("#dialogueDim"),
   npcMenu: el<HTMLElement>("#npcMenu"),
@@ -471,6 +478,7 @@ dom.abilitiesCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.classesCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.vendorCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.alchemistCloseButton.addEventListener("click", () => hideCenterPanels());
+dom.smithCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.mapCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.mapBackButton.addEventListener("click", () => {
   mapView = "region";
@@ -507,6 +515,8 @@ document.addEventListener("keydown", (event) => {
   });
 });
 dom.brewButton.addEventListener("click", () => send({ type: "brewPotion" }));
+dom.forgeWeaponButton.addEventListener("click", () => send({ type: "smithGear", slot: "weapon" }));
+dom.forgeArmorButton.addEventListener("click", () => send({ type: "smithGear", slot: "armor" }));
 dom.chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = dom.chatInput.value.trim();
@@ -707,7 +717,7 @@ let pendingLootTarget: string | null = null;
 let pendingNpcTalk: string | null = null;
 // Which action the player picked from the right-click NPC menu; consumed on
 // arrival (talk = full conversation, trade/alchemy = open the service directly).
-type NpcIntent = "talk" | "trade" | "alchemy";
+type NpcIntent = "talk" | "trade" | "alchemy" | "smith";
 let pendingNpcIntent: NpcIntent = "talk";
 let pendingFishingNode: string | null = null;
 let pendingMiningNode: string | null = null;
@@ -725,6 +735,20 @@ let holdMoveLastRepathAt = 0;
 const HOLD_MOVE_REPATH_MS = 80;
 const MINIMAP_DRAW_MS = 100;
 const MAP_CHUNK_TILES = 16;
+
+const SMITHING_RECIPES = {
+  weapon: [
+    { tier: 1, bar: "copper_bar", qty: 1, level: 1, label: "Copper Edge" },
+    { tier: 2, bar: "iron_bar", qty: 2, level: 10, label: "Iron Edge" },
+    { tier: 3, bar: "mithril_bar", qty: 2, level: 40, label: "Mithril Edge" }
+  ],
+  armor: [
+    { tier: 1, bar: "tin_bar", qty: 1, level: 1, label: "Tin-Riveted Mail" },
+    { tier: 2, bar: "silver_bar", qty: 2, level: 20, label: "Silvered Mail" },
+    { tier: 3, bar: "adamant_bar", qty: 2, level: 50, label: "Adamant Mail" }
+  ]
+} as const;
+type SmithingSlot = keyof typeof SMITHING_RECIPES;
 const MAP_CHUNK_PADDING = 1;
 let mapLayer: Phaser.GameObjects.Container;
 let entityLayer: Phaser.GameObjects.Container;
@@ -1861,6 +1885,7 @@ const HERB_SPRITES: Record<string, { key: string; w: number; h: number }> = {
 
 function herbPlantSprite(node: HerbNodeView): { key: string; w: number; h: number } | null {
   const label = node.label.toLowerCase();
+  if (label.includes("mushroom")) return null;
   if (label.includes("tidal")) return HERB_SPRITES.herbTidal ?? null;
   if (label.includes("quartz")) return null; // a mineral, not a plant
   let hash = 0;
@@ -1874,6 +1899,17 @@ function createHerbNodeView(node: HerbNodeView): HerbEntityView {
   view.add(base);
   const zone = scene.add.zone(0, -4, 40, 40).setInteractive({ cursor: "pointer" });
   attachZoneMenu(zone, () => startHerbPath(node), node.label, () => herbMenuActions(node));
+
+  if (node.label.toLowerCase().includes("mushroom")) {
+    const stem = scene.add.ellipse(0, 4, 10, 18, 0xd7c6a4, 0.95);
+    const cap = scene.add.circle(0, -6, 9, 0xb65454, 0.96).setScale(1.6, 0.9);
+    const spotA = scene.add.circle(-7, -8, 2, 0xf1dfc4, 0.95);
+    const spotB = scene.add.circle(4, -9, 2, 0xf1dfc4, 0.95);
+    const spotC = scene.add.circle(9, -4, 1.6, 0xf1dfc4, 0.95);
+    view.add([stem, cap, spotA, spotB, spotC, zone]);
+    view.bloom = cap;
+    return view;
+  }
 
   if (node.requiredLevel > 0) {
     // Mire-Lotus keeps its bespoke swamp-lotus sprite.
@@ -2128,8 +2164,8 @@ function renderHud(me: PlayerView): void {
     setBar(dom.xpBar, dom.xpText, me.xp - levelStart, levelEnd - levelStart, "XP");
     dom.levelText.textContent = String(me.level);
     dom.goldText.textContent = String(me.gold);
-    dom.weaponText.textContent = me.weaponTier ? (SHOP.weapon?.knightName ?? "Basic") : "Basic";
-    dom.armorText.textContent = me.armorTier ? (SHOP.armor?.name ?? "Cloth") : "Cloth";
+    dom.weaponText.textContent = gearTierName("weapon", me.weaponTier);
+    dom.armorText.textContent = gearTierName("armor", me.armorTier);
     dom.weightText.textContent = String(me.weight);
     dom.weightMax.textContent = String(me.maxWeight);
     dom.weightText.classList.toggle("over", me.weight > me.maxWeight);
@@ -2156,6 +2192,7 @@ function renderHud(me: PlayerView): void {
     renderedEquipmentSignature = equipmentSignature;
     renderEquipment(me);
   }
+  if (!dom.smith.classList.contains("hidden")) renderSmith(me);
   const abilitySignature = abilityHudSignature(me.abilities);
   if (abilitySignature !== renderedAbilitySignature) {
     renderedAbilitySignature = abilitySignature;
@@ -2174,9 +2211,10 @@ function renderHud(me: PlayerView): void {
   }
   const nearVendor = NPCS.some((npc) => npc.role === "vendor" && me.floor === npc.floor && Phaser.Math.Distance.Between(me.x, me.y, npc.x, npc.y) < 2.2);
   if (!nearVendor && !dom.vendor.classList.contains("hidden")) hideCenterPanels();
-  const alchemistNpc = NPCS.find((npc) => npc.role === "alchemist");
-  const nearAlchemist = alchemistNpc != null && me.floor === alchemistNpc.floor && Phaser.Math.Distance.Between(me.x, me.y, alchemistNpc.x, alchemistNpc.y) < 2.2;
+  const nearAlchemist = NPCS.some((npc) => npc.role === "alchemist" && me.floor === npc.floor && Phaser.Math.Distance.Between(me.x, me.y, npc.x, npc.y) < 2.2);
   if (!nearAlchemist && !dom.alchemist.classList.contains("hidden")) hideCenterPanels();
+  const nearSmith = NPCS.some((npc) => npc.role === "smith" && me.floor === npc.floor && Phaser.Math.Distance.Between(me.x, me.y, npc.x, npc.y) < 2.2);
+  if (!nearSmith && !dom.smith.classList.contains("hidden")) hideCenterPanels();
 }
 
 function buffHudSignature(buffs: Partial<BuffsView> = {}): string {
@@ -2349,11 +2387,11 @@ function renderEquipment(me: PlayerView | null | undefined): void {
     fills.weapon = { name: bow.label, iconUrl: bow.iconUrl, detail: "Ranged" };
   } else {
     fills.weapon = me.weaponTier
-      ? { name: SHOP.weapon?.knightName ?? "Forged Blade", iconUrl: "/icons/shop-weapon.png", detail: `+${dmgBonus} dmg` }
+      ? { name: gearTierName("weapon", me.weaponTier), iconUrl: "/icons/shop-weapon.png", detail: `+${dmgBonus} dmg` }
       : { name: "Worn Blade", iconUrl: "/icons/ui-weapon.png", detail: "starter" };
   }
   fills.body = me.armorTier
-    ? { name: SHOP.armor?.name ?? "Plated Mail", iconUrl: "/icons/shop-armor.png", detail: `+${armorBonus} armour` }
+    ? { name: gearTierName("armor", me.armorTier), iconUrl: "/icons/shop-armor.png", detail: `+${armorBonus} armour` }
     : { name: "Cloth Tunic", iconUrl: "/icons/ui-armor.png", detail: "starter" };
 
   dom.paperdoll.innerHTML = PAPERDOLL_LAYOUT
@@ -3332,6 +3370,48 @@ function openAlchemist(): void {
   showCenterPanel(dom.alchemist);
 }
 
+function openSmith(): void {
+  renderSmith(self());
+  showCenterPanel(dom.smith);
+}
+
+function gearTierName(slot: SmithingSlot, tier: number): string {
+  if (tier <= 0) return slot === "weapon" ? "Basic" : "Cloth";
+  const recipe = SMITHING_RECIPES[slot].find((entry) => entry.tier === tier);
+  if (recipe) return recipe.label;
+  return slot === "weapon" ? (SHOP.weapon?.knightName ?? "Forged Blade") : (SHOP.armor?.name ?? "Plated Mail");
+}
+
+function renderSmith(me: PlayerView | null | undefined): void {
+  renderSmithSlot("weapon", me, dom.forgeWeaponButton, dom.forgeWeaponHint);
+  renderSmithSlot("armor", me, dom.forgeArmorButton, dom.forgeArmorHint);
+}
+
+function renderSmithSlot(slot: SmithingSlot, me: PlayerView | null | undefined, button: HTMLButtonElement, hint: HTMLElement): void {
+  const currentTier = slot === "weapon" ? me?.weaponTier ?? 0 : me?.armorTier ?? 0;
+  const recipe = SMITHING_RECIPES[slot].find((entry) => entry.tier === currentTier + 1);
+  if (!recipe) {
+    button.disabled = true;
+    hint.textContent = `${titleCase(slot)}: fully forged.`;
+    return;
+  }
+  const smithing = me?.skills.find((skill) => skill.id === "smithing");
+  const level = smithing?.level ?? 1;
+  const qty = inventoryQuantity(me, recipe.bar);
+  const barLabel = itemLabel(recipe.bar);
+  const ready = level >= recipe.level && qty >= recipe.qty;
+  button.disabled = !ready;
+  hint.textContent = `${titleCase(slot)} -> ${recipe.label}: ${recipe.qty} ${barLabel}, Smithing ${recipe.level}. You have ${qty}.`;
+}
+
+function inventoryQuantity(me: PlayerView | null | undefined, itemId: string): number {
+  return (me?.inventory ?? []).reduce((sum, item) => sum + (item?.id === itemId ? item.qty : 0), 0);
+}
+
+function itemLabel(itemId: string): string {
+  return ITEMS[itemId]?.label ?? titleCase(itemId.replace(/_/g, " "));
+}
+
 // --- Bespoke right-click context menu (NPCs, monsters, corpses, ground) --------
 interface MenuAction {
   label: string;
@@ -3470,6 +3550,7 @@ function npcMenuActions(npc: NpcView): MenuAction[] {
   const actions: MenuAction[] = [{ label: "Talk", run: () => runNpcIntent(npc.id, "talk") }];
   if (npc.role === "vendor") actions.push({ label: "Trade", run: () => runNpcIntent(npc.id, "trade") });
   if (npc.role === "alchemist") actions.push({ label: "Alchemy", run: () => runNpcIntent(npc.id, "alchemy") });
+  if (npc.role === "smith") actions.push({ label: "Forge", run: () => runNpcIntent(npc.id, "smith") });
   if (npc.role === "quest") actions.push({ label: "Quest", run: () => runNpcIntent(npc.id, "talk") });
   if (npc.role === "trainer") actions.push({ label: "Train", run: () => runNpcIntent(npc.id, "talk") });
   actions.push({ label: "Examine", run: () => examineNpc(npc) });
@@ -3518,6 +3599,8 @@ function npcRoleFlavor(role: string): string {
       return "has work that needs doing";
     case "trainer":
       return "a seasoned trainer";
+    case "smith":
+      return "a forge master";
     case "guide":
       return "a guide to these lands";
     default:
@@ -3542,7 +3625,12 @@ function arriveAtNpc(npc: NpcView): void {
     openAlchemist();
     return;
   }
+  if (intent === "smith") {
+    openSmith();
+    return;
+  }
   if (npc.role === "vendor") openVendor();
+  if (npc.role === "smith") openSmith();
   lastTalkNpcId = npc.id;
   send({ type: "talkNpc", id: npc.id });
 }
@@ -3776,6 +3864,7 @@ function hideCenterPanels(): void {
   dom.classesPanel.classList.add("hidden");
   dom.vendor.classList.add("hidden");
   dom.alchemist.classList.add("hidden");
+  dom.smith.classList.add("hidden");
   dom.mapScreen.classList.add("hidden");
   closeDialogue(false);
 }
@@ -4254,7 +4343,13 @@ function openDialogue(event: GameEvent): void {
   const lines: DialogueLine[] = Array.isArray(event.lines) ? event.lines : [];
   if (!lines.length) return;
   hideCenterPanels();
-  activeDialogue = { lines, index: 0, opensShop: Boolean(event.opensShop), opensAlchemist: Boolean(event.opensAlchemist) };
+  activeDialogue = {
+    lines,
+    index: 0,
+    opensShop: Boolean(event.opensShop),
+    opensAlchemist: Boolean(event.opensAlchemist),
+    opensSmith: Boolean(event.opensSmith)
+  };
   // The dialogue box floats over the world (no menu backdrop) for immersion; the
   // player is frozen (see sendInput) so stop any in-progress movement now.
   clearClickDestination();
@@ -4327,6 +4422,7 @@ function advanceDialogue(): void {
 function closeDialogue(openFollowup = true): void {
   const opensShop = Boolean(activeDialogue?.opensShop);
   const opensAlchemist = Boolean(activeDialogue?.opensAlchemist);
+  const opensSmith = Boolean(activeDialogue?.opensSmith);
   const wasOpen = activeDialogue != null;
   stopTypewriter();
   activeDialogue = null;
@@ -4335,12 +4431,12 @@ function closeDialogue(openFollowup = true): void {
   dom.dialogueDim.classList.add("hidden");
   dom.dialogue.classList.remove("ready");
   if (wasOpen) send({ type: "endDialogue" }); // release the NPC to wander again
-  if (openFollowup && (opensShop || opensAlchemist)) {
+  if (openFollowup && (opensShop || opensAlchemist || opensSmith)) {
     dom.menuBackdrop.classList.remove("hidden");
-    (opensAlchemist ? dom.alchemist : dom.vendor).classList.remove("hidden");
+    (opensSmith ? dom.smith : opensAlchemist ? dom.alchemist : dom.vendor).classList.remove("hidden");
     return;
   }
-  if ([dom.skillsPanel, dom.inventoryPanel, dom.equipmentPanel, dom.abilitiesPanel, dom.vendor, dom.alchemist].every((panel) => panel.classList.contains("hidden"))) {
+  if ([dom.skillsPanel, dom.inventoryPanel, dom.equipmentPanel, dom.abilitiesPanel, dom.vendor, dom.alchemist, dom.smith].every((panel) => panel.classList.contains("hidden"))) {
     dom.menuBackdrop.classList.add("hidden");
   }
 }
