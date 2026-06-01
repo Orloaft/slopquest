@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
-import type { AbilityEffect, AbilitySpec, AbilityTargeting, DialogueLine, Range } from "../src/content-types.ts";
+import type { AbilityEffect, AbilitySpec, AbilityTargeting, CombatAnimationSpec, DialogueLine, Range } from "../src/content-types.ts";
 
 // --- Raw YAML shapes (everything optional; validated below) ----------------
 
@@ -51,6 +51,7 @@ interface RawMonster {
   slowMs?: number;
   weakenPct?: number;
   weakenMs?: number;
+  projectileAnimation?: string;
   armor?: number;
   pack?: boolean;
   burrow?: boolean;
@@ -109,6 +110,10 @@ interface RawAbility extends Partial<AbilitySpec> {
   effects?: AbilityEffect[];
 }
 
+interface RawCombatAnimation extends Partial<CombatAnimationSpec> {
+  id?: string;
+}
+
 interface RawQuest {
   id?: string;
   title?: string;
@@ -148,6 +153,7 @@ const herbNodes = load<RawHerbNode[]>("herb-nodes.yaml") ?? [];
 const shop = load<Record<string, unknown>>("shop.yaml") ?? {};
 const spawns = load<RawSpawns>("spawns.yaml") ?? {};
 const abilities = load<RawAbility[]>("abilities.yaml") ?? [];
+const combatAnimations = load<RawCombatAnimation[]>("combat-animations.yaml") ?? [];
 const quests = loadQuests();
 
 const itemIds = new Set(items.map((i) => i.id));
@@ -170,6 +176,32 @@ const abilityDamageTypes = new Set(["physical", "magic"]);
 const abilityConditionalBonusWhen = new Set(["behindTarget"]);
 const abilityAnimationKinds = new Set(["slash_arc", "self_pulse", "ground_burst", "projectile_trail", "impact_ring"]);
 const abilityAnimationAttach = new Set(["self", "target", "origin", "path"]);
+const combatAnimationKinds = new Set(["melee_arc", "projectile", "impact", "ground", "self", "trail"]);
+const combatAnimationRenderers = new Set([
+  "slash_arc",
+  "arrow",
+  "arrow_heavy",
+  "arrow_poison",
+  "arcane",
+  "arcane_lance",
+  "frost_shard",
+  "fire_orb",
+  "curse_bolt",
+  "flask",
+  "spit",
+  "fire_missile",
+  "ice_missile",
+  "impact_ring",
+  "fire_burst",
+  "ice_burst",
+  "ground_burst",
+  "self_pulse",
+  "projectile_trail"
+]);
+const combatAnimationSources = new Set(["effects", "primitive", "sheet"]);
+const combatAnimationAnchors = new Set(["caster", "target", "path", "ground", "self"]);
+const combatAnimationOrientations = new Set(["rotate_to_target", "directional_4", "directional_8", "screen_fixed"]);
+const combatAnimationZ = new Set(["below_actor", "actor", "above_actor"]);
 const requiredQuestPhases = ["intro", "progress", "turnIn", "claimed"];
 
 function loadQuests(): RawQuest[] {
@@ -251,8 +283,40 @@ for (const h of herbNodes) {
 }
 
 const abilityIds = new Set<string>();
+const combatAnimationIds = new Set<string>();
+for (const animation of combatAnimations) {
+  validateCombatAnimation(animation);
+}
 for (const a of abilities) {
   validateAbility(a);
+}
+
+function validateCombatAnimation(animation: RawCombatAnimation): void {
+  const where = `combat-animations.yaml:${animation.id ?? "?"}`;
+  if (!animation.id) { fail("combat-animations.yaml", "combat animation missing id"); return; }
+  if (combatAnimationIds.has(animation.id)) fail(where, `duplicate combat animation id "${animation.id}"`);
+  combatAnimationIds.add(animation.id);
+  if (!combatAnimationKinds.has(animation.kind ?? "")) fail(where, `unknown kind "${animation.kind}"`);
+  if (!combatAnimationRenderers.has(animation.renderer ?? "")) fail(where, `unknown renderer "${animation.renderer}"`);
+  if (!combatAnimationSources.has(animation.source ?? "")) fail(where, `unknown source "${animation.source}"`);
+  if (!Number.isInteger(animation.frames) || (animation.frames ?? 0) < 1) fail(where, "frames must be a positive integer");
+  if (!positiveNumber(animation.frameMs)) fail(where, "frameMs must be positive");
+  if (!combatAnimationAnchors.has(animation.anchor ?? "")) fail(where, `unknown anchor "${animation.anchor}"`);
+  if (!combatAnimationOrientations.has(animation.orientation ?? "")) fail(where, `unknown orientation "${animation.orientation}"`);
+  if (!combatAnimationZ.has(animation.z ?? "")) fail(where, `unknown z "${animation.z}"`);
+  if (animation.scale != null && !positiveNumber(animation.scale)) fail(where, "scale must be positive when present");
+  if (animation.hitFrame != null && (!Number.isInteger(animation.hitFrame) || animation.hitFrame < 0)) fail(where, "hitFrame must be a non-negative integer when present");
+}
+
+for (const animation of combatAnimations) {
+  if (animation.impact && !combatAnimationIds.has(animation.impact)) {
+    fail(`combat-animations.yaml:${animation.id}`, `impact refs unknown combat animation "${animation.impact}"`);
+  }
+}
+for (const m of monsters) {
+  if (m.projectileAnimation && !combatAnimationIds.has(m.projectileAnimation)) {
+    fail(`monsters.yaml:${m.id ?? "?"}`, `projectileAnimation refs unknown combat animation "${m.projectileAnimation}"`);
+  }
 }
 
 function validateAbility(a: RawAbility): void {
@@ -272,6 +336,9 @@ function validateAbility(a: RawAbility): void {
   if (!Array.isArray(a.effects) || a.effects.length === 0) fail(where, "missing or empty effects");
   else a.effects.forEach((effect, i) => validateAbilityEffect(effect, `${where}.effects[${i}]`));
   if (a.skill != null && !skillIds.has(a.skill)) fail(where, `unknown skill "${a.skill}"`);
+  if (a.projectile?.id != null && !combatAnimationIds.has(a.projectile.id)) {
+    fail(`${where}.projectile`, `id refs unknown combat animation "${a.projectile.id}"`);
+  }
   if (a.animation) validateAbilityAnimation(a, where);
 }
 
@@ -323,6 +390,7 @@ function validateAbilityEffect(effect: AbilityEffect, where: string): void {
 function validateAbilityAnimation(a: RawAbility, where: string): void {
   const animation = a.animation;
   if (!animation) return;
+  if (animation.id != null && !combatAnimationIds.has(animation.id)) fail(where, `animation.id refs unknown combat animation "${animation.id}"`);
   if (!abilityAnimationKinds.has(animation.kind)) fail(where, `unknown animation.kind "${animation.kind}"`);
   if (!abilityAnimationAttach.has(animation.attach)) fail(where, `unknown animation.attach "${animation.attach}"`);
   if (animation.scale != null && !positiveNumber(animation.scale)) fail(where, "animation.scale must be positive when present");
@@ -435,6 +503,7 @@ const MONSTERS = Object.fromEntries(
     if (m.slowMs != null) entry["slowMs"] = m.slowMs;
     if (m.weakenPct != null) entry["weakenPct"] = m.weakenPct;
     if (m.weakenMs != null) entry["weakenMs"] = m.weakenMs;
+    if (m.projectileAnimation != null) entry["projectileAnimation"] = m.projectileAnimation;
     if (m.armor != null) entry["armor"] = m.armor;
     if (m.pack) entry["pack"] = true;
     if (m.burrow) entry["burrow"] = true;
@@ -526,6 +595,7 @@ const HERB_NODES = herbNodes.map((h) => {
   return entry;
 });
 const ABILITIES = Object.fromEntries(abilities.map((a) => [a.id, a]));
+const COMBAT_ANIMATIONS = Object.fromEntries(combatAnimations.map((a) => [a.id, a]));
 const QUESTS = Object.fromEntries(
   quests.map((q) => [
     q.id,
@@ -547,6 +617,7 @@ const QUESTS = Object.fromEntries(
 
 const TYPE_ANNOTATIONS: Record<string, string> = {
   ABILITIES: "Record<string, AbilitySpec>",
+  COMBAT_ANIMATIONS: "Record<string, CombatAnimationSpec>",
   ITEMS: "Record<string, Item>",
   MONSTERS: "Record<string, Monster>",
   QUEST_DROPS: "Record<string, QuestDrop>",
@@ -565,6 +636,7 @@ const banner = `// AUTO-GENERATED by scripts/build-content.ts — DO NOT EDIT BY
 // Edit YAML under content/ and rerun \`npm run content:build\`.
 import type {
   AbilitySpec,
+  CombatAnimationSpec,
   FishingNode,
   HerbNode,
   Item,
@@ -583,6 +655,7 @@ import type {
 const body = (
   [
     ["ABILITIES", ABILITIES],
+    ["COMBAT_ANIMATIONS", COMBAT_ANIMATIONS],
     ["ITEMS", ITEMS],
     ["MONSTERS", MONSTERS],
     ["QUEST_DROPS", QUEST_DROPS],

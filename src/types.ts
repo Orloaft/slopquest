@@ -221,6 +221,7 @@ export interface GameEvent {
   angle?: number;
   scale?: number;
   durationMs?: number;
+  animationId?: string;
   to?: string;
   lines?: DialogueLineView[];
   opensShop?: boolean;

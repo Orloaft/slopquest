@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TIB combat animations",
+  "type": "array",
+  "items": { "$ref": "#/$defs/combatAnimation" },
+  "$defs": {
+    "combatAnimation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "renderer", "source", "frames", "frameMs", "anchor", "orientation", "z"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$" },
+        "kind": { "enum": ["melee_arc", "projectile", "impact", "ground", "self", "trail"] },
+        "renderer": {
+          "enum": [
+            "slash_arc",
+            "arrow",
+            "arrow_heavy",
+            "arrow_poison",
+            "arcane",
+            "arcane_lance",
+            "frost_shard",
+            "fire_orb",
+            "curse_bolt",
+            "flask",
+            "spit",
+            "fire_missile",
+            "ice_missile",
+            "impact_ring",
+            "fire_burst",
+            "ice_burst",
+            "ground_burst",
+            "self_pulse",
+            "projectile_trail"
+          ]
+        },
+        "source": { "enum": ["effects", "primitive", "sheet"] },
+        "frames": { "type": "number", "minimum": 1 },
+        "frameMs": { "type": "number", "minimum": 1 },
+        "anchor": { "enum": ["caster", "target", "path", "ground", "self"] },
+        "orientation": { "enum": ["rotate_to_target", "directional_4", "directional_8", "screen_fixed"] },
+        "z": { "enum": ["below_actor", "actor", "above_actor"] },
+        "scale": { "type": "number", "exclusiveMinimum": 0 },
+        "hitFrame": { "type": "number", "minimum": 0 },
+        "impact": { "type": "string" }
+      }
+    }
+  }
+}

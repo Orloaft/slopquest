@@ -27,6 +27,7 @@
       "additionalProperties": false,
       "required": ["kind"],
       "properties": {
+        "id": { "type": "string" },
         "kind": { "type": "string" },
         "color": { "type": "string" },
         "targetEnemy": { "type": "boolean" }
@@ -46,6 +47,7 @@
       "additionalProperties": false,
       "required": ["kind", "attach"],
       "properties": {
+        "id": { "type": "string" },
         "kind": { "enum": ["slash_arc", "self_pulse", "ground_burst", "projectile_trail", "impact_ring"] },
         "attach": { "enum": ["self", "target", "origin", "path"] },
         "color": { "type": "string" },

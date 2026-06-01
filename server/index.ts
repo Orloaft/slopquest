@@ -39,6 +39,7 @@ import {
 import type { AbilityEffect, AbilitySpec, ClassSpec } from "../src/shared.ts";
 import type {
   Item,
+  Monster,
   MonsterSpawn,
   Quest,
   QuestDialogue,
@@ -1025,7 +1026,12 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
           addSkillXp(target, "agility", Math.max(1, shot));
           event("float", "Dodge!", target.x, target.y - 0.55, target.floor, "#a0e8ff");
         } else {
-          event("projectile", "spit", target.x, target.y, target.floor, "#9ad36b", monster.id, target.id, { fromX: monster.x, fromY: monster.y });
+          const projectile = monsterProjectileSpec(catalog);
+          event("projectile", projectile.kind, target.x, target.y, target.floor, projectile.color, monster.id, target.id, {
+            fromX: monster.x,
+            fromY: monster.y,
+            animationId: projectile.animationId
+          });
           damagePlayer(target, shot, catalog.name);
           if (catalog.slowPct) applyPlayerSlow(target, catalog.slowPct, catalog.slowMs ?? 1500);
           if (catalog.weakenPct) applyPlayerWeaken(target, catalog.weakenPct, catalog.weakenMs ?? 4000);
@@ -1240,7 +1246,7 @@ function tryUseComposedAbility(player: ServerPlayer, spec: AbilitySpec, now: num
       spec.projectile.color ?? null,
       player.id,
       spec.projectile.targetEnemy ? resolution.targetId : null,
-      { fromX: player.x, fromY: player.y }
+      { fromX: player.x, fromY: player.y, animationId: spec.projectile.id }
     );
   }
 
@@ -1272,7 +1278,8 @@ function emitAbilityAnimation(player: ServerPlayer, resolution: AbilityResolutio
     fromX: player.x,
     fromY: player.y,
     scale: animation.scale,
-    durationMs: animation.durationMs
+    durationMs: animation.durationMs,
+    animationId: animation.id
   });
 }
 
@@ -1411,7 +1418,11 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
   monster.hp = clamp(monster.hp - dealt, 0, monster.maxHp);
   // Taking damage shatters a freeze (per Frost Nova design).
   if (monster.freezeUntil) monster.freezeUntil = 0;
-  event("effect", kind, monster.x, monster.y, monster.floor, null, player.id, monster.id, { fromX: player.x, fromY: player.y });
+  event("effect", kind, monster.x, monster.y, monster.floor, null, player.id, monster.id, {
+    fromX: player.x,
+    fromY: player.y,
+    animationId: combatAnimationIdForEffectKind(kind)
+  });
   event("hit", dealt, monster.x, monster.y - 0.45, monster.floor, kind === "flare" ? "#8fd8ff" : "#ffd166", player.id, monster.id);
   if (monster.hp > 0) return;
 
@@ -1438,6 +1449,23 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
   addToSpatial(spatial.corpses, corpse);
   scheduleCorpseExpiration(corpse, performance.now() + CORPSE_DECAY_MS);
   systemToPlayer(player, `${player.name} defeated ${catalog.name}.`);
+}
+
+function combatAnimationIdForEffectKind(kind: string): string | undefined {
+  if (kind === "hit") return "melee.slash.light";
+  if (kind === "flare") return "projectile.orb.fire";
+  if (kind === "bolt") return "projectile.bolt.arcane_lance";
+  if (kind === "frost") return "projectile.shard.frost";
+  return undefined;
+}
+
+function monsterProjectileSpec(catalog: Monster): { kind: string; color: string; animationId: string } {
+  const animationId = catalog.projectileAnimation ?? "projectile.spit.acid";
+  if (animationId === "projectile.bolt.arcane_lance") return { kind: "arcane", color: "#b7f7ff", animationId };
+  if (animationId === "projectile.shard.frost") return { kind: "frost", color: "#b8eaff", animationId };
+  if (animationId === "projectile.orb.fire") return { kind: "flare", color: "#ff9d4a", animationId };
+  if (animationId === "projectile.bolt.curse") return { kind: "curse", color: "#b48cff", animationId };
+  return { kind: "spit", color: "#9ad36b", animationId };
 }
 
 function rollQuestDrops(monsterType: string): Array<{ id: string; qty: number }> {
@@ -4877,7 +4905,8 @@ function hasLineOfSight(floor: number, ax: number, ay: number, bx: number, by: n
 function fireProjectile(player: ServerPlayer, monster: ServerMonster, damage: number, kind: string): void {
   event("projectile", kind, monster.x, monster.y, monster.floor, null, player.id, monster.id, {
     fromX: player.x,
-    fromY: player.y
+    fromY: player.y,
+    animationId: kind === "arrow" ? "projectile.arrow.basic" : undefined
   });
   damageMonster(player, monster, damage, "hit");
 }

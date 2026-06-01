@@ -1,0 +1,277 @@
+# yaml-language-server: $schema=./schema/combat-animations.schema.json
+# Named combat animation contracts. These entries intentionally wrap today's
+# renderer primitives first; later passes can point the same ids at generated
+# sheets without changing ability or monster content.
+
+- id: melee.slash.light
+  kind: melee_arc
+  renderer: slash_arc
+  source: effects
+  frames: 6
+  frameMs: 45
+  anchor: target
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1
+  hitFrame: 2
+
+- id: projectile.arrow.basic
+  kind: projectile
+  renderer: arrow
+  source: primitive
+  frames: 1
+  frameMs: 150
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1
+  impact: impact.hit.spark
+
+- id: projectile.arrow.heavy
+  kind: projectile
+  renderer: arrow_heavy
+  source: primitive
+  frames: 1
+  frameMs: 145
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1.1
+  impact: impact.hit.spark
+
+- id: projectile.arrow.poison
+  kind: projectile
+  renderer: arrow_poison
+  source: primitive
+  frames: 1
+  frameMs: 150
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 0.95
+  impact: impact.poison.splash
+
+- id: projectile.bolt.arcane
+  kind: projectile
+  renderer: arcane
+  source: primitive
+  frames: 1
+  frameMs: 150
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1
+  impact: impact.arcane.ring
+
+- id: projectile.bolt.arcane_lance
+  kind: projectile
+  renderer: arcane_lance
+  source: primitive
+  frames: 1
+  frameMs: 135
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1.05
+  impact: impact.arcane.ring
+
+- id: projectile.shard.frost
+  kind: projectile
+  renderer: frost_shard
+  source: primitive
+  frames: 1
+  frameMs: 150
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1
+  impact: impact.frost.burst
+
+- id: projectile.orb.fire
+  kind: projectile
+  renderer: fire_orb
+  source: primitive
+  frames: 1
+  frameMs: 150
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1
+  impact: impact.fire.burst
+
+- id: projectile.bolt.curse
+  kind: projectile
+  renderer: curse_bolt
+  source: primitive
+  frames: 1
+  frameMs: 165
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1
+  impact: impact.curse.ring
+
+- id: projectile.flask.volatile
+  kind: projectile
+  renderer: flask
+  source: primitive
+  frames: 1
+  frameMs: 150
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1
+  impact: impact.poison.splash
+
+- id: projectile.spit.acid
+  kind: projectile
+  renderer: spit
+  source: primitive
+  frames: 1
+  frameMs: 150
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1
+  impact: impact.poison.splash
+
+- id: projectile.missile.fire
+  kind: projectile
+  renderer: fire_missile
+  source: effects
+  frames: 6
+  frameMs: 45
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1
+  impact: impact.fire.burst
+
+- id: projectile.missile.frost
+  kind: projectile
+  renderer: ice_missile
+  source: effects
+  frames: 6
+  frameMs: 45
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1
+  impact: impact.frost.burst
+
+- id: impact.shield_ring
+  kind: impact
+  renderer: impact_ring
+  source: primitive
+  frames: 1
+  frameMs: 360
+  anchor: target
+  orientation: screen_fixed
+  z: above_actor
+  scale: 1.1
+  hitFrame: 0
+
+- id: impact.arcane.ring
+  kind: impact
+  renderer: impact_ring
+  source: primitive
+  frames: 1
+  frameMs: 300
+  anchor: target
+  orientation: screen_fixed
+  z: above_actor
+  scale: 0.9
+  hitFrame: 0
+
+- id: impact.hit.spark
+  kind: impact
+  renderer: impact_ring
+  source: primitive
+  frames: 1
+  frameMs: 260
+  anchor: target
+  orientation: screen_fixed
+  z: above_actor
+  scale: 0.75
+  hitFrame: 0
+
+- id: impact.curse.ring
+  kind: impact
+  renderer: impact_ring
+  source: primitive
+  frames: 1
+  frameMs: 340
+  anchor: target
+  orientation: screen_fixed
+  z: above_actor
+  scale: 1
+  hitFrame: 0
+
+- id: impact.fire.burst
+  kind: impact
+  renderer: fire_burst
+  source: effects
+  frames: 4
+  frameMs: 55
+  anchor: target
+  orientation: screen_fixed
+  z: above_actor
+  scale: 1
+  hitFrame: 0
+
+- id: impact.frost.burst
+  kind: impact
+  renderer: ice_burst
+  source: effects
+  frames: 4
+  frameMs: 55
+  anchor: target
+  orientation: screen_fixed
+  z: above_actor
+  scale: 1
+  hitFrame: 0
+
+- id: impact.poison.splash
+  kind: impact
+  renderer: ground_burst
+  source: primitive
+  frames: 1
+  frameMs: 320
+  anchor: target
+  orientation: screen_fixed
+  z: above_actor
+  scale: 1
+  hitFrame: 0
+
+- id: aura.self_pulse
+  kind: self
+  renderer: self_pulse
+  source: primitive
+  frames: 1
+  frameMs: 320
+  anchor: self
+  orientation: screen_fixed
+  z: above_actor
+  scale: 1
+
+- id: ground.burst.fire
+  kind: ground
+  renderer: ground_burst
+  source: primitive
+  frames: 1
+  frameMs: 360
+  anchor: ground
+  orientation: screen_fixed
+  z: below_actor
+  scale: 1
+
+- id: trail.path.arcane
+  kind: trail
+  renderer: projectile_trail
+  source: primitive
+  frames: 1
+  frameMs: 260
+  anchor: path
+  orientation: rotate_to_target
+  z: above_actor
+  scale: 1

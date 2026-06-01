@@ -5,6 +5,7 @@ import {
   SKILLS,
   CLASSES,
   CLASS_UNLOCKS,
+  COMBAT_ANIMATIONS,
   ITEMS,
   MAP_COLS,
   MAP_ROWS,
@@ -51,7 +52,7 @@ const OUTPOST_TRACK: Record<number, string> = {
   5: "serenade", // Alchemist's Hut
   6: "mirage" // Frontier Camp
 };
-import type { ItemUse, TreeType } from "./content-types.ts";
+import type { CombatAnimationSpec, ItemUse, TreeType } from "./content-types.ts";
 import type {
   AbilityView,
   BuffsView,
@@ -76,6 +77,34 @@ import type {
 } from "./types.ts";
 
 void MONSTERS;
+
+const LEGACY_COMBAT_ANIMATION_IDS: Record<string, string> = {
+  slash_arc: "melee.slash.light",
+  arrow: "projectile.arrow.basic",
+  arcane: "projectile.bolt.arcane",
+  flask: "projectile.flask.volatile",
+  spit: "projectile.spit.acid",
+  bolt: "projectile.missile.frost",
+  flare: "projectile.missile.fire",
+  frost: "projectile.missile.frost",
+  impact_ring: "impact.arcane.ring",
+  ground_burst: "ground.burst.fire",
+  self_pulse: "aura.self_pulse",
+  projectile_trail: "trail.path.arcane",
+  path: "trail.path.arcane"
+};
+const PRIMITIVE_PROJECTILE_RENDERERS = new Set([
+  "arrow",
+  "arrow_heavy",
+  "arrow_poison",
+  "arcane",
+  "arcane_lance",
+  "frost_shard",
+  "fire_orb",
+  "curse_bolt",
+  "flask",
+  "spit"
+]);
 
 // --- Local client-side structures -----------------------------------------
 
@@ -4492,8 +4521,11 @@ function playCombatEffect(event: GameEvent): void {
     return;
   }
 
-  if (event.text === "bolt" || event.text === "flare" || event.text === "frost") {
-    const family = event.text === "flare" ? "fireMissile" : "iceMissile";
+  const combatAnimation = combatAnimationForEvent(event);
+  const renderer = combatAnimation?.renderer ?? String(event.text);
+
+  if (renderer === "fire_missile" || renderer === "ice_missile" || (!combatAnimation && (event.text === "bolt" || event.text === "flare" || event.text === "frost"))) {
+    const family = renderer === "fire_missile" || event.text === "flare" ? "fireMissile" : "iceMissile";
     const missile = scene.add.sprite(fromX, fromY, effectFrameKey(family, 0)).setOrigin(0.5);
     missile.setDisplaySize(58, 28);
     missile.setRotation(angle);
@@ -4516,6 +4548,13 @@ function playCombatEffect(event: GameEvent): void {
     return;
   }
 
+  if (PRIMITIVE_PROJECTILE_RENDERERS.has(renderer)) {
+    playPrimitiveProjectile(renderer, fromX, fromY, targetX, targetY, event.color, combatAnimation?.frameMs ?? 150, () => {
+      playPrimitiveProjectileImpact(renderer, targetX, targetY, event.color);
+    });
+    return;
+  }
+
   playSlash(targetX, targetY, angle);
 }
 
@@ -4524,20 +4563,9 @@ function playProjectile(event: GameEvent): void {
   const targetY = (event.y ?? 0) * TILE_SIZE - 10;
   const fromX = (event.fromX ?? event.x ?? 0) * TILE_SIZE;
   const fromY = (event.fromY ?? event.y ?? 0) * TILE_SIZE - 10;
-  const angle = Phaser.Math.Angle.Between(fromX, fromY, targetX, targetY);
-  const fill = hexColorToNumber(event.color, event.text === "arcane" ? 0xc8a8ff : 0xf4e3b0);
-  const stroke = event.text === "arcane" ? 0x5f3fa8 : 0x6b4a1f;
-  const arrow = scene.add.rectangle(fromX, fromY, event.text === "arcane" ? 24 : 20, event.text === "arcane" ? 5 : 3, fill).setRotation(angle);
-  arrow.setStrokeStyle(1, stroke);
-  fxLayer.add(arrow);
-  scene.tweens.add({
-    targets: arrow,
-    x: targetX,
-    y: targetY,
-    duration: 150,
-    ease: "Quad.easeIn",
-    onComplete: () => arrow.destroy()
-  });
+  const combatAnimation = combatAnimationForEvent(event);
+  const renderer = combatAnimation?.renderer ?? String(event.text);
+  playPrimitiveProjectile(renderer, fromX, fromY, targetX, targetY, event.color, combatAnimation?.frameMs ?? 150);
 }
 
 function playAbilityVfx(event: GameEvent): void {
@@ -4546,9 +4574,10 @@ function playAbilityVfx(event: GameEvent): void {
   const fromX = (event.fromX ?? event.x ?? 0) * TILE_SIZE;
   const fromY = (event.fromY ?? event.y ?? 0) * TILE_SIZE - 10;
   const color = hexColorToNumber(event.color, 0xc8a8ff);
-  const scale = event.scale ?? 1;
-  const duration = event.durationMs ?? 360;
-  const kind = String(event.text);
+  const combatAnimation = combatAnimationForEvent(event);
+  const scale = event.scale ?? combatAnimation?.scale ?? 1;
+  const duration = event.durationMs ?? combatAnimation?.frameMs ?? 360;
+  const kind = combatAnimation?.renderer ?? String(event.text);
 
   if (kind === "slash_arc") {
     playSlash(x, y, Phaser.Math.Angle.Between(fromX, fromY, x, y));
@@ -4579,6 +4608,113 @@ function playAbilityVfx(event: GameEvent): void {
   const pulse = scene.add.circle(x, y, 14 * scale, color, 0.28).setStrokeStyle(2, color, 0.9);
   fxLayer.add(pulse);
   scene.tweens.add({ targets: pulse, alpha: 0, scale: 2, duration, ease: "Quad.easeOut", onComplete: () => pulse.destroy() });
+}
+
+function playPrimitiveProjectile(
+  renderer: string,
+  fromX: number,
+  fromY: number,
+  targetX: number,
+  targetY: number,
+  color: string | null | undefined,
+  duration: number,
+  onComplete?: () => void
+): void {
+  const angle = Phaser.Math.Angle.Between(fromX, fromY, targetX, targetY);
+  const fill = projectileFill(renderer, color);
+  const stroke = projectileStroke(renderer);
+  const projectile = scene.add.container(fromX, fromY).setRotation(angle);
+  fxLayer.add(projectile);
+
+  if (renderer === "arrow_heavy") {
+    projectile.add(scene.add.rectangle(-2, 0, 28, 4, fill).setStrokeStyle(1, stroke));
+    projectile.add(scene.add.triangle(14, 0, 0, -6, 0, 6, 10, 0, 0xd8d0b8).setStrokeStyle(1, stroke));
+    projectile.add(scene.add.rectangle(-16, -4, 7, 2, 0x8a5630));
+    projectile.add(scene.add.rectangle(-16, 4, 7, 2, 0x8a5630));
+  } else if (renderer === "arrow_poison") {
+    projectile.add(scene.add.rectangle(-2, 0, 22, 3, 0xc8d9a0).setStrokeStyle(1, 0x426b2f));
+    projectile.add(scene.add.triangle(12, 0, 0, -4, 0, 4, 9, 0, 0x9ad36b).setStrokeStyle(1, 0x315a27));
+    projectile.add(scene.add.circle(4, 0, 3, 0x7bd45a, 0.65));
+  } else if (renderer === "arcane_lance") {
+    projectile.add(scene.add.ellipse(0, 0, 30, 8, fill, 0.75).setStrokeStyle(2, stroke, 0.9));
+    projectile.add(scene.add.circle(11, 0, 5, 0xf2e8ff, 0.95));
+    projectile.add(scene.add.ellipse(-17, 0, 18, 5, fill, 0.32));
+  } else if (renderer === "frost_shard") {
+    projectile.add(scene.add.triangle(4, 0, -12, -7, -12, 7, 18, 0, fill).setStrokeStyle(2, 0xf2fbff, 0.95));
+    projectile.add(scene.add.triangle(-10, 0, -24, -3, -24, 3, -8, 0, 0x7ecfff, 0.4));
+  } else if (renderer === "fire_orb") {
+    projectile.add(scene.add.circle(7, 0, 8, fill, 0.9).setStrokeStyle(2, 0xfff0a0, 0.85));
+    projectile.add(scene.add.circle(-5, 0, 6, 0xff623d, 0.45));
+    projectile.add(scene.add.circle(-15, 0, 4, 0xffb23d, 0.28));
+  } else if (renderer === "curse_bolt") {
+    projectile.add(scene.add.polygon(4, 0, [-12, 0, -2, -9, 16, 0, -2, 9], fill, 0.82).setStrokeStyle(2, stroke, 0.9));
+    projectile.add(scene.add.circle(-12, 0, 5, fill, 0.28));
+  } else if (renderer === "flask") {
+    projectile.add(scene.add.circle(4, 0, 7, fill, 0.85).setStrokeStyle(2, stroke));
+    projectile.add(scene.add.rectangle(-5, 0, 9, 4, 0xd7c9a4).setStrokeStyle(1, stroke));
+  } else if (renderer === "spit") {
+    projectile.add(scene.add.ellipse(2, 0, 18, 10, fill, 0.75).setStrokeStyle(1, stroke));
+    projectile.add(scene.add.circle(-10, 0, 4, fill, 0.35));
+  } else if (renderer === "arcane") {
+    projectile.add(scene.add.rectangle(0, 0, 24, 5, fill).setStrokeStyle(1, stroke));
+    projectile.add(scene.add.circle(10, 0, 4, 0xf2e8ff, 0.8));
+  } else {
+    projectile.add(scene.add.rectangle(0, 0, 20, 3, fill).setStrokeStyle(1, stroke));
+    projectile.add(scene.add.triangle(11, 0, 0, -4, 0, 4, 8, 0, fill).setStrokeStyle(1, stroke));
+  }
+
+  scene.tweens.add({
+    targets: projectile,
+    x: targetX,
+    y: targetY,
+    duration,
+    ease: "Quad.easeIn",
+    onComplete: () => {
+      projectile.destroy();
+      onComplete?.();
+    }
+  });
+}
+
+function projectileFill(renderer: string, color: string | null | undefined): number {
+  if (renderer === "arcane" || renderer === "arcane_lance") return hexColorToNumber(color, 0xc8a8ff);
+  if (renderer === "frost_shard") return hexColorToNumber(color, 0xa8e6ff);
+  if (renderer === "fire_orb") return hexColorToNumber(color, 0xff9d4a);
+  if (renderer === "curse_bolt") return hexColorToNumber(color, 0xb48cff);
+  if (renderer === "spit" || renderer === "flask" || renderer === "arrow_poison") return hexColorToNumber(color, 0x9ad36b);
+  return hexColorToNumber(color, 0xf4e3b0);
+}
+
+function projectileStroke(renderer: string): number {
+  if (renderer === "arcane" || renderer === "arcane_lance") return 0x5f3fa8;
+  if (renderer === "frost_shard") return 0x4b9fcb;
+  if (renderer === "fire_orb") return 0x9a2f1f;
+  if (renderer === "curse_bolt") return 0x4a285f;
+  if (renderer === "spit" || renderer === "flask" || renderer === "arrow_poison") return 0x426b2f;
+  return 0x6b4a1f;
+}
+
+function playPrimitiveProjectileImpact(renderer: string, x: number, y: number, color: string | null | undefined): void {
+  if (renderer === "fire_orb") {
+    playBurst("fireMissile", x, y);
+    return;
+  }
+  if (renderer === "frost_shard") {
+    playBurst("iceMissile", x, y);
+    return;
+  }
+  const fill = projectileFill(renderer, color);
+  const scale = renderer === "arrow_heavy" ? 0.8 : renderer === "curse_bolt" ? 1.05 : 0.9;
+  const ring = scene.add.ellipse(x, y + 4, 34 * scale, 18 * scale, fill, 0.18).setStrokeStyle(2, fill, 0.85);
+  fxLayer.add(ring);
+  scene.tweens.add({ targets: ring, alpha: 0, scale: 1.75, duration: 260, ease: "Quad.easeOut", onComplete: () => ring.destroy() });
+}
+
+function combatAnimationForEvent(event: GameEvent): CombatAnimationSpec | null {
+  const directId = event.animationId;
+  if (directId && COMBAT_ANIMATIONS[directId]) return COMBAT_ANIMATIONS[directId];
+  const legacyId = LEGACY_COMBAT_ANIMATION_IDS[String(event.text)];
+  return legacyId ? COMBAT_ANIMATIONS[legacyId] ?? null : null;
 }
 
 function playSlash(x: number, y: number, angle: number): void {

@@ -10,6 +10,7 @@ import {
 
 export {
   ABILITIES,
+  COMBAT_ANIMATIONS,
   ITEMS,
   MONSTERS,
   QUEST_DROPS,
@@ -32,7 +33,8 @@ export type {
   AbilityProjectile,
   AbilitySpec,
   AbilityTargeting,
-  AbilityVfx
+  AbilityVfx,
+  CombatAnimationSpec
 } from "./content-types.ts";
 
 export const TILE_SIZE = 32;

@@ -192,6 +192,7 @@
   aggro: 6.5
   range: 5.5
   ranged: true
+  projectileAnimation: projectile.bolt.arcane_lance
   slowPct: 20
   slowMs: 1200
 
@@ -207,6 +208,7 @@
   aggro: 7
   range: 6
   ranged: true
+  projectileAnimation: projectile.bolt.curse
   weakenPct: 25
   weakenMs: 3000
 
@@ -314,6 +316,7 @@
   aggro: 7
   range: 5.5
   ranged: true
+  projectileAnimation: projectile.shard.frost
   slowPct: 25
   slowMs: 1600
 
@@ -354,6 +357,7 @@
   aggro: 7
   range: 6
   ranged: true
+  projectileAnimation: projectile.spit.acid
   slowPct: 20
   slowMs: 1500
 
@@ -429,6 +433,7 @@
   aggro: 7
   range: 6
   ranged: true
+  projectileAnimation: projectile.orb.fire
   weakenPct: 35
   weakenMs: 4000
 
@@ -472,6 +477,7 @@
   aggro: 7
   range: 6
   ranged: true
+  projectileAnimation: projectile.bolt.curse
   slowPct: 25
   slowMs: 2000
   drops:

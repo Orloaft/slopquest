@@ -64,7 +64,7 @@
       status: snare
       durationMs: 1400
       float: { text: Staggered!, color: "#d7e4ef", yOffset: -0.65 }
-  animation: { kind: impact_ring, attach: target, color: "#d7e4ef", scale: 1.1, durationMs: 360 }
+  animation: { id: impact.shield_ring, kind: impact_ring, attach: target, color: "#d7e4ef", scale: 1.1, durationMs: 360 }
   float: { text: Shield Bash, color: "#d7e4ef" }
 
 - id: pinning_shot
@@ -78,7 +78,7 @@
   range: 5
   effectKind: arrow
   targeting: { mode: enemy, range: 5, requiresLineOfSight: true }
-  projectile: { kind: arrow, targetEnemy: true }
+  projectile: { id: projectile.arrow.heavy, kind: arrow, targetEnemy: true }
   effects:
     - { kind: damage, amount: [10, 16], skill: ranged, damageType: physical, xpFactor: 1.5, effectKind: hit }
     - kind: debuff_enemy
@@ -173,10 +173,10 @@
   range: 6
   effectKind: bolt
   targeting: { mode: enemy, range: 6, requiresLineOfSight: true }
-  projectile: { kind: arcane, color: "#c8a8ff", targetEnemy: true }
+  projectile: { id: projectile.bolt.arcane_lance, kind: arcane, color: "#c8a8ff", targetEnemy: true }
   effects:
     - { kind: damage, amount: [8, 13], skill: magic, damageType: magic, xpFactor: 1.2, effectKind: bolt }
-  animation: { kind: impact_ring, attach: target, color: "#c8a8ff", scale: 0.9, durationMs: 300 }
+  animation: { id: impact.arcane.ring, kind: impact_ring, attach: target, color: "#c8a8ff", scale: 0.9, durationMs: 300 }
   float: { text: Arcane Bolt, color: "#c8a8ff" }
 
 - id: healing_poultice
@@ -204,7 +204,7 @@
   range: 4
   effectKind: flare
   targeting: { mode: aoe_point, offset: 2.5, radius: 1.6, range: 4 }
-  projectile: { kind: flask, color: "#a6e06b" }
+  projectile: { id: projectile.flask.volatile, kind: flask, color: "#a6e06b" }
   effects:
     - { kind: damage, amount: [10, 16], skill: magic, damageType: magic, xpFactor: 1.2, effectKind: flare }
     - { kind: debuff_enemy, status: inaccurate }

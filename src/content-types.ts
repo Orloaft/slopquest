@@ -74,6 +74,7 @@ export interface Monster {
   // Ranged debuff that reduces the hit player's PHYSICAL damage output.
   weakenPct?: number;
   weakenMs?: number;
+  projectileAnimation?: string;
   // Flat damage reduction on incoming hits (armored monsters).
   armor?: number;
   // Pack hunters: aggroing alerts nearby same-type monsters to the same target.
@@ -182,6 +183,7 @@ export interface AbilityConditionalBonus {
 }
 
 export interface AbilityProjectile {
+  id?: string;
   kind: string;
   color?: string;
   targetEnemy?: boolean;
@@ -193,11 +195,52 @@ export interface AbilityVfx {
 }
 
 export interface AbilityAnimation {
+  id?: string;
   kind: "slash_arc" | "self_pulse" | "ground_burst" | "projectile_trail" | "impact_ring";
   attach: "self" | "target" | "origin" | "path";
   color?: string;
   scale?: number;
   durationMs?: number;
+}
+
+export type CombatAnimationKind = "melee_arc" | "projectile" | "impact" | "ground" | "self" | "trail";
+export type CombatAnimationRenderer =
+  | "slash_arc"
+  | "arrow"
+  | "arrow_heavy"
+  | "arrow_poison"
+  | "arcane"
+  | "arcane_lance"
+  | "frost_shard"
+  | "fire_orb"
+  | "curse_bolt"
+  | "flask"
+  | "spit"
+  | "fire_missile"
+  | "ice_missile"
+  | "impact_ring"
+  | "fire_burst"
+  | "ice_burst"
+  | "ground_burst"
+  | "self_pulse"
+  | "projectile_trail";
+export type CombatAnimationAnchor = "caster" | "target" | "path" | "ground" | "self";
+export type CombatAnimationOrientation = "rotate_to_target" | "directional_4" | "directional_8" | "screen_fixed";
+export type CombatAnimationZ = "below_actor" | "actor" | "above_actor";
+
+export interface CombatAnimationSpec {
+  id: string;
+  kind: CombatAnimationKind;
+  renderer: CombatAnimationRenderer;
+  source: "effects" | "primitive" | "sheet";
+  frames: number;
+  frameMs: number;
+  anchor: CombatAnimationAnchor;
+  orientation: CombatAnimationOrientation;
+  z: CombatAnimationZ;
+  scale?: number;
+  hitFrame?: number;
+  impact?: string;
 }
 
 export interface AbilityFloat {
