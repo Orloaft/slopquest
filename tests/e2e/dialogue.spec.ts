@@ -20,6 +20,7 @@ test("an NPC freezes in place while in dialogue and resumes after it ends", asyn
       return n ? { x: n.x, y: n.y, moving: n.moving } : null;
     });
 
+  await page.waitForTimeout(400); // let any in-flight wander step settle into the freeze
   const start = await npcPos();
   expect(start).not.toBeNull();
   // Over 3s (long enough to wander several tiles) it must not drift, and not be

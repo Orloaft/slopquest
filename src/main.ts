@@ -409,6 +409,7 @@ const dom = {
   alchemistCloseButton: el<HTMLButtonElement>("#alchemistCloseButton"),
   brewButton: el<HTMLButtonElement>("#brewButton"),
   dialogue: el<HTMLElement>("#dialogue"),
+  dialogueDim: el<HTMLElement>("#dialogueDim"),
   dialogueSpeaker: el<HTMLElement>("#dialogueSpeaker"),
   dialogueLine: el<HTMLElement>("#dialogueLine"),
   dialogueNextButton: el<HTMLButtonElement>("#dialogueNextButton"),
@@ -909,7 +910,7 @@ function update(this: Phaser.Scene, time: number): void {
   updateFloaters();
   const ownView = selfId ? playerViews.get(selfId) : undefined;
   if (ownView) {
-    scene.cameras.main.centerOn(ownView.x, ownView.y);
+    updateDialogueCamera(ownView.x, ownView.y);
     updateVisibleMapChunks();
   }
   if (time - lastMinimapDrawAt >= MINIMAP_DRAW_MS) {
@@ -2965,6 +2966,7 @@ function inputTowardDestination(me: PlayerView): MovementInput | null {
       clearClickDestination();
       sendStopInput();
       if (npc.role === "vendor") openVendor();
+      lastTalkNpcId = npcId;
       send({ type: "talkNpc", id: npcId });
       return null;
     }
@@ -3150,6 +3152,7 @@ function startNpcTalkPath(npcOrId: string | NpcView): void {
   if (Phaser.Math.Distance.Between(me.x, me.y, npc.x, npc.y) <= 2.25) {
     pendingNpcTalk = null;
     if (npc.role === "vendor") openVendor();
+    lastTalkNpcId = npc.id;
     send({ type: "talkNpc", id: npc.id });
     return;
   }
@@ -3791,6 +3794,60 @@ let typewriterTimer: number | null = null;
 let typewriterFull = "";
 let typewriterDone = true;
 
+// Cinematic dialogue focus: the camera frames the player + this NPC (pixel
+// coords) and zooms in; restored on close.
+let lastTalkNpcId: string | null = null;
+let dialogueFocus: { x: number; y: number } | null = null;
+const BASE_CAMERA_ZOOM = 1.35;
+const DIALOGUE_CAMERA_ZOOM = 1.72;
+const DIALOGUE_FOCUS_DROP = 1.1 * TILE_SIZE; // push the view down so the two stand above the box
+
+function updateDialogueCamera(ownX: number, ownY: number): void {
+  const cam = scene.cameras.main;
+  if (activeDialogue && dialogueFocus) {
+    const fx = (ownX + dialogueFocus.x) / 2;
+    const fy = (ownY + dialogueFocus.y) / 2 + DIALOGUE_FOCUS_DROP;
+    cam.setZoom(lerpNum(cam.zoom, DIALOGUE_CAMERA_ZOOM, 0.1));
+    cam.centerOn(lerpNum(cam.midPoint.x, fx, 0.14), lerpNum(cam.midPoint.y, fy, 0.14));
+  } else if (Math.abs(cam.zoom - BASE_CAMERA_ZOOM) > 0.004) {
+    cam.setZoom(lerpNum(cam.zoom, BASE_CAMERA_ZOOM, 0.16));
+    cam.centerOn(ownX, ownY);
+  } else {
+    cam.setZoom(BASE_CAMERA_ZOOM);
+    cam.centerOn(ownX, ownY);
+  }
+}
+
+function lerpNum(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+// Soft per-character "voice" blip while text types — pitch keyed to the speaker.
+function playDialogueBlip(speaker: string): void {
+  if (!titleSoundOn) return;
+  try {
+    if (!titleAudioCtx) titleAudioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const ctx = titleAudioCtx;
+    if (ctx.state === "suspended") void ctx.resume();
+    let hash = 0;
+    for (let i = 0; i < speaker.length; i += 1) hash = (hash * 31 + speaker.charCodeAt(i)) | 0;
+    const base = 300 + (Math.abs(hash) % 220); // 300–520 Hz per speaker
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(base, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.035, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.07);
+  } catch {
+    // Audio is a nicety; never let it break dialogue.
+  }
+}
+
 function openDialogue(event: GameEvent): void {
   const lines: DialogueLine[] = Array.isArray(event.lines) ? event.lines : [];
   if (!lines.length) return;
@@ -3800,6 +3857,10 @@ function openDialogue(event: GameEvent): void {
   // player is frozen (see sendInput) so stop any in-progress movement now.
   clearClickDestination();
   sendStopInput();
+  // Cinematic focus: frame the player + the NPC we just talked to, and dim the world.
+  const npc = lastTalkNpcId ? latestState?.npcs?.find((n) => n.id === lastTalkNpcId) : undefined;
+  dialogueFocus = npc ? { x: npc.x * TILE_SIZE, y: npc.y * TILE_SIZE } : null;
+  dom.dialogueDim.classList.remove("hidden");
   dom.dialogue.classList.remove("hidden");
   renderDialogueLine();
 }
@@ -3826,10 +3887,13 @@ function startTypewriter(text: string): void {
   dom.dialogueLine.textContent = "";
   typewriterDone = false;
   dom.dialogue.classList.remove("ready");
+  const speaker = dom.dialogueSpeaker.textContent ?? "";
   let i = 0;
   typewriterTimer = window.setInterval(() => {
     i += 1;
+    const ch = typewriterFull[i - 1] ?? "";
     dom.dialogueLine.textContent = typewriterFull.slice(0, i);
+    if (ch.trim()) playDialogueBlip(speaker); // blip on non-space chars
     if (i >= typewriterFull.length) finishTypewriter();
   }, 18);
 }
@@ -3864,7 +3928,9 @@ function closeDialogue(openFollowup = true): void {
   const wasOpen = activeDialogue != null;
   stopTypewriter();
   activeDialogue = null;
+  dialogueFocus = null; // camera eases back to the player
   dom.dialogue.classList.add("hidden");
+  dom.dialogueDim.classList.add("hidden");
   dom.dialogue.classList.remove("ready");
   if (wasOpen) send({ type: "endDialogue" }); // release the NPC to wander again
   if (openFollowup && (opensShop || opensAlchemist)) {
