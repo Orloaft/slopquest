@@ -59,7 +59,14 @@ test("a class unlocks at its trainer, equips in town, and is blocked outside tow
 
   // Meet the Vanguard thresholds (Melee 15 / Defense 15) and stand by Captain Doran.
   await page.evaluate((p) => {
-    window.__TIB_E2E__?.send({ type: "e2eGrantItems", skills: { attack: 99999, defense: 99999 }, floor: 0, x: p.x, y: p.y });
+    window.__TIB_E2E__?.send({
+      type: "e2eGrantItems",
+      skills: { attack: 99999, defense: 99999 },
+      quests: { northwatch_vanguard: { accepted: true, complete: true, claimed: true } },
+      floor: 0,
+      x: p.x,
+      y: p.y
+    });
   }, { x: scaleX(0, 51.5), y: scaleY(0, 46.5) });
   await page.waitForFunction(() => {
     const me = window.__TIB_E2E__?.self();

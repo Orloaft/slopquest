@@ -130,6 +130,16 @@ export interface ServerMonster {
   // When set and in the future, the monster is mid-attack — drives the client's
   // bespoke attack animation (timestamp in performance.now ms).
   attackUntil?: number;
+  heavyReadyAt?: number;
+  heavyResolveAt?: number;
+  heavyX?: number;
+  heavyY?: number;
+  heavyTargetId?: string;
+  rangedResolveAt?: number;
+  rangedX?: number;
+  rangedY?: number;
+  rangedTargetId?: string;
+  rangedDamage?: number;
   deadUntil: number;
   homeX: number;
   homeY: number;
@@ -139,6 +149,8 @@ export interface ServerMonster {
   // Status effects applied by player abilities (timestamps in performance.now ms).
   tauntUntil?: number;
   tauntBy?: string;
+  threat: Map<string, number>;
+  threatLastAt?: number;
   snareUntil?: number;
   freezeUntil?: number;
   burnUntil?: number;

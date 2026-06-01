@@ -36,6 +36,7 @@ import {
   xpForLevel,
   zoneAt
 } from "../src/shared.ts";
+import { encounterRole, isNaturallyAggressive, monsterCombatLevel, playerCombatLevel } from "../src/balance.ts";
 import type { AbilityEffect, AbilitySpec, ClassSpec } from "../src/shared.ts";
 import type {
   Item,
@@ -480,6 +481,29 @@ const FORAGE_XP = 12;
 // How long a monster's attack pose is broadcast as active (drives the bespoke
 // client attack animation for enemies that have one).
 const MONSTER_ATTACK_ANIM_MS = 480;
+const MONSTER_RANGED_WINDUP_MS = 420;
+const MONSTER_RANGED_EVADE_RADIUS = 1.15;
+const MONSTER_LEASH_RADIUS = 12;
+const MONSTER_LEASH_REGEN_PER_SEC = 18;
+const THREAT_DECAY_PER_SEC = 1.5;
+const THREAT_FORCED_TAUNT = 10000;
+const THREAT_ASSIST_RADIUS = 7;
+const CONTROL_STATUS_MULT_BY_ROLE = {
+  trash: 1,
+  pack: 1,
+  ambush: 0.8,
+  turret: 0.75,
+  elite: 0.55,
+  boss: 0.25
+} as const;
+const DOT_STATUS_MULT_BY_ROLE = {
+  trash: 1,
+  pack: 1,
+  ambush: 1,
+  turret: 1,
+  elite: 0.85,
+  boss: 0.65
+} as const;
 // WebSocket delivery is ordered/reliable, so full snapshots are a recovery guard
 // rather than the normal data path. Dynamic entities still get periodic full
 // recovery; static resources are initial-full + deltas only so dense zones do
@@ -921,6 +945,7 @@ function updatePlayers(dt: number, now: number): void {
       speed *= player.slowMult ?? 1;
     } else if (player.slowUntil) {
       player.slowUntil = 0;
+      player.slowMult = 1;
     }
 
     const hasMoveVector = input.moveX !== 0 || input.moveY !== 0;
@@ -1002,7 +1027,7 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
     // Hidden burrower (Dust Burrower): inert and invisible until a player steps
     // adjacent, then it bursts out for heavy damage + a stun.
     if (monster.hidden) {
-      const victim = nearestPlayer(monster, 1.3);
+      const victim = nearestPlayer(monster, 1.3, 1, catalog);
       if (victim && !victim.dead && !isSafeZone(victim.floor, victim.x, victim.y)) {
         monster.hidden = false;
         monster.lastAttack = now;
@@ -1017,25 +1042,21 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
 
     tickMonsterStatus(monster, now);
     if (monster.deadUntil) continue; // burn may have killed it this tick
+    resolveMonsterRangedAttack(monster, catalog, now);
+    if (monster.deadUntil) continue;
+    resolveMonsterHeavyAttack(monster, catalog, now);
+    if (monster.deadUntil) continue;
+    if (leashMonster(monster, catalog, dt, now)) {
+      updateMonsterCell(monster, oldFloor, oldX, oldY);
+      continue;
+    }
 
     // Never sit on a player's exact tile — e.g. when a monster respawns on a tile
     // the player is standing on. Coincident sprites hide behind the player yet can
     // still hit; nudge out so the monster keeps its own (visible) tile.
     separateFromPlayer(monster, catalog);
 
-    // Taunt (Provoke) overrides aggro to the taunting player while it lasts.
-    let target = nearestPlayer(monster, catalog.aggro, ROAD_AGGRO_FACTOR);
-    if (monster.tauntUntil && now < monster.tauntUntil && monster.tauntBy) {
-      const taunter = playerById(monster.tauntBy);
-      if (taunter && !taunter.dead && taunter.floor === monster.floor && !isSafeZone(taunter.floor, taunter.x, taunter.y)) {
-        target = taunter;
-      }
-    }
-    // Pack alert: honor a partner's call even if the player is out of aggro range.
-    if (!target && monster.alertUntil && now < monster.alertUntil && monster.alertTarget) {
-      const ally = playerById(monster.alertTarget);
-      if (ally && !ally.dead && ally.floor === monster.floor && !isSafeZone(ally.floor, ally.x, ally.y)) target = ally;
-    }
+    let target = selectMonsterTarget(monster, catalog, now);
     // Pack hunters: an aggroed member alerts nearby same-type members to the kill.
     if (catalog.pack && target && !isSafeZone(target.floor, target.x, target.y)) {
       forEachSpatial(spatial.monsters, monster.floor, monster.x, monster.y, 8, (other) => {
@@ -1043,6 +1064,7 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
         if (distanceSq(monster, other) <= 64) {
           other.alertUntil = now + 5000;
           other.alertTarget = target.id;
+          addThreat(other, target, 6, now);
         }
       });
     }
@@ -1063,27 +1085,17 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
     const distSq = distanceSq(monster, target);
     const rangeSq = catalog.range * catalog.range;
 
-    // Ranged turret (Mire Spitter): anchored, fires a slowing projectile on sight.
+    // Ranged turrets wind up before the projectile resolves; the marked player
+    // can break line-of-sight or step out of the aim spot to evade the shot.
     if (catalog.ranged) {
-      if (!frozen && distSq <= rangeSq && now - monster.lastAttack >= catalog.attackMs && hasLineOfSight(monster.floor, monster.x, monster.y, target.x, target.y)) {
-        monster.lastAttack = now;
-        monster.attackUntil = now + MONSTER_ATTACK_ANIM_MS;
-        monster.dir = facing(monster, target);
-        const shot = Math.max(1, roll(catalog.damage) - armorReduction(target));
-        if (rollDodge(target)) {
-          addSkillXp(target, "agility", Math.max(1, shot));
-          event("float", "Dodge!", target.x, target.y - 0.55, target.floor, "#a0e8ff");
-        } else {
-          const projectile = monsterProjectileSpec(catalog);
-          event("projectile", projectile.kind, target.x, target.y, target.floor, projectile.color, monster.id, target.id, {
-            fromX: monster.x,
-            fromY: monster.y,
-            animationId: projectile.animationId
-          });
-          damagePlayer(target, shot, catalog.name);
-          if (catalog.slowPct) applyPlayerSlow(target, catalog.slowPct, catalog.slowMs ?? 1500);
-          if (catalog.weakenPct) applyPlayerWeaken(target, catalog.weakenPct, catalog.weakenMs ?? 4000);
-        }
+      if (
+        !monster.rangedResolveAt &&
+        !frozen &&
+        distSq <= rangeSq &&
+        now - monster.lastAttack >= catalog.attackMs &&
+        hasLineOfSight(monster.floor, monster.x, monster.y, target.x, target.y)
+      ) {
+        startMonsterRangedAttack(monster, catalog, target, now);
       }
       continue; // anchored — never chases or melees
     }
@@ -1099,6 +1111,7 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
 
     const meleeRange = catalog.range + 0.15;
     if (!frozen && distSq <= meleeRange * meleeRange && now - monster.lastAttack >= catalog.attackMs) {
+      if (startMonsterHeavyAttack(monster, catalog, target, now)) continue;
       monster.lastAttack = now;
       monster.attackUntil = now + MONSTER_ATTACK_ANIM_MS;
       monster.dir = facing(monster, target);
@@ -1117,6 +1130,242 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
     }
   }
   }
+}
+
+function leashMonster(monster: ServerMonster, catalog: Monster, dt: number, now: number): boolean {
+  if (monster.tauntUntil && now < monster.tauntUntil) return false;
+  const homeDistSq = (monster.x - monster.homeX) ** 2 + (monster.y - monster.homeY) ** 2;
+  if (homeDistSq <= MONSTER_LEASH_RADIUS * MONSTER_LEASH_RADIUS) return false;
+
+  clearMonsterCombatState(monster);
+  monster.heavyResolveAt = 0;
+  monster.heavyTargetId = undefined;
+  monster.wanderTarget = null;
+  monster.attackUntil = 0;
+  monster.moving = true;
+  if (monster.hp < monster.maxHp) monster.hp = clamp(monster.hp + MONSTER_LEASH_REGEN_PER_SEC * dt, 0, monster.maxHp);
+
+  const dist = Math.sqrt(homeDistSq);
+  if (dist < 0.3 || catalog.speed <= 0) {
+    monster.x = monster.homeX;
+    monster.y = monster.homeY;
+    monster.moving = false;
+    return true;
+  }
+  moveEntity(monster, ((monster.homeX - monster.x) / dist) * Math.max(catalog.speed, 2.4) * 1.35 * dt, ((monster.homeY - monster.y) / dist) * Math.max(catalog.speed, 2.4) * 1.35 * dt);
+  monster.dir = facing(monster, { x: monster.homeX, y: monster.homeY });
+  return true;
+}
+
+function clearMonsterCombatState(monster: ServerMonster): void {
+  monster.tauntUntil = 0;
+  monster.tauntBy = undefined;
+  monster.alertUntil = 0;
+  monster.alertTarget = undefined;
+  monster.rangedResolveAt = 0;
+  monster.rangedTargetId = undefined;
+  monster.rangedDamage = 0;
+  monster.threat.clear();
+}
+
+function selectMonsterTarget(monster: ServerMonster, catalog: Monster, now: number): ServerPlayer | null {
+  decayThreat(monster, now);
+
+  if (monster.tauntUntil && now < monster.tauntUntil && monster.tauntBy) {
+    const taunter = validThreatTarget(monster, monster.tauntBy);
+    if (taunter) {
+      addThreat(monster, taunter, THREAT_FORCED_TAUNT, now);
+      return taunter;
+    }
+  }
+
+  let target = highestThreatTarget(monster);
+  if (target) return target;
+
+  if (monster.alertUntil && now < monster.alertUntil && monster.alertTarget) {
+    const ally = validThreatTarget(monster, monster.alertTarget);
+    if (ally) {
+      addThreat(monster, ally, 8, now);
+      return ally;
+    }
+  }
+
+  target = nearestPlayer(monster, catalog.aggro, ROAD_AGGRO_FACTOR, catalog);
+  if (target) addThreat(monster, target, 4, now);
+  return target;
+}
+
+function decayThreat(monster: ServerMonster, now: number): void {
+  const elapsedMs = Math.max(0, now - (monster.threatLastAt ?? now));
+  monster.threatLastAt = now;
+  if (elapsedMs <= 0 || monster.threat.size === 0) return;
+  const decay = (elapsedMs / 1000) * THREAT_DECAY_PER_SEC;
+  for (const [playerId, value] of monster.threat) {
+    const player = validThreatTarget(monster, playerId);
+    const next = value - decay;
+    if (!player || next <= 0) monster.threat.delete(playerId);
+    else monster.threat.set(playerId, next);
+  }
+}
+
+function highestThreatTarget(monster: ServerMonster): ServerPlayer | null {
+  let best: ServerPlayer | null = null;
+  let bestThreat = 0;
+  for (const [playerId, threat] of monster.threat) {
+    const player = validThreatTarget(monster, playerId);
+    if (!player) {
+      monster.threat.delete(playerId);
+      continue;
+    }
+    if (threat > bestThreat) {
+      best = player;
+      bestThreat = threat;
+    }
+  }
+  return best;
+}
+
+function monsterTargetId(monster: ServerMonster, now: number): string | undefined {
+  if (monster.tauntUntil && monster.tauntUntil > now && monster.tauntBy) return monster.tauntBy;
+  let bestId: string | undefined;
+  let bestThreat = 0;
+  for (const [playerId, threat] of monster.threat) {
+    if (threat > bestThreat) {
+      bestId = playerId;
+      bestThreat = threat;
+    }
+  }
+  return bestId;
+}
+
+function validThreatTarget(monster: ServerMonster, playerId: string): ServerPlayer | null {
+  const player = playerById(playerId);
+  if (!player || player.dead || player.floor !== monster.floor) return null;
+  if (isSafeZone(player.floor, player.x, player.y)) return null;
+  const leashSq = (MONSTER_LEASH_RADIUS + 2) ** 2;
+  if ((player.x - monster.homeX) ** 2 + (player.y - monster.homeY) ** 2 > leashSq) return null;
+  return player;
+}
+
+function addThreat(monster: ServerMonster, player: ServerPlayer, amount: number, now = performance.now()): void {
+  if (player.dead || player.floor !== monster.floor || amount <= 0) return;
+  monster.threatLastAt = now;
+  monster.threat.set(player.id, (monster.threat.get(player.id) ?? 0) + amount);
+}
+
+function assistNearbyMonsters(source: ServerMonster, player: ServerPlayer, amount: number, now = performance.now()): void {
+  const sourceCatalog = MONSTERS[source.type];
+  forEachSpatial(spatial.monsters, source.floor, source.x, source.y, THREAT_ASSIST_RADIUS, (other) => {
+    if (other === source || other.deadUntil || other.hidden || other.floor !== source.floor) return;
+    const otherCatalog = MONSTERS[other.type];
+    if (!otherCatalog) return;
+    const sameFamily = other.type === source.type;
+    if (!sameFamily && !sourceCatalog?.pack && !otherCatalog.pack) return;
+    if (distanceSq(source, other) > THREAT_ASSIST_RADIUS * THREAT_ASSIST_RADIUS) return;
+    addThreat(other, player, amount, now);
+    other.alertUntil = Math.max(other.alertUntil ?? 0, now + 3500);
+    other.alertTarget = player.id;
+  });
+}
+
+function startMonsterHeavyAttack(monster: ServerMonster, catalog: Monster, target: ServerPlayer, now: number): boolean {
+  const heavy = catalog.heavyAttack;
+  if (!heavy) return false;
+  if (monster.heavyResolveAt && now < monster.heavyResolveAt) return true;
+  if (now < (monster.heavyReadyAt ?? 0)) return false;
+  monster.heavyReadyAt = now + heavy.cooldownMs;
+  monster.heavyResolveAt = now + heavy.windupMs;
+  monster.heavyX = target.x;
+  monster.heavyY = target.y;
+  monster.heavyTargetId = target.id;
+  monster.lastAttack = now;
+  monster.attackUntil = now + heavy.windupMs + MONSTER_ATTACK_ANIM_MS;
+  monster.dir = facing(monster, target);
+  event("telegraph", "heavy", target.x, target.y, monster.floor, "#f0b24a", monster.id, target.id, {
+    durationMs: heavy.windupMs,
+    scale: heavy.radius
+  });
+  event("float", "Heavy!", monster.x, monster.y - 0.6, monster.floor, "#f0b24a", monster.id, target.id);
+  return true;
+}
+
+function startMonsterRangedAttack(monster: ServerMonster, catalog: Monster, target: ServerPlayer, now: number): void {
+  monster.lastAttack = now;
+  monster.rangedResolveAt = now + MONSTER_RANGED_WINDUP_MS;
+  monster.rangedX = target.x;
+  monster.rangedY = target.y;
+  monster.rangedTargetId = target.id;
+  monster.rangedDamage = Math.max(1, roll(catalog.damage) - armorReduction(target));
+  monster.attackUntil = now + MONSTER_RANGED_WINDUP_MS + MONSTER_ATTACK_ANIM_MS;
+  monster.dir = facing(monster, target);
+  event("telegraph", "aim", target.x, target.y, monster.floor, rangedWarningColor(catalog), monster.id, target.id, {
+    durationMs: MONSTER_RANGED_WINDUP_MS,
+    scale: 0.82
+  });
+}
+
+function resolveMonsterRangedAttack(monster: ServerMonster, catalog: Monster, now: number): void {
+  if (!monster.rangedResolveAt || now < monster.rangedResolveAt) return;
+  const targetId = monster.rangedTargetId;
+  const target = targetId ? validThreatTarget(monster, targetId) : null;
+  const aimX = monster.rangedX ?? monster.x;
+  const aimY = monster.rangedY ?? monster.y;
+  const damage = monster.rangedDamage ?? Math.max(1, roll(catalog.damage));
+  monster.rangedResolveAt = 0;
+  monster.rangedTargetId = undefined;
+  monster.rangedDamage = 0;
+  if (!catalog.ranged || !target) return;
+  const stillInRange = distanceSq(monster, target) <= catalog.range * catalog.range;
+  const heldPosition = distanceSq(target, { x: aimX, y: aimY }) <= MONSTER_RANGED_EVADE_RADIUS * MONSTER_RANGED_EVADE_RADIUS;
+  if (!stillInRange || !heldPosition || !hasLineOfSight(monster.floor, monster.x, monster.y, target.x, target.y)) {
+    event("float", "Evade!", aimX, aimY - 0.55, monster.floor, "#a0e8ff", monster.id, target.id);
+    return;
+  }
+  const projectile = monsterProjectileSpec(catalog);
+  event("projectile", projectile.kind, target.x, target.y, target.floor, projectile.color, monster.id, target.id, {
+    fromX: monster.x,
+    fromY: monster.y,
+    animationId: projectile.animationId
+  });
+  if (rollDodge(target)) {
+    addSkillXp(target, "agility", Math.max(1, damage));
+    event("float", "Dodge!", target.x, target.y - 0.55, target.floor, "#a0e8ff");
+    return;
+  }
+  damagePlayer(target, damage, catalog.name);
+  if (catalog.slowPct) applyPlayerSlow(target, catalog.slowPct, catalog.slowMs ?? 1500);
+  if (catalog.weakenPct) applyPlayerWeaken(target, catalog.weakenPct, catalog.weakenMs ?? 4000);
+}
+
+function rangedWarningColor(catalog: Monster): string {
+  if (catalog.weakenPct) return "#b48cff";
+  if (catalog.slowPct) return "#76d6ff";
+  return "#ffcf66";
+}
+
+function resolveMonsterHeavyAttack(monster: ServerMonster, catalog: Monster, now: number): void {
+  const heavy = catalog.heavyAttack;
+  if (!heavy || !monster.heavyResolveAt || now < monster.heavyResolveAt) return;
+  const x = monster.heavyX ?? monster.x;
+  const y = monster.heavyY ?? monster.y;
+  monster.heavyResolveAt = 0;
+  monster.heavyTargetId = undefined;
+  event("effect", "ground_burst", x, y, monster.floor, "#f0b24a", monster.id, null, {
+    animationId: "impact.ground_burst",
+    scale: heavy.radius / 1.6
+  });
+  const radiusSq = heavy.radius * heavy.radius;
+  forEachSpatial(spatial.players, monster.floor, x, y, heavy.radius, (player) => {
+    if (player.dead || player.floor !== monster.floor || isSafeZone(player.floor, player.x, player.y)) return;
+    if (distanceSq(player, { x, y }) > radiusSq) return;
+    const damage = Math.max(1, Math.round(roll(catalog.damage) * heavy.damageMultiplier) - armorReduction(player));
+    if (rollDodge(player)) {
+      addSkillXp(player, "agility", Math.max(1, damage));
+      event("float", "Dodge!", player.x, player.y - 0.55, player.floor, "#a0e8ff");
+      return;
+    }
+    damagePlayer(player, damage, `${catalog.name} heavy attack`);
+  });
 }
 
 function occupiedRegions(): ActiveRegions {
@@ -1231,10 +1480,35 @@ function monstersInRadius(floor: number, cx: number, cy: number, radius: number)
 
 function applyBurn(player: ServerPlayer, monster: ServerMonster, durationMs: number, perTick: number): void {
   const now = performance.now();
-  monster.burnUntil = now + durationMs;
-  monster.burnPerTick = perTick;
+  const adjustedDuration = adjustedMonsterStatusDuration(monster, durationMs, "dot");
+  monster.burnUntil = Math.max(monster.burnUntil ?? 0, now + adjustedDuration);
+  monster.burnPerTick = Math.max(monster.burnPerTick ?? 0, perTick);
   monster.burnNextAt = now + 1000;
   monster.burnBy = player.id;
+}
+
+function applyMonsterControlStatus(monster: ServerMonster, status: "snare" | "slow" | "freeze" | "inaccurate", durationMs: number, now: number, slowMultiplier = 0.6): boolean {
+  const adjustedDuration = adjustedMonsterStatusDuration(monster, durationMs, "control");
+  if (adjustedDuration < 250) return false;
+  const until = now + adjustedDuration;
+  if (status === "snare") monster.snareUntil = Math.max(monster.snareUntil ?? 0, until);
+  if (status === "slow") {
+    monster.slowUntil = Math.max(monster.slowUntil ?? 0, until);
+    monster.slowMult = Math.min(monster.slowMult ?? 1, slowMultiplier);
+  }
+  if (status === "freeze") {
+    monster.freezeUntil = Math.max(monster.freezeUntil ?? 0, until);
+    monster.snareUntil = Math.max(monster.snareUntil ?? 0, until);
+  }
+  if (status === "inaccurate") monster.inaccurateUntil = Math.max(monster.inaccurateUntil ?? 0, until);
+  return true;
+}
+
+function adjustedMonsterStatusDuration(monster: ServerMonster, durationMs: number, kind: "control" | "dot"): number {
+  const catalog = MONSTERS[monster.type];
+  const role = catalog ? encounterRole(catalog) : "trash";
+  const mult = kind === "control" ? CONTROL_STATUS_MULT_BY_ROLE[role] : DOT_STATUS_MULT_BY_ROLE[role];
+  return Math.round(durationMs * mult);
 }
 
 // Move the player up to `tiles` tiles along their facing, stopping before the
@@ -1488,14 +1762,16 @@ function applyAbilityEffect(
     let affected = 0;
     for (const monster of resolution.targets) {
       if (monster.deadUntil) continue;
-      if (effect.status === "snare") monster.snareUntil = now + durationMs;
-      if (effect.status === "slow") {
-        monster.slowUntil = now + durationMs;
-        monster.slowMult = effect.slowMultiplier ?? 0.6;
-      }
-      if (effect.status === "freeze") monster.freezeUntil = now + durationMs;
-      if (effect.status === "inaccurate") monster.inaccurateUntil = now + durationMs;
+      let applied = true;
+      if (effect.status === "snare") applied = applyMonsterControlStatus(monster, "snare", durationMs, now);
+      if (effect.status === "slow") applied = applyMonsterControlStatus(monster, "slow", durationMs, now, effect.slowMultiplier ?? 0.6);
+      if (effect.status === "freeze") applied = applyMonsterControlStatus(monster, "freeze", durationMs, now);
+      if (effect.status === "inaccurate") applied = applyMonsterControlStatus(monster, "inaccurate", durationMs, now);
       if (effect.status === "burn") applyBurn(player, monster, durationMs, effect.perTick ?? 1);
+      if (!applied) {
+        event("float", "Resist", monster.x, monster.y - 0.55, monster.floor, "#c8a8ff");
+        continue;
+      }
       if (effect.float) event("float", effect.float.text, monster.x, monster.y + (effect.float.yOffset ?? -0.5), monster.floor, effect.float.color);
       affected += 1;
     }
@@ -1504,8 +1780,14 @@ function applyAbilityEffect(
 
   if (effect.kind === "buff_self") {
     const durationMs = effect.durationMs ?? spec.durationMs;
-    if (effect.cleanse?.includes("slow")) player.slowUntil = 0;
-    if (effect.cleanse?.includes("weaken")) player.weakUntil = 0;
+    if (effect.cleanse?.includes("slow")) {
+      player.slowUntil = 0;
+      player.slowMult = 1;
+    }
+    if (effect.cleanse?.includes("weaken")) {
+      player.weakUntil = 0;
+      player.weakMult = 1;
+    }
     player.abilityBuffs[effect.buff] = { until: now + durationMs };
     return 1;
   }
@@ -1517,8 +1799,14 @@ function applyAbilityEffect(
   }
   if (effect.kind === "cleanse_self") {
     const statuses = effect.statuses ?? ["slow", "weaken"];
-    if (statuses.includes("slow")) player.slowUntil = 0;
-    if (statuses.includes("weaken")) player.weakUntil = 0;
+    if (statuses.includes("slow")) {
+      player.slowUntil = 0;
+      player.slowMult = 1;
+    }
+    if (statuses.includes("weaken")) {
+      player.weakUntil = 0;
+      player.weakMult = 1;
+    }
     if (statuses.includes("stun")) player.stunUntil = 0;
     addSkillXp(player, spec.skill ?? "magic", 4);
     return 1;
@@ -1570,6 +1858,7 @@ function applyAbilityEffect(
     for (const monster of resolution.targets) {
       monster.tauntUntil = now + durationMs;
       monster.tauntBy = player.id;
+      addThreat(monster, player, THREAT_FORCED_TAUNT, now);
     }
     return resolution.targets.length;
   }
@@ -1580,6 +1869,8 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
   const armor = MONSTERS[monster.type]?.armor ?? 0;
   const dealt = Math.max(1, damage - armor);
   monster.hp = clamp(monster.hp - dealt, 0, monster.maxHp);
+  addThreat(monster, player, dealt * 1.4);
+  assistNearbyMonsters(monster, player, Math.max(2, dealt * 0.25));
   // Taking damage shatters a freeze (per Frost Nova design).
   if (monster.freezeUntil) monster.freezeUntil = 0;
   event("effect", kind, monster.x, monster.y, monster.floor, null, player.id, monster.id, {
@@ -1593,6 +1884,7 @@ function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: num
   const catalog = MONSTERS[monster.type];
   if (!catalog) return;
   monster.deadUntil = performance.now() + (monster.type === "boss" ? 45000 : 18000);
+  clearMonsterCombatState(monster);
   removeFromSpatial(spatial.monsters, monster);
   player.xp += catalog.xp;
   if (catalog.isUnholy) completeFaithDeed(player, "unholy_slay", catalog.faithXp ?? Math.max(4, Math.floor(catalog.xp * 0.45)));
@@ -2579,6 +2871,7 @@ function grantE2EItems(
     x?: number;
     y?: number;
     skills?: Record<string, number>;
+    quests?: Record<string, Partial<QuestState>>;
     forceDodge?: boolean;
   }
 ): void {
@@ -2604,6 +2897,19 @@ function grantE2EItems(
     player.hp = clamp(player.hp, 1, player.maxHp);
     player.mana = clamp(player.mana, 0, player.maxMana);
     player.favor = clamp(player.favor, 0, player.maxFavor);
+  }
+  if (message.quests) {
+    let changed = false;
+    for (const [id, patch] of Object.entries(message.quests)) {
+      const state = player.quests[id];
+      if (!state || !patch) continue;
+      state.accepted = patch.accepted ?? state.accepted;
+      state.progress = Number.isFinite(patch.progress) ? Math.max(0, Math.floor(Number(patch.progress))) : state.progress;
+      state.complete = patch.complete ?? state.complete;
+      state.claimed = patch.claimed ?? state.claimed;
+      changed = true;
+    }
+    if (changed) markQuestChanged(player);
   }
   if (typeof message.forceDodge === "boolean") player.forceDodge = message.forceDodge;
   if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y)) {
@@ -3207,12 +3513,14 @@ function spawnMonster(spawn: MonsterSpawn): void {
     dir: "down",
     moving: false,
     lastAttack: 0,
+    heavyReadyAt: performance.now() + roll([1200, Math.max(1800, catalog.heavyAttack?.cooldownMs ?? 1800)]),
     deadUntil: 0,
     homeX: spawn.x + 0.5,
     homeY: spawn.y + 0.5,
     zone: spawn.zone ?? zoneAt(spawn.floor, spawn.x + 0.5, spawn.y + 0.5),
     wanderTarget: null,
     wanderNextAt: performance.now() + roll([800, 2800]),
+    threat: new Map(),
     hidden: catalog.burrow === true
   };
   monsters.set(monster.id, monster);
@@ -3250,10 +3558,12 @@ function respawnMonster(monster: ServerMonster): void {
   monster.hp = catalog.maxHp;
   monster.maxHp = catalog.maxHp;
   monster.deadUntil = 0;
+  monster.heavyReadyAt = performance.now() + roll([1200, Math.max(1800, catalog.heavyAttack?.cooldownMs ?? 1800)]);
+  monster.heavyResolveAt = 0;
+  monster.heavyTargetId = undefined;
   monster.wanderTarget = null;
   monster.wanderNextAt = performance.now() + roll([1000, 3500]);
-  monster.tauntUntil = 0;
-  monster.tauntBy = undefined;
+  clearMonsterCombatState(monster);
   monster.snareUntil = 0;
   monster.freezeUntil = 0;
   monster.burnUntil = 0;
@@ -3444,12 +3754,13 @@ function separateFromPlayer(monster: ServerMonster, catalog: { speed: number }):
   updateMonsterCell(monster, oldFloor, oldX, oldY);
 }
 
-function nearestPlayer(monster: ServerMonster, maxDistance: number, roadFactor = 1): ServerPlayer | null {
+function nearestPlayer(monster: ServerMonster, maxDistance: number, roadFactor = 1, catalog?: Monster): ServerPlayer | null {
   let best: ServerPlayer | null = null;
   let bestDistSq = maxDistance * maxDistance;
   const roadDistSq = (maxDistance * roadFactor) ** 2;
   forEachSpatial(spatial.players, monster.floor, monster.x, monster.y, maxDistance, (player) => {
     if (player.dead || player.floor !== monster.floor) return;
+    if (catalog && !isNaturallyAggressive(monsterCombatLevel(catalog), combatLevelForAggro(player))) return;
     const distSq = distanceSq(monster, player);
     if (distSq >= bestDistSq) return; // out of aggro, or not closer than the current pick
     // On-road players are only noticed inside the reduced road range.
@@ -3458,6 +3769,17 @@ function nearestPlayer(monster: ServerMonster, maxDistance: number, roadFactor =
     bestDistSq = distSq;
   });
   return best;
+}
+
+function combatLevelForAggro(player: ServerPlayer): number {
+  return playerCombatLevel({
+    level: player.level,
+    attack: skillLevel(player, "attack"),
+    defense: skillLevel(player, "defense"),
+    ranged: skillLevel(player, "ranged"),
+    magic: skillLevel(player, "magic"),
+    faith: skillLevel(player, "faith")
+  });
 }
 
 function awardLevels(player: ServerPlayer): void {
@@ -4055,7 +4377,8 @@ function buildPlayerPublicSignature(player: ServerPlayer, action: ActionView | n
   return hash;
 }
 
-function buildMonsterSignature(monster: ServerMonster, attacking: boolean): number {
+function buildMonsterSignature(monster: ServerMonster, attacking: boolean, now: number): number {
+  const catalog = MONSTERS[monster.type];
   let hash = HASH_INIT;
   hash = hashNumber(hash, monster.floor);
   hash = hashNumber(hash, round(monster.x));
@@ -4065,6 +4388,9 @@ function buildMonsterSignature(monster: ServerMonster, attacking: boolean): numb
   hash = hashBool(hash, attacking);
   hash = hashNumber(hash, Math.round(monster.hp));
   hash = hashNumber(hash, monster.maxHp);
+  hash = hashNumber(hash, catalog ? monsterCombatLevel(catalog) : 0);
+  hash = hashString(hash, monsterTargetId(monster, now) ?? "");
+  hash = hashString(hash, monsterStatusSignature(monster, now));
   return hash;
 }
 
@@ -4381,10 +4707,11 @@ function serializeAbilities(player: ServerPlayer, now: number): AbilityView[] {
 }
 
 function serializeMonster(monster: ServerMonster, now: number): MonsterView {
+  const catalog = MONSTERS[monster.type];
   const cached = monsterViewCache.get(monster);
   if (cached?.checkedSequence === snapshotSequence) return cached.view;
   const attacking = (monster.attackUntil ?? 0) > now;
-  const signature = buildMonsterSignature(monster, attacking);
+  const signature = buildMonsterSignature(monster, attacking, now);
   if (cached?.signature === signature) {
     cached.checkedSequence = snapshotSequence;
     return cached.view;
@@ -4392,13 +4719,17 @@ function serializeMonster(monster: ServerMonster, now: number): MonsterView {
   const view = {
     id: monster.id,
     type: monster.type,
-    name: MONSTERS[monster.type]?.name ?? monster.type,
+    name: catalog?.name ?? monster.type,
+    level: catalog ? monsterCombatLevel(catalog) : 1,
+    role: catalog ? encounterRole(catalog) : "trash",
     floor: monster.floor,
     x: round(monster.x),
     y: round(monster.y),
     dir: monster.dir,
     moving: monster.moving,
     attacking,
+    targetId: monsterTargetId(monster, now),
+    statuses: monsterStatuses(monster, now),
     hp: Math.round(monster.hp),
     maxHp: monster.maxHp,
     zone: monster.zone
@@ -4406,6 +4737,22 @@ function serializeMonster(monster: ServerMonster, now: number): MonsterView {
   resourceViewSignatureCache.set(view, signature);
   monsterViewCache.set(monster, { checkedSequence: snapshotSequence, signature, view });
   return view;
+}
+
+function monsterStatuses(monster: ServerMonster, now: number): MonsterView["statuses"] {
+  const statuses: NonNullable<MonsterView["statuses"]> = [];
+  if (monster.tauntUntil && now < monster.tauntUntil) statuses.push("taunt");
+  if (monster.snareUntil && now < monster.snareUntil) statuses.push("snare");
+  if (monster.freezeUntil && now < monster.freezeUntil) statuses.push("freeze");
+  if (monster.burnUntil && now < monster.burnUntil) statuses.push("burn");
+  if (monster.slowUntil && now < monster.slowUntil) statuses.push("slow");
+  if (monster.inaccurateUntil && now < monster.inaccurateUntil) statuses.push("inaccurate");
+  if (monster.rangedResolveAt && now < monster.rangedResolveAt) statuses.push("aiming");
+  return statuses;
+}
+
+function monsterStatusSignature(monster: ServerMonster, now: number): string {
+  return (monsterStatuses(monster, now) ?? []).join(",");
 }
 
 function serializeNpc(npc: NpcRuntime): NpcView {
@@ -5073,13 +5420,15 @@ function classOf(player: ServerPlayer): ClassSpec {
 }
 
 function applyPlayerSlow(player: ServerPlayer, pct: number, ms: number): void {
-  player.slowUntil = performance.now() + ms;
-  player.slowMult = Math.max(0.2, 1 - pct / 100);
+  const now = performance.now();
+  player.slowUntil = Math.max(player.slowUntil ?? 0, now + ms);
+  player.slowMult = Math.min(player.slowMult ?? 1, Math.max(0.2, 1 - pct / 100));
   event("float", "Slowed!", player.x, player.y - 0.55, player.floor, "#9ad36b");
 }
 
 function applyPlayerStun(player: ServerPlayer, ms: number): void {
-  player.stunUntil = performance.now() + ms;
+  const now = performance.now();
+  player.stunUntil = Math.max(player.stunUntil ?? 0, now + ms);
   event("float", "Stunned!", player.x, player.y - 0.55, player.floor, "#f0c84a");
 }
 
@@ -5088,8 +5437,9 @@ function isStunned(player: ServerPlayer): boolean {
 }
 
 function applyPlayerWeaken(player: ServerPlayer, pct: number, ms: number): void {
-  player.weakUntil = performance.now() + ms;
-  player.weakMult = Math.max(0.2, 1 - pct / 100);
+  const now = performance.now();
+  player.weakUntil = Math.max(player.weakUntil ?? 0, now + ms);
+  player.weakMult = Math.min(player.weakMult ?? 1, Math.max(0.2, 1 - pct / 100));
   event("float", "Weakened!", player.x, player.y - 0.55, player.floor, "#e6c27a");
 }
 

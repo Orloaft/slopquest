@@ -53,12 +53,16 @@ interface CompactMonsterView {
   i: string;
   t: string;
   n: string;
+  l?: number;
+  r?: number | MonsterView["role"];
   f: number;
   x: number;
   y: number;
   d: MonsterView["dir"];
   mo?: 1;
   at?: 1;
+  tg?: string;
+  st?: number | MonsterView["statuses"];
   h: number;
   mh: number;
   z: string;
@@ -231,6 +235,9 @@ const compactMiningNodeViewCache = new WeakMap<MiningNodeView, CompactMiningNode
 const compactHerbNodeViewCache = new WeakMap<HerbNodeView, CompactHerbNodeView>();
 const compactGameEventCache = new WeakMap<GameEvent, CompactGameEvent>();
 
+const MONSTER_ROLE_CODES = ["pack", "ambush", "turret", "elite", "boss"] as const satisfies readonly MonsterView["role"][];
+const MONSTER_STATUS_BITS = ["taunt", "snare", "freeze", "burn", "slow", "inaccurate", "aiming"] as const satisfies readonly NonNullable<MonsterView["statuses"]>[number][];
+
 export function compactStateSnapshot(snapshot: StateSnapshot): CompactStateSnapshot {
   const wire: CompactStateSnapshot = { type: "state" };
   if (snapshot.players.length > 0) wire.p = snapshot.players.map(compactPlayerView);
@@ -400,8 +407,12 @@ function compactMonsterView(monster: MonsterView): CompactMonsterView {
     mh: monster.maxHp,
     z: monster.zone
   };
+  if (monster.level !== 1) compact.l = monster.level;
+  if (monster.role !== "trash") compact.r = compactMonsterRole(monster.role);
   if (monster.moving) compact.mo = 1;
   if (monster.attacking) compact.at = 1;
+  if (monster.targetId) compact.tg = monster.targetId;
+  if (monster.statuses?.length) compact.st = compactMonsterStatuses(monster.statuses);
   compactMonsterViewCache.set(monster, compact);
   return compact;
 }
@@ -412,16 +423,45 @@ function expandMonsterView(monster: CompactMonsterView | MonsterView): MonsterVi
     id: monster.i,
     type: monster.t,
     name: monster.n,
+    level: monster.l ?? 1,
+    role: expandMonsterRole(monster.r),
     floor: monster.f,
     x: monster.x,
     y: monster.y,
     dir: monster.d,
     moving: Boolean(monster.mo),
     attacking: Boolean(monster.at),
+    targetId: monster.tg,
+    statuses: expandMonsterStatuses(monster.st),
     hp: monster.h,
     maxHp: monster.mh,
     zone: monster.z
   };
+}
+
+function compactMonsterRole(role: MonsterView["role"]): number | undefined {
+  const index = MONSTER_ROLE_CODES.indexOf(role as (typeof MONSTER_ROLE_CODES)[number]);
+  return index >= 0 ? index + 1 : undefined;
+}
+
+function expandMonsterRole(code: number | MonsterView["role"] | undefined): MonsterView["role"] {
+  if (typeof code === "string") return code;
+  return code ? (MONSTER_ROLE_CODES[code - 1] ?? "trash") : "trash";
+}
+
+function compactMonsterStatuses(statuses: NonNullable<MonsterView["statuses"]>): number {
+  let mask = 0;
+  for (const status of statuses) {
+    const index = MONSTER_STATUS_BITS.indexOf(status);
+    if (index >= 0) mask |= 1 << index;
+  }
+  return mask;
+}
+
+function expandMonsterStatuses(mask: number | MonsterView["statuses"] | undefined): MonsterView["statuses"] {
+  if (Array.isArray(mask)) return mask;
+  if (!mask) return [];
+  return MONSTER_STATUS_BITS.filter((_, index) => Boolean(mask & (1 << index)));
 }
 
 function compactNpcView(npc: NpcView): CompactNpcView {

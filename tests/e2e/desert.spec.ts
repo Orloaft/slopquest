@@ -15,6 +15,15 @@ test("travel loop: cemetery south portal -> desert, and the oasis passage -> Way
   await page.goto("/?e2e");
   await join(page);
 
+  await page.evaluate(() =>
+    window.__TIB_E2E__?.send({
+      type: "e2eGrantItems",
+      quests: {
+        marsh_lily_poultice: { accepted: true, complete: true, claimed: true },
+        badlands_truce: { accepted: true, complete: true, claimed: true }
+      }
+    })
+  );
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: p.x, y: p.y }), { x: scaleX(1, 56.5), y: scaleY(1, 70.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 7, null, { timeout: 8000 });
 

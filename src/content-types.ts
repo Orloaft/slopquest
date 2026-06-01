@@ -25,6 +25,8 @@ export type Capability = "chop_tree" | "fish" | "mine" | "ranged";
 
 export type NpcRole = "vendor" | "quest" | "guide" | "alchemist" | "trainer" | "smith";
 
+export type EncounterRole = "trash" | "pack" | "ambush" | "turret" | "elite" | "boss";
+
 export type QuestKind = "kill" | "gather" | "fetch";
 
 export interface Buff {
@@ -57,8 +59,10 @@ export interface Item {
 }
 
 export interface Monster {
+  id?: string;
   name: string;
   description?: string;
+  role?: EncounterRole;
   maxHp: number;
   speed: number;
   damage: Range;
@@ -88,6 +92,12 @@ export interface Monster {
   // damage + a stun (stunMs).
   burrow?: boolean;
   stunMs?: number;
+  heavyAttack?: {
+    cooldownMs: number;
+    windupMs: number;
+    damageMultiplier: number;
+    radius: number;
+  };
 }
 
 export interface QuestDrop {

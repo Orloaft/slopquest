@@ -1,7 +1,7 @@
 // Wire protocol shared by client and server: the snapshot the server broadcasts,
 // the per-entity views inside it, and the messages the client sends back.
 
-import type { NpcRole, QuestKind } from "./content-types.ts";
+import type { EncounterRole, NpcRole, QuestKind } from "./content-types.ts";
 
 export type Direction = "up" | "down" | "left" | "right";
 
@@ -120,16 +120,22 @@ export interface MonsterView {
   id: string;
   type: string;
   name: string;
+  level: number;
+  role: EncounterRole;
   floor: number;
   x: number;
   y: number;
   dir: Direction;
   moving: boolean;
   attacking?: boolean;
+  targetId?: string;
+  statuses?: MonsterStatusView[];
   hp: number;
   maxHp: number;
   zone: string;
 }
+
+export type MonsterStatusView = "taunt" | "snare" | "freeze" | "burn" | "slow" | "inaccurate" | "aiming";
 
 export interface NpcView {
   id: string;
@@ -378,6 +384,7 @@ export type ClientMessage =
       x?: number;
       y?: number;
       skills?: Record<string, number>;
+      quests?: Record<string, Partial<{ accepted: boolean; progress: number; complete: boolean; claimed: boolean }>>;
       forceDodge?: boolean;
     }
   | { type: "e2eEmitEvents"; count?: number; floor?: number; x?: number; y?: number; spread?: number }

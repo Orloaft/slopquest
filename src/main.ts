@@ -218,6 +218,9 @@ interface PlayerEntityView extends ActorView {
 interface MonsterEntityView extends ActorView {
   hp: Phaser.GameObjects.Rectangle;
   targetRing: Phaser.GameObjects.Ellipse;
+  aggroRing: Phaser.GameObjects.Ellipse;
+  roleBadge: Phaser.GameObjects.Text;
+  statusText: Phaser.GameObjects.Text;
 }
 
 interface NpcEntityView extends ActorView {}
@@ -1624,8 +1627,15 @@ function syncEntities(): void {
     view.sprite.clearTint();
     if (actor.tint) view.sprite.setTint(actor.tint);
     view.nameText.setText(monster.name);
+    view.roleBadge.setText(roleBadgeText(monster.role));
+    view.roleBadge.setColor(roleBadgeColor(monster.role));
+    view.roleBadge.setVisible(monster.role !== "trash");
+    const statusLabel = monsterStatusLabel(monster);
+    view.statusText.setText(statusLabel);
+    view.statusText.setVisible(statusLabel.length > 0);
     view.hp.width = 36 * (monster.hp / monster.maxHp);
     view.targetRing.setVisible(me.targetId === monster.id);
+    view.aggroRing.setVisible(monster.targetId === me.id);
   }
 
   for (const [id, view] of monsterViews) {
@@ -1999,11 +2009,14 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
   view.targetX = view.x;
   view.targetY = view.y;
   const targetRing = scene.add.ellipse(0, 8, 38, 20).setStrokeStyle(2, 0xf97316, 0.9).setVisible(false);
+  const aggroRing = scene.add.ellipse(0, 8, 44, 24).setStrokeStyle(2, 0xef4444, 0.95).setVisible(false);
   const shadow = scene.add.ellipse(0, 13, 30, 12, 0x000000, 0.28);
   const actor = monsterActorSpec(monster);
   const sprite = scene.add.sprite(0, actor.yOffset, actorTextureKey(actor.family, monster.dir, 0)).setDisplaySize(actor.width, actor.height);
   if (actor.tint) sprite.setTint(actor.tint);
   const nameText = scene.add.text(0, -45, monster.name, textStyle(11, "#f8ead0")).setOrigin(0.5);
+  const roleBadge = scene.add.text(0, -58, roleBadgeText(monster.role), textStyle(10, roleBadgeColor(monster.role))).setOrigin(0.5).setVisible(monster.role !== "trash");
+  const statusText = scene.add.text(0, -21, "", textStyle(9, "#fde68a")).setOrigin(0.5).setVisible(false);
   const hpBack = scene.add.rectangle(-18, -32, 36, 4, 0x191d1a).setOrigin(0, 0.5);
   const hp = scene.add.rectangle(-18, -32, 36, 4, 0xef4444).setOrigin(0, 0.5);
   const zone = scene.add.zone(0, 0, 54, 56).setInteractive({ cursor: "pointer" });
@@ -2018,13 +2031,46 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
     }
   });
   attachHoverTint(zone, sprite);
-  view.add([targetRing, shadow, sprite, nameText, hpBack, hp, zone]);
+  view.add([aggroRing, targetRing, shadow, sprite, nameText, roleBadge, statusText, hpBack, hp, zone]);
   view.nameText = nameText;
   view.hp = hp;
   view.targetRing = targetRing;
+  view.aggroRing = aggroRing;
+  view.roleBadge = roleBadge;
+  view.statusText = statusText;
   view.sprite = sprite;
   setActorAnimation(view, actor.family, monster.dir, monster.moving, actor.width, actor.height, monster.attacking);
   return view;
+}
+
+function roleBadgeText(role: MonsterView["role"]): string {
+  if (role === "boss") return "BOSS";
+  if (role === "elite") return "ELITE";
+  if (role === "turret") return "CAST";
+  if (role === "ambush") return "AMB";
+  if (role === "pack") return "PACK";
+  return "";
+}
+
+function roleBadgeColor(role: MonsterView["role"]): string {
+  if (role === "boss") return "#ffb4a2";
+  if (role === "elite") return "#fcd34d";
+  if (role === "turret") return "#a5f3fc";
+  if (role === "ambush") return "#c4b5fd";
+  if (role === "pack") return "#bbf7d0";
+  return "#f8ead0";
+}
+
+function monsterStatusLabel(monster: MonsterView): string {
+  const statuses = monster.statuses ?? [];
+  if (statuses.includes("aiming")) return "AIM";
+  if (statuses.includes("taunt")) return "TAUNT";
+  if (statuses.includes("freeze")) return "FREEZE";
+  if (statuses.includes("snare")) return "SNARE";
+  if (statuses.includes("burn")) return "BURN";
+  if (statuses.includes("slow")) return "SLOW";
+  if (statuses.includes("inaccurate")) return "BLIND";
+  return "";
 }
 
 function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
@@ -3672,8 +3718,8 @@ function walkToTile(floor: number, tx: number, ty: number): void {
 
 function examineMonster(monster: MonsterView): void {
   const desc = MONSTERS[monster.type]?.description;
-  const hp = `${Math.max(0, Math.ceil(monster.hp))}/${monster.maxHp} HP`;
-  addSystemLine(desc ? `${monster.name} — ${desc}. (${hp})` : `${monster.name} — ${hp}.`);
+  const stats = `level ${monster.level} ${monster.role}, ${Math.max(0, Math.ceil(monster.hp))}/${monster.maxHp} HP`;
+  addSystemLine(desc ? `${monster.name} — ${desc}. (${stats})` : `${monster.name} — ${stats}.`);
 }
 
 function examineNpc(npc: NpcView): void {
@@ -4391,6 +4437,7 @@ function consumeEvents(events: GameEvent[]): void {
     }
     if (event.type === "effect" && self()?.floor === event.floor) playCombatEffect(event);
     if (event.type === "ability_vfx" && self()?.floor === event.floor) playAbilityVfx(event);
+    if (event.type === "telegraph" && self()?.floor === event.floor) playTelegraph(event);
     if (event.type === "projectile" && self()?.floor === event.floor) playProjectile(event);
     if ((event.type === "hit" || event.type === "float") && self()?.floor === event.floor) {
       const floater = scene.add.text((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, String(event.text), textStyle(13, event.color ?? "#fff")).setOrigin(0.5) as Floater;
@@ -4399,6 +4446,24 @@ function consumeEvents(events: GameEvent[]): void {
       fxLayer.add(floater);
     }
   }
+}
+
+function playTelegraph(event: GameEvent): void {
+  const x = (event.x ?? 0) * TILE_SIZE;
+  const y = (event.y ?? 0) * TILE_SIZE;
+  const radius = Math.max(0.4, event.scale ?? 1.6) * TILE_SIZE;
+  const color = hexColorToNumber(event.color, 0xf0b24a);
+  const duration = event.durationMs ?? 800;
+  const warning = scene.add.ellipse(x, y + 8, radius * 2, radius, color, 0.18).setStrokeStyle(3, color, 0.95);
+  const inner = scene.add.ellipse(x, y + 8, radius * 1.35, radius * 0.68, color, 0.12).setStrokeStyle(1, color, 0.65);
+  fxLayer.add(warning);
+  fxLayer.add(inner);
+  scene.tweens.add({ targets: warning, alpha: 0.35, scale: 0.88, yoyo: true, repeat: 2, duration: Math.max(90, duration / 4), ease: "Sine.easeInOut" });
+  scene.tweens.add({ targets: inner, alpha: 0.55, scale: 0.72, duration, ease: "Quad.easeIn" });
+  scene.time.delayedCall(duration, () => {
+    warning.destroy();
+    inner.destroy();
+  });
 }
 
 function playHolyChime(): void {

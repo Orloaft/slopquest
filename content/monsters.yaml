@@ -10,6 +10,7 @@
 
 - id: rat
   name: Rat
+  role: trash
   description: "a mangy scavenger, bold only in numbers"
   maxHp: 28
   speed: 2.4
@@ -169,6 +170,7 @@
 
 - id: dire_wolf
   name: Dire Wolf
+  role: pack
   description: "a massive alpha wolf; its pack answers its howl"
   maxHp: 78
   speed: 3.15
@@ -182,6 +184,7 @@
 
 - id: forest_pixie
   name: Forest Pixie
+  role: turret
   description: "a mischievous sprite flitting through the glades"
   maxHp: 48
   speed: 3.1
@@ -198,6 +201,7 @@
 
 - id: bone_druid
   name: Bone Druid
+  role: turret
   description: "a withered druid bound to rotting roots"
   maxHp: 82
   speed: 2.05
@@ -226,6 +230,7 @@
 
 - id: ancient_treant
   name: Ancient Treant
+  role: elite
   description: "an age-old tree-lord, slow but terribly strong"
   maxHp: 130
   speed: 1.35
@@ -236,6 +241,11 @@
   aggro: 7
   range: 1.15
   armor: 5
+  heavyAttack:
+    cooldownMs: 6500
+    windupMs: 850
+    damageMultiplier: 1.8
+    radius: 1.8
 
 - id: orc
   name: Orc
@@ -314,6 +324,7 @@
 
 - id: pale_banshee
   name: Pale Banshee
+  role: turret
   description: "a wailing spectre whose cry chills the blood"
   maxHp: 64
   speed: 2.25
@@ -332,6 +343,7 @@
 
 - id: boss
   name: Ashen Warden
+  role: boss
   description: "keeper of the crypt's deepest, dust-choked vault"
   maxHp: 420
   speed: 1.85
@@ -341,6 +353,11 @@
   gold: [80, 135]
   aggro: 9
   range: 1.15
+  heavyAttack:
+    cooldownMs: 5200
+    windupMs: 950
+    damageMultiplier: 1.65
+    radius: 2.1
 
 # --- The Sunken Marsh (floor 5) ---
 - id: skitterer
@@ -357,6 +374,7 @@
 
 - id: mire_spitter
   name: Mire Spitter
+  role: turret
   description: "an anchored bog-turret that spits slowing bile"
   maxHp: 70
   speed: 0
@@ -374,6 +392,7 @@
 # --- The Searing Badlands (floor 6) ---
 - id: canyon_scavenger
   name: Canyon Scavenger
+  role: pack
   description: "a pack-hunting carrion beast of the badlands"
   maxHp: 90
   speed: 2.2
@@ -388,6 +407,7 @@
 
 - id: dust_burrower
   name: Dust Burrower
+  role: ambush
   description: "a buried ambusher that erupts underfoot"
   maxHp: 60
   speed: 2.0
@@ -402,6 +422,7 @@
 
 - id: crimson_burrower
   name: Crimson Burrower
+  role: elite
   description: "a shard-fed burrower with Searing Core crystal fused through its shell"
   maxHp: 125
   speed: 2.25
@@ -414,6 +435,11 @@
   armor: 3
   burrow: true
   stunMs: 1400
+  heavyAttack:
+    cooldownMs: 6800
+    windupMs: 700
+    damageMultiplier: 1.5
+    radius: 1.5
   drops:
     - item: vault_key_tooth
       chance: 0.35
@@ -424,15 +450,16 @@
   description: "a sand-swift skitterer of the deep desert"
   maxHp: 30
   speed: 4.1
-  damage: [5, 9]
+  damage: [3, 6]
   attackMs: 850
   xp: 30
   gold: [4, 9]
-  aggro: 8
+  aggro: 6.5
   range: 1
 
 - id: sun_wraith
   name: Sun-Scorched Wraith
+  role: turret
   description: "a heat-warped spectre that saps a warrior's strength"
   maxHp: 64
   speed: 0
@@ -465,6 +492,7 @@
 # --- The Untamed Jungle (floor 9) ---
 - id: venomous_stalker
   name: Venomous Stalker
+  role: ambush
   description: "a cloaked jungle hunter that strikes from cover"
   maxHp: 80
   speed: 2.8
@@ -479,6 +507,7 @@
 
 - id: totem_wraith
   name: Ancient Totem Wraith
+  role: turret
   description: "a bound spirit that fires curses down the trail"
   maxHp: 80
   speed: 0
@@ -500,6 +529,7 @@
 
 - id: verdant_faultwarden
   name: Verdant Faultwarden
+  role: boss
   description: "an overgrown Waystone guardian widening the tectonic tears it was made to seal"
   maxHp: 520
   speed: 1.75
@@ -510,3 +540,8 @@
   aggro: 9
   range: 1.2
   armor: 6
+  heavyAttack:
+    cooldownMs: 5000
+    windupMs: 1000
+    damageMultiplier: 1.7
+    radius: 2.25

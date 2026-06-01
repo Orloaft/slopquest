@@ -20,6 +20,7 @@
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
         "name": { "type": "string", "description": "Display name." },
+        "role": { "enum": ["trash", "pack", "ambush", "turret", "elite", "boss"], "description": "Encounter balance role. If omitted, tools infer one from stats/behavior." },
         "maxHp": { "type": "number" },
         "speed": { "type": "number" },
         "damage": { "$ref": "#/$defs/range" },
@@ -40,6 +41,17 @@
         "pack": { "type": "boolean", "description": "Aggroing alerts nearby same-type monsters." },
         "burrow": { "type": "boolean", "description": "Hidden until a player steps adjacent, then bursts." },
         "stunMs": { "type": "number", "description": "Stun applied on the burrow ambush, in ms." },
+        "heavyAttack": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cooldownMs", "windupMs", "damageMultiplier", "radius"],
+          "properties": {
+            "cooldownMs": { "type": "number", "minimum": 1 },
+            "windupMs": { "type": "number", "minimum": 1 },
+            "damageMultiplier": { "type": "number", "minimum": 1 },
+            "radius": { "type": "number", "minimum": 0.1 }
+          }
+        },
         "drops": {
           "type": "array",
           "items": {
