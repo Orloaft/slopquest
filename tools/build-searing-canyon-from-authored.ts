@@ -105,17 +105,20 @@ const PLACEMENTS: Place[] = [
   B("spriteBarrelStack", `${LANDMK}/barrel_stack.png`, 56, 64, 95, 60, 50, [1, 1]),
   B("spriteBarrelStack", `${LANDMK}/barrel_stack.png`, 56, 64, 80, 55, 50, [1, 1]),
 ];
-// Outpost spiked-log palisade: ring the pad border (a placement every cell); collision is set
-// separately by the perimeter blockCell loop, so the interior stays walkable (trail = gate gap).
-const OUTPOST_BOX = { x0: 60, y0: 0, x1: 101, y1: 20 };
-const palisadeRing = (b: { x0: number; y0: number; x1: number; y1: number }): Place[] => {
+// Generic fence/palisade ring: one bottom-center segment sprite stamped on every cell of a
+// pad-border box. Collision is set separately by the perimeter blockCell loop, so the interior
+// stays walkable (the trail crossing the border reads as the gate gap). Reusable for any future
+// walled compound (outpost palisade today).
+type Box = { x0: number; y0: number; x1: number; y1: number };
+const fenceRing = (b: Box, key: string, file: string, nw: number, nh: number, dispW: number): Place[] => {
   const out: Place[] = [];
-  const seg = (x: number, y: number) => B("spritePalisade", `${LANDMK}/palisade_seg.png`, 64, 80, x, y, 64);
+  const seg = (x: number, y: number) => B(key, file, nw, nh, x, y, dispW);
   for (let x = b.x0; x <= b.x1; x++) { out.push(seg(x, b.y0)); out.push(seg(x, b.y1)); }
   for (let y = b.y0 + 1; y < b.y1; y++) { out.push(seg(b.x0, y)); out.push(seg(b.x1, y)); }
   return out;
 };
-PLACEMENTS.push(...palisadeRing(OUTPOST_BOX));
+const OUTPOST_BOX: Box = { x0: 60, y0: 0, x1: 101, y1: 20 };
+PLACEMENTS.push(...fenceRing(OUTPOST_BOX, "spritePalisade", `${LANDMK}/palisade_seg.png`, 64, 80, 64));
 // Empty stub so downstream PENS loops are no-ops (cow/goose pens stripped with the village).
 const PENS: { x0: number; y0: number; x1: number; y1: number }[] = [];
 
@@ -576,14 +579,29 @@ for (let c = OUTPOST_BOX.x0; c <= OUTPOST_BOX.x1; c++) { blockCell(OUTPOST_BOX.y
 for (let r = OUTPOST_BOX.y0; r <= OUTPOST_BOX.y1; r++) { blockCell(r, OUTPOST_BOX.x0); blockCell(r, OUTPOST_BOX.x1); }
 
 // ---- landmark tile overlays written into the fringe layer (after footprints so floor wins) --
+// Generic apply pass: stamp a registered overlay tile (see overlayTile() above) onto a set of
+// target cells. Walkable, water-safe; the floor reads under the depth-sorted set-piece sprites.
+const overlayTiles = (name: string, cells: Array<[number, number]>) => {
+  const idx = OVERLAY_IDX[name];
+  if (idx === undefined) return;
+  for (const [r, c] of cells) {
+    if (fringe[r]?.[c] === undefined || at(r, c) === "~") continue;
+    fringe[r][c] = `searing-canyon:${idx}`;
+  }
+};
+// ritual circle: basalt disc with a rune-etched edge ring (two registered tiles, split by radius)
 const RITUAL = { cx: 53, cy: 28, rad: 6 };
+const ritualStone: Array<[number, number]> = [], ritualEdge: Array<[number, number]> = [];
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const dist = Math.hypot(c - RITUAL.cx, r - RITUAL.cy);
-  if (dist > RITUAL.rad || at(r, c) === "~") continue;
-  fringe[r][c] = `searing-canyon:${dist > RITUAL.rad - 1.2 ? OVERLAY_IDX.ritual_edge : OVERLAY_IDX.ritual_stone}`;
+  if (dist > RITUAL.rad) continue;
+  (dist > RITUAL.rad - 1.2 ? ritualEdge : ritualStone).push([r, c]);
 }
+overlayTiles("ritual_stone", ritualStone);
+overlayTiles("ritual_edge", ritualEdge);
+// mine rail: cave-mouth -> scaffold line
 const TRACK: Array<[number, number]> = [[43, 84], [46, 86], [49, 88], [52, 90]]; // [row,col] cave -> scaffold
-for (const [tr, tc] of TRACK) if (fringe[tr]?.[tc] !== undefined && at(tr, tc) !== "~") fringe[tr][tc] = `searing-canyon:${OVERLAY_IDX.mine_track}`;
+overlayTiles("mine_track", TRACK);
 legend.B = `searing-canyon:${grassTile}`;
 vocab.B = { ...CHAR_VOCAB.B, minimapColor: avgColor(tileBuf[grassTile]) };
 
