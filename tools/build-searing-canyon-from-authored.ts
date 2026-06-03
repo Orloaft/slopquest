@@ -73,7 +73,49 @@ const T = (key: string, atlas: string, sx: number, sy: number, sw: number, sh: n
   ({ key, atlas, sx, sy, nw: sw, nh: sh, tx, ty, dispW, block });
 const B = (key: string, file: string, nw: number, nh: number, tx: number, ty: number, dispW: number, block?: [number, number]): Place =>
   ({ key, file, nw, nh, tx, ty, dispW, block });
-const PLACEMENTS: Place[] = []; // canyon set-pieces (outpost/ritual/cultist/mine) land in M2; village sprites stripped
+// M2 set-piece landmarks. Sprite files are PLACEHOLDER colour boxes at the canonical kit
+// paths (tools/make_landmark_placeholders.py); the real sliced kits overwrite them in place.
+// Anchors are bottom-center tx,ty on the M0-flattened pads -> no mid-cliff float. See
+// docs/searing-canyon-asset-gaps.md §1b.
+const LANDMK = "assetsources/curated/bespoke/searing-canyon-landmarks-v1";
+const PLACEMENTS: Place[] = [
+  // --- OUTPOST (pad cols 60-101 x rows 0-20) ---
+  B("spriteOutpostTentChief", `${LANDMK}/tent_chief.png`, 200, 280, 80, 12, 200, [5, 3]),
+  B("spriteOutpostTentRaider", `${LANDMK}/tent_raider.png`, 120, 176, 69, 7, 120, [3, 2]),
+  B("spriteOutpostTentRaider", `${LANDMK}/tent_raider.png`, 120, 176, 92, 8, 120, [3, 2]),
+  B("spriteOutpostTower", `${LANDMK}/watchtower.png`, 112, 224, 63, 5, 112, [2, 3]),
+  B("spriteOutpostTower", `${LANDMK}/watchtower.png`, 112, 224, 98, 6, 112, [2, 3]),
+  B("spriteSkullTotem", `${LANDMK}/skull_totem.png`, 40, 112, 75, 9, 36),
+  B("spriteSkullTotem", `${LANDMK}/skull_totem.png`, 40, 112, 86, 10, 36),
+  // --- CULTIST CAMP (pad cols 2-22 x rows 0-13) ---
+  B("spriteCultTent", `${LANDMK}/tent_cult.png`, 120, 176, 12, 9, 120, [3, 2]),
+  B("spriteCanyonCampfire", `${LANDMK}/campfire.png`, 56, 56, 8, 11, 48),
+  B("spriteSkullTotemTall", `${LANDMK}/skull_totem_tall.png`, 40, 128, 5, 7, 36),
+  B("spriteSkullTotemTall", `${LANDMK}/skull_totem_tall.png`, 40, 128, 18, 8, 36),
+  // --- RITUAL CIRCLE (pad cols 46-60 x rows 22-33) ---
+  B("spriteRitualRune", `${LANDMK}/rune_core.png`, 112, 112, 53, 28, 96),       // walkable center
+  B("spriteRitualArch", `${LANDMK}/arch_stone.png`, 88, 144, 47, 26, 80, [2, 2]),
+  B("spriteRitualArch", `${LANDMK}/arch_stone.png`, 88, 144, 59, 27, 80, [2, 2]),
+  B("spriteRitualArch", `${LANDMK}/arch_stone.png`, 88, 144, 53, 23, 80, [2, 2]),
+  // --- MINING FACILITY (pad cols 75-109 x rows 40-68; rear cliff ~row 40) ---
+  B("spriteCaveMouth", `${LANDMK}/cave_mouth.png`, 128, 128, 84, 42, 120, [3, 2]),
+  B("spriteCaveMouth", `${LANDMK}/cave_mouth.png`, 128, 128, 98, 43, 120, [3, 2]),
+  B("spriteMineScaffold", `${LANDMK}/scaffold_crane.png`, 176, 208, 90, 52, 168, [5, 3]),
+  B("spriteMinecart", `${LANDMK}/minecart.png`, 56, 48, 88, 58, 52),
+  B("spriteBarrelStack", `${LANDMK}/barrel_stack.png`, 56, 64, 95, 60, 50, [1, 1]),
+  B("spriteBarrelStack", `${LANDMK}/barrel_stack.png`, 56, 64, 80, 55, 50, [1, 1]),
+];
+// Outpost spiked-log palisade: ring the pad border (a placement every cell); collision is set
+// separately by the perimeter blockCell loop, so the interior stays walkable (trail = gate gap).
+const OUTPOST_BOX = { x0: 60, y0: 0, x1: 101, y1: 20 };
+const palisadeRing = (b: { x0: number; y0: number; x1: number; y1: number }): Place[] => {
+  const out: Place[] = [];
+  const seg = (x: number, y: number) => B("spritePalisade", `${LANDMK}/palisade_seg.png`, 64, 80, x, y, 64);
+  for (let x = b.x0; x <= b.x1; x++) { out.push(seg(x, b.y0)); out.push(seg(x, b.y1)); }
+  for (let y = b.y0 + 1; y < b.y1; y++) { out.push(seg(b.x0, y)); out.push(seg(b.x1, y)); }
+  return out;
+};
+PLACEMENTS.push(...palisadeRing(OUTPOST_BOX));
 // Empty stub so downstream PENS loops are no-ops (cow/goose pens stripped with the village).
 const PENS: { x0: number; y0: number; x1: number; y1: number }[] = [];
 
@@ -404,6 +446,24 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   }
   cellTile[r][c] = idx;
 }
+// ---- tile overlays: append landmark fringe tiles (ritual floor, mine track) ----------------
+// Generalized crop-field-style overlay: each file becomes an extra tileset entry, written into
+// the fringe layer over target cells later. Walkable (no collision) -- the floor reads under
+// the depth-sorted set-piece sprites.
+const OVERLAY_IDX: Record<string, number> = {};
+const overlayTile = (name: string, file: string) => {
+  const p = PNG.sync.read(readFileSync(nodePath.join(repoRoot, file)));
+  const buf = Buffer.alloc(ts * ts * 4);
+  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
+    const si = (Math.min(y, p.height - 1) * p.width + Math.min(x, p.width - 1)) * 4, di = (y * ts + x) * 4;
+    buf[di] = p.data[si]; buf[di + 1] = p.data[si + 1]; buf[di + 2] = p.data[si + 2]; buf[di + 3] = p.data[si + 3];
+  }
+  OVERLAY_IDX[name] = tileBuf.length;
+  tileBuf.push(buf); tileBlocked.push(false); tileKind.push("road");
+};
+overlayTile("ritual_stone", `${LANDMK}/floor_stone.png`);
+overlayTile("ritual_edge", `${LANDMK}/floor_edge.png`);
+overlayTile("mine_track", `${LANDMK}/track_seg.png`);
 const N = tileBuf.length;
 const freq = new Array(N).fill(0);
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) if (!tileBlocked[cellTile[r][c]] && (tileKind[cellTile[r][c]] === "grass" || tileKind[cellTile[r][c]] === "plateau")) freq[cellTile[r][c]]++;
@@ -511,6 +571,19 @@ for (const pen of PENS) {
   for (let c = pen.x0; c <= pen.x1; c++) { blockCell(pen.y0, c); blockCell(pen.y1, c); }
   for (let r = pen.y0; r <= pen.y1; r++) { blockCell(r, pen.x0); blockCell(r, pen.x1); }
 }
+// outpost palisade perimeter collision (interior walkable; blockCell skips road -> trail gate)
+for (let c = OUTPOST_BOX.x0; c <= OUTPOST_BOX.x1; c++) { blockCell(OUTPOST_BOX.y0, c); blockCell(OUTPOST_BOX.y1, c); }
+for (let r = OUTPOST_BOX.y0; r <= OUTPOST_BOX.y1; r++) { blockCell(r, OUTPOST_BOX.x0); blockCell(r, OUTPOST_BOX.x1); }
+
+// ---- landmark tile overlays written into the fringe layer (after footprints so floor wins) --
+const RITUAL = { cx: 53, cy: 28, rad: 6 };
+for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+  const dist = Math.hypot(c - RITUAL.cx, r - RITUAL.cy);
+  if (dist > RITUAL.rad || at(r, c) === "~") continue;
+  fringe[r][c] = `searing-canyon:${dist > RITUAL.rad - 1.2 ? OVERLAY_IDX.ritual_edge : OVERLAY_IDX.ritual_stone}`;
+}
+const TRACK: Array<[number, number]> = [[43, 84], [46, 86], [49, 88], [52, 90]]; // [row,col] cave -> scaffold
+for (const [tr, tc] of TRACK) if (fringe[tr]?.[tc] !== undefined && at(tr, tc) !== "~") fringe[tr][tc] = `searing-canyon:${OVERLAY_IDX.mine_track}`;
 legend.B = `searing-canyon:${grassTile}`;
 vocab.B = { ...CHAR_VOCAB.B, minimapColor: avgColor(tileBuf[grassTile]) };
 
@@ -549,9 +622,26 @@ const objects = PLACEMENTS.map((p) => ({
 // ===========================================================================
 const exportDir = nodePath.join(repoRoot, "assetsources/asset-forge/exports/searing-canyon");
 mkdirSync(exportDir, { recursive: true });
-// M1 verification preview: the full WxH composited map (NOT the packed tileset) so we can
-// see whether E/W side faces land in the correct neighbour columns. Village clutter is still
-// present (passes not yet stripped) -> expect a wild render; we only read the cliff walls.
+// Verification preview: the full WxH composited terrain map (NOT the packed tileset). Objects
+// are normally rendered by the engine from stage.json, so for the M2 landmark test we also
+// composite the placeholder sprites onto the preview here, bottom-center anchored + depth
+// sorted, to eyeball placement on the pads. (Debug-only; engine ignores this PNG.)
+const previewCache = new Map<string, PNG>();
+for (const p of [...PLACEMENTS].sort((a, b) => a.ty - b.ty)) {
+  if (!p.file) continue;
+  let spr = previewCache.get(p.file);
+  if (!spr) { spr = PNG.sync.read(readFileSync(nodePath.join(repoRoot, p.file))); previewCache.set(p.file, spr); }
+  const dw = p.dispW, dh = Math.round((p.dispW * p.nh) / p.nw);
+  const x0 = Math.round((p.tx + 0.5) * ts - dw / 2), y0 = (p.ty + 1) * ts - dh;
+  for (let y = 0; y < dh; y++) for (let x = 0; x < dw; x++) {
+    const px = x0 + x, py = y0 + y; if (px < 0 || py < 0 || px >= W || py >= H) continue;
+    const sx = Math.min(spr.width - 1, Math.floor((x * spr.width) / dw));
+    const sy = Math.min(spr.height - 1, Math.floor((y * spr.height) / dh));
+    const si = (sy * spr.width + sx) * 4; if (spr.data[si + 3] < 20) continue;
+    const di = (py * W + px) * 4;
+    out.data[di] = spr.data[si]; out.data[di + 1] = spr.data[si + 1]; out.data[di + 2] = spr.data[si + 2]; out.data[di + 3] = 255;
+  }
+}
 writeFileSync(nodePath.join(repoRoot, "assetsources/searing-canyon/_m1_baketest.png"), PNG.sync.write(out));
 writeFileSync(nodePath.join(exportDir, "searing-canyon.png"), PNG.sync.write(sheet));
 writeFileSync(nodePath.join(exportDir, "searing-canyon.tileset.json"), JSON.stringify({ schema: "asset-forge/tileset@1", name: "searing-canyon", image: "searing-canyon.png", tileSize: ts, columns: PACK_COLS, rows: packRows, tiles: Array.from({ length: N }, (_, i) => ({ index: i, role: ROLE_BY_KIND[tileKind[i]], blocked: tileBlocked[i] })) }, null, 2));
