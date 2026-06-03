@@ -3,7 +3,13 @@
   "floor": 0,
   "stageName": "waystone",
   "description": "Waystone authored-layout bridge (terrain pass): flat town, tiles from the locked autotile atlases. Structures placed as objects in the placement pass.",
-  "requiredPortals": {},
+  "requiredPortals": {
+    "N": {
+      "x": 37,
+      "y": 0,
+      "to": "Northwood"
+    }
+  },
   "requiredWalkable": [],
   "chars": {
     "F": {
@@ -11,7 +17,7 @@
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#b9b23e"
+      "minimapColor": "#494819"
     },
     "~": {
       "role": "deep-water",
@@ -25,28 +31,49 @@
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#b69d30"
+      "minimapColor": "#876a3a"
     },
     ".": {
       "role": "sand-shore",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#b9b23e"
+      "minimapColor": "#494819"
     },
     "^": {
       "role": "forest-border-canopy",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#b9b23e"
+      "minimapColor": "#494819"
+    },
+    "q": {
+      "role": "town-cliff-face",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#6b5827"
+    },
+    "m": {
+      "role": "town-stairs",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#6c4f31"
     },
     "B": {
       "role": "building",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#b9b23e"
+      "minimapColor": "#494819"
+    },
+    "N": {
+      "role": "portal-north",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#876a3a"
     }
   }
 }
