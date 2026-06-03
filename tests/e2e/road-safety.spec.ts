@@ -8,20 +8,20 @@ test("isRoadTile marks the dirt road/lane, and the Northwood roads read as road"
   expect(isBlockedTile("t")).toBe(false); // roads are walkable
 
   const rows = makeFloorTiles(3);
-  // North-south spine (x54-56) above the central clearing, and the east-west
-  // road just west of it — both must read as road for the safe-path mechanic.
-  expect(isRoadTile(rows[9]?.[55] ?? "")).toBe(true);
-  expect(isRoadTile(rows[36]?.[48] ?? "")).toBe(true);
+  // Authored-layout roads run as east-west lanes through the wood; these two
+  // packed-road cells must read as road for the safe-path mechanic.
+  expect(isRoadTile(rows[20]?.[66] ?? "")).toBe(true);
+  expect(isRoadTile(rows[23]?.[84] ?? "")).toBe(true);
 });
 
-// Geometry verified against makeFloorTiles(3): the wolf sits on a clear clearing
-// tile; both player spots are exactly 5.0 tiles away — one on the east-west road
-// ("t"), one on open clearing ("d"). 5.0 sits between a wolf's reduced on-road
-// aggro range (6.8 * 0.45 = 3.06) and its normal range (6.8), so the road tile
-// is the only thing that changes the outcome.
-const WOLF = { x: 53, y: 36 };
-const ON_ROAD = { x: 48, y: 36 };
-const OFF_ROAD = { x: 58, y: 36 };
+// Geometry verified against makeFloorTiles(3): the wolf sits on open ground just
+// off the northern east-west lane. The on-road spot (dist 5.0) stays outside the
+// reduced on-road aggro range (6.8 * 0.45 = 3.06), while the off-road spot
+// (dist 4.47) stays inside normal aggro range, so the player's road status is the
+// thing that changes the outcome.
+const WOLF = { x: 71, y: 20 };
+const ON_ROAD = { x: 66, y: 20 };
+const OFF_ROAD = { x: 73, y: 24 };
 
 test("a player on the road slips past a wolf that aggros them off-road", async ({ page }) => {
   logErrors(page);
@@ -59,7 +59,7 @@ test("a player on the road slips past a wolf that aggros them off-road", async (
   await page.waitForFunction(
     (id) => {
       const m = (window.__TIB_E2E__?.getState()?.monsters ?? []).find((mm) => mm.id === id);
-      return Boolean(m && m.x > 55); // moved east of its home toward the off-road player
+      return Boolean(m && m.x > 72); // moved east of its home (71) toward the off-road player
     },
     wolfId,
     { timeout: 12000 }

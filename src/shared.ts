@@ -7,6 +7,7 @@ import {
   buildingInteriorBounds,
   isCutawayBuilding
 } from "./map-objects.ts";
+import { NORTHWOOD_STAGE } from "./generated/stages/index.ts";
 
 export {
   ABILITIES,
@@ -67,6 +68,7 @@ const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
 // placed in expanded coordinates, so it must NOT be scaled again).
 const AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const SWAMP_WATER_TILES = new Set(["W", "3", "4"]);
+const NORTHWOOD_WATER_TILES = new Set(["~", "!", "?", "=", "{", "}", "(", ")", "/", "P", "w", "Q", "V", "U", "x", "0", "J"]);
 const SWAMP_LAND_TILES = new Set(["m", "k", "B", "M", "L", "o"]);
 const BEACH_LAND_TILES = new Set(["e", "l", ",", ";", "z", "2", "[", "]", "x", "0", "1", "|", "u", "Y", "j"]);
 const BEACH_WATER_TILES = new Set(["I", "!", "?", "=", "v", "{", "}", "(", ")"]);
@@ -254,6 +256,12 @@ export function dodgeChanceFor(classKey: string, agilityLevel: number): number {
 export function makeFloorTiles(floor: number): string[] {
   const cached = FLOOR_TILE_CACHE.get(floor);
   if (cached) return cached;
+
+  if (floor === NORTHWOOD_STAGE.floor) {
+    const generated = [...NORTHWOOD_STAGE.rows];
+    FLOOR_TILE_CACHE.set(floor, generated);
+    return generated;
+  }
 
   // Floor 3 is authored at the expanded size; the rest are authored at the
   // native footprint and upscaled below.
@@ -1080,7 +1088,7 @@ export function tileAt(floor: number, tx: number, ty: number): string {
 
 export function isBlockedTile(tile: string): boolean {
   return (
-    tile === "#" || tile === "~" || SWAMP_WATER_TILES.has(tile) || tile === "f" || tile === "q" || tile === "r" || tile === "O" || tile === "o" ||
+    tile === "#" || NORTHWOOD_WATER_TILES.has(tile) || SWAMP_WATER_TILES.has(tile) || tile === "f" || tile === "y" || tile === "^" || tile === "q" || tile === "r" || tile === "n" || tile === "O" || tile === "o" ||
     tile === "*" ||
     tile === "X" || tile === "P" || tile === "w" || // badlands cliff wall + pit + massif
     tile === "Q" || tile === "V" || tile === "U" || // desert quicksand + oasis + ruin
@@ -1096,7 +1104,7 @@ export function isBlockedTile(tile: string): boolean {
 export function isSightBlocked(tile: string): boolean {
   // Open water/quicksand/pits do NOT block sight; solid walls/ruins/jungle do.
   return (
-    tile === "#" || tile === "o" || tile === "O" || tile === "*" || tile === "f" || tile === "r" || tile === "q" ||
+    tile === "#" || tile === "o" || tile === "O" || tile === "*" || tile === "f" || tile === "y" || tile === "^" || tile === "r" || tile === "q" || tile === "n" ||
     tile === "X" || tile === "w" || tile === "U" || // badlands cliff/massif, ruin
     tile === "x" || tile === "0" || tile === "1" || tile === "|" || tile === "u" || tile === "E" // beach cliff/rocks, jungle wall
   );
@@ -1107,7 +1115,7 @@ export function isSightBlocked(tile: string): boolean {
 // player can stick to the main road and slip past most of a zone's wildlife.
 // `t` is the dirt road/lane used by the Waystone and Northwood arteries; other
 // biomes' paths (cemetery `b`/`c`, etc.) can be added here as roads are tuned.
-const ROAD_TILES = new Set(["t"]);
+const ROAD_TILES = new Set(["t", "$", "%", "&", "+", "g", "h", "j", "k", "@", "`", ":", ";", "<", ">", "A"]);
 export function isRoadTile(tile: string): boolean {
   return ROAD_TILES.has(tile);
 }

@@ -1,0 +1,141 @@
+{
+  "zone": "northwood",
+  "floor": 3,
+  "stageName": "northwood",
+  "description": "Northwood authored-layout bridge: tiles derived from the locked compositor; trees/props are runtime sprite objects.",
+  "requiredPortals": {
+    "S": {
+      "x": 55,
+      "y": 70,
+      "to": "Waystone"
+    },
+    "N": {
+      "x": 55,
+      "y": 1,
+      "to": "Northwatch"
+    },
+    "M": {
+      "x": 1,
+      "y": 36,
+      "to": "The Sunken Marsh"
+    },
+    "D": {
+      "x": 108,
+      "y": 35,
+      "to": "The Searing Badlands"
+    }
+  },
+  "requiredWalkable": [
+    {
+      "x": 11,
+      "y": 59,
+      "label": "southwest ore approach"
+    },
+    {
+      "x": 99,
+      "y": 14,
+      "label": "northeast ore approach"
+    },
+    {
+      "x": 96,
+      "y": 56,
+      "label": "southeast ore approach"
+    },
+    {
+      "x": 61,
+      "y": 8,
+      "label": "coal seam approach"
+    },
+    {
+      "x": 66,
+      "y": 8,
+      "label": "iron seam approach"
+    }
+  ],
+  "chars": {
+    "F": {
+      "role": "forest-floor",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#b9b23e"
+    },
+    "~": {
+      "role": "deep-water",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#087696"
+    },
+    "t": {
+      "role": "packed-road",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#b79a31"
+    },
+    ".": {
+      "role": "sand-shore",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#dec896"
+    },
+    "^": {
+      "role": "forest-border-canopy",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#1a2a3a"
+    },
+    "q": {
+      "role": "woodland-cliff-face",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
+    },
+    "m": {
+      "role": "mossy-stone-stairs",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#7b5e33"
+    },
+    "y": {
+      "role": "tree-trunk",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#b9b23e"
+    },
+    "S": {
+      "role": "portal-south",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e7d37c"
+    },
+    "N": {
+      "role": "portal-north",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e7d37c"
+    },
+    "M": {
+      "role": "portal-marsh",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e7d37c"
+    },
+    "D": {
+      "role": "portal-badlands",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e7d37c"
+    }
+  }
+}

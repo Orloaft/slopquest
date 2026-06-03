@@ -33,39 +33,39 @@ monsters:
   - { type: rat,           at: { floor: 3, x: 46, y: 62 }, zone: woods }
   - { type: spider,        at: { floor: 3, x: 64, y: 62 }, zone: woods }
   - { type: goblin_scout,  at: { floor: 3, x: 34, y: 55 }, zone: woods }
-  - { type: goblin_scout,  at: { floor: 3, x: 73, y: 56 }, zone: woods }
-  - { type: goblin_scout,  at: { floor: 3, x: 20, y: 46 }, zone: woods }
-  - { type: wolf,          at: { floor: 3, x: 15, y: 60 }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 73, y: 57 }, zone: woods }
+  - { type: goblin_scout,  at: { floor: 3, x: 24, y: 49 }, zone: woods }
+  - { type: wolf,          at: { floor: 3, x: 15, y: 59 }, zone: woods }
   - { type: wolf,          at: { floor: 3, x: 90, y: 59 }, zone: woods }
   - { type: wolf,          at: { floor: 3, x: 42, y: 48 }, zone: woods }
   - { type: wolf,          at: { floor: 3, x: 71, y: 41 }, zone: woods }
   - { type: wild_boar,     at: { floor: 3, x: 16, y: 58 }, zone: woods }
   - { type: thorn_hedgehog, at: { floor: 3, x: 88, y: 55 }, zone: woods }
   - { type: forest_slime,  at: { floor: 3, x: 48, y: 62 }, zone: woods }
-  - { type: forest_spider, at: { floor: 3, x: 24, y: 23 }, zone: woods }
+  - { type: forest_spider, at: { floor: 3, x: 25, y: 23 }, zone: woods }
   - { type: sapling_deer,  at: { floor: 3, x: 68, y: 47 }, zone: woods }
   - { type: wisp,          at: { floor: 3, x: 29, y: 62 }, zone: woods }
   - { type: wisp,          at: { floor: 3, x: 66, y: 66 }, zone: woods }
-  - { type: wisp,          at: { floor: 3, x: 12, y: 50 }, zone: woods }
+  - { type: wisp,          at: { floor: 3, x: 10, y: 52 }, zone: woods }
   - { type: wisp,          at: { floor: 3, x: 93, y: 47 }, zone: woods }
   - { type: wisp,          at: { floor: 3, x: 57, y: 53 }, zone: woods }
-  - { type: goblin,        at: { floor: 3, x: 34, y: 25 }, zone: woods }
-  - { type: goblin,        at: { floor: 3, x: 73, y: 29 }, zone: woods }
+  - { type: goblin,        at: { floor: 3, x: 35, y: 25 }, zone: woods }
+  - { type: goblin,        at: { floor: 3, x: 71, y: 27 }, zone: woods }
   - { type: goblin_shaman, at: { floor: 3, x: 22, y: 10 }, zone: woods }
-  - { type: goblin_shaman, at: { floor: 3, x: 90, y: 12 }, zone: woods }
+  - { type: goblin_shaman, at: { floor: 3, x: 90, y: 10 }, zone: woods }
   - { type: orc,           at: { floor: 3, x: 51, y: 8  }, zone: woods }
-  - { type: orc,           at: { floor: 3, x: 68, y: 14 }, zone: woods }
+  - { type: orc,           at: { floor: 3, x: 67, y: 13 }, zone: woods }
   - { type: orc,           at: { floor: 3, x: 100, y: 29 }, zone: woods }
   - { type: mushroom_brute, at: { floor: 3, x: 42, y: 18 }, zone: woods }
-  - { type: dire_wolf,     at: { floor: 3, x: 89, y: 16 }, zone: woods }
+  - { type: dire_wolf,     at: { floor: 3, x: 95, y: 13 }, zone: woods }
   - { type: dire_wolf,     at: { floor: 3, x: 97, y: 56 }, zone: woods }
   # Pixie drifts in the crossroads clearing but off the road tile itself.
   - { type: forest_pixie,  at: { floor: 3, x: 51, y: 40 }, zone: woods }
-  - { type: bone_druid,    at: { floor: 3, x: 88, y: 13 }, zone: woods }
-  - { type: bog_wraith,    at: { floor: 3, x: 79, y: 23 }, zone: woods }
+  - { type: bone_druid,    at: { floor: 3, x: 86, y: 9 }, zone: woods }
+  - { type: bog_wraith,    at: { floor: 3, x: 81, y: 25 }, zone: woods }
   # Deep-wood elite — pulled off the central spine into the NE groves so it
   # guards the wood rather than camping the safe artery.
-  - { type: ancient_treant, at: { floor: 3, x: 81, y: 19 }, zone: woods }
+  - { type: ancient_treant, at: { floor: 3, x: 86, y: 26 }, zone: woods }
   # The Sunken Marsh (floor 5): skitterers patrol the causeway; mire spitters
   # are anchored on deep water and fire across it.
   - { type: skitterer,     at: { floor: 5, x: 59, y: 24 }, zone: marsh }

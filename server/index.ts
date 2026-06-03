@@ -3353,15 +3353,12 @@ function composedTreeId(tree: (typeof COMPOSED_TREE_NODES)[number]): string {
 }
 
 function isGeneratedTreeTile(floor: number, x: number, y: number): boolean {
-  return (
-    floor >= 0 &&
-    floor <= 4 &&
-    x >= 0 &&
-    y >= 0 &&
-    x < floorCols(floor) &&
-    y < floorRows(floor) &&
-    tileAt(floor, x, y) === "f"
-  );
+  if (floor < 0 || floor > 4 || x < 0 || y < 0 || x >= floorCols(floor) || y >= floorRows(floor)) return false;
+  const tile = tileAt(floor, x, y);
+  // 'f' = legacy procedural forest tile (engine spriteTree). 'y' = authored
+  // Northwood tree trunk: same choppable/blocking node, but the client renders
+  // the authored sprite (mapped back from the stage object by tile).
+  return tile === "f" || tile === "y";
 }
 
 function treeTypeForTile(floor: number, x: number, y: number): string {

@@ -208,11 +208,7 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spritePine", x: 17.4, y: 35.8, w: 58, h: 92 },
     { key: "spriteTree", x: 23.8, y: 8.9, w: 76, h: 98 },
     { key: "spritePine", x: 38.3, y: 28.6, w: 56, h: 90 },
-    { key: "spriteTree", x: 55.2, y: 18.4, w: 82, h: 106 },
-    { key: "spriteRock", x: 22.9, y: 30.2, w: 44, h: 34 },
-    { key: "spriteRock", x: 47.1, y: 6.8, w: 48, h: 36 },
-    { key: "spriteBoulder", x: 34.7, y: 15.1, w: 52, h: 64 },
-    { key: "spriteBoulder", x: 50.8, y: 32.8, w: 46, h: 58 }
+    { key: "spriteTree", x: 55.2, y: 18.4, w: 82, h: 106 }
   ],
   4: [
     // Northwatch (bespoke 90x60). Barracks, quarters, well and quartermaster's

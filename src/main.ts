@@ -29,6 +29,7 @@ import {
   xpForLevel
 } from "./shared.ts";
 import type { ClassSpec } from "./shared.ts";
+import { NORTHWOOD_STAGE, type GeneratedStage } from "./generated/stages/index.ts";
 import { MAP_OBJECTS, isCutawayBuilding, isInsideCutawayBuilding } from "./map-objects.ts";
 import { setTrack, unlockAudio, setMusicEnabled, currentTrack } from "./audio.ts";
 import { normalizeServerMessage, type WireServerMessage } from "./wire.ts";
@@ -340,6 +341,7 @@ interface E2EHooks {
   stateVersion: () => number;
   viewCounts: () => { trees: number; npcs: number };
   actorFrameAnchorDrift: () => Array<{ family: string; dir: Direction; driftX: number; driftY: number }>;
+  textureAlphaStats: (keys: string[]) => Array<{ key: string; exists: boolean; width: number; height: number; opaque: number; edgeOpaque: number; darkEdgeOpaque: number }>;
   monsterTextureCoverage: (
     types?: string[]
   ) => Array<{
@@ -350,6 +352,7 @@ interface E2EHooks {
     attackFrames: Array<{ dir: Direction; frame: number; key: string; exists: boolean }>;
   }>;
   mapChunkStats: () => MapChunkStats;
+  generatedStageTextureKeys: (floor: number) => Array<{ char: string; key: string; exists: boolean; ref: string }>;
   cutawayRoofAlphas: () => Array<{ floor: number; key: string; x: number; y: number; alpha: number }>;
   currentTrack: () => string | null;
   recentEvents: () => GameEvent[];
@@ -687,6 +690,7 @@ if (E2E_MODE) {
     stateVersion: () => stateVersion,
     viewCounts: () => ({ trees: treeViews.size, npcs: npcViews.size }),
     actorFrameAnchorDrift: () => actorFrameAnchorDrift(),
+    textureAlphaStats: (keys: string[]) => textureAlphaStats(keys),
     monsterTextureCoverage: (types?: string[]) =>
       (types ?? []).map((type) => {
         const spec = monsterActorSpec({ type });
@@ -709,6 +713,7 @@ if (E2E_MODE) {
         return { type, family: spec.family, frames, attackFamily, attackFrames };
       }),
     mapChunkStats: () => mapChunkStats(),
+    generatedStageTextureKeys: (floor: number) => generatedStageTextureKeys(floor),
     cutawayRoofAlphas: () =>
       cutawayBuildingSprites
         .filter((entry) => entry.sprite.active)
@@ -792,6 +797,7 @@ const SMITHING_RECIPES = {
 type SmithingSlot = keyof typeof SMITHING_RECIPES;
 const MAP_CHUNK_PADDING = 1;
 let mapLayer: Phaser.GameObjects.Container;
+let mapDecorationLayer: Phaser.GameObjects.Container;
 let entityLayer: Phaser.GameObjects.Container;
 let fxLayer: Phaser.GameObjects.Container;
 let mapRender: MapRenderState | null = null;
@@ -844,6 +850,10 @@ const WOODLAND_BESPOKE_FAMILIES = [
   "crypt_sentinel",
   "pale_banshee"
 ] as const;
+// Northwood authored-layout tree/prop sprite catalogue ids (obj_NNN). Sprites are
+// exported to public/sprites/nw/ by tools/build-northwood-from-authored.ts and
+// referenced by the stage's objects[] as keys spriteNw<NNN>.
+const NORTHWOOD_SPRITE_IDS = [6, 7, 8, 22, 24, 25, 33, 34, 35, 39, 49, 53, 54, 70, 84, 85, 89, 90, 97, 105, 107, 115] as const;
 // Walk cycles are 4 frames unless a family overrides it here.
 const FAMILY_WALK_FRAMES: Record<string, number> = {
   mire_spitter: 3,
@@ -888,6 +898,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("forestTiles", "/foresttiles.png");
   this.load.image("graveyardTiles", "/graveyardtiles.png");
   this.load.image("darkForestTiles", "/dark-forest-tiles.png");
+  this.load.image("northwoodTreeSheet", "/northwood-trees-v1.png");
   this.load.image("swampTiles", "/swamp-tiles.png");
   this.load.image("badlandsTiles", "/badlands-tiles.png");
   this.load.image("desertTiles", "/desert-tiles.png");
@@ -900,6 +911,15 @@ function preload(this: Phaser.Scene): void {
   this.load.image("herbBloom", "/herb-bloom.png");
   this.load.image("herbField", "/herb-field.png");
   this.load.image("herbTidal", "/herb-tidal.png");
+  // Northwood authored-layout tree/prop sprites (exported by tools/build-northwood-from-authored.ts).
+  for (const id of NORTHWOOD_SPRITE_IDS) {
+    this.load.image(`spriteNw${String(id).padStart(3, "0")}`, `/sprites/nw/obj_${String(id).padStart(3, "0")}.png`);
+  }
+  for (const stage of GENERATED_STAGES) {
+    for (const tileset of stage.tilesets) {
+      if (tileset.publicPath) this.load.image(generatedTilesetTextureKey(stage, tileset.name), tileset.publicPath);
+    }
+  }
 }
 
 function create(this: Phaser.Scene): void {
@@ -914,8 +934,9 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "graveyardTiles", "tileGraveDirt", 24, 34, 84, 84);
   makeTileTexture(this, "graveyardTiles", "tileGravePath", 612, 860, 84, 84);
   makeTileTexture(this, "townTiles", "tileWater", 24, 248, 84, 84);
-  makeSpriteTexture(this, "forestTiles", "spriteTree", 578, 28, 120, 150);
-  makeSpriteTexture(this, "forestTiles", "spritePine", 820, 30, 82, 150);
+  createGeneratedStageTileTextures(this);
+  makeSpriteTexture(this, "northwoodTreeSheet", "spriteTree", 35, 55, 355, 385);
+  makeSpriteTexture(this, "northwoodTreeSheet", "spritePine", 455, 50, 220, 390);
   makeSpriteTexture(this, "forestTiles", "spriteRock", 640, 500, 92, 72);
   // First sprite wired from the reviewed dark-forest source sheet (see
   // assetsources/asset-review.md). Background normalized to the project magenta
@@ -1031,10 +1052,11 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "jungleTiles", "spriteJungleVault", 676, 862, 120, 100);
 
   mapLayer = this.add.container(0, 0);
+  mapDecorationLayer = this.add.container(0, 0);
   entityLayer = this.add.container(0, 0);
   fxLayer = this.add.container(0, 0);
   this.cameras.main.setBounds(0, 0, MAP_COLS * TILE_SIZE, MAP_ROWS * TILE_SIZE);
-  this.cameras.main.setZoom(1.35);
+  this.cameras.main.setZoom(BASE_CAMERA_ZOOM);
 
   const keyboard = this.input.keyboard;
   if (!keyboard) throw new Error("Keyboard input plugin unavailable");
@@ -1075,8 +1097,48 @@ function create(this: Phaser.Scene): void {
     cycleTarget();
   });
   this.input.on("pointerdown", handleWorldClick);
+
+  // --- Player-controlled camera zoom (wheel + pinch + keyboard). ---
+  // The per-frame camera lerp (updateDialogueCamera) reads userZoomFactor, so
+  // these handlers only have to move the factor; the camera eases to it.
+  this.input.on(
+    "wheel",
+    (_pointer: Phaser.Input.Pointer, _objs: unknown, _dx: number, dy: number) => {
+      if (dy === 0) return;
+      nudgeUserZoom(dy < 0 ? ZOOM_WHEEL_STEP : 1 / ZOOM_WHEEL_STEP);
+    }
+  );
+  // Two-finger pinch: track the live pointer pair and scale by the change in
+  // their separation each move.
+  this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+    const p1 = this.input.pointer1;
+    const p2 = this.input.pointer2;
+    if (!p1?.isDown || !p2?.isDown) {
+      lastPinchDistance = null;
+      return;
+    }
+    const dist = Phaser.Math.Distance.Between(p1.x, p1.y, p2.x, p2.y);
+    if (lastPinchDistance !== null && lastPinchDistance > 0 && dist > 0) {
+      nudgeUserZoom(dist / lastPinchDistance);
+    }
+    lastPinchDistance = dist;
+    void pointer;
+  });
+  this.input.on("pointerup", () => {
+    lastPinchDistance = null;
+  });
+  const zoomKeys = keyboard.addKeys("MINUS,PLUS,NUMPAD_ADD,NUMPAD_SUBTRACT", false) as Record<string, Phaser.Input.Keyboard.Key>;
+  zoomKeys.PLUS?.on("down", () => { if (!isTextEntryFocused()) nudgeUserZoom(ZOOM_KEY_STEP); });
+  zoomKeys.NUMPAD_ADD?.on("down", () => { if (!isTextEntryFocused()) nudgeUserZoom(ZOOM_KEY_STEP); });
+  zoomKeys.MINUS?.on("down", () => { if (!isTextEntryFocused()) nudgeUserZoom(1 / ZOOM_KEY_STEP); });
+  zoomKeys.NUMPAD_SUBTRACT?.on("down", () => { if (!isTextEntryFocused()) nudgeUserZoom(1 / ZOOM_KEY_STEP); });
+
   refreshKeyboardCapture();
 }
+
+// Pixel separation of the two active touch pointers on the previous pointermove,
+// used to derive pinch-zoom deltas. Null whenever fewer than two are down.
+let lastPinchDistance: number | null = null;
 
 function update(this: Phaser.Scene, time: number): void {
   if (!latestState || !self()) return;
@@ -1466,12 +1528,16 @@ function drawMap(floor: number, center?: TilePoint): void {
   currentFloor = floor;
   cutawayBuildingSprites.length = 0;
   mapLayer.removeAll(true);
+  mapDecorationLayer.removeAll(true);
   const rows = makeFloorTiles(floor);
   const cols = floorCols(floor);
   const rowCount = floorRows(floor);
   scene.cameras.main.setBounds(0, 0, cols * TILE_SIZE, rowCount * TILE_SIZE);
+  scene.cameras.main.setZoom(cameraZoomForFloor(floor));
   mapRender = { floor, rows, cols, rowCount, chunks: new Map(), visibleChunkBoundsKey: null };
   updateVisibleMapChunks(center ? center.x * TILE_SIZE : undefined, center ? center.y * TILE_SIZE : undefined);
+  addTileDecorations(floor, rows, mapDecorationLayer);
+  addComposedMapObjects(floor, mapDecorationLayer);
 }
 
 function showLoadingScreen(title?: string): void {
@@ -1534,16 +1600,28 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
   chunk.setDepth(chunkY);
 
   const texture = scene.add.renderTexture(tileX * TILE_SIZE, tileY * TILE_SIZE, width, height).setOrigin(0);
-  for (let y = tileY; y < tileBottom; y += 1) {
-    const row = state.rows[y];
-    if (row === undefined) continue;
-    for (let x = tileX; x < tileRight; x += 1) {
-      texture.draw(tileBaseTexture(row[x] ?? ""), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+  const generatedStage = GENERATED_STAGES_BY_FLOOR.get(state.floor);
+  if (generatedStage?.layers?.length) {
+    for (const layer of generatedStage.layers) {
+      for (let y = tileY; y < tileBottom; y += 1) {
+        for (let x = tileX; x < tileRight; x += 1) {
+          const ref = layer.data[y]?.[x];
+          if (!ref) continue;
+          const key = generatedStageRefTextureKey(generatedStage, ref);
+          texture.draw(scene.textures.exists(key) ? key : tileBaseTexture(state.rows[y]?.[x] ?? ""), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+        }
+      }
+    }
+  } else {
+    for (let y = tileY; y < tileBottom; y += 1) {
+      const row = state.rows[y];
+      if (row === undefined) continue;
+      for (let x = tileX; x < tileRight; x += 1) {
+        texture.draw(tileBaseTexture(row[x] ?? ""), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+      }
     }
   }
   chunk.add(texture);
-  addTileDecorations(state.rows, chunk, tileX, tileY, tileRight, tileBottom);
-  addComposedMapObjects(state.floor, chunk, tileX, tileY, tileRight, tileBottom);
   mapLayer.add(chunk);
   return chunk;
 }
@@ -1854,9 +1932,32 @@ function createNpcView(npc: NpcView): NpcEntityView {
   return view;
 }
 
+// Authored Northwood tree sprites, keyed by trunk tile. Floor-3 woodcutting nodes
+// render the approved bespoke art (the stage object) instead of the generic
+// engine spriteTree/spritePine; chop difficulty/xp/drops still come from the
+// node's tree type. Built once from the generated stage's resource objects.
+type AuthoredTreeSpec = { textureKey: string; width: number; height: number; zoneWidth: number; zoneHeight: number };
+const northwoodTreeSpriteByTile = new Map<string, AuthoredTreeSpec>();
+for (const obj of NORTHWOOD_STAGE.objects) {
+  const res = (obj as { resource?: { kind: string; tx: number; ty: number } }).resource;
+  if (res?.kind !== "tree") continue;
+  northwoodTreeSpriteByTile.set(`${res.tx},${res.ty}`, {
+    textureKey: obj.key,
+    width: obj.w,
+    height: obj.h,
+    zoneWidth: Math.max(24, Math.round(obj.w * 0.7)),
+    zoneHeight: Math.max(40, Math.round(obj.h * 0.85))
+  });
+}
+function authoredTreeSpec(tree: TreeView): AuthoredTreeSpec | null {
+  if (tree.floor !== NORTHWOOD_STAGE.floor) return null;
+  // Server node sits at tileX+0.5, tileY+0.95, so floor() recovers the trunk tile.
+  return northwoodTreeSpriteByTile.get(`${Math.floor(tree.x)},${Math.floor(tree.y)}`) ?? null;
+}
+
 function createTreeView(tree: TreeView): TreeEntityView {
   const view = scene.add.container(tree.x * TILE_SIZE, tree.y * TILE_SIZE) as TreeEntityView;
-  const spec = treeTypeSpec(tree);
+  const spec = authoredTreeSpec(tree) ?? treeTypeSpec(tree);
   const treeSprite = scene.add.image(0, 4, spec.textureKey).setOrigin(0.5, 1).setDisplaySize(spec.width, spec.height);
   const stump = scene.add.rectangle(0, 12, 20, 12, 0x705036).setStrokeStyle(2, 0x2d1f14).setVisible(false);
   const zone = scene.add.zone(0, -18, spec.zoneWidth, spec.zoneHeight).setInteractive({ cursor: "pointer" });
@@ -1871,7 +1972,7 @@ function createTreeView(tree: TreeView): TreeEntityView {
 }
 
 function updateTreeViewTexture(view: TreeEntityView, tree: TreeView): void {
-  const spec = treeTypeSpec(tree);
+  const spec = authoredTreeSpec(tree) ?? treeTypeSpec(tree);
   view.treeSprite.setTexture(spec.textureKey);
   view.treeSprite.setDisplaySize(spec.width, spec.height);
   view.zone.setSize(spec.zoneWidth, spec.zoneHeight);
@@ -1884,14 +1985,34 @@ function treeTypeSpec(tree: TreeView): TreeType | TreeSpec {
 
 function createFishingNodeView(node: FishingNodeView): FishingEntityView {
   const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE) as FishingEntityView;
-  const ring = scene.add.ellipse(0, 2, 34, 14, 0x4db6d8, 0.16).setStrokeStyle(1, 0xbbeeff, 0.55);
-  const sprite = scene.add.image(0, 0, "spriteFishingRipple").setDisplaySize(34, 34);
+  ensureFishingRippleTexture();
+  const ring = scene.add.ellipse(0, 2, 32, 13, 0x4db6d8, 0.1).setStrokeStyle(1, 0xbbeeff, 0.45);
+  const sprite = scene.add.image(0, 0, "spriteFishingRippleSoft").setDisplaySize(34, 34);
   const zone = scene.add.zone(0, 0, 48, 42).setInteractive({ cursor: "pointer" });
   attachZoneMenu(zone, () => startFishingPath(node), "Fishing Spot", () => fishingMenuActions(node));
   attachHoverTint(zone, sprite);
   view.add([ring, sprite, zone]);
   view.sprite = sprite;
   return view;
+}
+
+function ensureFishingRippleTexture(): void {
+  if (scene.textures.exists("spriteFishingRippleSoft")) return;
+  const g = scene.make.graphics({ x: 0, y: 0 }, false);
+  g.clear();
+  g.lineStyle(2, 0xbbeeff, 0.82);
+  g.strokeEllipse(24, 24, 28, 12);
+  g.lineStyle(1, 0x8fd9ef, 0.72);
+  g.strokeEllipse(24, 24, 18, 8);
+  g.strokeEllipse(24, 24, 8, 4);
+  g.lineStyle(1, 0xe0fbff, 0.62);
+  g.beginPath();
+  g.arc(24, 24, 5, -0.7, 0.7);
+  g.strokePath();
+  g.fillStyle(0x62c6df, 0.18);
+  g.fillEllipse(24, 24, 26, 10);
+  g.generateTexture("spriteFishingRippleSoft", 48, 48);
+  g.destroy();
 }
 
 const ORE_VEIN_TEXTURES: Record<string, string> = {
@@ -1946,18 +2067,17 @@ function herbPlantSprite(node: HerbNodeView): { key: string; w: number; h: numbe
 
 function createHerbNodeView(node: HerbNodeView): HerbEntityView {
   const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE) as HerbEntityView;
-  const base = scene.add.ellipse(0, 7, 26, 12, 0x3a5a2a, 0.4);
-  view.add(base);
   const zone = scene.add.zone(0, -4, 40, 40).setInteractive({ cursor: "pointer" });
   attachZoneMenu(zone, () => startHerbPath(node), node.label, () => herbMenuActions(node));
 
   if (node.label.toLowerCase().includes("mushroom")) {
+    const base = scene.add.ellipse(0, 7, 22, 10, 0x25381d, 0.18);
     const stem = scene.add.ellipse(0, 4, 10, 18, 0xd7c6a4, 0.95);
     const cap = scene.add.circle(0, -6, 9, 0xb65454, 0.96).setScale(1.6, 0.9);
     const spotA = scene.add.circle(-7, -8, 2, 0xf1dfc4, 0.95);
     const spotB = scene.add.circle(4, -9, 2, 0xf1dfc4, 0.95);
     const spotC = scene.add.circle(9, -4, 1.6, 0xf1dfc4, 0.95);
-    view.add([stem, cap, spotA, spotB, spotC, zone]);
+    view.add([base, stem, cap, spotA, spotB, spotC, zone]);
     view.bloom = cap;
     return view;
   }
@@ -1981,11 +2101,12 @@ function createHerbNodeView(node: HerbNodeView): HerbEntityView {
   }
 
   // Fallback sketch for non-plant foraging nodes (e.g. quartz outcrops).
+  const base = scene.add.ellipse(0, 7, 22, 10, 0x25381d, 0.18);
   const leafA = scene.add.ellipse(-5, -1, 10, 18, 0x4caf50, 0.95).setRotation(-0.4);
   const leafB = scene.add.ellipse(5, -1, 10, 18, 0x66bb6a, 0.95).setRotation(0.4);
   const leafC = scene.add.ellipse(0, -5, 9, 17, 0x81c784, 0.95);
   const bloom = scene.add.circle(0, -10, 3, 0xf6c9e0, 0.95);
-  view.add([leafA, leafB, leafC, bloom, zone]);
+  view.add([base, leafA, leafB, leafC, bloom, zone]);
   view.bloom = bloom;
   return view;
 }
@@ -4342,6 +4463,7 @@ function clearClickDestination({ keepHold = false }: { keepHold?: boolean } = {}
 }
 
 function addTileDecorations(
+  floor: number,
   rows: string[],
   parent: Phaser.GameObjects.Container,
   fromX = 0,
@@ -4349,6 +4471,8 @@ function addTileDecorations(
   toX = rows[0]?.length ?? 0,
   toY = rows.length
 ): void {
+  if (GENERATED_STAGES_BY_FLOOR.has(floor)) return;
+
   const decorations: DecorationSprite[] = [];
   for (let y = fromY; y < toY; y += 1) {
     const row = rows[y];
@@ -4382,9 +4506,13 @@ function addComposedMapObjects(
   // expanded footprint (factor 1 for floors authored at the target size).
   const fx = contentScaleX(floor);
   const fy = contentScaleY(floor);
-  const objects = MAP_OBJECTS[floor] ?? [];
+  const generatedStage = GENERATED_STAGES_BY_FLOOR.get(floor);
+  const objects = [...(MAP_OBJECTS[floor] ?? []), ...(generatedStage?.objects ?? [])];
   objects
-    .filter((item) => item.key !== "spriteTree" && item.key !== "spritePine")
+    // Skip engine trees AND authored resource trees: both are drawn by the tree
+    // entity system (so they can be chopped, depth-sort against the player, and
+    // block movement) rather than as static, walk-through decoration.
+    .filter((item) => item.key !== "spriteTree" && item.key !== "spritePine" && (item as { resource?: { kind?: string } }).resource?.kind !== "tree")
     .map((item) => ({ ...item, x: item.x * fx, y: item.y * fy }))
     .filter((item) => item.x >= fromX - 2 && item.x < toX + 2 && item.y >= fromY - 3 && item.y < toY + 1)
     .sort((a, b) => a.y - b.y)
@@ -4500,21 +4628,52 @@ let typewriterDone = true;
 let lastTalkNpcId: string | null = null;
 let dialogueFocus: { x: number; y: number } | null = null;
 const BASE_CAMERA_ZOOM = 1.35;
+// Northwood's detailed authored art reads best pulled in close, so it now defaults
+// to the fully-zoomed-in framing (≈ the old 0.82 base at max user zoom). The wider
+// MIN factor below still lets players pull back to the old overview.
+const NORTHWOOD_CAMERA_ZOOM = 1.8;
 const DIALOGUE_CAMERA_ZOOM = 1.72;
 const DIALOGUE_FOCUS_DROP = 1.1 * TILE_SIZE; // push the view down so the two stand above the box
 
+// Player-controlled zoom. The per-floor base zoom (above) sets the default
+// framing; `userZoomFactor` is a multiplier the player nudges with the wheel,
+// pinch, or +/- keys so they can pull back to read the new, more detailed
+// Northwood perspective or push in for skilling. Clamped so the world never
+// shrinks to a speck or balloons past the art's native resolution.
+const MIN_USER_ZOOM_FACTOR = 0.45;
+const MAX_USER_ZOOM_FACTOR = 1.5;
+const ZOOM_WHEEL_STEP = 1.1; // multiplicative per wheel notch
+const ZOOM_KEY_STEP = 1.12;
+let userZoomFactor = 1;
+
+function clampUserZoom(factor: number): number {
+  return Math.min(MAX_USER_ZOOM_FACTOR, Math.max(MIN_USER_ZOOM_FACTOR, factor));
+}
+
+function cameraZoomForFloor(floor: number | null): number {
+  const base = floor === 3 ? NORTHWOOD_CAMERA_ZOOM : BASE_CAMERA_ZOOM;
+  return base * userZoomFactor;
+}
+
+function nudgeUserZoom(multiplier: number): void {
+  const next = clampUserZoom(userZoomFactor * multiplier);
+  if (next === userZoomFactor) return;
+  userZoomFactor = next;
+}
+
 function updateDialogueCamera(ownX: number, ownY: number): void {
   const cam = scene.cameras.main;
+  const floorZoom = cameraZoomForFloor(currentFloor);
   if (activeDialogue && dialogueFocus) {
     const fx = (ownX + dialogueFocus.x) / 2;
     const fy = (ownY + dialogueFocus.y) / 2 + DIALOGUE_FOCUS_DROP;
     cam.setZoom(lerpNum(cam.zoom, DIALOGUE_CAMERA_ZOOM, 0.1));
     cam.centerOn(lerpNum(cam.midPoint.x, fx, 0.14), lerpNum(cam.midPoint.y, fy, 0.14));
-  } else if (Math.abs(cam.zoom - BASE_CAMERA_ZOOM) > 0.004) {
-    cam.setZoom(lerpNum(cam.zoom, BASE_CAMERA_ZOOM, 0.16));
+  } else if (Math.abs(cam.zoom - floorZoom) > 0.004) {
+    cam.setZoom(lerpNum(cam.zoom, floorZoom, 0.16));
     cam.centerOn(ownX, ownY);
   } else {
-    cam.setZoom(BASE_CAMERA_ZOOM);
+    cam.setZoom(floorZoom);
     cam.centerOn(ownX, ownY);
   }
 }
@@ -5197,6 +5356,34 @@ function actorFrameAnchorDrift(): Array<{ family: string; dir: Direction; driftX
   );
 }
 
+function textureAlphaStats(keys: string[]): Array<{ key: string; exists: boolean; width: number; height: number; opaque: number; edgeOpaque: number; darkEdgeOpaque: number }> {
+  return keys.map((key) => {
+    if (!scene?.textures.exists(key)) return { key, exists: false, width: 0, height: 0, opaque: 0, edgeOpaque: 0, darkEdgeOpaque: 0 };
+    const image = scene.textures.get(key).getSourceImage() as HTMLCanvasElement;
+    const width = image.width;
+    const height = image.height;
+    const ctx = image.getContext?.("2d");
+    if (!ctx) return { key, exists: true, width, height, opaque: 0, edgeOpaque: 0, darkEdgeOpaque: 0 };
+    const data = ctx.getImageData(0, 0, width, height).data;
+    let opaque = 0;
+    let edgeOpaque = 0;
+    let darkEdgeOpaque = 0;
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const i = (y * width + x) * 4;
+        const alpha = data[i + 3] ?? 0;
+        if (alpha === 0) continue;
+        opaque += 1;
+        const edge = x === 0 || y === 0 || x === width - 1 || y === height - 1;
+        if (!edge) continue;
+        edgeOpaque += 1;
+        if ((data[i] ?? 0) < 38 && (data[i + 1] ?? 0) < 38 && (data[i + 2] ?? 0) < 38) darkEdgeOpaque += 1;
+      }
+    }
+    return { key, exists: true, width, height, opaque, edgeOpaque, darkEdgeOpaque };
+  });
+}
+
 function mirrorRightFromLeft(family: string): boolean {
   return family === "knight" || family === "caster" || family === "goblin" || family === "skeleton";
 }
@@ -5224,8 +5411,8 @@ function createAlignedTransparentFrames(scene: Phaser.Scene, sourceKey: string, 
   const maxRight = Math.max(...crops.map((crop) => crop.bbox.x + crop.bbox.w - crop.anchor.x));
   const maxUp = Math.max(...crops.map((crop) => crop.anchor.y - crop.bbox.y));
   const maxDown = Math.max(...crops.map((crop) => crop.bbox.y + crop.bbox.h - crop.anchor.y));
-  const sourceW = Math.max(...crops.map((crop) => crop.w));
-  const sourceH = Math.max(...crops.map((crop) => crop.h));
+  const sourceW = Math.max(...crops.map((crop) => crop.canvas.width));
+  const sourceH = Math.max(...crops.map((crop) => crop.canvas.height));
   const canvasW = Math.max(sourceW, Math.ceil(maxLeft + maxRight));
   const canvasH = Math.max(sourceH, Math.ceil(maxUp + maxDown));
   const targetAnchor = { x: Math.round(canvasW / 2), y: canvasH };
@@ -5238,20 +5425,31 @@ function createAlignedTransparentFrames(scene: Phaser.Scene, sourceKey: string, 
     if (!ctx) continue;
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(crop.canvas, Math.round(targetAnchor.x - crop.anchor.x), Math.round(targetAnchor.y - crop.anchor.y));
+    if (sourceKey === "ratSpiderSheet") clearOpaqueEdgePixels(ctx, canvasW, canvasH);
     addNearestCanvasTexture(scene, crop.key, canvas);
   }
 }
 
 function createTransparentCropCanvas(scene: Phaser.Scene, sourceKey: string, sx: number, sy: number, sw: number, sh: number): HTMLCanvasElement {
   const source = scene.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
+  const sourceImage = source as { width?: number; height?: number };
+  const pad = sourceKey === "ratSpiderSheet" ? 8 : 0;
+  const cropX = Math.max(0, sx - pad);
+  const cropY = Math.max(0, sy - pad);
+  const cropW = Math.min(sourceImage.width ?? sx + sw + pad, sx + sw + pad) - cropX;
+  const cropH = Math.min(sourceImage.height ?? sy + sh + pad, sy + sh + pad) - cropY;
   const canvas = document.createElement("canvas");
-  canvas.width = sw;
-  canvas.height = sh;
+  canvas.width = cropW;
+  canvas.height = cropH;
   const ctx = canvas.getContext("2d");
   if (!ctx) return canvas;
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(source, sx, sy, sw, sh, 0, 0, sw, sh);
-  chromaKeyMagenta(ctx, sw, sh);
+  ctx.drawImage(source, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+  chromaKeyMagenta(ctx, cropW, cropH);
+  if (sourceKey === "ratSpiderSheet") {
+    clearConnectedBackground(ctx, cropW, cropH, isNearBlackBackground);
+    clearEdgePixels(ctx, cropW, cropH, isNearBlackBackground);
+  }
   return canvas;
 }
 
@@ -5339,6 +5537,78 @@ function chromaKeyMagenta(ctx: CanvasRenderingContext2D, width: number, height: 
     const g = image.data[i + 1] ?? 0;
     const b = image.data[i + 2] ?? 0;
     if (isMagentaKey(r, g, b)) image.data[i + 3] = 0;
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
+function clearConnectedBackground(ctx: CanvasRenderingContext2D, width: number, height: number, isBackground: (r: number, g: number, b: number, a: number) => boolean): void {
+  const image = ctx.getImageData(0, 0, width, height);
+  const queue: Array<[number, number]> = [];
+  const seen = new Uint8Array(width * height);
+  const enqueue = (x: number, y: number): void => {
+    if (x < 0 || y < 0 || x >= width || y >= height) return;
+    const pos = y * width + x;
+    if (seen[pos]) return;
+    const i = pos * 4;
+    if (!isBackground(image.data[i] ?? 0, image.data[i + 1] ?? 0, image.data[i + 2] ?? 0, image.data[i + 3] ?? 0)) return;
+    seen[pos] = 1;
+    queue.push([x, y]);
+  };
+
+  for (let x = 0; x < width; x += 1) {
+    enqueue(x, 0);
+    enqueue(x, height - 1);
+  }
+  for (let y = 1; y < height - 1; y += 1) {
+    enqueue(0, y);
+    enqueue(width - 1, y);
+  }
+
+  while (queue.length > 0) {
+    const [x, y] = queue.pop()!;
+    const i = (y * width + x) * 4;
+    image.data[i + 3] = 0;
+    enqueue(x + 1, y);
+    enqueue(x - 1, y);
+    enqueue(x, y + 1);
+    enqueue(x, y - 1);
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
+function isNearBlackBackground(r: number, g: number, b: number, a: number): boolean {
+  return a > 0 && r < 38 && g < 38 && b < 38;
+}
+
+function clearEdgePixels(ctx: CanvasRenderingContext2D, width: number, height: number, isBackground: (r: number, g: number, b: number, a: number) => boolean): void {
+  const image = ctx.getImageData(0, 0, width, height);
+  const clear = (x: number, y: number): void => {
+    const i = (y * width + x) * 4;
+    if (isBackground(image.data[i] ?? 0, image.data[i + 1] ?? 0, image.data[i + 2] ?? 0, image.data[i + 3] ?? 0)) image.data[i + 3] = 0;
+  };
+  for (let x = 0; x < width; x += 1) {
+    clear(x, 0);
+    clear(x, height - 1);
+  }
+  for (let y = 1; y < height - 1; y += 1) {
+    clear(0, y);
+    clear(width - 1, y);
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
+function clearOpaqueEdgePixels(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+  const image = ctx.getImageData(0, 0, width, height);
+  const clear = (x: number, y: number): void => {
+    image.data[(y * width + x) * 4 + 3] = 0;
+  };
+  for (let x = 0; x < width; x += 1) {
+    clear(x, 0);
+    clear(x, height - 1);
+  }
+  for (let y = 1; y < height - 1; y += 1) {
+    clear(0, y);
+    clear(width - 1, y);
   }
   ctx.putImageData(image, 0, 0);
 }
@@ -6265,7 +6535,75 @@ const TILE_UNDERLAY_TEXTURE: Record<string, string> = {
     "?": "tileOcean"
 };
 
+const GENERATED_STAGES: GeneratedStage[] = [NORTHWOOD_STAGE];
+const GENERATED_STAGES_BY_FLOOR = new Map<number, GeneratedStage>(GENERATED_STAGES.map((stage) => [stage.floor, stage]));
+
+function generatedTilesetTextureKey(stage: GeneratedStage, tilesetName: string): string {
+  return `generated:${stage.zone}:${tilesetName}`;
+}
+
+function generatedTileTextureKey(stage: GeneratedStage, tile: string): string {
+  return `generated:${stage.zone}:tile:${tile}`;
+}
+
+function generatedStageRefTextureKey(stage: GeneratedStage, ref: string): string {
+  return `generated:${stage.zone}:ref:${ref}`;
+}
+
+function createGeneratedStageTileTextures(phaserScene: Phaser.Scene): void {
+  for (const stage of GENERATED_STAGES) {
+    const refs = new Set<string>();
+    for (const [char, tile] of Object.entries(stage.tiles)) {
+      refs.add(tile.ref);
+      const [tilesetName, rawIndex] = tile.ref.split(":");
+      const index = Number(rawIndex);
+      if (!tilesetName || !Number.isInteger(index)) continue;
+      const sourceKey = generatedTilesetTextureKey(stage, tilesetName);
+      if (!phaserScene.textures.exists(sourceKey)) continue;
+      const source = phaserScene.textures.get(sourceKey).getSourceImage() as HTMLImageElement | HTMLCanvasElement;
+      const columns = Math.max(1, Math.floor(source.width / stage.tileSize));
+      const sx = (index % columns) * stage.tileSize;
+      const sy = Math.floor(index / columns) * stage.tileSize;
+      makeTileTexture(phaserScene, sourceKey, generatedTileTextureKey(stage, char), sx, sy, stage.tileSize, stage.tileSize, 0, true);
+    }
+    for (const layer of stage.layers ?? []) {
+      for (const row of layer.data) {
+        for (const ref of row) {
+          if (ref) refs.add(ref);
+        }
+      }
+    }
+    for (const ref of refs) {
+      const [tilesetName, rawIndex] = ref.split(":");
+      const index = Number(rawIndex);
+      if (!tilesetName || !Number.isInteger(index)) continue;
+      const sourceKey = generatedTilesetTextureKey(stage, tilesetName);
+      const textureKey = generatedStageRefTextureKey(stage, ref);
+      if (!phaserScene.textures.exists(sourceKey) || phaserScene.textures.exists(textureKey)) continue;
+      const source = phaserScene.textures.get(sourceKey).getSourceImage() as HTMLImageElement | HTMLCanvasElement;
+      const columns = Math.max(1, Math.floor(source.width / stage.tileSize));
+      const sx = (index % columns) * stage.tileSize;
+      const sy = Math.floor(index / columns) * stage.tileSize;
+      makeTileTexture(phaserScene, sourceKey, textureKey, sx, sy, stage.tileSize, stage.tileSize, 0, true);
+    }
+  }
+}
+
+function generatedStageTextureKeys(floor: number): Array<{ char: string; key: string; exists: boolean; ref: string }> {
+  const stage = GENERATED_STAGES_BY_FLOOR.get(floor);
+  if (!stage) return [];
+  return Object.entries(stage.tiles).map(([char, tile]) => {
+    const key = generatedTileTextureKey(stage, char);
+    return { char, key, exists: Boolean(scene?.textures?.exists?.(key)), ref: tile.ref };
+  });
+}
+
 function tileBaseTexture(tile: string): string {
+  const generatedStage = currentFloor == null ? undefined : GENERATED_STAGES_BY_FLOOR.get(currentFloor);
+  const generatedTexture = generatedStage ? generatedTileTextureKey(generatedStage, tile) : undefined;
+  if (generatedTexture && scene.textures.exists(generatedTexture)) return generatedTexture;
+  const generatedFallback = generatedStage?.tiles[tile]?.textureKey;
+  if (generatedFallback) return generatedFallback;
   return TILE_UNDERLAY_TEXTURE[tile] ?? TILE_BASE_TEXTURE[tile] ?? "tileGrass";
 }
 

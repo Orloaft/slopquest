@@ -33,8 +33,8 @@
 
 - id: mine-3-50-6
   kind: coal
-  at: { floor: 3, x: 61.5, y: 7.5 }
-  approach: { x: 61.5, y: 8.5 }
+  at: { floor: 3, x: 62.5, y: 5.5 }
+  approach: { x: 62.5, y: 6.5 }
 
 # Ore veins embedded in the Searing Badlands canyon walls (floor 6, 110x72):
 # the vein sits on the cliff face, mined from the floor below it.

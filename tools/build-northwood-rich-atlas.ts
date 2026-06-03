@@ -1,3 +1,7 @@
+// DEPRECATED / RETIRED (2026-06-02). This procedural generator invented Northwood's
+// layout + tileset from scratch and never read the authored mockup. The in-game stage is
+// now produced by the authored-layout bridge: tools/build-northwood-from-authored.ts
+// (`npm run assets:northwood`). Kept for reference only; not wired into any npm script.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import nodePath from "node:path";
 import { PNG } from "pngjs";
