@@ -203,7 +203,13 @@ const wCols = water.width / ts, rCols = road.width / ts, PTCOLS = ptop.width / t
 // optional bespoke grass-variation atlas (8x1). Falls back to the single ptop grass tile
 // until tools/slice-grass-v1.py has produced it. See bespoke/waystone-grass-v1/PROMPT.md.
 const grassVarPath = nodePath.join(repoRoot, "assetsources/curated/sliced/grass-v1.png");
-const grassVar = existsSync(grassVarPath) ? PNG.sync.read(readFileSync(grassVarPath)) : null;
+// M3: the forged sun-baked cracked-earth atlas (16x1) supersedes the recolored grass atlas as
+// the ground fill once tools/slice-searing-canyon-m3.py has produced it. It rides the existing
+// grassVar slot, so the ground-fill / water-mask / plateau-skip passes all pick it up unchanged.
+const crackedPath = nodePath.join(repoRoot, "assetsources/curated/sliced/cracked-earth-v1.png");
+const groundReal = existsSync(crackedPath);
+const grassVar = groundReal ? PNG.sync.read(readFileSync(crackedPath))
+  : existsSync(grassVarPath) ? PNG.sync.read(readFileSync(grassVarPath)) : null;
 const GVCOLS = grassVar ? grassVar.width / ts : 0;
 // PLACEHOLDER desert recolor: green -> orange sun-baked cracked-earth, applied in-place to the
 // ground source buffers so every downstream blit (ground fill + plateau rim) paints warm clay.
@@ -218,7 +224,7 @@ const desertRecolor = (img: PNG) => {
   }
 };
 desertRecolor(ptop);
-if (grassVar) desertRecolor(grassVar);
+if (grassVar && !groundReal) desertRecolor(grassVar);          // cracked-earth ships already sun-baked; only the legacy green atlas needs the recolor
 // optional bespoke packed-dirt atlas (4x1) for path/plaza interiors. Falls back to the
 // procedural roadFill below. See bespoke/waystone-dirt-v1/PROMPT.md.
 const dirtVarPath = nodePath.join(repoRoot, "assetsources/curated/sliced/dirt-v1.png");
@@ -288,6 +294,7 @@ const GRASS_IDX0 = 0;
 let gseed = 20260602;
 const grand = () => { gseed = (gseed * 1103515245 + 12345) & 0x7fffffff; return gseed / 0x7fffffff; };
 const pickGrassVariant = () => {
+  if (groundReal) return Math.floor(grand() * GVCOLS);   // 16 cracked-earth variants, uniform -> no visible grid
   const roll = grand();
   if (roll < 0.58) return 0;            // plain base turf dominates
   if (roll < 0.72) return 1;            // denser blade texture
@@ -446,6 +453,45 @@ for (const sh of shadows) for (let dy = 0; dy < SH; dy++) for (let x = 0; x < ts
   out.data[di] = Math.round(out.data[di] * (1 - fall));
   out.data[di + 1] = Math.round(out.data[di + 1] * (1 - fall));
   out.data[di + 2] = Math.round(out.data[di + 2] * (1 - fall));
+}
+
+// ---- M3 desert flora scatter (mirrors the Waystone vegetation pass; consumes vAvoid) -------
+// Sparse, deterministic scatter of saguaro / scrub / skull-pile / scree props on open desert
+// land. NON-blocking (no footprint flip -> never walls the player). The vAvoid halo built up
+// top keeps props off every landmark + overlay. Saguaros ride ~2-2.7 tiles tall (dispW < native
+// width, like trees); ground clutter stays < ~1.3 tiles. Skipped wholesale until the sliced
+// prop PNGs exist (tools/slice-searing-canyon-m3.py).
+const FLORA = "assetsources/curated/bespoke/searing-canyon-m3-assets/sliced";
+const FLORA_DEFS: Array<{ key: string; file: string; dispW: number; weight: number }> = [
+  { key: "spriteSaguaroLg", file: `${FLORA}/saguaro_lg.png`, dispW: 26, weight: 1 },
+  { key: "spriteSaguaroMd", file: `${FLORA}/saguaro_md.png`, dispW: 24, weight: 2 },
+  { key: "spriteSaguaroSm", file: `${FLORA}/saguaro_sm.png`, dispW: 22, weight: 2 },
+  { key: "spriteScrubDead", file: `${FLORA}/scrub_dead.png`, dispW: 30, weight: 4 },
+  { key: "spriteScrubDry", file: `${FLORA}/scrub_dry.png`, dispW: 32, weight: 4 },
+  { key: "spriteSkullPile", file: `${FLORA}/skull_pile.png`, dispW: 30, weight: 2 },
+  { key: "spriteScreeLg", file: `${FLORA}/scree_lg.png`, dispW: 36, weight: 3 },
+  { key: "spriteScreeSm", file: `${FLORA}/scree_sm.png`, dispW: 24, weight: 4 },
+];
+if (FLORA_DEFS.every((f) => existsSync(nodePath.join(repoRoot, f.file)))) {
+  const dim = new Map<string, { w: number; h: number }>();
+  for (const f of FLORA_DEFS) { const p = PNG.sync.read(readFileSync(nodePath.join(repoRoot, f.file))); dim.set(f.key, { w: p.width, h: p.height }); }
+  const wsum = FLORA_DEFS.reduce((s, f) => s + f.weight, 0);
+  let fseed = 60030603;
+  const frand = () => { fseed = (fseed * 1103515245 + 12345) & 0x7fffffff; return fseed / 0x7fffffff; };
+  const pickFlora = () => { let roll = frand() * wsum; for (const f of FLORA_DEFS) { roll -= f.weight; if (roll <= 0) return f; } return FLORA_DEFS[FLORA_DEFS.length - 1]; };
+  const plantOK = (r: number, c: number) => (kind[r][c] === "grass" || kind[r][c] === "plateau") && !blocked[r][c] && !vAvoid.has(`${r},${c}`);
+  const floraAt: Array<[number, number]> = [];
+  const floraFar = (r: number, c: number) => floraAt.every(([pr, pc]) => Math.abs(pr - r) >= 2 || Math.abs(pc - c) >= 2);
+  let planted = 0;
+  for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+    if (!plantOK(r, c)) continue;
+    if (frand() > 0.055 || !floraFar(r, c)) continue;          // sparse desert gate; spacing >= 2 cells
+    floraAt.push([r, c]);
+    const f = pickFlora(), d = dim.get(f.key)!;
+    PLACEMENTS.push(B(f.key, f.file, d.w, d.h, c, r, f.dispW)); // non-blocking (no footprint arg)
+    planted++;
+  }
+  console.log(`desert flora: ${planted} props scattered (${floraAt.length} cells, vAvoid-gated)`);
 }
 
 // ===========================================================================
