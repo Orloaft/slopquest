@@ -583,4 +583,4 @@ writeFileSync(nodePath.join(repoRoot, "assetsources/asset-forge/searing-canyon.v
 
 const counts = { water: 0, road: 0, grass: 0, beach: 0, void: 0, wall: 0, ladder: 0 } as Record<string, number>;
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) counts[kind[r][c] === "plateau" ? "grass" : kind[r][c]]++;
-console.log(`waystone stage -> ${C}x${R}; tileset ${N} tiles (${PACK_COLS}x${packRows}); ${objects.length} objects; cells:`, counts);
+console.log(`searing-canyon stage -> ${C}x${R}; tileset ${N} tiles (${PACK_COLS}x${packRows}); ${objects.length} objects; cells:`, counts);
