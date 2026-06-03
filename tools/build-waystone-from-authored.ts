@@ -132,7 +132,7 @@ const isR = (r: number, c: number) => at(r, c) === "t";
 // open dirt, not striped path. Never pave the crop field (its overlay skips road).
 const inField = (r: number, c: number) => r >= FIELD.y0 && r <= FIELD.y1 && c >= FIELD.x0 && c <= FIELD.x1;
 const pave = (r: number, c: number) => { if (rows[r]?.[c] === "F" || rows[r]?.[c] === "q") rows[r][c] = "t"; };
-const PLAZA = { cx: 59, cy: 28, rx: 8, ry: 4 };
+const PLAZA = { cx: 59, cy: 28, rx: 10, ry: 5 };  // widened toward the mockup's open dirt square
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const dx = (c - PLAZA.cx) / PLAZA.rx, dy = (r - PLAZA.cy) / PLAZA.ry;
   if (dx * dx + dy * dy <= 1 && !inField(r, c)) pave(r, c);
@@ -143,6 +143,21 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) if (rows[r][c] === "t") 
 for (const [r, c] of roadSeed) for (const [dr, dc] of [[1, 0], [0, 1]] as const) {
   const nr = r + dr, nc = c + dc;
   if (nr >= 0 && nc >= 0 && nr < R && nc < C && !inField(nr, nc)) pave(nr, nc);
+}
+
+// ---- ASSET GROUNDING (anti-float) ------------------------------------------
+// Pave a 1-cell packed-dirt apron around the major buildings so they sit on earth
+// instead of floating on pure grass. The footprint cells themselves get overwritten
+// to grass-under-sprite later (the B-flip), so only the visible apron ring stays
+// dirt; the road-edge dither then stipples its grass border for free.
+const GROUNDED = new Set(["spriteRedHouse", "spriteThatchHouse", "spriteGreenHouse", "spriteBlueHouse", "spriteWindmill", "spriteWatchtower"]);
+for (const p of PLACEMENTS) {
+  if (!p.block || !GROUNDED.has(p.key)) continue;
+  const [bw, bh] = p.block, c0 = p.tx - Math.floor((bw - 1) / 2);
+  for (let dy = -1; dy <= bh; dy++) for (let dc = -1; dc <= bw; dc++) {
+    const r = p.ty - dy, c = c0 + dc;
+    if (r >= 0 && c >= 0 && r < R && c < C && !inField(r, c)) pave(r, c);
+  }
 }
 
 // ---- VEGETATION SCATTER (decorative, non-blocking sprite objects) ----------
@@ -219,7 +234,10 @@ const propFar = (r: number, c: number) => propAt.every(([pr, pc]) => Math.abs(pr
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {       // pass 2: bushes / flowers / logs
   if (!plantable(r, c) || vAvoid.has(`${r},${c}`)) continue;
   if (treeAt.some(([pr, pc]) => Math.abs(pr - r) <= 1 && Math.abs(pc - c) <= 1)) continue;
-  if (vrand() > 0.10 || !propFar(r, c)) continue;
+  // village core is busier in the mockup -> boost the clutter gate there; rest stays sparse.
+  // (waystone's inline prop gate, the local equivalent of northwood's ENVIRO_PROP_DENSITY_GATE.)
+  const propGate = (r >= 8 && r <= 40 && c >= 14 && c <= 78) ? 0.30 : 0.10;
+  if (vrand() > propGate || !propFar(r, c)) continue;
   propAt.push([r, c]);
   const id = PROP_IDS[Math.floor(vrand() * PROP_IDS.length)];
   const d = propDim.get(id)!;

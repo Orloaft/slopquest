@@ -52,7 +52,7 @@
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#6b5827"
+      "minimapColor": "#70512d"
     },
     "m": {
       "role": "town-stairs",

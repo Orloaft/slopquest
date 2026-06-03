@@ -513,27 +513,27 @@
     },
     {
       "index": 101,
-      "role": "town-cliff-face",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 102,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 103,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 104,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 105,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
@@ -558,27 +558,27 @@
     },
     {
       "index": 110,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 111,
-      "role": "packed-road",
-      "blocked": false
+      "role": "town-cliff-face",
+      "blocked": true
     },
     {
       "index": 112,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 113,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 114,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
@@ -588,7 +588,7 @@
     },
     {
       "index": 116,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
@@ -598,17 +598,17 @@
     },
     {
       "index": 118,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 119,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 120,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
@@ -618,18 +618,18 @@
     },
     {
       "index": 122,
-      "role": "town-cliff-face",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 123,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 124,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 125,
@@ -643,78 +643,78 @@
     },
     {
       "index": 127,
-      "role": "town-stairs",
-      "blocked": false
-    },
-    {
-      "index": 128,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 129,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 130,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 131,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 132,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 133,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 134,
       "role": "town-green",
       "blocked": false
     },
     {
-      "index": 135,
+      "index": 128,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 129,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 130,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 131,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 132,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 133,
       "role": "town-stairs",
       "blocked": false
     },
     {
+      "index": 134,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 135,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
       "index": 136,
-      "role": "town-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 137,
-      "role": "town-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 138,
-      "role": "town-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 139,
-      "role": "town-stairs",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 140,
-      "role": "town-cliff-face",
-      "blocked": true
+      "role": "town-stairs",
+      "blocked": false
     },
     {
       "index": 141,
-      "role": "town-stairs",
-      "blocked": false
+      "role": "town-cliff-face",
+      "blocked": true
     },
     {
       "index": 142,
@@ -723,108 +723,108 @@
     },
     {
       "index": 143,
-      "role": "town-stairs",
-      "blocked": false
-    },
-    {
-      "index": 144,
-      "role": "town-stairs",
-      "blocked": false
-    },
-    {
-      "index": 145,
-      "role": "town-green",
-      "blocked": false
-    },
-    {
-      "index": 146,
-      "role": "deep-water",
+      "role": "town-cliff-face",
       "blocked": true
     },
     {
+      "index": 144,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 145,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 146,
+      "role": "town-stairs",
+      "blocked": false
+    },
+    {
       "index": 147,
-      "role": "deep-water",
+      "role": "town-cliff-face",
       "blocked": true
     },
     {
       "index": 148,
-      "role": "town-green",
+      "role": "town-stairs",
       "blocked": false
     },
     {
       "index": 149,
-      "role": "deep-water",
+      "role": "town-cliff-face",
       "blocked": true
     },
     {
       "index": 150,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 151,
       "role": "deep-water",
       "blocked": true
     },
     {
-      "index": 151,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
       "index": 152,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 153,
-      "role": "town-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
+      "index": 153,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
       "index": 154,
-      "role": "town-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 155,
-      "role": "town-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 156,
-      "role": "town-stairs",
-      "blocked": false
-    },
-    {
-      "index": 157,
-      "role": "town-stairs",
-      "blocked": false
-    },
-    {
-      "index": 158,
       "role": "packed-road",
       "blocked": false
     },
     {
+      "index": 157,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 158,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
       "index": 159,
-      "role": "deep-water",
+      "role": "town-cliff-face",
       "blocked": true
     },
     {
       "index": 160,
-      "role": "deep-water",
+      "role": "town-cliff-face",
       "blocked": true
     },
     {
       "index": 161,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-stairs",
+      "blocked": false
     },
     {
       "index": 162,
-      "role": "deep-water",
+      "role": "town-cliff-face",
       "blocked": true
     },
     {
       "index": 163,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 164,
@@ -838,28 +838,28 @@
     },
     {
       "index": 166,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 167,
-      "role": "packed-road",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 168,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 169,
-      "role": "packed-road",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 170,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 171,
@@ -873,7 +873,7 @@
     },
     {
       "index": 173,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
@@ -883,7 +883,7 @@
     },
     {
       "index": 175,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
@@ -903,22 +903,22 @@
     },
     {
       "index": 179,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 180,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 181,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 182,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
@@ -928,18 +928,18 @@
     },
     {
       "index": 184,
-      "role": "town-cliff-face",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 185,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 186,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 187,
@@ -948,37 +948,37 @@
     },
     {
       "index": 188,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 189,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 190,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 191,
       "role": "deep-water",
       "blocked": true
     },
     {
-      "index": 190,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 191,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
       "index": 192,
-      "role": "packed-road",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 193,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 194,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
@@ -988,18 +988,18 @@
     },
     {
       "index": 196,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 197,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 198,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 199,
@@ -1018,47 +1018,47 @@
     },
     {
       "index": 202,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 203,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 204,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 205,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 206,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 207,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 208,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 209,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 210,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
@@ -1068,18 +1068,18 @@
     },
     {
       "index": 212,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 213,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 214,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 215,
@@ -1088,27 +1088,27 @@
     },
     {
       "index": 216,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 217,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 218,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 219,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 220,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
@@ -1118,12 +1118,12 @@
     },
     {
       "index": 222,
-      "role": "town-cliff-face",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 223,
-      "role": "town-stairs",
+      "role": "packed-road",
       "blocked": false
     },
     {
@@ -1133,12 +1133,12 @@
     },
     {
       "index": 225,
-      "role": "town-green",
-      "blocked": false
+      "role": "town-cliff-face",
+      "blocked": true
     },
     {
       "index": 226,
-      "role": "town-green",
+      "role": "town-stairs",
       "blocked": false
     },
     {
@@ -1148,17 +1148,17 @@
     },
     {
       "index": 228,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 229,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 230,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
@@ -1173,12 +1173,12 @@
     },
     {
       "index": 233,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 234,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
@@ -1193,17 +1193,17 @@
     },
     {
       "index": 237,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 238,
-      "role": "town-stairs",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 239,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
@@ -1213,33 +1213,33 @@
     },
     {
       "index": 241,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-stairs",
+      "blocked": false
     },
     {
       "index": 242,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 243,
       "role": "deep-water",
       "blocked": true
     },
     {
-      "index": 243,
-      "role": "town-green",
-      "blocked": false
-    },
-    {
       "index": 244,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 245,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 246,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 247,
@@ -1248,13 +1248,13 @@
     },
     {
       "index": 248,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
       "index": 249,
-      "role": "town-cliff-face",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 250,
@@ -1263,13 +1263,13 @@
     },
     {
       "index": 251,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 252,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 253,
@@ -1283,8 +1283,8 @@
     },
     {
       "index": 255,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 256,
@@ -1293,28 +1293,28 @@
     },
     {
       "index": 257,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 258,
-      "role": "deep-water",
+      "role": "town-cliff-face",
       "blocked": true
     },
     {
       "index": 259,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 260,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 261,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 262,
@@ -1323,13 +1323,13 @@
     },
     {
       "index": 263,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 264,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 265,
@@ -1348,18 +1348,18 @@
     },
     {
       "index": 268,
-      "role": "town-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 269,
-      "role": "town-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 270,
-      "role": "town-stairs",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 271,
@@ -1368,12 +1368,12 @@
     },
     {
       "index": 272,
-      "role": "town-cliff-face",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 273,
-      "role": "town-stairs",
+      "role": "town-green",
       "blocked": false
     },
     {
@@ -1388,62 +1388,62 @@
     },
     {
       "index": 276,
-      "role": "town-cliff-face",
-      "blocked": true
-    },
-    {
-      "index": 277,
-      "role": "town-cliff-face",
-      "blocked": true
-    },
-    {
-      "index": 278,
       "role": "town-stairs",
       "blocked": false
     },
     {
-      "index": 279,
+      "index": 277,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 278,
       "role": "town-cliff-face",
       "blocked": true
     },
     {
+      "index": 279,
+      "role": "town-stairs",
+      "blocked": false
+    },
+    {
       "index": 280,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 281,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 282,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 283,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 284,
+      "role": "town-stairs",
+      "blocked": false
+    },
+    {
+      "index": 285,
+      "role": "town-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 286,
       "role": "packed-road",
       "blocked": false
     },
     {
-      "index": 281,
-      "role": "town-green",
-      "blocked": false
-    },
-    {
-      "index": 282,
-      "role": "town-green",
-      "blocked": false
-    },
-    {
-      "index": 283,
-      "role": "town-stairs",
-      "blocked": false
-    },
-    {
-      "index": 284,
-      "role": "town-cliff-face",
-      "blocked": true
-    },
-    {
-      "index": 285,
-      "role": "town-green",
-      "blocked": false
-    },
-    {
-      "index": 286,
-      "role": "town-green",
-      "blocked": false
-    },
-    {
       "index": 287,
-      "role": "town-green",
+      "role": "town-stairs",
       "blocked": false
     },
     {
@@ -1458,12 +1458,12 @@
     },
     {
       "index": 290,
-      "role": "town-green",
+      "role": "town-stairs",
       "blocked": false
     },
     {
       "index": 291,
-      "role": "deep-water",
+      "role": "town-cliff-face",
       "blocked": true
     },
     {
@@ -1488,7 +1488,7 @@
     },
     {
       "index": 296,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
@@ -1498,8 +1498,8 @@
     },
     {
       "index": 298,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 299,
@@ -1508,18 +1508,18 @@
     },
     {
       "index": 300,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 301,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 302,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 303,
@@ -1533,7 +1533,7 @@
     },
     {
       "index": 305,
-      "role": "town-green",
+      "role": "packed-road",
       "blocked": false
     },
     {
@@ -1553,8 +1553,8 @@
     },
     {
       "index": 309,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 310,
@@ -1563,13 +1563,13 @@
     },
     {
       "index": 311,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 312,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 313,
@@ -1578,7 +1578,7 @@
     },
     {
       "index": 314,
-      "role": "packed-road",
+      "role": "town-green",
       "blocked": false
     },
     {
@@ -1593,8 +1593,8 @@
     },
     {
       "index": 317,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 318,
@@ -1603,8 +1603,8 @@
     },
     {
       "index": 319,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 320,
@@ -1633,18 +1633,18 @@
     },
     {
       "index": 325,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 326,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 327,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 328,
@@ -1653,8 +1653,8 @@
     },
     {
       "index": 329,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 330,
@@ -1673,18 +1673,18 @@
     },
     {
       "index": 333,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 334,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 335,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 336,
@@ -1693,13 +1693,13 @@
     },
     {
       "index": 337,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 338,
-      "role": "deep-water",
-      "blocked": true
+      "role": "town-green",
+      "blocked": false
     },
     {
       "index": 339,
@@ -1713,21 +1713,61 @@
     },
     {
       "index": 341,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 342,
-      "role": "town-green",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 343,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 344,
       "role": "town-green",
       "blocked": false
     },
     {
-      "index": 344,
+      "index": 345,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 346,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 347,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 348,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 349,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 350,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 351,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 352,
       "role": "town-green",
       "blocked": false
     }
