@@ -122,6 +122,34 @@ PLACEMENTS.push(...fenceRing(OUTPOST_BOX, "spritePalisade", `${LANDMK}/palisade_
 // Empty stub so downstream PENS loops are no-ops (cow/goose pens stripped with the village).
 const PENS: { x0: number; y0: number; x1: number; y1: number }[] = [];
 
+// === M3 flora-scatter reservation halo ======================================
+// vAvoid is the keep-out set for the (future) desert-flora scatter pass — saguaro/scrub/skull-
+// pile/scree props must never spawn on a landmark. Built now so M3 drops its scatter loop in
+// behind a single `if (vAvoid.has(`${r},${c}`)) continue;` guard, exactly like the Waystone
+// baker's vegetation pass. Covers all 21 set-piece footprints (+1-cell margin), every palisade
+// segment, and the two ground overlays (ritual basalt disc + mine rail line) — so cacti and
+// rock piles can't clip tents, campfires, totems, or the mining tracks. RITUAL/TRACK are hoisted
+// here so the overlay-apply pass below reuses the same geometry (single source of truth).
+const RITUAL = { cx: 53, cy: 28, rad: 6 };
+const TRACK: Array<[number, number]> = [[43, 84], [46, 86], [49, 88], [52, 90]]; // [row,col] cave -> scaffold
+const vAvoid = new Set<string>();
+const vReserve = (r: number, c: number) => { if (r >= 0 && c >= 0 && r < R && c < C) vAvoid.add(`${r},${c}`); };
+const vReserveHalo = (cr: number, cc: number, pad: number) => {
+  for (let dr = -pad; dr <= pad; dr++) for (let dc = -pad; dc <= pad; dc++) vReserve(cr + dr, cc + dc);
+};
+for (const p of PLACEMENTS) {                                   // footprints: blocked sprites reserve their box +1 margin
+  if (p.block) {
+    const [bw, bh] = p.block, c0 = p.tx - Math.floor((bw - 1) / 2);
+    for (let dy = -1; dy <= bh; dy++) for (let dx = -1; dx <= bw; dx++) vReserve(p.ty - dy, c0 + dx);
+  } else {
+    vReserveHalo(p.ty, p.tx, 1);                                // non-blocking props (campfire/totems/minecart/rune/palisade): 3x3 halo
+  }
+}
+for (let r = 0; r < R; r++) for (let c = 0; c < C; c++)         // ritual basalt disc + 1-cell ring
+  if (Math.hypot(c - RITUAL.cx, r - RITUAL.cy) <= RITUAL.rad + 1) vReserve(r, c);
+for (const [tr, tc] of TRACK) vReserveHalo(tr, tc, 1);          // mine rail line + 1-cell halo
+console.log(`flora keep-out: ${vAvoid.size} cells reserved around 21 landmarks + overlays`);
+
 // de-speckle water (identical to compositor)
 const wn = (r: number, c: number) => at(r, c) === "~";
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
@@ -589,8 +617,8 @@ const overlayTiles = (name: string, cells: Array<[number, number]>) => {
     fringe[r][c] = `searing-canyon:${idx}`;
   }
 };
-// ritual circle: basalt disc with a rune-etched edge ring (two registered tiles, split by radius)
-const RITUAL = { cx: 53, cy: 28, rad: 6 };
+// ritual circle: basalt disc with a rune-etched edge ring (two registered tiles, split by radius).
+// RITUAL geometry is hoisted to the reservation block above (single source of truth).
 const ritualStone: Array<[number, number]> = [], ritualEdge: Array<[number, number]> = [];
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const dist = Math.hypot(c - RITUAL.cx, r - RITUAL.cy);
@@ -599,8 +627,7 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
 }
 overlayTiles("ritual_stone", ritualStone);
 overlayTiles("ritual_edge", ritualEdge);
-// mine rail: cave-mouth -> scaffold line
-const TRACK: Array<[number, number]> = [[43, 84], [46, 86], [49, 88], [52, 90]]; // [row,col] cave -> scaffold
+// mine rail: cave-mouth -> scaffold line (TRACK hoisted to the reservation block above)
 overlayTiles("mine_track", TRACK);
 legend.B = `searing-canyon:${grassTile}`;
 vocab.B = { ...CHAR_VOCAB.B, minimapColor: avgColor(tileBuf[grassTile]) };
