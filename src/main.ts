@@ -29,7 +29,7 @@ import {
   xpForLevel
 } from "./shared.ts";
 import type { ClassSpec } from "./shared.ts";
-import { NORTHWOOD_STAGE, type GeneratedStage } from "./generated/stages/index.ts";
+import { NORTHWOOD_STAGE, WAYSTONE_STAGE, type GeneratedStage } from "./generated/stages/index.ts";
 import { MAP_OBJECTS, isCutawayBuilding, isInsideCutawayBuilding } from "./map-objects.ts";
 import { setTrack, unlockAudio, setMusicEnabled, currentTrack } from "./audio.ts";
 import { normalizeServerMessage, type WireServerMessage } from "./wire.ts";
@@ -915,6 +915,12 @@ function preload(this: Phaser.Scene): void {
   for (const id of NORTHWOOD_SPRITE_IDS) {
     this.load.image(`spriteNw${String(id).padStart(3, "0")}`, `/sprites/nw/obj_${String(id).padStart(3, "0")}.png`);
   }
+  // Waystone (floor 0) bespoke structures, referenced by the stage objects[] keys.
+  this.load.image("spriteWindmill", "/waystone/windmill.png");
+  this.load.image("spriteWatchtower", "/waystone/watchtower.png");
+  this.load.image("spriteCow", "/waystone/cow.png");
+  this.load.image("spriteGoose", "/waystone/goose.png");
+  this.load.image("spriteScarecrow", "/waystone/scarecrow.png");
   for (const stage of GENERATED_STAGES) {
     for (const tileset of stage.tilesets) {
       if (tileset.publicPath) this.load.image(generatedTilesetTextureKey(stage, tileset.name), tileset.publicPath);
@@ -6535,7 +6541,7 @@ const TILE_UNDERLAY_TEXTURE: Record<string, string> = {
     "?": "tileOcean"
 };
 
-const GENERATED_STAGES: GeneratedStage[] = [NORTHWOOD_STAGE];
+const GENERATED_STAGES: GeneratedStage[] = [NORTHWOOD_STAGE, WAYSTONE_STAGE];
 const GENERATED_STAGES_BY_FLOOR = new Map<number, GeneratedStage>(GENERATED_STAGES.map((stage) => [stage.floor, stage]));
 
 function generatedTilesetTextureKey(stage: GeneratedStage, tilesetName: string): string {

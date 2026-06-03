@@ -87,8 +87,11 @@ const fenceRing = (x0: number, y0: number, x1: number, y1: number): Place[] => {
   for (let y = y0 + 2; y < y1; y += 2) { out.push(T("spriteFence", "graveyardTiles", 20, 552, 126, 66, x0, y, 64)); out.push(T("spriteFence", "graveyardTiles", 20, 552, 126, 66, x1, y, 64)); }
   return out;
 };
-PLACEMENTS.push(...fenceRing(83, 22, 92, 28));   // cow pen
-PLACEMENTS.push(...fenceRing(17, 43, 25, 49));   // goose pen
+const PENS = [
+  { x0: 83, y0: 22, x1: 92, y1: 28 },   // cow pen (E)
+  { x0: 17, y0: 43, x1: 25, y1: 49 },   // goose pen (SW)
+];
+for (const pen of PENS) PLACEMENTS.push(...fenceRing(pen.x0, pen.y0, pen.x1, pen.y1));
 
 // ---- CROP FIELD (tile-fill region, fenced central plot) ---------------------
 const FIELD = { x0: 52, y0: 35, x1: 67, y1: 47 };
@@ -351,7 +354,20 @@ for (const p of PLACEMENTS) {
     if (at(r, c) === "~") continue;                                // never wall water
     ascii[r] = ascii[r].slice(0, c) + "B" + ascii[r].slice(c + 1);
     collision[r][c] = 1;
+    base[r][c] = `waystone:${grassTile}`; fringe[r][c] = null;     // grass under structure (sprite covers it)
   }
+}
+// fence rings block movement along the full perimeter (interior stays walkable)
+const blockCell = (r: number, c: number) => {
+  if (r < 0 || c < 0 || r >= R || c >= C) return;
+  if (at(r, c) === "~" || at(r, c) === "t") return;                // never wall water/road
+  ascii[r] = ascii[r].slice(0, c) + "B" + ascii[r].slice(c + 1);
+  collision[r][c] = 1;
+  base[r][c] = `waystone:${grassTile}`; fringe[r][c] = null;
+};
+for (const pen of PENS) {
+  for (let c = pen.x0; c <= pen.x1; c++) { blockCell(pen.y0, c); blockCell(pen.y1, c); }
+  for (let r = pen.y0; r <= pen.y1; r++) { blockCell(r, pen.x0); blockCell(r, pen.x1); }
 }
 legend.B = `waystone:${grassTile}`;
 vocab.B = { ...CHAR_VOCAB.B, minimapColor: avgColor(tileBuf[grassTile]) };
