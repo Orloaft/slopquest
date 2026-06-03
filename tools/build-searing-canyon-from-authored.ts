@@ -587,22 +587,9 @@ for (const [tr, tc] of TRACK) if (fringe[tr]?.[tc] !== undefined && at(tr, tc) !
 legend.B = `searing-canyon:${grassTile}`;
 vocab.B = { ...CHAR_VOCAB.B, minimapColor: avgColor(tileBuf[grassTile]) };
 
-// --- NORTH GATE portal -> Northwood -----------------------------------------
-// The engine's portalFor() already routes floor-0 tile 'N' -> Northwood (floor 3), and
-// Northwood's 'S' returns the player to Waystone's north-gate lane (37.5,4.5). That 'N'
-// gate char was lost when this bridge stage replaced the old procedural hub (the removed
-// "placeholder gate" Alex flagged). Re-stamp it on the northernmost gate road cells; the
-// road visual is kept, only the semantic char + portal routing change.
-const NORTH_GATE: Array<[number, number]> = [[0, 36], [0, 37], [0, 38], [0, 39]];
-const GATE_PORTAL = { x: 37, y: 0, to: "Northwood" };
-for (const [r, c] of NORTH_GATE) {
-  if (ascii[r]?.[c] === undefined) continue;
-  ascii[r] = ascii[r].slice(0, c) + "N" + ascii[r].slice(c + 1);
-  collision[r][c] = 0;                                            // walkable trigger
-}
-const gateRoadTile = canonTile.t ?? grassTile;
-legend.N = `searing-canyon:${gateRoadTile}`;
-vocab.N = { role: "portal-north", blocked: false, sightBlocked: false, road: true, minimapColor: avgColor(tileBuf[gateRoadTile]) };
+// NOTE: No north-gate portal. Searing Canyon owns its mechanical boundaries; the
+// vestigial Waystone -> Northwood 'N' portal pass was stripped so no stray Waystone
+// transition logic clobbers the canyon's engine states.
 
 // --- objects: structures as bottom-center, y-sorted sprites -----------------
 const objects = PLACEMENTS.map((p) => ({
@@ -665,7 +652,7 @@ const fullVocab = {
   floor: 0,
   stageName: "searing-canyon",
   description: "Searing Canyon authored-layout bridge (M1 terrain pass, WIP): multi-direction cliff faces from elevation deltas. Village clutter passes still inherited from waystone clone, pending strip.",
-  requiredPortals: { N: GATE_PORTAL },
+  requiredPortals: {},
   requiredWalkable: [],
   chars: { ...vocab },
 };
