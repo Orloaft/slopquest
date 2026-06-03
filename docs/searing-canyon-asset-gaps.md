@@ -87,6 +87,71 @@ the real art into the same tile slots.
 
 ---
 
+### 1b. Bespoke set-piece landmarks — LOCKED (M2)
+
+Four landmark **kit sheets**, one per M0 flat pad. Rigid contract: pure magenta `#FF00FF`
+bg, hard edges (clean RGBA key), each sprite **bottom-center-anchored** at 1×, ~8px gutter,
+label above each cell, painterly-crisp, sun-baked palette, upper-left light. Anchors are the
+`tools/author_searing_canyon.py` pads; placement API is `B(key, file, nativeW, nativeH, tx,
+ty, dispW, block)` in `tools/build-searing-canyon-from-authored.ts`.
+
+**Outpost kit — `outpost-kit.png`** · pad cols 60–101 × rows 0–20 (tier-3 mesa, center 80)
+> `tent_chief` (200×280) massive central chieftain's tent, bone/skull totems, war-banners ·
+> `tent_raider` (120×176) smaller red canvas tent · `watchtower` (112×224) banner-draped log
+> tower, spiked top · `palisade_seg` (64×80) spiked-log fence segment, tiles H+V seamlessly ·
+> `skull_totem` (40×112) stacked-skull totem pole.
+
+| sprite | tx,ty | dispW | block |
+|---|---|---|---|
+| palisade_seg | perimeter ring of 60–101 × 0–20 (every cell) | 64 | perimeter `blockCell` |
+| tent_chief | 80,12 | 200 | [5,3] |
+| tent_raider | 69,7 / 92,8 | 120 | [3,2] |
+| watchtower | 63,5 / 98,6 | 112 | [2,3] |
+| skull_totem | 75,9 / 86,10 | 36 | — |
+
+**Cultist camp kit — `cultist-kit.png`** · pad cols 2–22 × rows 0–13 (tier-3 mesa, center 12)
+> `tent_cult` (120×176) dark-red cult tent, bone fetishes · `campfire` (56×56) active glowing
+> campfire, emissive embers · `skull_totem_tall` (40×128) tall skull/bone totem.
+
+| sprite | tx,ty | dispW | block |
+|---|---|---|---|
+| tent_cult | 12,9 | 120 | [3,2] |
+| campfire | 8,11 | 48 | — |
+| skull_totem_tall | 5,7 / 18,8 | 36 | — |
+
+**Ritual circle kit — `ritual-kit.png`** · pad cols 46–60 × rows 22–33 (tier-2, center 53,28)
+> `floor_stone` (32×32 tileable) basalt floor w/ faint magma cracks · `floor_edge` (32×32)
+> rune-etched border ring · `rune_core` (112×112) central glowing fiery magma rune, emissive ·
+> `arch_stone` (88×144) curved standing bone/stone arch.
+
+| element | tx,ty / cells | dispW | block / overlay |
+|---|---|---|---|
+| floor_stone / floor_edge | disc r≈6 around 53,28 (edge on rim, stone interior) | — | fringe overlay |
+| rune_core | 53,28 | 96 | — (walkable center) |
+| arch_stone | 47,26 / 59,27 / 53,23 | 80 | [2,2] |
+
+**Mining facility kit — `mine-kit.png`** · pad cols 75–109 × rows 40–68 (tier-1; rear cliff row ~40, center 92)
+> `cave_mouth` (128×128) red-sandstone cave arch, timber lintel (×2 = dual entry) ·
+> `scaffold_crane` (176×208) timber scaffold + rope crane hoist · `minecart` (56×48) loaded
+> ore cart · `barrel_stack` (56×64) stacked barrels/crates · `track_seg` (32×32 tileable) rail.
+
+| element | tx,ty / cells | dispW | block / overlay |
+|---|---|---|---|
+| cave_mouth ×2 | 84,42 / 98,43 (against rear cliff) | 120 | [3,2] |
+| scaffold_crane | 90,52 | 168 | [5,3] |
+| minecart | 88,58 | 52 | — |
+| barrel_stack | 95,60 / 80,55 | 50 | [1,1] |
+| track_seg | cave_mouth → scaffold line | — | fringe overlay |
+
+**Wiring contract:** object sprites → `PLACEMENTS.push(B(...))` (bottom-center `tx,ty`,
+`block=[w,h]` flips the footprint to `'B'`). Pads are M0-flattened so bottom-center anchoring
+never floats mid-cliff. Outpost palisade via a `fenceRing`-style loop + perimeter `blockCell`
+(interior walkable). Tile overlays (ritual floor, mine track) via a generic `overlayTiles`
+helper that appends tileset entries and writes `fringe[r][c]`. Re-add a `vReserve` halo around
+footprints when the desert-flora scatter returns, so props don't spawn on a tent.
+
+---
+
 ## 2. Set-piece bespoke sprites (full prompts written JIT, tower-style)
 
 Specs locked now; I'll expand each into a full Forge prompt right before we generate it
