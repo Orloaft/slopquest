@@ -61,7 +61,7 @@ const PLACEMENTS: Place[] = [
   T("spriteBlueHouse", "townTiles", 996, 374, 250, 180, 18, 18, 200, [4, 2]),
   // --- bespoke hero structures ---
   B("spriteWindmill", `${BESPOKE}/windmill.png`, 128, 224, 94, 10, 175, [3, 2]),
-  B("spriteWatchtower", `${BESPOKE}/watchtower.png`, 96, 224, 104, 11, 120, [2, 2]),
+  B("spriteWatchtower", `${BESPOKE}/tower-waystone.png`, 106, 238, 104, 11, 140, [3, 2]), // bespoke town tower (was Northwood watchtower.png)
   // --- town centre ---
   T("spriteWell", "townTiles", 824, 420, 94, 132, 56, 25, 56, [1, 1]),
   T("spriteMarket", "townTiles", 1208, 786, 188, 84, 64, 29, 120, [3, 1]),

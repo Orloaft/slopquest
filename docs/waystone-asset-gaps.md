@@ -9,37 +9,32 @@ All sheets follow the standard pipeline (`world_crafting_spec.md` §2/§8):
 magenta `#FF00FF` background, hard edges, **fixed visual cell order**, 32px authored @1×,
 sliced with the magenta key (`blue ≥ green + 8`).
 
-## 1. Roof palette variants
+## 1. Roof palette variants — ✅ RESOLVED (no gap; closed 2026-06-03)
 
-The mockup shows the cottage row in **three distinct slate-roof colors** (red, yellow, blue).
-The current bespoke house assets do not carry per-roof-color variants.
+**Not a real gap.** The houses are `townTiles` atlas slices, and the baker already places
+four distinct colors — `spriteRedHouse`, `spriteThatchHouse` (yellow), `spriteGreenHouse`,
+`spriteBlueHouse` (`build-waystone-from-authored.ts:57-60`). The render confirms a red roof
+and a yellow thatch roof in the top row plus the blue west manor, which covers the mockup's
+red/yellow/blue trio. No generation needed; the original flag was made from the mockup alone
+without checking the atlas. Reopen only if we want bespoke half-timbered houses for higher
+fidelity than the atlas slices.
 
-- [ ] **Red slate roof** sheet
-- [ ] **Yellow slate roof** sheet
-- [ ] **Blue slate roof** sheet
-
-Author as a roof-tile set (or full house variants) in fixed-cell order so the slicer can
-index each color deterministically. Match the existing house sprite dims used in
-`tools/build-waystone-from-authored.ts` (the `B(...)` bespoke placements).
-
-## 2. Unique main tower (starting-town variant)
+## 2. Unique main tower (starting-town variant) — 🎯 ACTIVE
 
 The mockup's main tower must read as a distinct **starting-town landmark**, not the reused
-Northwood `watchtower.png`.
+Northwood `watchtower.png` (currently identical art → breaks regional identity).
 
-- [ ] **`tower-waystone.png`** — bespoke tower distinct from `watchtower.png`.
+- [ ] **`tower-waystone.png`** — bespoke town tower (square stone base + oversailing
+  half-timber gallery + teal/brown hip roof, NOT a grey round turret with a red cone).
 
-Target spec dims to drop into the baker's `B(...)` block alongside the current watchtower
-entry (`build-waystone-from-authored.ts:64`):
+**Generation prompt + full wiring contract:** `docs/waystone-tower-prompt.md`.
+Target B(...) swap at `build-waystone-from-authored.ts:64` (keeps map position col 104, row 11):
 
 ```ts
-// current:
-B("spriteWatchtower", `${BESPOKE}/watchtower.png`, 96, 224, 104, 11, 120, [2, 2]),
-// add a distinct main tower, e.g.:
-B("spriteTowerWaystone", `${BESPOKE}/tower-waystone.png`, 96, 256, <tx>, <ty>, 128, [2, 2]),
+B("spriteWatchtower", `${BESPOKE}/tower-waystone.png`, 112, 256, 104, 11, 140, [3, 2]),
 ```
 
-Pick `nw/nh` to fit the authored art; `block` footprint `[2,2]` unless the silhouette needs more.
+Set `nw/nh` to the trimmed PNG's actual px. Then `npm run assets:waystone && npm run workflow:waystone`.
 
 ---
 
