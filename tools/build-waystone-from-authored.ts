@@ -571,10 +571,26 @@ for (let r = 0; r < R; r++) {
 }
 
 // --- crop-field fill: overlay crop tiles on the fenced central plot ----------
+// Rounded plot: chamfer the four corners (asymmetric depths -> organic, not a hard
+// rectangle). Purely a fringe overlay (walkable, no collision), so cut corners just
+// revert to grass. inField/road-exclusion stays the full rectangle on purpose, so
+// paths can't sneak into the freed corners. `border` now traces the rounded outline.
+const CHAMFER = { tl: 3, tr: 4, bl: 4, br: 3 };
+const inPlot = (r: number, c: number): boolean => {
+  if (r < FIELD.y0 || r > FIELD.y1 || c < FIELD.x0 || c > FIELD.x1) return false;
+  const lx = c - FIELD.x0, rx = FIELD.x1 - c, ty = r - FIELD.y0, by = FIELD.y1 - r;
+  if (lx + ty < CHAMFER.tl) return false;
+  if (rx + ty < CHAMFER.tr) return false;
+  if (lx + by < CHAMFER.bl) return false;
+  if (rx + by < CHAMFER.br) return false;
+  return true;
+};
 for (let r = FIELD.y0; r <= FIELD.y1; r++) for (let c = FIELD.x0; c <= FIELD.x1; c++) {
   if (r < 0 || c < 0 || r >= R || c >= C) continue;
+  if (!inPlot(r, c)) continue;                                   // chamfered corner -> grass
   if (at(r, c) === "~" || at(r, c) === "t") continue;            // keep water/road
-  const border = r === FIELD.y0 || r === FIELD.y1 || c === FIELD.x0 || c === FIELD.x1;
+  // border = plot-edge cell (a 4-neighbour leaves the rounded plot) -> follows the outline
+  const border = !inPlot(r - 1, c) || !inPlot(r + 1, c) || !inPlot(r, c - 1) || !inPlot(r, c + 1);
   const sunZone = c >= FIELD.x1 - 4 && r <= FIELD.y0 + 5;           // sunflower block, NE corner
   const name = border ? "edge" : sunZone ? "sun" : (r % 2 === 0 ? "ripe" : "young"); // leafy green rows
   fringe[r][c] = `waystone:${CROP_IDX[name]}`;

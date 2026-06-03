@@ -33,6 +33,7 @@
     "assets:stage:waystone": "node tools/import-asset-forge-stage.ts --stage assetsources/asset-forge/exports/waystone/waystone.stage.json --vocab assetsources/asset-forge/waystone.vocab.json --out src/generated/stages/waystone.ts --public-dir public/tilesets/waystone",
     "assets:stage:waystone:check": "node tools/import-asset-forge-stage.ts --stage assetsources/asset-forge/exports/waystone/waystone.stage.json --vocab assetsources/asset-forge/waystone.vocab.json --out src/generated/stages/waystone.ts --public-dir public/tilesets/waystone --check",
     "workflow:northwood": "npm run assets:stage:northwood:check && npm run typecheck && playwright test tests/e2e/asset-forge-stage.spec.ts tests/e2e/road-safety.spec.ts --project=chromium",
+    "workflow:waystone": "npm run assets:stage:waystone:check && npm run typecheck && playwright test tests/e2e/waystone-screenshot.spec.ts --project=chromium",
     "assets:enemies": "python3 tools/generate_woodland_enemy_sprites_v2.py && python3 tools/validate_enemy_asset_pipeline.py",
     "assets:enemies:check": "python3 tools/validate_enemy_asset_pipeline.py",
     "test:e2e": "playwright test",
