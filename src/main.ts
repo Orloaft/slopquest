@@ -921,6 +921,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("spriteCow", "/waystone/cow.png");
   this.load.image("spriteGoose", "/waystone/goose.png");
   this.load.image("spriteScarecrow", "/waystone/scarecrow.png");
+  this.load.image("spriteWaystoneCave", "/waystone/cave.png"); // pre-cleaned cave arch (de-fringed)
   for (const stage of GENERATED_STAGES) {
     for (const tileset of stage.tilesets) {
       if (tileset.publicPath) this.load.image(generatedTilesetTextureKey(stage, tileset.name), tileset.publicPath);
@@ -1046,7 +1047,7 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "beachTiles", "spriteBeachHut", 1366, 860, 116, 118);
   makeSpriteTexture(this, "beachTiles", "spriteBeachDock", 642, 650, 168, 86);
   makeSpriteTexture(this, "beachTiles", "spriteBeachBoat", 560, 722, 74, 48);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachCave", 714, 840, 104, 102);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachCave", 684, 861, 118, 89);
   makeSpriteTexture(this, "beachTiles", "spriteBeachTent", 1040, 866, 92, 70);
   makeSpriteTexture(this, "beachTiles", "spriteBeachCampfire", 1160, 872, 72, 66);
   makeSpriteTexture(this, "beachTiles", "spriteBeachPalm", 1438, 944, 86, 72);

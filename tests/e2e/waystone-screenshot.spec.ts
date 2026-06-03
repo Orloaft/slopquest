@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 // Boots the game, joins a fresh character (spawns on floor 0 = Waystone per
 // START), lets the stage + sprites settle, and screenshots the live render.
