@@ -1,0 +1,45 @@
+{
+  "zone": "waystone",
+  "floor": 0,
+  "stageName": "waystone",
+  "description": "Waystone authored-layout bridge (terrain pass): flat town, tiles from the locked autotile atlases. Structures placed as objects in the placement pass.",
+  "requiredPortals": {},
+  "requiredWalkable": [],
+  "chars": {
+    "F": {
+      "role": "town-green",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#b9b23e"
+    },
+    "~": {
+      "role": "deep-water",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#087696"
+    },
+    "t": {
+      "role": "packed-road",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#b69d30"
+    },
+    ".": {
+      "role": "sand-shore",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#b9b23e"
+    },
+    "^": {
+      "role": "forest-border-canopy",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#b9b23e"
+    }
+  }
+}

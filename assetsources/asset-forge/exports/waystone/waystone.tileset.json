@@ -1,0 +1,520 @@
+{
+  "schema": "asset-forge/tileset@1",
+  "name": "waystone",
+  "image": "waystone.png",
+  "tileSize": 32,
+  "columns": 24,
+  "rows": 5,
+  "tiles": [
+    {
+      "index": 0,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 1,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 2,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 3,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 4,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 5,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 6,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 7,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 8,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 9,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 10,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 11,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 12,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 13,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 14,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 15,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 16,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 17,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 18,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 19,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 20,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 21,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 22,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 23,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 24,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 25,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 26,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 27,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 28,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 29,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 30,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 31,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 32,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 33,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 34,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 35,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 36,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 37,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 38,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 39,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 40,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 41,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 42,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 43,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 44,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 45,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 46,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 47,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 48,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 49,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 50,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 51,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 52,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 53,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 54,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 55,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 56,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 57,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 58,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 59,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 60,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 61,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 62,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 63,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 64,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 65,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 66,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 67,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 68,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 69,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 70,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 71,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 72,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 73,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 74,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 75,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 76,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 77,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 78,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 79,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 80,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 81,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 82,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 83,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 84,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 85,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 86,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 87,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 88,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 89,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 90,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 91,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 92,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 93,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 94,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 95,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 96,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 97,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 98,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 99,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 100,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 101,
+      "role": "town-green",
+      "blocked": false
+    }
+  ]
+}
