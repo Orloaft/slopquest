@@ -463,9 +463,9 @@ for (const sh of shadows) for (let dy = 0; dy < SH; dy++) for (let x = 0; x < ts
 // prop PNGs exist (tools/slice-searing-canyon-m3.py).
 const FLORA = "assetsources/curated/bespoke/searing-canyon-m3-assets/sliced";
 const FLORA_DEFS: Array<{ key: string; file: string; dispW: number; weight: number }> = [
-  { key: "spriteSaguaroLg", file: `${FLORA}/saguaro_lg.png`, dispW: 26, weight: 1 },
-  { key: "spriteSaguaroMd", file: `${FLORA}/saguaro_md.png`, dispW: 24, weight: 2 },
-  { key: "spriteSaguaroSm", file: `${FLORA}/saguaro_sm.png`, dispW: 22, weight: 2 },
+  { key: "spriteSaguaroLg", file: `${FLORA}/saguaro_lg.png`, dispW: 32, weight: 1 },   // ~3.3 tiles tall -> towering, echoes the cliff scale
+  { key: "spriteSaguaroMd", file: `${FLORA}/saguaro_md.png`, dispW: 28, weight: 2 },   // ~2.4 tiles
+  { key: "spriteSaguaroSm", file: `${FLORA}/saguaro_sm.png`, dispW: 24, weight: 2 },   // ~1.4 tiles
   { key: "spriteScrubDead", file: `${FLORA}/scrub_dead.png`, dispW: 30, weight: 4 },
   { key: "spriteScrubDry", file: `${FLORA}/scrub_dry.png`, dispW: 32, weight: 4 },
   { key: "spriteSkullPile", file: `${FLORA}/skull_pile.png`, dispW: 30, weight: 2 },
@@ -480,12 +480,19 @@ if (FLORA_DEFS.every((f) => existsSync(nodePath.join(repoRoot, f.file)))) {
   const frand = () => { fseed = (fseed * 1103515245 + 12345) & 0x7fffffff; return fseed / 0x7fffffff; };
   const pickFlora = () => { let roll = frand() * wsum; for (const f of FLORA_DEFS) { roll -= f.weight; if (roll <= 0) return f; } return FLORA_DEFS[FLORA_DEFS.length - 1]; };
   const plantOK = (r: number, c: number) => (kind[r][c] === "grass" || kind[r][c] === "plateau") && !blocked[r][c] && !vAvoid.has(`${r},${c}`);
+  // cliff-edge clustering bias: props bunch at the foot of cliff faces (talus/scree reads), but
+  // the trail channels stay clearer for combat/navigation.
+  const nearWall = (r: number, c: number) => { for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++) if (kind[r + dr]?.[c + dc] === "wall") return true; return false; };
+  const nearRoad = (r: number, c: number) => { for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) if (at(r + dr, c + dc) === "t") return true; return false; };
   const floraAt: Array<[number, number]> = [];
   const floraFar = (r: number, c: number) => floraAt.every(([pr, pc]) => Math.abs(pr - r) >= 2 || Math.abs(pc - c) >= 2);
   let planted = 0;
   for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
     if (!plantOK(r, c)) continue;
-    if (frand() > 0.055 || !floraFar(r, c)) continue;          // sparse desert gate; spacing >= 2 cells
+    let gate = 0.055;                                          // sparse desert baseline
+    if (nearWall(r, c)) gate = 0.11;                           // ~2x within 2 cells of a cliff face
+    if (nearRoad(r, c)) gate *= 0.4;                           // thin out along trail channels
+    if (frand() > gate || !floraFar(r, c)) continue;           // spacing >= 2 cells
     floraAt.push([r, c]);
     const f = pickFlora(), d = dim.get(f.key)!;
     PLACEMENTS.push(B(f.key, f.file, d.w, d.h, c, r, f.dispW)); // non-blocking (no footprint arg)
