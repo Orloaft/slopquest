@@ -1,0 +1,4 @@
+outpost-palisade
+outpost-tent
+outpost-watchtower
+outpost-totem
