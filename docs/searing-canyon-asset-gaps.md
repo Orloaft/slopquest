@@ -51,6 +51,40 @@ Output one PNG, tightly cropped to the grid+gutters, 1x, one consistent palette 
 Wiring: slice A as corner-Wang, B/C/D/E by label; feed the multi-direction renderer
 (`searing-canyon-engine-plan.md`). Recolor the teal water from `water-wang.png` separately.
 
+### 1a. Per-group prompts — LOCKED (M1)
+
+The renderer is wired to three face groups (`build-searing-canyon-from-authored.ts`: `face`
+= B 5×3, `faceSide` = C 2×3, `caps` = D 4×1). A solid-colour placeholder (`tools/
+make_cliff_red_placeholder.py`) already proves the `drop(r,c,dir)` math; these prompts forge
+the real art into the same tile slots.
+
+**Shared texture preamble (keeps all four directions uniform):**
+
+> Sun-baked **red-orange sandstone**, **vertical fluted columns** with darker rust-brown
+> crevices between them, fine horizontal **striation banding** across the rock, a cool
+> purple-grey shadow pooling at the very base, capped by a thin baked-earth lip (NOT grass —
+> desert). Flat slightly-front orthographic light from upper-left. 32×32 content @1× (no
+> upscale), pure magenta `#FF00FF` bg, hard edges, no AA/glow bleed, ~8px gutter, label above
+> each cell. Not green, glossy, cartoonish, or blurry.
+
+**Group B — SOUTH FACE** (horizontal-run, stacks vertically; fills `face`):
+> 3 rows × 5 cols = 15 tiles. Rows = **TOP lip / MID course / BASE** (purple-grey contact
+> shadow on BASE). Cols = **LEFT-CAP, STRAIGHT, RIGHT-CAP, INNER-L, INNER-R**. Rock columns
+> run vertically within each tile (wall seen head-on); STRAIGHT tiles tile seamlessly
+> left↔right; CAPs round the wall ends; INNER-L/R turn the corner back into the plateau.
+> Labels `B_top_Lcap` … `B_base_innerR`.
+
+**Group C — SIDE FACE** (vertical-run, E/W drops — the net-new art the engine needs; fills `faceSide`):
+> 3 rows × 2 cols = 6 tiles. Same sandstone, but the **columns run horizontally** — the wall
+> seen edge-on, rotated 90° from Group B. Cols = **FACING-LEFT** (west drop, lit edge on its
+> right) and **FACING-RIGHT** (east drop, lit edge on its left). Rows = **TOP / MID / BASE**.
+> Tiles seamlessly top↔bottom so a tall E/W wall stacks cleanly. Labels `C_top_left` …
+> `C_base_right`.
+
+**Group D — CORNER CAPS** (convex S↔side junctions; fills `caps`):
+> 1 row × 4 cols = 4 tiles, `D_NE, D_NW, D_SE, D_SW`. Each blends a south face into a side
+> face at a plateau's outer corner so the L-join shows no seam. Same palette + light dir.
+
 ---
 
 ## 2. Set-piece bespoke sprites (full prompts written JIT, tower-style)
