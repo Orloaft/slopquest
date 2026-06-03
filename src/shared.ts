@@ -157,7 +157,7 @@ export interface SkillDef {
   iconUrl: string;
 }
 
-export const START: Portal = { floor: 0, x: 55.5, y: 40.5 };
+export const START: Portal = { floor: 0, x: 56.5, y: 28.5 };
 
 export const ZONES: Record<ZoneId, Zone> = {
   southTown: { id: "southTown", label: "Waystone", floor: 0, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
@@ -318,11 +318,16 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 87, 48, 1, 10, "q");
     fillRect(rows, 78, 56, 4, 2, "d"); // garden gate gap on the path side
 
-    // Portals at the north and south edges.
-    setTile(rows, 55, 2, "N"); // north -> Northwood (floor 3)
+    // North gate on the VISIBLE north-west road tip (the generated stage's northernmost
+    // road runs to the top edge at cols 36-39) -> Northwood (floor 3). The previous gate
+    // sat at x55 over grass with no visible road, so walking the road the player can see
+    // did nothing; realigned to the road they actually walk.
+    for (const gx of [36, 37, 38, 39]) setTile(rows, gx, 0, "N");
+    for (let gy = 1; gy <= 7; gy += 1) setTile(rows, 37, gy, "t"); // walkable approach lane to the gate
+    setTile(rows, 36, 1, "t");
+    setTile(rows, 38, 1, "t");
     setTile(rows, 64, 70, "S"); // south -> Southgate Cemetery (floor 1)
-    // Approach stubs so the gates open onto walkable lane, not raw grass/edge.
-    setTile(rows, 55, 4, "t");
+    // Approach stub so the south gate opens onto walkable lane, not raw grass/edge.
     setTile(rows, 64, 68, "d");
 
     // Woodland framing the clearing (kept clear of the lanes/plaza by seed).
@@ -1186,7 +1191,7 @@ function portalForRaw(floor: number, x: number, y: number): Portal | null {
   if (floor === 1 && tile === "T") return { floor: 0, x: 64.5, y: 66.5 }; // arrive at Waystone's south gate
   if (floor === 1 && tile === "C") return { floor: 2, x: 9.5, y: 7.5 }; // arrive in the crypt's entry chamber
   if (floor === 2 && tile === "T") return { floor: 1, x: 56.5, y: 37.5 }; // arrive on the cemetery's crypt-entrance apron
-  if (floor === 3 && tile === "S") return { floor: 0, x: 55.5, y: 5.5 }; // arrive at Waystone's north gate
+  if (floor === 3 && tile === "S") return { floor: 0, x: 37.5, y: 4.5 }; // arrive on Waystone's north-gate lane
   if (floor === 3 && tile === "N") return { floor: 4, x: 55.5, y: 60.5 }; // arrive at Northwatch's south gate
   if (floor === 3 && tile === "M") return { floor: 5, x: 59.5, y: 19.5 };
   if (floor === 4 && tile === "S") return { floor: 3, x: 55.5, y: 2.5 };
