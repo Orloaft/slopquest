@@ -515,6 +515,31 @@
       "index": 101,
       "role": "town-green",
       "blocked": false
+    },
+    {
+      "index": 102,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 103,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 104,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 105,
+      "role": "town-green",
+      "blocked": false
+    },
+    {
+      "index": 106,
+      "role": "town-green",
+      "blocked": false
     }
   ]
 }

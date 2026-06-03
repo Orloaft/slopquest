@@ -40,6 +40,13 @@
       "sightBlocked": true,
       "road": false,
       "minimapColor": "#b9b23e"
+    },
+    "B": {
+      "role": "building",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#b9b23e"
     }
   }
 }

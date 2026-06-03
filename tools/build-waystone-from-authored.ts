@@ -28,6 +28,76 @@ const at = (r: number, c: number) => (r >= 0 && c >= 0 && r < R && c < C ? rows[
 const eh = (r: number, c: number) => (r >= 0 && c >= 0 && r < R && c < C ? elev[r][c] : 0);
 const topLvl = Math.max(...elev.flat());
 
+// ---- STRUCTURE PLACEMENT ----------------------------------------------------
+// tx,ty = base-center TILE (sprite bottom-center plants there). dispW = display
+// width px (height keeps native aspect). block=[w,h] tiles flips an ascii
+// footprint to 'B' (blocked+sight) so collision walls the structure; the visual
+// stays the depth-sorted sprite object. Reused sprites use their existing engine
+// key (already preloaded from the named atlas); bespoke use a new key + file.
+type Place = {
+  key: string; tx: number; ty: number; dispW: number; nw: number; nh: number;
+  block?: [number, number]; atlas?: string; sx?: number; sy?: number; file?: string;
+};
+const T = (key: string, atlas: string, sx: number, sy: number, sw: number, sh: number, tx: number, ty: number, dispW: number, block?: [number, number]): Place =>
+  ({ key, atlas, sx, sy, nw: sw, nh: sh, tx, ty, dispW, block });
+const B = (key: string, file: string, nw: number, nh: number, tx: number, ty: number, dispW: number, block?: [number, number]): Place =>
+  ({ key, file, nw, nh, tx, ty, dispW, block });
+const BESPOKE = "assetsources/curated/bespoke/fantasy-village-assets-v1";
+const PLACEMENTS: Place[] = [
+  // --- houses (top row + west manor) ---
+  T("spriteRedHouse", "townTiles", 996, 22, 238, 176, 47, 9, 120, [3, 2]),
+  T("spriteThatchHouse", "townTiles", 1294, 24, 130, 176, 58, 8, 92, [2, 2]),
+  T("spriteGreenHouse", "townTiles", 1272, 374, 142, 178, 67, 9, 92, [2, 2]),
+  T("spriteBlueHouse", "townTiles", 996, 374, 250, 180, 18, 18, 124, [3, 2]),
+  // --- bespoke hero structures ---
+  B("spriteWindmill", `${BESPOKE}/windmill.png`, 128, 224, 94, 10, 128, [3, 2]),
+  B("spriteWatchtower", `${BESPOKE}/watchtower.png`, 96, 224, 104, 11, 90, [2, 2]),
+  // --- town centre ---
+  T("spriteWell", "townTiles", 824, 420, 94, 132, 56, 25, 56, [1, 1]),
+  T("spriteMarket", "townTiles", 1208, 786, 188, 84, 64, 29, 120, [3, 1]),
+  T("spriteSign", "townTiles", 616, 420, 74, 90, 50, 23, 38),
+  T("spriteLamp", "townTiles", 912, 424, 38, 136, 52, 27, 30),
+  T("spriteLamp", "townTiles", 912, 424, 38, 136, 72, 31, 30),
+  T("spriteBarrels", "townTiles", 1200, 700, 90, 70, 44, 13, 52),
+  // --- coast NW ---
+  T("spriteBeachDock", "beachTiles", 642, 650, 168, 86, 8, 7, 120),
+  T("spriteBeachBoat", "beachTiles", 560, 722, 74, 48, 4, 11, 52),
+  // --- mine + SW camp ---
+  T("spriteBeachCave", "beachTiles", 714, 840, 104, 102, 99, 32, 96, [3, 2]),
+  B("spriteScarecrow", `${BESPOKE}/scarecrow.png`, 32, 64, 59, 41, 32),
+  T("spriteBeachTent", "beachTiles", 1040, 866, 92, 70, 11, 55, 60, [2, 1]),
+  T("spriteBeachCampfire", "beachTiles", 1160, 872, 72, 66, 8, 57, 44),
+  // --- bridges over the river ---
+  T("spriteBridge", "townTiles", 20, 466, 92, 56, 34, 25, 70),
+  T("spriteBridge", "townTiles", 20, 466, 92, 56, 30, 58, 70),
+  // --- livestock ---
+  B("spriteCow", `${BESPOKE}/cow_left.png`, 64, 48, 86, 25, 56),
+  B("spriteCow", `${BESPOKE}/cow_left.png`, 64, 48, 89, 26, 56),
+  B("spriteGoose", `${BESPOKE}/goose_left.png`, 32, 32, 20, 45, 28),
+  B("spriteGoose", `${BESPOKE}/goose_left.png`, 32, 32, 22, 46, 28),
+  B("spriteGoose", `${BESPOKE}/goose_left.png`, 32, 32, 21, 47, 28),
+  // --- scattered pines (engine spritePine from the northwood tree sheet) ---
+  ...([[6, 17], [101, 21], [105, 42], [10, 65], [96, 47], [78, 14], [40, 52]] as const)
+    .map(([x, y]) => T("spritePine", "northwoodTreeSheet", 455, 50, 220, 390, x, y, 56, [1, 1])),
+];
+// fence rings around the two animal pens (cow pen NE-centre, goose pen SW)
+const fenceRing = (x0: number, y0: number, x1: number, y1: number): Place[] => {
+  const out: Place[] = [];
+  for (let x = x0; x <= x1; x += 2) { out.push(T("spriteFence", "graveyardTiles", 20, 552, 126, 66, x, y0, 64)); out.push(T("spriteFence", "graveyardTiles", 20, 552, 126, 66, x, y1, 64)); }
+  for (let y = y0 + 2; y < y1; y += 2) { out.push(T("spriteFence", "graveyardTiles", 20, 552, 126, 66, x0, y, 64)); out.push(T("spriteFence", "graveyardTiles", 20, 552, 126, 66, x1, y, 64)); }
+  return out;
+};
+PLACEMENTS.push(...fenceRing(83, 22, 92, 28));   // cow pen
+PLACEMENTS.push(...fenceRing(17, 43, 25, 49));   // goose pen
+
+// ---- CROP FIELD (tile-fill region, fenced central plot) ---------------------
+const FIELD = { x0: 52, y0: 35, x1: 67, y1: 47 };
+const CROP_FILES = {
+  edge: `${BESPOKE}/field_edge.png`, soil: `${BESPOKE}/field_soil.png`,
+  young: `${BESPOKE}/field_crop_young.png`, ripe: `${BESPOKE}/field_crop_ripe.png`,
+  sun: `${BESPOKE}/field_sunflowers.png`,
+};
+
 // de-speckle water (identical to compositor)
 const wn = (r: number, c: number) => at(r, c) === "~";
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
@@ -168,6 +238,19 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   }
   cellTile[r][c] = idx;
 }
+// append the seamless crop tiles as extra tileset entries (referenced by the field fill)
+const CROP_IDX: Record<string, number> = {};
+for (const [name, file] of Object.entries(CROP_FILES)) {
+  const p = PNG.sync.read(readFileSync(nodePath.join(repoRoot, file)));
+  const buf = Buffer.alloc(ts * ts * 4);
+  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
+    const si = ((Math.min(y, p.height - 1)) * p.width + Math.min(x, p.width - 1)) * 4;
+    const di = (y * ts + x) * 4;
+    buf[di] = p.data[si]; buf[di + 1] = p.data[si + 1]; buf[di + 2] = p.data[si + 2]; buf[di + 3] = p.data[si + 3];
+  }
+  CROP_IDX[name] = tileBuf.length;
+  tileBuf.push(buf); tileBlocked.push(false); tileKind.push("grass");
+}
 const N = tileBuf.length;
 const freq = new Array(N).fill(0);
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) if (!tileBlocked[cellTile[r][c]] && (tileKind[cellTile[r][c]] === "grass" || tileKind[cellTile[r][c]] === "plateau")) freq[cellTile[r][c]]++;
@@ -208,6 +291,7 @@ const CHAR_VOCAB: Record<string, { role: string; blocked: boolean; sightBlocked:
   t: { role: "packed-road", blocked: false, sightBlocked: false, road: true },
   ".": { role: "sand-shore", blocked: false, sightBlocked: false, road: false },
   "^": { role: "forest-border-canopy", blocked: true, sightBlocked: true, road: false },
+  B: { role: "building", blocked: true, sightBlocked: true, road: false },
 };
 
 const charTileFreq: Record<string, Map<number, number>> = {};
@@ -246,6 +330,44 @@ for (let r = 0; r < R; r++) {
   ascii.push(line); collision.push(col); base.push(baseRow); fringe.push(fringeRow);
 }
 
+// --- crop-field fill: overlay crop tiles on the fenced central plot ----------
+for (let r = FIELD.y0; r <= FIELD.y1; r++) for (let c = FIELD.x0; c <= FIELD.x1; c++) {
+  if (r < 0 || c < 0 || r >= R || c >= C) continue;
+  if (at(r, c) === "~" || at(r, c) === "t") continue;            // keep water/road
+  const border = r === FIELD.y0 || r === FIELD.y1 || c === FIELD.x0 || c === FIELD.x1;
+  const sunZone = c >= FIELD.x1 - 4 && r <= FIELD.y0 + 5;           // sunflower block, NE corner
+  const name = border ? "edge" : sunZone ? "sun" : (r % 2 === 0 ? "ripe" : "young"); // leafy green rows
+  fringe[r][c] = `waystone:${CROP_IDX[name]}`;
+}
+
+// --- structure footprints: flip ascii -> 'B' (blocked) ----------------------
+for (const p of PLACEMENTS) {
+  if (!p.block) continue;
+  const [bw, bh] = p.block;
+  const c0 = p.tx - Math.floor((bw - 1) / 2);
+  for (let dy = 0; dy < bh; dy++) for (let dx = 0; dx < bw; dx++) {
+    const r = p.ty - dy, c = c0 + dx;
+    if (r < 0 || c < 0 || r >= R || c >= C) continue;
+    if (at(r, c) === "~") continue;                                // never wall water
+    ascii[r] = ascii[r].slice(0, c) + "B" + ascii[r].slice(c + 1);
+    collision[r][c] = 1;
+  }
+}
+legend.B = `waystone:${grassTile}`;
+vocab.B = { ...CHAR_VOCAB.B, minimapColor: avgColor(tileBuf[grassTile]) };
+
+// --- objects: structures as bottom-center, y-sorted sprites -----------------
+const objects = PLACEMENTS.map((p) => ({
+  key: p.key,
+  x: p.tx + 0.5,
+  y: p.ty + 1,
+  w: p.dispW,
+  h: Math.round((p.dispW * p.nh) / p.nw),
+  blocking: !!p.block,
+  // preview-only source (engine ignores extra fields; it renders via `key`)
+  src: p.file ? { file: p.file } : { atlas: p.atlas, sx: p.sx, sy: p.sy, sw: p.nw, sh: p.nh },
+})).sort((a, b) => a.y - b.y);
+
 // ===========================================================================
 // WRITE OUTPUTS
 // ===========================================================================
@@ -263,7 +385,7 @@ const stage = {
   tilesets: [{ name: "waystone", image: "waystone.png", manifest: "waystone.tileset.json" }],
   layers: [{ name: "base", type: "tile", data: base }, { name: "fringe", type: "tile", data: fringe }],
   collision,
-  objects: [] as unknown[],
+  objects,
   ascii: { legend, rows: ascii },
 };
 writeFileSync(nodePath.join(exportDir, "waystone.stage.json"), JSON.stringify(stage));
@@ -281,4 +403,4 @@ writeFileSync(nodePath.join(repoRoot, "assetsources/asset-forge/waystone.vocab.j
 
 const counts = { water: 0, road: 0, grass: 0, beach: 0, void: 0 } as Record<string, number>;
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) counts[kind[r][c] === "plateau" ? "grass" : kind[r][c]]++;
-console.log(`waystone stage -> ${C}x${R}; tileset ${N} tiles (${PACK_COLS}x${packRows}); cells:`, counts);
+console.log(`waystone stage -> ${C}x${R}; tileset ${N} tiles (${PACK_COLS}x${packRows}); ${objects.length} objects; cells:`, counts);
