@@ -1086,6 +1086,39 @@ function create(this: Phaser.Scene): void {
       this.textures.get("searingCliffLip").setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
   }
+  // Teal canyon river ('5', floor 6). Procedural so it needs no asset and stays tunable:
+  // a teal base with deterministic ripple streaks and a lighter feathered edge so banks
+  // read as shallow foam against the rock. Water blocks movement, not sight.
+  {
+    const water = document.createElement("canvas");
+    water.width = TILE_SIZE;
+    water.height = TILE_SIZE;
+    const wc = water.getContext("2d");
+    if (wc) {
+      wc.fillStyle = "#2f97a3";
+      wc.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+      // ripple streaks (sine-driven, deterministic) — lighter teal highlights.
+      for (let y = 0; y < TILE_SIZE; y += 1) {
+        const t = Math.sin(y * 0.8) * Math.sin(y * 0.27 + 1.3);
+        if (t > 0.55) {
+          wc.fillStyle = `rgba(120,214,214,${0.10 + (t - 0.55) * 0.5})`;
+          wc.fillRect(0, y, TILE_SIZE, 1);
+        }
+      }
+      // lighter feathered edge (shore foam) on all four sides.
+      const edge = 4;
+      for (let d = 0; d < edge; d += 1) {
+        const a = (1 - d / edge) * 0.5;
+        wc.fillStyle = `rgba(150,224,222,${a})`;
+        wc.fillRect(d, d, TILE_SIZE - 2 * d, 1);
+        wc.fillRect(d, TILE_SIZE - 1 - d, TILE_SIZE - 2 * d, 1);
+        wc.fillRect(d, d, 1, TILE_SIZE - 2 * d);
+        wc.fillRect(TILE_SIZE - 1 - d, d, 1, TILE_SIZE - 2 * d);
+      }
+      this.textures.addCanvas("searingRiver", water);
+      this.textures.get("searingRiver").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
   makeSpriteTexture(this, "badlandsTiles", "spriteTent", 1070, 873, 92, 72);
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsLedge", 20, 862, 72, 86);
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsBoulder", 1248, 388, 98, 80);
@@ -5885,6 +5918,7 @@ function minimapTileColor(tile: string): string {
     X: "#5c3320", // cliff wall (blocked)
     P: "#140f0d", // pit chasm (blocked, sight-open)
     A: "#c98a4a", // ramp
+    "5": "#3fa9b0", // teal searing river (blocked, sight-open)
     D: "#d6ad4e", // badlands portal (landmark)
     Z: "#e0c070", // badlands ledge (landmark)
     "%": "#9a7038", // saguaro on badlands ground (flora)
@@ -6627,6 +6661,7 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     "7": "tileBadlandsGravel",
     w: "tileMassif",
     X: "tileCliff",
+    "5": "searingRiver",
     P: "tilePit",
     A: "tileRamp",
     D: "tileBadlands",

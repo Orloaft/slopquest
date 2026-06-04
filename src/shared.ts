@@ -593,6 +593,25 @@ export function makeFloorTiles(floor: number): string[] {
     for (const [x, y] of despeckle) rows[y]![x] = "R";
     // Layered cliff faces where the massif overhangs a canyon floor.
     applyCliffEdges(rows);
+    // Teal canyon river (#1, the mockup's signature feature): a winding waterway through
+    // the bottom-left, crossed by a wooden plank bridge near the west entry. Carved AFTER
+    // cliffs so faces don't form into the water. Reachability-SAFE by construction — a
+    // massif cell ('w') becomes water ('5', blocked->blocked) and any walkable cell the
+    // river crosses becomes a walkable bridge ('B'), so the canyon neck stays linked and
+    // nothing is stranded. '5' blocks movement, not sight (isBlockedTile only).
+    const riverSegments: Array<[number, number, number, number]> = [
+      [0, 45, 9, 2],   // west arm — runs through the rock along the entry's south edge
+      [9, 45, 6, 3],   // canyon neck — the walkable cells here become the bridge crossing
+      [15, 46, 16, 2], // east arm
+      [28, 47, 2, 6]   // south bend, fading into the deep rock
+    ];
+    for (const [bx, by, bw, bh] of riverSegments)
+      for (let yy = by; yy < by + bh; yy += 1)
+        for (let xx = bx; xx < bx + bw; xx += 1) {
+          const cur = rows[yy]?.[xx];
+          if (cur === undefined) continue;
+          rows[yy]![xx] = cur === "w" ? "5" : "B"; // massif -> water, walkable -> bridge
+        }
     // Desert flora dressing — scatter cacti/scrub/scree/bones across the open canyon
     // floor so it reads lived-in rather than bare. Non-blocking decoration tiles
     // (rendered by addTileDecorations in main.ts). Fixed seeds keep bakes deterministic.
@@ -1164,7 +1183,7 @@ export function isBlockedTile(tile: string): boolean {
   return (
     tile === "#" || NORTHWOOD_WATER_TILES.has(tile) || SWAMP_WATER_TILES.has(tile) || tile === "f" || tile === "y" || tile === "^" || tile === "q" || tile === "r" || tile === "n" || tile === "O" || tile === "o" ||
     tile === "*" ||
-    tile === "X" || tile === "P" || tile === "w" || // badlands cliff wall + pit + massif
+    tile === "X" || tile === "P" || tile === "w" || tile === "5" || // badlands cliff wall + pit + massif + teal river
     tile === "Q" || tile === "V" || tile === "U" || // desert quicksand + oasis + ruin
     BEACH_WATER_TILES.has(tile) || tile === "x" || tile === "0" || tile === "1" || tile === "|" || tile === "u" || // beach sea/shore/cliff/rocks
     tile === "E" || tile === "i" // jungle wall + jungle river
