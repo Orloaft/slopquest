@@ -12,6 +12,8 @@ const SHOTS: Array<{ name: string; x: number; y: number }> = [
   { name: "corridor-vert", x: 56, y: 16 }, // TEMP: densest E/W flank cluster (14 cells)
   { name: "corridor-drop", x: 72, y: 32 }, // TEMP: second dense flank cluster (14 cells)
   { name: "river-bridge", x: 11, y: 43 }, // teal river + plank bridge crossing
+  { name: "terrace", x: 46, y: 39 }, // tall south-facing drop (lip y=36) — strata-bench terracing
+  { name: "terrace2", x: 73, y: 51 }, // second tall south drop (lip y=48) — strata-bench terracing
 ];
 
 test("Searing Badlands landmarks render in-browser", async ({ page }) => {

@@ -1086,6 +1086,34 @@ function create(this: Phaser.Scene): void {
       this.textures.get("searingCliffLip").setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
   }
+  // Strata bench: a flat lit ledge stamped one course into a tall face so the drop
+  // reads as STACKED TERRACES instead of one monolithic wall (the Northwood depth
+  // cue). Procedural like the lip/AO — no new art: the lit mesa-top cracked earth is
+  // the ledge surface, a sun-catch rim marks where the upper face breaks onto it, and
+  // a contact shadow at its foot grounds the lower face below.
+  {
+    const bench = document.createElement("canvas");
+    bench.width = TILE_SIZE;
+    bench.height = TILE_SIZE;
+    const bctx = bench.getContext("2d");
+    if (bctx) {
+      bctx.imageSmoothingEnabled = false;
+      const ledge = this.textures.get("searingMesaTopV0").getSourceImage() as CanvasImageSource;
+      bctx.drawImage(ledge, 0, 0, TILE_SIZE, TILE_SIZE);
+      const rim = 7;
+      for (let dy = 0; dy < rim; dy += 1) {
+        bctx.fillStyle = `rgba(255,201,128,${(1 - dy / rim) * 0.5})`;
+        bctx.fillRect(0, dy, TILE_SIZE, 1);
+      }
+      const shade = 11;
+      for (let dy = 0; dy < shade; dy += 1) {
+        bctx.fillStyle = `rgba(0,0,0,${(1 - dy / shade) * 0.4})`;
+        bctx.fillRect(0, TILE_SIZE - 1 - dy, TILE_SIZE, 1);
+      }
+      this.textures.addCanvas("searingCliffBench", bench);
+      this.textures.get("searingCliffBench").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
   // Teal canyon river ('5', floor 6). Procedural so it needs no asset and stays tunable:
   // a teal base with deterministic ripple streaks and a lighter feathered edge so banks
   // read as shallow foam against the rock. Water blocks movement, not sight.
@@ -1772,7 +1800,9 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
         for (let x = tileX; x < tileRight; x += 1) {
           const face = searingCliffFace(state, x, y);
           if (!face) continue;
-          texture.draw(face.key, (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+          // A bench course steps back to a flat lit ledge (stacked-terrace cue);
+          // every other course draws the ribbed red-rock face sub-tile.
+          texture.draw(face.bench ? "searingCliffBench" : face.key, (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
           if (face.top) {
             texture.draw("searingCliffLip", (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
           }
@@ -6830,7 +6860,7 @@ const SEARING_CLIFF_MAX = 4;
 function isSearingMassif(c: string | undefined): boolean {
   return c === "w" || c === "X";
 }
-function searingCliffFace(state: MapRenderState, x: number, y: number): { key: string; foot: boolean; top: boolean } | null {
+function searingCliffFace(state: MapRenderState, x: number, y: number): { key: string; foot: boolean; top: boolean; bench: boolean } | null {
   if (state.floor !== 6) return null;
   const here = state.rows[y]?.[x];
   if (here !== "X" && here !== "w") return null;
@@ -6849,7 +6879,11 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
     while (total < SEARING_CLIFF_MAX && state.rows[footY - total]?.[x] === "w") total += 1;
     const rowKind = courseFromFoot === 0 ? 2 : courseFromFoot >= total - 1 ? 0 : 1; // base / top / mid
     const col = state.rows[footY]?.[x - 1] !== "X" ? 0 : state.rows[footY]?.[x + 1] !== "X" ? 2 : 1; // Lcap / straight / Rcap
-    return { key: `searingCliffR${rowKind}C${col}`, foot: courseFromFoot === 0, top: rowKind === 0 };
+    // On a face 4+ courses tall, one interior course steps back to a strata bench so
+    // the drop reads as stacked tiers. Placed near mid-height (never the foot or top).
+    const benchCourse = total >= 4 ? Math.floor((total - 1) / 2) : -1;
+    const bench = courseFromFoot === benchCourse;
+    return { key: `searingCliffR${rowKind}C${col}`, foot: courseFromFoot === 0, top: rowKind === 0, bench };
   }
   // --- West/east-facing flank: a 'w' tile whose left or right neighbour is open canyon is
   // a vertical corridor wall the south system never touches; it used to fall back to the
@@ -6869,7 +6903,7 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
   const flankBelow = state.rows[y + 1]?.[x] === "w"
     && state.rows[y + 1]?.[x + side] !== undefined && !isSearingMassif(state.rows[y + 1]?.[x + side]);
   const rowKind = !flankAbove ? 0 : !flankBelow ? 2 : 1; // top rim / base foot / mid
-  return { key: `searingCliffR${rowKind}C${col}`, foot: false, top: rowKind === 0 };
+  return { key: `searingCliffR${rowKind}C${col}`, foot: false, top: rowKind === 0, bench: false };
 }
 
 function tileBaseTexture(tile: string): string {
