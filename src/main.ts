@@ -6741,26 +6741,51 @@ function searingGroundTexture(floor: number, tile: string, x: number, y: number)
 // shadow on the floor below). Returns null for any cell that should keep its base texture.
 // Collision is untouched — it stays tile-based on 'X'/'w' in shared.ts.
 const SEARING_CLIFF_MAX = 4;
+// A 'w' massif body or 'X' south-lip both count as the impassable rock bulk; anything
+// else (canyon floor, flora, pit, portal, void) is "open" for cliff-edge purposes.
+function isSearingMassif(c: string | undefined): boolean {
+  return c === "w" || c === "X";
+}
 function searingCliffFace(state: MapRenderState, x: number, y: number): { key: string; foot: boolean } | null {
   if (state.floor !== 6) return null;
   const here = state.rows[y]?.[x];
   if (here !== "X" && here !== "w") return null;
-  // Walk down (at most SEARING_CLIFF_MAX cells) to the 'X' lip; a 'w' farther above the
-  // lip than that keeps the flat massif top and is left to the base pass.
+  // --- South-facing face: walk down to the 'X' lip and stack courses above it. ---
+  // A 'w' farther above the lip than SEARING_CLIFF_MAX keeps the flat massif top.
   let footY = -1;
   for (let i = 0; i < SEARING_CLIFF_MAX; i += 1) {
     const c = state.rows[y + i]?.[x];
     if (c === "X") { footY = y + i; break; }
     if (c !== "w") break;
   }
-  if (footY < 0) return null;
-  const courseFromFoot = footY - y; // 0 = lip/foot
-  // Column height (lip + contiguous 'w' above), capped, drives top/mid/base assignment.
-  let total = 1;
-  while (total < SEARING_CLIFF_MAX && state.rows[footY - total]?.[x] === "w") total += 1;
-  const rowKind = courseFromFoot === 0 ? 2 : courseFromFoot >= total - 1 ? 0 : 1; // base / top / mid
-  const col = state.rows[footY]?.[x - 1] !== "X" ? 0 : state.rows[footY]?.[x + 1] !== "X" ? 2 : 1; // Lcap / straight / Rcap
-  return { key: `searingCliffR${rowKind}C${col}`, foot: courseFromFoot === 0 };
+  if (footY >= 0) {
+    const courseFromFoot = footY - y; // 0 = lip/foot
+    // Column height (lip + contiguous 'w' above), capped, drives top/mid/base assignment.
+    let total = 1;
+    while (total < SEARING_CLIFF_MAX && state.rows[footY - total]?.[x] === "w") total += 1;
+    const rowKind = courseFromFoot === 0 ? 2 : courseFromFoot >= total - 1 ? 0 : 1; // base / top / mid
+    const col = state.rows[footY]?.[x - 1] !== "X" ? 0 : state.rows[footY]?.[x + 1] !== "X" ? 2 : 1; // Lcap / straight / Rcap
+    return { key: `searingCliffR${rowKind}C${col}`, foot: courseFromFoot === 0 };
+  }
+  // --- West/east-facing flank: a 'w' tile whose left or right neighbour is open canyon is
+  // a vertical corridor wall the south system never touches; it used to fall back to the
+  // flat dark massif body. Paint the inner-corner face so the flank reads as sculpted rock:
+  // innerL (col 3, rock body on the right) faces WEST = open ground on the left; innerR
+  // (col 4) faces EAST. The transparent notch reveals the dark massif behind as a recessed
+  // top-shadow. Row variant tracks the vertical run — lit rim where the flank begins,
+  // shadowed foot where it ends. Collision is untouched (still tile-based on 'w'/'X').
+  if (here !== "w") return null;
+  const groundLeft = state.rows[y]?.[x - 1] !== undefined && !isSearingMassif(state.rows[y]?.[x - 1]);
+  const groundRight = state.rows[y]?.[x + 1] !== undefined && !isSearingMassif(state.rows[y]?.[x + 1]);
+  if (!groundLeft && !groundRight) return null;
+  const side = groundLeft ? -1 : 1; // direction of the open ground this flank faces
+  const col = groundLeft ? 3 : 4; // innerL faces west / innerR faces east
+  const flankAbove = state.rows[y - 1]?.[x] === "w"
+    && state.rows[y - 1]?.[x + side] !== undefined && !isSearingMassif(state.rows[y - 1]?.[x + side]);
+  const flankBelow = state.rows[y + 1]?.[x] === "w"
+    && state.rows[y + 1]?.[x + side] !== undefined && !isSearingMassif(state.rows[y + 1]?.[x + side]);
+  const rowKind = !flankAbove ? 0 : !flankBelow ? 2 : 1; // top rim / base foot / mid
+  return { key: `searingCliffR${rowKind}C${col}`, foot: false };
 }
 
 function tileBaseTexture(tile: string): string {

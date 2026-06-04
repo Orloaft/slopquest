@@ -9,6 +9,8 @@ const SHOTS: Array<{ name: string; x: number; y: number }> = [
   { name: "mine", x: 15, y: 55 }, // a few tiles clear of the arch portal tile
   { name: "ritual", x: 55, y: 55 },
   { name: "outpost", x: 90, y: 20 },
+  { name: "corridor-vert", x: 56, y: 16 }, // TEMP: densest E/W flank cluster (14 cells)
+  { name: "corridor-drop", x: 72, y: 32 }, // TEMP: second dense flank cluster (14 cells)
 ];
 
 test("Searing Badlands landmarks render in-browser", async ({ page }) => {
