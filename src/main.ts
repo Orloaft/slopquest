@@ -905,6 +905,11 @@ function preload(this: Phaser.Scene): void {
   // 72x72 each) + desert flora props. Sliced by tools/slice-searing-canyon-ground-runtime.py
   // and tools/slice-searing-canyon-m3.py; scattered/placed on the live hand-authored floor.
   this.load.image("searingGround", "/tilesets/searing-canyon-ground.png");
+  // Red-rock cliff-face autotile (floor 6 sculpted mesa faces). 5col x 3row @32px:
+  // cols [Lcap, straight, Rcap, innerL, innerR], rows [top/rim, mid, base/foot].
+  // Painted as a multi-course south-facing overlay by createMapChunk (collision stays
+  // tile-based on 'X'/'w'). Sliced from cliff-red.png by tools/slice-searing-canyon-cliff.py.
+  this.load.image("searingCliff", "/tilesets/searing-canyon-cliff.png");
   this.load.image("floraSaguaroLg", "/tilesets/searing-canyon-flora/saguaro_lg.png");
   this.load.image("floraSaguaroMd", "/tilesets/searing-canyon-flora/saguaro_md.png");
   this.load.image("floraSaguaroSm", "/tilesets/searing-canyon-flora/saguaro_sm.png");
@@ -1021,6 +1026,29 @@ function create(this: Phaser.Scene): void {
   // canyon floor stops reading as a repeated grid.
   for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
     makeTileTexture(this, "searingGround", `searingGroundV${i}`, i * 72, 0, 72, 72);
+  }
+  // Red-rock cliff faces: slice the 5col x 3row @32 atlas into 15 overlay sub-tiles.
+  // inset 0 + preserveTransparent so cap edges stay aligned and the transparent gutters
+  // (above the rim, cap shoulders) let the flat massif top read through behind the face.
+  for (let row = 0; row < 3; row += 1)
+    for (let col = 0; col < 5; col += 1)
+      makeTileTexture(this, "searingCliff", `searingCliffR${row}C${col}`, col * 32, row * 32, 32, 32, 0, true);
+  // Contact-shadow band dropped on the canyon floor directly under each cliff lip,
+  // so the foot reads grounded instead of floating (mirrors the baker's wall-foot AO).
+  {
+    const ao = document.createElement("canvas");
+    ao.width = TILE_SIZE;
+    ao.height = TILE_SIZE;
+    const aoCtx = ao.getContext("2d");
+    if (aoCtx) {
+      const band = 15;
+      for (let dy = 0; dy < band; dy += 1) {
+        aoCtx.fillStyle = `rgba(0,0,0,${(1 - dy / band) * 0.42})`;
+        aoCtx.fillRect(0, dy, TILE_SIZE, 1);
+      }
+      this.textures.addCanvas("searingCliffAO", ao);
+      this.textures.get("searingCliffAO").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
   }
   makeSpriteTexture(this, "badlandsTiles", "spriteTent", 1070, 873, 92, 72);
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsLedge", 20, 862, 72, 86);
@@ -1664,6 +1692,22 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
       if (row === undefined) continue;
       for (let x = tileX; x < tileRight; x += 1) {
         texture.draw(searingGroundTexture(state.floor, row[x] ?? "", x, y), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+      }
+    }
+    // Second pass: composite the sculpted red-rock cliff faces over the south-facing
+    // massif edges (floor 6 only). Per-cell + self-contained so faces don't break across
+    // chunk seams; the contact shadow lands on the floor cell just below each lip.
+    if (state.floor === 6) {
+      for (let y = tileY; y < tileBottom; y += 1) {
+        if (state.rows[y] === undefined) continue;
+        for (let x = tileX; x < tileRight; x += 1) {
+          const face = searingCliffFace(state, x, y);
+          if (!face) continue;
+          texture.draw(face.key, (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+          if (face.foot && y + 1 < tileBottom) {
+            texture.draw("searingCliffAO", (x - tileX) * TILE_SIZE, (y + 1 - tileY) * TILE_SIZE);
+          }
+        }
       }
     }
   }
@@ -6684,6 +6728,39 @@ function searingGroundTexture(floor: number, tile: string, x: number, y: number)
     return `searingGroundV${h % SEARING_GROUND_VARIANTS}`;
   }
   return tileBaseTexture(tile);
+}
+
+// Sculpted-mesa cliff overlay (floor 6). The hand-authored canyon fills a 'w' massif,
+// carves 'R' floors, and applyCliffEdges() flips each massif tile that overhangs a floor
+// into an 'X' lip. This paints the red-rock face autotile DOWN-to-UP over the southern
+// edge of each massif: base/foot course on the 'X' lip, mid courses on the 'w' directly
+// above, top/rim on the highest painted course — at most SEARING_CLIFF_MAX courses, so a
+// tall massif keeps its flat dark top (mesa plateau) above the painted face. Caps
+// (Lcap/straight/Rcap) come from the horizontal run of the 'X' lip. Returns the overlay
+// sub-tile for cell (x,y) plus foot=true on the lip itself (so the caller lays a contact
+// shadow on the floor below). Returns null for any cell that should keep its base texture.
+// Collision is untouched — it stays tile-based on 'X'/'w' in shared.ts.
+const SEARING_CLIFF_MAX = 4;
+function searingCliffFace(state: MapRenderState, x: number, y: number): { key: string; foot: boolean } | null {
+  if (state.floor !== 6) return null;
+  const here = state.rows[y]?.[x];
+  if (here !== "X" && here !== "w") return null;
+  // Walk down (at most SEARING_CLIFF_MAX cells) to the 'X' lip; a 'w' farther above the
+  // lip than that keeps the flat massif top and is left to the base pass.
+  let footY = -1;
+  for (let i = 0; i < SEARING_CLIFF_MAX; i += 1) {
+    const c = state.rows[y + i]?.[x];
+    if (c === "X") { footY = y + i; break; }
+    if (c !== "w") break;
+  }
+  if (footY < 0) return null;
+  const courseFromFoot = footY - y; // 0 = lip/foot
+  // Column height (lip + contiguous 'w' above), capped, drives top/mid/base assignment.
+  let total = 1;
+  while (total < SEARING_CLIFF_MAX && state.rows[footY - total]?.[x] === "w") total += 1;
+  const rowKind = courseFromFoot === 0 ? 2 : courseFromFoot >= total - 1 ? 0 : 1; // base / top / mid
+  const col = state.rows[footY]?.[x - 1] !== "X" ? 0 : state.rows[footY]?.[x + 1] !== "X" ? 2 : 1; // Lcap / straight / Rcap
+  return { key: `searingCliffR${rowKind}C${col}`, foot: courseFromFoot === 0 };
 }
 
 function tileBaseTexture(tile: string): string {
