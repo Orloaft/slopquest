@@ -890,6 +890,10 @@ function preload(this: Phaser.Scene): void {
   this.load.image("darkForestTiles", "/dark-forest-tiles.png");
   this.load.image("swampTiles", "/swamp-tiles.png");
   this.load.image("badlandsTiles", "/badlands-tiles.png");
+  this.load.image("outpostKit", "/tilesets/searing-canyon-landmarks/outpost-kit.png");
+  this.load.image("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png");
+  this.load.image("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png");
+  this.load.image("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png");
   this.load.image("desertTiles", "/desert-tiles.png");
   this.load.image("beachTiles", "/beach-tiles.png");
   this.load.image("jungleTiles", "/jungle-tiles.png");
@@ -976,6 +980,23 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsLedge", 20, 862, 72, 86);
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsBoulder", 1248, 388, 98, 80);
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsShard", 1368, 392, 104, 70);
+  // Searing Badlands landmark kits (floor 6). Crop boxes profiled by
+  // tools/slice-searing-canyon-landmarks.py from the magenta-keyed kit sheets;
+  // sheets chroma-key cleanly via makeSpriteTexture. Placed in MAP_OBJECTS[6].
+  makeSpriteTexture(this, "outpostKit", "spriteOutpostPalisade", 60, 220, 557, 381);
+  makeSpriteTexture(this, "outpostKit", "spriteRaiderTent", 706, 73, 451, 569);
+  makeSpriteTexture(this, "outpostKit", "spriteOutpostWatchtower", 1262, 40, 333, 628);
+  makeSpriteTexture(this, "outpostKit", "spriteOutpostTotem", 1805, 102, 209, 526);
+  makeSpriteTexture(this, "cultistKit", "spriteCultistTent", 107, 79, 610, 651);
+  makeSpriteTexture(this, "cultistKit", "spriteCultistCampfire", 847, 322, 433, 396);
+  makeSpriteTexture(this, "cultistKit", "spriteCultistTotem", 1487, 58, 285, 664);
+  makeSpriteTexture(this, "ritualKit", "spriteRitualFloor", 54, 207, 508, 484);
+  makeSpriteTexture(this, "ritualKit", "spriteRitualCore", 646, 224, 478, 467);
+  makeSpriteTexture(this, "ritualKit", "spriteRitualArch", 1192, 211, 539, 470);
+  makeSpriteTexture(this, "mineKit", "spriteMineArch", 57, 120, 523, 473);
+  makeSpriteTexture(this, "mineKit", "spriteMineHoist", 653, 121, 407, 463);
+  makeSpriteTexture(this, "mineKit", "spriteMineCart", 1162, 241, 327, 336);
+  makeSpriteTexture(this, "mineKit", "spriteMineTrack", 1601, 293, 467, 268);
   // Sunken Desert (floor 7). Crops from assetsources/rejected/desert-biome-tiles.png
   // (1536x1024, magenta-keyed) — sand/quicksand/oasis tiles + palm, market tent, ledge.
   makeTileTexture(this, "desertTiles", "tileSand", 25, 101, 71, 73);
