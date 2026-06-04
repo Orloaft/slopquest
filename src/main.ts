@@ -6854,7 +6854,7 @@ function searingGroundTexture(floor: number, tile: string, x: number, y: number)
 // sub-tile for cell (x,y) plus foot=true on the lip itself (so the caller lays a contact
 // shadow on the floor below). Returns null for any cell that should keep its base texture.
 // Collision is untouched — it stays tile-based on 'X'/'w' in shared.ts.
-const SEARING_CLIFF_MAX = 4;
+const SEARING_CLIFF_MAX = 6;
 // A 'w' massif body or 'X' south-lip both count as the impassable rock bulk; anything
 // else (canyon floor, flora, pit, portal, void) is "open" for cliff-edge purposes.
 function isSearingMassif(c: string | undefined): boolean {
@@ -6879,10 +6879,10 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
     while (total < SEARING_CLIFF_MAX && state.rows[footY - total]?.[x] === "w") total += 1;
     const rowKind = courseFromFoot === 0 ? 2 : courseFromFoot >= total - 1 ? 0 : 1; // base / top / mid
     const col = state.rows[footY]?.[x - 1] !== "X" ? 0 : state.rows[footY]?.[x + 1] !== "X" ? 2 : 1; // Lcap / straight / Rcap
-    // On a face 4+ courses tall, one interior course steps back to a strata bench so
-    // the drop reads as stacked tiers. Placed near mid-height (never the foot or top).
-    const benchCourse = total >= 4 ? Math.floor((total - 1) / 2) : -1;
-    const bench = courseFromFoot === benchCourse;
+    // On a face 4+ courses tall, every other interior course steps back to a strata
+    // bench (never the foot or top) so the drop reads as stacked tiers. With the cap
+    // at 6 the tallest columns get two benches (3 tiers); 4-5 tall faces get one.
+    const bench = total >= 4 && courseFromFoot > 0 && courseFromFoot < total - 1 && courseFromFoot % 2 === 0;
     return { key: `searingCliffR${rowKind}C${col}`, foot: courseFromFoot === 0, top: rowKind === 0, bench };
   }
   // --- West/east-facing flank: a 'w' tile whose left or right neighbour is open canyon is
