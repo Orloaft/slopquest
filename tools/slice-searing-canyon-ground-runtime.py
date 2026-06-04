@@ -51,10 +51,29 @@ def main():
         for ci, (x0, x1) in enumerate(col_runs):
             tile = src.crop((x0, y0, x1 + 1, y1 + 1)).resize((TS, TS), Image.LANCZOS)
             atlas.paste(tile.convert("RGBA"), ((ri * 4 + ci) * TS, 0))
+
+    # --- seam normalization -----------------------------------------------------
+    # The raw 4x4 sheet has a ~39-luma / ~51-green spread between cells, so adjacent
+    # variants pop as a CHECKERBOARD grid on the canyon floor (and the derived mesa
+    # tops). The seam is a per-tile MEAN difference, not texture, so shift each tile's
+    # mean toward the shared global mean while preserving its crack detail (the high-
+    # frequency variance). NORM=1.0 fully equalizes; we keep a hair of variety.
+    NORM = 0.92
+    a = np.array(atlas).astype(np.float32)
+    rgb = a[..., :3]
+    tiles = [rgb[:, i * TS:(i + 1) * TS, :] for i in range(16)]
+    global_mean = np.stack([t.reshape(-1, 3).mean(0) for t in tiles]).mean(0)
+    for i, t in enumerate(tiles):
+        shift = (global_mean - t.reshape(-1, 3).mean(0)) * NORM
+        a[:, i * TS:(i + 1) * TS, :3] = np.clip(t + shift, 0, 255)
+    atlas = Image.fromarray(a.astype(np.uint8), "RGBA")
+
     leak = int(magenta_mask(np.array(atlas)).sum())
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     atlas.save(OUT)
-    print(f"ground: 4x4 grid -> {atlas.size[0]}x{atlas.size[1]} searing-canyon-ground.png (magenta leak: {leak} px)")
+    lum = np.stack([np.array(atlas).astype(float)[:, i * TS:(i + 1) * TS, :3].reshape(-1, 3).mean(0) for i in range(16)]) @ [0.299, 0.587, 0.114]
+    print(f"ground: 4x4 grid -> {atlas.size[0]}x{atlas.size[1]} searing-canyon-ground.png "
+          f"(magenta leak: {leak} px, luma spread {lum.max() - lum.min():.1f} after norm)")
 
 
 if __name__ == "__main__":
