@@ -599,19 +599,46 @@ export function makeFloorTiles(floor: number): string[] {
     // massif cell ('w') becomes water ('5', blocked->blocked) and any walkable cell the
     // river crosses becomes a walkable bridge ('B'), so the canyon neck stays linked and
     // nothing is stranded. '5' blocks movement, not sight (isBlockedTile only).
-    const riverSegments: Array<[number, number, number, number]> = [
-      [0, 45, 9, 2],   // west arm — runs through the rock along the entry's south edge
-      [9, 45, 6, 3],   // canyon neck — the walkable cells here become the bridge crossing
-      [15, 46, 16, 2], // east arm
-      [28, 47, 2, 6]   // south bend, fading into the deep rock
+    // The channel winds rather than running dead-straight: massif rock ('w') and
+    // cliff-lip rock ('X') it crosses become water ('5'), and the walkable neck it
+    // passes through becomes a plank bridge ('B'). Rock->water is blocked->blocked
+    // and walkable->bridge is walkable->walkable, so reachability is unchanged.
+    // Off-neck the channel only ever carves water into rock ('w'/'X' -> '5'); it
+    // never touches a walkable cell, so no path is blocked and no stray plank lands
+    // on open floor. The neck is the one place a walkable crossing is wanted, so
+    // there walkable cells become the plank bridge ('B').
+    const carveRiver = (xx: number, yy: number): void => {
+      const cur = rows[yy]?.[xx];
+      if (cur === "w" || cur === "X") rows[yy]![xx] = "5";
+    };
+    // West arm: water threading the rock along the entry's south edge.
+    for (let xx = 0; xx <= 8; xx += 1) {
+      carveRiver(xx, 45);
+      carveRiver(xx, 46);
+    }
+    // Canyon neck: the walkable crossing becomes the plank bridge (rock stays water).
+    for (let xx = 9; xx <= 14; xx += 1)
+      for (let yy = 45; yy <= 47; yy += 1) {
+        const cur = rows[yy]?.[xx];
+        if (cur === undefined) continue;
+        rows[yy]![xx] = cur === "w" || cur === "X" ? "5" : "B";
+      }
+    // East meander: a sine-wound channel (period ~15 cols, ~±1.5 amplitude) through
+    // the canyon-wall rock, with an occasional widened bank so it reads organic.
+    for (let xx = 15; xx <= 35; xx += 1) {
+      const yc = 46 + Math.round(1.5 * Math.sin((xx - 15) * 0.42));
+      carveRiver(xx, yc);
+      carveRiver(xx, yc + 1);
+      if (xx % 3 === 0) carveRiver(xx, yc - 1);
+    }
+    // South tongue: the river bends down and fades into the deep rock east of the mine.
+    const riverTongue: Array<[number, number]> = [
+      [33, 47], [33, 48], [32, 49], [31, 50], [31, 51], [30, 52], [30, 53]
     ];
-    for (const [bx, by, bw, bh] of riverSegments)
-      for (let yy = by; yy < by + bh; yy += 1)
-        for (let xx = bx; xx < bx + bw; xx += 1) {
-          const cur = rows[yy]?.[xx];
-          if (cur === undefined) continue;
-          rows[yy]![xx] = cur === "w" ? "5" : "B"; // massif -> water, walkable -> bridge
-        }
+    for (const [xx, yy] of riverTongue) {
+      carveRiver(xx, yy);
+      carveRiver(xx - 1, yy);
+    }
     // Desert flora dressing — scatter cacti/scrub/scree/bones across the open canyon
     // floor so it reads lived-in rather than bare. Non-blocking decoration tiles
     // (rendered by addTileDecorations in main.ts). Fixed seeds keep bakes deterministic.
