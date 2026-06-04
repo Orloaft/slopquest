@@ -545,6 +545,52 @@ export function makeFloorTiles(floor: number): string[] {
     setTile(rows, 1, 40, "D"); // west edge -> the forest
     setTile(rows, 95, 16, "Z"); // cliff ledge -> western Northwatch (one-way)
     setTile(rows, 11, 53, ">"); // copper dead-end shaft -> the Deepdelve Mine (floor 10)
+    // Organic wall weathering: the canyon was carved as rectangles, so its walls read as
+    // straight blocks. Nibble the massif EDGE deterministically (a 'w' touching open
+    // canyon) so the cliffs erode into a natural silhouette. OPEN-ONLY (w -> R): it never
+    // seals a route, never overwrites a floor/portal/ore tile, and skips a keep-out around
+    // the landmarks/portals/ambush anchors. Collected against the original boundary so it
+    // is a single coherent pass (no cascading widening); applyCliffEdges() then recomputes
+    // the cliff faces on the new organic edge. Deterministic hash keeps bakes stable.
+    const carveKeepOut: Array<[number, number, number, number]> = [
+      [6, 35, 12, 9],   // cultist camp
+      [0, 38, 6, 5],    // forest portal D@1,40
+      [5, 49, 16, 8],   // mine surface + shaft portal >@11,53
+      [49, 52, 15, 8],  // ritual circle
+      [70, 13, 32, 16], // raider outpost + Northwatch ledge Z@95,16
+      [27, 20, 4, 4],   // scripted burrower ambush anchor
+      [41, 38, 4, 4]    // second burrower anchor
+    ];
+    const inCarveKeepOut = (x: number, y: number): boolean =>
+      carveKeepOut.some(([bx, by, bw, bh]) => x >= bx - 1 && x < bx + bw + 1 && y >= by - 1 && y < by + bh + 1);
+    const weathered: Array<[number, number]> = [];
+    for (let y = 1; y < rows.length - 1; y += 1) {
+      const row = rows[y];
+      if (!row) continue;
+      for (let x = 1; x < row.length - 1; x += 1) {
+        if (row[x] !== "w" || inCarveKeepOut(x, y)) continue;
+        const edge = (rows[y - 1]?.[x] ?? "w") !== "w" || (rows[y + 1]?.[x] ?? "w") !== "w"
+          || (row[x - 1] ?? "w") !== "w" || (row[x + 1] ?? "w") !== "w";
+        if (!edge) continue;
+        const h = ((x * 374761393) ^ (y * 668265263)) >>> 0;
+        if (h % 100 < 38) weathered.push([x, y]);
+      }
+    }
+    for (const [x, y] of weathered) rows[y]![x] = "R";
+    // De-speckle: weathering can strand lone massif nubs; open any 'w' with no orthogonal
+    // 'w' neighbour so the eroded edge reads as ridges, not floating debris (open-only).
+    const despeckle: Array<[number, number]> = [];
+    for (let y = 0; y < rows.length; y += 1) {
+      const row = rows[y];
+      if (!row) continue;
+      for (let x = 0; x < row.length; x += 1) {
+        if (row[x] !== "w") continue;
+        const neighbours = (rows[y - 1]?.[x] === "w" ? 1 : 0) + (rows[y + 1]?.[x] === "w" ? 1 : 0)
+          + (row[x - 1] === "w" ? 1 : 0) + (row[x + 1] === "w" ? 1 : 0);
+        if (neighbours === 0) despeckle.push([x, y]);
+      }
+    }
+    for (const [x, y] of despeckle) rows[y]![x] = "R";
     // Layered cliff faces where the massif overhangs a canyon floor.
     applyCliffEdges(rows);
     // Desert flora dressing — scatter cacti/scrub/scree/bones across the open canyon
