@@ -1027,6 +1027,24 @@ function create(this: Phaser.Scene): void {
   for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
     makeTileTexture(this, "searingGround", `searingGroundV${i}`, i * 72, 0, 72, 72);
   }
+  // Lit mesa-top variants (floor 6): the massif PLATEAU TOP reuses the cracked-earth
+  // ground, brightened + warmed so raised rock reads as sun-hit, distinct from the
+  // shadowed canyon floor below. Depth then comes from the rim lip + face, Northwood-
+  // style — instead of the flat dark tileMassif that made mesas read as voids.
+  for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
+    const src = this.textures.get(`searingGroundV${i}`).getSourceImage() as CanvasImageSource;
+    const top = document.createElement("canvas");
+    top.width = TILE_SIZE;
+    top.height = TILE_SIZE;
+    const topCtx = top.getContext("2d");
+    if (topCtx) {
+      topCtx.imageSmoothingEnabled = false;
+      topCtx.filter = "brightness(1.22) saturate(1.08)";
+      topCtx.drawImage(src, 0, 0);
+      this.textures.addCanvas(`searingMesaTopV${i}`, top);
+      this.textures.get(`searingMesaTopV${i}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
   // Red-rock cliff faces: slice the 5col x 3row @32 atlas into 15 overlay sub-tiles.
   // inset 0 + preserveTransparent so cap edges stay aligned and the transparent gutters
   // (above the rim, cap shoulders) let the flat massif top read through behind the face.
@@ -1048,6 +1066,24 @@ function create(this: Phaser.Scene): void {
       }
       this.textures.addCanvas("searingCliffAO", ao);
       this.textures.get("searingCliffAO").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
+  // Bright sun-catch rim lip laid on the TOP course of each cliff face — the highlight
+  // line where the lit plateau breaks into the drop. This is Northwood's strongest depth
+  // cue; without it the red-rock face blended into the mesa top above it.
+  {
+    const lip = document.createElement("canvas");
+    lip.width = TILE_SIZE;
+    lip.height = TILE_SIZE;
+    const lipCtx = lip.getContext("2d");
+    if (lipCtx) {
+      const band = 7;
+      for (let dy = 0; dy < band; dy += 1) {
+        lipCtx.fillStyle = `rgba(255,201,128,${(1 - dy / band) * 0.5})`;
+        lipCtx.fillRect(0, dy, TILE_SIZE, 1);
+      }
+      this.textures.addCanvas("searingCliffLip", lip);
+      this.textures.get("searingCliffLip").setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
   }
   makeSpriteTexture(this, "badlandsTiles", "spriteTent", 1070, 873, 92, 72);
@@ -1704,6 +1740,9 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
           const face = searingCliffFace(state, x, y);
           if (!face) continue;
           texture.draw(face.key, (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+          if (face.top) {
+            texture.draw("searingCliffLip", (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+          }
           if (face.foot && y + 1 < tileBottom) {
             texture.draw("searingCliffAO", (x - tileX) * TILE_SIZE, (y + 1 - tileY) * TILE_SIZE);
           }
@@ -6723,9 +6762,12 @@ const SEARING_GROUND_TILES = new Set(["R", "6", "7", "J", "D", "Z", "O", "%", "&
 // canyon floor doesn't read as one repeated tile. Falls back to the normal resolver
 // for every other floor/tile.
 function searingGroundTexture(floor: number, tile: string, x: number, y: number): string {
-  if (floor === 6 && SEARING_GROUND_TILES.has(tile)) {
+  if (floor === 6) {
     const h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
-    return `searingGroundV${h % SEARING_GROUND_VARIANTS}`;
+    // Massif body ('w') is the raised plateau TOP — lit mesa rock, not flat dark
+    // tileMassif. The cliff-face overlay then paints its exposed edges on top.
+    if (tile === "w") return `searingMesaTopV${h % SEARING_GROUND_VARIANTS}`;
+    if (SEARING_GROUND_TILES.has(tile)) return `searingGroundV${h % SEARING_GROUND_VARIANTS}`;
   }
   return tileBaseTexture(tile);
 }
@@ -6746,7 +6788,7 @@ const SEARING_CLIFF_MAX = 4;
 function isSearingMassif(c: string | undefined): boolean {
   return c === "w" || c === "X";
 }
-function searingCliffFace(state: MapRenderState, x: number, y: number): { key: string; foot: boolean } | null {
+function searingCliffFace(state: MapRenderState, x: number, y: number): { key: string; foot: boolean; top: boolean } | null {
   if (state.floor !== 6) return null;
   const here = state.rows[y]?.[x];
   if (here !== "X" && here !== "w") return null;
@@ -6765,7 +6807,7 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
     while (total < SEARING_CLIFF_MAX && state.rows[footY - total]?.[x] === "w") total += 1;
     const rowKind = courseFromFoot === 0 ? 2 : courseFromFoot >= total - 1 ? 0 : 1; // base / top / mid
     const col = state.rows[footY]?.[x - 1] !== "X" ? 0 : state.rows[footY]?.[x + 1] !== "X" ? 2 : 1; // Lcap / straight / Rcap
-    return { key: `searingCliffR${rowKind}C${col}`, foot: courseFromFoot === 0 };
+    return { key: `searingCliffR${rowKind}C${col}`, foot: courseFromFoot === 0, top: rowKind === 0 };
   }
   // --- West/east-facing flank: a 'w' tile whose left or right neighbour is open canyon is
   // a vertical corridor wall the south system never touches; it used to fall back to the
@@ -6785,7 +6827,7 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
   const flankBelow = state.rows[y + 1]?.[x] === "w"
     && state.rows[y + 1]?.[x + side] !== undefined && !isSearingMassif(state.rows[y + 1]?.[x + side]);
   const rowKind = !flankAbove ? 0 : !flankBelow ? 2 : 1; // top rim / base foot / mid
-  return { key: `searingCliffR${rowKind}C${col}`, foot: false };
+  return { key: `searingCliffR${rowKind}C${col}`, foot: false, top: rowKind === 0 };
 }
 
 function tileBaseTexture(tile: string): string {
