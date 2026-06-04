@@ -547,6 +547,29 @@ export function makeFloorTiles(floor: number): string[] {
     setTile(rows, 11, 53, ">"); // copper dead-end shaft -> the Deepdelve Mine (floor 10)
     // Layered cliff faces where the massif overhangs a canyon floor.
     applyCliffEdges(rows);
+    // Desert flora dressing — scatter cacti/scrub/scree/bones across the open canyon
+    // floor so it reads lived-in rather than bare. Non-blocking decoration tiles
+    // (rendered by addTileDecorations in main.ts). Fixed seeds keep bakes deterministic.
+    scatter(rows, "R", "%", 110, 61); // saguaro cacti
+    scatter(rows, "R", "&", 90, 62);  // dry scrub / dead brush
+    scatter(rows, "R", "@", 60, 63);  // scree rubble
+    scatter(rows, "R", "+", 16, 64);  // sun-bleached bone piles (rare)
+    // Flora keep-out: revert any prop that landed on a landmark footprint, portal,
+    // or scripted-encounter tile back to clean canyon floor so nothing clips them.
+    const floraChars = new Set(["%", "&", "@", "+"]);
+    const floraKeepOut: Array<[number, number, number, number]> = [
+      [6, 35, 12, 9],   // cultist camp (west-mouth niche)
+      [0, 38, 6, 5],    // forest portal D@1,40
+      [5, 49, 16, 8],   // mine surface + shaft portal >@11,53
+      [49, 52, 15, 8],  // ritual circle (iron pocket)
+      [70, 13, 32, 16], // raider outpost (east clearing) + Northwatch ledge Z@95,16
+      [27, 20, 4, 4],   // scripted burrower ambush anchor
+      [41, 38, 4, 4]    // second burrower anchor
+    ];
+    for (const [bx, by, bw, bh] of floraKeepOut)
+      for (let yy = by; yy < by + bh; yy += 1)
+        for (let xx = bx; xx < bx + bw; xx += 1)
+          if (floraChars.has(rows[yy]?.[xx] ?? "")) rows[yy]![xx] = "R";
   }
 
   if (floor === 7) {

@@ -277,7 +277,26 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     // Cluster against the copper-canyon wall.
     { key: "spriteBadlandsBoulder", x: 17.7, y: 53.8, w: 72, h: 58 },
     { key: "spriteBadlandsShard", x: 62.9, y: 44.3, w: 70, h: 50 },
-    { key: "spriteBadlandsBoulder", x: 71.5, y: 26.9, w: 76, h: 60 }
+    { key: "spriteBadlandsBoulder", x: 71.5, y: 26.9, w: 76, h: 60 },
+    // --- Density pass: raider Outpost defensive layers (east clearing). Extra tents +
+    // totems spread the camp into believable depth. Non-blocking; clear of Northwatch Z@95,16.
+    { key: "spriteRaiderTent", x: 78.0, y: 23.2, w: 104, h: 131 },
+    { key: "spriteRaiderTent", x: 86.4, y: 25.4, w: 92, h: 116 },
+    { key: "spriteOutpostTotem", x: 72.2, y: 22.0, w: 60, h: 150 },
+    { key: "spriteCultistTotem", x: 88.6, y: 14.6, w: 56, h: 132 }, // raider trophy stake on the back line
+    // --- Rubble nestled against cliff bases so landmarks/terrain feel anchored, not floated.
+    { key: "spriteBadlandsBoulder", x: 7.4, y: 54.1, w: 70, h: 56 },  // mine canyon wall
+    { key: "spriteBadlandsShard", x: 15.6, y: 41.2, w: 66, h: 48 },   // west climb mouth
+    { key: "spriteBadlandsBoulder", x: 8.8, y: 36.4, w: 64, h: 52 },  // cultist niche shoulder
+    { key: "spriteBadlandsShard", x: 30.4, y: 26.3, w: 68, h: 48 },   // upper run south wall
+    { key: "spriteBadlandsBoulder", x: 43.2, y: 44.1, w: 74, h: 58 }, // mid run elbow
+    { key: "spriteBadlandsShard", x: 60.3, y: 53.7, w: 64, h: 46 },   // ritual pocket rim
+    { key: "spriteBadlandsBoulder", x: 50.6, y: 57.4, w: 72, h: 56 }, // ritual pocket floor
+    { key: "spriteBadlandsShard", x: 26.4, y: 13.2, w: 66, h: 48 },   // north prospect shelf
+    { key: "spriteBadlandsBoulder", x: 72.6, y: 56.2, w: 76, h: 60 }, // south shelf wall
+    { key: "spriteBadlandsShard", x: 90.4, y: 50.3, w: 70, h: 50 },   // south shelf east
+    { key: "spriteBadlandsBoulder", x: 79.3, y: 37.2, w: 70, h: 56 }, // terrace base
+    { key: "spriteBadlandsShard", x: 66.5, y: 26.4, w: 64, h: 46 }    // camp approach wall
   ],
   7: [
     { key: "spriteOutpostTent", x: 47.1, y: 64.3, w: 130, h: 104 }, // Oasis Trade Outpost (south)

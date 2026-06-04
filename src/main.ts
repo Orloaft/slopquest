@@ -901,6 +901,18 @@ function preload(this: Phaser.Scene): void {
   this.load.image("northwoodTreeSheet", "/northwood-trees-v1.png");
   this.load.image("swampTiles", "/swamp-tiles.png");
   this.load.image("badlandsTiles", "/badlands-tiles.png");
+  // Searing Badlands (floor 6) painterly cracked-earth ground atlas (16 variants,
+  // 72x72 each) + desert flora props. Sliced by tools/slice-searing-canyon-ground-runtime.py
+  // and tools/slice-searing-canyon-m3.py; scattered/placed on the live hand-authored floor.
+  this.load.image("searingGround", "/tilesets/searing-canyon-ground.png");
+  this.load.image("floraSaguaroLg", "/tilesets/searing-canyon-flora/saguaro_lg.png");
+  this.load.image("floraSaguaroMd", "/tilesets/searing-canyon-flora/saguaro_md.png");
+  this.load.image("floraSaguaroSm", "/tilesets/searing-canyon-flora/saguaro_sm.png");
+  this.load.image("floraScrubDry", "/tilesets/searing-canyon-flora/scrub_dry.png");
+  this.load.image("floraScrubDead", "/tilesets/searing-canyon-flora/scrub_dead.png");
+  this.load.image("floraScreeLg", "/tilesets/searing-canyon-flora/scree_lg.png");
+  this.load.image("floraScreeSm", "/tilesets/searing-canyon-flora/scree_sm.png");
+  this.load.image("floraSkullPile", "/tilesets/searing-canyon-flora/skull_pile.png");
   this.load.image("outpostKit", "/tilesets/searing-canyon-landmarks/outpost-kit.png");
   this.load.image("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png");
   this.load.image("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png");
@@ -1004,6 +1016,12 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "badlandsTiles", "tileCliff", 528, 100, 68, 82);
   makeTileTexture(this, "badlandsTiles", "tilePit", 1346, 188, 72, 70);
   makeTileTexture(this, "badlandsTiles", "tileRamp", 392, 864, 68, 80);
+  // Painterly cracked-earth ground variants (floor 6). 16x (72x72) packed in a 1152x72
+  // strip; per-tile variant is picked by position hash in searingGroundTexture() so the
+  // canyon floor stops reading as a repeated grid.
+  for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
+    makeTileTexture(this, "searingGround", `searingGroundV${i}`, i * 72, 0, 72, 72);
+  }
   makeSpriteTexture(this, "badlandsTiles", "spriteTent", 1070, 873, 92, 72);
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsLedge", 20, 862, 72, 86);
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsBoulder", 1248, 388, 98, 80);
@@ -1645,7 +1663,7 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
       const row = state.rows[y];
       if (row === undefined) continue;
       for (let x = tileX; x < tileRight; x += 1) {
-        texture.draw(tileBaseTexture(row[x] ?? ""), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+        texture.draw(searingGroundTexture(state.floor, row[x] ?? "", x, y), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
       }
     }
   }
@@ -4516,6 +4534,22 @@ function addTileDecorations(
       if (tile === "U") decorations.push({ key: "spriteObelisk", x: x + 0.5, y: y + 0.95, w: 40, h: 64 });
       if (tile === "H") decorations.push({ key: "spriteDesertLedge", x: x + 0.5, y: y + 0.95, w: 52, h: 50 });
       if (tile === "K") decorations.push({ key: "spriteJungleVault", x: x + 0.5, y: y + 1.0, w: 96, h: 80 });
+      // Searing Badlands desert flora (scattered onto canyon floor 'R' in makeFloorTiles).
+      // Non-blocking decoration; size/variant varies per cell so clumps don't read uniform.
+      if (tile === "%") { // saguaro cactus
+        const v = (((x * 49297) ^ (y * 233280)) >>> 0) % 3;
+        const pick = v === 0 ? ["floraSaguaroLg", 19, 54] : v === 1 ? ["floraSaguaroMd", 18, 48] : ["floraSaguaroSm", 13, 38];
+        decorations.push({ key: pick[0] as string, x: x + 0.5, y: y + 0.96, w: pick[1] as number, h: pick[2] as number });
+      }
+      if (tile === "&") { // dry scrub / dead brush
+        const dead = ((((x * 12347) ^ (y * 6791)) >>> 0) & 1) === 0;
+        decorations.push({ key: dead ? "floraScrubDead" : "floraScrubDry", x: x + 0.5, y: y + 0.9, w: dead ? 13 : 21, h: dead ? 28 : 30 });
+      }
+      if (tile === "@") { // scree rubble
+        const big = ((((x * 7793) ^ (y * 3119)) >>> 0) & 1) === 0;
+        decorations.push({ key: big ? "floraScreeLg" : "floraScreeSm", x: x + 0.5, y: y + 0.85, w: big ? 20 : 12, h: big ? 26 : 20 });
+      }
+      if (tile === "+") decorations.push({ key: "floraSkullPile", x: x + 0.5, y: y + 0.85, w: 25, h: 28 }); // sun-bleached bones
       if (["N", "S", "T", "C", "M", "D", "G", "Y", "j", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
     }
   }
@@ -5770,6 +5804,10 @@ function minimapTileColor(tile: string): string {
     A: "#c98a4a", // ramp
     D: "#d6ad4e", // badlands portal (landmark)
     Z: "#e0c070", // badlands ledge (landmark)
+    "%": "#9a7038", // saguaro on badlands ground (flora)
+    "&": "#9c6a3a", // dry scrub (flora)
+    "@": "#8a5a30", // scree rubble (flora)
+    "+": "#c8b89a", // sun-bleached bones (flora)
     a: "#d8b367", // sand
     Q: "#7a5a2e", // quicksand (blocked, sight-open)
     V: "#2f7d8a", // oasis water (blocked)
@@ -6510,6 +6548,10 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     A: "tileRamp",
     D: "tileBadlands",
     Z: "tileBadlands",
+    "%": "tileBadlands", // saguaro flora — ground beneath the prop
+    "&": "tileBadlands", // dry scrub flora
+    "@": "tileBadlands", // scree rubble flora
+    "+": "tileBadlands", // bone-pile flora
     a: "tileSand",
     Q: "tileQuicksand",
     V: "tileOasisWater",
@@ -6624,6 +6666,24 @@ function generatedStageTextureKeys(floor: number): Array<{ char: string; key: st
     const key = generatedTileTextureKey(stage, char);
     return { char, key, exists: Boolean(scene?.textures?.exists?.(key)), ref: tile.ref };
   });
+}
+
+// Floor-6 walkable ground chars that render with the painterly cracked-earth atlas
+// (incl. the flora-scatter chars, whose ground reads as badlands beneath the prop).
+const SEARING_GROUND_VARIANTS = 16;
+// "O" = blocking-object footprint (e.g. outpost palisade/watchtower); on floor 6 it
+// must read as canyon ground under the sprite, not the cross-floor tileGrass default.
+const SEARING_GROUND_TILES = new Set(["R", "6", "7", "J", "D", "Z", "O", "%", "&", "@", "+"]);
+
+// Picks a deterministic painterly ground variant per cell so the Searing Badlands
+// canyon floor doesn't read as one repeated tile. Falls back to the normal resolver
+// for every other floor/tile.
+function searingGroundTexture(floor: number, tile: string, x: number, y: number): string {
+  if (floor === 6 && SEARING_GROUND_TILES.has(tile)) {
+    const h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
+    return `searingGroundV${h % SEARING_GROUND_VARIANTS}`;
+  }
+  return tileBaseTexture(tile);
 }
 
 function tileBaseTexture(tile: string): string {
