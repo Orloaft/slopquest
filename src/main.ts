@@ -1894,6 +1894,32 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
       }
     }
   }
+  // Northwood (floor 3) painted relief. The generated stage already bakes the cliff
+  // faces (L plateau top / q,o ribbed face) as atlas tiles, so we don't repaint them —
+  // we add the two depth cues the baked tiles lack *in context*: a warm sun-catch rim
+  // lip on the plateau lip where it breaks into the drop (the strongest cue), and a
+  // contact-shadow AO cast onto the lower ground directly below each cliff foot so the
+  // massif reads grounded instead of pasted on. Reuses the palette-neutral searing
+  // lip/AO. Collision is untouched (still tile-based on L/q/o/m in shared.ts).
+  if (state.floor === NORTHWOOD_STAGE.floor) {
+    const isFace = (c: string | undefined): boolean => c === "q" || c === "o";
+    const isElevation = (c: string | undefined): boolean => c === "L" || c === "q" || c === "o" || c === "m";
+    for (let y = tileY; y < tileBottom; y += 1) {
+      if (state.rows[y] === undefined) continue;
+      for (let x = tileX; x < tileRight; x += 1) {
+        const here = state.rows[y]?.[x];
+        // Rim lip: the TOP course of a cliff face (a q/o cell with no face above it) is
+        // where the lit plateau breaks into the drop — lay the warm sun-catch highlight there.
+        if (isFace(here) && !isFace(state.rows[y - 1]?.[x])) {
+          texture.draw("searingCliffLip", (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+        }
+        // Foot AO: a cliff foot (q/o) whose cell below is open lower ground (not more cliff).
+        if (isFace(here) && !isElevation(state.rows[y + 1]?.[x]) && y + 1 < tileBottom) {
+          texture.draw("searingCliffAO", (x - tileX) * TILE_SIZE, (y + 1 - tileY) * TILE_SIZE);
+        }
+      }
+    }
+  }
   chunk.add(texture);
   mapLayer.add(chunk);
   return chunk;
