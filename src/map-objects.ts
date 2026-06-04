@@ -28,7 +28,12 @@ export const BLOCKING_OBJECT_KEYS = new Set<string>([
   "spriteWell",
   "spriteMarket",
   "spriteCrypt",
-  "spriteMausoleum"
+  "spriteMausoleum",
+  // Searing Badlands outpost: solid palisade wall + watchtower. (Mine arch,
+  // cultist camp, and ritual props stay walk-through — the canyon is narrow and
+  // the mine portal must stay reachable.)
+  "spriteOutpostPalisade",
+  "spriteOutpostWatchtower"
 ]);
 
 // Buildings that should behave like same-map cutaways: the exterior sprite
@@ -241,9 +246,31 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteMireLotus", x: 16.5, y: 46.2, w: 34, h: 32 }
   ],
   6: [
-    { key: "spriteTent", x: 86.2, y: 20.6, w: 110, h: 86 }, // Frontier Camp (east clearing)
-    { key: "spriteCampfire", x: 89.8, y: 23.3, w: 54, h: 54 },
-    { key: "spriteBarrels", x: 82.5, y: 17.3, w: 54, h: 42 },
+    // East clearing — painterly raider Outpost kit replaces the old placeholder
+    // Frontier Camp. The Northwatch portal (Z @ 95,16) stays clear; FOOTPRINT_SKIP
+    // shields it from the blocking watchtower/palisade footprints in shared.ts.
+    { key: "spriteOutpostWatchtower", x: 82, y: 21, w: 122, h: 230 },
+    { key: "spriteRaiderTent", x: 93, y: 24, w: 119, h: 150 },
+    { key: "spriteOutpostPalisade", x: 74, y: 18, w: 150, h: 103 },
+    { key: "spriteOutpostPalisade", x: 89, y: 16, w: 150, h: 103 },
+    { key: "spriteOutpostTotem", x: 97, y: 23, w: 68, h: 170 },
+    // West copper dead-end canyon — Deepdelve Mine surface entry framing the
+    // shaft portal (> @ 11,53). All non-blocking so the portal stays reachable.
+    { key: "spriteMineArch", x: 11, y: 53, w: 155, h: 140 },
+    { key: "spriteMineHoist", x: 14, y: 52, w: 114, h: 130 },
+    { key: "spriteMineCart", x: 8.5, y: 53, w: 58, h: 60 },
+    { key: "spriteMineTrack", x: 12.5, y: 53.6, w: 120, h: 69 },
+    // West-mouth niche — hidden zealot Cultist encampment, moved well clear of
+    // the mine canyon so the two sites read as distinct (forest portal D@1,40 stays clear).
+    { key: "spriteCultistTent", x: 12, y: 39, w: 122, h: 130 },
+    { key: "spriteCultistCampfire", x: 14, y: 40, w: 66, h: 60 },
+    { key: "spriteCultistTotem", x: 9.5, y: 38, w: 71, h: 165 },
+    // Hidden iron-pocket ravine (off the mid lower run) — Ritual circle. The
+    // floor is a walk-over decal (non-blocking); two leaning monoliths flank the core.
+    { key: "spriteRitualFloor", x: 55, y: 56, w: 210, h: 200 },
+    { key: "spriteRitualCore", x: 55, y: 55.4, w: 97, h: 95 },
+    { key: "spriteRitualArch", x: 52, y: 55, w: 126, h: 110 },
+    { key: "spriteRitualArch", x: 58, y: 55, w: 126, h: 110 },
     // Native badlands rocks ring the terrace pit-gap, so it reads as a tectonic tear.
     { key: "spriteBadlandsBoulder", x: 78.8, y: 40.7, w: 76, h: 62 },
     { key: "spriteBadlandsShard", x: 91.1, y: 40.6, w: 74, h: 54 },
