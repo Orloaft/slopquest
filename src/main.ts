@@ -5834,7 +5834,14 @@ function isMagentaKey(r: number, g: number, b: number): boolean {
   // red dominates blue, and blue stays well above zero. That near-black-green,
   // red-leaning-purple combination is a chroma key, never real art (warm colours
   // keep green >= ~15; blue-purples have blue above red).
-  return g < 10 && r > 70 && b > 42 && r > b - 5 && r > g * 7 && b > g * 7;
+  if (g < 10 && r > 70 && b > 42 && r > b - 5 && r > g * 7 && b > g * 7) return true;
+  // Dimmed / anti-aliased magenta fringe on the landmark-kit sheets: a 255,0,255
+  // key darkened toward black yields pixels like 64,0,80 or 80,0,96 — green
+  // essentially zero, BOTH channels elevated and roughly balanced (unlike the
+  // clauses above, this catches the blue-leaning side too). Pure primaries are
+  // excluded by requiring both r and b > 45, and real art at this green level is
+  // warm (green >= ~15), so this only eats the dark magenta halo, not sprite art.
+  return g < 12 && r > 45 && b > 45 && Math.abs(r - b) < 60 && r > g * 6 && b > g * 6;
 }
 
 function addChat(line: string): void {
