@@ -1,0 +1,26 @@
+Top-down 2D RPG ground-texture tile sheet, hand-painted "Tibia / classic-MMO" style. A single
+image laid out as a 4-columns × 2-rows grid of 8 separate 32×32 pixel ground tiles. Put an 8-pixel
+PURE MAGENTA (#FF00FF) separator strip BETWEEN the columns and between the two rows — magenta gutters
+between tiles ONLY, with NO magenta border around the outside. The first tile is flush to the
+top-left corner. Final image size exactly 152 × 72 pixels (no upscaling, crisp pixels).
+
+All 8 tiles are DARK, MUTED OLIVE-GREEN grass — earthy and slightly desaturated, NOT bright, NOT
+lime, NOT neon. Target color: dominant midtone around #4F4B1A (dark khaki-olive green), shadow
+clumps near #1E2410, blade highlights only up to a muted #6E7A30. Think shaded forest-town turf.
+
+Hard requirement: every tile must TILE SEAMLESSLY when repeated (left edge wraps to right, top wraps
+to bottom), AND all 8 tiles must share the same grass tone at their edges so any tile can sit beside
+any other with no seam. Keep all flowers / patches / specks in the tile INTERIOR, never touching an
+edge. Keep accents small and subtle — these repeat across a whole map.
+
+The 8 tiles, left-to-right, top row then bottom row:
+1. Plain even dark-olive turf, fine blade texture only (this one is the main fill).
+2. Same turf with a slightly denser tuft / blade texture.
+3. Turf with 2–3 tiny pale white wildflower dots in the interior.
+4. Turf with a small cluster of 3–4 tiny yellow flower dots in the interior.
+5. Turf with a small darker shaded patch (deeper olive, like grass in shadow).
+6. Turf with a small subtle mossy / slightly lighter green patch.
+7. Turf with a few tiny earthy-brown pebbles or a small twig scattered in the interior.
+8. Turf with a small warm bare-earth soil scuff in the interior (edges stay grass).
+
+Deliver the flat 152×72 PNG. Save as waystone-grass-v1-1x.png.

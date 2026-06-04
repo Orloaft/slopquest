@@ -1,0 +1,66 @@
+{
+  "zone": "searing-canyon",
+  "floor": 0,
+  "stageName": "searing-canyon",
+  "description": "Searing Canyon authored-layout bridge (M1 terrain pass, WIP): multi-direction cliff faces from elevation deltas. Village clutter passes still inherited from waystone clone, pending strip.",
+  "requiredPortals": {},
+  "requiredWalkable": [],
+  "chars": {
+    "F": {
+      "role": "town-green",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#d05e2a"
+    },
+    "~": {
+      "role": "deep-water",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#c66331"
+    },
+    "t": {
+      "role": "packed-road",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#876a3a"
+    },
+    ".": {
+      "role": "sand-shore",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#d05e2a"
+    },
+    "^": {
+      "role": "forest-border-canopy",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#d05e2a"
+    },
+    "q": {
+      "role": "town-cliff-face",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#c66331"
+    },
+    "m": {
+      "role": "town-stairs",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#7c5e33"
+    },
+    "B": {
+      "role": "building",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#d05e2a"
+    }
+  }
+}

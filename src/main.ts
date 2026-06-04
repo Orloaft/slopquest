@@ -1051,6 +1051,8 @@ function create(this: Phaser.Scene): void {
   for (let row = 0; row < 3; row += 1)
     for (let col = 0; col < 5; col += 1)
       makeTileTexture(this, "searingCliff", `searingCliffR${row}C${col}`, col * 32, row * 32, 32, 32, 0, true);
+  // Vertical flank walls for the E/W mesa edges (rust palette) — replaces the L-shaped col 3/4 look.
+  buildCliffFlanks(this, "searing", [255, 201, 128]);
   // Contact-shadow band dropped on the canyon floor directly under each cliff lip,
   // so the foot reads grounded instead of floating (mirrors the baker's wall-foot AO).
   {
@@ -1176,6 +1178,83 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "desertTiles", "spriteOutpostTent", 1364, 854, 104, 84);
   makeSpriteTexture(this, "desertTiles", "spritePalm", 1456, 958, 62, 58);
   makeSpriteTexture(this, "desertTiles", "spriteDesertLedge", 22, 856, 66, 86);
+  // --- Sunken Desert (floor 7) painted relief: sandstone palette. Reuses the floor-6
+  // badlands relief engine (lit mesa tops, ribbed faces, rim lip, strata bench, foot AO)
+  // with a sandstone recolour — same geometry, warmer/lighter tan hue so the canyon reads
+  // as sandstone, not rust badlands. No new art: tops brighten tileSand, faces hue-shift the
+  // already-sliced searing cliff sub-tiles, and the lip/AO are shared (palette-neutral warm).
+  {
+    // Lit sandstone plateau top: tileSand brightened/warmed so raised rock reads sun-hit vs
+    // the shadowed sand floor below (mirrors searingMesaTop made from the cracked-earth ground).
+    const sand = this.textures.get("tileSand").getSourceImage() as CanvasImageSource;
+    const top = document.createElement("canvas");
+    top.width = TILE_SIZE;
+    top.height = TILE_SIZE;
+    const topCtx = top.getContext("2d");
+    if (topCtx) {
+      topCtx.imageSmoothingEnabled = false;
+      topCtx.filter = "brightness(1.28) saturate(1.12)";
+      topCtx.drawImage(sand, 0, 0, TILE_SIZE, TILE_SIZE);
+      // Warm the lit plateau top so it reads sun-hit and clearly WARMER than the shadowed
+      // cliff face below — the lit-top vs shadowed-face temperature split is the single biggest
+      // elevation-readability lever (per the 2D-cliff art research).
+      topCtx.filter = "none";
+      topCtx.globalCompositeOperation = "overlay";
+      topCtx.fillStyle = "rgba(255,176,88,0.12)";
+      topCtx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+      topCtx.globalCompositeOperation = "source-over";
+      this.textures.addCanvas("desertMesaTop", top);
+      this.textures.get("desertMesaTop").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+    // Sandstone cliff faces: recolour each of the 15 searing red-rock slices toward tan/gold
+    // (sepia base + slight saturate/brightness) so the proven ribbing reads as sandstone.
+    // Alpha (transparent gutters above the rim / cap shoulders) is preserved by the filter.
+    for (let row = 0; row < 3; row += 1)
+      for (let col = 0; col < 5; col += 1) {
+        const src = this.textures.get(`searingCliffR${row}C${col}`).getSourceImage() as CanvasImageSource;
+        const c = document.createElement("canvas");
+        c.width = 32;
+        c.height = 32;
+        const cx = c.getContext("2d");
+        if (cx) {
+          cx.imageSmoothingEnabled = false;
+          // Shadowed sandstone face: DARKER + slightly cooler/less-warm than the lit plateau
+          // top (was brightness 1.12 — brighter than the top, which flattened the drop). The
+          // top↔face value+temperature delta is what makes the cliff read as a real drop.
+          cx.filter = "sepia(0.38) saturate(1.12) brightness(0.8)";
+          cx.drawImage(src, 0, 0);
+          this.textures.addCanvas(`desertCliffR${row}C${col}`, c);
+          this.textures.get(`desertCliffR${row}C${col}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+        }
+      }
+    // Vertical flank walls for the E/W mesa edges (sandstone palette).
+    buildCliffFlanks(this, "desert", [255, 224, 168]);
+    // Strata bench for the desert face: the sandstone ledge surface (desertMesaTop) with a
+    // sun-catch rim on top and a contact shadow at its foot (same recipe as searingCliffBench).
+    {
+      const bench = document.createElement("canvas");
+      bench.width = TILE_SIZE;
+      bench.height = TILE_SIZE;
+      const bctx = bench.getContext("2d");
+      if (bctx) {
+        bctx.imageSmoothingEnabled = false;
+        const ledge = this.textures.get("desertMesaTop").getSourceImage() as CanvasImageSource;
+        bctx.drawImage(ledge, 0, 0, TILE_SIZE, TILE_SIZE);
+        const rim = 7;
+        for (let dy = 0; dy < rim; dy += 1) {
+          bctx.fillStyle = `rgba(255,224,168,${(1 - dy / rim) * 0.5})`;
+          bctx.fillRect(0, dy, TILE_SIZE, 1);
+        }
+        const shade = 11;
+        for (let dy = 0; dy < shade; dy += 1) {
+          bctx.fillStyle = `rgba(0,0,0,${(1 - dy / shade) * 0.4})`;
+          bctx.fillRect(0, TILE_SIZE - 1 - dy, TILE_SIZE, 1);
+        }
+        this.textures.addCanvas("desertCliffBench", bench);
+        this.textures.get("desertCliffBench").setFilter(Phaser.Textures.FilterMode.NEAREST);
+      }
+    }
+  }
   // Sunken Beach (floor 8). Crops from assetsources/rejected/beach-biome-tiles.png.
   makeTileTexture(this, "beachTiles", "tileBeachSand", 20, 99, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachRippleSand", 100, 99, 70, 72);
@@ -1791,18 +1870,20 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
         texture.draw(searingGroundTexture(state.floor, row[x] ?? "", x, y), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
       }
     }
-    // Second pass: composite the sculpted red-rock cliff faces over the south-facing
-    // massif edges (floor 6 only). Per-cell + self-contained so faces don't break across
-    // chunk seams; the contact shadow lands on the floor cell just below each lip.
-    if (state.floor === 6) {
+    // Second pass: composite the sculpted cliff faces over the south-facing massif edges
+    // (floor 6 badlands + floor 7 sandstone — both use the 'a/w/X' relief). Per-cell +
+    // self-contained so faces don't break across chunk seams; the contact shadow lands on
+    // the floor cell just below each lip.
+    if (state.floor === 6 || state.floor === 7) {
+      const benchKey = `${reliefPrefix(state.floor)}CliffBench`;
       for (let y = tileY; y < tileBottom; y += 1) {
         if (state.rows[y] === undefined) continue;
         for (let x = tileX; x < tileRight; x += 1) {
           const face = searingCliffFace(state, x, y);
           if (!face) continue;
           // A bench course steps back to a flat lit ledge (stacked-terrace cue);
-          // every other course draws the ribbed red-rock face sub-tile.
-          texture.draw(face.bench ? "searingCliffBench" : face.key, (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+          // every other course draws the ribbed rock face sub-tile.
+          texture.draw(face.bench ? benchKey : face.key, (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
           if (face.top) {
             texture.draw("searingCliffLip", (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
           }
@@ -6841,7 +6922,68 @@ function searingGroundTexture(floor: number, tile: string, x: number, y: number)
     if (tile === "w") return `searingMesaTopV${h % SEARING_GROUND_VARIANTS}`;
     if (SEARING_GROUND_TILES.has(tile)) return `searingGroundV${h % SEARING_GROUND_VARIANTS}`;
   }
+  // Sunken Desert (floor 7): the massif body 'w' is the raised sandstone PLATEAU TOP — a lit
+  // sand surface, not the dark borrowed badlands massif. The cliff-face overlay paints its
+  // exposed edges on top. The open sand floor keeps its base tileSand for the lit/shadowed delta.
+  if (floor === 7 && tile === "w") return "desertMesaTop";
   return tileBaseTexture(tile);
+}
+
+// Relief palette prefix: floor 6 = rust badlands ("searing*" textures), floor 7 = sandstone
+// desert ("desert*" recolour). Drives the cliff-face / bench texture keys for each stage.
+function reliefPrefix(floor: number): string {
+  return floor === 7 ? "desert" : "searing";
+}
+
+// Clean vertical flank walls for the E/W mesa edges. The atlas cols 3/4 are L-shaped concave-
+// corner pieces; stacked along a straight vertical edge they read as a row of elbows, not a
+// wall. Instead, rotate the straight ribbed south-face body 90° (horizontal strata -> vertical
+// columnar grain) and bake a sun rim on the open-ground side + a shadow on the massif side,
+// per facing (W = open ground on the left, E = on the right). Procedural like the lip/AO — no
+// new art. Produces `${prefix}CliffFlankW` and `${prefix}CliffFlankE`.
+function buildCliffFlanks(scene: Phaser.Scene, prefix: string, rim: [number, number, number]): void {
+  const src = scene.textures.get(`${prefix}CliffR1C1`).getSourceImage() as CanvasImageSource;
+  for (const side of ["W", "E"] as const) {
+    const c = document.createElement("canvas");
+    c.width = 32;
+    c.height = 32;
+    const cx = c.getContext("2d");
+    if (!cx) continue;
+    cx.imageSmoothingEnabled = false;
+    cx.save();
+    cx.translate(16, 16);
+    cx.rotate(Math.PI / 2);
+    cx.drawImage(src, -16, -16, 32, 32);
+    cx.restore();
+    // Sun-catch rim down the open-ground edge, but PER-ROW jittered (rim width varies) plus
+    // occasional dark notch pixels at the very edge — so the silhouette is a broken, irregular
+    // rock line, not a ruler-straight wall (research: irregular dark edges are what make a flank
+    // read as rock rather than a flat panel).
+    const baseRim = 4;
+    for (let yy = 0; yy < 32; yy += 1) {
+      const h = ((yy + 1) * 2654435761) >>> 0;
+      const rimW = baseRim + (h % 3); // 4–6 px this row
+      for (let dx = 0; dx < rimW; dx += 1) {
+        const a = (1 - dx / rimW) * 0.5;
+        const xx = side === "W" ? dx : 31 - dx;
+        cx.fillStyle = `rgba(${rim[0]},${rim[1]},${rim[2]},${a})`;
+        cx.fillRect(xx, yy, 1, 1);
+      }
+      if (((h >> 3) % 3) === 0) { // ~1/3 of rows bite a dark pixel into the outer edge
+        cx.fillStyle = "rgba(0,0,0,0.5)";
+        cx.fillRect(side === "W" ? 0 : 31, yy, 1, 1);
+      }
+    }
+    const shW = 9; // shadow falling back into the massif on the rock side
+    for (let dx = 0; dx < shW; dx += 1) {
+      const a = (1 - dx / shW) * 0.4;
+      const xx = side === "W" ? 31 - dx : dx;
+      cx.fillStyle = `rgba(0,0,0,${a})`;
+      cx.fillRect(xx, 0, 1, 32);
+    }
+    scene.textures.addCanvas(`${prefix}CliffFlank${side}`, c);
+    scene.textures.get(`${prefix}CliffFlank${side}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+  }
 }
 
 // Sculpted-mesa cliff overlay (floor 6). The hand-authored canyon fills a 'w' massif,
@@ -6861,7 +7003,7 @@ function isSearingMassif(c: string | undefined): boolean {
   return c === "w" || c === "X";
 }
 function searingCliffFace(state: MapRenderState, x: number, y: number): { key: string; foot: boolean; top: boolean; bench: boolean } | null {
-  if (state.floor !== 6) return null;
+  if (state.floor !== 6 && state.floor !== 7) return null;
   const here = state.rows[y]?.[x];
   if (here !== "X" && here !== "w") return null;
   // --- South-facing face: walk down to the 'X' lip and stack courses above it. ---
@@ -6883,7 +7025,7 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
     // bench (never the foot or top) so the drop reads as stacked tiers. With the cap
     // at 6 the tallest columns get two benches (3 tiers); 4-5 tall faces get one.
     const bench = total >= 4 && courseFromFoot > 0 && courseFromFoot < total - 1 && courseFromFoot % 2 === 0;
-    return { key: `searingCliffR${rowKind}C${col}`, foot: courseFromFoot === 0, top: rowKind === 0, bench };
+    return { key: `${reliefPrefix(state.floor)}CliffR${rowKind}C${col}`, foot: courseFromFoot === 0, top: rowKind === 0, bench };
   }
   // --- West/east-facing flank: a 'w' tile whose left or right neighbour is open canyon is
   // a vertical corridor wall the south system never touches; it used to fall back to the
@@ -6897,13 +7039,15 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
   const groundRight = state.rows[y]?.[x + 1] !== undefined && !isSearingMassif(state.rows[y]?.[x + 1]);
   if (!groundLeft && !groundRight) return null;
   const side = groundLeft ? -1 : 1; // direction of the open ground this flank faces
-  const col = groundLeft ? 3 : 4; // innerL faces west / innerR faces east
   const flankAbove = state.rows[y - 1]?.[x] === "w"
     && state.rows[y - 1]?.[x + side] !== undefined && !isSearingMassif(state.rows[y - 1]?.[x + side]);
   const flankBelow = state.rows[y + 1]?.[x] === "w"
     && state.rows[y + 1]?.[x + side] !== undefined && !isSearingMassif(state.rows[y + 1]?.[x + side]);
-  const rowKind = !flankAbove ? 0 : !flankBelow ? 2 : 1; // top rim / base foot / mid
-  return { key: `searingCliffR${rowKind}C${col}`, foot: false, top: rowKind === 0, bench: false };
+  // Continuous vertical wall (rotated ribbed body + baked side rim/shadow) instead of the
+  // L-shaped concave-corner atlas cells. Bracket the vertical run with a lit rim at its TOP
+  // (where it breaks onto the plateau) and a contact shadow at its BASE (foot) so the wall reads
+  // with top-down form/recession rather than a flat uniform band.
+  return { key: `${reliefPrefix(state.floor)}CliffFlank${groundLeft ? "W" : "E"}`, foot: !flankBelow, top: !flankAbove, bench: false };
 }
 
 function tileBaseTexture(tile: string): string {

@@ -697,6 +697,49 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 29, 50, 3, 4, "Q");
     for (const [rx, ry] of [[13, 19], [29, 19], [44, 16], [49, 21], [31, 33], [49, 33], [20, 34], [27, 45], [40, 45]] as Array<[number, number]>)
       setTile(rows, rx, ry, "U");
+    // Organic wall weathering (mirrors floor 6): the desert canyon was carved as rectangles, so
+    // its sandstone walls read as straight blocks. Nibble the massif EDGE deterministically (a
+    // 'w' touching open sand) so the mesas erode into a natural silhouette and the grid-square
+    // corners break up. OPEN-ONLY (w -> a): never seals a route, never overwrites a portal/oasis
+    // tile, and skips a keep-out around the gates + oasis crossing. Collected against the original
+    // boundary (single coherent pass, no cascading widening); applyCliffEdges() then recomputes
+    // the cliff faces on the new organic edge. Deterministic hash keeps bakes stable.
+    const desertKeepOut: Array<[number, number, number, number]> = [
+      [27, 0, 6, 5],   // north gate G
+      [29, 57, 5, 5],  // passage H to Waystone
+      [0, 36, 5, 5],   // west trail Y to the Sunken Beach
+      [35, 54, 11, 9]  // oasis pool + crossing
+    ];
+    const inDesertKeepOut = (x: number, y: number): boolean =>
+      desertKeepOut.some(([bx, by, bw, bh]) => x >= bx - 1 && x < bx + bw + 1 && y >= by - 1 && y < by + bh + 1);
+    const dWeathered: Array<[number, number]> = [];
+    for (let y = 1; y < rows.length - 1; y += 1) {
+      const row = rows[y];
+      if (!row) continue;
+      for (let x = 1; x < row.length - 1; x += 1) {
+        if (row[x] !== "w" || inDesertKeepOut(x, y)) continue;
+        const edge = (rows[y - 1]?.[x] ?? "w") !== "w" || (rows[y + 1]?.[x] ?? "w") !== "w"
+          || (row[x - 1] ?? "w") !== "w" || (row[x + 1] ?? "w") !== "w";
+        if (!edge) continue;
+        const h = ((x * 374761393) ^ (y * 668265263)) >>> 0;
+        if (h % 100 < 38) dWeathered.push([x, y]);
+      }
+    }
+    for (const [x, y] of dWeathered) rows[y]![x] = "a";
+    // De-speckle: open any 'w' left with no orthogonal 'w' neighbour so the eroded edge reads
+    // as ridges, not floating debris (open-only).
+    const dDespeckle: Array<[number, number]> = [];
+    for (let y = 0; y < rows.length; y += 1) {
+      const row = rows[y];
+      if (!row) continue;
+      for (let x = 0; x < row.length; x += 1) {
+        if (row[x] !== "w") continue;
+        const n = (rows[y - 1]?.[x] === "w" ? 1 : 0) + (rows[y + 1]?.[x] === "w" ? 1 : 0)
+          + (row[x - 1] === "w" ? 1 : 0) + (row[x + 1] === "w" ? 1 : 0);
+        if (n === 0) dDespeckle.push([x, y]);
+      }
+    }
+    for (const [x, y] of dDespeckle) rows[y]![x] = "a";
     applyCliffEdges(rows, "a", "w", "X");
   }
 
