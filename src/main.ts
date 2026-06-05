@@ -1068,6 +1068,12 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "swampTiles", "spriteMireLotus", 820, 388, 38, 36);
   makeSpriteTexture(this, "swampTiles", "spriteSwampReeds", 1448, 944, 72, 72);
   makeSpriteTexture(this, "swampTiles", "spriteSwampLog", 886, 476, 112, 50);
+  // Dense swamp undergrowth — scattered non-blocking onto floor-5 marsh land so the
+  // biome reads packed like the target mockup instead of bare causeways (addTileDecorations).
+  makeSpriteTexture(this, "swampTiles", "spriteSwampBramble0", 524, 556, 76, 56, true);
+  makeSpriteTexture(this, "swampTiles", "spriteSwampBramble1", 616, 552, 76, 64, true);
+  makeSpriteTexture(this, "swampTiles", "spriteSwampBramble2", 876, 556, 68, 60, true);
+  makeSpriteTexture(this, "swampTiles", "spriteSwampStump", 664, 500, 56, 40, true);
   makeSpriteTexture(this, "swampTiles", "spriteCliffLedge", 714, 958, 70, 58);
   // Searing Badlands (floor 6). Crops from assetsources/rejected/badlands-biome-tiles-01.png
   // (1536x1024, magenta-keyed) — rust ground/rock/cliff/pit/ramp tiles + a frontier tent.
@@ -4876,6 +4882,27 @@ function addTileDecorations(
       if (tile === "@") { // scree rubble
         const big = ((((x * 7793) ^ (y * 3119)) >>> 0) & 1) === 0;
         decorations.push({ key: big ? "floraScreeLg" : "floraScreeSm", x: x + 0.5, y: y + 0.85, w: big ? 20 : 12, h: big ? 26 : 20 });
+      }
+      // Sunken Marsh undergrowth scatter: pack non-blocking brambles/stumps/reeds onto
+      // the purple marsh land (m) so the biome reads dense like the target mockup. Per-cell
+      // hash keeps it deterministic; ~30% of land cells get a clump, size-jittered. Floor-5
+      // only; non-blocking (collision is untouched), so causeways stay walkable.
+      if (floor === 5 && tile === "m") {
+        const h = ((x * 2654435761) ^ (y * 40503)) >>> 0;
+        if (h % 100 < 30) {
+          const SCATTER: Array<[string, number, number]> = [
+            ["spriteSwampBramble0", 40, 30],
+            ["spriteSwampBramble1", 38, 34],
+            ["spriteSwampBramble2", 36, 32],
+            ["spriteSwampStump", 34, 26],
+            ["spriteSwampReeds", 34, 34]
+          ];
+          const [key, w, hgt] = SCATTER[(h >>> 9) % SCATTER.length]!;
+          const jit = 0.85 + ((h >>> 17) % 30) / 100; // 0.85–1.15 size jitter
+          const ox = (((h >>> 3) % 7) - 3) / 14; // small sub-tile offset so clumps don't grid up
+          const oy = (((h >>> 11) % 7) - 3) / 14;
+          decorations.push({ key, x: x + 0.5 + ox, y: y + 0.88 + oy, w: Math.round(w * jit), h: Math.round(hgt * jit) });
+        }
       }
       if (tile === "+") decorations.push({ key: "floraSkullPile", x: x + 0.5, y: y + 0.85, w: 25, h: 28 }); // sun-bleached bones
       if (["N", "S", "T", "C", "M", "D", "G", "Y", "j", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
