@@ -30,6 +30,16 @@ monsters:
   # Northwood (enlarged 110x72): the roster spread across the larger wood as a
   # danger gradient — gentle critters near the southern Waystone arrival, tougher
   # greenskins deeper north and out toward the marsh/badlands gates.
+  # Starter critters (lvl 1-5) right at the southern Waystone arrival (portal
+  # lands at 55,68) — the first, trivially-safe things a new player meets, just
+  # below the rat/spider line. Tiles verified open/off-road via makeFloorTiles(3).
+  - { type: reach_hen,     at: { floor: 3, x: 51, y: 65 }, zone: woods }
+  - { type: reach_hen,     at: { floor: 3, x: 59, y: 66 }, zone: woods }
+  - { type: reach_hen,     at: { floor: 3, x: 48, y: 67 }, zone: woods }
+  - { type: meadow_hopper, at: { floor: 3, x: 42, y: 64 }, zone: woods }
+  - { type: meadow_hopper, at: { floor: 3, x: 63, y: 65 }, zone: woods }
+  - { type: reach_vole,    at: { floor: 3, x: 34, y: 64 }, zone: woods }
+  - { type: reach_vole,    at: { floor: 3, x: 70, y: 64 }, zone: woods }
   - { type: rat,           at: { floor: 3, x: 46, y: 62 }, zone: woods }
   - { type: spider,        at: { floor: 3, x: 64, y: 62 }, zone: woods }
   - { type: goblin_scout,  at: { floor: 3, x: 34, y: 55 }, zone: woods }

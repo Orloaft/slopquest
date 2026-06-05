@@ -21,6 +21,49 @@
   aggro: 5.5
   range: 1
 
+  # --- Starter critters: the level 1-5 bottom rung, by the southern Waystone
+  # arrival in Northwood. Hens/hoppers are docile (aggro 0 — must be provoked);
+  # the vole is mildly territorial. Combat levels land 1 / 3 / 5, bridging the
+  # gap up to the Rat (8). The RuneScape "chicken-and-cow field outside Lumbridge".
+- id: reach_hen
+  name: Reach Hen
+  role: trash
+  description: "a plump barnyard fowl, all cluck and no fight"
+  maxHp: 10
+  speed: 1.5
+  damage: [1, 2]
+  attackMs: 1500
+  xp: 5
+  gold: [0, 2]
+  aggro: 0
+  range: 1
+
+- id: meadow_hopper
+  name: Meadow Hopper
+  role: trash
+  description: "a long-eared hare that bolts at the first sign of trouble"
+  maxHp: 16
+  speed: 2.8
+  damage: [2, 3]
+  attackMs: 1150
+  xp: 10
+  gold: [1, 4]
+  aggro: 0
+  range: 1
+
+- id: reach_vole
+  name: Reach Vole
+  role: trash
+  description: "a burrowing rodent, territorial over its meadow den"
+  maxHp: 24
+  speed: 2.3
+  damage: [3, 5]
+  attackMs: 1100
+  xp: 13
+  gold: [2, 6]
+  aggro: 4.5
+  range: 1
+
 - id: spider
   name: Spider
   description: "a skittering hunter with a venomous nip"
