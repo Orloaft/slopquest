@@ -459,6 +459,7 @@ const dom = {
   alchemistCloseButton: el<HTMLButtonElement>("#alchemistCloseButton"),
   brewButton: el<HTMLButtonElement>("#brewButton"),
   smith: el<HTMLElement>("#smith"),
+  smithTitle: el<HTMLElement>("#smithTitle"),
   smithCloseButton: el<HTMLButtonElement>("#smithCloseButton"),
   forgeWeaponButton: el<HTMLButtonElement>("#forgeWeaponButton"),
   forgeArmorButton: el<HTMLButtonElement>("#forgeArmorButton"),
@@ -4027,7 +4028,16 @@ function openAlchemist(): void {
   showCenterPanel(dom.alchemist);
 }
 
-function openSmith(): void {
+// Forge title follows the town the smith stands in, so the Waystone hub forge
+// isn't mislabelled "Northwatch Forge".
+function forgeTitleForFloor(floor: number): string {
+  if (floor === 0) return "Waystone Forge";
+  if (floor === 4) return "Northwatch Forge";
+  return "Forge";
+}
+
+function openSmith(npc?: NpcView): void {
+  if (npc) dom.smithTitle.textContent = forgeTitleForFloor(npc.floor);
   renderSmith(self());
   showCenterPanel(dom.smith);
 }
@@ -4283,11 +4293,11 @@ function arriveAtNpc(npc: NpcView): void {
     return;
   }
   if (intent === "smith") {
-    openSmith();
+    openSmith(npc);
     return;
   }
   if (npc.role === "vendor") openVendor();
-  if (npc.role === "smith") openSmith();
+  if (npc.role === "smith") openSmith(npc);
   lastTalkNpcId = npc.id;
   send({ type: "talkNpc", id: npc.id });
 }

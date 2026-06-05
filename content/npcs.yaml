@@ -37,6 +37,15 @@
   at: { floor: 4, x: 71.5, y: 48.5 }
   idleDialogue: "Bars on the anvil, steady heat, clean hammer. I can turn ore-work into real kit."
 
+# Waystone hub forge — at-home smithing so a fresh player doesn't have to trek to
+# Northwatch (floor 4) to upgrade gear. Smelt ore into bars on any fire, then bring
+# the bars here. East apron of the plaza, clear of the well and the trader cluster.
+- id: waystone-smith
+  name: Ferra Emberhand
+  role: smith
+  at: { floor: 0, x: 68.5, y: 38.5 }
+  idleDialogue: "Furnace is hot and the anvil's free. Smelt your ore on any fire, then bring the bars to me and I'll forge you a proper edge."
+
 - id: cemetery-warden
   name: Mira Gravewatch
   role: quest
