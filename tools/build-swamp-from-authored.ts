@@ -23,7 +23,7 @@ const repoRoot = process.cwd();
 const ts = 32;
 
 // ---- inputs ----------------------------------------------------------------
-const layoutPath = nodePath.join(repoRoot, "assetsources/mockup/swamp-layout-authored.txt");
+const layoutPath = nodePath.join(repoRoot, process.argv[2] ?? "assetsources/mockup/swamp-layout-authored.txt");
 const rows = readFileSync(layoutPath, "utf8").replace(/\n$/, "").split("\n").map((r) => r.split(""));
 const R = rows.length, C = rows[0].length, W = C * ts, H = R * ts;
 // Out-of-bounds is open water (the floor-5 border is a water fill), so banks feather at edges.
