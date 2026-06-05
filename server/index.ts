@@ -460,18 +460,27 @@ const CORPSE_DECAY_MS = positiveIntEnv("TIB_CORPSE_DECAY_MS", 180000);
 const DROP_DECAY_MS = positiveIntEnv("TIB_DROP_DECAY_MS", 300000);
 const INVENTORY_SIZE = 30;
 const BREW_XP = 30;
+// `coal` is the forge fuel for the hotter tiers — the sink that makes coal worth
+// mining. Tier-1 gear needs none; the upper tiers burn progressively more.
 const SMITHING_RECIPES = {
   weapon: [
-    { tier: 1, bar: "copper_bar", qty: 1, level: 1, xp: 35, label: "Copper Edge" },
-    { tier: 2, bar: "iron_bar", qty: 2, level: 10, xp: 80, label: "Iron Edge" },
-    { tier: 3, bar: "mithril_bar", qty: 2, level: 40, xp: 150, label: "Mithril Edge" }
+    { tier: 1, bar: "copper_bar", qty: 1, coal: 0, level: 1, xp: 35, label: "Copper Edge" },
+    { tier: 2, bar: "iron_bar", qty: 2, coal: 2, level: 10, xp: 80, label: "Iron Edge" },
+    { tier: 3, bar: "mithril_bar", qty: 2, coal: 4, level: 40, xp: 150, label: "Mithril Edge" }
   ],
   armor: [
-    { tier: 1, bar: "tin_bar", qty: 1, level: 1, xp: 35, label: "Tin-Riveted Mail" },
-    { tier: 2, bar: "silver_bar", qty: 2, level: 20, xp: 95, label: "Silvered Mail" },
-    { tier: 3, bar: "adamant_bar", qty: 2, level: 50, xp: 175, label: "Adamant Mail" }
+    { tier: 1, bar: "tin_bar", qty: 1, coal: 0, level: 1, xp: 35, label: "Tin-Riveted Mail" },
+    { tier: 2, bar: "silver_bar", qty: 2, coal: 3, level: 20, xp: 95, label: "Silvered Mail" },
+    { tier: 3, bar: "adamant_bar", qty: 2, coal: 6, level: 50, xp: 175, label: "Adamant Mail" }
   ]
 } as const;
+// Alchemy reagents → brewed product. Herb is the staple Health Potion; a foraged
+// mushroom brews the stronger Potent Tonic — the mushroom sink, and Alchemy's
+// second recipe.
+const BREW_RECIPES = [
+  { reagent: "herb", product: "potion", xp: BREW_XP },
+  { reagent: "mushroom", product: "strong_potion", xp: 45 }
+] as const;
 // Encumbrance: at/below the soft cap you move at full speed; past it, speed
 // falls off linearly to MIN_ENCUMBRANCE_MULT at the hard cap.
 const WEIGHT_SOFT_CAP = 40;
@@ -2114,23 +2123,24 @@ function brewPotion(player: ServerPlayer): void {
     event("float", "You need an alchemy kit.", player.x, player.y, player.floor, "#f7d486");
     return;
   }
-  if (!hasInventoryItem(player, "herb") || !hasInventoryItem(player, "empty_flask")) {
-    event("float", "You need a herb and an empty flask.", player.x, player.y, player.floor, "#f7d486");
+  const recipe = BREW_RECIPES.find((r) => hasInventoryItem(player, r.reagent));
+  if (!recipe || !hasInventoryItem(player, "empty_flask")) {
+    event("float", "You need a herb or mushroom and an empty flask.", player.x, player.y, player.floor, "#f7d486");
     return;
   }
-  if (!removeInventoryItem(player, "herb", 1)) return;
+  if (!removeInventoryItem(player, recipe.reagent, 1)) return;
   if (!removeInventoryItem(player, "empty_flask", 1)) {
-    addInventoryItem(player, "herb", 1);
+    addInventoryItem(player, recipe.reagent, 1);
     return;
   }
-  if (!addInventoryItem(player, "potion", 1)) {
-    addInventoryItem(player, "herb", 1);
+  if (!addInventoryItem(player, recipe.product, 1)) {
+    addInventoryItem(player, recipe.reagent, 1);
     addInventoryItem(player, "empty_flask", 1);
     systemToPlayer(player, "Your inventory is full.");
     return;
   }
-  addSkillXp(player, "alchemy", BREW_XP);
-  event("float", `+${BREW_XP} Alchemy`, player.x, player.y - 0.55, player.floor, "#c8a8ff");
+  addSkillXp(player, "alchemy", recipe.xp);
+  event("float", `+${recipe.xp} Alchemy`, player.x, player.y - 0.55, player.floor, "#c8a8ff");
 }
 
 function smithGear(player: ServerPlayer, slot: unknown): void {
@@ -2156,7 +2166,17 @@ function smithGear(player: ServerPlayer, slot: unknown): void {
     systemToPlayer(player, `Bring ${recipe.qty} ${label} for ${recipe.label}.`);
     return;
   }
+  if (recipe.coal > 0 && inventoryCount(player, "coal") < recipe.coal) {
+    const coalLabel = ITEMS["coal"]?.label ?? "Coal";
+    event("float", `Need ${recipe.coal} ${coalLabel}.`, player.x, player.y, player.floor, "#f7d486");
+    systemToPlayer(player, `${recipe.label} needs ${recipe.coal} ${coalLabel} to fire the forge.`);
+    return;
+  }
   if (!removeInventoryItem(player, recipe.bar, recipe.qty)) return;
+  if (recipe.coal > 0 && !removeInventoryItem(player, "coal", recipe.coal)) {
+    addInventoryItem(player, recipe.bar, recipe.qty);
+    return;
+  }
   if (slot === "weapon") player.weaponTier = recipe.tier;
   else player.armorTier = recipe.tier;
   addSkillXp(player, "smithing", recipe.xp);

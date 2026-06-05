@@ -434,6 +434,18 @@
     kind: drink_potion
     restoreHp: 58
 
+# Brewed from a foraged mushroom instead of a herb — the alchemist's second
+# recipe. Stronger heal, so the mushroom line finally has a sink.
+- id: strong_potion
+  label: Potent Tonic
+  icon: PT
+  iconUrl: /icons/item-potion.png
+  stackable: true
+  tags: [consumable]
+  use:
+    kind: drink_potion
+    restoreHp: 90
+
 - id: herb
   label: Wild Herb
   icon: H
@@ -486,6 +498,14 @@
   stackable: true
   tags: [material]
   weight: 1
+  # Heat glass-sand on a fire and it forms into an empty flask — the quartz sink
+  # that feeds the alchemy supply chain. A botched melt slumps into slag.
+  use:
+    kind: cook_on_fire
+    produces: empty_flask
+    burns: slag
+    skill: smithing
+    xp: 15
 
 - id: black_ledger
   label: Black-Market Ledger
