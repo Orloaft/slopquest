@@ -1060,6 +1060,7 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "swampTiles", "tileMarshPurple1", 97, 177, 68, 68); // purple stone-moss
   makeTileTexture(this, "swampTiles", "tileMarshPurple2", 18, 256, 68, 68); // violet cobble-moss
   makeTileTexture(this, "swampTiles", "tileMarshPurple3", 333, 256, 68, 68); // dark soil + purple specks
+  makeTileTexture(this, "swampTiles", "tileMarshPath", 252, 261, 68, 72); // warm brown-dirt trail (PATHS & ROAD EDGES) — the "tan" tone the mockup threads through the purple
   makeTileTexture(this, "swampTiles", "tileSwampWater", 1041, 102, 74, 71);
   makeTileTexture(this, "swampTiles", "tileSwampWaterMottle", 1129, 102, 74, 71);
   makeTileTexture(this, "swampTiles", "tileSwampWaterEdge", 1217, 102, 82, 71);
@@ -7097,21 +7098,24 @@ function cityGroundTexture(tile: string, x: number, y: number): string | null {
   return null;
 }
 
-// Sunken Marsh (floor 5) ground: the marsh land (m) and boulder pads (o) hash-scatter
-// across the purple lichen variants (mostly violet, one olive accent) to give the biome
-// the dense purple identity from the target mockup. Floor-5-scoped so no other stage is
-// touched; water/dirt/bridge keep their existing textures.
-const MARSH_GROUND_TEXTURES = [
-  "tileMarshPurple0",
-  "tileMarshPurple1",
-  "tileMarshPurple2",
-  "tileMarshPurple3",
-  "tileMarsh" // olive accent
-] as const;
+// Sunken Marsh (floor 5) ground. Alex's target mockup is PURPLE-dominant: cohesive
+// violet/magenta lichen masses, threaded by warmer brown-dirt trails, with olive moss
+// as a minor accent. The first pass picked a fresh purple per cell, which checkerboarded
+// into a noisy quilt; instead pick ONE purple variant per ~4x4 region (cohesive blotches)
+// and drop brown-dirt / olive accents as small ~2x2 clusters, not single-cell speckle.
+// Floor-5-scoped; water/dirt/bridge keep their existing textures.
+const MARSH_PURPLE = ["tileMarshPurple0", "tileMarshPurple1", "tileMarshPurple2", "tileMarshPurple3"] as const;
+function marshHash(x: number, y: number): number {
+  return ((x * 73856093) ^ (y * 19349663)) >>> 0;
+}
 function marshGroundTexture(tile: string, x: number, y: number): string | null {
-  if (tile === "m" || tile === "o") {
-    const h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
-    return MARSH_GROUND_TEXTURES[h % MARSH_GROUND_TEXTURES.length]!;
+  if (tile === "o") return "tileMarshPurple1"; // raised boulder pad — solid purple stone-moss
+  if (tile === "m") {
+    const block = marshHash(x >> 1, y >> 1) % 100; // 2x2 blocks share a roll -> clustered accent blotches
+    if (block < 12) return "tileMarshPath"; // warm brown-dirt trail tone (~12%)
+    if (block < 20) return "tileMarsh"; // olive moss accent (~8%)
+    const region = marshHash(x >> 2, y >> 2); // ~4x4 regions share one purple -> cohesive masses
+    return MARSH_PURPLE[region % MARSH_PURPLE.length]!;
   }
   return null;
 }
