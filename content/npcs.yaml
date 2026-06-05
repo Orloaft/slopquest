@@ -23,6 +23,14 @@
   at: { floor: 4, x: 55.5, y: 43.5 }
   idleDialogue: "Northwatch is quiet for now."
 
+# Northwood's first NPC — greets new arrivals at the southern Waystone gate and
+# signposts the wood as a danger gradient (gentle here, deadly to the north).
+- id: northwood-warden
+  name: Forester Linn
+  role: guide
+  at: { floor: 3, x: 58.5, y: 66.5 }
+  idleDialogue: "New to the Reach? Cull the hens and voles here to find your feet, fish the south pond, and chip the copper vein by the SW glade. Keep south — the deep wood north of the crossroads bites back."
+
 - id: northwatch-smith
   name: Master Harlowe
   role: smith
@@ -58,6 +66,15 @@
   role: alchemist
   at: { floor: 0, x: 59.5, y: 37.5 }
   idleDialogue: "Bring me wild herbs and a flask, and I'll show you how to brew."
+
+# Starter combat instructor — the safe "kill 3 chickens" first quest. Gates the
+# cemetery (southgate) so a fresh player cuts their teeth on the meadow critters
+# before facing undead.
+- id: reach-steward
+  name: Steward Bramwel
+  role: quest
+  at: { floor: 0, x: 59.5, y: 57.5 }
+  idleDialogue: "Before you chase glory, the meadow past the south gate needs thinning. Start there."
 
 # Class trainers (role: trainer) — gate the Tier-1 classes once skill
 # thresholds are met. See CLASS_UNLOCKS in src/shared.ts.

@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: cull_commons
+title: Cull the Commons
+giver: reach-steward
+objective:
+  kind: kill
+  monsters: [reach_hen, meadow_hopper, reach_vole]
+  in: woods
+  count: 3
+reward:
+  gold: 30
+  xp: 50
+
+dialogue:
+  intro:
+    - npc: "Welcome to the Reach. The meadow past the south gate is overrun — hens, hares, and voles in the seed stores."
+    - player: "Sounds like easy work."
+    - npc: "It is, and that's the point. Thin {target.count} of them, get a feel for your blade, then come back."
+  progress:
+    - npc: "{progress}/{target.count} culled. Keep at it — none of them bite hard."
+    - player: "Almost there."
+  turnIn:
+    - npc: "Good hands. You're ready for sterner work now — Mira Gravewatch has the cemetery in mind, and there's ore and timber waiting."
+    - player: "Point me at it."
+  claimed:
+    - npc: "The commons are quiet. The wider Reach is yours to prove now."
