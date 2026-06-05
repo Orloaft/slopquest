@@ -24,15 +24,29 @@ const GIVERS: Giver[] = NPCS.filter((npc) => npc.role === "quest").map((npc) => 
   return { npcId: npc.id, npcName: npc.name, floor: npc.floor, quest };
 });
 
-const KILL_GIVERS = GIVERS.filter((g) => g.quest.kind === "kill");
-const ITEM_GIVERS = GIVERS.filter((g) => g.quest.kind === "gather" || g.quest.kind === "fetch");
+// Quests whose giver gates the offer behind a prerequisite — mirror of
+// QUEST_PREREQUISITES in server/index.ts; keep the two in sync. On a fresh
+// character these answer with a single block line instead of accepting, so they
+// are exercised by the gate assertion in the intro test rather than the
+// accept/turn-in play-throughs (which a fresh character can't complete).
+const PREREQ_GATED = new Set([
+  "cleanse_ashen_crypt",
+  "southward_proof",
+  "deepdelve_vault_key",
+  "jungle_vault_faultwarden"
+]);
+
+const OPEN_GIVERS = GIVERS.filter((g) => !PREREQ_GATED.has(g.quest.id));
+const GATED_GIVERS = GIVERS.filter((g) => PREREQ_GATED.has(g.quest.id));
+const KILL_GIVERS = OPEN_GIVERS.filter((g) => g.quest.kind === "kill");
+const ITEM_GIVERS = OPEN_GIVERS.filter((g) => g.quest.kind === "gather" || g.quest.kind === "fetch");
 
 test("every quest giver opens its quest with a clean, fully-rendered intro", async ({ page }) => {
   forwardPageErrors(page);
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
 
-  for (const giver of GIVERS) {
+  for (const giver of OPEN_GIVERS) {
     const lines = await openDialogueWith(page, giver.npcId);
 
     expectMatchesPhase(lines, giver.quest, "intro");
@@ -47,9 +61,26 @@ test("every quest giver opens its quest with a clean, fully-rendered intro", asy
     await expect(page.locator("#questTracker"), `${giver.quest.id} should appear in tracker`).toContainText(giver.quest.title);
   }
 
+  // Gated givers refuse with a single, fully-rendered block line until the
+  // prerequisite is met: the quest must stay unaccepted and out of the tracker.
+  for (const giver of GATED_GIVERS) {
+    const lines = await openDialogueWith(page, giver.npcId);
+
+    expect(lines.length, `${giver.quest.id} gate should be one line`).toBe(1);
+    expect(lines[0]?.speaker).toBe(giver.npcName);
+    expect(lines[0]?.text.length, `${giver.quest.id} gate line must be non-empty`).toBeGreaterThan(0);
+    expect(lines[0]?.text, `${giver.quest.id} gate line has unresolved template`).not.toMatch(TEMPLATE_PATTERN);
+
+    const state = await questState(page, giver.quest.id);
+    expect(state?.accepted, `${giver.quest.id} must stay locked behind its prerequisite`).toBe(false);
+  }
+
   const tracker = await page.locator("#questTracker").innerText();
-  for (const giver of GIVERS) {
+  for (const giver of OPEN_GIVERS) {
     expect(tracker, `tracker missing ${giver.quest.title}`).toContain(giver.quest.title);
+  }
+  for (const giver of GATED_GIVERS) {
+    expect(tracker, `gated ${giver.quest.title} should not be tracked yet`).not.toContain(giver.quest.title);
   }
 });
 

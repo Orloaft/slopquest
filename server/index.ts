@@ -323,11 +323,13 @@ const QUEST_REPUTATION: Record<string, Partial<ReputationState>> = {
   jungle_vault_faultwarden: { waystone: 3, northwatch: 2, marsh: 1, scavenger: 1 }
 };
 const QUEST_PREREQUISITES: Record<string, (player: ServerPlayer) => boolean> = {
+  cleanse_ashen_crypt: (player) => questClaimed(player, "southgate"),
   southward_proof: hasOuterBranchEvidence,
   deepdelve_vault_key: (player) => questClaimed(player, "southward_proof"),
   jungle_vault_faultwarden: (player) => questClaimed(player, "deepdelve_vault_key")
 };
 const QUEST_PREREQUISITE_DIALOGUE: Record<string, string> = {
+  cleanse_ashen_crypt: "Thin the cemetery above first. Until the graves are quiet, the crypt will only drag you under.",
   southward_proof: "Northwatch still needs proof from the marsh and one eastern front before Mourner's Gate opens.",
   deepdelve_vault_key: "Mark the southern road from Mourner's Gate before you ask Deepdelve for vault-work.",
   jungle_vault_faultwarden: "The Jungle Vault will not answer until the Deepdelve key is rejoined."

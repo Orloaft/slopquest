@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=../schema/quest.schema.json
+id: cleanse_ashen_crypt
+title: Cleanse the Ashen Crypt
+giver: crypt-warden
+objective:
+  kind: kill
+  monsters: [restless_husk, grave_shambler, bound_wight, boss]
+  in: crypt
+  count: 6
+reward:
+  gold: 100
+  xp: 160
+
+dialogue:
+  intro:
+    - npc: "You thinned the cemetery, but the rot only deepens. It rises from the Ashen Crypt below — and the Ashen Warden stirs at its heart."
+    - player: "Then I'll go down and end it."
+    - npc: "Put {target.count} of the crypt's dead to rest, the Warden among them, and the gate above may finally hold."
+  progress:
+    - npc: "The crypt still breathes cold. Keep at the dead below."
+    - player: "{progress}/{target.count} laid to rest. The Warden's vault is close."
+  turnIn:
+    - npc: "It's done — I can feel the chill lift. The Reach owes you its quiet, {player.name}."
+    - player: "The crypt is clean. For now."
+  claimed:
+    - npc: "The Ashen Crypt sleeps because you walked into it. Few would."

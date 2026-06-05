@@ -52,6 +52,12 @@
   at: { floor: 0, x: 61.5, y: 59.5 }
   idleDialogue: "Southgate Cemetery is restless."
 
+- id: crypt-warden
+  name: Mira Gravewatch
+  role: quest
+  at: { floor: 1, x: 52.5, y: 36.5 }
+  idleDialogue: "The cold comes up from the crypt now, not the graves."
+
 - id: lumberjack
   name: Brann Splitlog
   role: quest
