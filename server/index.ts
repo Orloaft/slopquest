@@ -30,6 +30,7 @@ import {
   isRoadTile,
   isSightBlocked,
   oreTierFor,
+  fishTierFor,
   isSafeZone,
   portalFor,
   tileAt,
@@ -2588,8 +2589,13 @@ function fishNode(player: ServerPlayer, id: string): void {
     event("float", "You need a fishing rod.", player.x, player.y, player.floor, "#f7d486");
     return;
   }
-  player.targetId = null;
   const level = skillLevel(player, "fishing");
+  const tier = fishTierFor(node.kind);
+  if (level < tier.reqLevel) {
+    event("float", `Requires Fishing ${tier.reqLevel}.`, node.x, node.y, node.floor, "#f7d486");
+    return;
+  }
+  player.targetId = null;
   player.action = { type: "fishing", nodeId: node.id, nextAt: performance.now() + fishingCatchMs(level), startedAt: performance.now() };
   event("float", "You cast your line.", node.x, node.y, node.floor, "#8fd8ff");
 }
@@ -2777,11 +2783,12 @@ function updateFishingAction(player: ServerPlayer, now: number): void {
   }
   if (now < action.nextAt) return;
   player.action = null;
-  if (!addInventoryItem(player, "raw_fish", 1)) {
+  const tier = fishTierFor(node.kind);
+  if (!addInventoryItem(player, tier.item, 1)) {
     systemToPlayer(player, "Your inventory is full.");
     return;
   }
-  const xp = 18;
+  const xp = tier.xp;
   addSkillXp(player, "fishing", xp);
   event("effect", "fish", node.x, node.y, node.floor, null, player.id, node.id);
   event("float", `+${xp} Fishing`, node.x, node.y, node.floor, "#8fd8ff");

@@ -3,39 +3,55 @@
 #
 # at        — the water tile coordinates.
 # approach  — the standing tile next to the water (player walks here to fish).
+# kind      — fish tier (fish | trout | pike | bass | shark). Selects the catch,
+#             the Fishing level required, and XP (see FISH_TIERS in src/shared.ts).
+#             The rarer fish live in more dangerous water — the danger→reward
+#             gradient: safe town/woods ponds yield Fish/Trout; the mire, the surf,
+#             and the deeps yield Pike/Bass/Shark.
 
+# Waystone town ponds (floor 0, safe) — the starter spots. Fish (Fishing 1).
 - id: fish-0-5-9
+  kind: fish
   at: { floor: 0, x: 12.5, y: 13.5 }
   approach: { x: 15.5, y: 13.5 }
 
 - id: fish-0-5-15
+  kind: fish
   at: { floor: 0, x: 13.5, y: 32.5 }
   approach: { x: 16.5, y: 32.5 }
 
 - id: fish-0-5-21
+  kind: fish
   at: { floor: 0, x: 14.5, y: 42.5 }
   approach: { x: 17.5, y: 42.5 }
 
-# Woodland ponds in the enlarged Northwood (floor 3, 110x72).
-# Relocated to real ponds in the authored-layout map (2026-06-02 bridge).
+# Woodland ponds in the enlarged Northwood (floor 3, 110x72). The quiet southern
+# pond stays Fish; the two northern ponds — deeper in the wood, nearer the
+# goblins/orcs — hold Trout (Fishing 10).
 - id: fish-3-22-20
+  kind: trout
   at: { floor: 3, x: 27.5, y: 24.5 }
   approach: { x: 27.5, y: 25.5 }
 
 - id: fish-3-66-20
+  kind: trout
   at: { floor: 3, x: 69.5, y: 28.5 }
   approach: { x: 69.5, y: 27.5 }
 
 - id: fish-3-41-48
+  kind: fish
   at: { floor: 3, x: 64.5, y: 56.5 }
   approach: { x: 64.5, y: 57.5 }
 
-# Sunken Marsh (floor 5) — fish the open swamp water from a causeway edge.
+# Sunken Marsh (floor 5) — fish the open swamp water from a causeway edge, in
+# range of the mire-spitters. Pike (Fishing 20).
 - id: fish-5-43-22
+  kind: pike
   at: { floor: 5, x: 51.5, y: 29.5 }
   approach: { x: 51.5, y: 28.5 }
 
-# Sunken Beach (floor 8) — surfcasting from the south sand.
+# Sunken Beach (floor 8) — surfcasting the reef-prowler shallows. Bass (Fishing 35).
 - id: fish-8-50-46
+  kind: bass
   at: { floor: 8, x: 39.5, y: 52.5 }
   approach: { x: 39.5, y: 51.5 }

@@ -12,6 +12,11 @@
       "required": ["id", "at", "approach"],
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "kind": {
+          "type": "string",
+          "enum": ["fish", "trout", "pike", "bass", "shark"],
+          "description": "Fish tier: fish | trout | pike | bass | shark. Selects the catch, the Fishing level required, and XP (see FISH_TIERS in src/shared.ts). Defaults to fish."
+        },
         "at": {
           "type": "object",
           "additionalProperties": false,

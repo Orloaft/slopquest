@@ -297,6 +297,126 @@
         durationMs: 90000
     float: Well fed
 
+# Higher fishing tiers — caught in progressively more dangerous water (see
+# FISH_TIERS in src/shared.ts). Each raw fish smokes on a fire into its cooked
+# form (more healing the rarer the fish) and trains Cooking harder. Icons reuse
+# the base fish art for now (no new asset gen).
+- id: raw_trout
+  label: Raw Trout
+  icon: rT
+  iconUrl: /icons/item-raw-fish.png
+  stackable: true
+  tags: [food, raw]
+  use:
+    kind: cook_on_fire
+    produces: cooked_trout
+    burns: burnt_fish
+    skill: cooking
+    xp: 35
+
+- id: cooked_trout
+  label: Cooked Trout
+  icon: cT
+  iconUrl: /icons/item-cooked-fish.png
+  stackable: true
+  tags: [food, consumable]
+  use:
+    kind: eat
+    restoreHp: 11
+    buffs:
+      - id: food_regen
+        durationMs: 18000
+      - id: well_fed
+        durationMs: 90000
+    float: Well fed
+
+- id: raw_pike
+  label: Raw Pike
+  icon: rP
+  iconUrl: /icons/item-raw-fish.png
+  stackable: true
+  tags: [food, raw]
+  use:
+    kind: cook_on_fire
+    produces: cooked_pike
+    burns: burnt_fish
+    skill: cooking
+    xp: 55
+
+- id: cooked_pike
+  label: Cooked Pike
+  icon: cP
+  iconUrl: /icons/item-cooked-fish.png
+  stackable: true
+  tags: [food, consumable]
+  use:
+    kind: eat
+    restoreHp: 16
+    buffs:
+      - id: food_regen
+        durationMs: 22000
+      - id: well_fed
+        durationMs: 90000
+    float: Well fed
+
+- id: raw_bass
+  label: Raw Bass
+  icon: rB
+  iconUrl: /icons/item-raw-fish.png
+  stackable: true
+  tags: [food, raw]
+  use:
+    kind: cook_on_fire
+    produces: cooked_bass
+    burns: burnt_fish
+    skill: cooking
+    xp: 80
+
+- id: cooked_bass
+  label: Cooked Bass
+  icon: cB
+  iconUrl: /icons/item-cooked-fish.png
+  stackable: true
+  tags: [food, consumable]
+  use:
+    kind: eat
+    restoreHp: 22
+    buffs:
+      - id: food_regen
+        durationMs: 26000
+      - id: well_fed
+        durationMs: 90000
+    float: Well fed
+
+- id: raw_shark
+  label: Raw Shark
+  icon: rS
+  iconUrl: /icons/item-raw-fish.png
+  stackable: true
+  tags: [food, raw]
+  use:
+    kind: cook_on_fire
+    produces: cooked_shark
+    burns: burnt_fish
+    skill: cooking
+    xp: 120
+
+- id: cooked_shark
+  label: Cooked Shark
+  icon: cS
+  iconUrl: /icons/item-cooked-fish.png
+  stackable: true
+  tags: [food, consumable]
+  use:
+    kind: eat
+    restoreHp: 30
+    buffs:
+      - id: food_regen
+        durationMs: 30000
+      - id: well_fed
+        durationMs: 90000
+    float: Well fed
+
 - id: burnt_fish
   label: Burnt Fish
   icon: bF

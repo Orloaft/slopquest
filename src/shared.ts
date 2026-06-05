@@ -1327,6 +1327,28 @@ export function oreTierFor(kind: string): OreTier {
   return ORE_TIERS[kind] ?? ORE_TIERS.copper!;
 }
 
+// Fishing catch ladder. A node's `kind` (content/fishing-nodes.yaml) selects the
+// fish it yields, the Fishing level required to work the spot, and the XP per
+// catch — the rarer fish live in the more dangerous water (marsh, surf, deeps).
+// A new fish needs only: a tier here, a raw + cooked item in items.yaml (the raw
+// item carries the cook_on_fire recipe), and the `kind` added to the schema enum.
+export interface FishTier {
+  item: string;
+  reqLevel: number;
+  xp: number;
+  label: string;
+}
+export const FISH_TIERS: Record<string, FishTier> = {
+  fish: { item: "raw_fish", reqLevel: 1, xp: 16, label: "Fish" },
+  trout: { item: "raw_trout", reqLevel: 10, xp: 28, label: "Trout" },
+  pike: { item: "raw_pike", reqLevel: 20, xp: 46, label: "Pike" },
+  bass: { item: "raw_bass", reqLevel: 35, xp: 68, label: "Bass" },
+  shark: { item: "raw_shark", reqLevel: 50, xp: 95, label: "Shark" }
+};
+export function fishTierFor(kind: string): FishTier {
+  return FISH_TIERS[kind] ?? FISH_TIERS.fish!;
+}
+
 export function isSafeZone(floor: number, x: number, y: number): boolean {
   if (floor === 0 || floor === 4) return true;
   // Outpost clearings are authored in native coords; scale the rect to match

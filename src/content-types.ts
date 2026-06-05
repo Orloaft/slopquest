@@ -290,6 +290,7 @@ export interface FishingNode {
   y: number;
   approachX: number;
   approachY: number;
+  kind: string;
 }
 
 export interface MiningNode {

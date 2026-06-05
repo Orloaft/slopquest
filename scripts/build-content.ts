@@ -76,6 +76,7 @@ interface RawNpc {
 
 interface RawFishingNode {
   id?: string;
+  kind?: string;
   at?: { floor: number; x: number; y: number };
   approach?: { x: number; y: number };
 }
@@ -168,6 +169,7 @@ const capabilityIds = new Set(["chop_tree", "fish", "mine", "ranged"]);
 const skillIds = new Set(["attack", "defense", "magic", "woodcutting", "fishing", "mining", "firemaking", "cooking", "agility", "alchemy", "ranged", "foraging", "smithing", "faith"]);
 const questKinds = new Set(["kill", "gather", "fetch"]);
 const oreKinds = new Set(["copper", "tin", "iron", "coal", "silver", "gold", "mithril", "adamant"]);
+const fishKinds = new Set(["fish", "trout", "pike", "bass", "shark"]);
 const abilityGuards = new Set(["requireBelowMaxHp"]);
 const abilityTargetModes = new Set(["self", "enemy", "aoe_self", "aoe_front", "aoe_point", "line_front", "dash"]);
 const abilityCategories = new Set(["class", "spell", "miracle"]);
@@ -278,6 +280,11 @@ for (const t of spawns.trees ?? []) {
 for (const m of miningNodes) {
   if (m.kind != null && !oreKinds.has(m.kind)) {
     fail(`mining-nodes.yaml:${m.id ?? "?"}`, `unknown kind "${m.kind}" (known: ${[...oreKinds].join(", ")})`);
+  }
+}
+for (const f of fishingNodes) {
+  if (f.kind != null && !fishKinds.has(f.kind)) {
+    fail(`fishing-nodes.yaml:${f.id ?? "?"}`, `unknown kind "${f.kind}" (known: ${[...fishKinds].join(", ")})`);
   }
 }
 for (const h of herbNodes) {
@@ -591,6 +598,7 @@ const COMPOSED_TREE_NODES = (spawns.trees ?? []).map((t) => ({
 }));
 const FISHING_NODES = fishingNodes.map((f) => ({
   id: f.id,
+  kind: f.kind ?? "fish",
   floor: f.at?.floor,
   x: sX(f.at?.floor, f.at?.x),
   y: sY(f.at?.floor, f.at?.y),
