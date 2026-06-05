@@ -54,6 +54,9 @@ export interface Item {
   tags?: string[];
   capabilities?: Capability[];
   use?: ItemUse;
+  // Market value in gold. Vendors buy at round(value*0.5); buy-backs cost `value`.
+  // Items without a value cannot be sold (quest/key items).
+  value?: number;
   // Mass carried in the inventory; drives the encumbrance speed modifier.
   weight?: number;
 }

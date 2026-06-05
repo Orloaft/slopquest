@@ -364,6 +364,7 @@ export type ClientMessage =
   | { type: "loot" }
   | { type: "lootCorpse"; id: string }
   | { type: "buy"; item: string }
+  | { type: "sell"; item: string }
   | { type: "talkNpc"; id: string }
   | { type: "cutTree"; id: string }
   | { type: "fishNode"; id: string }

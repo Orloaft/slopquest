@@ -30,6 +30,7 @@ interface RawItem {
   stackable?: boolean;
   tags?: string[];
   capabilities?: string[];
+  value?: number;
   weight?: number;
   use?: RawUse;
 }
@@ -518,6 +519,7 @@ const ITEMS = Object.fromEntries(
     if (i.stackable != null) entry["stackable"] = i.stackable;
     if (i.tags) entry["tags"] = i.tags;
     if (i.capabilities) entry["capabilities"] = i.capabilities;
+    if (i.value != null) entry["value"] = i.value;
     if (i.weight != null) entry["weight"] = i.weight;
     if (i.use) entry["use"] = i.use;
     return [i.id, entry];

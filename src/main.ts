@@ -450,6 +450,7 @@ const dom = {
   minimapZone: el<HTMLElement>("#minimapZone"),
   netStats: el<HTMLElement>("#netStats"),
   vendor: el<HTMLElement>("#vendor"),
+  vendorSell: el<HTMLElement>("#vendorSell"),
   vendorCloseButton: el<HTMLButtonElement>("#vendorCloseButton"),
   alchemist: el<HTMLElement>("#alchemist"),
   alchemistCloseButton: el<HTMLButtonElement>("#alchemistCloseButton"),
@@ -2790,6 +2791,7 @@ function renderHud(me: PlayerView): void {
   if (inventorySignature !== renderedInventoryDataSignature) {
     renderedInventoryDataSignature = inventorySignature;
     renderInventory(me.inventory);
+    renderVendorSell(me.inventory);
   }
   const equipmentSignature = equipmentHudSignature(me);
   if (!dom.equipmentPanel.classList.contains("hidden") && equipmentSignature !== renderedEquipmentSignature) {
@@ -4493,6 +4495,56 @@ function resolveNpc(npcOrId: string | NpcView): NpcView | null {
 
 function openVendor(): void {
   showCenterPanel(dom.vendor);
+  renderVendorSell(self()?.inventory ?? []);
+}
+
+// Sell prices mirror the server (server/index.ts itemSellPrice): half value,
+// minimum 1g. Quest items have no value and are not offered.
+function itemSellPrice(id: string): number {
+  const value = ITEMS[id]?.value ?? 0;
+  if (value <= 0) return 0;
+  return Math.max(1, Math.round(value * 0.5));
+}
+
+function isSellableItem(id: string): boolean {
+  const spec = ITEMS[id];
+  if (!spec || (spec.value ?? 0) <= 0) return false;
+  return !(spec.tags ?? []).includes("quest");
+}
+
+let renderedVendorSellSignature = "";
+
+function renderVendorSell(inventory: Array<InventoryItemView | null> = []): void {
+  if (dom.vendor.classList.contains("hidden")) return;
+  // Collapse stacks to one button per distinct sellable item.
+  const seen = new Map<string, { item: InventoryItemView; qty: number }>();
+  for (const slot of inventory) {
+    if (!slot || !isSellableItem(slot.id)) continue;
+    const entry = seen.get(slot.id);
+    if (entry) entry.qty += slot.qty;
+    else seen.set(slot.id, { item: slot, qty: slot.qty });
+  }
+  const rows = [...seen.values()];
+  const signature = rows.map((r) => `${r.item.id}:${r.qty}`).join("|");
+  if (signature === renderedVendorSellSignature) return;
+  renderedVendorSellSignature = signature;
+  if (rows.length === 0) {
+    dom.vendorSell.innerHTML = `<p class="subcopy">Nothing here the trader will buy.</p>`;
+    return;
+  }
+  dom.vendorSell.innerHTML = rows
+    .map((r) => {
+      const price = itemSellPrice(r.item.id);
+      const qty = r.qty > 1 ? ` ×${r.qty}` : "";
+      return `<button type="button" data-sell="${escapeHtml(r.item.id)}">${iconMarkup(r.item.iconUrl, r.item.icon, "item-icon")}Sell ${escapeHtml(r.item.label)}${qty} (${price}g)</button>`;
+    })
+    .join("");
+  dom.vendorSell.querySelectorAll<HTMLElement>("[data-sell]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const item = button.dataset.sell;
+      if (item) send({ type: "sell", item });
+    });
+  });
 }
 
 function toggleCenterPanel(panel: HTMLElement): void {

@@ -24,6 +24,7 @@
         },
         "stackable": { "type": "boolean" },
         "tags": { "type": "array", "items": { "type": "string" } },
+        "value": { "type": "number", "minimum": 0, "description": "Market value in gold. Vendors buy at round(value*0.5) and sell buy-backs at value. Omit to make the item unsellable (quest/key items)." },
         "weight": { "type": "number", "minimum": 0, "description": "Mass carried per unit; drives encumbrance." },
         "capabilities": {
           "type": "array",

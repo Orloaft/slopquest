@@ -40,6 +40,7 @@
 
 - id: axe
   label: Bronze Axe
+  value: 25
   icon: A
   iconUrl: /icons/item-axe.png
   stackable: false
@@ -49,6 +50,7 @@
 
 - id: fishing_rod
   label: Fishing Rod
+  value: 18
   icon: R
   iconUrl: /icons/item-fishing-rod.png
   stackable: false
@@ -58,6 +60,7 @@
 
 - id: pickaxe
   label: Bronze Pickaxe
+  value: 25
   icon: P
   iconUrl: /icons/item-pickaxe.png
   stackable: false
@@ -67,6 +70,7 @@
 
 - id: flint_steel
   label: Flint and Steel
+  value: 16
   icon: F
   iconUrl: /icons/item-flint-steel.png
   stackable: false
@@ -84,6 +88,7 @@
 
 - id: logs
   label: Oak Logs
+  value: 4
   icon: L
   iconUrl: /icons/item-logs.png
   stackable: true
@@ -92,6 +97,7 @@
 
 - id: pine_logs
   label: Pine Logs
+  value: 8
   icon: P
   iconUrl: /icons/item-pine-logs.png
   stackable: true
@@ -102,6 +108,7 @@
 # each burns hotter for more Firemaking xp (see flint_steel.consumesAny).
 - id: willow_logs
   label: Willow Logs
+  value: 14
   icon: WL
   iconUrl: /icons/item-logs.png
   stackable: true
@@ -110,6 +117,7 @@
 
 - id: teak_logs
   label: Teak Logs
+  value: 28
   icon: TL
   iconUrl: /icons/item-pine-logs.png
   stackable: true
@@ -118,6 +126,7 @@
 
 - id: mahogany_logs
   label: Mahogany Logs
+  value: 45
   icon: ML
   iconUrl: /icons/item-logs.png
   stackable: true
@@ -128,6 +137,7 @@
 # botched smelt yields slag. XP rises with tier so the deep cave ores matter.
 - id: copper_ore
   label: Copper Ore
+  value: 4
   icon: Cu
   iconUrl: /icons/item-copper-ore.png
   stackable: true
@@ -142,6 +152,7 @@
 
 - id: tin_ore
   label: Tin Ore
+  value: 4
   icon: Sn
   iconUrl: /icons/item-tin-ore.png
   stackable: true
@@ -156,6 +167,7 @@
 
 - id: iron_ore
   label: Iron Ore
+  value: 9
   icon: Fe
   iconUrl: /icons/item-iron-ore.png
   stackable: true
@@ -170,6 +182,7 @@
 
 - id: coal
   label: Coal
+  value: 14
   icon: C
   iconUrl: /icons/item-coal.png
   stackable: true
@@ -178,6 +191,7 @@
 
 - id: silver_ore
   label: Silver Ore
+  value: 22
   icon: Ag
   iconUrl: /icons/item-silver-ore.png
   stackable: true
@@ -192,6 +206,7 @@
 
 - id: gold_ore
   label: Gold Ore
+  value: 50
   icon: Au
   iconUrl: /icons/item-gold-ore.png
   stackable: true
@@ -206,6 +221,7 @@
 
 - id: mithril_ore
   label: Mithril Ore
+  value: 85
   icon: Mi
   iconUrl: /icons/item-mithril-ore.png
   stackable: true
@@ -220,6 +236,7 @@
 
 - id: adamant_ore
   label: Adamant Ore
+  value: 170
   icon: Ad
   iconUrl: /icons/item-adamant-ore.png
   stackable: true
@@ -235,6 +252,7 @@
 # Smelted metal bars — smithing stock (a future smith turns these into gear).
 - id: copper_bar
   label: Copper Bar
+  value: 8
   icon: Cu
   iconUrl: /icons/item-copper-bar.png
   stackable: true
@@ -243,6 +261,7 @@
 
 - id: tin_bar
   label: Tin Bar
+  value: 8
   icon: Sn
   iconUrl: /icons/item-tin-bar.png
   stackable: true
@@ -251,6 +270,7 @@
 
 - id: iron_bar
   label: Iron Bar
+  value: 20
   icon: Fe
   iconUrl: /icons/item-iron-bar.png
   stackable: true
@@ -259,6 +279,7 @@
 
 - id: silver_bar
   label: Silver Bar
+  value: 45
   icon: Ag
   iconUrl: /icons/item-silver-bar.png
   stackable: true
@@ -267,6 +288,7 @@
 
 - id: gold_bar
   label: Gold Bar
+  value: 95
   icon: Au
   iconUrl: /icons/item-gold-bar.png
   stackable: true
@@ -275,6 +297,7 @@
 
 - id: mithril_bar
   label: Mithril Bar
+  value: 170
   icon: Mi
   iconUrl: /icons/item-mithril-bar.png
   stackable: true
@@ -283,6 +306,7 @@
 
 - id: adamant_bar
   label: Adamant Bar
+  value: 340
   icon: Ad
   iconUrl: /icons/item-adamant-bar.png
   stackable: true
@@ -291,6 +315,7 @@
 
 - id: slag
   label: Slag
+  value: 1
   icon: sl
   iconUrl: /icons/item-slag.png
   stackable: true
@@ -299,6 +324,7 @@
 
 - id: raw_fish
   label: Raw Fish
+  value: 4
   icon: rF
   iconUrl: /icons/item-raw-fish.png
   stackable: true
@@ -312,6 +338,7 @@
 
 - id: cooked_fish
   label: Cooked Fish
+  value: 9
   icon: cF
   iconUrl: /icons/item-cooked-fish.png
   stackable: true
@@ -332,6 +359,7 @@
 # the base fish art for now (no new asset gen).
 - id: raw_trout
   label: Raw Trout
+  value: 8
   icon: rT
   iconUrl: /icons/item-raw-fish.png
   stackable: true
@@ -345,6 +373,7 @@
 
 - id: cooked_trout
   label: Cooked Trout
+  value: 16
   icon: cT
   iconUrl: /icons/item-cooked-fish.png
   stackable: true
@@ -361,6 +390,7 @@
 
 - id: raw_pike
   label: Raw Pike
+  value: 14
   icon: rP
   iconUrl: /icons/item-raw-fish.png
   stackable: true
@@ -374,6 +404,7 @@
 
 - id: cooked_pike
   label: Cooked Pike
+  value: 26
   icon: cP
   iconUrl: /icons/item-cooked-fish.png
   stackable: true
@@ -390,6 +421,7 @@
 
 - id: raw_bass
   label: Raw Bass
+  value: 22
   icon: rB
   iconUrl: /icons/item-raw-fish.png
   stackable: true
@@ -403,6 +435,7 @@
 
 - id: cooked_bass
   label: Cooked Bass
+  value: 42
   icon: cB
   iconUrl: /icons/item-cooked-fish.png
   stackable: true
@@ -419,6 +452,7 @@
 
 - id: raw_shark
   label: Raw Shark
+  value: 60
   icon: rS
   iconUrl: /icons/item-raw-fish.png
   stackable: true
@@ -432,6 +466,7 @@
 
 - id: cooked_shark
   label: Cooked Shark
+  value: 115
   icon: cS
   iconUrl: /icons/item-cooked-fish.png
   stackable: true
@@ -448,6 +483,7 @@
 
 - id: burnt_fish
   label: Burnt Fish
+  value: 1
   icon: bF
   iconUrl: /icons/item-burnt-fish.png
   stackable: true
@@ -455,6 +491,7 @@
 
 - id: potion
   label: Health Potion
+  value: 12
   icon: P
   iconUrl: /icons/item-potion.png
   stackable: true
@@ -467,6 +504,7 @@
 # recipe. Stronger heal, so the mushroom line finally has a sink.
 - id: strong_potion
   label: Potent Tonic
+  value: 40
   icon: PT
   iconUrl: /icons/item-potion.png
   stackable: true
@@ -477,6 +515,7 @@
 
 - id: herb
   label: Wild Herb
+  value: 5
   icon: H
   iconUrl: /icons/item-herb.png
   stackable: true
@@ -484,6 +523,7 @@
 
 - id: mushroom
   label: Marsh Mushroom
+  value: 6
   icon: M
   iconUrl: /icons/item-herb.png
   stackable: true
@@ -491,6 +531,7 @@
 
 - id: empty_flask
   label: Empty Flask
+  value: 6
   icon: eF
   iconUrl: /icons/item-empty-flask.png
   stackable: true
@@ -498,6 +539,7 @@
 
 - id: alchemy_kit
   label: Alchemy Kit
+  value: 40
   icon: aK
   iconUrl: /icons/item-alchemy-kit.png
   stackable: false
@@ -506,6 +548,7 @@
 
 - id: hunting_bow
   label: Hunting Bow
+  value: 35
   icon: bow
   iconUrl: /icons/item-hunting-bow.png
   stackable: false
@@ -522,6 +565,7 @@
 
 - id: quartz
   label: Glass-Sand Quartz
+  value: 18
   icon: Qz
   iconUrl: /icons/item-quartz.png
   stackable: true
@@ -585,6 +629,7 @@
 
 - id: broken_reach_map
   label: Inked Survey of The Broken Reach
+  value: 150
   icon: Map
   iconUrl: /icons/item-map.png
   stackable: false

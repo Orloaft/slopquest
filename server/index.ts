@@ -699,6 +699,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
     if (message.type === "loot") lootAdjacent(session.player);
     if (message.type === "lootCorpse") lootCorpse(session.player, String(message.id ?? ""));
     if (message.type === "buy") buyItem(session.player, String(message.item ?? ""));
+    if (message.type === "sell") sellItem(session.player, String(message.item ?? ""));
     if (message.type === "talkNpc") talkNpc(session.player, String(message.id ?? ""));
     if (message.type === "endDialogue") endConversation(session.player);
     if (message.type === "cutTree") cutTree(session.player, String(message.id ?? ""));
@@ -2114,6 +2115,38 @@ function buyItem(player: ServerPlayer, item: string): void {
     player.gold -= SHOP["broken_reach_map"]!.cost;
     systemToPlayer(player, `${player.name} bought the Inked Survey of The Broken Reach.`);
   }
+}
+
+// --- Selling ---------------------------------------------------------------
+// Any item with a market `value` can be sold to a vendor. Quest/key items carry
+// no value and are refused. Selling pays half the item's value; buy-backs cost
+// the full value, so there is never a sell -> buy-back arbitrage loop.
+function itemSellPrice(id: string): number {
+  const value = ITEMS[id]?.value ?? 0;
+  if (value <= 0) return 0;
+  return Math.max(1, Math.round(value * 0.5));
+}
+
+function isSellable(id: string): boolean {
+  const spec = ITEMS[id];
+  if (!spec || (spec.value ?? 0) <= 0) return false;
+  return !(spec.tags ?? []).includes("quest");
+}
+
+function sellItem(player: ServerPlayer, id: string): void {
+  if (player.dead) return;
+  if (!nearbyNpcOfRole(player, "vendor")) return;
+  const spec = ITEMS[id];
+  if (!spec) return;
+  if (!isSellable(id)) {
+    systemToPlayer(player, `The trader won't buy your ${spec.label}.`);
+    return;
+  }
+  if (!hasInventoryItem(player, id)) return;
+  const price = itemSellPrice(id);
+  if (!removeInventoryItem(player, id, 1)) return;
+  player.gold += price;
+  systemToPlayer(player, `Sold ${spec.label} for ${price}g.`);
 }
 
 function brewPotion(player: ServerPlayer): void {
