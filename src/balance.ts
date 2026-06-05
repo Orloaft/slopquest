@@ -82,6 +82,46 @@ export function monsterCombatLevel(monster: Monster): number {
   return Math.max(1, Math.round(raw));
 }
 
+// Region/tier level bands. A spawn's monster (via monsterCombatLevel) must fall
+// within its zone's [min, max] band — this is the balance equivalent of the
+// asset budget: scripts/balance-bands.ts fails the build on any drift.
+// Broken Reach (Tier 1, levels 1-35) only. "Beyond the Reach" zones (desert,
+// beach, jungle, deepMine) are intentionally unlisted until that region is
+// re-tiered; their spawns are not yet band-checked.
+export const ZONE_LEVEL_BANDS: Record<string, [number, number]> = {
+  woods: [1, 25],
+  cemetery: [11, 28],
+  crypt: [11, 21],
+  marsh: [18, 27],
+  badlands: [32, 35]
+};
+
+export interface ZoneBandViolation {
+  zone: string;
+  monster: string;
+  level: number;
+  band: [number, number];
+}
+
+export function zoneBandViolations(monsters: Record<string, Monster>, spawns: MonsterSpawn[]): ZoneBandViolation[] {
+  const violations: ZoneBandViolation[] = [];
+  const seen = new Set<string>();
+  for (const spawn of spawns) {
+    const band = ZONE_LEVEL_BANDS[spawn.zone];
+    if (!band) continue; // unlisted zone (Beyond the Reach) — not yet checked
+    const monster = monsters[spawn.type];
+    if (!monster) continue;
+    const key = `${spawn.zone}:${spawn.type}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const level = monsterCombatLevel(monster);
+    if (level < band[0] || level > band[1]) {
+      violations.push({ zone: spawn.zone, monster: spawn.type, level, band });
+    }
+  }
+  return violations;
+}
+
 export function encounterRole(monster: Monster): EncounterRole {
   if (monster.role) return monster.role;
   if (monster.maxHp >= 220) return "boss";

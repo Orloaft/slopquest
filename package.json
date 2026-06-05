@@ -22,6 +22,7 @@
     "perf:soak": "node scripts/perf-gate.ts --soak",
     "perf:stress": "node scripts/perf-gate.ts --stress",
     "balance:areas": "node scripts/balance-areas.ts",
+    "balance:bands": "node scripts/balance-bands.ts",
     "balance:combat": "node scripts/balance-combat.ts",
     "assets:budget": "node scripts/asset-budget.ts --preload-entry src/main.ts --max-preload-bytes 57671680 --max-preload-files 65",
     "assets:bridge:northwood": "node tools/build-northwood-from-authored.ts",
@@ -45,7 +46,7 @@
     "test:e2e": "playwright test",
     "test:visual": "playwright test tests/e2e/tib-features.spec.ts --project=chromium",
     "typecheck": "tsc",
-    "check": "tsc && npm run assets:enemies:check && npm run assets:budget"
+    "check": "tsc && npm run assets:enemies:check && npm run assets:budget && npm run balance:bands"
   },
   "dependencies": {
     "concurrently": "^9.1.2",

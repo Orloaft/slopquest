@@ -27,9 +27,12 @@ test("area balance metrics summarize each monster-spawn zone", () => {
 test("encounter roles and combat metrics expose TTK/TTD balance pressure", () => {
   expect(encounterRole(MONSTERS["mire_spitter"]!)).toBe("turret");
   expect(encounterRole(MONSTERS["boss"]!)).toBe("boss");
+  // A crypt-graduate player (L20) poking the badlands frontier: the ambusher
+  // should register real danger. Uses a high-damage monster so the assertion
+  // tests the metric, not a rounding cliff near zero.
   const profile = { label: "test", level: 20, attack: 20, defense: 16, ranged: 14, magic: 10, faith: 8, maxHp: 280, weaponTier: 1, armorTier: 1 };
-  expect(estimateTimeToKill(MONSTERS["wolf"]!, profile)).toBeGreaterThan(0);
-  expect(estimateTimeToDie(MONSTERS["wolf"]!, profile)).toBeGreaterThan(0);
-  const rows = monsterCombatMetrics({ wolf: MONSTERS["wolf"]! }, [profile]);
+  expect(estimateTimeToKill(MONSTERS["dust_burrower"]!, profile)).toBeGreaterThan(0);
+  expect(estimateTimeToDie(MONSTERS["dust_burrower"]!, profile)).toBeGreaterThan(0);
+  const rows = monsterCombatMetrics({ dust_burrower: MONSTERS["dust_burrower"]! }, [profile]);
   expect(rows[0]?.dangerRatio).toBeGreaterThan(0);
 });

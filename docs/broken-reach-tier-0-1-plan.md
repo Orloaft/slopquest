@@ -153,3 +153,41 @@ Final rewards:
 - Layouts should foreshadow danger before combat: broken carts at canyon entrances, warning charms in marshes, drowned roads in the south.
 - Mining can gate the Sunken Desert Caves, but Apothecary/Thief/Vanguard should provide advantages rather than hard-blocking the main story.
 - Return the player to Waystone or Northwatch after major branch completions so the world state feels responsive.
+
+## Level Tiering & Balance (decided 2026-06-05)
+
+Broken Reach is **Tier 1, levels 1–35** — one contiguous home landmass that teaches
+the basics but keeps dangerous "menace edges" near the safe parts (stakes by design,
+not a tutorial sandbox). The cap at 35 falls naturally on the existing deep gates.
+
+**In Broken Reach (band-checked):**
+
+| Zone (floor) | Level band | Notes |
+| --- | --- | --- |
+| Northwood woods (3) | 1–25 | main ladder 1–16 kept; deep-north tail (orc→treant) is the 17–25 edge |
+| Cemetery (1) | 11–28 | entry husk/shambler 11–14; deep undead a 23–28 "don't go yet" pocket |
+| Ashen Crypt (2) | 11–21 | first dungeon (capstone) |
+| Sunken Marsh (5) | 18–27 | |
+| Searing Badlands (6) | 32–35 | the frontier; hardest T1 content (dust_burrower L35) |
+
+**Beyond the Reach (Tier 2+, NOT yet re-tiered, not band-checked):** Sunken Desert (7),
+Beach (8), Jungle (9), Deepdelve Mine (10). Reached *through* the Reach's frontier gates
+(Mourner's Gate, the Badlands descent). The Jungle Faultwarden (L126) stays high — it is
+no longer early-region content.
+
+**Balance method:** monster stats are derived from `level + role`, not hand-set. A
+monster's level is `monsterCombatLevel()` (src/balance.ts). The 2026-06-05 re-tier rescaled
+17–18 Broken Reach monsters to their target levels, preserving each monster's attack rhythm
+and hp:damage character; xp/gold were restandardized only for monsters whose level moved.
+`ZONE_LEVEL_BANDS` in src/balance.ts is the single source of truth, and `npm run
+balance:bands` (wired into `npm run check`) fails the build if any spawned monster drifts
+outside its zone band — the balance equivalent of the asset budget.
+
+**Beyond-the-Reach follow-ups (tracked, out of scope for the 1–35 pass):**
+
+- Split the monsters shared with the Deepmine (skeleton, ghoul, canyon_scavenger,
+  dust_burrower) into stronger deepmine variants — RuneScape-style same-name/higher-level.
+  Until then those deepmine spawns ride the (now weaker) Tier-1 base stats.
+- Re-tier the Desert/Beach **up** (~35–50): they are currently low-level (10–22) but sit
+  behind the mid-game Mourner's Gate, so today they read easier than where the player came
+  from. Add `ZONE_LEVEL_BANDS` entries for the Beyond zones when this is done.

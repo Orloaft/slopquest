@@ -91,12 +91,12 @@
 - id: wolf
   name: Grey Wolf
   description: "a lean grey predator of the treeline"
-  maxHp: 58
+  maxHp: 49
   speed: 3.2
-  damage: [7, 13]
+  damage: [7, 10]
   attackMs: 880
-  xp: 38
-  gold: [6, 15]
+  xp: 31
+  gold: [10, 20]
   aggro: 6.8
   range: 1
 
@@ -127,12 +127,12 @@
 - id: goblin_shaman
   name: Goblin Shaman
   description: "a goblin spellcaster wreathed in foul smoke"
-  maxHp: 54
+  maxHp: 45
   speed: 2.35
-  damage: [9, 17]
+  damage: [9, 13]
   attackMs: 1180
-  xp: 56
-  gold: [12, 24]
+  xp: 32
+  gold: [10, 20]
   aggro: 6.5
   range: 1.1
 
@@ -189,24 +189,24 @@
 - id: sapling_deer
   name: Sapling Deer
   description: "a timid spirit-deer crowned with new growth"
-  maxHp: 50
+  maxHp: 45
   speed: 3.05
-  damage: [7, 12]
+  damage: [7, 10]
   attackMs: 980
-  xp: 38
-  gold: [6, 15]
+  xp: 29
+  gold: [9, 18]
   aggro: 6.2
   range: 1
 
 - id: mushroom_brute
   name: Mushroom Brute
   description: "a lumbering fungal hulk that spreads spores"
-  maxHp: 76
+  maxHp: 50
   speed: 1.9
-  damage: [10, 18]
+  damage: [8, 11]
   attackMs: 1250
-  xp: 58
-  gold: [10, 22]
+  xp: 38
+  gold: [12, 24]
   aggro: 6
   range: 1.05
   armor: 3
@@ -215,12 +215,12 @@
   name: Dire Wolf
   role: pack
   description: "a massive alpha wolf; its pack answers its howl"
-  maxHp: 78
+  maxHp: 53
   speed: 3.15
-  damage: [11, 19]
+  damage: [8, 12]
   attackMs: 850
-  xp: 60
-  gold: [11, 24]
+  xp: 48
+  gold: [15, 30]
   aggro: 7
   range: 1
   pack: true
@@ -229,12 +229,12 @@
   name: Forest Pixie
   role: turret
   description: "a mischievous sprite flitting through the glades"
-  maxHp: 48
+  maxHp: 31
   speed: 3.1
-  damage: [6, 11]
+  damage: [4, 6]
   attackMs: 1500
-  xp: 46
-  gold: [9, 18]
+  xp: 41
+  gold: [13, 26]
   aggro: 6.5
   range: 5.5
   ranged: true
@@ -246,12 +246,12 @@
   name: Bone Druid
   role: turret
   description: "a withered druid bound to rotting roots"
-  maxHp: 82
+  maxHp: 38
   speed: 2.05
-  damage: [12, 20]
+  damage: [6, 9]
   attackMs: 1650
-  xp: 72
-  gold: [14, 30]
+  xp: 50
+  gold: [16, 31]
   aggro: 7
   range: 6
   ranged: true
@@ -262,12 +262,12 @@
 - id: bog_wraith
   name: Bog Wraith
   description: "a drowned spirit dripping with marsh-rot"
-  maxHp: 72
+  maxHp: 57
   speed: 2.4
-  damage: [10, 17]
+  damage: [9, 13]
   attackMs: 1350
-  xp: 66
-  gold: [12, 26]
+  xp: 34
+  gold: [11, 21]
   aggro: 6.8
   range: 1.1
 
@@ -275,12 +275,12 @@
   name: Ancient Treant
   role: elite
   description: "an age-old tree-lord, slow but terribly strong"
-  maxHp: 130
+  maxHp: 58
   speed: 1.35
-  damage: [16, 26]
+  damage: [8, 11]
   attackMs: 1450
-  xp: 96
-  gold: [24, 48]
+  xp: 72
+  gold: [23, 45]
   aggro: 7
   range: 1.15
   armor: 5
@@ -293,12 +293,12 @@
 - id: orc
   name: Orc
   description: "a hulking warbrute clad in scavenged iron"
-  maxHp: 84
+  maxHp: 63
   speed: 2.25
-  damage: [10, 18]
+  damage: [9, 12]
   attackMs: 1150
-  xp: 54
-  gold: [11, 24]
+  xp: 36
+  gold: [11, 23]
   aggro: 6
   range: 1.1
   drops:
@@ -338,14 +338,14 @@
 - id: skeleton
   name: Skeleton
   description: "a clattering grave-walker, tireless and cold"
-  maxHp: 68
+  maxHp: 62
   speed: 2.05
-  damage: [11, 18]
+  damage: [11, 15]
   attackMs: 1250
-  xp: 52
+  xp: 41
   isUnholy: true
   faithXp: 24
-  gold: [9, 20]
+  gold: [13, 26]
   aggro: 6
   range: 1.05
   drops:
@@ -355,28 +355,28 @@
 - id: ghoul
   name: Ghoul
   description: "a famished corpse that hungers for the living"
-  maxHp: 92
+  maxHp: 80
   speed: 1.9
-  damage: [12, 21]
+  damage: [12, 17]
   attackMs: 1200
-  xp: 70
+  xp: 49
   isUnholy: true
   faithXp: 32
-  gold: [14, 28]
+  gold: [15, 31]
   aggro: 6.5
   range: 1.05
 
 - id: grave_revenant
   name: Grave Revenant
   description: "a vengeful dead thing risen from a broken tomb"
-  maxHp: 76
+  maxHp: 67
   speed: 2.55
-  damage: [10, 18]
+  damage: [10, 15]
   attackMs: 980
-  xp: 66
+  xp: 43
   isUnholy: true
   faithXp: 30
-  gold: [12, 26]
+  gold: [14, 27]
   aggro: 7
   range: 1.05
 
@@ -399,14 +399,14 @@
   name: Pale Banshee
   role: turret
   description: "a wailing spectre whose cry chills the blood"
-  maxHp: 64
+  maxHp: 53
   speed: 2.25
-  damage: [9, 16]
+  damage: [8, 12]
   attackMs: 1450
-  xp: 78
+  xp: 60
   isUnholy: true
   faithXp: 36
-  gold: [15, 32]
+  gold: [19, 38]
   aggro: 7
   range: 5.5
   ranged: true
@@ -462,12 +462,12 @@
 - id: skitterer
   name: Skitterer
   description: "a chittering marsh-crawler that darts through reeds"
-  maxHp: 24
+  maxHp: 39
   speed: 3.6
-  damage: [4, 8]
+  damage: [8, 11]
   attackMs: 800
-  xp: 24
-  gold: [3, 7]
+  xp: 32
+  gold: [10, 20]
   aggro: 7
   range: 1
 
@@ -475,12 +475,12 @@
   name: Mire Spitter
   role: turret
   description: "an anchored bog-turret that spits slowing bile"
-  maxHp: 70
+  maxHp: 81
   speed: 0
-  damage: [5, 9]
+  damage: [7, 10]
   attackMs: 1900
-  xp: 48
-  gold: [10, 20]
+  xp: 56
+  gold: [18, 35]
   aggro: 7
   range: 6
   ranged: true
@@ -493,12 +493,12 @@
   name: Canyon Scavenger
   role: pack
   description: "a pack-hunting carrion beast of the badlands"
-  maxHp: 90
+  maxHp: 83
   speed: 2.2
-  damage: [9, 14]
+  damage: [9, 13]
   attackMs: 1100
-  xp: 60
-  gold: [12, 24]
+  xp: 69
+  gold: [22, 43]
   aggro: 6
   range: 1.05
   armor: 4
@@ -508,12 +508,12 @@
   name: Dust Burrower
   role: ambush
   description: "a buried ambusher that erupts underfoot"
-  maxHp: 60
+  maxHp: 54
   speed: 2.0
-  damage: [16, 26]
+  damage: [16, 22]
   attackMs: 1200
-  xp: 55
-  gold: [10, 22]
+  xp: 82
+  gold: [26, 52]
   aggro: 5
   range: 1
   burrow: true
