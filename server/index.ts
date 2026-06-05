@@ -646,6 +646,7 @@ for (const spawn of MONSTER_SPAWNS) {
   spawnMonster(spawn);
 }
 spawnNpcs();
+seedTownFurnaces();
 rebuildStaticSpatialIndex();
 
 const wss = new WebSocketServer({
@@ -3573,6 +3574,23 @@ function scheduleResourceRespawn(kind: ResourceRespawnKind, id: string, at: numb
 
 function scheduleFireExpiration(fire: Fire): void {
   fireExpirations.push({ id: fire.id, at: fire.expiresAt });
+}
+
+// Permanent town furnace beside the Waystone hub forge: a fire that never burns
+// out, so a fresh player can smelt ore -> bars at home without buying flint &
+// steel. It is never pushed onto the expiration heap (the only thing that deletes
+// fires), and expiresAt is a large FINITE value — not Infinity — so the wire's
+// remainingMs stays a JSON-safe number rather than serializing to null.
+function seedTownFurnaces(): void {
+  const furnace: Fire = {
+    id: "fire-waystone-furnace",
+    floor: 0,
+    x: 67.5,
+    y: 38.5,
+    expiresAt: Number.MAX_SAFE_INTEGER,
+    owner: "Waystone Forge"
+  };
+  fires.set(furnace.id, furnace);
 }
 
 function updateFires(now: number): void {
