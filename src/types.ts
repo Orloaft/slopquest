@@ -248,6 +248,10 @@ export interface GameEvent {
   durationMs?: number;
   animationId?: string;
   deedType?: string;
+  // Critical hit (drives the bigger/red damage float and impact pop).
+  crit?: boolean;
+  // Facing direction for directional effects (e.g. the dodge dash swoosh).
+  dir?: Direction;
   to?: string;
   lines?: DialogueLineView[];
   opensShop?: boolean;
@@ -372,6 +376,7 @@ export type ClientMessage =
   | { type: "input"; input: Partial<InputPayload> }
   | { type: "target"; id: string }
   | { type: "ability"; slot: string | number }
+  | { type: "dodge" }
   | { type: "useClassAbility"; id: string }
   | { type: "loot" }
   | { type: "lootCorpse"; id: string }
@@ -400,6 +405,7 @@ export type ClientMessage =
       skills?: Record<string, number>;
       quests?: Record<string, Partial<{ accepted: boolean; progress: number; complete: boolean; claimed: boolean }>>;
       forceDodge?: boolean;
+      forceCrit?: boolean;
     }
   | { type: "e2eEmitEvents"; count?: number; floor?: number; x?: number; y?: number; spread?: number }
   | { type: "e2eSimulateBackpressure"; durationMs?: number }

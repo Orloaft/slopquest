@@ -190,7 +190,14 @@
               <input id="chatInput" maxlength="120" autocomplete="off" placeholder="party chat..." />
             </form>
           </div>
-          <div id="hotbar" class="hotbar"></div>
+          <div class="hotbar-row">
+            <div id="hotbar" class="hotbar"></div>
+            <button id="dodgeButton" class="dodge-button" type="button" title="Dodge (Space)" aria-label="Dodge">
+              <span class="dodge-glyph">⟳</span>
+              <span class="dodge-label">DODGE</span>
+              <span id="dodgeCooldown" class="dodge-cooldown"></span>
+            </button>
+          </div>
         </div>
 
         <div id="itemPopover" class="item-popover hidden"></div>

@@ -1448,6 +1448,63 @@ canvas {
   gap: 5px;
 }
 
+/* Hotbar + dodge button share the bottom-right cluster. */
+.hotbar-row {
+  pointer-events: auto;
+  margin-left: auto;
+  align-self: end;
+  justify-self: end;
+  z-index: 7;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* Dodge: a big round thumb-reachable button (the action-combat keystone). A
+   discrete button, not a gesture, so it works identically on desktop (Space)
+   and mobile (tap). The cooldown sweeps a conic overlay driven by --cd. */
+.dodge-button {
+  position: relative;
+  width: calc(66px * var(--ui-scale));
+  height: calc(66px * var(--ui-scale));
+  border-radius: 50%;
+  border: 2px solid rgba(159, 220, 255, 0.7);
+  background: radial-gradient(circle at 50% 35%, rgba(40, 70, 90, 0.95), rgba(12, 20, 26, 0.95));
+  color: #bfe9ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 0 10px rgba(159, 220, 255, 0.25), inset 0 0 8px rgba(0, 0, 0, 0.5);
+  touch-action: manipulation;
+}
+.dodge-button:active {
+  transform: scale(0.94);
+}
+.dodge-button.cooling {
+  opacity: 0.5;
+  cursor: default;
+}
+.dodge-glyph {
+  font-size: calc(20px * var(--ui-scale));
+  line-height: 1;
+}
+.dodge-label {
+  font-size: calc(9px * var(--ui-scale));
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.dodge-cooldown {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(rgba(0, 0, 0, 0.6) var(--cd, 0%), transparent 0);
+  pointer-events: none;
+}
+
 .hotbar-slot {
   position: relative;
   display: grid;

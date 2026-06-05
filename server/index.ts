@@ -699,6 +699,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
     }
     if (message.type === "target") setTarget(session.player, message.id);
     if (message.type === "ability") useAbility(session.player);
+    if (message.type === "dodge") playerDash(session.player);
     if (message.type === "useClassAbility") useClassAbility(session.player, String(message.id ?? ""));
     if (message.type === "loot") lootAdjacent(session.player);
     if (message.type === "lootCorpse") lootCorpse(session.player, String(message.id ?? ""));
@@ -1096,6 +1097,8 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
     const frozen = Boolean(monster.freezeUntil && now < monster.freezeUntil);
     const snared = Boolean(monster.snareUntil && now < monster.snareUntil);
     const slowed = Boolean(monster.slowUntil && now < monster.slowUntil);
+    // Crit hitstop: brief pause on movement + attack so a crit visibly lands.
+    const staggered = Boolean(monster.staggerUntil && now < monster.staggerUntil);
     if (monster.slowUntil && !slowed) {
       monster.slowUntil = 0;
       monster.slowMult = 1;
@@ -1118,7 +1121,7 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
       continue; // anchored — never chases or melees
     }
 
-    if (distSq > rangeSq && !frozen && !snared) {
+    if (distSq > rangeSq && !frozen && !snared && !staggered) {
       const dist = Math.sqrt(distSq);
       const dx = (target.x - monster.x) / dist;
       const dy = (target.y - monster.y) / dist;
@@ -1128,7 +1131,7 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
     }
 
     const meleeRange = catalog.range + 0.15;
-    if (!frozen && distSq <= meleeRange * meleeRange && now - monster.lastAttack >= catalog.attackMs) {
+    if (!frozen && !staggered && distSq <= meleeRange * meleeRange && now - monster.lastAttack >= catalog.attackMs) {
       if (startMonsterHeavyAttack(monster, catalog, target, now)) continue;
       monster.lastAttack = now;
       monster.attackUntil = now + MONSTER_ATTACK_ANIM_MS;
@@ -1553,6 +1556,42 @@ function dashPlayer(player: ServerPlayer, tiles: number): void {
   player.y = destY;
 }
 
+// --- Active combat: the dodge dash + critical hits (action-combat direction) ---
+const DASH_COOLDOWN_MS = 1500;
+const DASH_IFRAME_MS = 350;
+const DASH_TILES = 2;
+const CRIT_BASE_CHANCE = 0.12;
+const CRIT_MULTIPLIER = 1.7;
+const CRIT_STAGGER_MS = 140;
+
+// The keystone action verb: a button-press dash (collision-safe, reuses
+// dashPlayer) that grants brief i-frames. Roll through a telegraphed slam and
+// you take nothing. Bound to a key on desktop and a button on mobile.
+function playerDash(player: ServerPlayer): void {
+  if (player.dead || isStunned(player)) return;
+  const now = performance.now();
+  if (player.dashReadyAt && now < player.dashReadyAt) return;
+  player.dashReadyAt = now + DASH_COOLDOWN_MS;
+  player.iframeUntil = now + DASH_IFRAME_MS;
+  player.action = null;
+  dashPlayer(player, DASH_TILES);
+  event("effect", "dash", player.x, player.y, player.floor, "#bfe9ff", player.id, null, {
+    dir: player.dir,
+    durationMs: DASH_IFRAME_MS
+  });
+}
+
+// Crit chance: a flat base nudged up by Agility, capped. E2E-deterministic via
+// forceCrit (default false) so existing combat tests see identical damage.
+function critChanceFor(player: ServerPlayer): number {
+  return Math.min(0.35, CRIT_BASE_CHANCE + Math.max(0, skillLevel(player, "agility") - 1) * 0.004);
+}
+
+function rollCrit(player: ServerPlayer): boolean {
+  if (E2E_TEST) return player.forceCrit === true;
+  return Math.random() < critChanceFor(player);
+}
+
 function pushMonsterAway(monster: ServerMonster, player: ServerPlayer, tiles: number): void {
   const dx = monster.x - player.x;
   const dy = monster.y - player.y;
@@ -1885,18 +1924,22 @@ function applyAbilityEffect(
 
 function damageMonster(player: ServerPlayer, monster: ServerMonster, damage: number, kind: string): void {
   const armor = MONSTERS[monster.type]?.armor ?? 0;
-  const dealt = Math.max(1, damage - armor);
+  // Crits multiply pre-armor damage, then a brief hitstop stagger sells the hit.
+  const crit = rollCrit(player);
+  const dealt = Math.max(1, (crit ? Math.round(damage * CRIT_MULTIPLIER) : damage) - armor);
   monster.hp = clamp(monster.hp - dealt, 0, monster.maxHp);
   addThreat(monster, player, dealt * 1.4);
   assistNearbyMonsters(monster, player, Math.max(2, dealt * 0.25));
   // Taking damage shatters a freeze (per Frost Nova design).
   if (monster.freezeUntil) monster.freezeUntil = 0;
+  if (crit) monster.staggerUntil = performance.now() + CRIT_STAGGER_MS;
   event("effect", kind, monster.x, monster.y, monster.floor, null, player.id, monster.id, {
     fromX: player.x,
     fromY: player.y,
-    animationId: combatAnimationIdForEffectKind(kind)
+    animationId: combatAnimationIdForEffectKind(kind),
+    crit
   });
-  event("hit", dealt, monster.x, monster.y - 0.45, monster.floor, kind === "holy" ? "#f5d778" : kind === "flare" ? "#8fd8ff" : "#ffd166", player.id, monster.id);
+  event("hit", dealt, monster.x, monster.y - 0.45, monster.floor, crit ? "#ff5a3c" : kind === "holy" ? "#f5d778" : kind === "flare" ? "#8fd8ff" : "#ffd166", player.id, monster.id, { crit });
   if (monster.hp > 0) return;
 
   const catalog = MONSTERS[monster.type];
@@ -1977,6 +2020,12 @@ function rollDodge(player: ServerPlayer): boolean {
 }
 
 function damagePlayer(player: ServerPlayer, damage: number, source: string): void {
+  // Active dodge i-frames negate everything — melee, ranged, heavy slam, ambush.
+  // This is the single chokepoint all incoming damage routes through.
+  if (player.iframeUntil && performance.now() < player.iframeUntil) {
+    event("float", "Dodge!", player.x, player.y - 0.55, player.floor, "#a0e8ff", source);
+    return;
+  }
   // Iron Clad mitigates incoming damage.
   if (player.abilityBuffs?.ironClad && performance.now() < player.abilityBuffs.ironClad.until) {
     damage = Math.max(1, Math.round(damage * 0.7));
@@ -2995,6 +3044,7 @@ function grantE2EItems(
     skills?: Record<string, number>;
     quests?: Record<string, Partial<QuestState>>;
     forceDodge?: boolean;
+    forceCrit?: boolean;
   }
 ): void {
   if (!E2E_TEST) return;
@@ -3034,6 +3084,7 @@ function grantE2EItems(
     if (changed) markQuestChanged(player);
   }
   if (typeof message.forceDodge === "boolean") player.forceDodge = message.forceDodge;
+  if (typeof message.forceCrit === "boolean") player.forceCrit = message.forceCrit;
   if (Number.isFinite(message.floor) && Number.isFinite(message.x) && Number.isFinite(message.y)) {
     const spot = findStandableNear(Math.floor(Number(message.floor)), Number(message.x), Number(message.y));
     if (spot) {

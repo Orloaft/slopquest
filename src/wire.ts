@@ -151,6 +151,8 @@ interface CompactGameEvent {
   os?: 1;
   oa?: 1;
   sm?: 1;
+  cr?: 1;
+  dr?: GameEvent["dir"];
 }
 
 interface CompactStateMetrics {
@@ -636,6 +638,8 @@ function compactGameEvent(event: GameEvent): CompactGameEvent {
   if (event.opensShop) compact.os = 1;
   if (event.opensAlchemist) compact.oa = 1;
   if (event.opensSmith) compact.sm = 1;
+  if (event.crit) compact.cr = 1;
+  if (event.dir !== undefined) compact.dr = event.dir;
   compactGameEventCache.set(event, compact);
   return compact;
 }
@@ -664,6 +668,8 @@ function expandGameEvent(event: CompactGameEvent | GameEvent): GameEvent {
   if (event.os) expanded.opensShop = true;
   if (event.oa) expanded.opensAlchemist = true;
   if (event.sm) expanded.opensSmith = true;
+  if (event.cr) expanded.crit = true;
+  if (event.dr !== undefined) expanded.dir = event.dr;
   return expanded;
 }
 

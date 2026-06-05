@@ -446,6 +446,8 @@ const dom = {
   paperdoll: el<HTMLElement>("#paperdoll"),
   equipStats: el<HTMLElement>("#equipStats"),
   hotbar: el<HTMLElement>("#hotbar"),
+  dodgeButton: el<HTMLButtonElement>("#dodgeButton"),
+  dodgeCooldown: el<HTMLElement>("#dodgeCooldown"),
   minimapCanvas: el<HTMLCanvasElement>("#minimapCanvas"),
   compassCanvas: el<HTMLCanvasElement>("#compassCanvas"),
   minimapZone: el<HTMLElement>("#minimapZone"),
@@ -505,6 +507,10 @@ const dom = {
 
 dom.joinButton.addEventListener("click", () => joinCharacter(dom.nameInput.value, true));
 dom.refreshRosterButton.addEventListener("click", () => send({ type: "characters" }));
+dom.dodgeButton.addEventListener("click", (e) => {
+  e.preventDefault();
+  triggerDodge();
+});
 dom.respawnButton.addEventListener("click", () => send({ type: "respawn" }));
 dom.skillsButton.addEventListener("click", () => toggleCenterPanel(dom.skillsPanel));
 dom.inventoryButton.addEventListener("click", () => toggleCenterPanel(dom.inventoryPanel));
@@ -1390,8 +1396,8 @@ function create(this: Phaser.Scene): void {
     left: Phaser.Input.Keyboard.KeyCodes.LEFT,
     right: Phaser.Input.Keyboard.KeyCodes.RIGHT
   }, false) as typeof cursors;
-  keyboard.addCapture([Phaser.Input.Keyboard.KeyCodes.TAB]);
-  keys = keyboard.addKeys("W,A,S,D,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,F,B,M,ENTER,TAB", false) as Record<string, Phaser.Input.Keyboard.Key>;
+  keyboard.addCapture([Phaser.Input.Keyboard.KeyCodes.TAB, Phaser.Input.Keyboard.KeyCodes.SPACE]);
+  keys = keyboard.addKeys("W,A,S,D,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,F,B,M,ENTER,TAB,SPACE", false) as Record<string, Phaser.Input.Keyboard.Key>;
   const hotbarKeys = [keys.ONE, keys.TWO, keys.THREE, keys.FOUR, keys.FIVE, keys.SIX, keys.SEVEN, keys.EIGHT];
   hotbarKeys.forEach((key, index) => {
     if (!key) return;
@@ -1405,6 +1411,9 @@ function create(this: Phaser.Scene): void {
   });
   keys.F?.on("down", () => {
     if (!isTextEntryFocused()) send({ type: "loot" });
+  });
+  keys.SPACE?.on("down", () => {
+    if (!isTextEntryFocused()) triggerDodge();
   });
   keys.B?.on("down", () => {
     if (!isTextEntryFocused()) toggleCenterPanel(dom.vendor);
@@ -1464,6 +1473,26 @@ function create(this: Phaser.Scene): void {
 // used to derive pinch-zoom deltas. Null whenever fewer than two are down.
 let lastPinchDistance: number | null = null;
 
+// --- Active dodge (keystone). The server is authoritative on the actual dash
+// and i-frames; this only fires the request and drives the button's local
+// cooldown sweep. DODGE_COOLDOWN_MS mirrors the server's DASH_COOLDOWN_MS. ---
+const DODGE_COOLDOWN_MS = 1500;
+let dodgeReadyAtLocal = 0;
+function triggerDodge(): void {
+  const me = self();
+  if (!me || me.dead) return;
+  const now = performance.now();
+  if (now < dodgeReadyAtLocal) return;
+  dodgeReadyAtLocal = now + DODGE_COOLDOWN_MS;
+  send({ type: "dodge" });
+}
+function updateDodgeButton(): void {
+  const remaining = Math.max(0, dodgeReadyAtLocal - performance.now());
+  const pct = Math.round((remaining / DODGE_COOLDOWN_MS) * 100);
+  dom.dodgeCooldown.style.setProperty("--cd", `${pct}%`);
+  dom.dodgeButton.classList.toggle("cooling", remaining > 0);
+}
+
 function update(this: Phaser.Scene, time: number): void {
   if (!latestState || !self()) return;
   const me = self();
@@ -1495,6 +1524,7 @@ function update(this: Phaser.Scene, time: number): void {
   }
   interpolateEntities();
   animateEntities();
+  updateDodgeButton();
   if (hudStateVersion !== stateVersion) {
     renderHud(me);
     hudStateVersion = stateVersion;
@@ -5099,8 +5129,13 @@ function consumeEvents(events: GameEvent[]): void {
     if (event.type === "telegraph" && self()?.floor === event.floor) playTelegraph(event);
     if (event.type === "projectile" && self()?.floor === event.floor) playProjectile(event);
     if ((event.type === "hit" || event.type === "float") && self()?.floor === event.floor) {
-      const floater = scene.add.text((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, String(event.text), textStyle(13, event.color ?? "#fff")).setOrigin(0.5) as Floater;
-      floater.life = 1000;
+      const crit = event.crit === true;
+      const floater = scene.add.text((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, crit ? `${event.text}!` : String(event.text), textStyle(crit ? 21 : 13, event.color ?? "#fff")).setOrigin(0.5) as Floater;
+      floater.life = crit ? 1200 : 1000;
+      if (crit) {
+        floater.setScale(0.5);
+        scene.tweens.add({ targets: floater, scale: 1.15, duration: 150, yoyo: true, ease: "Back.easeOut" });
+      }
       floaters.push(floater);
       fxLayer.add(floater);
     }
@@ -5347,6 +5382,14 @@ function playCombatEffect(event: GameEvent): void {
   const fromX = (event.fromX ?? event.x ?? 0) * TILE_SIZE;
   const fromY = (event.fromY ?? event.y ?? 0) * TILE_SIZE - 10;
   const angle = Phaser.Math.Angle.Between(fromX, fromY, targetX, targetY);
+
+  if (event.text === "dash") {
+    // i-frame shimmer: a quick expanding ring where the dodge began.
+    const ring = scene.add.ellipse(targetX, targetY + 8, 30, 16, 0xbfe9ff, 0.3).setStrokeStyle(2, 0xbfe9ff, 0.9);
+    fxLayer.add(ring);
+    scene.tweens.add({ targets: ring, alpha: 0, scaleX: 2.2, scaleY: 1.6, duration: event.durationMs ?? 350, ease: "Quad.easeOut", onComplete: () => ring.destroy() });
+    return;
+  }
 
   if (event.text === "fish") {
     const splash = scene.add.ellipse(targetX, targetY + 12, 38, 16, 0x8fd8ff, 0.48).setStrokeStyle(2, 0xbbeeff);

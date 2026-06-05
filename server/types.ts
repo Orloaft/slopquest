@@ -117,6 +117,13 @@ export interface ServerPlayer {
   // E2E-only: when set, the player always dodges incoming hits (deterministic
   // testing of the dodge mechanic). Never set outside E2E_TEST.
   forceDodge?: boolean;
+  // Active dodge ("Dash"): a button-press dash that grants brief i-frames.
+  // dashReadyAt gates the cooldown; while now < iframeUntil all incoming damage
+  // is negated. The keystone of the action-combat direction.
+  dashReadyAt?: number;
+  iframeUntil?: number;
+  // E2E-only: when set, player attacks always crit (deterministic crit tests).
+  forceCrit?: boolean;
 }
 
 export interface ServerMonster {
@@ -164,6 +171,9 @@ export interface ServerMonster {
   inaccurateUntil?: number;
   slowUntil?: number;
   slowMult?: number;
+  // Brief "hitstop" stagger on a critical hit: the monster's movement and attack
+  // are paused until this timestamp, selling the impact of a crit.
+  staggerUntil?: number;
   // Badlands: hidden burrower (invisible until it ambushes) and pack-alert state.
   hidden?: boolean;
   alertUntil?: number;
