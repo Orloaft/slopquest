@@ -539,6 +539,10 @@ const GLOBAL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_GLOBAL_EVENT_QUEUE_LIMIT", 
 const TARGETED_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_TARGETED_EVENT_QUEUE_LIMIT", 64);
 const CELL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_CELL_EVENT_QUEUE_LIMIT", 256);
 const VISIBLE_EVENT_LIMIT = positiveIntEnv("TIB_VISIBLE_EVENT_LIMIT", 192);
+// Reaction-critical events (telegraphs) must survive event-channel truncation so
+// dense crowds never starve the one thing players must react to. Gated for A/B.
+const EVENT_PRIORITY = process.env.TIB_EVENT_PRIORITY === "1";
+const EVENT_METRICS_LOG = process.env.TIB_EVENT_METRICS_LOG === "1";
 const WS_COMPRESSION = process.env.TIB_WS_COMPRESSION === "1" || (!E2E_TEST && process.env.TIB_WS_COMPRESSION !== "0");
 const WS_COMPRESSION_THRESHOLD = positiveIntEnv("TIB_WS_COMPRESSION_THRESHOLD", 1024);
 mkdirSync(DATA_DIR, { recursive: true });
@@ -641,6 +645,10 @@ let saveInFlight = false;
 const dirtyPlayerKeys = new Set<string>();
 let snapshotSequence = 0;
 let nextEventOrder = 1;
+// Telegraph-channel instrumentation (logged each second when EVENT_METRICS_LOG).
+let telegraphsEmittedThisSecond = 0;
+let telegraphsDroppedThisSecond = 0;
+let cosmeticsEvictedThisSecond = 0;
 let lastStaticResourcePruneAt = 0;
 const snapshotCaches = new WeakMap<Session, SnapshotCache>();
 
@@ -773,6 +781,17 @@ setInterval(() => {
 setInterval(() => {
   persistOnlinePlayers();
 }, 10000);
+
+if (EVENT_METRICS_LOG) {
+  setInterval(() => {
+    console.log(
+      `[tgmetric] priority=${EVENT_PRIORITY ? "on" : "off"} emitted=${telegraphsEmittedThisSecond} dropped=${telegraphsDroppedThisSecond} cosmeticsEvicted=${cosmeticsEvictedThisSecond}`
+    );
+    telegraphsEmittedThisSecond = 0;
+    telegraphsDroppedThisSecond = 0;
+    cosmeticsEvictedThisSecond = 0;
+  }, 1000);
+}
 
 setInterval(() => {
   for (const { socket } of clients.values()) {
@@ -5099,6 +5118,7 @@ function eventVisibleTo(viewer: ServerPlayer, item: GameEvent): boolean {
 function visibleEventsFor(viewer: ServerPlayer): GameEvent[] {
   const targeted = targetedEventsByPlayer.get(viewer.id);
   if (globalEvents.length === 0 && !targeted && eventsByCell.size === 0) return EMPTY_EVENTS;
+  if (EVENT_PRIORITY) return visibleEventsForPrioritized(viewer, targeted);
   if (eventsByCell.size === 0) {
     if (globalEvents.length === 0) return boundedEventList(targeted ?? EMPTY_EVENTS);
     if (!targeted) return boundedEventList(globalEvents);
@@ -5117,6 +5137,36 @@ function visibleEventsFor(viewer: ServerPlayer): GameEvent[] {
   });
   if (visible.length > 1) visible.sort(compareEventsByOrder);
   return visible;
+}
+
+// Priority-aware assembly: gather all candidate events, then keep high-priority
+// (telegraphs) ahead of cosmetics when truncating to VISIBLE_EVENT_LIMIT. Only a
+// flood of >192 telegraphs alone could drop one — and that drop is counted.
+function visibleEventsForPrioritized(viewer: ServerPlayer, targeted: GameEvent[] | undefined): GameEvent[] {
+  const candidates: GameEvent[] = [];
+  if (targeted) candidates.push(...targeted);
+  if (globalEvents.length) candidates.push(...globalEvents);
+  forEachEventCell(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (item) => {
+    if (eventVisibleTo(viewer, item)) candidates.push(item);
+  });
+  if (candidates.length <= VISIBLE_EVENT_LIMIT) {
+    if (candidates.length > 1) candidates.sort(compareEventsByOrder);
+    return candidates;
+  }
+  // High-priority first, then insertion order within each tier.
+  candidates.sort((a, b) => {
+    const pa = isHighPriorityEvent(a) ? 0 : 1;
+    const pb = isHighPriorityEvent(b) ? 0 : 1;
+    if (pa !== pb) return pa - pb;
+    return compareEventsByOrder(a, b);
+  });
+  const kept = candidates.slice(0, VISIBLE_EVENT_LIMIT);
+  // A telegraph past the cap means >192 telegraphs in view at once — count it.
+  for (let i = VISIBLE_EVENT_LIMIT; i < candidates.length; i += 1) {
+    if (isHighPriorityEvent(candidates[i]!)) telegraphsDroppedThisSecond += 1;
+  }
+  kept.sort(compareEventsByOrder);
+  return kept;
 }
 
 function boundedEventList(events: GameEvent[]): GameEvent[] {
@@ -5821,32 +5871,50 @@ function event(
 ): void {
   const item: GameEvent = { type, text, x, y, floor, color, from, target, t: Date.now(), ...extra };
   eventOrder.set(item, nextEventOrder++);
+  const hiPri = isHighPriorityEvent(item);
+  if (hiPri) telegraphsEmittedThisSecond += 1;
   if (item.to) {
     const bucket = targetedEventsByPlayer.get(item.to) ?? [];
-    if (bucket.length >= TARGETED_EVENT_QUEUE_LIMIT) {
-      metrics.eventsDroppedThisSecond += 1;
-      return;
-    }
-    bucket.push(item);
+    if (!admitToBucket(bucket, item, hiPri, TARGETED_EVENT_QUEUE_LIMIT)) return;
     targetedEventsByPlayer.set(item.to, bucket);
     return;
   }
   if (eventIsBroadcastGlobal(item)) {
-    if (globalEvents.length >= GLOBAL_EVENT_QUEUE_LIMIT) {
-      metrics.eventsDroppedThisSecond += 1;
-      return;
-    }
-    globalEvents.push(item);
+    admitToBucket(globalEvents, item, hiPri, GLOBAL_EVENT_QUEUE_LIMIT);
     return;
   }
   const key = spatialKey(item.floor!, item.x!, item.y!);
   const bucket = eventsByCell.get(key) ?? [];
-  if (bucket.length >= CELL_EVENT_QUEUE_LIMIT) {
-    metrics.eventsDroppedThisSecond += 1;
-    return;
-  }
-  bucket.push(item);
+  if (!admitToBucket(bucket, item, hiPri, CELL_EVENT_QUEUE_LIMIT)) return;
   eventsByCell.set(key, bucket);
+}
+
+// Push `item` into `bucket`, honoring the queue limit. Returns false if the item
+// was dropped (bucket full). With EVENT_PRIORITY, a full bucket evicts one
+// low-priority (cosmetic) event to make room for a high-priority telegraph
+// rather than dropping the telegraph.
+function admitToBucket(bucket: GameEvent[], item: GameEvent, hiPri: boolean, limit: number): boolean {
+  if (bucket.length < limit) {
+    bucket.push(item);
+    return true;
+  }
+  if (EVENT_PRIORITY && hiPri) {
+    const victim = bucket.findIndex((e) => !isHighPriorityEvent(e));
+    if (victim !== -1) {
+      bucket[victim] = item;
+      cosmeticsEvictedThisSecond += 1;
+      return true;
+    }
+  }
+  if (hiPri) telegraphsDroppedThisSecond += 1;
+  metrics.eventsDroppedThisSecond += 1;
+  return false;
+}
+
+// Reaction-critical events the player must perceive to play correctly. Telegraphs
+// (heavy-attack windups, ranged aim) are the canonical case.
+function isHighPriorityEvent(item: GameEvent): boolean {
+  return item.type === "telegraph";
 }
 
 function eventIsBroadcastGlobal(item: GameEvent): boolean {
