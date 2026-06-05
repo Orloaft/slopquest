@@ -1,0 +1,610 @@
+{
+  "schema": "asset-forge/tileset@1",
+  "name": "swamp",
+  "image": "swamp.png",
+  "tileSize": 32,
+  "columns": 24,
+  "rows": 5,
+  "tiles": [
+    {
+      "index": 0,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 1,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 2,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 3,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 4,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 5,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 6,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 7,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 8,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 9,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 10,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 11,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 12,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 13,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 14,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 15,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 16,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 17,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 18,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 19,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 20,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 21,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 22,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 23,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 24,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 25,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 26,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 27,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 28,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 29,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 30,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 31,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 32,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 33,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 34,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 35,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 36,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 37,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 38,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 39,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 40,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 41,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 42,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 43,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 44,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 45,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 46,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 47,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 48,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 49,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 50,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 51,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 52,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 53,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 54,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 55,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 56,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 57,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 58,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 59,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 60,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 61,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 62,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 63,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 64,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 65,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 66,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 67,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 68,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 69,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 70,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 71,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 72,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 73,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 74,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 75,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 76,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 77,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 78,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 79,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 80,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 81,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 82,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 83,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 84,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 85,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 86,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 87,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 88,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 89,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 90,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 91,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 92,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 93,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 94,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 95,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 96,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 97,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 98,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 99,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 100,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 101,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 102,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 103,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 104,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 105,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 106,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 107,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 108,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 109,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 110,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 111,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 112,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 113,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 114,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 115,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 116,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 117,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 118,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 119,
+      "role": "marsh",
+      "blocked": false
+    }
+  ]
+}

@@ -7,7 +7,7 @@ import {
   buildingInteriorBounds,
   isCutawayBuilding
 } from "./map-objects.ts";
-import { NORTHWOOD_STAGE } from "./generated/stages/index.ts";
+import { NORTHWOOD_STAGE, SWAMP_STAGE } from "./generated/stages/index.ts";
 
 export {
   ABILITIES,
@@ -259,6 +259,14 @@ export function makeFloorTiles(floor: number): string[] {
 
   if (floor === NORTHWOOD_STAGE.floor) {
     const generated = [...NORTHWOOD_STAGE.rows];
+    FLOOR_TILE_CACHE.set(floor, generated);
+    return generated;
+  }
+
+  // Floor 5 (Sunken Marsh) is now a generated stage (path-B reskin of the original
+  // hand-authored geometry); the legacy floor===5 fillRect block below is dead.
+  if (floor === SWAMP_STAGE.floor) {
+    const generated = [...SWAMP_STAGE.rows];
     FLOOR_TILE_CACHE.set(floor, generated);
     return generated;
   }

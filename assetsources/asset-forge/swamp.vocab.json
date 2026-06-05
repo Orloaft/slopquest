@@ -1,0 +1,103 @@
+{
+  "zone": "swamp",
+  "floor": 5,
+  "stageName": "swamp",
+  "description": "Sunken Marsh path-B reskin: current geometry re-rendered via the Northwood assembly method (lichen carpet + water/path corner-Wang). Props are runtime objects.",
+  "requiredPortals": {
+    "L": {
+      "x": 7,
+      "y": 16
+    },
+    "M": {
+      "x": 68,
+      "y": 28
+    }
+  },
+  "requiredWalkable": [],
+  "chars": {
+    "3": {
+      "role": "swamp-water",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#253027"
+    },
+    "4": {
+      "role": "swamp-water",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#273027"
+    },
+    "W": {
+      "role": "swamp-water",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#253027"
+    },
+    "m": {
+      "role": "marsh-lichen",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#462e33"
+    },
+    "k": {
+      "role": "marsh-dirt",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#3d2a22"
+    },
+    "B": {
+      "role": "swamp-bridge",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#5a3e26"
+    },
+    "o": {
+      "role": "marsh-rock",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#3a2924"
+    },
+    "*": {
+      "role": "marsh-rock",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#392823"
+    },
+    "n": {
+      "role": "marsh-rock",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#392823"
+    },
+    "O": {
+      "role": "marsh-rock",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#3a2924"
+    },
+    "M": {
+      "role": "portal-marsh-exit",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#462e33"
+    },
+    "L": {
+      "role": "portal-ledge",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#422d2d"
+    }
+  }
+}

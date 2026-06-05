@@ -29,7 +29,7 @@ import {
   xpForLevel
 } from "./shared.ts";
 import type { ClassSpec } from "./shared.ts";
-import { NORTHWOOD_STAGE, WAYSTONE_STAGE, type GeneratedStage } from "./generated/stages/index.ts";
+import { NORTHWOOD_STAGE, WAYSTONE_STAGE, SWAMP_STAGE, type GeneratedStage } from "./generated/stages/index.ts";
 import { MAP_OBJECTS, isCutawayBuilding, isInsideCutawayBuilding } from "./map-objects.ts";
 import { setTrack, unlockAudio, setMusicEnabled, currentTrack } from "./audio.ts";
 import { normalizeServerMessage, type WireServerMessage } from "./wire.ts";
@@ -1075,6 +1075,11 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "swampTiles", "spriteSwampBramble1", 616, 552, 76, 64, true);
   makeSpriteTexture(this, "swampTiles", "spriteSwampBramble2", 876, 556, 68, 60, true);
   makeSpriteTexture(this, "swampTiles", "spriteSwampStump", 664, 500, 56, 40, true);
+  // Drowned-temple ruins (floor 5) — the mockup's identity is a sunken stone ruin in the
+  // purple mire. RUINS & STONE STRUCTURES row on the swamp sheet; placed as non-blocking
+  // landmark scenery at fixed marsh anchors (MARSH_RUINS) so collision/pathing are untouched.
+  makeSpriteTexture(this, "swampTiles", "spriteRuinArch", 1043, 635, 94, 101, true);
+  makeSpriteTexture(this, "swampTiles", "spriteRuinPillar", 827, 635, 34, 100, true);
   makeSpriteTexture(this, "swampTiles", "spriteCliffLedge", 714, 958, 70, 58);
   // Searing Badlands (floor 6). Crops from assetsources/rejected/badlands-biome-tiles-01.png
   // (1536x1024, magenta-keyed) — rust ground/rock/cliff/pit/ramp tiles + a frontier tent.
@@ -4905,6 +4910,13 @@ function addTileDecorations(
           decorations.push({ key, x: x + 0.5 + ox, y: y + 0.88 + oy, w: Math.round(w * jit), h: Math.round(hgt * jit) });
         }
       }
+      // Drowned-temple ruins: place fixed stone-arch/pillar landmarks on chosen marsh
+      // anchors so the mire reads as a sunken ruin (the mockup's identity). Non-blocking
+      // scenery on existing 'm' ground — map chars/collision/pathing are untouched.
+      if (floor === 5 && tile === "m") {
+        const ruin = MARSH_RUINS.find((r) => r[0] === x && r[1] === y);
+        if (ruin) decorations.push({ key: ruin[2], x: x + 0.5, y: y + 1.0, w: ruin[3], h: ruin[4] });
+      }
       if (tile === "+") decorations.push({ key: "floraSkullPile", x: x + 0.5, y: y + 0.85, w: 25, h: 28 }); // sun-bleached bones
       if (["N", "S", "T", "C", "M", "D", "G", "Y", "j", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
     }
@@ -7012,7 +7024,7 @@ const TILE_UNDERLAY_TEXTURE: Record<string, string> = {
     "?": "tileOcean"
 };
 
-const GENERATED_STAGES: GeneratedStage[] = [NORTHWOOD_STAGE, WAYSTONE_STAGE];
+const GENERATED_STAGES: GeneratedStage[] = [NORTHWOOD_STAGE, WAYSTONE_STAGE, SWAMP_STAGE];
 const GENERATED_STAGES_BY_FLOOR = new Map<number, GeneratedStage>(GENERATED_STAGES.map((stage) => [stage.floor, stage]));
 
 function generatedTilesetTextureKey(stage: GeneratedStage, tilesetName: string): string {
@@ -7105,6 +7117,17 @@ function cityGroundTexture(tile: string, x: number, y: number): string | null {
 // and drop brown-dirt / olive accents as small ~2x2 clusters, not single-cell speckle.
 // Floor-5-scoped; water/dirt/bridge keep their existing textures.
 const MARSH_PURPLE = ["tileMarshPurple0", "tileMarshPurple1", "tileMarshPurple2", "tileMarshPurple3"] as const;
+// Drowned-temple ruin landmarks (floor 5): [x, y, spriteKey, w, h]. Anchored on wide marsh
+// shelves (mushroom bog cluster + a welcome arch at the east entry basin + scattered pillars
+// for spread) so the mire reads as a sunken stone ruin. Non-blocking scenery (addTileDecorations).
+const MARSH_RUINS: ReadonlyArray<readonly [number, number, string, number, number]> = [
+  [50, 53, "spriteRuinArch", 80, 86], // mushroom-bog hero arch
+  [47, 54, "spriteRuinPillar", 26, 76], // flanking broken pillars
+  [53, 54, "spriteRuinPillar", 26, 76],
+  [62, 29, "spriteRuinArch", 74, 80], // entry-basin welcome arch (first thing seen on arrival)
+  [66, 37, "spriteRuinPillar", 26, 74], // SE shelf lone pillar
+  [18, 44, "spriteRuinPillar", 26, 74] // SW lotus-pocket pillar
+] as const;
 function marshHash(x: number, y: number): number {
   return ((x * 73856093) ^ (y * 19349663)) >>> 0;
 }
