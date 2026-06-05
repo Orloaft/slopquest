@@ -58,12 +58,12 @@ test("closed loops: coal/quartz/mushroom each feed a sink item", () => {
 
 test("every new gathering node sits on a walkable approach", () => {
   const newFish = FISHING_NODES.filter((n) => n.kind === "shark");
-  const cavecap = HERB_NODES.filter((n) => n.id.startsWith("cavecap-"));
+  const newHerbs = HERB_NODES.filter((n) => n.id.startsWith("cavecap-") || n.id.startsWith("faultroot-"));
   const newTrees = COMPOSED_TREE_NODES.filter((t) => ["willow", "teak", "mahogany"].includes(t.type));
   expect(newFish.length).toBeGreaterThan(0);
-  expect(cavecap.length).toBeGreaterThan(0);
+  expect(newHerbs.length).toBeGreaterThan(3);
   expect(newTrees.length).toBe(9);
-  for (const n of [...newFish, ...cavecap]) {
+  for (const n of [...newFish, ...newHerbs]) {
     const rows = makeFloorTiles(n.floor);
     const x = Math.floor(n.approachX);
     const y = Math.floor(n.approachY);

@@ -169,3 +169,25 @@
   item: mushroom
   requiredLevel: 12
   xp: 38
+
+# Faultroot — the Untamed Jungle (floor 9), among the venomous stalkers and totem
+# wraiths. The highest-tier wild herb (Foraging 15), richest XP; feeds the alchemy
+# potion line. Verified-walkable jungle-floor tiles.
+- id: faultroot-9-10-7
+  at: { floor: 9, x: 10.5, y: 7.5 }
+  approach: { x: 10.5, y: 8.5 }
+  label: Faultroot
+  requiredLevel: 15
+  xp: 42
+- id: faultroot-9-17-7
+  at: { floor: 9, x: 17.5, y: 7.5 }
+  approach: { x: 17.5, y: 8.5 }
+  label: Faultroot
+  requiredLevel: 15
+  xp: 42
+- id: faultroot-9-24-7
+  at: { floor: 9, x: 24.5, y: 7.5 }
+  approach: { x: 24.5, y: 8.5 }
+  label: Faultroot
+  requiredLevel: 15
+  xp: 42
