@@ -39,3 +39,51 @@
   height: 84
   zoneWidth: 50
   zoneHeight: 86
+
+# Higher woodcutting tiers, spread by danger: Willow in the Sunken Marsh (f5),
+# Teak in the Sunken Desert (f7), Mahogany on the Sunken Beach (f8). Textures
+# reuse the oak/pine sprites for now (no new asset gen); logs feed Firemaking.
+- id: willow
+  label: Willow
+  requiredLevel: 20
+  chopsRequired: 12
+  baseSwingMs: 2400
+  minSwingMs: 1100
+  xp: 80
+  itemId: willow_logs
+  dropLabel: Willow Logs
+  textureKey: spriteTree
+  width: 58
+  height: 76
+  zoneWidth: 54
+  zoneHeight: 80
+
+- id: teak
+  label: Teak
+  requiredLevel: 35
+  chopsRequired: 14
+  baseSwingMs: 2700
+  minSwingMs: 1250
+  xp: 110
+  itemId: teak_logs
+  dropLabel: Teak Logs
+  textureKey: spritePine
+  width: 54
+  height: 84
+  zoneWidth: 50
+  zoneHeight: 86
+
+- id: mahogany
+  label: Mahogany
+  requiredLevel: 50
+  chopsRequired: 16
+  baseSwingMs: 3000
+  minSwingMs: 1400
+  xp: 150
+  itemId: mahogany_logs
+  dropLabel: Mahogany Logs
+  textureKey: spriteTree
+  width: 58
+  height: 76
+  zoneWidth: 54
+  zoneHeight: 80

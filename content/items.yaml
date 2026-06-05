@@ -76,6 +76,9 @@
     consumesAny:
       - { item: logs, qty: 1, xp: 10 }
       - { item: pine_logs, qty: 1, xp: 18 }
+      - { item: willow_logs, qty: 1, xp: 26 }
+      - { item: teak_logs, qty: 1, xp: 36 }
+      - { item: mahogany_logs, qty: 1, xp: 48 }
     skill: firemaking
     durationMs: 120000
 
@@ -94,6 +97,32 @@
   stackable: true
   tags: [material]
   weight: 1
+
+# Higher-tier logs (Willow/Teak/Mahogany). Icons reuse the base log art for now;
+# each burns hotter for more Firemaking xp (see flint_steel.consumesAny).
+- id: willow_logs
+  label: Willow Logs
+  icon: WL
+  iconUrl: /icons/item-logs.png
+  stackable: true
+  tags: [material]
+  weight: 1
+
+- id: teak_logs
+  label: Teak Logs
+  icon: TL
+  iconUrl: /icons/item-pine-logs.png
+  stackable: true
+  tags: [material]
+  weight: 1
+
+- id: mahogany_logs
+  label: Mahogany Logs
+  icon: ML
+  iconUrl: /icons/item-logs.png
+  stackable: true
+  tags: [material]
+  weight: 2
 
 # Ores smelt on a fire into bars (use.kind cook_on_fire, skill: smithing). A
 # botched smelt yields slag. XP rises with tier so the deep cave ores matter.

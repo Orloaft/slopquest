@@ -143,3 +143,29 @@
   approach: { x: 80.5, y: 42.5 }
   label: Tidal Bloom
   xp: 18
+
+# Cavecap Fungus — the Deepdelve Mine deeps (floor 10), down where the crypt
+# sentinels guard the silver/gold/mithril chambers. The top foraging tier:
+# gated to Foraging 12, richest XP, and yields a mushroom for Potent Tonics.
+# Verified-walkable cave-floor tiles (tools/scout-gather-tiles.ts).
+- id: cavecap-10-45-16
+  at: { floor: 10, x: 45.5, y: 16.5 }
+  approach: { x: 45.5, y: 17.5 }
+  label: Cavecap Fungus
+  item: mushroom
+  requiredLevel: 12
+  xp: 38
+- id: cavecap-10-49-18
+  at: { floor: 10, x: 49.5, y: 18.5 }
+  approach: { x: 49.5, y: 19.5 }
+  label: Cavecap Fungus
+  item: mushroom
+  requiredLevel: 12
+  xp: 38
+- id: cavecap-10-57-18
+  at: { floor: 10, x: 57.5, y: 18.5 }
+  approach: { x: 57.5, y: 19.5 }
+  label: Cavecap Fungus
+  item: mushroom
+  requiredLevel: 12
+  xp: 38

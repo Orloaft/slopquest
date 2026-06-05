@@ -55,3 +55,10 @@
   kind: bass
   at: { floor: 8, x: 39.5, y: 52.5 }
   approach: { x: 39.5, y: 51.5 }
+
+# Sunken Beach deep surf (floor 8, NE) — the dangerous far reef, cast for Shark
+# (Fishing 50). The richest catch in the most exposed water. Verified tile.
+- id: fish-8-73-6
+  kind: shark
+  at: { floor: 8, x: 73.5, y: 6.5 }
+  approach: { x: 73.5, y: 7.5 }
