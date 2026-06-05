@@ -1052,6 +1052,14 @@ function create(this: Phaser.Scene): void {
   // (1536x1024, magenta-keyed) — ground/dirt/water tiles, a plank bridge, and swamp props.
   makeTileTexture(this, "swampTiles", "tileMarsh", 18, 98, 69, 72);
   makeTileTexture(this, "swampTiles", "tileSwampDirt", 97, 98, 67, 72);
+  // Purple lichen-moss ground variants (floor 5 only). Alex's target mockup makes
+  // the swamp PURPLE — dense violet/magenta lichen carpeting the land, olive as accent
+  // — so the marsh ground (char m/o) hash-scatters across these instead of the one flat
+  // olive tileMarsh. cityGroundTexture-style per-cell pick lives in marshGroundTexture().
+  makeTileTexture(this, "swampTiles", "tileMarshPurple0", 255, 256, 68, 68); // magenta-veined lichen
+  makeTileTexture(this, "swampTiles", "tileMarshPurple1", 97, 177, 68, 68); // purple stone-moss
+  makeTileTexture(this, "swampTiles", "tileMarshPurple2", 18, 256, 68, 68); // violet cobble-moss
+  makeTileTexture(this, "swampTiles", "tileMarshPurple3", 333, 256, 68, 68); // dark soil + purple specks
   makeTileTexture(this, "swampTiles", "tileSwampWater", 1041, 102, 74, 71);
   makeTileTexture(this, "swampTiles", "tileSwampWaterMottle", 1129, 102, 74, 71);
   makeTileTexture(this, "swampTiles", "tileSwampWaterEdge", 1217, 102, 82, 71);
@@ -7062,10 +7070,33 @@ function cityGroundTexture(tile: string, x: number, y: number): string | null {
   return null;
 }
 
+// Sunken Marsh (floor 5) ground: the marsh land (m) and boulder pads (o) hash-scatter
+// across the purple lichen variants (mostly violet, one olive accent) to give the biome
+// the dense purple identity from the target mockup. Floor-5-scoped so no other stage is
+// touched; water/dirt/bridge keep their existing textures.
+const MARSH_GROUND_TEXTURES = [
+  "tileMarshPurple0",
+  "tileMarshPurple1",
+  "tileMarshPurple2",
+  "tileMarshPurple3",
+  "tileMarsh" // olive accent
+] as const;
+function marshGroundTexture(tile: string, x: number, y: number): string | null {
+  if (tile === "m" || tile === "o") {
+    const h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
+    return MARSH_GROUND_TEXTURES[h % MARSH_GROUND_TEXTURES.length]!;
+  }
+  return null;
+}
+
 function searingGroundTexture(floor: number, tile: string, x: number, y: number): string {
   if (floor === 4) {
     const city = cityGroundTexture(tile, x, y);
     if (city) return city;
+  }
+  if (floor === 5) {
+    const marsh = marshGroundTexture(tile, x, y);
+    if (marsh) return marsh;
   }
   if (floor === 6) {
     const h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
