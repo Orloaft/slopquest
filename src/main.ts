@@ -6253,6 +6253,7 @@ function minimapTileColor(tile: string): string {
     Y: "#d6ad4e", // beach portal (landmark)
     j: "#d6ad4e", // beach<->jungle portal (landmark)
     y: "#3c6b35", // jungle floor
+    "-": "#3c6b35", // jungle floor (walkable run)
     E: "#26401f", // jungle wall (blocked)
     i: "#274d44", // jungle river (blocked)
     K: "#caa84e" // jungle vault (landmark)
@@ -7002,6 +7003,7 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     Y: "tileBeachPath",
     j: "tileBeachPath",
     y: "tileJungle",
+    "-": "tileJungle", // jungle floor (walkable run) — see floor-9 generator
     E: "tileJungleWall",
     i: "tileJungleRiver",
     K: "tileJungle"

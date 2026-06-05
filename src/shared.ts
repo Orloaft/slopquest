@@ -805,30 +805,35 @@ export function makeFloorTiles(floor: number): string[] {
 
   if (floor === 9) {
     // The Untamed Jungle (enlarged 110x72) — a claustrophobic maze of dense canopy
-    // walls (E) threaded by tight 3-wide jungle-floor runs (y). A winding river (i)
-    // splits the map, forded only at 1-tile boulder chokepoints where venomous
+    // walls (E) threaded by tight 3-wide jungle-floor runs (g, walkable). A winding
+    // river (i) splits the map, forded only at 1-tile chokepoints where venomous
     // stalkers ambush. The sealed Jungle Vault (K) sits in a dead-end clearing.
+    // NOTE: the floor runs use '-', NOT 'y' — 'y' is the Northwood tree trunk and
+    // is blocked globally by isBlockedTile; paving the jungle with 'y' made the
+    // whole zone impassable. '-' is the dedicated walkable jungle-floor glyph
+    // (the only free char in the tile vocab); it renders as tileJungle. Internal
+    // only — never shown to players.
     fillRect(rows, 0, 0, 110, 72, "E");
-    fillRect(rows, 1, 17, 14, 5, "y"); // entry run
+    fillRect(rows, 1, 17, 14, 5, "-"); // entry run
     setTile(rows, 1, 18, "j"); // west portal to/from the Sunken Beach (after the fill so it survives)
-    fillRect(rows, 10, 7, 5, 15, "y");
-    fillRect(rows, 10, 7, 27, 5, "y");
-    fillRect(rows, 24, 7, 5, 19, "y");
-    fillRect(rows, 15, 22, 14, 4, "y");
-    fillRect(rows, 15, 22, 5, 21, "y");
-    fillRect(rows, 10, 38, 22, 8, "y"); // vault clearing
-    fillRect(rows, 24, 26, 5, 20, "y");
+    fillRect(rows, 10, 7, 5, 15, "-");
+    fillRect(rows, 10, 7, 27, 5, "-");
+    fillRect(rows, 24, 7, 5, 19, "-");
+    fillRect(rows, 15, 22, 14, 4, "-");
+    fillRect(rows, 15, 22, 5, 21, "-");
+    fillRect(rows, 10, 38, 22, 8, "-"); // vault clearing
+    fillRect(rows, 24, 26, 5, 20, "-");
     fillRect(rows, 37, 2, 5, 36, "i"); // river trunk
     fillRect(rows, 37, 34, 31, 4, "i");
     fillRect(rows, 64, 34, 4, 31, "i");
-    fillRect(rows, 37, 8, 5, 2, "y"); // upper ford
-    fillRect(rows, 37, 36, 5, 1, "y"); // lower ford
-    fillRect(rows, 42, 7, 22, 5, "y");
-    fillRect(rows, 59, 7, 5, 23, "y");
-    fillRect(rows, 44, 25, 20, 5, "y");
-    fillRect(rows, 44, 38, 24, 8, "y");
-    fillRect(rows, 71, 38, 6, 15, "y");
-    fillRect(rows, 80, 38, 17, 14, "y"); // Jungle Vault arena, reached by the sealed K gate
+    fillRect(rows, 37, 8, 5, 2, "-"); // upper ford
+    fillRect(rows, 37, 36, 5, 1, "-"); // lower ford
+    fillRect(rows, 42, 7, 22, 5, "-");
+    fillRect(rows, 59, 7, 5, 23, "-");
+    fillRect(rows, 44, 25, 20, 5, "-");
+    fillRect(rows, 44, 38, 24, 8, "-");
+    fillRect(rows, 71, 38, 6, 15, "-");
+    fillRect(rows, 80, 38, 17, 14, "-"); // Jungle Vault arena, reached by the sealed K gate
     setTile(rows, 20, 42, "K"); // sealed Jungle Vault (does not transport)
   }
 

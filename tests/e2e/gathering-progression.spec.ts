@@ -76,7 +76,41 @@ test("every new gathering node sits on a walkable approach", () => {
   }
 });
 
+test("floor-9 jungle is now traversable (paved with walkable 'g', not blocked 'y')", () => {
+  // The bug: jungle runs were paved with 'y' (the Northwood tree trunk), which
+  // isBlockedTile blocks globally — so the whole zone was impassable.
+  expect(isBlockedTile("-")).toBe(false);
+  const rows = makeFloorTiles(9);
+  const count = (ch: string) => rows.reduce((n, r) => n + [...r].filter((c) => c === ch).length, 0);
+  expect(count("-")).toBeGreaterThan(800); // the run network exists and is walkable
+  // The monster + boss spawn tiles must be standable, or they're stuck in walls.
+  const spawns: Array<[number, number]> = [[17, 24], [46, 11], [26, 10], [60, 26], [85, 44]];
+  for (const [x, y] of spawns) {
+    expect(isBlockedTile(rows[y]?.[x] ?? "#"), `spawn (${x},${y}) must be walkable`).toBe(false);
+  }
+});
+
 // --- In-engine: the flagship new mechanics ---------------------------------
+
+test("a player can stand and move on the floor-9 jungle floor", async ({ page }) => {
+  logErrors(page);
+  await page.goto("/?e2e");
+  await join(page);
+  // Teleport onto a former-'y' (now 'g') run; place() only resolves if walkable.
+  await place(page, 9, 5, 19);
+  expect(await page.evaluate(() => window.__TIB_E2E__?.self()?.floor)).toBe(9);
+  // Drive steps east into adjacent jungle floor and confirm we actually move.
+  const startX = await page.evaluate(() => window.__TIB_E2E__?.self()?.x ?? 0);
+  let movedX = startX;
+  for (let i = 0; i < 25; i++) {
+    await page.evaluate(() => window.__TIB_E2E__?.send({ type: "input", input: { right: true } }));
+    await page.waitForTimeout(120);
+    movedX = await page.evaluate(() => window.__TIB_E2E__?.self()?.x ?? 0);
+    if (movedX > startX + 0.3) break;
+  }
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "input", input: {} }));
+  expect(movedX, "player should walk east across the jungle floor").toBeGreaterThan(startX + 0.3);
+});
 
 test("Shark is gated behind Fishing 50, then catchable on the f8 deep reef", async ({ page }) => {
   logErrors(page);
