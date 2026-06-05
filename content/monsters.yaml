@@ -305,6 +305,36 @@
     - item: stolen_goods
       chance: 0.10
 
+  # --- Low cemetery undead: the entry band just inside Southgate's north gate.
+  # Combat levels 11 / 14 — a gentle rung between the woods (Rat L8) and the deep
+  # cemetery's skeletons/ghouls (L26-33), so "Thin the Cemetery" is doable for a
+  # ~L12 newcomer at the gate while the scary undead still brood deeper south.
+- id: restless_husk
+  name: Restless Husk
+  role: trash
+  description: "a half-risen corpse, slow and grasping at the gate"
+  maxHp: 46
+  speed: 1.95
+  damage: [4, 8]
+  attackMs: 1200
+  xp: 20
+  gold: [5, 12]
+  aggro: 5.5
+  range: 1
+
+- id: grave_shambler
+  name: Grave Shambler
+  role: trash
+  description: "a shrouded shambler dragging its grave-dirt with it"
+  maxHp: 56
+  speed: 2.0
+  damage: [5, 9]
+  attackMs: 1150
+  xp: 28
+  gold: [7, 16]
+  aggro: 6
+  range: 1
+
 - id: skeleton
   name: Skeleton
   description: "a clattering grave-walker, tireless and cold"

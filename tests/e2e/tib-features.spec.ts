@@ -3,6 +3,9 @@ import { PNG } from "pngjs";
 import { MONSTER_SPAWNS, MINING_NODES, TILE_SIZE, floorCols, floorRows, scaleX, scaleY } from "../../src/shared.ts";
 
 const NORTHWOOD_EXPECTED_TYPES = [
+  "reach_hen",
+  "meadow_hopper",
+  "reach_vole",
   "rat",
   "spider",
   "goblin_scout",

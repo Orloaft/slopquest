@@ -4,7 +4,7 @@ title: Thin the Cemetery
 giver: cemetery-warden
 objective:
   kind: kill
-  monsters: [skeleton, ghoul]
+  monsters: [restless_husk, grave_shambler, skeleton, ghoul]
   in: cemetery
   count: 3
 reward:

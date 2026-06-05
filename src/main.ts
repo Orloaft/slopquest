@@ -2615,6 +2615,13 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "reef_prowler") return { family: "reef_prowler", width: 54, height: 50, yOffset: -10 };
   if (monster.type === "venomous_stalker") return { family: "venomous_stalker", width: 52, height: 46, yOffset: -8, tint: 0x9fd07a };
   if (monster.type === "totem_wraith") return { family: "totem_wraith", width: 48, height: 56, yOffset: -16, tint: 0xd0b3ff };
+  // Broken Reach 1-15 starter critters & low cemetery undead — placeholder art
+  // borrowing existing families (rodent / undead) until bespoke sprites land.
+  if (monster.type === "reach_hen") return { family: "rat", width: 38, height: 28, yOffset: 1 };
+  if (monster.type === "meadow_hopper") return { family: "rat", width: 42, height: 30, yOffset: 0 };
+  if (monster.type === "reach_vole") return { family: "rat", width: 44, height: 28, yOffset: 2 };
+  if (monster.type === "restless_husk") return { family: "ghoul", width: 44, height: 52, yOffset: -12 };
+  if (monster.type === "grave_shambler") return { family: "skeleton", width: 44, height: 50, yOffset: -11 };
   return { family: "goblin", width: 42, height: 46, yOffset: -10 };
 }
 

@@ -6,9 +6,19 @@
 # trees    — manually placed composed trees (in addition to procedurally generated tile trees).
 
 monsters:
-  # Southgate Cemetery (90x60): skeletons/ghouls roam the fenced grave plots and
-  # the winding paths between them. (13,12) is the NW-plot skeleton the dodge/
-  # ranged e2e tests drop next to.
+  # Southgate Cemetery (110x72): skeletons/ghouls roam the fenced grave plots and
+  # the winding paths between them. The player arrives at the NORTH gate (55,2).
+  # A low husk/shambler band (L11-14) now holds the entry so "Thin the Cemetery"
+  # is doable for a ~L12 newcomer fresh from the woods; the original L26-33 undead
+  # still brood deeper in (positions preserved — dodge/ranged/bugfix e2e tests
+  # drop next to the NW skeleton at 16,14 and the far-east one at 87,29).
+  # -- new entry band (L11-14), just inside the north gate --
+  - { type: restless_husk,  at: { floor: 1, x: 55, y: 7  }, zone: cemetery }
+  - { type: restless_husk,  at: { floor: 1, x: 50, y: 14 }, zone: cemetery }
+  - { type: restless_husk,  at: { floor: 1, x: 62, y: 15 }, zone: cemetery }
+  - { type: grave_shambler, at: { floor: 1, x: 44, y: 12 }, zone: cemetery }
+  - { type: grave_shambler, at: { floor: 1, x: 68, y: 26 }, zone: cemetery }
+  # -- original undead (unchanged positions): L26-33, deeper in --
   - { type: skeleton,      at: { floor: 1, x: 16, y: 14 }, zone: cemetery }
   - { type: ghoul,         at: { floor: 1, x: 37, y: 26 }, zone: cemetery }
   - { type: grave_revenant, at: { floor: 1, x: 55, y: 18 }, zone: cemetery }
