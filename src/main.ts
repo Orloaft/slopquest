@@ -981,7 +981,7 @@ function create(this: Phaser.Scene): void {
   //   - a procedural stone CURB is then painted on every road edge that faces grass
   //     (buildCityCurbs + the floor-4 pass in createMapChunk), the depth cue the flat
   //     crops lack — the dark-lined grey kerb that lines every street in the mockup.
-  makeTileTexture(this, "cityTiles", "tileCityRoad", 187, 140, 54, 60); // warm tan brick paving (clean street, vs the old earthy r0c5 dirt)
+  makeTileTexture(this, "cityTiles", "tileCityRoad", 300, 77, 54, 60); // warm tan paved street
   makeTileTexture(this, "cityTiles", "tileCityCobble", 17, 77, 54, 60); // legacy grey cobble (fallback)
   makeTileTexture(this, "cityTiles", "tileCityGrass", 74, 140, 54, 60); // grass variant 0 (lush green)
   makeTileTexture(this, "cityTiles", "tileCityGrass1", 356, 77, 54, 60); // variant 1 (mossy + pebbles)
