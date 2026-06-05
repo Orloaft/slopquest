@@ -875,42 +875,53 @@ export function makeFloorTiles(floor: number): string[] {
   }
 
   if (floor === 4) {
-    // Northwatch (enlarged 110x72) — a rugged frontier garrison ringed by a timber
-    // palisade. A stone parade ground musters at its heart, barracks/quarters and
-    // a quartermaster's market cluster inside the walls, and gates pierce the
-    // palisade to the south (forest road) and west (the badlands cliff drop).
-    fillRect(rows, 1, 1, 108, 70, "."); // open ground base
-    scatter(rows, ".", "r", 103, 42); // scattered rubble/boulders on the frontier
+    // Northwatch (110x72) — a walled stone CITY, rebuilt from Alex's mockup on the
+    // city-exterior-01 tileset (replacing the old frontier garrison). A moat (:)
+    // rings a gated curtain wall (_) with round corner towers (sprites); cobbled
+    // ground (8) inside will host the districts, cathedral, market and docks added
+    // in later milestones. Grass banks (9) lie between the moat and the map edge.
+    // Gates: south -> Northwood forest road (S portal); west -> badlands ledge (Z).
+    // MILESTONE 2 = bare shell (moat + walls + towers + gate causeways) only.
+    fillRect(rows, 0, 0, 110, 72, "9"); // grass base (banks + outside the moat)
 
-    // --- Timber palisade enclosing the garrison core. ---
-    fillRect(rows, 24, 14, 63, 2, "q"); // north wall
-    fillRect(rows, 24, 56, 63, 2, "q"); // south wall
-    fillRect(rows, 24, 14, 2, 44, "q"); // west wall
-    fillRect(rows, 86, 14, 1, 44, "q"); // east wall
-    // Gate gaps (kept walkable by laying path over the wall line).
-    fillRect(rows, 54, 56, 5, 2, "d"); // south gate
-    fillRect(rows, 24, 35, 2, 5, "d"); // west gate (badlands drop arrives here)
+    // --- Moat ring (open water), ~3 thick: a solid water rect hollowed back to
+    // grass so only a ring around the wall remains, with a 1-tile berm inside it. ---
+    fillRect(rows, 8, 4, 94, 64, ":"); // x8..101, y4..67 solid water
+    fillRect(rows, 11, 7, 88, 58, "9"); // hollow interior back to grass berm (x11..98, y7..64)
 
-    // --- Stone parade ground with a townfloor muster square. ---
-    fillRect(rows, 39, 24, 34, 24, "s"); // parade ground
-    fillRect(rows, 49, 30, 15, 12, "p"); // muster square
+    // --- Curtain wall (2 thick) just inside the berm. ---
+    fillRect(rows, 14, 9, 82, 2, "_"); // north wall (y9..10)
+    fillRect(rows, 14, 61, 82, 2, "_"); // south wall (y61..62)
+    fillRect(rows, 14, 9, 2, 54, "_"); // west wall (x14..15)
+    fillRect(rows, 94, 9, 2, 54, "_"); // east wall (x94..95)
 
-    // --- Roads (winding, hugging the buildings). ---
-    // South road: muster square down to the south gate and out to the forest.
-    fillRect(rows, 54, 42, 3, 16, "d");
-    fillRect(rows, 54, 58, 3, 12, "d");
-    // West road: muster square out to the west gate (the drop-in lands here).
-    fillRect(rows, 26, 35, 14, 3, "d");
-    // North spur to the barracks.
-    fillRect(rows, 55, 16, 4, 9, "d");
-    // East spur to the quartermaster's market.
-    fillRect(rows, 72, 34, 11, 3, "d");
+    // --- Interior: grass blocks divided by a cobbled street grid. ---
+    fillRect(rows, 16, 11, 78, 50, "9"); // grass block base (x16..93, y11..60)
+    // Main avenues (wide): N-S spine between the N/S gates, E-W between W/E gates.
+    fillRect(rows, 53, 11, 4, 50, "8"); // N-S avenue (x53..56)
+    fillRect(rows, 16, 34, 78, 4, "8"); // E-W avenue (y34..37)
+    // Secondary streets carving the quarters into blocks.
+    fillRect(rows, 31, 11, 3, 50, "8"); // N-S street (x31..33)
+    fillRect(rows, 72, 11, 3, 50, "8"); // N-S street (x72..74)
+    fillRect(rows, 16, 21, 78, 3, "8"); // E-W street (y21..23)
+    fillRect(rows, 16, 48, 78, 3, "8"); // E-W street (y48..50)
+    // Central plaza (cobble) at the avenue crossing.
+    fillRect(rows, 48, 30, 14, 12, "8");
 
-    // South-edge portal to the forest, with an approach stub past the gate.
-    setTile(rows, 55, 70, "S"); // south -> Northwood (floor 3)
-    setTile(rows, 55, 68, "d");
+    // --- SE harbour: a water inlet off the moat with a dock. ---
+    fillRect(rows, 80, 51, 14, 11, ":"); // inlet basin (x80..93, y51..61)
+    fillRect(rows, 80, 61, 14, 2, ":"); // breach the south wall/berm to the moat
 
-    scatter(rows, ".", "f", 117, 41); // woodland framing the clearing
+    // --- Gate causeways: cobble cut through wall + moat + berm out to the edge. ---
+    fillRect(rows, 53, 61, 4, 11, "8"); // south (main) gate -> Northwood
+    fillRect(rows, 0, 34, 16, 4, "8"); // west gate -> badlands ledge (Z arrives here)
+    fillRect(rows, 53, 0, 4, 11, "8"); // north gate
+    fillRect(rows, 94, 34, 16, 4, "8"); // east gate
+
+    // --- Portal anchor. ---
+    setTile(rows, 55, 71, "S"); // south edge -> Northwood (floor 3)
+
+    scatter(rows, "9", "f", 70, 41); // scattered woodland on the outer banks
   }
 
   if (floor === 10) {
@@ -1256,7 +1267,8 @@ export function isBlockedTile(tile: string): boolean {
     tile === "X" || tile === "P" || tile === "w" || tile === "5" || // badlands cliff wall + pit + massif + teal river
     tile === "Q" || tile === "V" || tile === "U" || // desert quicksand + oasis + ruin
     BEACH_WATER_TILES.has(tile) || tile === "x" || tile === "0" || tile === "1" || tile === "|" || tile === "u" || // beach sea/shore/cliff/rocks
-    tile === "E" || tile === "i" // jungle wall + jungle river
+    tile === "E" || tile === "i" || // jungle wall + jungle river
+    tile === ":" || tile === "_" // Northwatch city: moat water + curtain wall
   );
 }
 

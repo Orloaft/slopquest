@@ -33,7 +33,14 @@ export const BLOCKING_OBJECT_KEYS = new Set<string>([
   // cultist camp, and ritual props stay walk-through — the canyon is narrow and
   // the mine portal must stay reachable.)
   "spriteOutpostPalisade",
-  "spriteOutpostWatchtower"
+  "spriteOutpostWatchtower",
+  // Northwatch city districts: solid buildings (towers/trees stay walk-through).
+  "spriteCityHouseA",
+  "spriteCityHouseB",
+  "spriteCityHouseC",
+  "spriteCityHouseD",
+  "spriteCityCathedral",
+  "spriteCityHall"
 ]);
 
 // Buildings that should behave like same-map cutaways: the exterior sprite
@@ -216,22 +223,110 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteTree", x: 55.2, y: 18.4, w: 82, h: 106 }
   ],
   4: [
-    // Northwatch (bespoke 90x60). Barracks, quarters, well and quartermaster's
-    // market cluster inside the palisade around the parade ground. NPCs in
-    // npcs.yaml stand on the roads just outside these footprints.
-    { key: "spriteWell", x: 56.8, y: 28.8, w: 88, h: 122 }, // muster-square well
-    { key: "spriteMarket", x: 78.2, y: 30.6, w: 160, h: 72 }, // quartermaster's market (east)
-    { key: "spriteGreenHouse", x: 45.2, y: 24, w: 190, h: 176 }, // barracks (NW)
-    { key: "spriteBlueHouse", x: 66, y: 24, w: 220, h: 164 }, // officers' quarters (NE)
-    { key: "spriteThatchHouse", x: 42.8, y: 53.4, w: 210, h: 170 }, // quarters (SW)
-    { key: "spriteRedHouse", x: 69.7, y: 53.4, w: 230, h: 172 }, // smithy (SE)
-    { key: "spriteLamp", x: 48.3, y: 28.8, w: 28, h: 100 },
-    { key: "spriteLamp", x: 65.4, y: 28.8, w: 28, h: 100 },
-    { key: "spriteSign", x: 55, y: 25.2, w: 54, h: 66 }, // muster sign
-    { key: "spriteBarrels", x: 74.3, y: 42.2, w: 58, h: 46 },
-    { key: "spriteTree", x: 14.7, y: 63, w: 66, h: 86 }, // frontier woodland outside the walls
-    { key: "spritePine", x: 95.3, y: 21.8, w: 54, h: 84 },
-    { key: "spritePine", x: 12.2, y: 17, w: 54, h: 84 }
+    // Northwatch (110x72) — walled CITY rebuild, MILESTONE 4 (parity push). Houses
+    // packed two-deep into the grass blocks of the street grid (authored in shared.ts).
+    // Central N-S avenue (x53..56) + plaza kept clear; landmarks: town hall (NW),
+    // blue-dome cathedral (W); market stalls at the plaza fringe; SE water-inlet harbour.
+    // --- Towers: corners, gate flanks, wall midpoints. ---
+    { key: "spriteCityTowerRed", x: 15, y: 11.4, w: 48, h: 108 }, // NW
+    { key: "spriteCityTowerRed", x: 95, y: 11.4, w: 48, h: 108 }, // NE
+    { key: "spriteCityTowerRed", x: 15, y: 63, w: 48, h: 108 }, // SW
+    { key: "spriteCityTowerRed", x: 95, y: 63, w: 48, h: 108 }, // SE
+    { key: "spriteCityTowerRed", x: 50, y: 63, w: 48, h: 108 }, // S gate W
+    { key: "spriteCityTowerRed", x: 59, y: 63, w: 48, h: 108 }, // S gate E
+    { key: "spriteCityTowerRed", x: 15, y: 32, w: 48, h: 108 }, // W gate N
+    { key: "spriteCityTowerRed", x: 15, y: 40, w: 48, h: 108 }, // W gate S
+    { key: "spriteCityTowerRed", x: 35, y: 11.4, w: 48, h: 108 }, // N mid-W
+    { key: "spriteCityTowerRed", x: 74, y: 11.4, w: 48, h: 108 }, // N mid-E
+    { key: "spriteCityTowerRed", x: 35, y: 63, w: 48, h: 108 }, // S mid-W
+    { key: "spriteCityTowerRed", x: 78, y: 63, w: 48, h: 108 }, // S mid-E
+    { key: "spriteCityTowerRed", x: 95, y: 32, w: 48, h: 108 }, // E gate N
+    { key: "spriteCityTowerRed", x: 95, y: 40, w: 48, h: 108 }, // E gate S
+    { key: "spriteCityTowerRed", x: 95, y: 22, w: 48, h: 108 }, // E mid-N
+    { key: "spriteCityTowerRed", x: 95, y: 52, w: 48, h: 108 }, // E mid-S
+    // --- Landmarks. ---
+    { key: "spriteCityHall", x: 23, y: 19, w: 150, h: 168 }, // town hall (NW)
+    { key: "spriteCityCathedral", x: 23, y: 46, w: 156, h: 156 }, // cathedral (W)
+    // --- Packed terraced houses (two rows per block, x-step 6). ---
+    { key: "spriteCityHouseA", x: 36, y: 20, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 42, y: 20, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 48, y: 20, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 60, y: 20, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 66, y: 20, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 78, y: 20, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 84, y: 20, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 90, y: 20, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 36, y: 15, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 42, y: 15, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 48, y: 15, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 60, y: 15, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 66, y: 15, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 78, y: 15, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 84, y: 15, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 90, y: 15, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 18, y: 33, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 24, y: 33, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 30, y: 33, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 36, y: 33, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 42, y: 33, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 66, y: 33, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 78, y: 33, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 84, y: 33, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 90, y: 33, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 36, y: 28, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 42, y: 28, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 66, y: 28, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 78, y: 28, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 84, y: 28, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 90, y: 28, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 36, y: 47, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 42, y: 47, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 48, y: 47, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 60, y: 47, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 66, y: 47, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 78, y: 47, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 84, y: 47, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 90, y: 47, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 36, y: 42, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 42, y: 42, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 66, y: 42, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 78, y: 42, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 84, y: 42, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 90, y: 42, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 18, y: 60, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 24, y: 60, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 30, y: 60, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 36, y: 60, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 42, y: 60, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 48, y: 60, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 60, y: 60, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 66, y: 60, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 18, y: 55, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 24, y: 55, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 30, y: 55, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 36, y: 55, w: 126, h: 136 },
+    { key: "spriteCityHouseB", x: 42, y: 55, w: 74, h: 138 },
+    { key: "spriteCityHouseC", x: 48, y: 55, w: 78, h: 138 },
+    { key: "spriteCityHouseD", x: 60, y: 55, w: 84, h: 136 },
+    { key: "spriteCityHouseA", x: 66, y: 55, w: 126, h: 136 },
+    // --- Market stalls (plaza fringe). ---
+    { key: "spriteCityStall", x: 46, y: 45, w: 70, h: 56 },
+    { key: "spriteCityStall", x: 50, y: 45, w: 70, h: 56 },
+    { key: "spriteCityStall", x: 58, y: 45, w: 70, h: 56 },
+    { key: "spriteCityStall", x: 62, y: 45, w: 70, h: 56 },
+    // --- Plaza wells. ---
+    { key: "spriteWell", x: 49, y: 32, w: 88, h: 122 },
+    { key: "spriteWell", x: 60, y: 41, w: 88, h: 122 },
+    { key: "spriteWell", x: 49, y: 41, w: 88, h: 122 },
+    { key: "spriteWell", x: 60, y: 32, w: 88, h: 122 },
+    // --- SE harbour boats. ---
+    { key: "spriteCityBoat", x: 85, y: 57, w: 118, h: 98 },
+    { key: "spriteCityBoat", x: 90, y: 54, w: 118, h: 98 },
+    { key: "spriteCityBoat", x: 82, y: 59, w: 118, h: 98 },
+    // --- Trees. ---
+    { key: "spriteCityTree", x: 18, y: 57, w: 74, h: 74 },
+    { key: "spriteCityTree", x: 64, y: 16, w: 74, h: 74 },
+    { key: "spriteCityTree", x: 40, y: 16, w: 74, h: 74 }
   ],
   5: [
     { key: "spriteThatchHouse", x: 11, y: 22.8, w: 130, h: 176 }, // Alchemist's Hut (NW clearing)

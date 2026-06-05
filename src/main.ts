@@ -338,6 +338,7 @@ interface E2EHooks {
   monsterScreenPoint: (id: string) => { x: number; y: number } | null;
   worldScreenPoint: (tileX: number, tileY: number) => { x: number; y: number } | null;
   send: (msg: ClientMessage) => void;
+  setUserZoom: (z: number) => void;
   stateVersion: () => number;
   viewCounts: () => { trees: number; npcs: number };
   actorFrameAnchorDrift: () => Array<{ family: string; dir: Direction; driftX: number; driftY: number }>;
@@ -687,6 +688,11 @@ if (E2E_MODE) {
       };
     },
     send,
+    setUserZoom: (z: number) => {
+      userZoomFactor = z;
+      const cam = scene?.cameras?.main;
+      if (cam) cam.setZoom(cameraZoomForFloor(self()?.floor ?? null));
+    },
     stateVersion: () => stateVersion,
     viewCounts: () => ({ trees: treeViews.size, npcs: npcViews.size }),
     actorFrameAnchorDrift: () => actorFrameAnchorDrift(),
@@ -895,6 +901,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("swampEnemySheet", "/skitterer-spitter.png");
   this.load.image("uiSheet", "/ui-sheet.png");
   this.load.image("townTiles", "/towntiles.png");
+  this.load.image("cityTiles", "/citytiles.png"); // SPIKE: city-exterior-01 ingest proof (Northwatch rebuild)
   this.load.image("forestTiles", "/foresttiles.png");
   this.load.image("graveyardTiles", "/graveyardtiles.png");
   this.load.image("darkForestTiles", "/dark-forest-tiles.png");
@@ -954,9 +961,52 @@ function create(this: Phaser.Scene): void {
   createActorFrames(this);
   createEffectFrames(this);
   makeTileTexture(this, "townTiles", "tileGrass", 24, 24, 84, 84);
+  // Worn/scuffed grass variant — scattered into Northwatch's clearing so the open
+  // ground reads with natural variation instead of one flat green tile.
+  makeTileTexture(this, "townTiles", "tileGrassWorn", 130, 24, 84, 84);
   makeTileTexture(this, "townTiles", "tileStone", 236, 248, 84, 84);
+  // Northwatch muster square: a clean cool-grey cobble cell (distinct from the warm `s`
+  // apron). Replaces the broken magenta-keyed `p`/tileTownFloor crop that checkerboarded.
+  makeTileTexture(this, "townTiles", "tileMuster", 342, 248, 84, 84);
   makeTileTexture(this, "townTiles", "tileTownFloor", 1004, 794, 84, 84);
   makeTileTexture(this, "townTiles", "tileDirt", 236, 24, 84, 84);
+  // Northwatch ground, sliced from the city-exterior-01 sheet's 54x60 grid (zero
+  // magenta gutter bleed). Following the Northwood blueprint — its forest stage reads
+  // well because the road/grass tiles are warm-toned and PER-CELL varied (no flat
+  // repeated grid) with baked road->grass edges. So here:
+  //   - roads = warm TAN paved cobble (ground r0c5), matching the mockup's sandy streets
+  //     instead of the old cool-grey r0c0 cobble;
+  //   - grass = three green variants, hash-scattered per cell (cityGrassTexture) so the
+  //     open blocks stop reading as one flat tile;
+  //   - a procedural stone CURB is then painted on every road edge that faces grass
+  //     (buildCityCurbs + the floor-4 pass in createMapChunk), the depth cue the flat
+  //     crops lack — the dark-lined grey kerb that lines every street in the mockup.
+  makeTileTexture(this, "cityTiles", "tileCityRoad", 300, 77, 54, 60); // warm tan paved street
+  makeTileTexture(this, "cityTiles", "tileCityCobble", 17, 77, 54, 60); // legacy grey cobble (fallback)
+  makeTileTexture(this, "cityTiles", "tileCityGrass", 74, 140, 54, 60); // grass variant 0 (lush green)
+  makeTileTexture(this, "cityTiles", "tileCityGrass1", 356, 77, 54, 60); // variant 1 (mossy + pebbles)
+  makeTileTexture(this, "cityTiles", "tileCityGrass2", 356, 140, 54, 60); // variant 2 (tufted)
+  buildCityCurbs(this); // procedural N/E/S/W kerb overlays for road<->grass edges
+  // Moat water: the city water cells carry a stone curb, but the 10px tile inset
+  // crops past it to the open water inside -> a clean blue moat tile.
+  makeTileTexture(this, "cityTiles", "tileCityMoat", 996, 83, 54, 57);
+  // Curtain wall: grey stone face from the CITY WALL SET battlement (matches the
+  // tower stone). The crenellated-top art tiles awkwardly when stacked, so we use
+  // the solid masonry face for a clean curtain-wall band in any direction.
+  makeTileTexture(this, "cityTiles", "tileCityWall", 650, 948, 54, 54);
+  // Round corner tower (red conical roof) — cut without inset, so defringe=true
+  // strips the dark-magenta anti-alias halo around the silhouette.
+  makeSpriteTexture(this, "cityTiles", "spriteCityTowerRed", 1298, 318, 48, 108, true);
+  // --- City buildings (districts) — all defringed. ---
+  makeSpriteTexture(this, "cityTiles", "spriteCityHouseA", 428, 306, 126, 136, true); // wide red-roof
+  makeSpriteTexture(this, "cityTiles", "spriteCityHouseB", 556, 304, 74, 138, true); // tall red-roof
+  makeSpriteTexture(this, "cityTiles", "spriteCityHouseC", 714, 304, 78, 138, true); // shop house
+  makeSpriteTexture(this, "cityTiles", "spriteCityHouseD", 880, 306, 84, 136, true); // blue-roof
+  makeSpriteTexture(this, "cityTiles", "spriteCityCathedral", 864, 560, 156, 156, true); // blue-dome cathedral
+  makeSpriteTexture(this, "cityTiles", "spriteCityHall", 1024, 546, 150, 168, true); // columned town hall
+  makeSpriteTexture(this, "cityTiles", "spriteCityTree", 140, 358, 74, 74, true); // ornamental tree
+  makeSpriteTexture(this, "cityTiles", "spriteCityBoat", 874, 446, 118, 98, true); // harbour boat
+  makeSpriteTexture(this, "cityTiles", "spriteCityStall", 834, 744, 70, 56, true); // market stall
   makeTileTexture(this, "forestTiles", "tileForest", 24, 34, 84, 84);
   makeTileTexture(this, "forestTiles", "tileRock", 1120, 794, 84, 84);
   makeTileTexture(this, "graveyardTiles", "tileGraveDirt", 24, 34, 84, 84);
@@ -1868,6 +1918,23 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
       if (row === undefined) continue;
       for (let x = tileX; x < tileRight; x += 1) {
         texture.draw(searingGroundTexture(state.floor, row[x] ?? "", x, y), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+      }
+    }
+    // Northwatch (floor 4): paint a stone kerb on every road (8) edge that faces a
+    // grass (9) yard — the bordered-street look from the mockup. Per-cell + edge-local,
+    // so it never breaks across chunk seams.
+    if (state.floor === 4) {
+      for (let y = tileY; y < tileBottom; y += 1) {
+        if (state.rows[y] === undefined) continue;
+        for (let x = tileX; x < tileRight; x += 1) {
+          if (state.rows[y]?.[x] !== "8") continue;
+          const px = (x - tileX) * TILE_SIZE;
+          const py = (y - tileY) * TILE_SIZE;
+          if (state.rows[y - 1]?.[x] === "9") texture.draw("cityCurbN", px, py);
+          if (state.rows[y + 1]?.[x] === "9") texture.draw("cityCurbS", px, py);
+          if (state.rows[y]?.[x - 1] === "9") texture.draw("cityCurbW", px, py);
+          if (state.rows[y]?.[x + 1] === "9") texture.draw("cityCurbE", px, py);
+        }
       }
     }
     // Second pass: composite the sculpted cliff faces over the south-facing massif edges
@@ -5831,7 +5898,7 @@ function makeTileTexture(
   scene.textures.get(newKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
 
-function makeSpriteTexture(scene: Phaser.Scene, sourceKey: string, newKey: string, sx: number, sy: number, sw: number, sh: number): void {
+function makeSpriteTexture(scene: Phaser.Scene, sourceKey: string, newKey: string, sx: number, sy: number, sw: number, sh: number, defringe = false): void {
   const source = scene.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
   const canvas = document.createElement("canvas");
   canvas.width = sw;
@@ -5841,6 +5908,7 @@ function makeSpriteTexture(scene: Phaser.Scene, sourceKey: string, newKey: strin
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(source, sx, sy, sw, sh, 0, 0, sw, sh);
   chromaKeyMagenta(ctx, sw, sh);
+  if (defringe) defringeMagentaHalo(ctx, sw, sh);
   scene.textures.addCanvas(newKey, canvas);
   scene.textures.get(newKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
@@ -5852,6 +5920,43 @@ function chromaKeyMagenta(ctx: CanvasRenderingContext2D, width: number, height: 
     const g = image.data[i + 1] ?? 0;
     const b = image.data[i + 2] ?? 0;
     if (isMagentaKey(r, g, b)) image.data[i + 3] = 0;
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
+// Magenta-halo defringe for sprites cut WITHOUT an inset (makeSpriteTexture). The
+// city-exterior sheets sit on a dark-magenta (138,1,78) field whose anti-aliased
+// boundary blends toward black — pixels like (74,3,36) or (100,29,69) whose blue
+// dips below the chroma-key thresholds or whose green creeps up, leaving a 1-2px
+// pink halo around the art. We can't widen isMagentaKey globally (it would eat
+// real purple art), so instead we erode ONLY magenta-leaning pixels that touch an
+// already-transparent pixel: the halo ring is connected to the keyed background,
+// while interior art is not, so this strips the fringe and cannot reach solid art.
+function defringeMagentaHalo(ctx: CanvasRenderingContext2D, width: number, height: number, passes = 2): void {
+  const image = ctx.getImageData(0, 0, width, height);
+  const d = image.data;
+  const idx = (x: number, y: number): number => (y * width + x) * 4;
+  // Loose "magenta-leaning" test: clearly red-purple (r>g and b>g), green not high
+  // (warm/skin/foliage art keeps green up near or above red), and red~blue balanced.
+  const halo = (r: number, g: number, b: number): boolean =>
+    r > g && b > g && g < 95 && r > 40 && b > 22 && Math.abs(r - b) < 110;
+  for (let p = 0; p < passes; p += 1) {
+    const kill: number[] = [];
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const i = idx(x, y);
+        if (d[i + 3] === 0) continue;
+        if (!halo(d[i] ?? 0, d[i + 1] ?? 0, d[i + 2] ?? 0)) continue;
+        const transparentNeighbor =
+          (x > 0 && d[idx(x - 1, y) + 3] === 0) ||
+          (x < width - 1 && d[idx(x + 1, y) + 3] === 0) ||
+          (y > 0 && d[idx(x, y - 1) + 3] === 0) ||
+          (y < height - 1 && d[idx(x, y + 1) + 3] === 0);
+        if (transparentNeighbor) kill.push(i + 3);
+      }
+    }
+    if (kill.length === 0) break;
+    for (const a of kill) d[a] = 0;
   }
   ctx.putImageData(image, 0, 0);
 }
@@ -6772,6 +6877,10 @@ const TILE_BASE_TEXTURE: Record<string, string> = {
     f: "tileForest",
     r: "tileForest",
     s: "tileStone",
+    "8": "tileCityCobble", // Northwatch city rebuild: cobbled roads/ground
+    "9": "tileCityGrass", // Northwatch city rebuild: grass banks
+    ":": "tileCityMoat", // Northwatch city rebuild: moat water (blocked)
+    "_": "tileCityWall", // Northwatch city rebuild: curtain wall (blocked)
     p: "tileTownFloor",
     t: "tileDirt",
     d: "tileDirt",
@@ -6940,7 +7049,24 @@ const SEARING_GROUND_TILES = new Set(["R", "6", "7", "J", "D", "Z", "O", "%", "&
 // Picks a deterministic painterly ground variant per cell so the Searing Badlands
 // canyon floor doesn't read as one repeated tile. Falls back to the normal resolver
 // for every other floor/tile.
+// Northwatch (floor 4) ground: warm tan road for cobble (8) and a hash-scattered
+// green for grass (9), so the city blocks stop reading as one flat repeated tile —
+// the Northwood-stage trick (per-cell variants) applied to the authored char grid.
+const CITY_GRASS_TEXTURES = ["tileCityGrass", "tileCityGrass1", "tileCityGrass2"] as const;
+function cityGroundTexture(tile: string, x: number, y: number): string | null {
+  if (tile === "8") return "tileCityRoad";
+  if (tile === "9") {
+    const h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
+    return CITY_GRASS_TEXTURES[h % CITY_GRASS_TEXTURES.length]!;
+  }
+  return null;
+}
+
 function searingGroundTexture(floor: number, tile: string, x: number, y: number): string {
+  if (floor === 4) {
+    const city = cityGroundTexture(tile, x, y);
+    if (city) return city;
+  }
   if (floor === 6) {
     const h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
     // Massif body ('w') is the raised plateau TOP — lit mesa rock, not flat dark
@@ -6959,6 +7085,47 @@ function searingGroundTexture(floor: number, tile: string, x: number, y: number)
 // desert ("desert*" recolour). Drives the cliff-face / bench texture keys for each stage.
 function reliefPrefix(floor: number): string {
   return floor === 7 ? "desert" : "searing";
+}
+
+// Northwatch street kerbs (floor 4). The mockup lines every tan street with a raised
+// grey stone kerb where it meets a grass yard; the flat road crop has none, so roads
+// read as hard-edged paint. Bake four 32x32 edge overlays (N/E/S/W) — each a band on
+// one side of the tile: a dark mortar seam at the very edge, a mid-grey stone course,
+// and a thin sun-lit top lip — transparent everywhere else. The floor-4 pass in
+// createMapChunk draws the matching side onto any road cell whose orthogonal neighbour
+// is grass (convex corners just get two bands, forming an L). Procedural, like the
+// cliff rim/AO — no new art.
+function buildCityCurbs(scene: Phaser.Scene): void {
+  const band = 6; // kerb depth in px (of 32)
+  // Paint one horizontal kerb band into ctx with its OUTER edge at row `o`, growing
+  // inward by `dir` (+1 down / -1 up). Layers: edge mortar -> stone -> inner lip.
+  const paintBand = (ctx: CanvasRenderingContext2D, axis: "h" | "v", outer: number, dir: number): void => {
+    for (let d = 0; d < band; d += 1) {
+      const p = outer + d * dir; // pixel line, outer->inner
+      // colour by depth: 0-1 dark seam, 2-4 stone, 5 light lip
+      const col = d <= 1 ? "rgba(46,40,33,0.85)" : d >= band - 1 ? "rgba(176,168,150,0.7)" : "rgba(122,114,101,0.8)";
+      ctx.fillStyle = col;
+      if (axis === "h") ctx.fillRect(0, p, 32, 1);
+      else ctx.fillRect(p, 0, 1, 32);
+    }
+  };
+  const sides: Array<[string, "h" | "v", number, number]> = [
+    ["cityCurbN", "h", 0, 1], // grass to the north -> band along the top, growing down
+    ["cityCurbS", "h", 31, -1], // grass to the south -> bottom band, growing up
+    ["cityCurbW", "v", 0, 1], // grass to the west -> left band, growing right
+    ["cityCurbE", "v", 31, -1] // grass to the east -> right band, growing left
+  ];
+  for (const [key, axis, outer, dir] of sides) {
+    const c = document.createElement("canvas");
+    c.width = 32;
+    c.height = 32;
+    const ctx = c.getContext("2d");
+    if (!ctx) continue;
+    ctx.imageSmoothingEnabled = false;
+    paintBand(ctx, axis, outer, dir);
+    scene.textures.addCanvas(key, c);
+    scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+  }
 }
 
 // Clean vertical flank walls for the E/W mesa edges. The atlas cols 3/4 are L-shaped concave-
