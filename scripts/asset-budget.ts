@@ -88,7 +88,12 @@ function listFiles(dir: string): FileEntry[] {
 function preloadBudget(entry: string, rootDir: string): { files: FileEntry[]; missing: string[]; totalBytes: number } {
   const source = readFileSync(entry, "utf8");
   const assetPaths = new Set<string>();
-  for (const match of source.matchAll(/\bthis\.load\.(?:image|spritesheet|audio)\([^,]+,\s*["']([^"']+)["']/g)) {
+  // Only count loads whose key AND path are plain string literals — the
+  // statically-known preload set. Requiring a quoted-literal key (rather than a
+  // permissive `[^,]+`) skips data-driven/template-literal loops like the
+  // nw-sprite and generated-stage loaders, which would otherwise capture a comma
+  // inside the key expression (e.g. padStart(3, "0")) as a bogus asset path.
+  for (const match of source.matchAll(/\bthis\.load\.(?:image|spritesheet|audio)\(\s*["'][^"']*["']\s*,\s*["']([^"']+)["']/g)) {
     const path = match[1];
     if (path) assetPaths.add(path);
   }

@@ -904,7 +904,6 @@ function preload(this: Phaser.Scene): void {
   }
   this.load.image("newEnemiesSheet", "/new-enemies.png");
   this.load.image("swampEnemySheet", "/skitterer-spitter.png");
-  this.load.image("uiSheet", "/ui-sheet.png");
   this.load.image("townTiles", "/towntiles.png");
   this.load.image("cityTiles", "/citytiles.png"); // SPIKE: city-exterior-01 ingest proof (Northwatch rebuild)
   this.load.image("forestTiles", "/foresttiles.png");
