@@ -124,6 +124,10 @@ export interface ServerPlayer {
   iframeUntil?: number;
   // E2E-only: when set, player attacks always crit (deterministic crit tests).
   forceCrit?: boolean;
+  // Dev playtest cheats (DEV_TOOLS only). godMode negates all incoming damage;
+  // devSpeedMult scales movement speed. Never set outside DEV_TOOLS.
+  godMode?: boolean;
+  devSpeedMult?: number;
 }
 
 export interface ServerMonster {

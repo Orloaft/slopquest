@@ -541,7 +541,7 @@ const CELL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_CELL_EVENT_QUEUE_LIMIT", 256)
 const VISIBLE_EVENT_LIMIT = positiveIntEnv("TIB_VISIBLE_EVENT_LIMIT", 192);
 // Reaction-critical events (telegraphs) must survive event-channel truncation so
 // dense crowds never starve the one thing players must react to. Gated for A/B.
-const EVENT_PRIORITY = process.env.TIB_EVENT_PRIORITY === "1";
+let EVENT_PRIORITY = process.env.TIB_EVENT_PRIORITY === "1";
 const EVENT_METRICS_LOG = process.env.TIB_EVENT_METRICS_LOG === "1";
 const WS_COMPRESSION = process.env.TIB_WS_COMPRESSION === "1" || (!E2E_TEST && process.env.TIB_WS_COMPRESSION !== "0");
 const WS_COMPRESSION_THRESHOLD = positiveIntEnv("TIB_WS_COMPRESSION_THRESHOLD", 1024);
@@ -985,6 +985,7 @@ function updatePlayers(dt: number, now: number): void {
       player.slowUntil = 0;
       player.slowMult = 1;
     }
+    if (player.devSpeedMult && player.devSpeedMult !== 1) speed *= player.devSpeedMult; // dev cheat (/dev speed)
 
     const hasMoveVector = input.moveX !== 0 || input.moveY !== 0;
     let dx = hasMoveVector ? Number(input.moveX) : Number(input.right) - Number(input.left);
@@ -1608,6 +1609,7 @@ function critChanceFor(player: ServerPlayer): number {
 
 function rollCrit(player: ServerPlayer): boolean {
   if (E2E_TEST) return player.forceCrit === true;
+  if (player.forceCrit) return true; // dev cheat (/dev crit); only DEV_TOOLS can set it
   return Math.random() < critChanceFor(player);
 }
 
@@ -2035,10 +2037,16 @@ function rollPotionDrop(monsterType: string): Array<{ id: string; qty: number }>
 // existing combat tests are unaffected.
 function rollDodge(player: ServerPlayer): boolean {
   if (E2E_TEST) return player.forceDodge === true;
+  if (player.forceDodge) return true; // dev cheat (/dev dodge); only DEV_TOOLS can set it
   return Math.random() < dodgeChanceFor(player.classKey, skillLevel(player, "agility"));
 }
 
 function damagePlayer(player: ServerPlayer, damage: number, source: string): void {
+  // Dev godmode (DEV_TOOLS only): negate all incoming damage for fatigue-free testing.
+  if (player.godMode) {
+    event("float", "God", player.x, player.y - 0.55, player.floor, "#ffd86b", source);
+    return;
+  }
   // Active dodge i-frames negate everything — melee, ranged, heavy slam, ambush.
   // This is the single chokepoint all incoming damage routes through.
   if (player.iframeUntil && performance.now() < player.iframeUntil) {
@@ -2460,12 +2468,22 @@ function systemToPlayer(player: ServerPlayer, text: string): void {
   event("system", text, null, null, null, null, null, null, { to: player.id });
 }
 
-// Playtest cheats (DEV_TOOLS only). Usage in chat:
-//   /dev          — level all skills to 20, +1000g, plus a bow + alchemy gear
-//   /dev skills N  — set every skill to level N (default 20)
-//   /dev unlock    — unlock all Tier-1 classes (skip the trainers)
-//   /dev gold N    — set gold to N
-//   /dev help      — list commands
+// Playtest cheats (DEV_TOOLS only — E2E_TEST or TIB_DEV=1). Usage in chat:
+//   /dev            — full kit: all skills 20, +1000g, bow + alchemy gear
+//   /dev skills N   — set every skill to level N (alias: /dev level N)
+//   /dev unlock     — unlock all Tier-1 classes (skip the trainers)
+//   /dev gold N     — set gold to N
+//   /dev item ID [n]— grant n of an item by id
+//   /dev heal       — refill HP / mana / favor
+//   /dev god        — toggle damage immunity
+//   /dev crit       — toggle guaranteed crits
+//   /dev dodge      — toggle auto-dodge (every incoming hit dodged)
+//   /dev speed [x]  — movement speed ×x (default 2; 1 to reset)
+//   /dev tp F [x y] — teleport to floor F (optional coords)
+//   /dev spawn ID [n]— spawn n monsters next to you (great for density tests)
+//   /dev kill       — kill all monsters within 14 tiles
+//   /dev priority [on|off] — toggle telegraph-priority live (the event-channel fix)
+//   anything else   — prints the command list
 function handleDevCommand(player: ServerPlayer, text: string): void {
   const [, sub, arg] = text.split(/\s+/);
   const sysToPlayer = (msg: string): void => systemToPlayer(player, msg);
@@ -2479,11 +2497,115 @@ function handleDevCommand(player: ServerPlayer, text: string): void {
     sysToPlayer(`[dev] ${player.name} kitted out: all skills 20, +1000g, bow + alchemy gear. Visit a trainer, then equip in the Classes panel.`);
     return;
   }
-  if (sub === "skills") {
+  if (sub === "skills" || sub === "level") {
     const level = clamp(Math.floor(Number(arg) || 20), 1, 99);
     devSetAllSkills(player, level);
     persistPlayer(player);
     sysToPlayer(`[dev] ${player.name} set all skills to level ${level}.`);
+    return;
+  }
+  if (sub === "heal") {
+    recalculateVitals(player);
+    player.hp = player.maxHp;
+    player.mana = player.maxMana;
+    player.favor = player.maxFavor;
+    sysToPlayer(`[dev] full heal — ${player.hp} HP / ${player.mana} MP / ${player.favor} favor.`);
+    return;
+  }
+  if (sub === "god") {
+    player.godMode = !player.godMode;
+    sysToPlayer(`[dev] godmode ${player.godMode ? "ON — all damage negated" : "OFF"}.`);
+    return;
+  }
+  if (sub === "crit") {
+    player.forceCrit = !player.forceCrit;
+    sysToPlayer(`[dev] forced crits ${player.forceCrit ? "ON" : "OFF"}.`);
+    return;
+  }
+  if (sub === "dodge") {
+    player.forceDodge = !player.forceDodge;
+    sysToPlayer(`[dev] auto-dodge ${player.forceDodge ? "ON — every incoming hit dodged" : "OFF"}.`);
+    return;
+  }
+  if (sub === "speed") {
+    player.devSpeedMult = clamp(Number(arg) || 2, 0.25, 8);
+    sysToPlayer(`[dev] move speed ×${player.devSpeedMult}. (/dev speed 1 to reset)`);
+    return;
+  }
+  if (sub === "item") {
+    const parts = text.split(/\s+/);
+    const id = parts[2] ?? "";
+    const qty = clamp(Math.floor(Number(parts[3]) || 1), 1, 1000);
+    if (!ITEMS[id]) {
+      sysToPlayer(`[dev] unknown item '${id}'. e.g. /dev item hunting_bow 1`);
+      return;
+    }
+    addInventoryItem(player, id, qty);
+    persistPlayer(player);
+    sysToPlayer(`[dev] +${qty}× ${ITEMS[id].label ?? id}.`);
+    return;
+  }
+  if (sub === "tp") {
+    const parts = text.split(/\s+/);
+    const f = Math.floor(Number(parts[2]));
+    if (!Number.isFinite(f)) {
+      sysToPlayer("[dev] usage: /dev tp <floor> [x] [y]");
+      return;
+    }
+    const tx = Number(parts[3]);
+    const ty = Number(parts[4]);
+    const spot = findStandableNear(f, Number.isFinite(tx) ? tx : player.x, Number.isFinite(ty) ? ty : player.y);
+    if (!spot) {
+      sysToPlayer(`[dev] no standable tile on floor ${f} near those coords.`);
+      return;
+    }
+    const oldFloor = player.floor;
+    const oldX = player.x;
+    const oldY = player.y;
+    player.floor = spot.floor;
+    player.x = spot.x;
+    player.y = spot.y;
+    updateSpatialCell(spatial.players, player, oldFloor, oldX, oldY);
+    sysToPlayer(`[dev] teleported to floor ${spot.floor} (${spot.x.toFixed(1)}, ${spot.y.toFixed(1)}).`);
+    return;
+  }
+  if (sub === "spawn") {
+    const parts = text.split(/\s+/);
+    const type = parts[2] ?? "";
+    const count = clamp(Math.floor(Number(parts[3]) || 1), 1, 20);
+    if (!MONSTERS[type]) {
+      sysToPlayer(`[dev] unknown monster '${type}'. e.g. /dev spawn verdant_faultwarden 1`);
+      return;
+    }
+    let spawned = 0;
+    for (let i = 0; i < count; i += 1) {
+      const ang = i * 2.39996;
+      const r = 1.5 + i * 0.2;
+      const spot = findStandableNear(player.floor, player.x + Math.cos(ang) * r, player.y + Math.sin(ang) * r);
+      const sx = Math.floor(spot ? spot.x : player.x);
+      const sy = Math.floor(spot ? spot.y : player.y);
+      spawnMonster({ type, floor: player.floor, x: sx, y: sy, zone: zoneAt(player.floor, sx + 0.5, sy + 0.5) as MonsterSpawn["zone"] });
+      const m = monsters.get(`m${nextMonsterId - 1}`);
+      if (m) m.wanderNextAt = Number.POSITIVE_INFINITY;
+      spawned += 1;
+    }
+    sysToPlayer(`[dev] spawned ${spawned}× ${MONSTERS[type].name ?? type} near you.`);
+    return;
+  }
+  if (sub === "kill") {
+    let killed = 0;
+    const radius = 14;
+    forEachSpatial(spatial.monsters, player.floor, player.x, player.y, radius, (m) => {
+      if (m.deadUntil || m.floor !== player.floor || distanceSq(player, m) > radius * radius) return;
+      damageMonster(player, m, m.hp + 1, "dev");
+      killed += 1;
+    });
+    sysToPlayer(`[dev] slew ${killed} monster(s) within ${radius} tiles.`);
+    return;
+  }
+  if (sub === "priority") {
+    EVENT_PRIORITY = arg ? arg === "on" : !EVENT_PRIORITY;
+    sysToPlayer(`[dev] telegraph priority ${EVENT_PRIORITY ? "ON" : "OFF"} (server-wide).`);
     return;
   }
   if (sub === "unlock") {
@@ -2505,7 +2627,9 @@ function handleDevCommand(player: ServerPlayer, text: string): void {
     sysToPlayer(`[dev] ${player.name} gold set to ${player.gold}.`);
     return;
   }
-  sysToPlayer("[dev] commands: /dev (full kit) · /dev skills N · /dev unlock · /dev gold N");
+  sysToPlayer(
+    "[dev] kit · skills N · level N · unlock · gold N · item ID [n] · heal · god · crit · dodge · speed [x] · tp F [x y] · spawn ID [n] · kill · priority [on|off]"
+  );
 }
 
 function devSetAllSkills(player: ServerPlayer, level: number): void {
