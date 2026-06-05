@@ -60,6 +60,7 @@ import type {
   FireView,
   FishingNodeView,
   GameEvent,
+  BuybackEntryView,
   HerbNodeView,
   InputPayload,
   InventoryItemView,
@@ -700,6 +701,7 @@ wss.on("connection", (rawSocket: WebSocket) => {
     if (message.type === "lootCorpse") lootCorpse(session.player, String(message.id ?? ""));
     if (message.type === "buy") buyItem(session.player, String(message.item ?? ""));
     if (message.type === "sell") sellItem(session.player, String(message.item ?? ""));
+    if (message.type === "buyback") buybackItem(session.player, String(message.item ?? ""));
     if (message.type === "talkNpc") talkNpc(session.player, String(message.id ?? ""));
     if (message.type === "endDialogue") endConversation(session.player);
     if (message.type === "cutTree") cutTree(session.player, String(message.id ?? ""));
@@ -860,6 +862,7 @@ function createPlayer(name: string): ServerPlayer {
     inventory: createInventory(),
     carriedWeight: 0,
     inventoryRevision: 0,
+    buyback: [],
     quests: createQuestState(),
     questRevision: 0,
     reputation: createReputationState(),
@@ -899,6 +902,7 @@ function hydratePlayer(saved: SavedPlayer): ServerPlayer {
   player.reputation = normalizeReputationState(player.reputation);
   player.inventory = normalizeInventory(player.inventory);
   refreshCarriedWeight(player);
+  player.buyback = [];
   player.inventoryRevision = 0;
   player.questRevision = 0;
   player.skillRevision = 0;
@@ -2127,10 +2131,31 @@ function itemSellPrice(id: string): number {
   return Math.max(1, Math.round(value * 0.5));
 }
 
+function itemBuybackPrice(id: string): number {
+  const value = ITEMS[id]?.value ?? 0;
+  if (value <= 0) return 0;
+  return Math.max(1, Math.round(value));
+}
+
 function isSellable(id: string): boolean {
   const spec = ITEMS[id];
   if (!spec || (spec.value ?? 0) <= 0) return false;
   return !(spec.tags ?? []).includes("quest");
+}
+
+// How many distinct items the vendor remembers you sold. Oldest falls off.
+const BUYBACK_LIMIT = 12;
+
+function recordBuyback(player: ServerPlayer, id: string): void {
+  const existing = player.buyback.findIndex((entry) => entry.id === id);
+  if (existing >= 0) {
+    const entry = player.buyback.splice(existing, 1)[0]!;
+    entry.qty += 1;
+    player.buyback.unshift(entry);
+  } else {
+    player.buyback.unshift({ id, qty: 1 });
+  }
+  if (player.buyback.length > BUYBACK_LIMIT) player.buyback.length = BUYBACK_LIMIT;
 }
 
 function sellItem(player: ServerPlayer, id: string): void {
@@ -2146,7 +2171,41 @@ function sellItem(player: ServerPlayer, id: string): void {
   const price = itemSellPrice(id);
   if (!removeInventoryItem(player, id, 1)) return;
   player.gold += price;
+  recordBuyback(player, id);
   systemToPlayer(player, `Sold ${spec.label} for ${price}g.`);
+}
+
+function buybackItem(player: ServerPlayer, id: string): void {
+  if (player.dead) return;
+  if (!nearbyNpcOfRole(player, "vendor")) return;
+  const spec = ITEMS[id];
+  if (!spec) return;
+  const slot = player.buyback.findIndex((entry) => entry.id === id && entry.qty > 0);
+  if (slot < 0) return;
+  const price = itemBuybackPrice(id);
+  if (player.gold < price) {
+    systemToPlayer(player, `You can't afford to buy back ${spec.label} (${price}g).`);
+    return;
+  }
+  if (!addInventoryItem(player, id, 1)) {
+    systemToPlayer(player, "Your inventory is full.");
+    return;
+  }
+  player.gold -= price;
+  const entry = player.buyback[slot]!;
+  entry.qty -= 1;
+  if (entry.qty <= 0) player.buyback.splice(slot, 1);
+  systemToPlayer(player, `Bought back ${spec.label} for ${price}g.`);
+}
+
+function serializeBuyback(player: ServerPlayer): BuybackEntryView[] {
+  const out: BuybackEntryView[] = [];
+  for (const entry of player.buyback) {
+    const spec = ITEMS[entry.id];
+    if (!spec || entry.qty <= 0) continue;
+    out.push({ id: entry.id, label: spec.label, icon: spec.icon, iconUrl: spec.iconUrl, qty: entry.qty, price: itemBuybackPrice(entry.id) });
+  }
+  return out;
 }
 
 function brewPotion(player: ServerPlayer): void {
@@ -4653,6 +4712,7 @@ function serializePlayer(player: ServerPlayer, now: number): PlayerView {
     action,
     buffs,
     inventory: privateView.inventory,
+    buyback: serializeBuyback(player),
     quests: privateView.quests,
     skills: privateView.skills,
     abilities: privateView.abilities,

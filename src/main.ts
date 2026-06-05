@@ -59,6 +59,7 @@ import type { CombatAnimationSpec, ItemUse, TreeType } from "./content-types.ts"
 import type {
   AbilityView,
   BuffsView,
+  BuybackEntryView,
   ClientMessage,
   CorpseView,
   Direction,
@@ -451,6 +452,8 @@ const dom = {
   netStats: el<HTMLElement>("#netStats"),
   vendor: el<HTMLElement>("#vendor"),
   vendorSell: el<HTMLElement>("#vendorSell"),
+  vendorBuyback: el<HTMLElement>("#vendorBuyback"),
+  vendorBuybackHead: el<HTMLElement>("#vendorBuybackHead"),
   vendorCloseButton: el<HTMLButtonElement>("#vendorCloseButton"),
   alchemist: el<HTMLElement>("#alchemist"),
   alchemistCloseButton: el<HTMLButtonElement>("#alchemistCloseButton"),
@@ -2792,6 +2795,7 @@ function renderHud(me: PlayerView): void {
     renderedInventoryDataSignature = inventorySignature;
     renderInventory(me.inventory);
     renderVendorSell(me.inventory);
+    renderVendorBuyback(me.buyback ?? []);
   }
   const equipmentSignature = equipmentHudSignature(me);
   if (!dom.equipmentPanel.classList.contains("hidden") && equipmentSignature !== renderedEquipmentSignature) {
@@ -4496,6 +4500,34 @@ function resolveNpc(npcOrId: string | NpcView): NpcView | null {
 function openVendor(): void {
   showCenterPanel(dom.vendor);
   renderVendorSell(self()?.inventory ?? []);
+  renderVendorBuyback(self()?.buyback ?? []);
+}
+
+let renderedVendorBuybackSignature = " init";
+
+function renderVendorBuyback(buyback: BuybackEntryView[] = []): void {
+  if (dom.vendor.classList.contains("hidden")) return;
+  const signature = buyback.map((b) => `${b.id}:${b.qty}:${b.price}`).join("|");
+  if (signature === renderedVendorBuybackSignature) return;
+  renderedVendorBuybackSignature = signature;
+  dom.vendorBuybackHead.classList.toggle("hidden", buyback.length === 0);
+  dom.vendorBuyback.classList.toggle("hidden", buyback.length === 0);
+  if (buyback.length === 0) {
+    dom.vendorBuyback.innerHTML = "";
+    return;
+  }
+  dom.vendorBuyback.innerHTML = buyback
+    .map((b) => {
+      const qty = b.qty > 1 ? ` ×${b.qty}` : "";
+      return `<button type="button" data-buyback="${escapeHtml(b.id)}">${iconMarkup(b.iconUrl, b.icon, "item-icon")}Buy back ${escapeHtml(b.label)}${qty} (${b.price}g)</button>`;
+    })
+    .join("");
+  dom.vendorBuyback.querySelectorAll<HTMLElement>("[data-buyback]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const item = button.dataset.buyback;
+      if (item) send({ type: "buyback", item });
+    });
+  });
 }
 
 // Sell prices mirror the server (server/index.ts itemSellPrice): half value,
@@ -4512,7 +4544,7 @@ function isSellableItem(id: string): boolean {
   return !(spec.tags ?? []).includes("quest");
 }
 
-let renderedVendorSellSignature = "";
+let renderedVendorSellSignature = " init";
 
 function renderVendorSell(inventory: Array<InventoryItemView | null> = []): void {
   if (dom.vendor.classList.contains("hidden")) return;

@@ -50,6 +50,16 @@ export interface InventoryItemView {
   qty: number;
 }
 
+// A recently-sold item the vendor will sell back at its full market value.
+export interface BuybackEntryView {
+  id: string;
+  label: string;
+  icon: string | null;
+  iconUrl: string | null;
+  qty: number;
+  price: number;
+}
+
 export interface QuestView {
   id: string;
   title: string;
@@ -108,6 +118,8 @@ export interface PlayerView {
   action: ActionView | null;
   buffs: BuffsView;
   inventory: Array<InventoryItemView | null>;
+  // Recently-sold items, offered back at full value. Self view only.
+  buyback?: BuybackEntryView[];
   quests: QuestView[];
   skills: SkillView[];
   abilities: AbilityView[];
@@ -365,6 +377,7 @@ export type ClientMessage =
   | { type: "lootCorpse"; id: string }
   | { type: "buy"; item: string }
   | { type: "sell"; item: string }
+  | { type: "buyback"; item: string }
   | { type: "talkNpc"; id: string }
   | { type: "cutTree"; id: string }
   | { type: "fishNode"; id: string }

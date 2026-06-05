@@ -41,6 +41,7 @@ interface CompactPlayerView {
   ac?: ActionView | null;
   b?: BuffsView;
   inv?: PlayerView["inventory"];
+  bb?: PlayerView["buyback"];
   q?: PlayerView["quests"];
   sk?: PlayerView["skills"];
   ab?: PlayerView["abilities"];
@@ -346,6 +347,7 @@ function compactPlayerView(player: PlayerView): CompactPlayerView {
   if (player.action !== undefined) compact.ac = player.action;
   if (player.buffs !== undefined) compact.b = player.buffs;
   if (player.inventory !== undefined) compact.inv = player.inventory;
+  if (player.buyback !== undefined) compact.bb = player.buyback;
   if (player.quests !== undefined) compact.q = player.quests;
   if (player.skills !== undefined) compact.sk = player.skills;
   if (player.abilities !== undefined) compact.ab = player.abilities;
@@ -383,6 +385,7 @@ function expandPlayerView(player: CompactPlayerView | PlayerView): PlayerView {
     action: player.ac,
     buffs: player.b,
     inventory: player.inv,
+    buyback: player.bb,
     quests: player.q,
     skills: player.sk,
     abilities: player.ab,

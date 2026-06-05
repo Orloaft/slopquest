@@ -83,6 +83,10 @@ export interface ServerPlayer {
   inventory: InventorySlot[];
   carriedWeight: number;
   inventoryRevision: number;
+  // Session-only: items recently sold to a vendor, offered back at full value.
+  // Most-recent first; changes always coincide with an inventory change, so it
+  // rides the inventory cache signature.
+  buyback: Array<{ id: string; qty: number }>;
   quests: Record<string, QuestState>;
   questRevision: number;
   reputation: ReputationState;
