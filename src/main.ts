@@ -1055,7 +1055,7 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "swampTiles", "tileSwampWater", 1041, 102, 74, 71);
   makeTileTexture(this, "swampTiles", "tileSwampWaterMottle", 1129, 102, 74, 71);
   makeTileTexture(this, "swampTiles", "tileSwampWaterEdge", 1217, 102, 82, 71);
-  makeTileTexture(this, "swampTiles", "tileBridge", 95, 744, 68, 66);
+  buildSwampBridge(this); // tileBridge — procedural weathered planks (the sheet's bridge is a side-railing with a transparent deck, which keyed to magenta)
   makeSpriteTexture(this, "swampTiles", "spriteSwampBoulder", 1150, 392, 62, 50);
   makeSpriteTexture(this, "swampTiles", "spriteMireLotus", 820, 388, 38, 36);
   makeSpriteTexture(this, "swampTiles", "spriteSwampReeds", 1448, 944, 72, 72);
@@ -7126,6 +7126,53 @@ function buildCityCurbs(scene: Phaser.Scene): void {
     scene.textures.addCanvas(key, c);
     scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
   }
+}
+
+// Sunken Marsh bridge deck (floor 5, char B). The swamp sheet's only bridge art is a
+// 3/4-view railing whose deck is transparent, so the old crop keyed to magenta and the
+// walkway rendered as a purple void. Bake a clean top-down boardwalk instead: weathered
+// brown planks running across the span, dark seams between boards, a little grain and a
+// few moss-green flecks so it sits in the wetland. Deterministic (hash, no RNG) so it
+// survives resume; tiles seamlessly in any direction.
+function buildSwampBridge(scene: Phaser.Scene): void {
+  const c = document.createElement("canvas");
+  c.width = TILE_SIZE;
+  c.height = TILE_SIZE;
+  const ctx = c.getContext("2d");
+  if (!ctx) return;
+  ctx.imageSmoothingEnabled = false;
+  const plankH = 8; // 4 boards across a 32px tile
+  for (let y = 0; y < TILE_SIZE; y += 1) {
+    const within = y % plankH; // 0 = seam at the top of each board
+    for (let x = 0; x < TILE_SIZE; x += 1) {
+      const h = ((x * 374761393) ^ ((y + 1) * 668265263)) >>> 0;
+      let r = 110;
+      let g = 80;
+      let b = 48; // base weathered oak
+      if (within === 0) {
+        r = 52;
+        g = 36;
+        b = 22;
+      } else if (within === 1) {
+        r = 138;
+        g = 104;
+        b = 66;
+      } // lit top edge of each board
+      const n = (h % 24) - 12; // ±12 grain noise along the board
+      r = Math.max(0, Math.min(255, r + n));
+      g = Math.max(0, Math.min(255, g + Math.round(n * 0.8)));
+      b = Math.max(0, Math.min(255, b + Math.round(n * 0.6)));
+      if (within > 1 && h % 41 === 0) {
+        r = 70;
+        g = 92;
+        b = 48;
+      } // sparse moss fleck
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.fillRect(x, y, 1, 1);
+    }
+  }
+  scene.textures.addCanvas("tileBridge", c);
+  scene.textures.get("tileBridge").setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
 
 // Clean vertical flank walls for the E/W mesa edges. The atlas cols 3/4 are L-shaped concave-
