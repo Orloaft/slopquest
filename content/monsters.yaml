@@ -383,14 +383,14 @@
 - id: crypt_sentinel
   name: Crypt Sentinel
   description: "an armoured guardian sworn to the crypt's dead"
-  maxHp: 118
+  maxHp: 123
   speed: 1.55
-  damage: [14, 24]
+  damage: [15, 25]
   attackMs: 1350
-  xp: 92
+  xp: 106
   isUnholy: true
-  faithXp: 42
-  gold: [18, 36]
+  faithXp: 46
+  gold: [22, 42]
   aggro: 6.5
   range: 1.1
   armor: 4
@@ -523,12 +523,12 @@
   name: Crimson Burrower
   role: elite
   description: "a shard-fed burrower with Searing Core crystal fused through its shell"
-  maxHp: 125
+  maxHp: 115
   speed: 2.25
-  damage: [18, 30]
+  damage: [16, 27]
   attackMs: 1050
-  xp: 95
-  gold: [20, 42]
+  xp: 130
+  gold: [28, 52]
   aggro: 6
   range: 1.05
   armor: 3
@@ -543,16 +543,32 @@
     - item: vault_key_tooth
       chance: 0.35
 
+- id: deepdelve_wight
+  name: Deepdelve Wight
+  role: elite
+  description: "a mine-dead miner fused to its pick, armoured in the ore it died for"
+  maxHp: 112
+  speed: 1.7
+  damage: [15, 24]
+  attackMs: 1300
+  xp: 104
+  isUnholy: true
+  faithXp: 40
+  gold: [20, 40]
+  aggro: 6
+  range: 1.1
+  armor: 5
+
 # --- The Sunken Desert (floor 7) ---
 - id: dune_skitterer
   name: Dune Skitterer
   description: "a sand-swift skitterer of the deep desert"
-  maxHp: 30
+  maxHp: 72
   speed: 4.1
-  damage: [3, 6]
+  damage: [14, 24]
   attackMs: 850
-  xp: 30
-  gold: [4, 9]
+  xp: 80
+  gold: [12, 24]
   aggro: 6.5
   range: 1
 
@@ -560,14 +576,14 @@
   name: Sun-Scorched Wraith
   role: turret
   description: "a heat-warped spectre that saps a warrior's strength"
-  maxHp: 64
+  maxHp: 132
   speed: 0
-  damage: [4, 8]
+  damage: [8, 16]
   attackMs: 2000
-  xp: 52
+  xp: 88
   isUnholy: true
-  faithXp: 24
-  gold: [12, 22]
+  faithXp: 34
+  gold: [16, 30]
   aggro: 7
   range: 6
   ranged: true
@@ -579,26 +595,42 @@
 - id: reef_prowler
   name: Reef Prowler
   description: "a fast coastal predator stalking the tideline"
-  maxHp: 34
+  maxHp: 85
   speed: 4.0
-  damage: [6, 11]
+  damage: [15, 28]
   attackMs: 820
-  xp: 32
-  gold: [5, 11]
+  xp: 92
+  gold: [16, 32]
   aggro: 9
   range: 1
+
+- id: drowned_marauder
+  name: Drowned Marauder
+  role: elite
+  description: "a salt-crusted revenant risen from the drowned road, heavy with barnacle plate"
+  maxHp: 128
+  speed: 1.6
+  damage: [14, 23]
+  attackMs: 1300
+  xp: 100
+  isUnholy: true
+  faithXp: 38
+  gold: [20, 40]
+  aggro: 6.5
+  range: 1.1
+  armor: 4
 
 # --- The Untamed Jungle (floor 9) ---
 - id: venomous_stalker
   name: Venomous Stalker
   role: ambush
   description: "a cloaked jungle hunter that strikes from cover"
-  maxHp: 80
+  maxHp: 88
   speed: 2.8
-  damage: [18, 28]
+  damage: [20, 31]
   attackMs: 1100
-  xp: 70
-  gold: [14, 28]
+  xp: 108
+  gold: [22, 42]
   aggro: 5
   range: 1.05
   burrow: true
@@ -608,14 +640,14 @@
   name: Ancient Totem Wraith
   role: turret
   description: "a bound spirit that fires curses down the trail"
-  maxHp: 80
+  maxHp: 149
   speed: 0
-  damage: [6, 11]
+  damage: [11, 20]
   attackMs: 1800
-  xp: 60
+  xp: 100
   isUnholy: true
-  faithXp: 28
-  gold: [12, 24]
+  faithXp: 40
+  gold: [18, 34]
   aggro: 7
   range: 6
   ranged: true
@@ -630,17 +662,17 @@
   name: Verdant Faultwarden
   role: boss
   description: "an overgrown Waystone guardian widening the tectonic tears it was made to seal"
-  maxHp: 520
+  maxHp: 200
   speed: 1.75
-  damage: [22, 36]
+  damage: [7, 12]
   attackMs: 1150
-  xp: 260
-  gold: [110, 180]
+  xp: 180
+  gold: [90, 160]
   aggro: 9
   range: 1.2
   armor: 6
   heavyAttack:
-    cooldownMs: 5000
+    cooldownMs: 4800
     windupMs: 1000
-    damageMultiplier: 1.7
-    radius: 2.25
+    damageMultiplier: 2.4
+    radius: 2.5

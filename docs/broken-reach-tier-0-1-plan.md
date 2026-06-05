@@ -93,23 +93,40 @@ Class payoff:
 - Holding the line for Corbin unlocks Vanguard.
 - Both can eventually be earned, but the player's first unlock should reflect who they helped first.
 
-## Act 3: The Ominous Depths
+## Act 3: The Ominous Depths — Beyond the Reach (early Tier 2)
 
-Tier: late Tier 1, roughly levels 10-15.
+Tier: **early Tier 2, ~36-55.** This is *not* the back half of Broken Reach —
+Broken Reach is Tier 1 (levels 1-35) and ends at the Searing Badlands frontier
+(floor 6). The southern descent is the first region *beyond* the Reach: it picks
+up where the badlands leave off and climbs to the Verdant Faultwarden capstone at
+L55. Deep Tier 2 (the `jungle_ready` L58 profile and up) is future content for
+the next region beyond the mountains.
 
-After the west and east problems are resolved, the evidence points south. Searing Cores are not spreading outward; they are being pulled up from below the southern collapse.
+After the west and east problems are resolved, the evidence points south. Searing
+Cores are not spreading outward; they are being pulled up from below the southern
+collapse. The Reach gives way; the player crosses into Tier 2.
 
-Southern route:
+Southern route (floors 7-10, the descent):
 
-1. Mourner's Gate: opens beneath or beyond the graveyard after the outer branches are proven.
-2. Sunken Beach: drowned road, salt ruins, washed-up Searing Core fragments.
-3. Untamed Jungle: tight overgrowth, old machinery, ambush paths.
-4. Sunken Desert Caves: mandatory mining side-dungeon for vault key pieces.
-5. Jungle Vault: final Tier 1 capstone and route map to Tier 2.
+1. Mourner's Gate: opens beneath or beyond the graveyard after the outer branches are proven — the seam between Tier 1 and Tier 2.
+2. Sunken Desert (floor 7, **L36-42**): the step-up off the badlands. Sand-swift dune skitterers and heat-warped sun wraiths.
+3. Sunken Beach (floor 8, **L42-46**): drowned road, salt ruins, washed-up Searing Core fragments. Fast reef prowlers harry the open sand; drowned marauders rise heavy off the salt-ruin road.
+4. Deepdelve Mine (floor 10, **L32-53**): optional parallel mining dungeon, danger rising with depth (RuneScape-style — deeper chambers hold nastier variants).
+5. Untamed Jungle (floor 9, **L46-55**): tight overgrowth, old machinery, ambush paths, climbing to the Vault.
+6. Jungle Vault: the early-Tier-2 capstone and the gate to deep Tier 2.
 
-## Sunken Desert Caves
+### Beyond the Reach level bands (authoritative — mirrors `ZONE_LEVEL_BANDS`)
 
-Role: mandatory preparation dungeon.
+| Floor | Zone | Band | Notable |
+|---|---|---|---|
+| 7 | Sunken Desert | 36-42 | dune_skitterer 36, sun_wraith 40 |
+| 8 | Sunken Beach | 42-46 | reef_prowler 42, drowned_marauder 46 (new) |
+| 9 | Untamed Jungle | 46-55 | totem_wraith 46, venomous_stalker 49, **verdant_faultwarden 55 (capstone)** |
+| 10 | Deepdelve Mine | 32-53 | canyon_scavenger 32 / dust_burrower 35 (mouth) → deepdelve_wight 47 (new), crypt_sentinel 48, crimson_burrower 53 |
+
+## Deepdelve Mine (the desert caves)
+
+Role: optional preparation dungeon (floor 10), parallel to the jungle route.
 
 Core mechanics:
 
@@ -121,12 +138,12 @@ Core mechanics:
 Rewards:
 
 - Vault key components.
-- Mining materials for Tier 1 gear upgrades.
+- Mining materials for early Tier 2 gear upgrades.
 - Lore proving that Searing Cores are part of a buried sealing engine.
 
 ## Jungle Vault
 
-Role: final Tier 1 exam.
+Role: early-Tier-2 capstone exam (the gate from early to deep Tier 2).
 
 Class expression:
 

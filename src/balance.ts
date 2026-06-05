@@ -85,15 +85,22 @@ export function monsterCombatLevel(monster: Monster): number {
 // Region/tier level bands. A spawn's monster (via monsterCombatLevel) must fall
 // within its zone's [min, max] band — this is the balance equivalent of the
 // asset budget: scripts/balance-bands.ts fails the build on any drift.
-// Broken Reach (Tier 1, levels 1-35) only. "Beyond the Reach" zones (desert,
-// beach, jungle, deepMine) are intentionally unlisted until that region is
-// re-tiered; their spawns are not yet band-checked.
+// Broken Reach (Tier 1, levels 1-35) and Beyond the Reach (early Tier 2,
+// ~36-55, the descent south). The early-T2 ceiling is 55 (the Verdant
+// Faultwarden capstone); the `jungle_ready` profile (L58) targets *deep* Tier 2,
+// which is future content. deepMine's entry chambers carry over the badlands
+// pack/burrower (L32-35) as the soft mouth, climbing to L53 in the deeps.
 export const ZONE_LEVEL_BANDS: Record<string, [number, number]> = {
   woods: [1, 25],
   cemetery: [11, 28],
   crypt: [11, 21],
   marsh: [18, 27],
-  badlands: [32, 35]
+  badlands: [32, 35],
+  // Beyond the Reach — early Tier 2
+  desert: [36, 42],
+  beach: [42, 46],
+  jungle: [46, 55],
+  deepMine: [32, 53]
 };
 
 export interface ZoneBandViolation {

@@ -115,11 +115,14 @@ monsters:
   - { type: dune_skitterer, at: { floor: 7, x: 68, y: 32 }, zone: desert }
   - { type: sun_wraith,     at: { floor: 7, x: 37, y: 22 }, zone: desert }
   - { type: sun_wraith,     at: { floor: 7, x: 64, y: 26 }, zone: desert }
-  # The Sunken Beach (floor 8): fast reef prowlers in the open sand.
-  - { type: reef_prowler, at: { floor: 8, x: 20, y: 24 }, zone: beach }
-  - { type: reef_prowler, at: { floor: 8, x: 42, y: 14 }, zone: beach }
-  - { type: reef_prowler, at: { floor: 8, x: 71, y: 29 }, zone: beach }
-  - { type: reef_prowler, at: { floor: 8, x: 85, y: 35 }, zone: beach }
+  # The Sunken Beach (floor 8): fast reef prowlers harry the open sand while
+  # drowned marauders rise heavy off the salt-ruin road.
+  - { type: reef_prowler,    at: { floor: 8, x: 20, y: 24 }, zone: beach }
+  - { type: reef_prowler,    at: { floor: 8, x: 42, y: 14 }, zone: beach }
+  - { type: reef_prowler,    at: { floor: 8, x: 71, y: 29 }, zone: beach }
+  - { type: reef_prowler,    at: { floor: 8, x: 85, y: 35 }, zone: beach }
+  - { type: drowned_marauder, at: { floor: 8, x: 55, y: 40 }, zone: beach }
+  - { type: drowned_marauder, at: { floor: 8, x: 30, y: 46 }, zone: beach }
   # The Untamed Jungle (floor 9): hidden stalkers ambush; totem wraiths fire down paths.
   - { type: venomous_stalker, at: { floor: 9, x: 17, y: 24 }, zone: jungle }
   - { type: venomous_stalker, at: { floor: 9, x: 46, y: 11  }, zone: jungle }
@@ -127,8 +130,8 @@ monsters:
   - { type: totem_wraith,     at: { floor: 9, x: 60, y: 26 }, zone: jungle }
   # The Deepdelve Mine (floor 10): danger rises with depth. Cave scavengers
   # patrol the iron/coal chambers in pairs; burrowers ambush the mid corridors;
-  # undead haunt the silver/gold deeps; crypt sentinels guard the mithril/adamant
-  # pocket. The entry chamber (safe zone) stays clear.
+  # deepdelve wights haunt the silver/gold deeps; crypt sentinels guard the
+  # mithril/adamant pocket. The entry chamber (safe zone) stays clear.
   - { type: canyon_scavenger, at: { floor: 10, x: 34, y: 9  }, zone: deepMine }
   - { type: canyon_scavenger, at: { floor: 10, x: 37, y: 9  }, zone: deepMine }
   - { type: canyon_scavenger, at: { floor: 10, x: 16, y: 34 }, zone: deepMine }
@@ -137,10 +140,10 @@ monsters:
   - { type: dust_burrower,    at: { floor: 10, x: 46, y: 32 }, zone: deepMine }
   - { type: crimson_burrower,  at: { floor: 10, x: 34, y: 38 }, zone: deepMine }
   - { type: crimson_burrower,  at: { floor: 10, x: 64, y: 36 }, zone: deepMine }
-  - { type: skeleton,         at: { floor: 10, x: 52, y: 24 }, zone: deepMine }
-  - { type: skeleton,         at: { floor: 10, x: 58, y: 22 }, zone: deepMine }
-  - { type: ghoul,            at: { floor: 10, x: 72, y: 38 }, zone: deepMine }
-  - { type: skeleton,         at: { floor: 10, x: 78, y: 40 }, zone: deepMine }
+  - { type: deepdelve_wight,  at: { floor: 10, x: 52, y: 24 }, zone: deepMine }
+  - { type: deepdelve_wight,  at: { floor: 10, x: 58, y: 22 }, zone: deepMine }
+  - { type: deepdelve_wight,  at: { floor: 10, x: 72, y: 38 }, zone: deepMine }
+  - { type: deepdelve_wight,  at: { floor: 10, x: 78, y: 40 }, zone: deepMine }
   - { type: crypt_sentinel,   at: { floor: 10, x: 45, y: 53 }, zone: deepMine }
   - { type: crypt_sentinel,   at: { floor: 10, x: 51, y: 55 }, zone: deepMine }
   - { type: verdant_faultwarden, at: { floor: 9, x: 85, y: 44 }, zone: jungle }
