@@ -2627,6 +2627,7 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "reach_vole") return { family: "rat", width: 44, height: 28, yOffset: 2 };
   if (monster.type === "restless_husk") return { family: "ghoul", width: 44, height: 52, yOffset: -12 };
   if (monster.type === "grave_shambler") return { family: "skeleton", width: 44, height: 50, yOffset: -11 };
+  if (monster.type === "bound_wight") return { family: "grave_revenant", width: 46, height: 56, yOffset: -16 };
   return { family: "goblin", width: 42, height: 46, yOffset: -10 };
 }
 

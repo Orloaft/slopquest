@@ -414,23 +414,49 @@
   slowPct: 25
   slowMs: 1600
 
+- id: bound_wight
+  name: Bound Wight
+  role: trash
+  description: "a grave-bound revenant that drifts the crypt's middle halls"
+  maxHp: 70
+  speed: 2.0
+  damage: [6, 9]
+  attackMs: 1250
+  xp: 40
+  isUnholy: true
+  faithXp: 24
+  gold: [10, 22]
+  aggro: 6
+  range: 1
+
+# The Ashen Crypt's capstone. Re-tiered from an orphaned L95 bruiser down to a
+# beatable ~L21 first-dungeon boss for the Broken Reach 1-15 arc: a telegraphed
+# heavy slam you can read and step out of, and a vault-hoard drop (potion + a
+# gold-ore nugget that feeds the new sell/smith loops).
 - id: boss
   name: Ashen Warden
   role: boss
   description: "keeper of the crypt's deepest, dust-choked vault"
-  maxHp: 420
-  speed: 1.85
-  damage: [18, 30]
-  attackMs: 1100
-  xp: 180
-  gold: [80, 135]
+  maxHp: 105
+  speed: 1.6
+  damage: [6, 10]
+  attackMs: 1450
+  xp: 90
+  isUnholy: true
+  faithXp: 60
+  gold: [40, 75]
   aggro: 9
   range: 1.15
   heavyAttack:
-    cooldownMs: 5200
-    windupMs: 950
-    damageMultiplier: 1.65
-    radius: 2.1
+    cooldownMs: 6000
+    windupMs: 1000
+    damageMultiplier: 1.4
+    radius: 1.9
+  drops:
+    - item: strong_potion
+      chance: 0.5
+    - item: gold_ore
+      chance: 0.4
 
 # --- The Sunken Marsh (floor 5) ---
 - id: skitterer

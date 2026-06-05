@@ -26,17 +26,21 @@ monsters:
   - { type: ghoul,         at: { floor: 1, x: 22, y: 58 }, zone: cemetery }
   - { type: pale_banshee,  at: { floor: 1, x: 66, y: 52 }, zone: cemetery }
   - { type: skeleton,      at: { floor: 1, x: 86, y: 59 }, zone: cemetery }
-  # The Ashen Crypt (90x60): undead lurk in the chambers; the Ashen Warden boss
-  # holds the far-east chamber.
-  - { type: skeleton,      at: { floor: 2, x: 12, y: 11 }, zone: crypt }
-  - { type: ghoul,         at: { floor: 2, x: 15, y: 41 }, zone: crypt }
-  - { type: grave_revenant, at: { floor: 2, x: 23, y: 45 }, zone: crypt }
-  - { type: skeleton,      at: { floor: 2, x: 38, y: 19 }, zone: crypt }
-  - { type: crypt_sentinel, at: { floor: 2, x: 48, y: 17 }, zone: crypt }
-  - { type: ghoul,         at: { floor: 2, x: 65, y: 37 }, zone: crypt }
-  - { type: pale_banshee,  at: { floor: 2, x: 83, y: 43 }, zone: crypt }
-  - { type: crypt_sentinel, at: { floor: 2, x: 84, y: 28 }, zone: crypt }
-  - { type: boss,          at: { floor: 2, x: 93, y: 35 }, zone: crypt }
+  # The Ashen Crypt (90x60): the Broken Reach's FIRST DUNGEON, re-tiered for the
+  # 1-15 arc. A west-to-east danger gradient — Restless Husks (L11) at the entry
+  # chambers, Grave Shamblers (L14) through the middle, Bound Wights (L16) in the
+  # deep halls — climbing to the Ashen Warden (~L21 capstone boss, telegraphed
+  # heavy slam) in the far-east vault. Was a wall of L26-45 undead + an orphaned
+  # L95 boss, unbeatable for anyone who could actually reach it from the cemetery.
+  - { type: restless_husk,  at: { floor: 2, x: 12, y: 11 }, zone: crypt }
+  - { type: restless_husk,  at: { floor: 2, x: 15, y: 41 }, zone: crypt }
+  - { type: grave_shambler, at: { floor: 2, x: 23, y: 45 }, zone: crypt }
+  - { type: grave_shambler, at: { floor: 2, x: 38, y: 19 }, zone: crypt }
+  - { type: grave_shambler, at: { floor: 2, x: 48, y: 17 }, zone: crypt }
+  - { type: bound_wight,    at: { floor: 2, x: 65, y: 37 }, zone: crypt }
+  - { type: bound_wight,    at: { floor: 2, x: 83, y: 43 }, zone: crypt }
+  - { type: bound_wight,    at: { floor: 2, x: 84, y: 28 }, zone: crypt }
+  - { type: boss,           at: { floor: 2, x: 93, y: 35 }, zone: crypt }
   # Northwood (enlarged 110x72): the roster spread across the larger wood as a
   # danger gradient — gentle critters near the southern Waystone arrival, tougher
   # greenskins deeper north and out toward the marsh/badlands gates.

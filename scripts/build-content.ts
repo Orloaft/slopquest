@@ -39,6 +39,7 @@ interface RawMonster {
   id?: string;
   name?: string;
   description?: string;
+  role?: string;
   maxHp?: number;
   speed?: number;
   damage?: Range;
@@ -532,6 +533,9 @@ const MONSTERS = Object.fromEntries(
       xp: m.xp, gold: m.gold, aggro: m.aggro, range: m.range
     };
     if (m.description) entry["description"] = m.description;
+    // Explicit encounter role (content authority). Without this the engine falls
+    // back to hp/shape heuristics — which mislabels a low-hp boss as "trash".
+    if (m.role) entry["role"] = m.role;
     if (m.ranged) entry["ranged"] = true;
     if (m.slowPct != null) entry["slowPct"] = m.slowPct;
     if (m.slowMs != null) entry["slowMs"] = m.slowMs;
