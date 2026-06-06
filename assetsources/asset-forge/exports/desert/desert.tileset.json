@@ -4,7 +4,7 @@
   "image": "desert.png",
   "tileSize": 32,
   "columns": 24,
-  "rows": 5,
+  "rows": 4,
   "tiles": [
     {
       "index": 0,
@@ -483,26 +483,6 @@
     },
     {
       "index": 95,
-      "role": "plateau-relief",
-      "blocked": false
-    },
-    {
-      "index": 96,
-      "role": "plateau-relief",
-      "blocked": false
-    },
-    {
-      "index": 97,
-      "role": "plateau-relief",
-      "blocked": false
-    },
-    {
-      "index": 98,
-      "role": "plateau-relief",
-      "blocked": false
-    },
-    {
-      "index": 99,
       "role": "plateau-relief",
       "blocked": false
     }

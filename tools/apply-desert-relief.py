@@ -120,45 +120,44 @@ def main():
         ov[y0:y0 + TS, x0:x0 + TS, :3] = rgb
         ov[y0:y0 + TS, x0:x0 + TS, 3:4] = oa * 255
 
-    # ---- plateau: flatten the dithered bottom edge to one baseline -------------
-    botRow = [None] * C
-    for c in range(C):
-        rs = [r for r in range(R) if PLAT(r, c)]
-        if rs:
-            botRow[c] = max(rs)
-    target = [None] * C
-    for c in range(C):
-        if botRow[c] is None:
-            continue
-        cand = [botRow[c]]
-        for dc in (-1, 1):
-            b = botRow[c + dc] if 0 <= c + dc < C else None
-            if b is not None and abs(b - botRow[c]) <= 1:
-                cand.append(b)
-        target[c] = max(cand)
-    inband = lambda r, c: (target[c] is not None and (target[c] - FD + 1) <= r <= target[c])
+    # ---- plateau: a cliff face on EVERY south edge (every run bottom), not just
+    #      the lowest one per column. Foot baseline flattened locally so the
+    #      1-cell-dithered edge reads as one clean line. -------------------------
+    south = lambda r, c: PLAT(r, c) and not PLAT(r + 1, c)  # plateau cell w/ drop below
+    edges_by_col = {c: [r for r in range(R) if south(r, c)] for c in range(C)}
 
-    # top surface on non-band plateau cells
+    def flat_foot(r, c):  # snap to the lowest neighbouring south edge within 1 row
+        t = r
+        for dc in (-1, 1):
+            for e in edges_by_col.get(c + dc, []):
+                if abs(e - r) <= 1:
+                    t = max(t, e)
+        return t
+
+    wall_kind = {}  # (r,c) -> 'top'|'mid'|'base'
+    feet = []       # (c, foot_row) for AO
+    for c in range(C):
+        for rb in edges_by_col[c]:
+            ft = flat_foot(rb, c)            # rb or rb+1 (notch fill onto sand)
+            feet.append((c, ft))
+            for r in range(ft - FD + 1, ft + 1):
+                if PLAT(r, c) or rb < r <= ft:  # plateau face cell, or sand notch foot
+                    dd = ft - r
+                    wall_kind[(r, c)] = "base" if dd == 0 else ("top" if dd == FD - 1 else "mid")
+
+    # top surface on plateau cells that aren't part of a wall band
     for r in range(R):
         for c in range(C):
-            if not PLAT(r, c) or inband(r, c):
+            if not PLAT(r, c) or (r, c) in wall_kind:
                 continue
             m = (1 if PLAT(r - 1, c) else 0) | (2 if PLAT(r, c + 1) else 0) | (4 if PLAT(r + 1, c) else 0) | (8 if PLAT(r, c - 1) else 0)
             put(ptop_tile(maskToIdx[m]), c, r)
-    # wall band (the cliff face, in courses)
-    for c in range(C):
-        if target[c] is None:
-            continue
-        t = target[c]
-        for r in range(t - FD + 1, t + 1):
-            dd = t - r
-            rk = "base" if dd == 0 else ("top" if dd == FD - 1 else "mid")
-            put(WALL[rk].copy(), c, r)
+    # cliff face courses
+    for (r, c), rk in wall_kind.items():
+        put(WALL[rk].copy(), c, r)
     # contact AO on sand directly below each wall foot
-    for c in range(C):
-        if target[c] is None:
-            continue
-        baseY = (target[c] + 1) * TS
+    for c, ft in feet:
+        baseY = (ft + 1) * TS
         for dy in range(7):
             for x in range(TS):
                 px = c * TS + x; py = baseY + dy
