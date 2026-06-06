@@ -1,0 +1,130 @@
+{
+  "schema": "asset-forge/tileset@1",
+  "name": "beach",
+  "image": "beach.png",
+  "tileSize": 32,
+  "columns": 24,
+  "rows": 1,
+  "tiles": [
+    {
+      "index": 0,
+      "role": "beach-cliff-left",
+      "blocked": true
+    },
+    {
+      "index": 1,
+      "role": "beach-cliff-right",
+      "blocked": true
+    },
+    {
+      "index": 2,
+      "role": "beach-stairs",
+      "blocked": false
+    },
+    {
+      "index": 3,
+      "role": "beach-sand",
+      "blocked": false
+    },
+    {
+      "index": 4,
+      "role": "beach-shell-sand",
+      "blocked": false
+    },
+    {
+      "index": 5,
+      "role": "beach-wet-sand",
+      "blocked": false
+    },
+    {
+      "index": 6,
+      "role": "beach-ripple-sand",
+      "blocked": false
+    },
+    {
+      "index": 7,
+      "role": "beach-path",
+      "blocked": false
+    },
+    {
+      "index": 8,
+      "role": "beach-stairs-left",
+      "blocked": false
+    },
+    {
+      "index": 9,
+      "role": "beach-stairs-right",
+      "blocked": false
+    },
+    {
+      "index": 10,
+      "role": "beach-cliff",
+      "blocked": true
+    },
+    {
+      "index": 11,
+      "role": "beach-rock-wall",
+      "blocked": true
+    },
+    {
+      "index": 12,
+      "role": "beach-rock",
+      "blocked": true
+    },
+    {
+      "index": 13,
+      "role": "beach-lagoon",
+      "blocked": true
+    },
+    {
+      "index": 14,
+      "role": "beach-lagoon",
+      "blocked": true
+    },
+    {
+      "index": 15,
+      "role": "beach-lagoon",
+      "blocked": true
+    },
+    {
+      "index": 16,
+      "role": "beach-lagoon",
+      "blocked": true
+    },
+    {
+      "index": 17,
+      "role": "beach-lagoon",
+      "blocked": true
+    },
+    {
+      "index": 18,
+      "role": "beach-shallow",
+      "blocked": true
+    },
+    {
+      "index": 19,
+      "role": "beach-ocean",
+      "blocked": true
+    },
+    {
+      "index": 20,
+      "role": "beach-ocean-ripple",
+      "blocked": true
+    },
+    {
+      "index": 21,
+      "role": "beach-ocean-rock",
+      "blocked": true
+    },
+    {
+      "index": 22,
+      "role": "portal-desert",
+      "blocked": false
+    },
+    {
+      "index": 23,
+      "role": "portal-jungle",
+      "blocked": false
+    }
+  ]
+}

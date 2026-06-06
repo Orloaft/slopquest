@@ -31,11 +31,12 @@ function discoverStages(): Map<string, StageDef> {
   const out = new Map<string, StageDef>();
   for (const [key, cmd] of Object.entries<string>(pkg.scripts ?? {})) {
     const m = /^assets:stage:([a-z0-9-]+)$/.exec(key);
-    if (!m) continue; // skips `assets:stage:<name>:check` and unrelated scripts
+    const name = m?.[1];
+    if (!name) continue; // skips `assets:stage:<name>:check` and unrelated scripts
     const stagePath = /--stage\s+(\S+)/.exec(cmd)?.[1];
     const vocabPath = /--vocab\s+(\S+)/.exec(cmd)?.[1];
     if (!stagePath || !vocabPath) continue;
-    out.set(m[1], { name: m[1], stagePath, vocabPath, script: key });
+    out.set(name, { name, stagePath, vocabPath, script: key });
   }
   return out;
 }

@@ -1,0 +1,187 @@
+{
+  "zone": "beach",
+  "floor": 8,
+  "stageName": "beach",
+  "description": "Sunken Beach (floor 8): the hand-authored floor-8 geometry re-derived as an editable asset-forge stage. One 32px tile per char, cropped from beach-tiles.png the same way main.ts builds its beach textures. Collision/sight mirror shared.ts.",
+  "requiredPortals": {
+    "Y": {
+      "x": 31,
+      "y": 1
+    },
+    "j": {
+      "x": 61,
+      "y": 17
+    }
+  },
+  "requiredWalkable": [],
+  "chars": {
+    "0": {
+      "role": "beach-cliff-left",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#ba9261"
+    },
+    "1": {
+      "role": "beach-cliff-right",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#b58e5d"
+    },
+    "2": {
+      "role": "beach-stairs",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#b58552"
+    },
+    "e": {
+      "role": "beach-sand",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#f2ca89"
+    },
+    "l": {
+      "role": "beach-shell-sand",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e4b169"
+    },
+    ",": {
+      "role": "beach-wet-sand",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#d8b176"
+    },
+    ";": {
+      "role": "beach-ripple-sand",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#f3cc8b"
+    },
+    "z": {
+      "role": "beach-path",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#c89259"
+    },
+    "[": {
+      "role": "beach-stairs-left",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#c79961"
+    },
+    "]": {
+      "role": "beach-stairs-right",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#a97c4c"
+    },
+    "x": {
+      "role": "beach-cliff",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#bd945f"
+    },
+    "|": {
+      "role": "beach-rock-wall",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#b68b57"
+    },
+    "u": {
+      "role": "beach-rock",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#997e5b"
+    },
+    "v": {
+      "role": "beach-lagoon",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4da69a"
+    },
+    "{": {
+      "role": "beach-lagoon",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4da69a"
+    },
+    "}": {
+      "role": "beach-lagoon",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4da69a"
+    },
+    "(": {
+      "role": "beach-lagoon",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4da69a"
+    },
+    ")": {
+      "role": "beach-lagoon",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4da69a"
+    },
+    "=": {
+      "role": "beach-shallow",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4da69a"
+    },
+    "I": {
+      "role": "beach-ocean",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#49a79a"
+    },
+    "!": {
+      "role": "beach-ocean-ripple",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#47a59a"
+    },
+    "?": {
+      "role": "beach-ocean-rock",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4ca69c"
+    },
+    "Y": {
+      "role": "portal-desert",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#c89259"
+    },
+    "j": {
+      "role": "portal-jungle",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#c89259"
+    }
+  }
+}
