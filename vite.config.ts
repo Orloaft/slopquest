@@ -116,6 +116,77 @@ function buildDecoCatalog(stage: any): Array<{ value: string; label: string; url
   return out;
 }
 
+// --- Monster & tree sprite icons (editor markers) ---------------------------
+// The Spawns and Trees layers used to draw a plain ring. To show the real sprite
+// instead, the editor needs — per type — the spritesheet URL plus the source
+// crop of one representative frame (we use the "down"-facing walk frame 0). That
+// frame geometry is the SINGLE SOURCE OF TRUTH in src/main.ts (createActorFrames
+// / monsterActorSpec, and the tree makeSpriteTexture calls). This table MIRRORS
+// it for the editor only and must be kept in sync if those frames move. The
+// sheets are magenta-keyed; the editor strips the chroma key client-side
+// (mirrors chromaKeyMagenta() in main.ts) so the markers read as clean sprites.
+interface SpriteIcon { url: string; sx: number; sy: number; sw: number; sh: number }
+
+// Families whose walk sheets share one layout. Mirrors WOODLAND_BESPOKE_FAMILIES
+// + the new-enemies montage in src/main.ts createActorFrames.
+const WOODLAND_BESPOKE_FAMILIES = [
+  "dire_wolf", "orc", "ghoul", "wild_boar", "thorn_hedgehog", "forest_spider",
+  "forest_slime", "mushroom_brute", "sapling_deer", "ancient_treant", "bone_druid",
+  "forest_pixie", "bog_wraith", "grave_revenant", "crypt_sentinel", "pale_banshee"
+];
+const NEW_ENEMY_FAMILIES = [
+  "canyon_scavenger", "dust_burrower", "dune_skitterer", "sun_wraith",
+  "reef_prowler", "venomous_stalker", "totem_wraith"
+];
+// family -> down/frame-0 crop. The padded/explicit families are transcribed from
+// createActorFrames (the goblin/skeleton rects include the +8 paddedSpriteFrames pad).
+const MONSTER_ICON_BY_FAMILY: Record<string, SpriteIcon> = {
+  goblin:       { url: "/goblin.png",             sx: 295, sy: 338, sw: 115, sh: 124 },
+  skeleton:     { url: "/skeleton.png",           sx: 288, sy: 344, sw: 108, sh: 127 },
+  rat:          { url: "/ratandspiders.png",      sx: 612, sy: 126, sw: 54,  sh: 46  },
+  spider:       { url: "/ratandspiders.png",      sx: 616, sy: 686, sw: 58,  sh: 54  },
+  goblinScout:  { url: "/goblin-scout-sheet.png", sx: 0,   sy: 586, sw: 281, sh: 293 },
+  goblinShaman: { url: "/goblin-shaman-sheet.png",sx: 0,   sy: 626, sw: 313, sh: 313 },
+  goblinRaider: { url: "/goblin-raider-sheet.png",sx: 0,   sy: 640, sw: 320, sh: 320 },
+  greyWolf:     { url: "/grey-wolf-sheet.png",    sx: 0,   sy: 640, sw: 320, sh: 320 },
+  wisp:         { url: "/wisp-sheet.png",         sx: 0,   sy: 0,   sw: 221, sh: 443 },
+  skitterer:    { url: "/skitterer-spitter.png",  sx: 257, sy: 274, sw: 88,  sh: 96  },
+  mire_spitter: { url: "/skitterer-spitter.png",  sx: 683, sy: 274, sw: 100, sh: 96  },
+};
+// Woodland bespoke: /<family-with-dashes>-sheet.png, down row = (0+2)*96, 96×96.
+for (const f of WOODLAND_BESPOKE_FAMILIES) {
+  MONSTER_ICON_BY_FAMILY[f] = { url: `/${f.replaceAll("_", "-")}-sheet.png`, sx: 0, sy: 192, sw: 96, sh: 96 };
+}
+// New-area montage families in /new-enemies.png: rows 2..8, frame0 x=0 (64×56).
+NEW_ENEMY_FAMILIES.forEach((f, r) => {
+  MONSTER_ICON_BY_FAMILY[f] = { url: "/new-enemies.png", sx: 0, sy: (r + 2) * 56, sw: 64, sh: 56 };
+});
+// monster type -> family. Mirrors monsterActorSpec() in src/main.ts; unlisted
+// types fall back there to the default "goblin" family, so we do the same.
+const MONSTER_FAMILY: Record<string, string> = {
+  rat: "rat", spider: "spider", skeleton: "skeleton", ghoul: "ghoul", boss: "skeleton",
+  orc: "orc", goblin_scout: "goblinScout", goblin_shaman: "goblinShaman", wolf: "greyWolf",
+  wisp: "wisp", dire_wolf: "dire_wolf", wild_boar: "wild_boar", thorn_hedgehog: "thorn_hedgehog",
+  forest_spider: "forest_spider", forest_slime: "forest_slime", mushroom_brute: "mushroom_brute",
+  sapling_deer: "sapling_deer", ancient_treant: "ancient_treant", bone_druid: "bone_druid",
+  forest_pixie: "forest_pixie", bog_wraith: "bog_wraith", grave_revenant: "grave_revenant",
+  crypt_sentinel: "crypt_sentinel", pale_banshee: "pale_banshee",
+  skitterer: "skitterer", mire_spitter: "mire_spitter", canyon_scavenger: "canyon_scavenger",
+  dust_burrower: "dust_burrower", dune_skitterer: "dune_skitterer", sun_wraith: "sun_wraith",
+  reef_prowler: "reef_prowler", venomous_stalker: "venomous_stalker", totem_wraith: "totem_wraith",
+  reach_hen: "rat", meadow_hopper: "rat", reach_vole: "rat",
+  restless_husk: "ghoul", grave_shambler: "skeleton", bound_wight: "grave_revenant",
+};
+function monsterIcon(type: string): SpriteIcon | null {
+  return MONSTER_ICON_BY_FAMILY[MONSTER_FAMILY[type] ?? "goblin"] ?? null;
+}
+// Tree textureKey -> crop, off /northwood-trees-v1.png. Mirrors the spriteTree/
+// spritePine makeSpriteTexture() calls in src/main.ts. Species reuse these keys.
+const TREE_ICON_BY_TEXTURE: Record<string, SpriteIcon> = {
+  spriteTree: { url: "/northwood-trees-v1.png", sx: 35,  sy: 55, sw: 355, sh: 385 },
+  spritePine: { url: "/northwood-trees-v1.png", sx: 455, sy: 50, sw: 220, sh: 390 },
+};
+
 // --- Editor "Layers" feature -------------------------------------------------
 // Each editable region maps to a runtime FLOOR number + a spawn ZONE id. The
 // editor canvas works in tile coords (1:1 with spawns.yaml `at:` coords — all
@@ -435,7 +506,7 @@ function editorApi(): Plugin {
             editorSpawns = [...base, ...over];
             monsterTypes = ((readYaml("content/monsters.yaml") as any[]) ?? [])
               .filter((m) => m && m.id)
-              .map((m) => ({ id: m.id, name: m.name ?? m.id }));
+              .map((m) => ({ id: m.id, name: m.name ?? m.id, icon: monsterIcon(m.id) }));
             // Ore nodes for this floor (base mining-nodes.yaml minus suppressions +
             // editor overlay). Each node ships its at-tile (x/y) and approach (ax/ay).
             const oreCfg = NODE_LAYERS.ore!;
@@ -497,7 +568,7 @@ function editorApi(): Plugin {
             editorTrees = [...baseTrees, ...overTrees];
             treeTypes = (((readYaml("content/tree-types.yaml") as any[]) ?? []))
               .filter((t) => t && t.id)
-              .map((t) => ({ value: t.id, label: `${t.label ?? t.id} (L${t.requiredLevel ?? 1})`, fields: { type: t.id } }));
+              .map((t) => ({ value: t.id, label: `${t.label ?? t.id} (L${t.requiredLevel ?? 1})`, fields: { type: t.id }, icon: TREE_ICON_BY_TEXTURE[t.textureKey] ?? null }));
 
             // Teleport pads for this floor + the list of destination floors (every
             // floor/zone mapped in STAGE_META) for the palette + per-pad inspector.

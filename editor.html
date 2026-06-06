@@ -198,6 +198,41 @@
         const im = new Image(); im.src = url; im.onload = () => draw();
         spriteImgs.set(url, im);
       }
+      // Spawn/tree markers draw the real sprite: a crop of one walk frame off the
+      // family/species spritesheet (icon = {url,sx,sy,sw,sh} from the server). The
+      // sheets are magenta-keyed like the game, so we crop into an offscreen canvas
+      // and strip the chroma key ONCE, caching the result. isMagentaKey mirrors the
+      // same function in src/main.ts.
+      const spriteCrops = new Map();    // "url|sx,sy,sw,sh" -> chroma-keyed canvas
+      function isMagentaKey(r, g, b) {
+        if (r > 95 && b > 90 && g < 135 && Math.abs(r - b) < 95 && r > g * 1.35 && b > g * 1.25) return true;
+        if (g < 10 && r > 70 && b > 42 && r > b - 5 && r > g * 7 && b > g * 7) return true;
+        return g < 12 && r > 45 && b > 45 && Math.abs(r - b) < 60 && r > g * 6 && b > g * 6;
+      }
+      function spriteCrop(icon) {
+        if (!icon || !icon.url) return null;
+        const k = icon.url + "|" + icon.sx + "," + icon.sy + "," + icon.sw + "," + icon.sh;
+        const hit = spriteCrops.get(k); if (hit) return hit;
+        const im = spriteImgs.get(icon.url);
+        if (!im || !im.complete || !im.naturalWidth) return null;   // not loaded yet
+        const cv = document.createElement("canvas"); cv.width = icon.sw; cv.height = icon.sh;
+        const c = cv.getContext("2d"); c.imageSmoothingEnabled = false;
+        c.drawImage(im, icon.sx, icon.sy, icon.sw, icon.sh, 0, 0, icon.sw, icon.sh);
+        try {
+          const id = c.getImageData(0, 0, icon.sw, icon.sh), d = id.data;
+          for (let i = 0; i < d.length; i += 4) if (isMagentaKey(d[i], d[i + 1], d[i + 2])) d[i + 3] = 0;
+          c.putImageData(id, 0, 0);
+        } catch (e) { /* same-origin, shouldn't taint; fall back to the raw crop */ }
+        spriteCrops.set(k, cv);
+        return cv;
+      }
+      // The icon for a sprite-layer entity, looked up from the palette by its type.
+      function iconForEnt(lay, e) {
+        if (!lay || !lay.sprite) return null;
+        const st = layerData[lay.id]; if (!st) return null;
+        if (!st.iconByVal) { st.iconByVal = {}; for (const o of st.opts) if (o.icon) st.iconByVal[o.value] = o.icon; }
+        return st.iconByVal[e[lay.field]] || null;
+      }
 
       const refXY = (ref) => { const n = +ref.split(":")[1]; return [(n % ACOLS) * TS, Math.floor(n / ACOLS) * TS]; };
       const key = (x, y) => x + "," + y;
@@ -685,8 +720,8 @@
       // is the primary attribute used for the marker colour + label.
       const LAYERS = [
         { id: "spawns", label: "👹 Enemy spawns", btn: "layerSpawns", panel: "spawnPanel", sel: "spawnType",
-          noun: "spawn", api: "/editor/api/spawns/save", field: "type", coordKind: "int", suppress: "tile",
-          palette: () => (D.monsterTypes || []).map((m) => ({ value: m.id, label: `${m.name} (${m.id})`, fields: { type: m.id } })),
+          noun: "spawn", api: "/editor/api/spawns/save", field: "type", coordKind: "int", suppress: "tile", sprite: true,
+          palette: () => (D.monsterTypes || []).map((m) => ({ value: m.id, label: `${m.name} (${m.id})`, fields: { type: m.id }, icon: m.icon })),
           fromState: () => D.spawns || [], read: (s) => ({ type: s.type }) },
         { id: "ore", label: "⛏️ Ore", btn: "layerOre", panel: "orePanel", sel: "oreKind",
           noun: "ore vein", api: "/editor/api/nodes/save?layer=ore", field: "kind", coordKind: "center",
@@ -703,8 +738,8 @@
         // model (like spawns) rather than the id-keyed node model (ore/herbs), and
         // sit at tile centres so placements read like the hand-authored floats.
         { id: "trees", label: "🌳 Trees", btn: "layerTrees", panel: "treePanel", sel: "treeType",
-          noun: "tree", api: "/editor/api/trees/save", field: "type", coordKind: "center", suppress: "tile",
-          palette: () => (D.treeTypes || []),     // [{value,label,fields:{type}}]
+          noun: "tree", api: "/editor/api/trees/save", field: "type", coordKind: "center", suppress: "tile", sprite: true,
+          palette: () => (D.treeTypes || []),     // [{value,label,fields:{type},icon}]
           fromState: () => D.tree || [], read: (t) => ({ type: t.type }) },
         // Decorations are STAGE-LOCAL visual props (stage.json `objects`, no resource),
         // not a content-overlay layer: there's no base/overlay/suppress split and no
@@ -760,6 +795,7 @@
             baseKey: s.source === "base" ? (lay.suppress === "id" ? s.id : key(s.x, s.y)) : undefined,
           }));
           const opts = lay.palette();
+          if (lay.sprite) for (const o of opts) if (o.icon) ensureSpriteImg(o.icon.url);
           layerData[lay.id] = { ents: list, removed: new Set(), dirty: false, opts, paletteVal: opts[0]?.value ?? null };
           if (lay.kind === "objects") {
             buildDecoPalette(lay);                 // thumbnail grid (not a dropdown)
@@ -929,11 +965,39 @@
           vctx.textAlign = "start"; vctx.textBaseline = "alphabetic";
         }
       }
+      // A spawn/tree marker drawn as its real sprite: the walk-frame crop, scaled to
+      // fit ~1.3×1.7 tiles and bottom-anchored to the tile (feet grounded, like the
+      // in-game actor), with a foot dot for source (hollow ◯ = from yaml, filled ●
+      // = editor-placed) and the type label above. Returns false if the sprite isn't
+      // ready yet so the caller can fall back to the plain ring.
+      function drawNodeSprite(e) {
+        const cv = spriteCrop(iconForEnt(activeLayer, e));
+        if (!cv) return false;
+        const { px, py } = centerPx(activeLayer, e), on = e === entSel, col = entColor(e);
+        const s = Math.min((TS * 1.3) / cv.width, (TS * 1.7) / cv.height);
+        const dw = cv.width * s, dh = cv.height * s;
+        const footY = py + TS * 0.5, bx = px - dw / 2, by = footY - dh;
+        vctx.imageSmoothingEnabled = false;
+        vctx.drawImage(cv, bx, by, dw, dh);
+        if (on) { vctx.lineWidth = 2 / cam.scale; vctx.strokeStyle = "#ffcc44"; vctx.strokeRect(bx, by, dw, dh); }
+        vctx.beginPath(); vctx.arc(px, footY, TS * 0.1, 0, Math.PI * 2);
+        if (e.source === "overlay") { vctx.fillStyle = on ? "#ffcc44" : col; vctx.fill(); }
+        else { vctx.lineWidth = 2 / cam.scale; vctx.strokeStyle = on ? "#ffcc44" : "#000a"; vctx.stroke(); }
+        if (cam.scale > 0.45) {
+          vctx.fillStyle = "#fff"; vctx.strokeStyle = "#000"; vctx.lineWidth = 3 / cam.scale;
+          vctx.font = `${Math.round(TS * 0.3)}px system-ui`; vctx.textAlign = "center"; vctx.textBaseline = "bottom";
+          const t = entLabel(e), tt = t.length > 10 ? t.slice(0, 10) + "…" : t;
+          vctx.strokeText(tt, px, by - 1); vctx.fillText(tt, px, by - 1);
+          vctx.textAlign = "start"; vctx.textBaseline = "alphabetic";
+        }
+        return true;
+      }
       function drawEntities() {
         if (!activeLayer) return;
         if (activeLayer.kind === "objects") { for (const e of ents) drawDecoEnt(e); return; }
         const r = TS * 0.32, showLabel = cam.scale > 0.45;
         for (const e of ents) {
+          if (activeLayer.sprite && drawNodeSprite(e)) continue;   // real sprite; else fall back to a ring
           const { px, py } = centerPx(activeLayer, e), col = entColor(e), on = e === entSel;
           // approach tick (gathering nodes): line from the node to its standing tile
           if (activeLayer.approach && e.ax != null) {
