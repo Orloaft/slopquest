@@ -4,7 +4,7 @@
   "image": "desert.png",
   "tileSize": 32,
   "columns": 24,
-  "rows": 2,
+  "rows": 5,
   "tiles": [
     {
       "index": 0,
@@ -174,6 +174,336 @@
     {
       "index": 33,
       "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 34,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 35,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 36,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 37,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 38,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 39,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 40,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 41,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 42,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 43,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 44,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 45,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 46,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 47,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 48,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 49,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 50,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 51,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 52,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 53,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 54,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 55,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 56,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 57,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 58,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 59,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 60,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 61,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 62,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 63,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 64,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 65,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 66,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 67,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 68,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 69,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 70,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 71,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 72,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 73,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 74,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 75,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 76,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 77,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 78,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 79,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 80,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 81,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 82,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 83,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 84,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 85,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 86,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 87,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 88,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 89,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 90,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 91,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 92,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 93,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 94,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 95,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 96,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 97,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 98,
+      "role": "plateau-relief",
+      "blocked": false
+    },
+    {
+      "index": 99,
+      "role": "plateau-relief",
       "blocked": false
     }
   ]
