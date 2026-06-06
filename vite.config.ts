@@ -376,9 +376,25 @@ function editorApi(): Plugin {
               .filter((t) => t && t.id)
               .map((t) => ({ value: t.id, label: `${t.label ?? t.id} (L${t.requiredLevel ?? 1})`, fields: { type: t.id } }));
           }
+          // Decorations are stage-local visual props (stage.json `objects` with no
+          // `resource`). Offer the distinct sprites this stage already uses as a
+          // palette — placing stamps another of the same prop (key + px size +
+          // blocking). New sprites stay asset-forge-authored. Independent of the
+          // floor/zone mapping, so it works on every stage.
+          const decoSeen = new Map<string, any>();
+          for (const o of stage.objects ?? []) {
+            if (o.resource || decoSeen.has(o.key)) continue;
+            decoSeen.set(o.key, {
+              value: o.key,
+              label: `${o.key} (${o.w}×${o.h}${o.blocking ? " ⛔" : ""})`,
+              fields: { key: o.key, w: o.w, h: o.h, blocking: !!o.blocking }
+            });
+          }
+          const decoKeys = [...decoSeen.values()];
           send(res, 200, {
             floor,
             zone,
+            decoKeys,
             spawns: editorSpawns,
             monsterTypes,
             ore: editorOre,
@@ -401,7 +417,9 @@ function editorApi(): Plugin {
             fringe: fringe?.data ?? null,
             blobsets,
             rotations: stage.rotations ?? {},
-            objects: stage.objects.map((o: any) => ({ x: o.x, y: o.y, w: o.w, h: o.h }))
+            objects: stage.objects.map((o: any) => ({
+              x: o.x, y: o.y, w: o.w, h: o.h, key: o.key, blocking: !!o.blocking, resource: o.resource ?? null
+            }))
           });
         } catch (e) {
           send(res, 500, { error: String(e) });
@@ -552,6 +570,35 @@ function editorApi(): Plugin {
             }
             writeTreeOverlay({ trees, removed });
             const result = await regenerate("content:build");
+            send(res, result.ok ? 200 : 500, result);
+          })
+          .catch((e) => send(res, 400, { error: String(e) }));
+      });
+
+      // Decorations save: rewrite the stage's non-resource `objects` (visual props)
+      // straight into stage.json, then re-run that stage's import so the game hot-
+      // reloads. Resource objects (choppable trees etc.) are owned by asset-forge
+      // and left untouched. Stage-local — needs no floor/zone mapping, unlike the
+      // gathering layers. Payload: { objects:[{key,x,y,w,h,blocking}] } = the FULL
+      // desired prop set for the stage.
+      server.middlewares.use("/editor/api/objects/save", (req, res) => {
+        if (req.method !== "POST") return send(res, 405, { error: "POST only" });
+        let def: StageDef;
+        try {
+          def = resolveStage(req);
+        } catch (e) {
+          return send(res, 404, { error: String(e) });
+        }
+        body(req)
+          .then(async (payload) => {
+            const stage = readJson(def.stagePath);
+            const kept = (stage.objects ?? []).filter((o: any) => o.resource);
+            const deco = (payload.objects ?? []).map((o: any) => ({
+              key: o.key, x: o.x, y: o.y, w: o.w, h: o.h, blocking: !!o.blocking
+            }));
+            stage.objects = [...kept, ...deco];
+            writeJson(def.stagePath, stage);
+            const result = await regenerate(def.script);
             send(res, result.ok ? 200 : 500, result);
           })
           .catch((e) => send(res, 400, { error: String(e) }));

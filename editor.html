@@ -74,6 +74,7 @@
             <button id="layerOre">⛏️ Ore</button>
             <button id="layerHerbs">🌿 Herbs</button>
             <button id="layerTrees">🌳 Trees</button>
+            <button id="layerDeco">🪴 Decorations</button>
           </div>
           <div id="spawnPanel" style="display:none">
             <div class="row">
@@ -98,6 +99,12 @@
               <select id="treeType" style="flex:1; background:#0d1014; color:#d8dee4; border:1px solid #3a4651; border-radius:5px; padding:5px;"></select>
             </div>
             <small style="display:block; padding:2px 10px; color:#6c7986;">Woodcutting trees. Species (level/xp/log/sprite) come from tree-types.yaml. Click = place a choppable tree · drag = move · right-click / Del = delete. ◯ = from spawns.yaml, ● = editor-placed.</small>
+          </div>
+          <div id="decoPanel" style="display:none">
+            <div class="row">
+              <select id="decoKey" style="flex:1; background:#0d1014; color:#d8dee4; border:1px solid #3a4651; border-radius:5px; padding:5px;"></select>
+            </div>
+            <small style="display:block; padding:2px 10px; color:#6c7986;">Visual props in this stage's objects. The list = sprites the stage already uses (stamp more of the same). Click = place · drag = move (snaps to tile) · right-click / Del = delete. Saves into stage.json; choppable trees aren't touched. New sprites are asset-forge-authored.</small>
           </div>
         </div>
 
@@ -673,6 +680,16 @@
           noun: "tree", api: "/editor/api/trees/save", field: "type", coordKind: "center", suppress: "tile",
           palette: () => (D.treeTypes || []),     // [{value,label,fields:{type}}]
           fromState: () => D.tree || [], read: (t) => ({ type: t.type }) },
+        // Decorations are STAGE-LOCAL visual props (stage.json `objects`, no resource),
+        // not a content-overlay layer: there's no base/overlay/suppress split and no
+        // floor/zone gating — `kind:"objects"` flags the few places that diverge
+        // (working set, marker draw as a sprite box, save payload). The whole prop set
+        // is rewritten to stage.json on save (resource objects kept untouched).
+        { id: "deco", kind: "objects", label: "🪴 Decorations", btn: "layerDeco", panel: "decoPanel", sel: "decoKey",
+          noun: "decoration", api: "/editor/api/objects/save", field: "key", coordKind: "int",
+          palette: () => (D.decoKeys || []),       // [{value:key, label, fields:{key,w,h,blocking}}]
+          fromState: () => (D.objects || []).filter((o) => !o.resource),
+          read: (o) => ({ key: o.key, w: o.w, h: o.h, blocking: o.blocking }) },
       ];
       const layerById = Object.fromEntries(LAYERS.map((l) => [l.id, l]));
       // coordinate convention helpers
@@ -685,13 +702,20 @@
       function initLayers() {
         layerMode = null; activeLayer = null; ents = []; entSel = null; dragging = null;
         for (const k of Object.keys(layerData)) delete layerData[k];
+        // Floor layers (spawns/ore/herbs/trees) need a floor/zone mapping; the
+        // Decorations layer is stage-local and always available. The panel shows as
+        // long as ANY layer is offered (always true — every stage has props).
         const mapped = D.floor != null;
-        $("layerPanel").style.display = mapped ? "" : "none";
-        $("layerHint").textContent = mapped ? `floor ${D.floor} · ${D.zone}` : "";
-        if (!mapped) { setLayer(null); return; }
+        $("layerPanel").style.display = "";
+        $("layerHint").textContent = mapped ? `floor ${D.floor} · ${D.zone}` : "props only";
         for (const lay of LAYERS) {
+          const avail = lay.kind === "objects" || mapped;
+          $(lay.btn).style.display = avail ? "" : "none";
+          if (!avail) { $(lay.panel).style.display = "none"; $(lay.btn).classList.remove("on"); continue; }
+          // Deco objects carry no source/base split — default them to "overlay" so
+          // every prop is editable + drawn filled, and none is treated as a base.
           const list = lay.fromState().map((s) => ({
-            x: s.x, y: s.y, source: s.source, ...lay.read(s),
+            x: s.x, y: s.y, source: s.source ?? "overlay", ...lay.read(s),
             baseKey: s.source === "base" ? (lay.suppress === "id" ? s.id : key(s.x, s.y)) : undefined,
           }));
           const opts = lay.palette();
@@ -775,8 +799,30 @@
         ents.splice(i, 1); if (entSel === e) entSel = null; st.dirty = true;
         $("status").textContent = `Deleted ${entLabel(e)}.`;
       }
+      // A decoration draws as its sprite's bounding box (bottom-anchored at the
+      // object's tile, matching the "Show trees/props" overlay), plus a handle dot
+      // on the anchor tile you click to select/drag it.
+      function drawDecoEnt(e) {
+        const on = e === entSel, col = entColor(e), w = e.w || TS, h = e.h || TS;
+        const bx = e.x * TS, by = e.y * TS - (h - TS);
+        vctx.fillStyle = on ? "rgba(255,204,68,0.28)" : "rgba(120,180,255,0.20)";
+        vctx.fillRect(bx, by, w, h);
+        vctx.lineWidth = (on ? 3 : 1.5) / cam.scale;
+        vctx.strokeStyle = on ? "#ffcc44" : col;
+        vctx.strokeRect(bx, by, w, h);
+        vctx.beginPath(); vctx.arc((Math.floor(e.x) + 0.5) * TS, (Math.floor(e.y) + 0.5) * TS, TS * 0.14, 0, Math.PI * 2);
+        vctx.fillStyle = on ? "#ffcc44" : col; vctx.fill();
+        if (cam.scale > 0.45) {
+          vctx.fillStyle = "#fff"; vctx.strokeStyle = "#000"; vctx.lineWidth = 3 / cam.scale;
+          vctx.font = `${Math.round(TS * 0.3)}px system-ui`; vctx.textAlign = "center"; vctx.textBaseline = "bottom";
+          const t = String(e.key || ""), tt = t.length > 10 ? t.slice(0, 10) + "…" : t;
+          vctx.strokeText(tt, bx + w / 2, by - 1); vctx.fillText(tt, bx + w / 2, by - 1);
+          vctx.textAlign = "start"; vctx.textBaseline = "alphabetic";
+        }
+      }
       function drawEntities() {
         if (!activeLayer) return;
+        if (activeLayer.kind === "objects") { for (const e of ents) drawDecoEnt(e); return; }
         const r = TS * 0.32, showLabel = cam.scale > 0.45;
         for (const e of ents) {
           const { px, py } = centerPx(activeLayer, e), col = entColor(e), on = e === entSel;
@@ -803,6 +849,10 @@
       // The exact payload a save POSTs for a layer: overlay placements + suppressions.
       function buildPayload(lay) {
         const st = layerData[lay.id], over = st.ents.filter((e) => e.source === "overlay");
+        // Decorations: the whole prop set is the payload (no base/overlay/suppress).
+        if (lay.kind === "objects") {
+          return { objects: st.ents.map((e) => ({ key: e.key, x: e.x, y: e.y, w: e.w, h: e.h, blocking: !!e.blocking })) };
+        }
         if (lay.suppress === "id") {
           return {
             nodes: over.map((e) => {
@@ -975,7 +1025,7 @@
         for (const lay of LAYERS) {
           const st = layerData[lay.id];
           if (st && st.dirty) {
-            const p = buildPayload(lay), cnt = (p.nodes || p.overlay).length;
+            const p = buildPayload(lay), cnt = (p.nodes || p.overlay || p.objects).length;
             $("status").textContent = `Saving ${lay.noun}s + rebuilding…`;
             if (await saveLayer(lay)) done.push(`${cnt} ${lay.noun}(s)`);
           }
