@@ -62,13 +62,9 @@
         <label class="tog"><input type="checkbox" id="optTrees" /> Show trees/props</label>
         <label class="tog"><input type="checkbox" id="optGrid" checked /> Grid</label>
 
-        <div id="plateauPanel">
-          <h2>Plateau <small>(auto-tile)</small></h2>
-          <div class="row">
-            <button id="plGrass" title="Paint the walkable grass top — edges & corners auto-fit">🟩 Top</button>
-            <button id="plWall" title="Paint the rock face below the top — caps, feet & corners auto-fit; more rows = taller">🟫 Wall</button>
-            <button id="plTint" title="Click a plateau top to toggle its bright elevation highlight">✨ Tint</button>
-          </div>
+        <div id="autotilePanel" style="display:none">
+          <h2>Auto-tile <small>(paint membership; edges auto-fit)</small></h2>
+          <div class="row" id="autotileTools"></div>
         </div>
 
         <h2>Roster <small>(click to select)</small></h2>
@@ -114,9 +110,11 @@
       const legendAdds = {}, vocabAdds = {};
       let roster = [];              // {char, ref, blocked, road, sightBlocked, role, minimapColor}
       let sel = null;               // selected roster entry
-      let tool = "paint";           // paint | erase | pick | plateau
+      let tool = "paint";           // paint | erase | pick | autotile | tint
       let brushRot = 0;             // 0/90/180/270 applied to new paints
-      let plateauMat = "grass";     // grass | wall — material for the plateau autotile tool
+      let activePart = null;        // selected autotile part (paint membership + reflow)
+      let activeTintPart = null;    // selected part for the tint/recolor flood
+      let activePartList = [];      // autotile parts available for the loaded stage
       const cam = { scale: 1, x: 0, y: 0 };
       let painting = false, panning = false, panStart = null;
       let hover = null;             // {x,y}
@@ -139,7 +137,7 @@
         for (const k of Object.keys(vocabAdds)) delete vocabAdds[k];
         undoStack.length = 0;
         roster = []; sel = null; brushRot = 0; hover = null;
-        tool = "paint"; plateauMat = "grass"; userMoved = false;
+        tool = "paint"; activePart = null; activeTintPart = null; userMoved = false;
         $("addForm").classList.remove("show");
       }
 
@@ -154,10 +152,11 @@
         return best;
       }
 
-      // Plateau auto-tiling only makes sense where the full plateau char-set lives in
-      // the legend (currently just Northwood's forest atlas). Hide the panel elsewhere.
-      function plateauSupported() {
-        return [...GRASS_NORMAL, ...WALL_SET].every((c) => c in D.legend);
+      // Which autotile parts apply to the loaded stage — a part is offered only when
+      // every char it NEEDS exists in the legend (so e.g. plateau shows only on stages
+      // whose atlas carries the plateau tiles). Drives the data-driven auto-tile panel.
+      function computeActiveParts() {
+        activePartList = terrainParts().filter((p) => p.needs.every((ch) => ch in D.legend));
       }
 
       async function loadStages() {
@@ -184,7 +183,7 @@
         eraseChar = dominantChar() || "F";
         $("tErase").textContent = "Erase→" + eraseChar;
         $("stageSel").value = name;
-        $("plateauPanel").style.display = plateauSupported() ? "" : "none";
+        computeActiveParts(); buildAutotilePanel();
         atlas = new Image(); atlas.src = D.atlasUrl;
         await atlas.decode();
         atlasRead = document.createElement("canvas"); atlasRead.width = atlas.width; atlasRead.height = atlas.height;
@@ -379,7 +378,6 @@
       const GRASS_SET = new Set([...GRASS_NORMAL, ...GRASS_LIT]);          // walkable top
       const WALL_SET  = new Set(["c", "v", "b", "h", "i", "j", "k", "l", "o", "p", "r"]); // rock face
       const inBounds = (x, y) => x >= 0 && y >= 0 && x < D.cols && y < D.rows;
-      const plMat = (x, y) => { const c = charAt(x, y); return GRASS_SET.has(c) ? "grass" : WALL_SET.has(c) ? "wall" : null; };
       const inGrass = (x, y) => inBounds(x, y) && GRASS_SET.has(charAt(x, y));
       const inWall  = (x, y) => inBounds(x, y) && WALL_SET.has(charAt(x, y));
       // is this grass an ELEVATED plateau top (vs. lowland)? Scan straight down through
@@ -423,9 +421,8 @@
       }
       function autotileAt(x, y) {
         if (!inBounds(x, y)) return;
-        const m = plMat(x, y);
-        if (m === "grass") applyChar(x, y, resolveGrass(x, y));
-        else if (m === "wall") applyChar(x, y, resolveWall(x, y));
+        const p = partAt(x, y);
+        if (p) applyChar(x, y, p.resolve(x, y));
       }
       // contact shadow now lives baked inside the foot tiles' own grass base
       // (darkest at the rock-meets-ground line, fading out by the foot's bottom edge),
@@ -459,37 +456,90 @@
         extendWallToMatch(x + 1, depth + 1);
       }
 
-      function paintPlateau(x, y, mat) {
-        applyChar(x, y, mat === "grass" ? "g" : "v"); // stamp membership…
-        reflowAround(x, y);                            // …then resolve the 3x3
-        if (mat === "grass") extendWallToMatch(x, 0);  // pull the face under the new top
+      // ---- generic autotile engine (data-driven; Phase 1) --------------------
+      // An autotile PART is a paintable membership layer: stamp its `fill` char and
+      // every cell in the part re-resolves its exact tile from its neighbours via
+      // `resolve`. Parts are pure data — a part is offered for a stage only when all
+      // the chars it `needs` exist in the legend, so the toolbar is data-driven.
+      // Plateau (grass top + rock wall) is the first group; road / water blob parts
+      // slot straight in here once their edge tiles exist in a stage's atlas — give
+      // them a `resolve: blobResolver(memberOf, bitmaskToChar)` (Phase 2).
+      function terrainParts() {
+        return [
+          { group: "Plateau", id: "grass", fill: "g", needs: GRASS_NORMAL,
+            label: "🟩 Top", status: "Plateau TOP — paint the walkable grass; edges & corners auto-fit. Erase to reshape.",
+            memberOf: inGrass, resolve: resolveGrass, afterPaint: (x, y) => extendWallToMatch(x, 0),
+            tint: { lit: LIT_OF, norm: NORM_OF, requireElevated: true } },
+          { group: "Plateau", id: "wall", fill: "v", needs: ["c", "v", "b", "h", "i", "j", "k", "l", "o", "p", "r"],
+            label: "🟫 Wall", status: "Plateau WALL — paint the rock face below the top; caps, feet & end-corners auto-fit. More rows = taller cliff.",
+            memberOf: inWall, resolve: resolveWall },
+        ];
+      }
+      function partAt(x, y) { if (!inBounds(x, y)) return null; for (const p of activePartList) if (p.memberOf(x, y)) return p; return null; }
+      function paintPart(p, x, y) { applyChar(x, y, p.fill); reflowAround(x, y); p.afterPaint?.(x, y); }
+
+      // 4-neighbour "blob" resolver for Phase 2 (roads / water): pick a tile char from
+      // `map` keyed by the N|E|S|W membership bitmask (1|2|4|8). Supply a stage's
+      // bitmask→char table once its atlas carries the 16 edge/corner variants.
+      function blobResolver(memberOf, map, fallback) {
+        return (x, y) => {
+          const m = (memberOf(x, y - 1) ? 1 : 0) | (memberOf(x + 1, y) ? 2 : 0) | (memberOf(x, y + 1) ? 4 : 0) | (memberOf(x - 1, y) ? 8 : 0);
+          return map[m] ?? fallback;
+        };
       }
 
-      // flood the connected plateau top and toggle its whole palette (bright<->normal)
-      // based on the clicked cell's current tint. One click = one undoable action.
-      function tintPlateau(x, y) {
-        if (plMat(x, y) !== "grass") { $("status").textContent = "Click a plateau TOP to highlight it."; return; }
-        if (!isElevatedTop(x, y)) { $("status").textContent = "That grass isn't an elevated top (no cliff face below it) — Tint only highlights plateaus."; return; }
-        const makeLit = !isLit(charAt(x, y));
+      // flood the connected part and toggle its whole palette (bright<->normal) based
+      // on the clicked cell's current tint. One click = one undoable action. Generic
+      // over any part that declares a `tint` palette (currently the plateau top).
+      function tintFlood(p, x, y) {
+        const pal = p?.tint; if (!pal) return;
+        const lit = (ch) => ch in pal.norm;
+        const norm = (ch) => pal.norm[ch] || ch;
+        if (!p.memberOf(x, y)) { $("status").textContent = `Click a ${p.group.toLowerCase()} top to highlight it.`; return; }
+        if (pal.requireElevated && !isElevatedTop(x, y)) { $("status").textContent = "That grass isn't an elevated top (no cliff face below it) — Tint only highlights plateaus."; return; }
+        const makeLit = !lit(charAt(x, y));
         beginAction();
         const stack = [[x, y]], seen = new Set(); let n = 0; const CAP = 8000;
         while (stack.length && n < CAP) {
           const [cx, cy] = stack.pop(), k = key(cx, cy);
           if (seen.has(k) || !inBounds(cx, cy)) continue;
           seen.add(k);
-          if (plMat(cx, cy) !== "grass" || !isElevatedTop(cx, cy)) continue; // stay on the elevated top; never leak into lowland grass through a wall gap
-          const role = normRole(charAt(cx, cy));
-          applyChar(cx, cy, makeLit ? LIT_OF[role] : role);
+          if (!p.memberOf(cx, cy) || (pal.requireElevated && !isElevatedTop(cx, cy))) continue; // stay on the part; never leak through a gap
+          const role = norm(charAt(cx, cy));
+          applyChar(cx, cy, makeLit ? pal.lit[role] : role);
           n++;
           stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
         }
         endAction();
-        $("status").textContent = `${makeLit ? "Highlighted" : "Reset"} plateau top — ${n} cell(s).`;
+        $("status").textContent = `${makeLit ? "Highlighted" : "Reset"} ${p.group.toLowerCase()} — ${n} cell(s).`;
+      }
+
+      // Build the auto-tile toolbar from the parts active for this stage: one button
+      // per part (paint membership) plus a Tint button per part that has a palette.
+      function buildAutotilePanel() {
+        const wrap = $("autotilePanel"), tools = $("autotileTools");
+        tools.innerHTML = "";
+        if (!activePartList.length) { wrap.style.display = "none"; return; }
+        wrap.style.display = "";
+        for (const p of activePartList) {
+          const b = document.createElement("button");
+          b.textContent = p.label; b.title = `Auto-tile: ${p.group} ${p.id}`;
+          b._part = p; b._kind = "paint";
+          b.onclick = () => { tool = "autotile"; activePart = p; setTool(); $("status").textContent = p.status; };
+          tools.appendChild(b);
+          if (p.tint) {
+            const t = document.createElement("button");
+            t.textContent = "✨ Tint"; t.title = "Click a plateau top to toggle its bright elevation highlight";
+            t._part = p; t._kind = "tint";
+            t.onclick = () => { tool = "tint"; activeTintPart = p; setTool(); $("status").textContent = "Tint — click a plateau top to toggle its bright elevation highlight (click again to reset)."; };
+            tools.appendChild(t);
+          }
+        }
       }
 
       function paintCell(x, y) {
         if (tool === "pick") { pickAt(x, y); return; }
-        if (tool === "plateau") { paintPlateau(x, y, plateauMat); return; }
+        if (tool === "autotile") { if (activePart) paintPart(activePart, x, y); return; }
         if (tool === "erase") {
           const f = roster.find((r) => r.char === eraseChar);
           if (!f) { $("status").textContent = "No background tile to erase to."; return; }
@@ -527,7 +577,7 @@
         if (e.button === 1 || spaceDown) { panning = true; userMoved = true; panStart = { x: e.clientX - cam.x, y: e.clientY - cam.y }; e.preventDefault(); return; }
         if (e.button !== 0) return; // right-click handled by contextmenu
         const c = cellAt(e.clientX, e.clientY); if (!c) return;
-        if (tool === "tint") { tintPlateau(c.x, c.y); draw(); return; } // single click floods, no drag
+        if (tool === "tint") { tintFlood(activeTintPart, c.x, c.y); draw(); return; } // single click floods, no drag
         painting = true; beginAction(); paintCell(c.x, c.y); draw();
       });
       window.addEventListener("mousemove", (e) => {
@@ -591,16 +641,14 @@
 
       function setTool() {
         for (const [id, t] of [["tPaint", "paint"], ["tErase", "erase"], ["tPick", "pick"]]) $(id).classList.toggle("on", tool === t);
-        $("plGrass").classList.toggle("on", tool === "plateau" && plateauMat === "grass");
-        $("plWall").classList.toggle("on", tool === "plateau" && plateauMat === "wall");
-        $("plTint").classList.toggle("on", tool === "tint");
+        for (const b of $("autotileTools").children) {
+          b.classList.toggle("on", (b._kind === "paint" && tool === "autotile" && activePart === b._part)
+            || (b._kind === "tint" && tool === "tint" && activeTintPart === b._part));
+        }
       }
       $("tPaint").onclick = () => { tool = "paint"; setTool(); };
       $("tErase").onclick = () => { tool = "erase"; setTool(); };
       $("tPick").onclick = () => { tool = "pick"; setTool(); };
-      $("plGrass").onclick = () => { tool = "plateau"; plateauMat = "grass"; setTool(); $("status").textContent = "Plateau TOP — paint the walkable grass; edges & corners auto-fit. Erase to reshape."; };
-      $("plWall").onclick = () => { tool = "plateau"; plateauMat = "wall"; setTool(); $("status").textContent = "Plateau WALL — paint the rock face below the top; caps, feet & end-corners auto-fit. More rows = taller cliff."; };
-      $("plTint").onclick = () => { tool = "tint"; setTool(); $("status").textContent = "Tint — click a plateau top to toggle its bright elevation highlight (click again to reset)."; };
       $("tRot").onclick = rotateAction;
       $("toggleAtlas").onclick = () => $("atlasWrap").classList.toggle("show");
       for (const id of ["optCol", "optTrees", "optGrid"]) $(id).onchange = draw;
