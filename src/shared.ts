@@ -8,6 +8,7 @@ import {
   isCutawayBuilding
 } from "./map-objects.ts";
 import { NORTHWOOD_STAGE, SWAMP_STAGE } from "./generated/stages/index.ts";
+import { PORTALS } from "./generated/catalog.ts";
 
 export {
   ABILITIES,
@@ -1380,6 +1381,13 @@ export function zoneAt(floor: number, x: number, y: number): string {
 }
 
 export function portalFor(floor: number, x: number, y: number): Portal | null {
+  // Editor-placed teleport pads win first. Their coords are already runtime tile
+  // coords (the editor grid is 1:1 with runtime), so the destination is used as-is
+  // — no authored→expanded scaling, unlike the legacy char-based portals below.
+  const tx = Math.floor(x), ty = Math.floor(y);
+  for (const p of PORTALS) {
+    if (p.floor === floor && p.x === tx && p.y === ty) return { floor: p.toFloor, x: p.toX, y: p.toY };
+  }
   const dest = portalForRaw(floor, x, y);
   if (!dest) return null;
   // Destinations are written in each floor's authored coordinates; stretch them

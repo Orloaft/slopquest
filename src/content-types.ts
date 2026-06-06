@@ -286,6 +286,19 @@ export interface TreeNode {
   y: number;
 }
 
+// An editor-placed teleport pad: stepping on tile (floor,x,y) sends the player to
+// (toFloor, toX, toY). Authored in content/portals.editor.yaml by the editor's
+// Portals layer; consulted by portalFor() in shared.ts alongside the hardcoded
+// char-based portals. Coords are runtime tile coords (1:1 with the editor grid).
+export interface EditorPortal {
+  floor: number;
+  x: number;
+  y: number;
+  toFloor: number;
+  toX: number;
+  toY: number;
+}
+
 export interface FishingNode {
   id: string;
   floor: number;
