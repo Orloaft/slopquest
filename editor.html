@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Northwood Tile Editor</title>
+    <title>Tile Editor</title>
     <style>
       :root { color-scheme: dark; }
       * { box-sizing: border-box; }
@@ -48,10 +48,13 @@
   <body>
     <div id="app">
       <div id="side">
+        <h2>Stage</h2>
+        <div class="row"><select id="stageSel" style="flex:1; background:#0d1014; color:#d8dee4; border:1px solid #3a4651; border-radius:5px; padding:5px;"></select></div>
+
         <h2>Tools</h2>
         <div class="row">
           <button id="tPaint" class="on">Paint</button>
-          <button id="tErase">Erase→F</button>
+          <button id="tErase">Erase</button>
           <button id="tPick">Eyedropper</button>
           <button id="tRot" title="Rotate hovered tile, or the brush (R)">Rotate ⟳</button>
         </div>
@@ -59,11 +62,13 @@
         <label class="tog"><input type="checkbox" id="optTrees" /> Show trees/props</label>
         <label class="tog"><input type="checkbox" id="optGrid" checked /> Grid</label>
 
-        <h2>Plateau <small>(auto-tile)</small></h2>
-        <div class="row">
-          <button id="plGrass" title="Paint the walkable grass top — edges & corners auto-fit">🟩 Top</button>
-          <button id="plWall" title="Paint the rock face below the top — caps, feet & corners auto-fit; more rows = taller">🟫 Wall</button>
-          <button id="plTint" title="Click a plateau top to toggle its bright elevation highlight">✨ Tint</button>
+        <div id="plateauPanel">
+          <h2>Plateau <small>(auto-tile)</small></h2>
+          <div class="row">
+            <button id="plGrass" title="Paint the walkable grass top — edges & corners auto-fit">🟩 Top</button>
+            <button id="plWall" title="Paint the rock face below the top — caps, feet & corners auto-fit; more rows = taller">🟫 Wall</button>
+            <button id="plTint" title="Click a plateau top to toggle its bright elevation highlight">✨ Tint</button>
+          </div>
         </div>
 
         <h2>Roster <small>(click to select)</small></h2>
@@ -95,7 +100,10 @@
     <div id="ctx"></div>
 
     <script type="module">
-      const TS = 32, ACOLS = 24;
+      let TS = 32, ACOLS = 24;      // tile px + atlas columns — set per-stage from the API
+      let ATLAS_NAME = "forest";    // tileset name used in refs ("<name>:<index>") — set per-stage
+      let eraseChar = "F";          // the stage's background char; Erase paints this. Set per-stage.
+      let stageName = "";           // current stage id, sent on save
       const $ = (id) => document.getElementById(id);
       const view = $("view"), vctx = view.getContext("2d");
       let D = null;                 // state from server
@@ -123,17 +131,73 @@
       const blockedChar = (ch) => !!(vocabAdds[ch] ?? D.vocab[ch])?.blocked;
       const cellRot = (x, y) => overrides.get(key(x, y))?.rot ?? D.rotations[key(x, y)] ?? 0;
 
-      async function boot() {
-        D = await (await fetch("/editor/api/state")).json();
+      // Wipe all per-stage editing state so switching stages can't leak edits,
+      // roster, or undo history from the previously loaded region.
+      function resetState() {
+        overrides.clear();
+        for (const k of Object.keys(legendAdds)) delete legendAdds[k];
+        for (const k of Object.keys(vocabAdds)) delete vocabAdds[k];
+        undoStack.length = 0;
+        roster = []; sel = null; brushRot = 0; hover = null;
+        tool = "paint"; plateauMat = "grass"; userMoved = false;
+        $("addForm").classList.remove("show");
+      }
+
+      // The stage's "background" is the most common char in its ascii grid — that's
+      // what Erase paints. Northwood→F (floor), swamp→W (water), etc. Generic across
+      // stages instead of the old hardcoded "F".
+      function dominantChar() {
+        const freq = {};
+        for (const row of D.ascii) for (const c of row) freq[c] = (freq[c] || 0) + 1;
+        let best = null, n = -1;
+        for (const [c, k] of Object.entries(freq)) if (k > n && D.legend[c]) { best = c; n = k; }
+        return best;
+      }
+
+      // Plateau auto-tiling only makes sense where the full plateau char-set lives in
+      // the legend (currently just Northwood's forest atlas). Hide the panel elsewhere.
+      function plateauSupported() {
+        return [...GRASS_NORMAL, ...WALL_SET].every((c) => c in D.legend);
+      }
+
+      async function loadStages() {
+        const el = $("stageSel");
+        try {
+          const { stages, error } = await (await fetch("/editor/api/stages")).json();
+          if (error || !stages?.length) { el.innerHTML = "<option>northwood</option>"; return; }
+          el.innerHTML = stages.map((s) => `<option value="${s}">${s}</option>`).join("");
+        } catch { el.innerHTML = "<option>northwood</option>"; }
+        el.onchange = () => {
+          if ((overrides.size || Object.keys(legendAdds).length) &&
+              !confirm("Discard unsaved edits and switch stage?")) { el.value = stageName; return; }
+          loadStage(el.value);
+        };
+      }
+
+      async function loadStage(name) {
+        resetState();
+        stageName = name;
+        $("status").textContent = `Loading ${name}…`;
+        D = await (await fetch("/editor/api/state?stage=" + encodeURIComponent(name))).json();
         if (D.error) { $("status").textContent = "Load error: " + D.error; return; }
+        TS = D.tileSize || 32; ACOLS = D.atlasCols || 24; ATLAS_NAME = D.atlasName || "forest";
+        eraseChar = dominantChar() || "F";
+        $("tErase").textContent = "Erase→" + eraseChar;
+        $("stageSel").value = name;
+        $("plateauPanel").style.display = plateauSupported() ? "" : "none";
         atlas = new Image(); atlas.src = D.atlasUrl;
         await atlas.decode();
         atlasRead = document.createElement("canvas"); atlasRead.width = atlas.width; atlasRead.height = atlas.height;
         atlasRead.getContext("2d").drawImage(atlas, 0, 0);
         map = document.createElement("canvas"); map.width = D.cols * TS; map.height = D.rows * TS; mctx = map.getContext("2d");
         mctx.imageSmoothingEnabled = false;
-        buildRoster(); buildAtlas(); renderMapAll(); resize();
-        $("status").textContent = `Loaded Northwood — ${D.cols}×${D.rows}. Click a roster tile, then paint. Scroll=zoom, middle/space-drag=pan.`;
+        buildRoster(); buildAtlas(); renderMapAll(); setTool(); resize();
+        $("status").textContent = `Loaded ${D.name} — ${D.cols}×${D.rows}. Click a roster tile, then paint. Scroll=zoom, middle/space-drag=pan.`;
+      }
+
+      async function boot() {
+        await loadStages();
+        await loadStage($("stageSel").value || "northwood");
       }
 
       function buildRoster() {
@@ -166,14 +230,15 @@
         const el = $("atlasGrid"); el.innerHTML = "";
         const total = ACOLS * Math.floor(atlas.height / TS);
         for (let n = 0; n < total; n++) {
-          const [sx, sy] = refXY("forest:" + n);
+          const ref = ATLAS_NAME + ":" + n;
+          const [sx, sy] = refXY(ref);
           const c = document.createElement("div");
           c.className = "acell";
-          c.title = "forest:" + n;
+          c.title = ref;
           c.style.backgroundImage = `url(${D.atlasUrl})`;
           c.style.backgroundPosition = `-${sx}px -${sy}px`;
           c.style.backgroundSize = `${atlas.width}px ${atlas.height}px`;
-          c.onclick = () => openAdd("forest:" + n);
+          c.onclick = () => openAdd(ref);
           el.appendChild(c);
         }
       }
@@ -425,7 +490,8 @@
         if (tool === "pick") { pickAt(x, y); return; }
         if (tool === "plateau") { paintPlateau(x, y, plateauMat); return; }
         if (tool === "erase") {
-          const f = roster.find((r) => r.char === "F");
+          const f = roster.find((r) => r.char === eraseChar);
+          if (!f) { $("status").textContent = "No background tile to erase to."; return; }
           setCell(x, y, { char: f.char, ref: f.ref, blocked: f.blocked, rot: 0 });
           reflowAround(x, y);                          // heal adjacent plateau edges
           return;
@@ -438,9 +504,9 @@
       function rotateCell(rc, dir) { beginAction(); const nd = ((cellRot(rc.x, rc.y) + 90 * dir) % 360 + 360) % 360; setCell(rc.x, rc.y, { char: charAt(rc.x, rc.y), ref: displayRef(rc.x, rc.y), blocked: blockedChar(charAt(rc.x, rc.y)), rot: nd }); brushRot = nd; endAction(); draw(); }
       function copyCell(rc) { clipboard = { char: charAt(rc.x, rc.y), ref: displayRef(rc.x, rc.y), blocked: blockedChar(charAt(rc.x, rc.y)), rot: cellRot(rc.x, rc.y) }; $("status").textContent = `Copied '${clipboard.char}' (${clipboard.rot}°).`; }
       function pasteCell(rc) { if (!clipboard) return; beginAction(); setCell(rc.x, rc.y, { ...clipboard }); endAction(); draw(); }
-      function eraseCell(rc) { const f = roster.find((r) => r.char === "F"); beginAction(); setCell(rc.x, rc.y, { char: f.char, ref: f.ref, blocked: f.blocked, rot: 0 }); endAction(); draw(); }
+      function eraseCell(rc) { const f = roster.find((r) => r.char === eraseChar); if (!f) return; beginAction(); setCell(rc.x, rc.y, { char: f.char, ref: f.ref, blocked: f.blocked, rot: 0 }); endAction(); draw(); }
       function fillArea(rc) {
-        const t = tool === "erase" ? roster.find((r) => r.char === "F") : sel;
+        const t = tool === "erase" ? roster.find((r) => r.char === eraseChar) : sel;
         if (!t) { $("status").textContent = "Pick a tile first."; return; }
         const target = charAt(rc.x, rc.y); beginAction();
         const stack = [[rc.x, rc.y]], seen = new Set(); let n = 0; const CAP = 8000;
@@ -504,7 +570,7 @@
         mk("Pick as brush", () => pickAt(rc.x, rc.y));
         sep();
         mk("Fill matching area", () => fillArea(rc));
-        mk("Erase → F", () => eraseCell(rc));
+        mk("Erase → " + eraseChar, () => eraseCell(rc));
         menu.style.left = px + "px"; menu.style.top = py + "px"; menu.classList.add("show");
         const r = menu.getBoundingClientRect();
         if (r.right > innerWidth) menu.style.left = px - r.width + "px";
@@ -542,7 +608,7 @@
         if (!overrides.size && !Object.keys(legendAdds).length) { $("status").textContent = "Nothing to save."; return; }
         $("status").textContent = "Saving + rebuilding stage…";
         const cells = [...overrides.entries()].map(([k, v]) => { const [x, y] = k.split(",").map(Number); return { x, y, char: v.char, ref: v.ref, blocked: v.blocked, rot: v.rot || 0 }; });
-        const res = await fetch("/editor/api/save", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cells, legendAdds, vocabAdds }) }).then((r) => r.json());
+        const res = await fetch("/editor/api/save?stage=" + encodeURIComponent(stageName), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cells, legendAdds, vocabAdds }) }).then((r) => r.json());
         if (res.ok) {
           // fold saved edits into base so display stays correct, clear pending
           for (const [k, v] of overrides) { const [x, y] = k.split(",").map(Number); D.ascii[y] = D.ascii[y].slice(0, x) + v.char + D.ascii[y].slice(x + 1); D.base[y][x] = v.ref; if (D.fringe) D.fringe[y][x] = null; if (v.rot) D.rotations[k] = v.rot; else delete D.rotations[k]; }
