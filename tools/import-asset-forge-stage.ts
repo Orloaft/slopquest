@@ -29,6 +29,9 @@ interface AssetForgeStage {
   collision: number[][];
   objects: StageObject[];
   ascii?: { legend?: Record<string, string>; rows?: string[] };
+  // Sparse per-cell visual rotation in degrees, keyed "x,y". Hand-authored by the
+  // tile editor; passed straight through to the generated stage (visual only).
+  rotations?: Record<string, number>;
 }
 
 interface VocabTile {
@@ -202,7 +205,8 @@ export const ${exportName} = ${JSON.stringify(
       legend,
       tiles,
       collision: stage.collision,
-      objects
+      objects,
+      rotations: stage.rotations ?? {}
     },
     null,
     2

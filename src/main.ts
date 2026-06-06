@@ -1962,7 +1962,9 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
           const ref = layer.data[y]?.[x];
           if (!ref) continue;
           const key = generatedStageRefTextureKey(generatedStage, ref);
-          texture.draw(scene.textures.exists(key) ? key : tileBaseTexture(state.rows[y]?.[x] ?? ""), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+          const drawKey = scene.textures.exists(key) ? key : tileBaseTexture(state.rows[y]?.[x] ?? "");
+          const deg = generatedStage.rotations?.[`${x},${y}`] ?? 0;
+          texture.draw(rotatedTileTextureKey(drawKey, deg), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
         }
       }
     }
@@ -7183,6 +7185,30 @@ function generatedTileTextureKey(stage: GeneratedStage, tile: string): string {
 
 function generatedStageRefTextureKey(stage: GeneratedStage, ref: string): string {
   return `generated:${stage.zone}:ref:${ref}`;
+}
+
+// Lazily bakes (and caches) a rotated variant of an already-sliced tile texture.
+// deg is 90/180/270; 0 returns the base key untouched. Used by the hand-authored
+// per-cell rotations from the tile editor — visual only, collision is unaffected.
+function rotatedTileTextureKey(baseKey: string, deg: number): string {
+  const norm = ((deg % 360) + 360) % 360;
+  if (!norm || !scene.textures.exists(baseKey)) return baseKey;
+  const key = `${baseKey}@${norm}`;
+  if (!scene.textures.exists(key)) {
+    const source = scene.textures.get(baseKey).getSourceImage() as CanvasImageSource;
+    const canvas = document.createElement("canvas");
+    canvas.width = TILE_SIZE;
+    canvas.height = TILE_SIZE;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return baseKey;
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(TILE_SIZE / 2, TILE_SIZE / 2);
+    ctx.rotate((norm * Math.PI) / 180);
+    ctx.drawImage(source, -TILE_SIZE / 2, -TILE_SIZE / 2);
+    scene.textures.addCanvas(key, canvas);
+    scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+  }
+  return key;
 }
 
 function createGeneratedStageTileTextures(phaserScene: Phaser.Scene): void {

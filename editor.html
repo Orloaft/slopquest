@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Northwood Tile Editor</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; font: 13px/1.4 system-ui, sans-serif; background: #14181d; color: #d8dee4; }
+      #app { display: flex; height: 100vh; }
+      #side { width: 248px; flex: none; background: #1b2128; border-right: 1px solid #2c343d; display: flex; flex-direction: column; overflow: hidden; }
+      #stage { flex: 1; position: relative; overflow: hidden; background: #0d1014; }
+      #view { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; }
+      h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #7d8a98; margin: 14px 10px 6px; }
+      .pad { padding: 0 10px; }
+      .row { display: flex; gap: 6px; flex-wrap: wrap; padding: 4px 10px; }
+      button { background: #283139; color: #d8dee4; border: 1px solid #3a4651; border-radius: 5px; padding: 5px 9px; cursor: pointer; font: inherit; }
+      button:hover { background: #313c46; }
+      button.on { background: #2d6cdf; border-color: #2d6cdf; color: #fff; }
+      label.tog { display: flex; align-items: center; gap: 5px; padding: 3px 10px; cursor: pointer; }
+      #roster, #atlasGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 6px 10px; overflow-y: auto; }
+      #roster { max-height: 240px; }
+      .swatch { position: relative; aspect-ratio: 1; border: 2px solid #3a4651; border-radius: 5px; image-rendering: pixelated; cursor: pointer; background-size: cover; }
+      .swatch.sel { border-color: #ffcc44; box-shadow: 0 0 0 1px #ffcc44; }
+      .swatch .col { position: absolute; right: 1px; bottom: 1px; width: 8px; height: 8px; border-radius: 50%; border: 1px solid #0008; }
+      .swatch .ch { position: absolute; left: 1px; top: 0; font-size: 9px; color: #fff; text-shadow: 0 0 2px #000, 0 0 2px #000; }
+      #atlasWrap { flex: 1; overflow-y: auto; border-top: 1px solid #2c343d; display: none; }
+      #atlasWrap.show { display: block; }
+      #atlasGrid { grid-template-columns: repeat(8, 1fr); }
+      .acell { aspect-ratio: 1; image-rendering: pixelated; cursor: pointer; border: 1px solid #2c343d; background-size: cover; }
+      .acell:hover { outline: 2px solid #ffcc44; outline-offset: -2px; }
+      #addForm { padding: 8px 10px; border-top: 1px solid #2c343d; display: none; }
+      #addForm.show { display: block; }
+      #addForm input[type=text] { width: 100%; background: #0d1014; border: 1px solid #3a4651; color: #d8dee4; border-radius: 4px; padding: 4px; margin: 4px 0; }
+      #status { padding: 6px 10px; font-size: 12px; color: #8aa0b4; border-top: 1px solid #2c343d; min-height: 30px; white-space: pre-wrap; }
+      #hud { position: absolute; left: 8px; bottom: 8px; background: #1b2128cc; border: 1px solid #2c343d; border-radius: 5px; padding: 4px 8px; font-size: 11px; color: #9fb0c0; pointer-events: none; }
+      #ctx { position: fixed; z-index: 50; background: #222b33; border: 1px solid #3a4651; border-radius: 6px; padding: 4px; display: none; min-width: 156px; box-shadow: 0 6px 20px #0009; }
+      #ctx.show { display: block; }
+      #ctx .it { padding: 6px 10px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+      #ctx .it:hover { background: #2d6cdf; }
+      #ctx .it.dis { opacity: .45; pointer-events: none; cursor: default; }
+      #ctx .sep { height: 1px; background: #3a4651; margin: 4px 0; }
+      .spacer { flex: 1; }
+      small { color: #6c7986; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="side">
+        <h2>Tools</h2>
+        <div class="row">
+          <button id="tPaint" class="on">Paint</button>
+          <button id="tErase">Erase→F</button>
+          <button id="tPick">Eyedropper</button>
+          <button id="tRot" title="Rotate hovered tile, or the brush (R)">Rotate ⟳</button>
+        </div>
+        <label class="tog"><input type="checkbox" id="optCol" /> Collision overlay</label>
+        <label class="tog"><input type="checkbox" id="optTrees" /> Show trees/props</label>
+        <label class="tog"><input type="checkbox" id="optGrid" checked /> Grid</label>
+
+        <h2>Roster <small>(click to select)</small></h2>
+        <div id="roster"></div>
+
+        <div class="row">
+          <button id="toggleAtlas">Browse atlas ▾</button>
+        </div>
+        <div id="atlasWrap">
+          <div id="addForm">
+            <div>Tile <b id="addRef"></b></div>
+            <input type="text" id="addName" placeholder="name (e.g. lush-grass)" />
+            <label class="tog"><input type="checkbox" id="addBlocked" /> Blocks movement</label>
+            <label class="tog"><input type="checkbox" id="addRoad" /> Is road</label>
+            <div class="row"><button id="addGo" class="on">Add to roster</button><button id="addCancel">Cancel</button></div>
+          </div>
+          <div id="atlasGrid"></div>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="row"><button id="save" class="on" style="flex:1">💾 Save & rebuild</button></div>
+        <div id="status">Loading…</div>
+      </div>
+      <div id="stage">
+        <canvas id="view"></canvas>
+        <div id="hud"></div>
+      </div>
+    </div>
+    <div id="ctx"></div>
+
+    <script type="module">
+      const TS = 32, ACOLS = 24;
+      const $ = (id) => document.getElementById(id);
+      const view = $("view"), vctx = view.getContext("2d");
+      let D = null;                 // state from server
+      let atlas = null;             // Image
+      let atlasRead = null;         // canvas for pixel sampling
+      let map = null, mctx = null;  // offscreen pre-rendered map
+      const overrides = new Map();  // "x,y" -> {char, ref, blocked}
+      const legendAdds = {}, vocabAdds = {};
+      let roster = [];              // {char, ref, blocked, road, sightBlocked, role, minimapColor}
+      let sel = null;               // selected roster entry
+      let tool = "paint";           // paint | erase | pick
+      let brushRot = 0;             // 0/90/180/270 applied to new paints
+      const cam = { scale: 1, x: 0, y: 0 };
+      let painting = false, panning = false, panStart = null;
+      let hover = null;             // {x,y}
+
+      const refXY = (ref) => { const n = +ref.split(":")[1]; return [(n % ACOLS) * TS, Math.floor(n / ACOLS) * TS]; };
+      const key = (x, y) => x + "," + y;
+      const charAt = (x, y) => overrides.get(key(x, y))?.char ?? D.ascii[y][x];
+      const displayRef = (x, y) => {
+        const o = overrides.get(key(x, y)); if (o) return o.ref;
+        return (D.fringe && D.fringe[y][x]) || D.base[y][x] || D.legend[D.ascii[y][x]];
+      };
+      const blockedChar = (ch) => !!(vocabAdds[ch] ?? D.vocab[ch])?.blocked;
+      const cellRot = (x, y) => overrides.get(key(x, y))?.rot ?? D.rotations[key(x, y)] ?? 0;
+
+      async function boot() {
+        D = await (await fetch("/editor/api/state")).json();
+        if (D.error) { $("status").textContent = "Load error: " + D.error; return; }
+        atlas = new Image(); atlas.src = D.atlasUrl;
+        await atlas.decode();
+        atlasRead = document.createElement("canvas"); atlasRead.width = atlas.width; atlasRead.height = atlas.height;
+        atlasRead.getContext("2d").drawImage(atlas, 0, 0);
+        map = document.createElement("canvas"); map.width = D.cols * TS; map.height = D.rows * TS; mctx = map.getContext("2d");
+        mctx.imageSmoothingEnabled = false;
+        buildRoster(); buildAtlas(); renderMapAll(); resize();
+        $("status").textContent = `Loaded Northwood — ${D.cols}×${D.rows}. Click a roster tile, then paint. Scroll=zoom, middle/space-drag=pan.`;
+      }
+
+      function buildRoster() {
+        roster = [];
+        const seen = new Set();
+        const add = (ch) => {
+          if (seen.has(ch)) return; seen.add(ch);
+          const ref = legendAdds[ch] ?? D.legend[ch]; const v = vocabAdds[ch] ?? D.vocab[ch];
+          if (!ref || !v) return;
+          roster.push({ char: ch, ref, ...v });
+        };
+        Object.keys(D.legend).forEach(add);
+        Object.keys(legendAdds).forEach(add);
+        const el = $("roster"); el.innerHTML = "";
+        for (const t of roster) {
+          const [sx, sy] = refXY(t.ref);
+          const sw = document.createElement("div");
+          sw.className = "swatch" + (sel?.char === t.char ? " sel" : "");
+          sw.title = `${t.char} — ${t.role}${t.blocked ? " (blocks)" : ""}${t.road ? " (road)" : ""}`;
+          sw.style.backgroundImage = `url(${D.atlasUrl})`;
+          sw.style.backgroundPosition = `-${sx}px -${sy}px`;
+          sw.style.backgroundSize = `${atlas.width}px ${atlas.height}px`;
+          sw.innerHTML = `<span class="ch">${t.char}</span><span class="col" style="background:${t.blocked ? "#e0533d" : "#4fc46b"}"></span>`;
+          sw.onclick = () => { sel = t; tool = "paint"; setTool(); buildRoster(); };
+          el.appendChild(sw);
+        }
+      }
+
+      function buildAtlas() {
+        const el = $("atlasGrid"); el.innerHTML = "";
+        const total = ACOLS * Math.floor(atlas.height / TS);
+        for (let n = 0; n < total; n++) {
+          const [sx, sy] = refXY("forest:" + n);
+          const c = document.createElement("div");
+          c.className = "acell";
+          c.title = "forest:" + n;
+          c.style.backgroundImage = `url(${D.atlasUrl})`;
+          c.style.backgroundPosition = `-${sx}px -${sy}px`;
+          c.style.backgroundSize = `${atlas.width}px ${atlas.height}px`;
+          c.onclick = () => openAdd("forest:" + n);
+          el.appendChild(c);
+        }
+      }
+
+      let addRef = null;
+      function openAdd(ref) {
+        addRef = ref; $("addRef").textContent = ref; $("addForm").classList.add("show");
+        $("addName").value = ""; $("addBlocked").checked = false; $("addRoad").checked = false; $("addName").focus();
+      }
+      function sampleColor(ref) {
+        const [sx, sy] = refXY(ref);
+        const d = atlasRead.getContext("2d").getImageData(sx + 16, sy + 16, 1, 1).data;
+        return "#" + [d[0], d[1], d[2]].map((v) => v.toString(16).padStart(2, "0")).join("");
+      }
+      const CHARPOOL = "abcdeghijklnoprsuvwxzABCEGHIJKLOPQRTUVWXYZ0123456789+*#%&@!?<>=/";
+      function mintChar() {
+        const used = new Set([...Object.keys(D.legend), ...Object.keys(legendAdds)]);
+        for (const c of CHARPOOL) if (!used.has(c)) return c;
+        throw new Error("out of free tile chars");
+      }
+      $("addGo").onclick = () => {
+        const ch = mintChar();
+        const blocked = $("addBlocked").checked, road = $("addRoad").checked;
+        const role = $("addName").value.trim() || ("tile-" + addRef.split(":")[1]);
+        legendAdds[ch] = addRef;
+        vocabAdds[ch] = { role, blocked, sightBlocked: blocked, road, minimapColor: sampleColor(addRef) };
+        $("addForm").classList.remove("show");
+        buildRoster();
+        sel = roster.find((t) => t.char === ch); buildRoster();
+        $("status").textContent = `Added '${role}' as roster tile '${ch}'. Selected — paint away.`;
+      };
+      $("addCancel").onclick = () => $("addForm").classList.remove("show");
+
+      // ---- map rendering ----
+      function renderCell(x, y) {
+        const [sx, sy] = refXY(displayRef(x, y));
+        mctx.clearRect(x * TS, y * TS, TS, TS);
+        const deg = cellRot(x, y);
+        if (deg) {
+          mctx.save();
+          mctx.translate(x * TS + TS / 2, y * TS + TS / 2);
+          mctx.rotate((deg * Math.PI) / 180);
+          mctx.drawImage(atlas, sx, sy, TS, TS, -TS / 2, -TS / 2, TS, TS);
+          mctx.restore();
+        } else {
+          mctx.drawImage(atlas, sx, sy, TS, TS, x * TS, y * TS, TS, TS);
+        }
+      }
+      function renderMapAll() { for (let y = 0; y < D.rows; y++) for (let x = 0; x < D.cols; x++) renderCell(x, y); }
+
+      let userMoved = false;
+      function fit() {
+        if (view.clientWidth < 10 || view.clientHeight < 10) return;
+        const s = Math.min(view.clientWidth / (D.cols * TS), view.clientHeight / (D.rows * TS)) * 0.98;
+        cam.scale = s;
+        cam.x = (view.clientWidth - D.cols * TS * s) / 2;
+        cam.y = (view.clientHeight - D.rows * TS * s) / 2;
+      }
+      function resize() { view.width = view.clientWidth; view.height = view.clientHeight; if (!userMoved) fit(); draw(); }
+
+      function draw() {
+        if (!map) return;
+        vctx.setTransform(1, 0, 0, 1, 0, 0);
+        vctx.fillStyle = "#0d1014"; vctx.fillRect(0, 0, view.width, view.height);
+        vctx.imageSmoothingEnabled = false;
+        vctx.setTransform(cam.scale, 0, 0, cam.scale, cam.x, cam.y);
+        vctx.drawImage(map, 0, 0);
+        // visible cell bounds
+        const x0 = Math.max(0, Math.floor(-cam.x / cam.scale / TS));
+        const y0 = Math.max(0, Math.floor(-cam.y / cam.scale / TS));
+        const x1 = Math.min(D.cols, Math.ceil((view.width - cam.x) / cam.scale / TS));
+        const y1 = Math.min(D.rows, Math.ceil((view.height - cam.y) / cam.scale / TS));
+        if ($("optCol").checked) {
+          for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+            if (blockedChar(charAt(x, y))) { vctx.fillStyle = "rgba(224,83,61,0.38)"; vctx.fillRect(x * TS, y * TS, TS, TS); }
+          }
+        }
+        if ($("optTrees").checked) {
+          vctx.fillStyle = "rgba(70,200,120,0.30)"; vctx.strokeStyle = "rgba(120,255,170,0.6)"; vctx.lineWidth = 1 / cam.scale;
+          for (const o of D.objects) { const w = o.w || TS, h = o.h || TS; vctx.fillRect(o.x * TS, o.y * TS - (h - TS), w, h); }
+        }
+        if ($("optGrid").checked && cam.scale > 0.25) {
+          vctx.strokeStyle = "rgba(255,255,255,0.06)"; vctx.lineWidth = 1 / cam.scale; vctx.beginPath();
+          for (let x = x0; x <= x1; x++) { vctx.moveTo(x * TS, y0 * TS); vctx.lineTo(x * TS, y1 * TS); }
+          for (let y = y0; y <= y1; y++) { vctx.moveTo(x0 * TS, y * TS); vctx.lineTo(x1 * TS, y * TS); }
+          vctx.stroke();
+        }
+        if (hover) { vctx.strokeStyle = "#ffcc44"; vctx.lineWidth = 2 / cam.scale; vctx.strokeRect(hover.x * TS, hover.y * TS, TS, TS); }
+      }
+
+      // ---- interaction ----
+      const cellAt = (cx, cy) => {
+        const r = view.getBoundingClientRect();
+        const x = Math.floor((cx - r.left - cam.x) / cam.scale / TS);
+        const y = Math.floor((cy - r.top - cam.y) / cam.scale / TS);
+        return x >= 0 && y >= 0 && x < D.cols && y < D.rows ? { x, y } : null;
+      };
+      // ---- mutation + undo machinery ----
+      // Every edit goes through setCell, which records the prior value into the
+      // current action. A stroke (drag) is one action; menu ops are one each.
+      const undoStack = [];     // [ [{k, prev}] ]  prev = override value before, or undefined
+      let curAction = null;
+      let clipboard = null;     // {char, ref, blocked, rot}
+      const beginAction = () => { curAction = []; };
+      const endAction = () => { if (curAction && curAction.length) undoStack.push(curAction); curAction = null; };
+      function setCell(x, y, val) {
+        const k = key(x, y), ex = overrides.get(k);
+        if (val && ex && ex.char === val.char && ex.rot === val.rot && ex.ref === val.ref) return false;
+        if (curAction) curAction.push({ k, prev: ex ? { ...ex } : undefined });
+        if (val) overrides.set(k, val); else overrides.delete(k);
+        renderCell(x, y);
+        return true;
+      }
+      function undo() {
+        const a = undoStack.pop();
+        if (!a) { $("status").textContent = "Nothing to undo."; return; }
+        for (const { k, prev } of a) { if (prev === undefined) overrides.delete(k); else overrides.set(k, prev); const [x, y] = k.split(",").map(Number); renderCell(x, y); }
+        $("status").textContent = `Undid ${a.length} cell(s). (${undoStack.length} more)`; draw();
+      }
+      function pickAt(x, y) { const ch = charAt(x, y); const t = roster.find((r) => r.char === ch); if (t) { sel = t; brushRot = cellRot(x, y); tool = "paint"; setTool(); buildRoster(); } }
+
+      function paintCell(x, y) {
+        if (tool === "pick") { pickAt(x, y); return; }
+        const t = tool === "erase" ? roster.find((r) => r.char === "F") : sel;
+        if (!t) { $("status").textContent = "Pick a roster tile first."; return; }
+        setCell(x, y, { char: t.char, ref: t.ref, blocked: t.blocked, rot: brushRot });
+      }
+
+      // ---- right-click context-menu actions (operate on cell rc) ----
+      function rotateCell(rc, dir) { beginAction(); const nd = ((cellRot(rc.x, rc.y) + 90 * dir) % 360 + 360) % 360; setCell(rc.x, rc.y, { char: charAt(rc.x, rc.y), ref: displayRef(rc.x, rc.y), blocked: blockedChar(charAt(rc.x, rc.y)), rot: nd }); brushRot = nd; endAction(); draw(); }
+      function copyCell(rc) { clipboard = { char: charAt(rc.x, rc.y), ref: displayRef(rc.x, rc.y), blocked: blockedChar(charAt(rc.x, rc.y)), rot: cellRot(rc.x, rc.y) }; $("status").textContent = `Copied '${clipboard.char}' (${clipboard.rot}°).`; }
+      function pasteCell(rc) { if (!clipboard) return; beginAction(); setCell(rc.x, rc.y, { ...clipboard }); endAction(); draw(); }
+      function eraseCell(rc) { const f = roster.find((r) => r.char === "F"); beginAction(); setCell(rc.x, rc.y, { char: f.char, ref: f.ref, blocked: f.blocked, rot: 0 }); endAction(); draw(); }
+      function fillArea(rc) {
+        const t = tool === "erase" ? roster.find((r) => r.char === "F") : sel;
+        if (!t) { $("status").textContent = "Pick a tile first."; return; }
+        const target = charAt(rc.x, rc.y); beginAction();
+        const stack = [[rc.x, rc.y]], seen = new Set(); let n = 0; const CAP = 8000;
+        while (stack.length && n < CAP) {
+          const [x, y] = stack.pop(), k = key(x, y);
+          if (seen.has(k) || x < 0 || y < 0 || x >= D.cols || y >= D.rows) continue;
+          seen.add(k);
+          if (charAt(x, y) !== target) continue;
+          setCell(x, y, { char: t.char, ref: t.ref, blocked: t.blocked, rot: brushRot }); n++;
+          stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+        }
+        endAction(); $("status").textContent = `Filled ${n} cell(s)${n >= CAP ? " (capped)" : ""}.`; draw();
+      }
+
+      view.addEventListener("mousedown", (e) => {
+        closeCtx();
+        if (e.button === 1 || spaceDown) { panning = true; userMoved = true; panStart = { x: e.clientX - cam.x, y: e.clientY - cam.y }; e.preventDefault(); return; }
+        if (e.button !== 0) return; // right-click handled by contextmenu
+        const c = cellAt(e.clientX, e.clientY); if (c) { painting = true; beginAction(); paintCell(c.x, c.y); draw(); }
+      });
+      window.addEventListener("mousemove", (e) => {
+        if (panning) { cam.x = e.clientX - panStart.x; cam.y = e.clientY - panStart.y; draw(); return; }
+        const c = cellAt(e.clientX, e.clientY);
+        hover = c;
+        if (c) $("hud").textContent = `(${c.x}, ${c.y})  '${charAt(c.x, c.y)}'  ${blockedChar(charAt(c.x, c.y)) ? "⛔ blocked" : "✓ walkable"}  ·  rot ${cellRot(c.x, c.y)}°  ·  brush ${brushRot}°`;
+        if (painting && c) paintCell(c.x, c.y);
+        draw();
+      });
+      window.addEventListener("mouseup", () => { if (painting) endAction(); painting = false; panning = false; });
+      view.addEventListener("contextmenu", (e) => { e.preventDefault(); const c = cellAt(e.clientX, e.clientY); if (c) { hover = c; openCtx(e.clientX, e.clientY, c); } });
+      view.addEventListener("wheel", (e) => {
+        e.preventDefault(); userMoved = true;
+        const r = view.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+        const wx = (mx - cam.x) / cam.scale, wy = (my - cam.y) / cam.scale;
+        cam.scale = Math.max(0.08, Math.min(4, cam.scale * (e.deltaY < 0 ? 1.12 : 0.89)));
+        cam.x = mx - wx * cam.scale; cam.y = my - wy * cam.scale; draw();
+      }, { passive: false });
+
+      let spaceDown = false;
+      // Rotate the hovered tile in place (and sync the brush to it); if nothing is
+      // hovered, just advance the brush rotation used for subsequent paints.
+      function rotateAction() {
+        if (hover) { rotateCell(hover, 1); }
+        else { brushRot = (brushRot + 90) % 360; draw(); }
+      }
+
+      // ---- context menu UI ----
+      function closeCtx() { $("ctx").classList.remove("show"); }
+      function openCtx(px, py, rc) {
+        const menu = $("ctx"); menu.innerHTML = "";
+        const mk = (label, fn, disabled) => { const d = document.createElement("div"); d.className = "it" + (disabled ? " dis" : ""); d.textContent = label; if (!disabled) d.onmousedown = (ev) => { ev.preventDefault(); closeCtx(); fn(); }; menu.appendChild(d); };
+        const sep = () => { const s = document.createElement("div"); s.className = "sep"; menu.appendChild(s); };
+        const head = document.createElement("div"); head.className = "it dis"; head.textContent = `(${rc.x},${rc.y}) '${charAt(rc.x, rc.y)}' ${cellRot(rc.x, rc.y)}°`; menu.appendChild(head); sep();
+        mk("Rotate ⟳ 90°", () => rotateCell(rc, 1));
+        mk("Rotate ⟲ 90°", () => rotateCell(rc, -1));
+        sep();
+        mk("Copy tile", () => copyCell(rc));
+        mk("Paste here", () => pasteCell(rc), !clipboard);
+        mk("Pick as brush", () => pickAt(rc.x, rc.y));
+        sep();
+        mk("Fill matching area", () => fillArea(rc));
+        mk("Erase → F", () => eraseCell(rc));
+        menu.style.left = px + "px"; menu.style.top = py + "px"; menu.classList.add("show");
+        const r = menu.getBoundingClientRect();
+        if (r.right > innerWidth) menu.style.left = px - r.width + "px";
+        if (r.bottom > innerHeight) menu.style.top = py - r.height + "px";
+      }
+      window.addEventListener("mousedown", (e) => { if (!$("ctx").contains(e.target)) closeCtx(); });
+      window.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "INPUT") return;
+        if ((e.ctrlKey || e.metaKey) && e.code === "KeyZ") { e.preventDefault(); undo(); return; }
+        if ((e.ctrlKey || e.metaKey) && e.code === "KeyC") { if (hover) { e.preventDefault(); copyCell(hover); } return; }
+        if ((e.ctrlKey || e.metaKey) && e.code === "KeyV") { if (hover && clipboard) { e.preventDefault(); pasteCell(hover); } return; }
+        if (e.code === "Escape") closeCtx();
+        if (e.code === "Space") { spaceDown = true; view.style.cursor = "grab"; }
+        if (e.code === "KeyR") { e.preventDefault(); rotateAction(); }
+      });
+      window.addEventListener("keyup", (e) => { if (e.code === "Space") { spaceDown = false; view.style.cursor = "crosshair"; } });
+
+      function setTool() { for (const [id, t] of [["tPaint", "paint"], ["tErase", "erase"], ["tPick", "pick"]]) $(id).classList.toggle("on", tool === t); }
+      $("tPaint").onclick = () => { tool = "paint"; setTool(); };
+      $("tErase").onclick = () => { tool = "erase"; setTool(); };
+      $("tPick").onclick = () => { tool = "pick"; setTool(); };
+      $("tRot").onclick = rotateAction;
+      $("toggleAtlas").onclick = () => $("atlasWrap").classList.toggle("show");
+      for (const id of ["optCol", "optTrees", "optGrid"]) $(id).onchange = draw;
+
+      $("save").onclick = async () => {
+        if (!overrides.size && !Object.keys(legendAdds).length) { $("status").textContent = "Nothing to save."; return; }
+        $("status").textContent = "Saving + rebuilding stage…";
+        const cells = [...overrides.entries()].map(([k, v]) => { const [x, y] = k.split(",").map(Number); return { x, y, char: v.char, ref: v.ref, blocked: v.blocked, rot: v.rot || 0 }; });
+        const res = await fetch("/editor/api/save", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cells, legendAdds, vocabAdds }) }).then((r) => r.json());
+        if (res.ok) {
+          // fold saved edits into base so display stays correct, clear pending
+          for (const [k, v] of overrides) { const [x, y] = k.split(",").map(Number); D.ascii[y] = D.ascii[y].slice(0, x) + v.char + D.ascii[y].slice(x + 1); D.base[y][x] = v.ref; if (D.fringe) D.fringe[y][x] = null; if (v.rot) D.rotations[k] = v.rot; else delete D.rotations[k]; }
+          Object.assign(D.legend, legendAdds); Object.assign(D.vocab, vocabAdds);
+          overrides.clear(); undoStack.length = 0;
+          $("status").textContent = `Saved ${cells.length} cell(s) + rebuilt. Switch to the game tab — it hot-reloads.`;
+        } else {
+          $("status").textContent = "Save FAILED (stage not changed in-game):\n" + (res.error || res.log || "").slice(-600);
+        }
+      };
+
+      window.addEventListener("resize", resize);
+      new ResizeObserver(resize).observe($("stage"));
+      boot();
+    </script>
+  </body>
+</html>
