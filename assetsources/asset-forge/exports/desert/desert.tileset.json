@@ -1,0 +1,55 @@
+{
+  "schema": "asset-forge/tileset@1",
+  "name": "desert",
+  "image": "desert.png",
+  "tileSize": 32,
+  "columns": 24,
+  "rows": 1,
+  "tiles": [
+    {
+      "index": 0,
+      "role": "sand",
+      "blocked": false
+    },
+    {
+      "index": 1,
+      "role": "sand",
+      "blocked": false
+    },
+    {
+      "index": 2,
+      "role": "massif",
+      "blocked": true
+    },
+    {
+      "index": 3,
+      "role": "cliff",
+      "blocked": true
+    },
+    {
+      "index": 4,
+      "role": "sand",
+      "blocked": true
+    },
+    {
+      "index": 5,
+      "role": "quicksand",
+      "blocked": true
+    },
+    {
+      "index": 6,
+      "role": "oasis-water",
+      "blocked": true
+    },
+    {
+      "index": 7,
+      "role": "beach-path",
+      "blocked": false
+    },
+    {
+      "index": 8,
+      "role": "sand",
+      "blocked": false
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "asset-forge/tileset@1",
+  "name": "jungle",
+  "image": "jungle.png",
+  "tileSize": 32,
+  "columns": 24,
+  "rows": 1,
+  "tiles": [
+    {
+      "index": 0,
+      "role": "jungle-wall",
+      "blocked": true
+    },
+    {
+      "index": 1,
+      "role": "jungle-river",
+      "blocked": true
+    },
+    {
+      "index": 2,
+      "role": "jungle",
+      "blocked": false
+    },
+    {
+      "index": 3,
+      "role": "beach-path",
+      "blocked": false
+    },
+    {
+      "index": 4,
+      "role": "jungle",
+      "blocked": false
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schema": "asset-forge/tileset@1",
+  "name": "cemetery",
+  "image": "cemetery.png",
+  "tileSize": 32,
+  "columns": 24,
+  "rows": 1,
+  "tiles": [
+    {
+      "index": 0,
+      "role": "rock",
+      "blocked": true
+    },
+    {
+      "index": 1,
+      "role": "grave-dirt",
+      "blocked": false
+    },
+    {
+      "index": 2,
+      "role": "grave-path",
+      "blocked": false
+    },
+    {
+      "index": 3,
+      "role": "dirt",
+      "blocked": false
+    },
+    {
+      "index": 4,
+      "role": "grave-dirt",
+      "blocked": false
+    },
+    {
+      "index": 5,
+      "role": "forest",
+      "blocked": true
+    },
+    {
+      "index": 6,
+      "role": "grave-dirt",
+      "blocked": true
+    },
+    {
+      "index": 7,
+      "role": "grave-path",
+      "blocked": false
+    },
+    {
+      "index": 8,
+      "role": "grass",
+      "blocked": true
+    },
+    {
+      "index": 9,
+      "role": "grave-path",
+      "blocked": false
+    },
+    {
+      "index": 10,
+      "role": "sand",
+      "blocked": false
+    }
+  ]
+}

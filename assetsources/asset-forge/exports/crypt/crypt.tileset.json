@@ -1,0 +1,40 @@
+{
+  "schema": "asset-forge/tileset@1",
+  "name": "crypt",
+  "image": "crypt.png",
+  "tileSize": 32,
+  "columns": 24,
+  "rows": 1,
+  "tiles": [
+    {
+      "index": 0,
+      "role": "rock",
+      "blocked": true
+    },
+    {
+      "index": 1,
+      "role": "dirt",
+      "blocked": false
+    },
+    {
+      "index": 2,
+      "role": "dirt",
+      "blocked": false
+    },
+    {
+      "index": 3,
+      "role": "forest",
+      "blocked": true
+    },
+    {
+      "index": 4,
+      "role": "grave-path",
+      "blocked": false
+    },
+    {
+      "index": 5,
+      "role": "grave-path",
+      "blocked": false
+    }
+  ]
+}

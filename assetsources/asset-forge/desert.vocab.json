@@ -1,0 +1,73 @@
+{
+  "zone": "desert",
+  "floor": 7,
+  "stageName": "desert",
+  "description": "desert (floor 7): hand-authored floor geometry re-derived as an editable asset-forge stage. One 32px tile per char, cropped from the biome sheet the same way main.ts builds its textures. Collision/sight/road mirror shared.ts.",
+  "requiredPortals": {},
+  "requiredWalkable": [],
+  "chars": {
+    "a": {
+      "role": "sand",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e1a247"
+    },
+    "G": {
+      "role": "sand",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e1a247"
+    },
+    "w": {
+      "role": "massif",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#7a371c"
+    },
+    "X": {
+      "role": "cliff",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#903d29"
+    },
+    "U": {
+      "role": "sand",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#e1a247"
+    },
+    "Q": {
+      "role": "quicksand",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#825625"
+    },
+    "V": {
+      "role": "oasis-water",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4e6a5a"
+    },
+    "Y": {
+      "role": "beach-path",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#c89259"
+    },
+    "H": {
+      "role": "sand",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e1a247"
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "zone": "cemetery",
+  "floor": 1,
+  "stageName": "cemetery",
+  "description": "cemetery (floor 1): hand-authored floor geometry re-derived as an editable asset-forge stage. One 32px tile per char, cropped from the biome sheet the same way main.ts builds its textures. Collision/sight/road mirror shared.ts.",
+  "requiredPortals": {},
+  "requiredWalkable": [],
+  "chars": {
+    "#": {
+      "role": "rock",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#4f4438"
+    },
+    "g": {
+      "role": "grave-dirt",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#4a3d27"
+    },
+    "c": {
+      "role": "grave-path",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4d3c37"
+    },
+    "T": {
+      "role": "dirt",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#7d5e2d"
+    },
+    "h": {
+      "role": "grave-dirt",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#4a3d27"
+    },
+    "r": {
+      "role": "forest",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#546d13"
+    },
+    "q": {
+      "role": "grave-dirt",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#4a3d27"
+    },
+    "b": {
+      "role": "grave-path",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4d3c37"
+    },
+    "O": {
+      "role": "grass",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#5d7016"
+    },
+    "C": {
+      "role": "grave-path",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4d3c37"
+    },
+    "G": {
+      "role": "sand",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e1a247"
+    }
+  }
+}

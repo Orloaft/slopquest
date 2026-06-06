@@ -1,0 +1,52 @@
+{
+  "zone": "crypt",
+  "floor": 2,
+  "stageName": "crypt",
+  "description": "crypt (floor 2): hand-authored floor geometry re-derived as an editable asset-forge stage. One 32px tile per char, cropped from the biome sheet the same way main.ts builds its textures. Collision/sight/road mirror shared.ts.",
+  "requiredPortals": {},
+  "requiredWalkable": [],
+  "chars": {
+    "#": {
+      "role": "rock",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#4f4438"
+    },
+    "d": {
+      "role": "dirt",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#7d5e2d"
+    },
+    "T": {
+      "role": "dirt",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#7d5e2d"
+    },
+    "r": {
+      "role": "forest",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#546d13"
+    },
+    "b": {
+      "role": "grave-path",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4d3c37"
+    },
+    "c": {
+      "role": "grave-path",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4d3c37"
+    }
+  }
+}

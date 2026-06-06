@@ -1,0 +1,59 @@
+{
+  "zone": "northwatch",
+  "floor": 4,
+  "stageName": "northwatch",
+  "description": "northwatch (floor 4): hand-authored floor geometry re-derived as an editable asset-forge stage. One 32px tile per char, cropped from the biome sheet the same way main.ts builds its textures. Collision/sight/road mirror shared.ts.",
+  "requiredPortals": {},
+  "requiredWalkable": [],
+  "chars": {
+    "8": {
+      "role": "city-cobble",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#786b60"
+    },
+    "9": {
+      "role": "city-grass",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#505116"
+    },
+    "f": {
+      "role": "forest",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#546d13"
+    },
+    ":": {
+      "role": "city-moat",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#123d5d"
+    },
+    "_": {
+      "role": "city-wall",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#6a5948"
+    },
+    "O": {
+      "role": "grass",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#5d7016"
+    },
+    "S": {
+      "role": "dirt",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#7d5e2d"
+    }
+  }
+}

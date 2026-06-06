@@ -1,0 +1,45 @@
+{
+  "zone": "jungle",
+  "floor": 9,
+  "stageName": "jungle",
+  "description": "jungle (floor 9): hand-authored floor geometry re-derived as an editable asset-forge stage. One 32px tile per char, cropped from the biome sheet the same way main.ts builds its textures. Collision/sight/road mirror shared.ts.",
+  "requiredPortals": {},
+  "requiredWalkable": [],
+  "chars": {
+    "E": {
+      "role": "jungle-wall",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#434623"
+    },
+    "i": {
+      "role": "jungle-river",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#1a564f"
+    },
+    "-": {
+      "role": "jungle",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4a5c1f"
+    },
+    "j": {
+      "role": "beach-path",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#c89259"
+    },
+    "K": {
+      "role": "jungle",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#4a5c1f"
+    }
+  }
+}

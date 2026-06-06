@@ -1,0 +1,45 @@
+{
+  "schema": "asset-forge/tileset@1",
+  "name": "northwatch",
+  "image": "northwatch.png",
+  "tileSize": 32,
+  "columns": 24,
+  "rows": 1,
+  "tiles": [
+    {
+      "index": 0,
+      "role": "city-grass",
+      "blocked": false
+    },
+    {
+      "index": 1,
+      "role": "city-cobble",
+      "blocked": false
+    },
+    {
+      "index": 2,
+      "role": "forest",
+      "blocked": true
+    },
+    {
+      "index": 3,
+      "role": "city-moat",
+      "blocked": true
+    },
+    {
+      "index": 4,
+      "role": "city-wall",
+      "blocked": true
+    },
+    {
+      "index": 5,
+      "role": "grass",
+      "blocked": true
+    },
+    {
+      "index": 6,
+      "role": "dirt",
+      "blocked": false
+    }
+  ]
+}
