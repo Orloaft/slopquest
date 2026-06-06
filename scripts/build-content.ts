@@ -200,6 +200,25 @@ const mergedHerbNodes = [
   ...herbNodes.filter((h) => !removedHerbIds.has(h.id)),
   ...(herbOverlay.nodes ?? [])
 ];
+
+// Editor-authored tree overlay (content/trees.editor.yaml). Woodcutting trees are
+// authored inline in spawns.yaml `trees:` (type + sub-tile position, no id), so the
+// editor's Trees layer suppresses base trees by position — the same tile-keyed model
+// as the Spawns layer rather than the id-keyed node layers. Optional — missing → no-op.
+interface RawTreeOverlay {
+  trees?: RawSpawns["trees"];
+  removed?: Array<{ floor?: number; x?: number; y?: number }>;
+}
+const treesOverlay = loadOptional<RawTreeOverlay>("trees.editor.yaml") ?? {};
+const removedTreeKeys = new Set(
+  (treesOverlay.removed ?? []).map((r) => `${r.floor},${r.x},${r.y}`)
+);
+const mergedTrees = [
+  ...(spawns.trees ?? []).filter(
+    (t) => !removedTreeKeys.has(`${t.at?.floor},${t.at?.x},${t.at?.y}`)
+  ),
+  ...(treesOverlay.trees ?? [])
+];
 const abilities = load<RawAbility[]>("abilities.yaml") ?? [];
 const combatAnimations = load<RawCombatAnimation[]>("combat-animations.yaml") ?? [];
 const quests = loadQuests();
@@ -319,7 +338,7 @@ for (const s of mergedMonsterSpawns) {
   if (!s.type || !monsterIds.has(s.type)) fail("spawns", `monster spawn refs unknown type "${s.type}"`);
   if (!s.zone || !zoneIds.has(s.zone)) fail("spawns", `monster spawn refs unknown zone "${s.zone}"`);
 }
-for (const t of spawns.trees ?? []) {
+for (const t of mergedTrees) {
   if (!t.type || !treeTypeIds.has(t.type)) fail("spawns.yaml", `tree spawn refs unknown type "${t.type}"`);
 }
 const seenMiningIds = new Set<string>();
@@ -643,7 +662,7 @@ const MONSTER_SPAWNS = mergedMonsterSpawns.map((s) => ({
   y: sY(s.at?.floor, s.at?.y),
   zone: s.zone
 }));
-const COMPOSED_TREE_NODES = (spawns.trees ?? []).map((t) => ({
+const COMPOSED_TREE_NODES = mergedTrees.map((t) => ({
   type: t.type,
   floor: t.at?.floor,
   x: sX(t.at?.floor, t.at?.x),

@@ -73,6 +73,7 @@
             <button id="layerSpawns">👹 Enemy spawns</button>
             <button id="layerOre">⛏️ Ore</button>
             <button id="layerHerbs">🌿 Herbs</button>
+            <button id="layerTrees">🌳 Trees</button>
           </div>
           <div id="spawnPanel" style="display:none">
             <div class="row">
@@ -91,6 +92,12 @@
               <select id="herbType" style="flex:1; background:#0d1014; color:#d8dee4; border:1px solid #3a4651; border-radius:5px; padding:5px;"></select>
             </div>
             <small style="display:block; padding:2px 10px; color:#6c7986;">Herb types (label + level/xp/item) come from herb-nodes.yaml — placing copies the preset. New types are YAML-authored. ◯ = from herb-nodes.yaml, ● = editor-placed.</small>
+          </div>
+          <div id="treePanel" style="display:none">
+            <div class="row">
+              <select id="treeType" style="flex:1; background:#0d1014; color:#d8dee4; border:1px solid #3a4651; border-radius:5px; padding:5px;"></select>
+            </div>
+            <small style="display:block; padding:2px 10px; color:#6c7986;">Woodcutting trees. Species (level/xp/log/sprite) come from tree-types.yaml. Click = place a choppable tree · drag = move · right-click / Del = delete. ◯ = from spawns.yaml, ● = editor-placed.</small>
           </div>
         </div>
 
@@ -658,6 +665,14 @@
           suppress: "id", idPrefix: "herb", approach: true, payloadFields: ["label", "item", "requiredLevel", "xp"],
           palette: () => (D.herbTypes || []),     // [{value,label,fields:{label,item?,requiredLevel?,xp?}}]
           fromState: () => D.herb || [], read: (n) => ({ id: n.id, label: n.label, item: n.item, requiredLevel: n.requiredLevel, xp: n.xp, ax: n.ax, ay: n.ay }) },
+        // Trees are woodcutting nodes authored in spawns.yaml `trees:` — type + a
+        // sub-tile position, no id and no approach. So they use the tile-suppress
+        // model (like spawns) rather than the id-keyed node model (ore/herbs), and
+        // sit at tile centres so placements read like the hand-authored floats.
+        { id: "trees", label: "🌳 Trees", btn: "layerTrees", panel: "treePanel", sel: "treeType",
+          noun: "tree", api: "/editor/api/trees/save", field: "type", coordKind: "center", suppress: "tile",
+          palette: () => (D.treeTypes || []),     // [{value,label,fields:{type}}]
+          fromState: () => D.tree || [], read: (t) => ({ type: t.type }) },
       ];
       const layerById = Object.fromEntries(LAYERS.map((l) => [l.id, l]));
       // coordinate convention helpers
