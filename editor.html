@@ -291,6 +291,7 @@
 
       let userMoved = false;
       function fit() {
+        if (!D) return;   // a ResizeObserver tick can race the first/async stage load
         if (view.clientWidth < 10 || view.clientHeight < 10) return;
         const s = Math.min(view.clientWidth / (D.cols * TS), view.clientHeight / (D.rows * TS)) * 0.98;
         cam.scale = s;
