@@ -255,6 +255,13 @@
       "sightBlocked": true,
       "road": false,
       "minimapColor": "#705c2b"
+    },
+    "s": {
+      "role": "cliff-base-shadow",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#94912f"
     }
   }
 }

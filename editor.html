@@ -59,6 +59,12 @@
         <label class="tog"><input type="checkbox" id="optTrees" /> Show trees/props</label>
         <label class="tog"><input type="checkbox" id="optGrid" checked /> Grid</label>
 
+        <h2>Plateau <small>(auto-tile)</small></h2>
+        <div class="row">
+          <button id="plGrass" title="Paint the walkable grass top — edges & corners auto-fit">🟩 Top</button>
+          <button id="plWall" title="Paint the rock face below the top — caps, feet & corners auto-fit; more rows = taller">🟫 Wall</button>
+        </div>
+
         <h2>Roster <small>(click to select)</small></h2>
         <div id="roster"></div>
 
@@ -99,8 +105,9 @@
       const legendAdds = {}, vocabAdds = {};
       let roster = [];              // {char, ref, blocked, road, sightBlocked, role, minimapColor}
       let sel = null;               // selected roster entry
-      let tool = "paint";           // paint | erase | pick
+      let tool = "paint";           // paint | erase | pick | plateau
       let brushRot = 0;             // 0/90/180/270 applied to new paints
+      let plateauMat = "grass";     // grass | wall — material for the plateau autotile tool
       const cam = { scale: 1, x: 0, y: 0 };
       let painting = false, panning = false, panStart = null;
       let hover = null;             // {x,y}
@@ -287,11 +294,99 @@
       }
       function pickAt(x, y) { const ch = charAt(x, y); const t = roster.find((r) => r.char === ch); if (t) { sel = t; brushRot = cellRot(x, y); tool = "paint"; setTool(); buildRoster(); } }
 
+      // ---- plateau autotiling ----------------------------------------------
+      // One tool, two MATERIALS (grass top, rock wall). You paint membership;
+      // each cell's exact tile — edge/corner for the top, cap/mid/foot + end
+      // corners for the face — is derived from its neighbours and re-flows live
+      // as you extend or erase. Membership is implied by which char-set a cell's
+      // current char belongs to, so re-resolving is stateless.
+      const GRASS_SET = new Set(["g", "n", "A", "B", "w", "e"]);          // walkable top
+      const WALL_SET  = new Set(["c", "v", "b", "h", "i", "j", "k", "l", "o", "p", "r"]); // rock face
+      const inBounds = (x, y) => x >= 0 && y >= 0 && x < D.cols && y < D.rows;
+      const plMat = (x, y) => { const c = charAt(x, y); return GRASS_SET.has(c) ? "grass" : WALL_SET.has(c) ? "wall" : null; };
+      const inGrass = (x, y) => inBounds(x, y) && GRASS_SET.has(charAt(x, y));
+      const inWall  = (x, y) => inBounds(x, y) && WALL_SET.has(charAt(x, y));
+
+      // top surface: N/W/E membership picks corner (A/B), edge (n/w/e) or fill (g).
+      // South is intentionally ignored — the drop below the bottom row is the face.
+      function resolveGrass(x, y) {
+        const N = inGrass(x, y - 1), W = inGrass(x - 1, y), E = inGrass(x + 1, y);
+        if (!N && !W) return "A";          // top-left corner
+        if (!N && !E) return "B";          // top-right corner
+        if (!N) return "n";                // top edge
+        if (!W) return "w";                // left edge
+        if (!E) return "e";                // right edge
+        return "g";                        // interior
+      }
+      // rock face: vertical band (cap / mid / foot) x horizontal end (L / mid / R).
+      // FOOT-first: a 1-row wall is both cap and foot — render it as the foot, which
+      // carries the grass base + baked contact shadow, so single-tier walls look right.
+      function resolveWall(x, y) {
+        const cap = !inWall(x, y - 1), foot = !inWall(x, y + 1);
+        const L = !inWall(x - 1, y), R = !inWall(x + 1, y);
+        const band = foot ? ["p", "b", "r"] : cap ? ["j", "c", "k"] : ["l", "v", "o"];
+        return L ? band[0] : R ? band[2] : band[1];
+      }
+      function applyChar(x, y, ch) {
+        const ref = legendAdds[ch] ?? D.legend[ch];
+        const v = vocabAdds[ch] ?? D.vocab[ch];
+        setCell(x, y, { char: ch, ref, blocked: !!(v && v.blocked), rot: 0 });
+      }
+      function autotileAt(x, y) {
+        if (!inBounds(x, y)) return;
+        const m = plMat(x, y);
+        if (m === "grass") applyChar(x, y, resolveGrass(x, y));
+        else if (m === "wall") applyChar(x, y, resolveWall(x, y));
+      }
+      // contact shadow now lives baked inside the foot tiles' own grass base
+      // (darkest at the rock-meets-ground line, fading out by the foot's bottom edge),
+      // so there's no separate shadow tile to stack or mis-colour against the ground.
+      // re-resolve a cell and its 8 neighbours (membership of the painted/erased
+      // cell changes what its neighbours should be).
+      function reflowAround(x, y) {
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) autotileAt(x + dx, y + dy);
+      }
+      // wall-follow: the face height is a property you set by painting wall rows;
+      // once set, widening the top drags the face along at that height so you
+      // never re-paint walls just to keep them under the edge.
+      // south edge of the top in column x = lowest grass cell with no grass below.
+      function topSouthEdgeRow(x) {
+        let best = -1;
+        for (let y = 0; y < D.rows; y++) if (inGrass(x, y) && !inGrass(x, y + 1)) best = y;
+        return best;
+      }
+      const wallRunBelow = (x, ge) => { let h = 0, y = ge + 1; while (inWall(x, y)) { h++; y++; } return h; };
+      function extendWallToMatch(x, depth) {
+        if (x < 0 || x >= D.cols || depth > D.cols) return;
+        const ge = topSouthEdgeRow(x);
+        if (ge < 0) return;                              // no top in this column
+        const have = wallRunBelow(x, ge);
+        const nb = (c) => { const g = topSouthEdgeRow(c); return g < 0 ? 0 : wallRunBelow(c, g); };
+        const H = Math.max(nb(x - 1), nb(x + 1));        // match the taller neighbour
+        if (H <= have) return;                           // already tall enough → stop (also halts propagation)
+        for (let i = have; i < H; i++) applyChar(x, ge + 1 + i, "v"); // stamp the missing face rows
+        for (let i = -1; i <= H + 1; i++) reflowAround(x, ge + i);    // re-resolve cap/mid/foot/corners
+        extendWallToMatch(x - 1, depth + 1);             // carry the height along the edge, either drag direction
+        extendWallToMatch(x + 1, depth + 1);
+      }
+
+      function paintPlateau(x, y, mat) {
+        applyChar(x, y, mat === "grass" ? "g" : "v"); // stamp membership…
+        reflowAround(x, y);                            // …then resolve the 3x3
+        if (mat === "grass") extendWallToMatch(x, 0);  // pull the face under the new top
+      }
+
       function paintCell(x, y) {
         if (tool === "pick") { pickAt(x, y); return; }
-        const t = tool === "erase" ? roster.find((r) => r.char === "F") : sel;
-        if (!t) { $("status").textContent = "Pick a roster tile first."; return; }
-        setCell(x, y, { char: t.char, ref: t.ref, blocked: t.blocked, rot: brushRot });
+        if (tool === "plateau") { paintPlateau(x, y, plateauMat); return; }
+        if (tool === "erase") {
+          const f = roster.find((r) => r.char === "F");
+          setCell(x, y, { char: f.char, ref: f.ref, blocked: f.blocked, rot: 0 });
+          reflowAround(x, y);                          // heal adjacent plateau edges
+          return;
+        }
+        if (!sel) { $("status").textContent = "Pick a roster tile first."; return; }
+        setCell(x, y, { char: sel.char, ref: sel.ref, blocked: sel.blocked, rot: brushRot });
       }
 
       // ---- right-click context-menu actions (operate on cell rc) ----
@@ -380,10 +475,16 @@
       });
       window.addEventListener("keyup", (e) => { if (e.code === "Space") { spaceDown = false; view.style.cursor = "crosshair"; } });
 
-      function setTool() { for (const [id, t] of [["tPaint", "paint"], ["tErase", "erase"], ["tPick", "pick"]]) $(id).classList.toggle("on", tool === t); }
+      function setTool() {
+        for (const [id, t] of [["tPaint", "paint"], ["tErase", "erase"], ["tPick", "pick"]]) $(id).classList.toggle("on", tool === t);
+        $("plGrass").classList.toggle("on", tool === "plateau" && plateauMat === "grass");
+        $("plWall").classList.toggle("on", tool === "plateau" && plateauMat === "wall");
+      }
       $("tPaint").onclick = () => { tool = "paint"; setTool(); };
       $("tErase").onclick = () => { tool = "erase"; setTool(); };
       $("tPick").onclick = () => { tool = "pick"; setTool(); };
+      $("plGrass").onclick = () => { tool = "plateau"; plateauMat = "grass"; setTool(); $("status").textContent = "Plateau TOP — paint the walkable grass; edges & corners auto-fit. Erase to reshape."; };
+      $("plWall").onclick = () => { tool = "plateau"; plateauMat = "wall"; setTool(); $("status").textContent = "Plateau WALL — paint the rock face below the top; caps, feet & end-corners auto-fit. More rows = taller cliff."; };
       $("tRot").onclick = rotateAction;
       $("toggleAtlas").onclick = () => $("atlasWrap").classList.toggle("show");
       for (const id of ["optCol", "optTrees", "optGrid"]) $(id).onchange = draw;
