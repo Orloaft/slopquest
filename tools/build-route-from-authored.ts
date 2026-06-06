@@ -30,82 +30,101 @@ const ROAD_DITHER_PROB_BY_DEPTH = [0.2, 0.1, 0.04];
 // PROCEDURAL ROUTE-1 LAYOUT (chars: F grass, f tree, ~ water, t trail, ^ void)
 // ===========================================================================
 const R = 72, C = 110;
-const STREAM_Y0 = 33, STREAM_Y1 = 36;        // the stream band
 const PORTAL_X = 55;                          // both gates sit on x=55
-// Trail centre per row: a gentle double-sine S-curve, straightened at the gates.
-function trailCenter(y: number): number {
-  if (y <= 3) return PORTAL_X;
-  if (y >= R - 3) return PORTAL_X;
-  const raw = 55 + 14 * Math.sin(y / 11) + 5 * Math.sin(y / 4);
-  return Math.max(12, Math.min(97, Math.round(raw)));
-}
+const FORD_X = 66;                            // the trail crosses the stream here
+
+// --- Rectilinear winding trail -------------------------------------------------
+// A proper Pokémon/Chrono-Trigger route reads as a deliberate 1-tile dirt path:
+// long straight runs joined by single 90° bends. We define waypoints (south gate
+// -> north gate) and connect consecutive ones with AXIS-ALIGNED, 1-wide segments.
+// The Road edge-Wang autotiler then emits clean straights + exactly one corner
+// tile per bend — NOT the wide diagonal staircase of corner tiles that a
+// continuous sine curve + fill-between-row-centres produced before.
+const TRAIL: Array<[number, number]> = [
+  [PORTAL_X, 70], [PORTAL_X, 61], [40, 61], [40, 44], [FORD_X, 44],
+  [FORD_X, 28], [48, 28], [48, 12], [PORTAL_X, 12], [PORTAL_X, 1],
+];
+
 // deterministic PRNG so the bake is reproducible
 let _seed = 20260606;
 const rnd = (): number => { _seed = (_seed * 1103515245 + 12345) & 0x7fffffff; return _seed / 0x7fffffff; };
 
-// Two encounter clearings (tree-free grass pockets) beside the trail, plus the
-// landmark clearing. Kept open so spawns read as "tall grass" and the oak anchors.
-const CLEARINGS: Array<{ cx: number; cy: number; r: number }> = [];
-{
-  const cy1 = 52, cy2 = 16, cyL = 24;
-  CLEARINGS.push({ cx: trailCenter(cy1) + 7, cy: cy1, r: 6 });   // south clearing
-  CLEARINGS.push({ cx: trailCenter(cy2) - 7, cy: cy2, r: 6 });   // north clearing
-  CLEARINGS.push({ cx: trailCenter(cyL) + 9, cy: cyL, r: 4 });   // ancient-oak clearing
-}
+// Two encounter clearings (tree-free grass pockets) sized to cover the floor-11
+// spawn/herb anchors, plus the ancient-oak landmark clearing. Kept open so spawns
+// read as "tall grass" beside the trail and the oak anchors a vista.
+const CLEARINGS: Array<{ cx: number; cy: number; r: number }> = [
+  { cx: 52, cy: 53, r: 7 },   // south clearing  (spawns x47-59 y49-56; herb 47.5,50.5)
+  { cx: 58, cy: 16, r: 6 },   // north clearing  (spawns x56-61 y13-18; herb 60.5,15.5)
+  { cx: 84, cy: 52, r: 4 },   // ancient-oak landmark clearing
+];
 const inClearing = (r: number, c: number): boolean =>
   CLEARINGS.some((g) => Math.abs(r - g.cy) <= g.r && Math.abs(c - g.cx) <= g.r);
 
 const rows: string[][] = Array.from({ length: R }, () => new Array(C).fill("F"));
 const elev: number[][] = Array.from({ length: R }, () => new Array(C).fill(0));
 
+// Paint the 1-wide rectilinear trail into the grid (each segment is purely
+// vertical OR purely horizontal, so the autotiler stays clean).
+function paintTrail(): void {
+  for (let i = 0; i + 1 < TRAIL.length; i++) {
+    const [x0, y0] = TRAIL[i], [x1, y1] = TRAIL[i + 1];
+    if (x0 === x1) { const lo = Math.min(y0, y1), hi = Math.max(y0, y1); for (let y = lo; y <= hi; y++) if (y > 0 && y < R - 1) rows[y][x0] = "t"; }
+    else { const lo = Math.min(x0, x1), hi = Math.max(x0, x1); for (let x = lo; x <= hi; x++) if (x > 0 && x < C - 1) rows[y0][x] = "t"; }
+  }
+}
+// Nearest-trail test (Chebyshev radius) — used to frame trees against the path
+// and to leave the treeline open where the trail exits at the gates.
+const isRoadCell = (r: number, c: number) => r >= 0 && c >= 0 && r < R && c < C && rows[r][c] === "t";
+function nearTrail(r: number, c: number, d: number): boolean {
+  for (let dr = -d; dr <= d; dr++) for (let dc = -d; dc <= d; dc++) if (isRoadCell(r + dr, c + dc)) return true;
+  return false;
+}
+
 // 1) Outer void ring (1 tile) — the map border; the engine frames it as treeline.
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   if (r === 0 || r === R - 1 || c === 0 || c === C - 1) rows[r][c] = "^";
 }
-// 2) Treeline band hugging the edges, with gaps; leaves the trail columns open.
+// 2) The trail itself (paint first so the framing passes can avoid it).
+paintTrail();
+// 3) Treeline band hugging the edges, with gaps; opens where the trail exits.
 for (let r = 1; r < R - 1; r++) for (let c = 1; c < C - 1; c++) {
   const edgeDist = Math.min(r, R - 1 - r, c, C - 1 - c);
-  if (edgeDist <= 3 && Math.abs(c - trailCenter(r)) > 3 && rnd() < 0.72) rows[r][c] = "f";
+  if (edgeDist <= 3 && !nearTrail(r, c, 3) && rnd() < 0.72) rows[r][c] = "f";
 }
-// 3) The winding trail — fill between consecutive row-centres so it's always
-//    contiguous even where the curve is steep (width 3 + the connecting span).
-for (let y = 1; y < R - 1; y++) {
-  const a = trailCenter(y), b = trailCenter(y + 1 < R - 1 ? y + 1 : y);
-  const lo = Math.min(a, b) - 1, hi = Math.max(a, b) + 1;
-  for (let c = lo; c <= hi; c++) if (c > 0 && c < C - 1) rows[y][c] = "t";
-}
-// 4) Interior tree clusters to wind the path + frame the clearings (never on the
-//    trail, its margin, or a clearing).
+// 4) Interior tree clusters to frame the path + clearings (never on the trail,
+//    its margin, or a clearing). Clumps land anywhere on open grass; skipping the
+//    trail margin makes them naturally hug and wind around the path.
 function clump(cy: number, cx: number, spread: number, n: number): void {
   for (let i = 0; i < n; i++) {
     const r = cy + Math.round((rnd() - 0.5) * spread * 2);
     const c = cx + Math.round((rnd() - 0.5) * spread * 2);
     if (r < 2 || r > R - 3 || c < 2 || c > C - 3) continue;
     if (rows[r][c] !== "F") continue;
-    if (Math.abs(c - trailCenter(r)) <= 3) continue;
+    if (nearTrail(r, c, 2)) continue;
     if (inClearing(r, c)) continue;
     rows[r][c] = "f";
   }
 }
-for (let k = 0; k < 26; k++) {
+for (let k = 0; k < 30; k++) {
   const cy = 4 + Math.floor(rnd() * (R - 8));
-  const side = rnd() < 0.5 ? -1 : 1;
-  const cx = Math.max(6, Math.min(C - 7, trailCenter(cy) + side * (8 + Math.floor(rnd() * 16))));
+  const cx = 6 + Math.floor(rnd() * (C - 12));
   clump(cy, cx, 4, 10 + Math.floor(rnd() * 10));
 }
-// 5) Stream band with a trail ford (the trail cells stay 't' so the crossing reads
-//    as a fordable narrowing; water blocks elsewhere).
-for (let y = STREAM_Y0; y <= STREAM_Y1; y++) for (let c = 6; c < C - 6; c++) {
-  if (Math.abs(c - trailCenter(y)) <= 2) continue;   // ford
-  if (rows[y][c] === "^") continue;
-  rows[y][c] = "~";
+// 5) Meandering stream (organic centreline + varying width) with the trail ford
+//    left open at FORD_X. Trail cells stay 't', so the crossing reads as a ford
+//    and the water autotiles a finished shore around the gap.
+for (let c = 6; c < C - 6; c++) {
+  const cy = 34.5 + 1.6 * Math.sin(c / 9) + 0.9 * Math.sin(c / 4 + 1.3);
+  const hw = 1.0 + 0.9 * (0.5 + 0.5 * Math.sin(c / 6 + 0.5));
+  const y0 = Math.round(cy - hw), y1 = Math.round(cy + hw);
+  for (let y = y0; y <= y1; y++) {
+    if (y < 1 || y >= R - 1) continue;
+    if (rows[y][c] === "t" || rows[y][c] === "^") continue;
+    rows[y][c] = "~";
+  }
 }
-// 6) Re-stamp the trail on top so nothing above clipped it; clear trees off it.
-for (let y = 1; y < R - 1; y++) {
-  const a = trailCenter(y), b = trailCenter(y + 1 < R - 1 ? y + 1 : y);
-  const lo = Math.min(a, b) - 1, hi = Math.max(a, b) + 1;
-  for (let c = lo; c <= hi; c++) if (c > 0 && c < C - 1) rows[y][c] = "t";
-}
+// 6) Re-stamp the trail so nothing above clipped it.
+paintTrail();
 
 const at = (r: number, c: number) => (r >= 0 && c >= 0 && r < R && c < C ? rows[r][c] : "^");
 const eh = (_r: number, _c: number) => 0;
@@ -262,7 +281,8 @@ const PORTAL = [
 const REQUIRED_WALKABLE = [
   { x: PORTAL_X, y: 69, label: "south gate approach" },
   { x: PORTAL_X, y: 2, label: "north gate approach" },
-  { x: trailCenter(STREAM_Y0) + 1, y: STREAM_Y0, label: "stream ford" },
+  { x: FORD_X, y: 34, label: "stream ford" },
+  { x: FORD_X, y: 35, label: "stream ford 2" },
 ];
 const KIND_CHAR: Record<Kind, string> = {
   grass: "F", plateau: "F", water: "~", road: "t", beach: ".", void: "^", wall: "q", ladder: "m",

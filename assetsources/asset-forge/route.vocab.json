@@ -27,9 +27,14 @@
       "label": "north gate approach"
     },
     {
-      "x": 63,
-      "y": 33,
+      "x": 66,
+      "y": 34,
       "label": "stream ford"
+    },
+    {
+      "x": 66,
+      "y": 35,
+      "label": "stream ford 2"
     }
   ],
   "chars": {
@@ -52,7 +57,7 @@
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#aa932a"
+      "minimapColor": "#9f9326"
     },
     "^": {
       "role": "forest-border-canopy",
