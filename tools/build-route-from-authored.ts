@@ -200,21 +200,41 @@ for (let i = 0; i <= R; i++) for (let j = 0; j <= C; j++) {
   const m = (isW(i - 1, j - 1) ? 1 : 0) | (isW(i - 1, j) ? 2 : 0) | (isW(i, j) ? 4 : 0) | (isW(i, j - 1) ? 8 : 0);
   blitTile(water, wCols, m, Math.round((j - 0.5) * ts), Math.round((i - 0.5) * ts));
 }
-// ---- roads edge-Wang -------------------------------------------------------
-// road-wang.png is NOT laid out in NESW-mask order, so the connectivity mask must
-// be remapped to the actual atlas index. Verified empirically by rendering every
-// candidate tile inside each corner's real wang context (straight stubs on the
-// open sides) and picking the one whose dirt connects cleanly:
-//   straights  VERT(5)->5   HORIZ(10)->10
-//   corners    NE(3)->3   ES(6)->0   SW(12)->6   NW(9)->9
-//   T/cross    7->7  11->11  13->13  14->14  15->15 ; ends/0 fall back to a straight
-// (The trail only uses straights + the four corners.) Using the mask directly as
-// the index — the old bug — drew the ES/SW bends from the wrong "cap" tiles.
-const ROAD_TILE = [5, 5, 10, 3, 5, 5, 0, 7, 10, 9, 10, 11, 6, 13, 14, 15];
+// ---- roads: solid packed-dirt + procedural grass border --------------------
+// The road-wang atlas does NOT autotile as thin 1-wide paths. Inspecting all 16
+// tiles (edge dirt-fractions + shapes) shows the road is drawn off-centre and hugs
+// different sides per tile; several masks are DUPLICATED (NS, NES, SW, ESW each
+// twice) while the NE and ES corners are ABSENT entirely, and even the interior
+// tile is ~20% transparent. So any per-mask Wang blit mis-renders the bends — there
+// is literally no NE/ES corner tile to point at (the bug behind the last three
+// playtests, where only the NW bend blended). Waystone already solved this: underlay
+// a SOLID dirt tile (idx 15 with its transparent pixels filled with the mean dirt
+// colour) under every road cell, then let the edge-dither pass below paint the grass
+// border by sampling the real neighbouring grass. A 1-wide trail then renders as
+// continuous solid dirt whose every straight / corner / T blends perfectly — the
+// grass dither only stipples the sides that face grass, so a bend's two outer edges
+// round off into a clean corner and the two neighbour-facing edges flow straight on.
+const roadFill = new PNG({ width: ts, height: ts });
+{
+  const rfx = (15 % rCols) * ts, rfy = Math.floor(15 / rCols) * ts;
+  let mr = 0, mg = 0, mb = 0, n = 0;
+  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
+    const si = ((rfy + y) * road.width + (rfx + x)) * 4;
+    if (road.data[si + 3] !== 0) { mr += road.data[si]; mg += road.data[si + 1]; mb += road.data[si + 2]; n++; }
+  }
+  mr = Math.round(mr / n); mg = Math.round(mg / n); mb = Math.round(mb / n);
+  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
+    const si = ((rfy + y) * road.width + (rfx + x)) * 4, di = (y * ts + x) * 4;
+    const op = road.data[si + 3] !== 0;
+    roadFill.data[di] = op ? road.data[si] : mr;
+    roadFill.data[di + 1] = op ? road.data[si + 1] : mg;
+    roadFill.data[di + 2] = op ? road.data[si + 2] : mb;
+    roadFill.data[di + 3] = 255;
+  }
+}
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   if (!isR(r, c)) continue;
-  const m = (isR(r - 1, c) ? 1 : 0) | (isR(r, c + 1) ? 2 : 0) | (isR(r + 1, c) ? 4 : 0) | (isR(r, c - 1) ? 8 : 0);
-  blitTile(road, rCols, ROAD_TILE[m] ?? m, c * ts, r * ts);
+  blitTile(roadFill, 1, 0, c * ts, r * ts);
 }
 const isGrassCell = (r: number, c: number) => { const ch = at(r, c); return ch === "F" || ch === "f"; };
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
