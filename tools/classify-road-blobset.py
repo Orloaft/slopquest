@@ -44,6 +44,10 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--role", default="packed-road", help="manifest role to treat as road")
     ap.add_argument("--atlas-name", default=None, help="ref prefix; defaults to manifest name")
+    ap.add_argument("--connect", type=float, default=0.5,
+                    help="edge road-fraction above which that side counts as connected. "
+                         "Lower = more eager to call an edge a road (over-connects straights "
+                         "into junctions); raise toward 0.6 if straights misclassify.")
     args = ap.parse_args()
 
     man = json.load(open(args.manifest))
@@ -96,7 +100,7 @@ def main():
             "E": rm[lo:hi, -depth:].mean(),
         }, roadness(t)[lo:hi, lo:hi].mean()  # + interior roadness
 
-    CONNECT = 0.4   # edge counts as "road runs off here" above this fraction
+    CONNECT = args.connect   # edge counts as "road runs off here" above this fraction
     INTERIOR_MIN = 0.25  # ignore tiles that are basically all-grass (mislabelled)
 
     classified = {}  # bitmask -> list of {index, score, frac}

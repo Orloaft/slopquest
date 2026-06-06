@@ -78,4 +78,22 @@ test.describe("editor road autotiling", () => {
     expect(r.center).not.toBe(r.leftEdge);
     expect(errors).toEqual([]);
   });
+
+  test("waystone exposes both road and water auto-tile sets", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+    page.on("pageerror", (e) => errors.push(String(e)));
+
+    await page.goto("/editor.html?__test=1", { waitUntil: "networkidle" });
+    await page.waitForFunction(() => (window as any).__ed?.stage(), null, { timeout: 10000 });
+    await page.evaluate(() => (window as any).__ed.loadStage("waystone"));
+    await page.waitForFunction(
+      () => (window as any).__ed.stage() === "waystone" && (window as any).__ed.parts().length,
+      null, { timeout: 10000 });
+
+    const ids = await page.evaluate(() => (window as any).__ed.parts().map((p: any) => p.id));
+    expect(ids).toContain("road");
+    expect(ids).toContain("water");
+    expect(errors).toEqual([]);
+  });
 });

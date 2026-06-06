@@ -10,6 +10,16 @@ correct them when the auto-proposal gets one wrong.
 > bitmask table to atlas tile indices. Edit `tiles` by hand, reload the editor,
 > done. Nothing recompiles.
 
+## Which stages have it
+
+Run `python3 tools/survey-blobsets.py` to see road/water viability for every
+stage (it mirrors the classifiers, so the coverage it prints is what you'd get).
+As of this writing only **northwood** and **waystone** carry the art for clean
+blob sets — both have road + water wired. Every other stage came back "too few
+tiles" (dungeons/desert have no water bodies; swamp's water is organic, not a
+tile set; nothing else has a road network in its atlas). If you add road/water
+art to another biome later, re-run the survey, then the matching classifier.
+
 ## Where the tiles come from
 
 Our baked atlases were sliced from hand-painted maps, so the directional road art
@@ -30,7 +40,17 @@ python3 tools/classify-road-blobset.py --zone northwood \
 ```
 
 Re-running **overwrites your hand-edits**, so tune in the JSON only once you're
-happy with coverage, or keep your hand-tuned file and don't re-run.
+happy with coverage, or keep your hand-tuned file and don't re-run. (Water is
+different — its classifier *merges*, see below — but the road classifier rewrites
+the whole file's road set.)
+
+**`--connect` (road only).** The edge road-fraction above which a side counts as
+connected (default `0.5`). Lower over-connects straights into junctions; raise
+toward `0.6` if straights misclassify. It's per-stage: northwood likes `0.4`,
+waystone `0.46`. Some atlases (waystone) paint vertical and horizontal roads at
+different widths, so no single threshold nails both straights — generate at the
+value that covers the most, then hand-point the one straggler (waystone's vertical
+`bm5` was hand-set; see `handTuned` in its blobset).
 
 ## The bitmask (this is the whole model)
 
