@@ -25,6 +25,7 @@
     "balance:bands": "node scripts/balance-bands.ts",
     "balance:combat": "node scripts/balance-combat.ts",
     "assets:budget": "node scripts/asset-budget.ts --preload-entry src/main.ts --max-preload-bytes 57671680 --max-preload-files 65",
+    "assets:slice:road": "node tools/slice-road-wang.ts",
     "assets:bridge:northwood": "node tools/build-northwood-from-authored.ts",
     "assets:northwood": "npm run assets:bridge:northwood && npm run assets:stage:northwood",
     "assets:stage:northwood": "node tools/import-asset-forge-stage.ts --stage assetsources/asset-forge/exports/northwood/northwood.stage.json --vocab assetsources/asset-forge/northwood.vocab.json --out src/generated/stages/northwood.ts --public-dir public/tilesets/northwood",
