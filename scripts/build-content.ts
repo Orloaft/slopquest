@@ -1,7 +1,7 @@
 // Reads content/*.yaml, validates references, emits src/generated/catalog.ts.
 // Run before the server boots and before vite bundles the client. See package.json.
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
@@ -157,6 +157,27 @@ const miningNodes = load<RawMiningNode[]>("mining-nodes.yaml") ?? [];
 const herbNodes = load<RawHerbNode[]>("herb-nodes.yaml") ?? [];
 const shop = load<Record<string, unknown>>("shop.yaml") ?? {};
 const spawns = load<RawSpawns>("spawns.yaml") ?? {};
+// Editor-authored spawn overlay (content/spawns.editor.yaml). OPTIONAL — the
+// stage editor's Spawns layer writes ONLY its own placements + suppressions
+// here, so the hand-authored, heavily-commented spawns.yaml is never rewritten.
+// Merged below: base spawns minus any suppressed tile, plus the overlay's own
+// placements. Missing file → no-op.
+interface RawSpawnOverlay {
+  monsters?: RawSpawns["monsters"];
+  removed?: Array<{ floor?: number; x?: number; y?: number }>;
+}
+const spawnsOverlay: RawSpawnOverlay = existsSync(join(CONTENT, "spawns.editor.yaml"))
+  ? load<RawSpawnOverlay>("spawns.editor.yaml") ?? {}
+  : {};
+const removedSpawnKeys = new Set(
+  (spawnsOverlay.removed ?? []).map((r) => `${r.floor},${r.x},${r.y}`)
+);
+const mergedMonsterSpawns = [
+  ...(spawns.monsters ?? []).filter(
+    (s) => !removedSpawnKeys.has(`${s.at?.floor},${s.at?.x},${s.at?.y}`)
+  ),
+  ...(spawnsOverlay.monsters ?? [])
+];
 const abilities = load<RawAbility[]>("abilities.yaml") ?? [];
 const combatAnimations = load<RawCombatAnimation[]>("combat-animations.yaml") ?? [];
 const quests = loadQuests();
@@ -272,9 +293,9 @@ for (const t of treeTypes) {
 for (const n of npcs) {
   if (!n.id || !n.name) fail("npcs.yaml", `npc ${n.id ?? "?"} missing id/name`);
 }
-for (const s of spawns.monsters ?? []) {
-  if (!s.type || !monsterIds.has(s.type)) fail("spawns.yaml", `monster spawn refs unknown type "${s.type}"`);
-  if (!s.zone || !zoneIds.has(s.zone)) fail("spawns.yaml", `monster spawn refs unknown zone "${s.zone}"`);
+for (const s of mergedMonsterSpawns) {
+  if (!s.type || !monsterIds.has(s.type)) fail("spawns", `monster spawn refs unknown type "${s.type}"`);
+  if (!s.zone || !zoneIds.has(s.zone)) fail("spawns", `monster spawn refs unknown zone "${s.zone}"`);
 }
 for (const t of spawns.trees ?? []) {
   if (!t.type || !treeTypeIds.has(t.type)) fail("spawns.yaml", `tree spawn refs unknown type "${t.type}"`);
@@ -589,7 +610,7 @@ const NPCS = npcs.map((n) => ({
   dialogue: n.idleDialogue ?? ""
 }));
 const SHOP = shop;
-const MONSTER_SPAWNS = (spawns.monsters ?? []).map((s) => ({
+const MONSTER_SPAWNS = mergedMonsterSpawns.map((s) => ({
   type: s.type,
   floor: s.at?.floor,
   x: sX(s.at?.floor, s.at?.x),

@@ -67,6 +67,19 @@
           <div class="row" id="autotileTools"></div>
         </div>
 
+        <div id="layerPanel" style="display:none">
+          <h2>Layers <small id="layerHint"></small></h2>
+          <div class="row" id="layerTools">
+            <button id="layerSpawns">👹 Enemy spawns</button>
+          </div>
+          <div id="spawnPanel" style="display:none">
+            <div class="row">
+              <select id="spawnType" style="flex:1; background:#0d1014; color:#d8dee4; border:1px solid #3a4651; border-radius:5px; padding:5px;"></select>
+            </div>
+            <small style="display:block; padding:2px 10px; color:#6c7986;">Click empty tile = place · drag a marker = move · right-click / Del = delete. ◯ = from spawns.yaml, ● = editor-placed.</small>
+          </div>
+        </div>
+
         <h2>Roster <small>(click to select)</small></h2>
         <div id="roster"></div>
 
@@ -121,6 +134,18 @@
       let painting = false, panning = false, panStart = null;
       let hover = null;             // {x,y}
 
+      // ---- Layers (point-entity editing on top of the tile grid) ----
+      // layerMode === null → normal tile painting. When a layer is active, clicks
+      // place/select/move that layer's point-entities instead of painting tiles.
+      // First layer: enemy spawns (writes content/spawns.editor.yaml via the API).
+      let layerMode = null;             // null | "spawns"
+      let spawnList = [];               // [{type,x,y,source:'base'|'overlay',baseKey?}]
+      let removedBaseKeys = new Set();  // "x,y" of base (spawns.yaml) spawns to suppress
+      let spawnSel = null;              // selected spawn (move/delete target)
+      let spawnType = null;             // monster id to place
+      let draggingSpawn = null;         // spawn being dragged
+      let spawnsDirty = false;          // pending spawn edits to save
+
       const refXY = (ref) => { const n = +ref.split(":")[1]; return [(n % ACOLS) * TS, Math.floor(n / ACOLS) * TS]; };
       const key = (x, y) => x + "," + y;
       const charAt = (x, y) => overrides.get(key(x, y))?.char ?? D.ascii[y][x];
@@ -141,6 +166,8 @@
         undoStack.length = 0;
         roster = []; sel = null; brushRot = 0; hover = null;
         tool = "paint"; activePart = null; activeTintPart = null; userMoved = false;
+        layerMode = null; spawnList = []; removedBaseKeys = new Set();
+        spawnSel = null; spawnType = null; draggingSpawn = null; spawnsDirty = false;
         $("addForm").classList.remove("show");
       }
 
@@ -194,7 +221,7 @@
         computeActiveParts(); buildAutotilePanel();
         map = document.createElement("canvas"); map.width = D.cols * TS; map.height = D.rows * TS; mctx = map.getContext("2d");
         mctx.imageSmoothingEnabled = false;
-        buildRoster(); buildAtlas(); renderMapAll(); setTool(); resize();
+        buildRoster(); buildAtlas(); initLayers(); renderMapAll(); setTool(); resize();
         $("status").textContent = `Loaded ${D.name} — ${D.cols}×${D.rows}. Click a roster tile, then paint. Scroll=zoom, middle/space-drag=pan.`;
       }
 
@@ -224,7 +251,7 @@
           sw.style.backgroundPosition = `-${sx}px -${sy}px`;
           sw.style.backgroundSize = `${atlas.width}px ${atlas.height}px`;
           sw.innerHTML = `<span class="ch">${t.char}</span><span class="col" style="background:${t.blocked ? "#e0533d" : "#4fc46b"}"></span>`;
-          sw.onclick = () => { sel = t; tool = "paint"; setTool(); buildRoster(); };
+          sw.onclick = () => { clearLayer(); sel = t; tool = "paint"; setTool(); buildRoster(); };
           el.appendChild(sw);
         }
       }
@@ -330,6 +357,7 @@
           for (let y = y0; y <= y1; y++) { vctx.moveTo(x0 * TS, y * TS); vctx.lineTo(x1 * TS, y * TS); }
           vctx.stroke();
         }
+        drawSpawns();
         if (hover) { vctx.strokeStyle = "#ffcc44"; vctx.lineWidth = 2 / cam.scale; vctx.strokeRect(hover.x * TS, hover.y * TS, TS, TS); }
       }
 
@@ -581,16 +609,116 @@
           const b = document.createElement("button");
           b.textContent = p.label; b.title = `Auto-tile: ${p.group} ${p.id}`;
           b._part = p; b._kind = "paint";
-          b.onclick = () => { tool = "autotile"; activePart = p; setTool(); $("status").textContent = p.status; };
+          b.onclick = () => { clearLayer(); tool = "autotile"; activePart = p; setTool(); $("status").textContent = p.status; };
           tools.appendChild(b);
           if (p.tint) {
             const t = document.createElement("button");
             t.textContent = "✨ Tint"; t.title = "Click a plateau top to toggle its bright elevation highlight";
             t._part = p; t._kind = "tint";
-            t.onclick = () => { tool = "tint"; activeTintPart = p; setTool(); $("status").textContent = "Tint — click a plateau top to toggle its bright elevation highlight (click again to reset)."; };
+            t.onclick = () => { clearLayer(); tool = "tint"; activeTintPart = p; setTool(); $("status").textContent = "Tint — click a plateau top to toggle its bright elevation highlight (click again to reset)."; };
             tools.appendChild(t);
           }
         }
+      }
+
+      // ---- Layers: enemy spawns ---------------------------------------------
+      // Build the spawn working set from the server's merged view. Base spawns
+      // (from spawns.yaml) carry their origin tile as baseKey so a move/delete
+      // can suppress them; overlay spawns are the editor's own placements.
+      function initLayers() {
+        spawnList = (D.spawns || []).map((s) => ({
+          type: s.type, x: s.x, y: s.y, source: s.source,
+          baseKey: s.source === "base" ? key(s.x, s.y) : undefined,
+        }));
+        removedBaseKeys = new Set(); spawnSel = null; draggingSpawn = null; spawnsDirty = false;
+        layerMode = null;
+        spawnType = (D.monsterTypes && D.monsterTypes[0]?.id) || null;
+        const typeSel = $("spawnType");
+        typeSel.innerHTML = (D.monsterTypes || []).map((m) => `<option value="${m.id}">${m.name} (${m.id})</option>`).join("");
+        typeSel.onchange = () => { spawnType = typeSel.value; };
+        const mapped = D.floor != null;
+        $("layerPanel").style.display = mapped ? "" : "none";
+        $("layerHint").textContent = mapped ? `floor ${D.floor} · ${D.zone}` : "";
+        $("spawnPanel").style.display = "none";
+        setLayer(null);
+      }
+      function setLayer(mode) {
+        layerMode = mode;
+        if (mode) { tool = "paint"; sel = null; activePart = null; activeTintPart = null; }
+        $("layerSpawns").classList.toggle("on", mode === "spawns");
+        $("spawnPanel").style.display = mode === "spawns" ? "" : "none";
+        setTool(); buildRoster(); draw();
+        if (mode === "spawns") {
+          $("status").textContent = `Spawns layer (floor ${D.floor}/${D.zone}) — pick a monster, click to place. Drag to move, right-click or Del to delete.`;
+        }
+      }
+      $("layerSpawns").onclick = () => setLayer(layerMode === "spawns" ? null : "spawns");
+      // Tile tools and layer editing are mutually exclusive — picking a tile tool
+      // (or roster/autotile entry) drops out of the active layer so the canvas
+      // paints again. Spawn edits stay in memory until saved.
+      function clearLayer() {
+        if (!layerMode) return;
+        layerMode = null; spawnSel = null; draggingSpawn = null;
+        $("layerSpawns").classList.remove("on"); $("spawnPanel").style.display = "none"; draw();
+      }
+
+      // stable hue per monster type so markers are visually distinct
+      function spawnColor(type) {
+        let h = 0; for (let i = 0; i < type.length; i++) h = (h * 31 + type.charCodeAt(i)) >>> 0;
+        return `hsl(${h % 360}, 70%, 55%)`;
+      }
+      const spawnAtCell = (x, y) => { for (let i = spawnList.length - 1; i >= 0; i--) if (spawnList[i].x === x && spawnList[i].y === y) return spawnList[i]; return null; };
+      function placeSpawn(x, y) {
+        if (!spawnType) { $("status").textContent = "Pick a monster type first."; return; }
+        const s = { type: spawnType, x, y, source: "overlay" };
+        spawnList.push(s); spawnSel = s; spawnsDirty = true;
+        $("status").textContent = `Placed ${spawnType} at (${x},${y}). ${spawnList.length} spawn(s) on this floor.`;
+      }
+      function moveSpawnTo(s, x, y) {
+        if (s.x === x && s.y === y) return;
+        if (s.source === "base") { removedBaseKeys.add(s.baseKey); s.source = "overlay"; s.baseKey = undefined; }
+        s.x = x; s.y = y; spawnsDirty = true;
+      }
+      function deleteSpawn(s) {
+        const i = spawnList.indexOf(s); if (i < 0) return;
+        if (s.source === "base") removedBaseKeys.add(s.baseKey);
+        spawnList.splice(i, 1); if (spawnSel === s) spawnSel = null; spawnsDirty = true;
+        $("status").textContent = `Deleted ${s.type} at (${s.x},${s.y}).`;
+      }
+      function drawSpawns() {
+        if (layerMode !== "spawns") return;
+        const r = TS * 0.32, showLabel = cam.scale > 0.45;
+        for (const s of spawnList) {
+          const cx = (s.x + 0.5) * TS, cy = (s.y + 0.5) * TS;
+          vctx.beginPath(); vctx.arc(cx, cy, r, 0, Math.PI * 2);
+          if (s.source === "overlay") { vctx.fillStyle = spawnColor(s.type); vctx.fill(); }
+          vctx.lineWidth = (s === spawnSel ? 3 : 2) / cam.scale;
+          vctx.strokeStyle = s === spawnSel ? "#ffcc44" : (s.source === "overlay" ? "#0009" : spawnColor(s.type));
+          vctx.stroke();
+          if (showLabel) {
+            vctx.fillStyle = "#fff"; vctx.strokeStyle = "#000"; vctx.lineWidth = 3 / cam.scale;
+            vctx.font = `${Math.round(TS * 0.34)}px system-ui`; vctx.textAlign = "center"; vctx.textBaseline = "top";
+            const t = s.type.length > 8 ? s.type.slice(0, 8) + "…" : s.type;
+            vctx.strokeText(t, cx, cy + r + 1); vctx.fillText(t, cx, cy + r + 1);
+          }
+        }
+        vctx.textAlign = "start"; vctx.textBaseline = "alphabetic";
+      }
+
+      async function saveSpawns() {
+        const overlay = spawnList.filter((s) => s.source === "overlay").map((s) => ({ type: s.type, x: s.x, y: s.y }));
+        const removed = [...removedBaseKeys].map((k) => { const [x, y] = k.split(",").map(Number); return { x, y }; });
+        $("status").textContent = "Saving spawns + rebuilding content…";
+        const res = await fetch("/editor/api/spawns/save?stage=" + encodeURIComponent(stageName), {
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ overlay, removed }),
+        }).then((r) => r.json());
+        if (res.ok) {
+          spawnsDirty = false;
+          $("status").textContent = `Saved ${overlay.length} editor spawn(s) (+${removed.length} suppressed) + rebuilt content. Game tab hot-reloads.`;
+          return true;
+        }
+        $("status").textContent = "Spawn save FAILED:\n" + (res.error || res.log || "").slice(-600);
+        return false;
       }
 
       function paintCell(x, y) {
@@ -633,6 +761,11 @@
         if (e.button === 1 || spaceDown) { panning = true; userMoved = true; panStart = { x: e.clientX - cam.x, y: e.clientY - cam.y }; e.preventDefault(); return; }
         if (e.button !== 0) return; // right-click handled by contextmenu
         const c = cellAt(e.clientX, e.clientY); if (!c) return;
+        if (layerMode === "spawns") {
+          const hit = spawnAtCell(c.x, c.y);
+          if (hit) { spawnSel = hit; draggingSpawn = hit; } else { placeSpawn(c.x, c.y); }
+          draw(); return;
+        }
         if (tool === "tint") { tintFlood(activeTintPart, c.x, c.y); draw(); return; } // single click floods, no drag
         painting = true; beginAction(); paintCell(c.x, c.y); draw();
       });
@@ -641,11 +774,16 @@
         const c = cellAt(e.clientX, e.clientY);
         hover = c;
         if (c) $("hud").textContent = `(${c.x}, ${c.y})  '${charAt(c.x, c.y)}'  ${blockedChar(charAt(c.x, c.y)) ? "⛔ blocked" : "✓ walkable"}  ·  rot ${cellRot(c.x, c.y)}°  ·  brush ${brushRot}°`;
-        if (painting && c) paintCell(c.x, c.y);
+        if (draggingSpawn && c) moveSpawnTo(draggingSpawn, c.x, c.y);
+        else if (painting && c && layerMode !== "spawns") paintCell(c.x, c.y);
         draw();
       });
-      window.addEventListener("mouseup", () => { if (painting) endAction(); painting = false; panning = false; });
-      view.addEventListener("contextmenu", (e) => { e.preventDefault(); const c = cellAt(e.clientX, e.clientY); if (c) { hover = c; openCtx(e.clientX, e.clientY, c); } });
+      window.addEventListener("mouseup", () => { if (painting) endAction(); painting = false; panning = false; draggingSpawn = null; });
+      view.addEventListener("contextmenu", (e) => {
+        e.preventDefault(); const c = cellAt(e.clientX, e.clientY); if (!c) return; hover = c;
+        if (layerMode === "spawns") { const s = spawnAtCell(c.x, c.y); if (s) { deleteSpawn(s); draw(); } return; }
+        openCtx(e.clientX, e.clientY, c);
+      });
       view.addEventListener("wheel", (e) => {
         e.preventDefault(); userMoved = true;
         const r = view.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
@@ -689,7 +827,8 @@
         if ((e.ctrlKey || e.metaKey) && e.code === "KeyZ") { e.preventDefault(); undo(); return; }
         if ((e.ctrlKey || e.metaKey) && e.code === "KeyC") { if (hover) { e.preventDefault(); copyCell(hover); } return; }
         if ((e.ctrlKey || e.metaKey) && e.code === "KeyV") { if (hover && clipboard) { e.preventDefault(); pasteCell(hover); } return; }
-        if (e.code === "Escape") closeCtx();
+        if (e.code === "Escape") { closeCtx(); if (layerMode === "spawns") { spawnSel = null; draw(); } }
+        if ((e.code === "Delete" || e.code === "Backspace") && layerMode === "spawns" && spawnSel) { e.preventDefault(); deleteSpawn(spawnSel); draw(); }
         if (e.code === "Space") { spaceDown = true; view.style.cursor = "grab"; }
         if (e.code === "KeyR") { e.preventDefault(); rotateAction(); }
       });
@@ -702,9 +841,9 @@
             || (b._kind === "tint" && tool === "tint" && activeTintPart === b._part));
         }
       }
-      $("tPaint").onclick = () => { tool = "paint"; setTool(); };
-      $("tErase").onclick = () => { tool = "erase"; setTool(); };
-      $("tPick").onclick = () => { tool = "pick"; setTool(); };
+      $("tPaint").onclick = () => { clearLayer(); tool = "paint"; setTool(); };
+      $("tErase").onclick = () => { clearLayer(); tool = "erase"; setTool(); };
+      $("tPick").onclick = () => { clearLayer(); tool = "pick"; setTool(); };
       $("tRot").onclick = rotateAction;
       $("toggleAtlas").onclick = () => $("atlasWrap").classList.toggle("show");
       for (const id of ["optCol", "optTrees", "optGrid"]) $(id).onchange = draw;
@@ -713,13 +852,20 @@
         const cells = [...overrides.entries()].map(([k, v]) => { const [x, y] = k.split(",").map(Number); return { x, y, char: v.char, ref: v.ref, blocked: v.blocked, rot: v.rot || 0 }; });
         // Persist legend/vocab adds, but drop blob tiles that were never actually painted —
         // otherwise every load would bloat the stage legend with all 16 road variants.
+        // (This is also why we can't gauge "has tile edits" from legendAdds alone:
+        // road/water blob chars are minted on load but unused until painted.)
         const used = new Set(cells.map((c) => c.char));
         const legendAddsOut = {}, vocabAddsOut = {};
         for (const ch of Object.keys(legendAdds)) {
           if (blobChars.has(ch) && !used.has(ch)) continue;
           legendAddsOut[ch] = legendAdds[ch]; if (vocabAdds[ch]) vocabAddsOut[ch] = vocabAdds[ch];
         }
-        if (!cells.length && !Object.keys(legendAddsOut).length) { $("status").textContent = "Nothing to save."; return; }
+        const hasTileWork = cells.length || Object.keys(legendAddsOut).length;
+        // Spawn edits (overlay file + content rebuild) and tile edits (stage import)
+        // save independently. Save whatever is dirty; report a combined status.
+        const done = [];
+        if (spawnsDirty) { if (await saveSpawns()) done.push("spawns"); }
+        if (!hasTileWork) { if (!done.length) $("status").textContent = "Nothing to save."; return; }
         $("status").textContent = "Saving + rebuilding stage…";
         const res = await fetch("/editor/api/save?stage=" + encodeURIComponent(stageName), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cells, legendAdds: legendAddsOut, vocabAdds: vocabAddsOut }) }).then((r) => r.json());
         if (res.ok) {
@@ -727,7 +873,8 @@
           for (const [k, v] of overrides) { const [x, y] = k.split(",").map(Number); D.ascii[y] = D.ascii[y].slice(0, x) + v.char + D.ascii[y].slice(x + 1); D.base[y][x] = v.ref; if (D.fringe) D.fringe[y][x] = null; if (v.rot) D.rotations[k] = v.rot; else delete D.rotations[k]; }
           Object.assign(D.legend, legendAddsOut); Object.assign(D.vocab, vocabAddsOut);
           overrides.clear(); undoStack.length = 0;
-          $("status").textContent = `Saved ${cells.length} cell(s) + rebuilt. Switch to the game tab — it hot-reloads.`;
+          done.unshift(`${cells.length} cell(s)`);
+          $("status").textContent = `Saved ${done.join(" + ")} + rebuilt. Switch to the game tab — it hot-reloads.`;
         } else {
           $("status").textContent = "Save FAILED (stage not changed in-game):\n" + (res.error || res.log || "").slice(-600);
         }
@@ -746,6 +893,16 @@
           paint: (part, x, y) => paintPart(part, x, y),
           charAt: (x, y) => charAt(x, y),
           stage: () => stageName,
+          // Spawns layer seam: drive place/move/delete and read the working set +
+          // the exact payload a save would POST, without writing files.
+          setLayer, placeSpawn, deleteSpawn, moveSpawnTo,
+          floor: () => D?.floor,
+          spawnAt: (x, y) => spawnAtCell(x, y),
+          spawns: () => spawnList.map((s) => ({ ...s })),
+          spawnPayload: () => ({
+            overlay: spawnList.filter((s) => s.source === "overlay").map((s) => ({ type: s.type, x: s.x, y: s.y })),
+            removed: [...removedBaseKeys].map((k) => { const [x, y] = k.split(",").map(Number); return { x, y }; }),
+          }),
         };
       }
       boot();
