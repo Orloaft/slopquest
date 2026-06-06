@@ -1,26 +1,34 @@
 // Build the aligned road-wang.png from the pristine authored source.
 // ---------------------------------------------------------------------------
 // road-wang.png is a 4x4 @32px edge-Wang atlas the bakers index DIRECTLY by the
-// NESW mask (N=1,E=2,S=4,W=8 -> idx==mask; blit road[m], no LUT). Two defects in the
-// authored art (preserved in road-wang.src.png) made corners never blend:
+// NESW mask (N=1,E=2,S=4,W=8 -> idx==mask; blit road[m], no LUT). The STRAIGHTS
+// (V=5 N+S, H=10 E+W), the T-junctions and the cross are authored correctly and are
+// left byte-for-byte untouched. The four CORNERS (NW=9, NE=3, ES=6, SW=12) were the
+// problem: their authored bands sit at the wrong offset relative to the straights, so
+// a bend kinked at the tile seam. Only NW happened to be painted on-register.
 //
-//  1) OFF-CENTRE ROAD. Every tile's road band sits ~5px right and ~4px below centre
-//     (measured: vertical road x-centre 20.5, horizontal y-centre 19.5; centre=15.5).
-//     Straights tile fine with each other, but it bites once you rotate (see #2).
-//  2) ONLY NW IS A GOOD CORNER. Of the four corner slots only idx 9 (NW) has arms
-//     that match the straights; NE/ES/SW held mis-shaped tiles. The robust fix is to
-//     regenerate them as rotations of NW — but rotating the OFF-CENTRE NW flips its
-//     offset to the opposite side, so the rotated arms land ~10px off and the top/left
-//     strips no longer line up with the straights.
+// HISTORY of what did NOT work, so nobody re-treads it:
+//   - Rotating/mirroring the good NW corner: the road band sits at x~22 (right of the
+//     32px centre, because the straights' bands are off-centre), so any flip/rotate
+//     reflects it to x~10 -> ~12px off the straight. Dead end.
+//   - Warping each authored corner to re-register it (rigid shift, diagonal-ramp, then
+//     a gated separable shear): registration could be made to match at the seam, but
+//     warping SHEARS the authored pixels, so the grass COLLAR edge still stepped at the
+//     seam and large corrections (NE needed +7px) tore the band. Three corners never
+//     looked as clean as NW. Dead end.
 //
-// Fix, in order:
-//   (a) RECENTRE every tile by (-5,-4) with edge-clamp fill, so the road band is
-//       centred (15.5) in all tiles while still reaching its connecting edges (clamp
-//       replicates the far edge, preserving connectivity for straights/T/cross).
-//   (b) Regenerate the corners as lossless rotations of the now-centred NW:
-//       NE(3)=cw90, ES(6)=180, SW(12)=cw270. Centred + centred => everything aligns.
+// WHAT WORKS — SYNTHESISE every corner from the two straights (this file):
+//   A corner is just an L made of the vertical straight's band and the horizontal
+//   straight's band. So we composite the actual V and H straight TILES, each clipped to
+//   the half that reaches its connecting edge, and union them at the elbow. Because each
+//   arm IS the straight's own pixels (band AND collar), every connecting edge is
+//   pixel-identical to the neighbouring straight by construction -> seams are perfect,
+//   no step, no fringe. All four corners are built the same way, so they are uniform in
+//   quality (NW is rebuilt too, so it matches the others exactly). The inner concave
+//   corner carries the straights' collar (grass + flower dither); the outer corner is
+//   solid dirt. Out-of-L pixels stay TRANSPARENT so world grass shows through.
 //
-// Source of truth is road-wang.src.png (committed); this is idempotent. Re-run with
+// Idempotent. Source of truth: road-wang.src.png (committed). Re-run with
 // `npm run assets:fix:road-corners`, then re-bake the road stages (route, northwood).
 import { readFileSync, writeFileSync } from "node:fs";
 import nodePath from "node:path";
@@ -30,52 +38,70 @@ const repoRoot = process.cwd();
 const SRC = nodePath.join(repoRoot, "assetsources/curated/sliced/road-wang.src.png");
 const OUT = nodePath.join(repoRoot, "assetsources/curated/sliced/road-wang.png");
 const ts = 32, COLS = 4;
-const NW_IDX = 9, NE_IDX = 3, ES_IDX = 6, SW_IDX = 12;
-const SHIFT_X = -5, SHIFT_Y = -4; // recentre the +5,+4 authored offset
+const V_STRAIGHT = 5, H_STRAIGHT = 10; // NESW masks: 5 = N+S, 10 = E+W
 
 const src = PNG.sync.read(readFileSync(SRC));
-const out = new PNG({ width: src.width, height: src.height });
 const tileXY = (idx: number) => [(idx % COLS) * ts, Math.floor(idx / COLS) * ts] as const;
-const clamp = (v: number) => (v < 0 ? 0 : v > ts - 1 ? ts - 1 : v);
+// Strict core-dirt: orange/brown band only, excludes the greenish collar / flower dither.
+const isDirt = (r: number, g: number, b: number, a: number) => a > 127 && r - g > 22 && r - b > 45;
+function pixel(idx: number, x: number, y: number): [number, number, number, number] {
+  const [tx, ty] = tileXY(idx);
+  const i = ((ty + y) * src.width + (tx + x)) * 4;
+  return [src.data[i], src.data[i + 1], src.data[i + 2], src.data[i + 3]];
+}
 
-// (a) recentre every tile by (SHIFT_X, SHIFT_Y) with edge-clamp fill.
-for (let idx = 0; idx < 16; idx++) {
+// Median of the longest contiguous dirt run, sampled across the straight's length —
+// robust to the per-row/col dither wobble that throws off a min/max or centroid.
+function medianRun(idx: number, axis: "row" | "col"): [number, number] {
+  const los: number[] = [], his: number[] = [];
+  for (let s = 2; s <= 30; s++) {
+    let best: [number, number] | null = null, run: [number, number] | null = null;
+    for (let t = 0; t < ts; t++) {
+      const [r, g, b, a] = axis === "row" ? pixel(idx, t, s) : pixel(idx, s, t);
+      if (isDirt(r, g, b, a)) run = run ? [run[0], t] : [t, t];
+      else { if (run && (!best || run[1] - run[0] > best[1] - best[0])) best = run; run = null; }
+    }
+    if (run && (!best || run[1] - run[0] > best[1] - best[0])) best = run;
+    if (best) { los.push(best[0]); his.push(best[1]); }
+  }
+  const med = (a: number[]) => a.sort((x, y) => x - y)[Math.floor(a.length / 2)];
+  return [med(los), med(his)];
+}
+const [XL, XR] = medianRun(V_STRAIGHT, "row"); // vertical band's x-extent
+const [YT, YB] = medianRun(H_STRAIGHT, "col"); // horizontal band's y-extent
+
+const out = new PNG({ width: src.width, height: src.height });
+out.data.set(src.data); // straights / T / cross stay pristine; only corners are rebuilt
+
+// v/h name the connecting edges. Corner = (vertical straight's arm reaching that edge)
+// L (horizontal straight's arm reaching its edge).
+const CORNERS: Record<number, { v: "N" | "S"; h: "W" | "E" }> = {
+  9: { v: "N", h: "W" }, 3: { v: "N", h: "E" }, 6: { v: "S", h: "E" }, 12: { v: "S", h: "W" },
+};
+
+for (const [idxStr, { v, h }] of Object.entries(CORNERS)) {
+  const idx = Number(idxStr);
   const [tx, ty] = tileXY(idx);
   for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
-    const sx = clamp(x - SHIFT_X), sy = clamp(y - SHIFT_Y);
-    const si = ((ty + sy) * src.width + (tx + sx)) * 4;
+    // Keep the vertical arm from its connecting edge down/up to the far edge of the
+    // horizontal band (so it reaches the elbow but grows no stub past it); mirror for H.
+    const keepV = v === "N" ? y <= YB : y >= YT;
+    const keepH = h === "W" ? x <= XR : x >= XL;
+    const vp = pixel(V_STRAIGHT, x, y), hp = pixel(H_STRAIGHT, x, y);
+    const vOpaque = keepV && vp[3] > 127, hOpaque = keepH && hp[3] > 127;
+    const vDirt = vOpaque && isDirt(...vp), hDirt = hOpaque && isDirt(...hp);
+    const inVBand = x >= XL && x <= XR;
+    // Dirt always wins over collar (so neither arm's collar bleeds into the other's
+    // band at the elbow); within the vertical band columns prefer the V arm, else H.
+    let pick: [number, number, number, number] | null = null;
+    if (vDirt || hDirt) pick = vDirt && (inVBand || !hDirt) ? vp : hp;
+    else if (vOpaque || hOpaque) pick = vOpaque ? vp : hp; // collar
     const di = ((ty + y) * out.width + (tx + x)) * 4;
-    out.data[di] = src.data[si]; out.data[di + 1] = src.data[si + 1];
-    out.data[di + 2] = src.data[si + 2]; out.data[di + 3] = src.data[si + 3];
+    if (pick) { out.data[di] = pick[0]; out.data[di + 1] = pick[1]; out.data[di + 2] = pick[2]; out.data[di + 3] = 255; }
+    else { out.data[di] = 0; out.data[di + 1] = 0; out.data[di + 2] = 0; out.data[di + 3] = 0; } // grass shows through
   }
 }
-
-// read the now-centred NW tile out of `out`
-const [nwx, nwy] = tileXY(NW_IDX);
-const nw: number[][] = [];
-for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
-  const i = ((nwy + y) * out.width + (nwx + x)) * 4;
-  nw[y * ts + x] = [out.data[i], out.data[i + 1], out.data[i + 2], out.data[i + 3]];
-}
-
-// (b) rotate the centred NW into the other three corner slots.
-const rot = {
-  cw90: (x: number, y: number) => [y, ts - 1 - x] as const,
-  r180: (x: number, y: number) => [ts - 1 - x, ts - 1 - y] as const,
-  cw270: (x: number, y: number) => [ts - 1 - y, x] as const,
-};
-function writeRotated(idx: number, map: (x: number, y: number) => readonly [number, number]): void {
-  const [dx, dy] = tileXY(idx);
-  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
-    const [sx, sy] = map(x, y);
-    const px = nw[sy * ts + sx];
-    const di = ((dy + y) * out.width + (dx + x)) * 4;
-    out.data[di] = px[0]; out.data[di + 1] = px[1]; out.data[di + 2] = px[2]; out.data[di + 3] = px[3];
-  }
-}
-writeRotated(NE_IDX, rot.cw90);
-writeRotated(ES_IDX, rot.r180);
-writeRotated(SW_IDX, rot.cw270);
 
 writeFileSync(OUT, PNG.sync.write(out));
-console.log(`road-wang.png built from src: recentred by (${SHIFT_X},${SHIFT_Y}); NE/ES/SW = rotations of centred NW.`);
+console.log(`road-wang.png built: straights/T/cross pristine; 4 corners SYNTHESISED from straights ` +
+  `(V band x[${XL},${XR}], H band y[${YT},${YB}]) — seams pixel-identical to straights, all four uniform.`);

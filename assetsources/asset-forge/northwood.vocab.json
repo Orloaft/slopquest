@@ -72,7 +72,7 @@
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#aa9528"
+      "minimapColor": "#b79a31"
     },
     ".": {
       "role": "sand-shore",
@@ -100,7 +100,7 @@
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#7a5e33"
+      "minimapColor": "#7b5e33"
     },
     "y": {
       "role": "tree-trunk",
