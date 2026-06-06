@@ -1918,27 +1918,27 @@
     },
     {
       "index": 382,
-      "role": "woodland-cliff-face",
-      "blocked": true
-    },
-    {
-      "index": 383,
-      "role": "plateau-top",
-      "blocked": false
-    },
-    {
-      "index": 384,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 385,
       "role": "packed-road",
       "blocked": false
     },
     {
-      "index": 386,
+      "index": 383,
+      "role": "woodland-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 384,
       "role": "plateau-top",
+      "blocked": false
+    },
+    {
+      "index": 385,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 386,
+      "role": "packed-road",
       "blocked": false
     },
     {
@@ -1948,7 +1948,7 @@
     },
     {
       "index": 388,
-      "role": "forest-floor",
+      "role": "plateau-top",
       "blocked": false
     },
     {
@@ -1963,7 +1963,7 @@
     },
     {
       "index": 391,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
@@ -1973,23 +1973,23 @@
     },
     {
       "index": 393,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 394,
       "role": "woodland-cliff-face",
       "blocked": true
     },
     {
-      "index": 394,
+      "index": 395,
       "role": "packed-road",
       "blocked": false
-    },
-    {
-      "index": 395,
-      "role": "deep-water",
-      "blocked": true
     },
     {
       "index": 396,
-      "role": "packed-road",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 397,
@@ -2013,8 +2013,8 @@
     },
     {
       "index": 401,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 402,
@@ -2043,12 +2043,12 @@
     },
     {
       "index": 407,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 408,
-      "role": "plateau-top",
+      "role": "forest-floor",
       "blocked": false
     },
     {
@@ -2058,13 +2058,13 @@
     },
     {
       "index": 410,
-      "role": "mossy-stone-stairs",
+      "role": "plateau-top",
       "blocked": false
     },
     {
       "index": 411,
-      "role": "deep-water",
-      "blocked": true
+      "role": "mossy-stone-stairs",
+      "blocked": false
     },
     {
       "index": 412,
@@ -2073,7 +2073,7 @@
     },
     {
       "index": 413,
-      "role": "woodland-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
@@ -2083,7 +2083,7 @@
     },
     {
       "index": 415,
-      "role": "deep-water",
+      "role": "woodland-cliff-face",
       "blocked": true
     },
     {
@@ -2093,7 +2093,7 @@
     },
     {
       "index": 417,
-      "role": "woodland-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
@@ -2103,13 +2103,13 @@
     },
     {
       "index": 419,
-      "role": "mossy-stone-stairs",
-      "blocked": false
+      "role": "woodland-cliff-face",
+      "blocked": true
     },
     {
       "index": 420,
-      "role": "deep-water",
-      "blocked": true
+      "role": "mossy-stone-stairs",
+      "blocked": false
     },
     {
       "index": 421,
@@ -2118,12 +2118,12 @@
     },
     {
       "index": 422,
-      "role": "plateau-top",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 423,
-      "role": "forest-floor",
+      "role": "plateau-top",
       "blocked": false
     },
     {
@@ -2133,8 +2133,8 @@
     },
     {
       "index": 425,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 426,
@@ -2153,12 +2153,12 @@
     },
     {
       "index": 429,
-      "role": "woodland-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 430,
-      "role": "deep-water",
+      "role": "woodland-cliff-face",
       "blocked": true
     },
     {
@@ -2173,12 +2173,12 @@
     },
     {
       "index": 433,
-      "role": "plateau-top",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 434,
-      "role": "forest-floor",
+      "role": "plateau-top",
       "blocked": false
     },
     {
@@ -2193,27 +2193,27 @@
     },
     {
       "index": 437,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 438,
       "role": "forest-floor",
       "blocked": false
     },
     {
+      "index": 438,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
       "index": 439,
-      "role": "plateau-top",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 440,
-      "role": "woodland-cliff-face",
-      "blocked": true
+      "role": "plateau-top",
+      "blocked": false
     },
     {
       "index": 441,
-      "role": "deep-water",
+      "role": "woodland-cliff-face",
       "blocked": true
     },
     {
@@ -2223,12 +2223,12 @@
     },
     {
       "index": 443,
-      "role": "plateau-top",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 444,
-      "role": "forest-floor",
+      "role": "plateau-top",
       "blocked": false
     },
     {
@@ -2243,17 +2243,17 @@
     },
     {
       "index": 447,
-      "role": "plateau-top",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 448,
-      "role": "woodland-cliff-face",
-      "blocked": true
+      "role": "plateau-top",
+      "blocked": false
     },
     {
       "index": 449,
-      "role": "deep-water",
+      "role": "woodland-cliff-face",
       "blocked": true
     },
     {
@@ -2263,13 +2263,13 @@
     },
     {
       "index": 451,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 452,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 453,
@@ -2283,13 +2283,13 @@
     },
     {
       "index": 455,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 456,
-      "role": "woodland-cliff-face",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 457,
@@ -2308,13 +2308,13 @@
     },
     {
       "index": 460,
-      "role": "plateau-top",
-      "blocked": false
+      "role": "woodland-cliff-face",
+      "blocked": true
     },
     {
       "index": 461,
-      "role": "deep-water",
-      "blocked": true
+      "role": "plateau-top",
+      "blocked": false
     },
     {
       "index": 462,
@@ -2348,8 +2348,8 @@
     },
     {
       "index": 468,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 469,
@@ -2363,23 +2363,23 @@
     },
     {
       "index": 471,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 472,
       "role": "woodland-cliff-face",
       "blocked": true
     },
     {
-      "index": 472,
+      "index": 473,
       "role": "packed-road",
       "blocked": false
     },
     {
-      "index": 473,
+      "index": 474,
       "role": "woodland-cliff-face",
       "blocked": true
-    },
-    {
-      "index": 474,
-      "role": "forest-floor",
-      "blocked": false
     },
     {
       "index": 475,
@@ -2388,22 +2388,22 @@
     },
     {
       "index": 476,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 477,
       "role": "forest-floor",
       "blocked": false
     },
     {
-      "index": 478,
-      "role": "woodland-cliff-face",
+      "index": 477,
+      "role": "deep-water",
       "blocked": true
     },
     {
+      "index": 478,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
       "index": 479,
-      "role": "deep-water",
+      "role": "woodland-cliff-face",
       "blocked": true
     },
     {
@@ -2413,33 +2413,33 @@
     },
     {
       "index": 481,
-      "role": "plateau-top",
-      "blocked": false
-    },
-    {
-      "index": 482,
       "role": "deep-water",
       "blocked": true
     },
     {
+      "index": 482,
+      "role": "plateau-top",
+      "blocked": false
+    },
+    {
       "index": 483,
-      "role": "woodland-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 484,
+      "role": "woodland-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 485,
       "role": "plateau-top",
       "blocked": false
     },
     {
-      "index": 485,
+      "index": 486,
       "role": "forest-floor",
       "blocked": false
-    },
-    {
-      "index": 486,
-      "role": "deep-water",
-      "blocked": true
     },
     {
       "index": 487,
@@ -2448,48 +2448,48 @@
     },
     {
       "index": 488,
-      "role": "woodland-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 489,
-      "role": "deep-water",
+      "role": "woodland-cliff-face",
       "blocked": true
     },
     {
       "index": 490,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 491,
       "role": "sand-shore",
       "blocked": false
     },
     {
-      "index": 491,
+      "index": 492,
       "role": "packed-road",
       "blocked": false
     },
     {
-      "index": 492,
+      "index": 493,
       "role": "forest-floor",
       "blocked": false
     },
     {
-      "index": 493,
+      "index": 494,
       "role": "plateau-top",
       "blocked": false
-    },
-    {
-      "index": 494,
-      "role": "deep-water",
-      "blocked": true
     },
     {
       "index": 495,
-      "role": "plateau-top",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 496,
-      "role": "deep-water",
-      "blocked": true
+      "role": "plateau-top",
+      "blocked": false
     },
     {
       "index": 497,
@@ -2508,8 +2508,8 @@
     },
     {
       "index": 500,
-      "role": "plateau-top",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 501,
@@ -2523,23 +2523,23 @@
     },
     {
       "index": 503,
-      "role": "sand-shore",
+      "role": "plateau-top",
       "blocked": false
     },
     {
       "index": 504,
-      "role": "packed-road",
+      "role": "sand-shore",
       "blocked": false
     },
     {
       "index": 505,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 506,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 507,
@@ -2553,13 +2553,13 @@
     },
     {
       "index": 509,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 510,
-      "role": "woodland-cliff-face",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 511,
@@ -2573,53 +2573,53 @@
     },
     {
       "index": 513,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 514,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 515,
       "role": "woodland-cliff-face",
       "blocked": true
     },
     {
-      "index": 516,
+      "index": 514,
       "role": "forest-floor",
       "blocked": false
     },
     {
+      "index": 515,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 516,
+      "role": "woodland-cliff-face",
+      "blocked": true
+    },
+    {
       "index": 517,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 518,
-      "role": "plateau-top",
-      "blocked": false
-    },
-    {
-      "index": 519,
-      "role": "plateau-top",
-      "blocked": false
-    },
-    {
-      "index": 520,
       "role": "forest-floor",
       "blocked": false
     },
     {
+      "index": 519,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 520,
+      "role": "plateau-top",
+      "blocked": false
+    },
+    {
       "index": 521,
-      "role": "deep-water",
-      "blocked": true
+      "role": "plateau-top",
+      "blocked": false
     },
     {
       "index": 522,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 523,
@@ -2628,27 +2628,27 @@
     },
     {
       "index": 524,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 525,
-      "role": "woodland-cliff-face",
-      "blocked": true
-    },
-    {
-      "index": 526,
-      "role": "mossy-stone-stairs",
-      "blocked": false
-    },
-    {
-      "index": 527,
       "role": "deep-water",
       "blocked": true
     },
     {
+      "index": 525,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 526,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 527,
+      "role": "woodland-cliff-face",
+      "blocked": true
+    },
+    {
       "index": 528,
-      "role": "plateau-top",
+      "role": "mossy-stone-stairs",
       "blocked": false
     },
     {
@@ -2658,72 +2658,72 @@
     },
     {
       "index": 530,
-      "role": "packed-road",
+      "role": "plateau-top",
       "blocked": false
     },
     {
       "index": 531,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 532,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 533,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 534,
-      "role": "mossy-stone-stairs",
-      "blocked": false
-    },
-    {
-      "index": 535,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 536,
-      "role": "plateau-top",
-      "blocked": false
-    },
-    {
-      "index": 537,
-      "role": "plateau-top",
-      "blocked": false
-    },
-    {
-      "index": 538,
       "role": "deep-water",
       "blocked": true
     },
     {
-      "index": 539,
-      "role": "woodland-cliff-face",
-      "blocked": true
+      "index": 532,
+      "role": "packed-road",
+      "blocked": false
     },
     {
-      "index": 540,
+      "index": 533,
       "role": "mossy-stone-stairs",
       "blocked": false
     },
     {
-      "index": 541,
-      "role": "woodland-cliff-face",
-      "blocked": true
+      "index": 534,
+      "role": "forest-floor",
+      "blocked": false
     },
     {
-      "index": 542,
+      "index": 535,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 536,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 537,
+      "role": "mossy-stone-stairs",
+      "blocked": false
+    },
+    {
+      "index": 538,
       "role": "packed-road",
       "blocked": false
     },
     {
+      "index": 539,
+      "role": "plateau-top",
+      "blocked": false
+    },
+    {
+      "index": 540,
+      "role": "plateau-top",
+      "blocked": false
+    },
+    {
+      "index": 541,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 542,
+      "role": "woodland-cliff-face",
+      "blocked": true
+    },
+    {
       "index": 543,
-      "role": "packed-road",
+      "role": "mossy-stone-stairs",
       "blocked": false
     },
     {
@@ -2733,17 +2733,17 @@
     },
     {
       "index": 545,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 546,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 547,
-      "role": "deep-water",
+      "role": "woodland-cliff-face",
       "blocked": true
     },
     {
@@ -2753,18 +2753,18 @@
     },
     {
       "index": 549,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 550,
-      "role": "woodland-cliff-face",
+      "role": "deep-water",
       "blocked": true
     },
     {
       "index": 551,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 552,
@@ -2773,18 +2773,18 @@
     },
     {
       "index": 553,
+      "role": "woodland-cliff-face",
+      "blocked": true
+    },
+    {
+      "index": 554,
       "role": "forest-floor",
       "blocked": false
     },
     {
-      "index": 554,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
       "index": 555,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 556,
@@ -2793,8 +2793,8 @@
     },
     {
       "index": 557,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 558,
@@ -2803,18 +2803,18 @@
     },
     {
       "index": 559,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 560,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 561,
-      "role": "packed-road",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 562,
@@ -2823,31 +2823,46 @@
     },
     {
       "index": 563,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 564,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 565,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 566,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 567,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 568,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 569,
       "role": "deep-water",
       "blocked": true
     },
     {
-      "index": 568,
+      "index": 570,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 571,
       "role": "deep-water",
       "blocked": true
     }
