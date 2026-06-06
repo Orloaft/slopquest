@@ -60,6 +60,8 @@
     "assets:stage:northwatch": "node tools/import-asset-forge-stage.ts --stage assetsources/asset-forge/exports/northwatch/northwatch.stage.json --vocab assetsources/asset-forge/northwatch.vocab.json --out src/generated/stages/northwatch.ts --public-dir public/tilesets/northwatch",
     "assets:stage:northwatch:check": "node tools/import-asset-forge-stage.ts --stage assetsources/asset-forge/exports/northwatch/northwatch.stage.json --vocab assetsources/asset-forge/northwatch.vocab.json --out src/generated/stages/northwatch.ts --public-dir public/tilesets/northwatch --check",
     "assets:bridge:desert": "node tools/build-stage-from-textures.ts --floor 7 --name desert",
+    "assets:shoreline:desert": "node tools/apply-water-shoreline.ts --stage desert --water oasis-water --land sand",
+    "assets:desert": "npm run assets:bridge:desert && npm run assets:shoreline:desert && npm run assets:stage:desert",
     "assets:stage:desert": "node tools/import-asset-forge-stage.ts --stage assetsources/asset-forge/exports/desert/desert.stage.json --vocab assetsources/asset-forge/desert.vocab.json --out src/generated/stages/desert.ts --public-dir public/tilesets/desert",
     "assets:stage:desert:check": "node tools/import-asset-forge-stage.ts --stage assetsources/asset-forge/exports/desert/desert.stage.json --vocab assetsources/asset-forge/desert.vocab.json --out src/generated/stages/desert.ts --public-dir public/tilesets/desert --check",
     "assets:bridge:jungle": "node tools/build-stage-from-textures.ts --floor 9 --name jungle",

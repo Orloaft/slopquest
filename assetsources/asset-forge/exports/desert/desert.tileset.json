@@ -4,7 +4,7 @@
   "image": "desert.png",
   "tileSize": 32,
   "columns": 24,
-  "rows": 1,
+  "rows": 2,
   "tiles": [
     {
       "index": 0,
@@ -49,6 +49,131 @@
     {
       "index": 8,
       "role": "sand",
+      "blocked": false
+    },
+    {
+      "index": 9,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 10,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 11,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 12,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 13,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 14,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 15,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 16,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 17,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 18,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 19,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 20,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 21,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 22,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 23,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 24,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 25,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 26,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 27,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 28,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 29,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 30,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 31,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 32,
+      "role": "oasis-water-shore",
+      "blocked": false
+    },
+    {
+      "index": 33,
+      "role": "oasis-water-shore",
       "blocked": false
     }
   ]
