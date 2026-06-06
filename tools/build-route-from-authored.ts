@@ -21,8 +21,6 @@ const ts = 32;
 // ---- locked tunables (mirror build-northwood-from-authored.ts) -------------
 const TREE_TARGET_W_PX = 60;
 const TREE_MIN_SPACING_CELLS = 2;
-const ENVIRO_PROP_DENSITY_GATE = 0.16;
-const PROP_MIN_SPACING_CELLS = 2;
 const ROAD_DITHER_EDGE_PX = 3;
 const ROAD_DITHER_PROB_BY_DEPTH = [0.2, 0.1, 0.04];
 
@@ -110,12 +108,17 @@ for (let k = 0; k < 30; k++) {
   const cx = 6 + Math.floor(rnd() * (C - 12));
   clump(cy, cx, 4, 10 + Math.floor(rnd() * 10));
 }
-// 5) Meandering stream (organic centreline + varying width) with the trail ford
-//    left open at FORD_X. Trail cells stay 't', so the crossing reads as a ford
-//    and the water autotiles a finished shore around the gap.
+// 5) Meandering stream (organic centreline + varying width). The banks PINCH in
+//    toward the ford so the crossing reads as a natural shallow narrowing, and the
+//    water never sits flush against the crossing (otherwise the half-tile dual-grid
+//    water graphics bleed over a 1-wide ford and drown it — it looked impassable).
+const FORD_PINCH_SPAN = 7;
 for (let c = 6; c < C - 6; c++) {
   const cy = 34.5 + 1.6 * Math.sin(c / 9) + 0.9 * Math.sin(c / 4 + 1.3);
-  const hw = 1.0 + 0.9 * (0.5 + 0.5 * Math.sin(c / 6 + 0.5));
+  // 0 at the ford, ramping to 1 by FORD_PINCH_SPAN columns away
+  const pinch = Math.min(1, Math.abs(c - FORD_X) / FORD_PINCH_SPAN);
+  const hw = (1.0 + 0.9 * (0.5 + 0.5 * Math.sin(c / 6 + 0.5))) * pinch;
+  if (hw < 0.5) continue;                       // dry bank right at the crossing
   const y0 = Math.round(cy - hw), y1 = Math.round(cy + hw);
   for (let y = y0; y <= y1; y++) {
     if (y < 1 || y >= R - 1) continue;
@@ -123,8 +126,13 @@ for (let c = 6; c < C - 6; c++) {
     rows[y][c] = "~";
   }
 }
-// 6) Re-stamp the trail so nothing above clipped it.
+// 6) Re-stamp the trail, then flare the ford to a clear 3-wide crossing so the
+//    bridge over the (now-pinched) stream is unmistakable and never drowned.
 paintTrail();
+for (let y = 30; y <= 39; y++) for (let dc = -1; dc <= 1; dc++) {
+  const c = FORD_X + dc;
+  if (c > 0 && c < C - 1 && rows[y][c] !== "^") rows[y][c] = "t";
+}
 
 const at = (r: number, c: number) => (r >= 0 && c >= 0 && r < R && c < C ? rows[r][c] : "^");
 const eh = (_r: number, _c: number) => 0;
@@ -191,10 +199,18 @@ for (let i = 0; i <= R; i++) for (let j = 0; j <= C; j++) {
   blitTile(water, wCols, m, Math.round((j - 0.5) * ts), Math.round((i - 0.5) * ts));
 }
 // ---- roads edge-Wang -------------------------------------------------------
+// road-wang.png is NOT laid out in NESW-mask order, so the connectivity mask must
+// be remapped to the actual atlas index (verified by reading each tile's edges):
+//   straights  VERT(5)->5  HORIZ(10)->10
+//   corners    NE(3)->4  ES(6)->0  SW(12)->6  NW(9)->9
+//   T/cross    7->3  11->11  13->13  14->14  15->15 ; ends/0 fall back to a straight
+// Using the mask directly (the old bug) drew T-junctions and wrong-facing corners
+// at the bends, so the joints never blended.
+const ROAD_TILE = [5, 5, 2, 4, 5, 5, 0, 3, 12, 9, 10, 11, 6, 13, 14, 15];
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   if (!isR(r, c)) continue;
   const m = (isR(r - 1, c) ? 1 : 0) | (isR(r, c + 1) ? 2 : 0) | (isR(r + 1, c) ? 4 : 0) | (isR(r, c - 1) ? 8 : 0);
-  blitTile(road, rCols, m, c * ts, r * ts);
+  blitTile(road, rCols, ROAD_TILE[m] ?? m, c * ts, r * ts);
 }
 const isGrassCell = (r: number, c: number) => { const ch = at(r, c); return ch === "F" || ch === "f"; };
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
@@ -393,34 +409,12 @@ for (const pl of placed) {
   ascii[pl.r] = line.slice(0, pl.c) + "y" + line.slice(pl.c + 1);
   collision[pl.r][pl.c] = 1;
 }
-// props (non-blocking decorative shrubs/flowers on open grass)
-const DECO_GROUPS = [
-  { ids: [22, 24, 25, 70], w: 26 },
-  { ids: [33, 34, 35, 49, 105, 107], w: 22 },
-  { ids: [54, 97], w: 18 },
-];
-const decoDims = DECO_GROUPS.flatMap((g) => g.ids.map((id) => ({ id, ...objDim(id, g.w) })));
-const treeCells = new Set(placed.map((p) => `${p.r},${p.c}`));
-const decoPlaced: Array<{ r: number; c: number }> = [];
-const decoPl: Array<{ r: number; c: number; di: number }> = [];
-for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
-  if (at(r, c) !== "F") continue;
-  if (noTree.has(`${r},${c}`)) continue;
-  if (rand() > ENVIRO_PROP_DENSITY_GATE) continue;
-  let ok = true;
-  for (const p of decoPlaced) if (Math.abs(p.r - r) < PROP_MIN_SPACING_CELLS && Math.abs(p.c - c) < PROP_MIN_SPACING_CELLS) { ok = false; break; }
-  if (ok) for (let dr = -1; dr <= 1 && ok; dr++) for (let dc = -1; dc <= 1; dc++) if (treeCells.has(`${r + dr},${c + dc}`)) { ok = false; break; }
-  if (!ok) continue;
-  decoPlaced.push({ r, c });
-  decoPl.push({ r, c, di: Math.floor(rand() * decoDims.length) });
-}
-decoPl.sort((a, b) => a.r - b.r);
-for (const pl of decoPl) {
-  const cx = pl.c * ts + ts / 2 + Math.round((rand() - 0.5) * 12);
-  const baseY = pl.r * ts + ts - 2 + Math.round((rand() - 0.5) * 6);
-  const t = decoDims[pl.di];
-  objects.push({ key: treeKey(t.id), x: cx / ts, y: baseY / ts, w: t.w, h: t.h, blocking: false });
-}
+// NOTE: no scattered shrub/flower props. Densely sprinkling random small sprites
+// across the grass read as messy noise that fought the trees and the trail for
+// attention. Northwood's cohesion comes from trees + terrain alone, so the route
+// keeps only trees (woodland framing) + the landmark oak. Tall-grass clearings
+// stay clean open pockets where the spawns live.
+
 // Hero landmark: an oversized ancient oak in its own clearing, off the trail.
 {
   const g = CLEARINGS[2];
@@ -431,7 +425,7 @@ for (const pl of decoPl) {
   collision[g.cy][g.cx] = 1;
 }
 
-const spriteIds = [...new Set([...TREE_IDS, ...DECO_GROUPS.flatMap((g) => g.ids)])];
+const spriteIds = [...new Set(TREE_IDS)];
 const spriteOutDir = nodePath.join(repoRoot, "public/sprites/nw");
 mkdirSync(spriteOutDir, { recursive: true });
 for (const id of spriteIds) {
@@ -476,4 +470,4 @@ const fullVocab = {
 };
 writeFileSync(nodePath.join(repoRoot, "assetsources/asset-forge/route.vocab.json"), JSON.stringify(fullVocab, null, 2));
 
-console.log(`route stage -> ${C}x${R}; tileset ${N} tiles (${PACK_COLS}x${packRows}); ${objects.length} objects (${placements.length} trees + ${decoPl.length} props + 1 landmark)`);
+console.log(`route stage -> ${C}x${R}; tileset ${N} tiles (${PACK_COLS}x${packRows}); ${objects.length} objects (${placements.length} trees + 1 landmark, no scatter props)`);
