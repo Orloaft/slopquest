@@ -4,7 +4,7 @@
   "image": "swamp.png",
   "tileSize": 32,
   "columns": 24,
-  "rows": 5,
+  "rows": 6,
   "tiles": [
     {
       "index": 0,
@@ -34,12 +34,12 @@
     {
       "index": 5,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 6,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 7,
@@ -49,22 +49,22 @@
     {
       "index": 8,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 9,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 10,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 11,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 12,
@@ -74,37 +74,37 @@
     {
       "index": 13,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 14,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 15,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 16,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 17,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 18,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 19,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 20,
@@ -114,22 +114,22 @@
     {
       "index": 21,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 22,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 23,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 24,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 25,
@@ -139,12 +139,12 @@
     {
       "index": 26,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 27,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 28,
@@ -154,7 +154,7 @@
     {
       "index": 29,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 30,
@@ -169,12 +169,12 @@
     {
       "index": 32,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 33,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 34,
@@ -184,32 +184,32 @@
     {
       "index": 35,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 36,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 37,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 38,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 39,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 40,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 41,
@@ -224,7 +224,7 @@
     {
       "index": 43,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 44,
@@ -239,17 +239,17 @@
     {
       "index": 46,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 47,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 48,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 49,
@@ -264,7 +264,7 @@
     {
       "index": 51,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 52,
@@ -274,17 +274,17 @@
     {
       "index": 53,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 54,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 55,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 56,
@@ -294,17 +294,17 @@
     {
       "index": 57,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 58,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 59,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 60,
@@ -329,12 +329,12 @@
     {
       "index": 64,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 65,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 66,
@@ -369,7 +369,7 @@
     {
       "index": 72,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 73,
@@ -389,7 +389,7 @@
     {
       "index": 76,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 77,
@@ -414,12 +414,12 @@
     {
       "index": 81,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 82,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 83,
@@ -429,27 +429,27 @@
     {
       "index": 84,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 85,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 86,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 87,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 88,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 89,
@@ -459,12 +459,12 @@
     {
       "index": 90,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 91,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 92,
@@ -484,7 +484,7 @@
     {
       "index": 95,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 96,
@@ -499,7 +499,7 @@
     {
       "index": 98,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 99,
@@ -524,12 +524,12 @@
     {
       "index": 103,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 104,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 105,
@@ -549,12 +549,12 @@
     {
       "index": 108,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 109,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 110,
@@ -569,7 +569,7 @@
     {
       "index": 112,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 113,
@@ -579,22 +579,22 @@
     {
       "index": 114,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 115,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 116,
       "role": "marsh",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 117,
       "role": "marsh",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 118,
@@ -603,6 +603,46 @@
     },
     {
       "index": 119,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 120,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 121,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 122,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 123,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 124,
+      "role": "marsh",
+      "blocked": true
+    },
+    {
+      "index": 125,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 126,
+      "role": "marsh",
+      "blocked": false
+    },
+    {
+      "index": 127,
       "role": "marsh",
       "blocked": false
     }
