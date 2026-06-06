@@ -46,4 +46,36 @@ test.describe("editor road autotiling", () => {
     expect(r.corner).not.toBe(r.horiz![0]);
     expect(errors).toEqual([]);
   });
+
+  test("paints a water body whose interior differs from its shore", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+    page.on("pageerror", (e) => errors.push(String(e)));
+
+    await page.goto("/editor.html?__test=1", { waitUntil: "networkidle" });
+    await page.waitForFunction(() => (window as any).__ed?.stage(), null, { timeout: 10000 });
+    await page.evaluate(() => (window as any).__ed.loadStage("northwood"));
+    await page.waitForFunction(
+      () => (window as any).__ed.stage() === "northwood" && (window as any).__ed.parts().some((p: any) => p.id === "water"),
+      null, { timeout: 10000 });
+
+    const r = await page.evaluate(() => {
+      const ed = (window as any).__ed;
+      const water = ed.parts().find((p: any) => p.id === "water");
+      const cells: [number, number][] = [];
+      for (let y = 40; y <= 44; y++) for (let x = 40; x <= 44; x++) cells.push([x, y]);
+      for (const [x, y] of cells) ed.paint(water, x, y);
+      const ch = (x: number, y: number) => ed.charAt(x, y);
+      return {
+        center: ch(42, 42), topEdge: ch(42, 40), leftEdge: ch(40, 42),
+        allWater: cells.every(([x, y]) => water.memberOf(x, y)),
+      };
+    });
+
+    expect(r.allWater).toBe(true);
+    // Interior open water resolves to a different tile than its top/left shore.
+    expect(r.center).not.toBe(r.topEdge);
+    expect(r.center).not.toBe(r.leftEdge);
+    expect(errors).toEqual([]);
+  });
 });

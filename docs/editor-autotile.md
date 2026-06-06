@@ -118,19 +118,42 @@ which only writes the road tiles you actually placed into the stage legend.
   enters/exits at a consistent position to minimise this. A perfectly seamless set
   would need purpose-drawn blob art (the alternative path we did **not** take).
 
-## Adding water or another biome
+## Water (and adding more biomes)
 
-The format is generic. To add a water blob set to a stage:
+`<zone>.blobset.json` holds an array of `sets`, so a stage can carry **road and
+water** (and more) at once — each gets its own toolbar button automatically.
 
-1. Write a classifier pass (clone `classify-road-blobset.py`, point `--role` at the
-   water role — note some manifests label water poorly, so you may classify by
-   colour instead).
-2. Emit a second entry in that zone's `sets` array with `id: "water"`,
-   `blocked: true`, and its own `tiles` table.
-3. The editor builds a toolbar button for it automatically — no editor code change.
+**Water** ships for northwood via `tools/classify-water-blobset.py`. It differs
+from the road classifier in two ways:
 
-Plumbing: the dev server serves `<zone>.blobset.json` in `/editor/api/state`
-(`vite.config.ts`); `editor.html` mints a hidden tile char per distinct atlas index
-and drives them through the shared `blobResolver`. Membership is the set's own
-tiles; **connectivity** also counts legacy road tiles, so new roads butt cleanly
-against pre-existing ones.
+- It finds water by **colour, not manifest role** — our atlases mislabel water
+  (northwood tags cliff tiles `deep-water`), so it seeds the bluest tile and gates
+  on teal (blue clearly dominates red) to avoid false-positiving dark canopy/shadow.
+- It **merges** into the existing blobset (replacing only the `water` set), so it
+  won't clobber your hand-tuned road table:
+
+```bash
+python3 tools/classify-water-blobset.py --zone northwood \
+  --atlas public/tilesets/northwood/forest.png \
+  --manifest assetsources/asset-forge/exports/northwood/forest.tileset.json \
+  --out assetsources/asset-forge/exports/northwood/northwood.blobset.json \
+  --role deep-water
+```
+
+For water the bitmask bit means **"open water runs off this edge"** — so a *shore*
+edge (land beyond) leaves the bit clear. `bm 14` (water E+S+W) is a tile with land
+along its **north** edge; `bm 15` is open water. Tune it exactly like roads: edit
+`tiles`, reload. northwood covers 10/16 — the rare single-edge stubs and one outer
+corner (`bm 6`) fall back to open water; re-point them by hand if a pond corner
+looks unfinished.
+
+To add water to **another** stage, run the same tool with that zone's atlas and the
+`--role` of its legacy water tile. (Swamp is a poor fit — its water is organic, not
+a clean tile set; northwood's lake is the clean case.)
+
+**Plumbing.** The dev server serves `<zone>.blobset.json` in `/editor/api/state`
+(`vite.config.ts`); `editor.html` mints a roster-hidden tile char per distinct atlas
+index and drives them through the shared `blobResolver`. A set's membership is its
+own tiles; **connectivity** also counts legacy tiles of the **same vocab role**
+(`set.role` — `packed-road`, `deep-water`, …), so a freshly-painted path or shore
+butts cleanly against the pre-existing flat tiles.

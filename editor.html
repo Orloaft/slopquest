@@ -509,10 +509,13 @@
         return ch;
       }
       function prepareBlobsets() {
-        const legacyRoad = Object.keys(D.vocab).filter((ch) => (D.vocab[ch] || {}).road);
         for (const set of (D.blobsets || [])) {
           const prefix = set.atlas || ATLAS_NAME;
           const isRoad = set.id === "road";
+          // Legacy tiles of the SAME terrain (matched by vocab role) count toward
+          // connectivity, so a freshly-painted path/shore butts cleanly against the
+          // pre-existing flat tiles (legacy road 't', legacy water '~', …).
+          const legacy = set.role ? Object.keys(D.vocab).filter((ch) => (D.vocab[ch] || {}).role === set.role) : [];
           set._charByBitmask = {}; set._memberChars = new Set();
           for (let bm = 0; bm < 16; bm++) {
             const idx = set.tiles[bm] ?? set.tiles[String(bm)];
@@ -525,7 +528,7 @@
             set._charByBitmask[bm] = ch; set._memberChars.add(ch);
           }
           set._fillChar = set._charByBitmask[set.paintBitmask ?? 15] ?? set._charByBitmask[15];
-          set._connectChars = new Set([...set._memberChars, ...(isRoad ? legacyRoad : [])]);
+          set._connectChars = new Set([...set._memberChars, ...legacy]);
         }
       }
       function partAt(x, y) { if (!inBounds(x, y)) return null; for (const p of activePartList) if (p.memberOf(x, y)) return p; return null; }
