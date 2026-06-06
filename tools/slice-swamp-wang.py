@@ -38,6 +38,20 @@ def fillkeyed(im):  # replace keyed (transparent) pixels with tile mean -> no bl
                 ql[i, j] = (m[0], m[1], m[2], 255)
     return q
 
+def smooth(im, blur=2.0, flatten=0.55, sat=1.0):
+    # Calm a busy tile into a near-flat surface: blur out the per-pixel speckle, then
+    # pull every pixel partway toward the tile mean so the obvious tiling pattern
+    # disappears. Used for bog water -> smooth murky surface instead of dotted floor.
+    from PIL import ImageFilter
+    c = im.convert("RGB").filter(ImageFilter.GaussianBlur(blur))
+    a = np.asarray(c).astype(float)
+    m = a.reshape(-1, 3).mean(axis=0)
+    a = a * (1 - flatten) + m * flatten
+    out = Image.fromarray(a.clip(0, 255).astype("uint8"))
+    if sat != 1.0:
+        out = ImageEnhance.Color(out).enhance(sat)
+    return out.convert("RGBA")
+
 def make_tileable(im, band=8):  # cross-fade opposite edges so the tile repeats seamlessly
     a = np.asarray(im.convert("RGB")).astype(float); h, w, _ = a.shape; out = a.copy()
     for d in range(band):
@@ -53,10 +67,16 @@ def make_tileable(im, band=8):  # cross-fade opposite edges so the tile repeats 
 
 # base tiles (Alex-vetted coords from main.ts floor-5 picks)
 LICHEN = make_tileable(fillkeyed(grab(18, 256, 68, 68, 1.35)))   # purple2 violet cobble-moss
-WATER  = make_tileable(fillkeyed(grab(1041, 102, 74, 71, 1.2)))  # swamp water
-# 'k' land trails -> muddy marsh soil (sheet ground tile @252,178), desaturated so it
-# reads as worn marsh ground that blends in, NOT a tan boardwalk (was 252,261 maroon).
-DIRT   = make_tileable(fillkeyed(grab(252, 178, 69, 73, 0.95)))  # muddy swamp soil
+# Bog water: cleaner deep-water tile (@1119,102) SMOOTHED into a calm murky surface.
+# The old @1041,102 tile had a busy yellow-speck pattern that tiled obviously and read
+# as a dotted green floor; blur+flatten kills that so it looks like still bog water.
+WATER  = make_tileable(smooth(fillkeyed(grab(1119, 102, 74, 71, 1.0)), blur=2.2, flatten=0.6, sat=0.9))
+# 'k' land trails -> muddy marsh soil. Was olive (@252,178) which clashed with the
+# purple marsh; switch to an earthy brown mud (@330,178), desaturated + darkened so it
+# reads as worn marsh ground that matches the stage instead of a green floor.
+DIRT   = ImageEnhance.Brightness(
+    ImageEnhance.Color(make_tileable(fillkeyed(grab(330, 178, 69, 73, 1.0))).convert("RGB")).enhance(0.55)
+).enhance(0.82).convert("RGBA")
 
 def hashf(x, y):
     h = (x * 374761393 + y * 668265263) & 0xffffffff

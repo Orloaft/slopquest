@@ -20,21 +20,21 @@
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#253027"
+      "minimapColor": "#272e2a"
     },
     "4": {
       "role": "swamp-water",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#273027"
+      "minimapColor": "#282e2a"
     },
     "W": {
       "role": "swamp-water",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#253027"
+      "minimapColor": "#272e2a"
     },
     "m": {
       "role": "marsh-lichen",
@@ -48,7 +48,7 @@
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#4d4631"
+      "minimapColor": "#2d2722"
     },
     "B": {
       "role": "swamp-bridge",
@@ -97,7 +97,7 @@
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#483732"
+      "minimapColor": "#3c2c2d"
     }
   }
 }
