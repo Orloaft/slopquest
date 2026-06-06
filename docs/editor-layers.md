@@ -1,20 +1,20 @@
-# Editor Layers: spawns, ore (and friends)
+# Editor Layers: spawns, ore, herbs (and friends)
 
 The stage editor (`/editor.html`) has a **Layers** mode that edits *point-entities*
-on top of the tile grid — things placed at a tile, not painted into it. Two layers
+on top of the tile grid — things placed at a tile, not painted into it. Three layers
 ship today; more reuse the same UI + save pipeline:
 
 | Layer | Base file | Overlay file | Per-entity |
 |---|---|---|---|
 | 👹 Enemy spawns | `content/spawns.yaml` | `content/spawns.editor.yaml` | monster `type` |
 | ⛏️ Ore | `content/mining-nodes.yaml` | `content/mining-nodes.editor.yaml` | `kind` + auto `approach` |
-| 🌿 Herbs *(planned)* | `content/herb-nodes.yaml` | … | `label` + level/xp |
+| 🌿 Herbs | `content/herb-nodes.yaml` | `content/herb-nodes.editor.yaml` | `label` + item/level/xp preset + auto `approach` |
 | 🌳 Trees / decorations *(planned)* | `stage.json objects[]` | … | sprite + sub-tile pos |
 
-> TL;DR — pick a layer, choose a value (monster / ore kind), click empty tiles to
-> place, drag a marker to move, right-click or `Del` to delete, then **💾 Save**.
-> Your edits land in a `*.editor.yaml` **overlay**; the hand-authored, commented
-> base files are **never** rewritten.
+> TL;DR — pick a layer, choose a value (monster / ore kind / herb type), click empty
+> tiles to place, drag a marker to move, right-click or `Del` to delete, then
+> **💾 Save**. Your edits land in a `*.editor.yaml` **overlay**; the hand-authored,
+> commented base files are **never** rewritten.
 
 ## How to use it
 
@@ -51,15 +51,28 @@ removed:
   - { floor: 3, x: 51, y: 65 }     # hide the spawns.yaml spawn at this tile
 ```
 
-**Ore** (and other gathering nodes) — `content/mining-nodes.editor.yaml`. Nodes
-carry a unique `id`, so suppression is keyed by **id**, and coordinates are tile
-centres (`x.5`/`y.5`). The `approach` is auto-picked from a walkable neighbour:
+**Ore / herbs** (gathering nodes) — `content/mining-nodes.editor.yaml` /
+`content/herb-nodes.editor.yaml`. Nodes carry a unique `id`, so suppression is keyed
+by **id**, and coordinates are tile centres (`x.5`/`y.5`). The `approach` is
+auto-picked from a walkable neighbour:
 
 ```yaml
 nodes:
   - { id: mine-3-45-35, kind: iron, at: { floor: 3, x: 45.5, y: 35.5 }, approach: { x: 46.5, y: 35.5 } }
 removed:
   - { floor: 3, id: mine-3-8-49 }  # hide the mining-nodes.yaml node with this id
+```
+
+**Herb types are presets.** A herb's `label` carries loosely-coupled
+`item`/`requiredLevel`/`xp` knobs, so the editor's herb palette is the set of
+*distinct herb types* found in `herb-nodes.yaml` (each label + its fields). Placing
+copies the whole preset — you don't set level/xp by hand. **A brand-new herb type
+must be added to `herb-nodes.yaml` first** (one node with the desired label/fields);
+it then appears in the palette. Saved herb nodes carry the full field set:
+
+```yaml
+nodes:
+  - { id: herb-5-60-40, label: "Glowing Marsh Lily", item: marsh_lily, requiredLevel: 5, xp: 30, at: { floor: 5, x: 60.5, y: 40.5 }, approach: { x: 61.5, y: 40.5 } }
 ```
 
 Two consequences worth knowing:
@@ -111,18 +124,20 @@ The layer system is data-driven on both sides:
   sidebar HTML.
 - **Server** (`vite.config.ts`): spawns have a bespoke `/editor/api/spawns/save`
   (tile suppression); gathering nodes share a **generic** `/editor/api/nodes/save?layer=<id>`
-  driven by the `NODE_LAYERS` table — adding **herbs** is one row there (`field: "label"`)
-  plus an entry in `LAYERS`, plus the matching merge in `build-content.ts`.
+  driven by the `NODE_LAYERS` table — each row lists the per-node `fields` to carry
+  (ore `["kind"]`, herbs `["label","item","requiredLevel","xp"]`). The state endpoint
+  also serves each layer's data + palette.
 - **Build** (`scripts/build-content.ts`): `loadOptional` reads each overlay; the
   merge filters base by suppression then appends overlay placements.
 
-Herbs are the obvious next node layer; their only wrinkle over ore is that `label`
-is free text (not an enum) and they carry independent `requiredLevel`/`xp`/`item`
-knobs the editor would need a way to set.
+Adding a node layer = one `NODE_LAYERS` row + one `LAYERS` entry + a sidebar
+button/panel + the matching overlay merge in `build-content.ts`. Trees/decorations
+is the genuinely different remaining layer — it edits `stage.json objects[]` (sprite
++ sub-tile position) rather than a content-YAML node, so it needs its own save path.
 
 ## Tests
 
-`tests/e2e/editor-spawns.spec.ts` and `tests/e2e/editor-ore.spec.ts` drive the
-layers through the `?__test` seam and assert the working set + the exact save
-payload (place, move-suppresses-base, delete) without writing files. Run with
-`npx playwright test editor`.
+`tests/e2e/editor-spawns.spec.ts`, `editor-ore.spec.ts`, and `editor-herbs.spec.ts`
+drive the layers through the `?__test` seam and assert the working set + the exact
+save payload (place, move-suppresses-base, delete; herbs also check preset copy)
+without writing files. Run with `npx playwright test editor`.

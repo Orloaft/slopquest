@@ -72,6 +72,7 @@
           <div class="row" id="layerTools">
             <button id="layerSpawns">👹 Enemy spawns</button>
             <button id="layerOre">⛏️ Ore</button>
+            <button id="layerHerbs">🌿 Herbs</button>
           </div>
           <div id="spawnPanel" style="display:none">
             <div class="row">
@@ -84,6 +85,12 @@
               <select id="oreKind" style="flex:1; background:#0d1014; color:#d8dee4; border:1px solid #3a4651; border-radius:5px; padding:5px;"></select>
             </div>
             <small style="display:block; padding:2px 10px; color:#6c7986;">Click = place a vein · drag = move · right-click / Del = delete. The standing/approach tile (tick line) is auto-picked from a walkable neighbour. ◯ = from mining-nodes.yaml, ● = editor-placed.</small>
+          </div>
+          <div id="herbPanel" style="display:none">
+            <div class="row">
+              <select id="herbType" style="flex:1; background:#0d1014; color:#d8dee4; border:1px solid #3a4651; border-radius:5px; padding:5px;"></select>
+            </div>
+            <small style="display:block; padding:2px 10px; color:#6c7986;">Herb types (label + level/xp/item) come from herb-nodes.yaml — placing copies the preset. New types are YAML-authored. ◯ = from herb-nodes.yaml, ● = editor-placed.</small>
           </div>
         </div>
 
@@ -633,16 +640,24 @@
       // convention is per-layer: spawns sit on integer tiles, gathering nodes at
       // tile centres (x.5,y.5). `suppress` says how a base entity is hidden when
       // moved/deleted: by "tile" (spawns) or by "id" (nodes, which carry an id).
+      // A palette option carries `fields` — the attributes stamped onto a placed
+      // entity (a single value for spawns/ore, a whole preset for herbs). `field`
+      // is the primary attribute used for the marker colour + label.
       const LAYERS = [
         { id: "spawns", label: "👹 Enemy spawns", btn: "layerSpawns", panel: "spawnPanel", sel: "spawnType",
           noun: "spawn", api: "/editor/api/spawns/save", field: "type", coordKind: "int", suppress: "tile",
-          palette: () => (D.monsterTypes || []).map((m) => ({ value: m.id, label: `${m.name} (${m.id})` })),
+          palette: () => (D.monsterTypes || []).map((m) => ({ value: m.id, label: `${m.name} (${m.id})`, fields: { type: m.id } })),
           fromState: () => D.spawns || [], read: (s) => ({ type: s.type }) },
         { id: "ore", label: "⛏️ Ore", btn: "layerOre", panel: "orePanel", sel: "oreKind",
           noun: "ore vein", api: "/editor/api/nodes/save?layer=ore", field: "kind", coordKind: "center",
-          suppress: "id", idPrefix: "mine", approach: true,
-          palette: () => (D.oreKinds || []).map((k) => ({ value: k, label: k })),
+          suppress: "id", idPrefix: "mine", approach: true, payloadFields: ["kind"],
+          palette: () => (D.oreKinds || []).map((k) => ({ value: k, label: k, fields: { kind: k } })),
           fromState: () => D.ore || [], read: (n) => ({ id: n.id, kind: n.kind, ax: n.ax, ay: n.ay }) },
+        { id: "herbs", label: "🌿 Herbs", btn: "layerHerbs", panel: "herbPanel", sel: "herbType",
+          noun: "herb patch", api: "/editor/api/nodes/save?layer=herbs", field: "label", coordKind: "center",
+          suppress: "id", idPrefix: "herb", approach: true, payloadFields: ["label", "item", "requiredLevel", "xp"],
+          palette: () => (D.herbTypes || []),     // [{value,label,fields:{label,item?,requiredLevel?,xp?}}]
+          fromState: () => D.herb || [], read: (n) => ({ id: n.id, label: n.label, item: n.item, requiredLevel: n.requiredLevel, xp: n.xp, ax: n.ax, ay: n.ay }) },
       ];
       const layerById = Object.fromEntries(LAYERS.map((l) => [l.id, l]));
       // coordinate convention helpers
@@ -665,7 +680,7 @@
             baseKey: s.source === "base" ? (lay.suppress === "id" ? s.id : key(s.x, s.y)) : undefined,
           }));
           const opts = lay.palette();
-          layerData[lay.id] = { ents: list, removed: new Set(), dirty: false, paletteVal: opts[0]?.value ?? null };
+          layerData[lay.id] = { ents: list, removed: new Set(), dirty: false, opts, paletteVal: opts[0]?.value ?? null };
           const selEl = $(lay.sel);
           selEl.innerHTML = opts.map((o) => `<option value="${o.value}">${o.label}</option>`).join("");
           selEl.onchange = () => { layerData[lay.id].paletteVal = selEl.value; };
@@ -723,7 +738,8 @@
       function placeEntity(cx, cy) {
         const lay = activeLayer, st = layerData[lay.id];
         if (!st.paletteVal) { $("status").textContent = `Pick a ${lay.noun} type first.`; return; }
-        const e = { ...coordOf(lay, cx, cy), source: "overlay", [lay.field]: st.paletteVal };
+        const fields = st.opts.find((o) => o.value === st.paletteVal)?.fields ?? { [lay.field]: st.paletteVal };
+        const e = { ...coordOf(lay, cx, cy), source: "overlay", ...fields };
         if (lay.approach) Object.assign(e, deriveApproach(cx, cy));
         if (lay.idPrefix) e.id = mintNodeId(lay, cx, cy);
         ents.push(e); entSel = e; st.dirty = true;
@@ -774,7 +790,11 @@
         const st = layerData[lay.id], over = st.ents.filter((e) => e.source === "overlay");
         if (lay.suppress === "id") {
           return {
-            nodes: over.map((e) => ({ id: e.id, [lay.field]: e[lay.field], x: e.x, y: e.y, ax: e.ax, ay: e.ay })),
+            nodes: over.map((e) => {
+              const o = { id: e.id, x: e.x, y: e.y, ax: e.ax, ay: e.ay };
+              for (const f of lay.payloadFields) if (e[f] != null) o[f] = e[f];
+              return o;
+            }),
             removed: [...st.removed],          // base node ids
           };
         }
@@ -981,6 +1001,8 @@
           // writing files. setLayer(id) chooses the layer first.
           setLayer,
           floor: () => D?.floor,
+          palette: () => (activeLayer ? layerData[activeLayer.id].opts : []),
+          setPalette: (v) => { if (activeLayer) layerData[activeLayer.id].paletteVal = v; },
           place: (cx, cy) => placeEntity(cx, cy),
           move: (e, cx, cy) => moveEntityTo(e, cx, cy),
           del: (e) => deleteEntity(e),

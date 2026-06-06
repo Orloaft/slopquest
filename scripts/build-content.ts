@@ -193,6 +193,13 @@ const mergedMiningNodes = [
   ...miningNodes.filter((m) => !removedMiningIds.has(m.id)),
   ...(miningOverlay.nodes ?? [])
 ];
+
+const herbOverlay = loadOptional<RawNodeOverlay<RawHerbNode>>("herb-nodes.editor.yaml") ?? {};
+const removedHerbIds = new Set((herbOverlay.removed ?? []).map((r) => r.id));
+const mergedHerbNodes = [
+  ...herbNodes.filter((h) => !removedHerbIds.has(h.id)),
+  ...(herbOverlay.nodes ?? [])
+];
 const abilities = load<RawAbility[]>("abilities.yaml") ?? [];
 const combatAnimations = load<RawCombatAnimation[]>("combat-animations.yaml") ?? [];
 const quests = loadQuests();
@@ -327,10 +334,12 @@ for (const f of fishingNodes) {
     fail(`fishing-nodes.yaml:${f.id ?? "?"}`, `unknown kind "${f.kind}" (known: ${[...fishKinds].join(", ")})`);
   }
 }
-for (const h of herbNodes) {
-  if (!h.id) fail("herb-nodes.yaml", "herb node missing id");
-  if (!h.at || !h.approach) fail(`herb-nodes.yaml:${h.id ?? "?"}`, "missing at/approach");
-  if (h.item != null && !itemIds.has(h.item)) fail(`herb-nodes.yaml:${h.id ?? "?"}`, `item refs unknown item "${h.item}"`);
+const seenHerbIds = new Set<string>();
+for (const h of mergedHerbNodes) {
+  if (!h.id) fail("herb-nodes", "herb node missing id");
+  if (!h.at || !h.approach) fail(`herb-nodes:${h.id ?? "?"}`, "missing at/approach");
+  if (h.item != null && !itemIds.has(h.item)) fail(`herb-nodes:${h.id ?? "?"}`, `item refs unknown item "${h.item}"`);
+  if (h.id) { if (seenHerbIds.has(h.id)) fail("herb-nodes", `duplicate node id "${h.id}"`); seenHerbIds.add(h.id); }
 }
 
 const abilityIds = new Set<string>();
@@ -658,7 +667,7 @@ const MINING_NODES = mergedMiningNodes.map((m) => ({
   approachX: sX(m.at?.floor, m.approach?.x),
   approachY: sY(m.at?.floor, m.approach?.y)
 }));
-const HERB_NODES = herbNodes.map((h) => {
+const HERB_NODES = mergedHerbNodes.map((h) => {
   const entry: Record<string, unknown> = {
     id: h.id,
     floor: h.at?.floor,
