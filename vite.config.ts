@@ -1,5 +1,5 @@
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { spawn } from "node:child_process";
 import path from "node:path";
 import yaml from "js-yaml";
@@ -24,6 +24,96 @@ function writeJson(rel: string, value: unknown): void {
 }
 function readYaml(rel: string): any {
   return yaml.load(readFileSync(path.join(ROOT, rel), "utf8"));
+}
+
+// --- Decoration sprite catalogue --------------------------------------------
+// Object/prop sprites are individual PNGs under public/, referenced by the stage
+// objects' `key` and loaded client-side by main.ts. The editor's Decorations
+// layer wants (a) a thumbnail URL per key and (b) the full set of placeable
+// sprites for a stage, so it can show a picker and place props the stage doesn't
+// yet use. Northwood props are obj_<NNN>.png under /sprites/nw (key spriteNw<NNN>);
+// extend the table as other stages gain prop catalogues. Bespoke one-off keys
+// (e.g. waystone structures) have no generic mapping — they degrade to no
+// thumbnail + in-stage-only (still placeable).
+interface SpriteDir { test: RegExp; dir: string; file: (digits: string) => string; key: (digits: string) => string; scan: RegExp }
+const SPRITE_DIRS: SpriteDir[] = [
+  { test: /^spriteNw(\d+)$/, dir: "public/sprites/nw", file: (d) => `obj_${d}.png`, key: (d) => `spriteNw${d}`, scan: /^obj_(\d+)\.png$/ }
+];
+function spriteUrlForKey(key: string): string | null {
+  for (const s of SPRITE_DIRS) {
+    const m = s.test.exec(key);
+    if (m) {
+      const rel = `${s.dir}/${s.file(m[1]!)}`;
+      return existsSync(path.join(ROOT, rel)) ? "/" + rel.replace(/^public\//, "") : null;
+    }
+  }
+  return null;
+}
+// Intrinsic PNG pixel size, straight from the IHDR header (no decode).
+function pngSize(absPath: string): { w: number; h: number } | null {
+  try {
+    const b = readFileSync(absPath);
+    if (b.length < 24) return null;
+    return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+  } catch {
+    return null;
+  }
+}
+const median = (xs: number[]): number => {
+  if (!xs.length) return 0.23; // sensible default game/source scale for nw props
+  const s = [...xs].sort((a, b) => a - b);
+  return s[Math.floor(s.length / 2)]!;
+};
+function buildDecoCatalog(stage: any): Array<{ value: string; label: string; url: string | null; fields: any }> {
+  // In-stage non-resource props record their ACTUAL game-render w/h + blocking.
+  const inStage = new Map<string, { w: number; h: number; blocking: boolean }>();
+  for (const o of stage.objects ?? []) {
+    if (o.resource || inStage.has(o.key)) continue;
+    inStage.set(o.key, { w: o.w, h: o.h, blocking: !!o.blocking });
+  }
+  const pngOf = (key: string) => {
+    const url = spriteUrlForKey(key);
+    return url ? pngSize(path.join(ROOT, "public", url.slice(1))) : null;
+  };
+  // The game downscales source art; learn the factor from in-stage instances so
+  // catalogue-only sprites get plausibly-sized (not giant) defaults.
+  const rW: number[] = [], rH: number[] = [];
+  for (const [k, v] of inStage) {
+    const sz = pngOf(k);
+    if (sz) { rW.push(v.w / sz.w); rH.push(v.h / sz.h); }
+  }
+  const ratioW = median(rW), ratioH = median(rH);
+  // Full catalogue = in-stage keys ∪ every sprite in a matching sprite dir.
+  const keys = new Set(inStage.keys());
+  for (const s of SPRITE_DIRS) {
+    if (![...keys].some((k) => s.test.test(k))) continue; // only scan dirs this stage actually uses
+    try {
+      for (const f of readdirSync(path.join(ROOT, s.dir))) {
+        const m = s.scan.exec(f);
+        if (m) keys.add(s.key(m[1]!));
+      }
+    } catch { /* dir absent — skip */ }
+  }
+  const out: Array<{ value: string; label: string; url: string | null; fields: any }> = [];
+  for (const key of [...keys].sort()) {
+    const inst = inStage.get(key);
+    let w: number, h: number, blocking: boolean;
+    if (inst) {
+      ({ w, h, blocking } = inst);
+    } else {
+      const sz = pngOf(key);
+      w = sz ? Math.max(8, Math.round(sz.w * ratioW)) : 32;
+      h = sz ? Math.max(8, Math.round(sz.h * ratioH)) : 32;
+      blocking = false;
+    }
+    out.push({
+      value: key,
+      label: `${key} (${w}×${h}${blocking ? " ⛔" : ""}${inst ? "" : " ·new"})`,
+      url: spriteUrlForKey(key),
+      fields: { key, w, h, blocking }
+    });
+  }
+  return out;
 }
 
 // --- Editor "Layers" feature -------------------------------------------------
@@ -377,24 +467,15 @@ function editorApi(): Plugin {
               .map((t) => ({ value: t.id, label: `${t.label ?? t.id} (L${t.requiredLevel ?? 1})`, fields: { type: t.id } }));
           }
           // Decorations are stage-local visual props (stage.json `objects` with no
-          // `resource`). Offer the distinct sprites this stage already uses as a
-          // palette — placing stamps another of the same prop (key + px size +
-          // blocking). New sprites stay asset-forge-authored. Independent of the
-          // floor/zone mapping, so it works on every stage.
-          const decoSeen = new Map<string, any>();
-          for (const o of stage.objects ?? []) {
-            if (o.resource || decoSeen.has(o.key)) continue;
-            decoSeen.set(o.key, {
-              value: o.key,
-              label: `${o.key} (${o.w}×${o.h}${o.blocking ? " ⛔" : ""})`,
-              fields: { key: o.key, w: o.w, h: o.h, blocking: !!o.blocking }
-            });
-          }
-          const decoKeys = [...decoSeen.values()];
+          // `resource`). The catalogue = sprites this stage already uses PLUS every
+          // sprite in its sprite dir (so you can place new props too), each with a
+          // thumbnail URL + plausible size. Independent of the floor/zone mapping,
+          // so it works on every stage.
+          const decoCatalog = buildDecoCatalog(stage);
           send(res, 200, {
             floor,
             zone,
-            decoKeys,
+            decoCatalog,
             spawns: editorSpawns,
             monsterTypes,
             ore: editorOre,

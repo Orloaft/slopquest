@@ -61,4 +61,50 @@ test.describe("editor decorations layer", () => {
     expect(r.n2).toBe(r.n0);
     expect(errors).toEqual([]);
   });
+
+  test("the catalogue carries sprite thumbnails and props the stage doesn't yet use", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+    page.on("pageerror", (e) => errors.push(String(e)));
+    await loadNorthwoodDeco(page);
+
+    const pal = await page.evaluate(() => (window as any).__ed.palette());
+    expect(pal.length).toBeGreaterThan(0);
+    // every northwood prop resolves to an obj_NNN.png thumbnail URL
+    expect(pal.some((o: any) => o.url && /\/sprites\/nw\/obj_\d+\.png$/.test(o.url))).toBe(true);
+    // the catalogue extends beyond in-stage props (scanned from the sprite dir)
+    expect(pal.some((o: any) => / ·new\)$/.test(o.label))).toBe(true);
+    expect(errors).toEqual([]);
+  });
+
+  test("dragging a prop keeps its sub-tile offset", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+    page.on("pageerror", (e) => errors.push(String(e)));
+    await loadNorthwoodDeco(page);
+
+    const r = await page.evaluate(() => {
+      const ed = (window as any).__ed;
+      // find a cell whose TOPMOST prop sits at a fractional position
+      const insp = ed.entities();
+      for (let i = insp.length - 1; i >= 0; i--) {
+        const e = insp[i];
+        const fx = e.x - Math.floor(e.x), fy = e.y - Math.floor(e.y);
+        if (fx < 0.02 && fy < 0.02) continue;
+        const cx = Math.floor(e.x), cy = Math.floor(e.y), top = ed.entAt(cx, cy);
+        if (top && top.x === e.x && top.y === e.y) {
+          ed.move(ed.entAt(cx, cy), cx + 3, cy + 2);
+          const moved = ed.entAt(cx + 3, cy + 2);
+          return { beforeX: e.x, beforeY: e.y, movedX: moved.x, movedY: moved.y };
+        }
+      }
+      return null;
+    });
+
+    expect(r).toBeTruthy();
+    // offset within the tile is preserved across the 3,2 nudge
+    expect(r!.movedX).toBeCloseTo(r!.beforeX + 3, 5);
+    expect(r!.movedY).toBeCloseTo(r!.beforeY + 2, 5);
+    expect(errors).toEqual([]);
+  });
 });
