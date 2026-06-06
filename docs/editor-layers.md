@@ -1,107 +1,128 @@
-# Editor Layers: enemy spawns (and friends)
+# Editor Layers: spawns, ore (and friends)
 
 The stage editor (`/editor.html`) has a **Layers** mode that edits *point-entities*
-on top of the tile grid — things placed at a tile, not painted into it. The first
-layer is **enemy spawns**; herbs, ore, and tree/decoration layers slot in later
-behind the same UI + save pipeline.
+on top of the tile grid — things placed at a tile, not painted into it. Two layers
+ship today; more reuse the same UI + save pipeline:
 
-> TL;DR — pick **👹 Enemy spawns**, choose a monster, click empty tiles to place,
-> drag a marker to move, right-click or `Del` to delete, then **💾 Save**. Your
-> placements land in `content/spawns.editor.yaml`; the hand-authored, commented
-> `content/spawns.yaml` is **never** rewritten.
+| Layer | Base file | Overlay file | Per-entity |
+|---|---|---|---|
+| 👹 Enemy spawns | `content/spawns.yaml` | `content/spawns.editor.yaml` | monster `type` |
+| ⛏️ Ore | `content/mining-nodes.yaml` | `content/mining-nodes.editor.yaml` | `kind` + auto `approach` |
+| 🌿 Herbs *(planned)* | `content/herb-nodes.yaml` | … | `label` + level/xp |
+| 🌳 Trees / decorations *(planned)* | `stage.json objects[]` | … | sprite + sub-tile pos |
+
+> TL;DR — pick a layer, choose a value (monster / ore kind), click empty tiles to
+> place, drag a marker to move, right-click or `Del` to delete, then **💾 Save**.
+> Your edits land in a `*.editor.yaml` **overlay**; the hand-authored, commented
+> base files are **never** rewritten.
 
 ## How to use it
 
-1. Open `/editor.html`, pick the stage (region) you want from the top dropdown.
-2. Under **Layers**, click **👹 Enemy spawns**. The header shows the stage's
-   floor + zone (e.g. `floor 3 · woods`). If a stage has no Layers section, it
-   isn't mapped to a floor yet — see [Stage → floor/zone](#stage--floorzone).
-3. Pick a monster from the dropdown. Then on the canvas:
-   - **Click an empty tile** → place that monster there.
-   - **Drag a marker** → move a spawn to a new tile.
+1. Open `/editor.html`, pick the stage (region) from the top dropdown.
+2. Under **Layers**, click a layer (e.g. **👹 Enemy spawns** or **⛏️ Ore**). The
+   header shows the stage's floor + zone (e.g. `floor 3 · woods`). No Layers
+   section = the stage isn't mapped to a floor; see [Stage → floor/zone](#stage--floorzone).
+3. Pick a value from the dropdown (monster type / ore kind). Then on the canvas:
+   - **Click an empty tile** → place an entity there.
+   - **Drag a marker** → move it to a new tile.
    - **Right-click a marker**, or select it and press **Delete/Backspace** → remove it.
 4. Markers: a **filled disc ●** is an editor placement; a **hollow ring ◯** is an
-   existing spawn from `spawns.yaml`. A **yellow outline** is the current selection.
-5. **💾 Save & rebuild** writes the overlay file and reruns `content:build`, so the
-   running game tab hot-reloads with the new spawns. (Tile edits and spawn edits
-   save independently in the same click.)
+   existing entity from the base file. A **yellow outline** is the current selection.
+   Gathering nodes (ore) also draw a **tick line** to their auto-picked *approach*
+   tile — the walkable neighbour a player stands on to gather.
+5. **💾 Save & rebuild** writes the overlay file(s) and reruns `content:build`, so
+   the running game tab hot-reloads. Tile edits and every dirty layer save together
+   in one click. Switching layers preserves unsaved edits in the others.
 
-## Where placements go: the overlay file
+## Where placements go: the overlay files
 
-Editor spawn edits are written to **`content/spawns.editor.yaml`** — a small,
-machine-owned file:
+Each layer writes a small, machine-owned `*.editor.yaml`. `scripts/build-content.ts`
+merges it with the base file at build time:
+
+> **final = (base entities, minus any suppressed ones) + overlay placements**
+
+**Spawns** — `content/spawns.editor.yaml`. Suppression is keyed by **tile**, since
+spawns have no id:
 
 ```yaml
-monsters:                                  # editor placements
+monsters:
   - { type: wolf, at: { floor: 3, x: 42, y: 33 }, zone: woods }
-removed:                                   # suppress a spawns.yaml spawn at this tile
-  - { floor: 3, x: 51, y: 65 }
+removed:
+  - { floor: 3, x: 51, y: 65 }     # hide the spawns.yaml spawn at this tile
 ```
 
-`scripts/build-content.ts` merges it with `spawns.yaml` at build time:
+**Ore** (and other gathering nodes) — `content/mining-nodes.editor.yaml`. Nodes
+carry a unique `id`, so suppression is keyed by **id**, and coordinates are tile
+centres (`x.5`/`y.5`). The `approach` is auto-picked from a walkable neighbour:
 
-> **final spawns = (spawns.yaml minus every `removed` tile) + overlay `monsters`**
+```yaml
+nodes:
+  - { id: mine-3-45-35, kind: iron, at: { floor: 3, x: 45.5, y: 35.5 }, approach: { x: 46.5, y: 35.5 } }
+removed:
+  - { floor: 3, id: mine-3-8-49 }  # hide the mining-nodes.yaml node with this id
+```
 
 Two consequences worth knowing:
 
-- **`spawns.yaml` is never touched by the editor.** Your hand-authored comments and
-  carefully-tiered placements stay exactly as you wrote them. The overlay only
-  *adds* placements and *suppresses* specific base tiles.
-- **Moving or deleting a base (◯) spawn** records a `removed` entry for its original
-  tile. A move also adds a fresh placement at the new tile. So a moved base spawn =
-  one suppression + one placement; you'll see it flip from ◯ to ● after the move.
+- **Base files are never touched by the editor.** Your hand-authored comments and
+  carefully-tuned placements stay exactly as written. The overlay only *adds*
+  placements and *suppresses* specific base entities.
+- **Moving or deleting a base (◯) entity** records a suppression (by tile for
+  spawns, by id for nodes). A move also re-emits it as an overlay placement — so a
+  moved base entity flips from ◯ to ● and keeps its id.
 
-The overlay file is **authoritative content** (committed, like `spawns.yaml`) — not
-a scratch file. Don't hand-edit it while the editor is open; the editor rewrites it
-wholesale on each spawn save. To stop the editor managing a spawn entirely, move the
-placement into `spawns.yaml` by hand and delete the corresponding overlay/`removed`
-lines.
+Overlay files are **authoritative content** (committed, like the base files), not
+scratch files. Don't hand-edit one while the editor is open — the editor rewrites
+that floor's entries wholesale on save. To stop the editor managing an entity, move
+it into the base file by hand and drop the corresponding overlay/`removed` lines.
+The auto-derived `approach` is a plain neighbour pick — hand-tune it in YAML if a
+node needs a specific standing tile.
 
 ## Stage → floor/zone
 
-`spawns.yaml` keys spawns by **floor number** and **zone id**, but a stage's
-`stage.json` carries neither. The mapping lives in **`STAGE_META`** in
+The content files key entities by **floor number** (and spawns also by **zone id**),
+but a stage's `stage.json` carries neither. The mapping lives in **`STAGE_META`** in
 `vite.config.ts` (it mirrors `ZONES` in `src/shared.ts`):
 
-| stage | floor | zone |
-|---|---|---|
-| waystone | 0 | southTown |
-| cemetery | 1 | cemetery |
-| crypt | 2 | crypt |
-| northwood | 3 | woods |
-| northwatch | 4 | northTown |
-| swamp | 5 | marsh |
-| searing-canyon | 6 | badlands |
-| desert | 7 | desert |
-| beach | 8 | beach |
-| jungle | 9 | jungle |
-| deepmine | 10 | deepMine |
+| stage | floor | zone | stage | floor | zone |
+|---|---|---|---|---|---|
+| waystone | 0 | southTown | swamp | 5 | marsh |
+| cemetery | 1 | cemetery | searing-canyon | 6 | badlands |
+| crypt | 2 | crypt | desert | 7 | desert |
+| northwood | 3 | woods | beach | 8 | beach |
+| northwatch | 4 | northTown | jungle | 9 | jungle |
+| | | | deepmine | 10 | deepMine |
 
 A stage absent from `STAGE_META` simply shows no Layers section. Spawn coordinates
-are 1:1 with the editor grid (every floor is authored at its target size — see
-`SCALE_AUTHORED_AT_TARGET` in `build-content.ts`), so the tile you click *is* the
-spawn tile.
+are 1:1 with the editor grid; gathering nodes sit at tile centres (`+0.5`). Every
+floor is authored at its target size (see `SCALE_AUTHORED_AT_TARGET` in
+`build-content.ts`), so the tile you click *is* the entity tile.
 
-## Adding the next layer (herbs / ore / trees)
+## Architecture (adding the next layer)
 
-The plan is one layer per content file, all behind this same UI:
+The layer system is data-driven on both sides:
 
-| Layer | File | Build step |
-|---|---|---|
-| 👹 Enemy spawns | `content/spawns.editor.yaml` | `content:build` |
-| ⛏️ Ore | `content/mining-nodes.yaml` (overlay) | `content:build` |
-| 🌿 Herbs | `content/herb-nodes.yaml` (overlay) | `content:build` |
-| 🌳 Trees / decorations | `stage.json objects[]` | stage import |
+- **Client** (`editor.html`): a `LAYERS` array of configs. Each declares its
+  palette, coordinate convention (`int` vs `center`), suppression key (`tile` vs
+  `id`), whether it has an `approach`, and its save API. The interaction
+  (place/select/drag-move/delete), marker drawing, and per-layer working sets are
+  all shared (`placeEntity` / `moveEntityTo` / `deleteEntity` / `drawEntities` /
+  `buildPayload`). A new layer is a new entry in `LAYERS` + a button/panel in the
+  sidebar HTML.
+- **Server** (`vite.config.ts`): spawns have a bespoke `/editor/api/spawns/save`
+  (tile suppression); gathering nodes share a **generic** `/editor/api/nodes/save?layer=<id>`
+  driven by the `NODE_LAYERS` table — adding **herbs** is one row there (`field: "label"`)
+  plus an entry in `LAYERS`, plus the matching merge in `build-content.ts`.
+- **Build** (`scripts/build-content.ts`): `loadOptional` reads each overlay; the
+  merge filters base by suppression then appends overlay placements.
 
-The server side is the pattern to copy: `/editor/api/spawns/save` reads the optional
-overlay, replaces **only the current floor's** entries (other floors stay intact),
-writes it back, and reruns the build. The client side is the `layerMode` machinery
-in `editor.html` (`initLayers` / `setLayer` / `placeSpawn` / `moveSpawnTo` /
-`deleteSpawn` / `drawSpawns`). A new layer adds a button, a palette, a marker
-renderer, and a save endpoint — the place/move/delete interaction is shared.
+Herbs are the obvious next node layer; their only wrinkle over ore is that `label`
+is free text (not an enum) and they carry independent `requiredLevel`/`xp`/`item`
+knobs the editor would need a way to set.
 
 ## Tests
 
-`tests/e2e/editor-spawns.spec.ts` drives the layer through the `?__test` seam and
-asserts the working set + the exact save payload (place, move-suppresses-base,
-delete) without writing files. Run with `npx playwright test editor-spawns`.
+`tests/e2e/editor-spawns.spec.ts` and `tests/e2e/editor-ore.spec.ts` drive the
+layers through the `?__test` seam and assert the working set + the exact save
+payload (place, move-suppresses-base, delete) without writing files. Run with
+`npx playwright test editor`.

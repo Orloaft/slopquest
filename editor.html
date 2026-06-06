@@ -71,12 +71,19 @@
           <h2>Layers <small id="layerHint"></small></h2>
           <div class="row" id="layerTools">
             <button id="layerSpawns">👹 Enemy spawns</button>
+            <button id="layerOre">⛏️ Ore</button>
           </div>
           <div id="spawnPanel" style="display:none">
             <div class="row">
               <select id="spawnType" style="flex:1; background:#0d1014; color:#d8dee4; border:1px solid #3a4651; border-radius:5px; padding:5px;"></select>
             </div>
             <small style="display:block; padding:2px 10px; color:#6c7986;">Click empty tile = place · drag a marker = move · right-click / Del = delete. ◯ = from spawns.yaml, ● = editor-placed.</small>
+          </div>
+          <div id="orePanel" style="display:none">
+            <div class="row">
+              <select id="oreKind" style="flex:1; background:#0d1014; color:#d8dee4; border:1px solid #3a4651; border-radius:5px; padding:5px;"></select>
+            </div>
+            <small style="display:block; padding:2px 10px; color:#6c7986;">Click = place a vein · drag = move · right-click / Del = delete. The standing/approach tile (tick line) is auto-picked from a walkable neighbour. ◯ = from mining-nodes.yaml, ● = editor-placed.</small>
           </div>
         </div>
 
@@ -136,15 +143,14 @@
 
       // ---- Layers (point-entity editing on top of the tile grid) ----
       // layerMode === null → normal tile painting. When a layer is active, clicks
-      // place/select/move that layer's point-entities instead of painting tiles.
-      // First layer: enemy spawns (writes content/spawns.editor.yaml via the API).
-      let layerMode = null;             // null | "spawns"
-      let spawnList = [];               // [{type,x,y,source:'base'|'overlay',baseKey?}]
-      let removedBaseKeys = new Set();  // "x,y" of base (spawns.yaml) spawns to suppress
-      let spawnSel = null;              // selected spawn (move/delete target)
-      let spawnType = null;             // monster id to place
-      let draggingSpawn = null;         // spawn being dragged
-      let spawnsDirty = false;          // pending spawn edits to save
+      // place/select/move that layer's point-entities (enemy spawns, ore veins, …)
+      // instead of painting tiles. Layers are data-driven (see LAYERS below); each
+      // keeps its own working set in `layerData` so switching preserves edits.
+      let layerMode = null;             // active layer id | null
+      let activeLayer = null;           // active layer config | null
+      let ents = [];                    // active layer's working entities (alias into layerData)
+      let entSel = null, dragging = null;
+      const layerData = {};             // layer id -> { ents:[], removed:Set, dirty:bool, paletteVal }
 
       const refXY = (ref) => { const n = +ref.split(":")[1]; return [(n % ACOLS) * TS, Math.floor(n / ACOLS) * TS]; };
       const key = (x, y) => x + "," + y;
@@ -166,8 +172,8 @@
         undoStack.length = 0;
         roster = []; sel = null; brushRot = 0; hover = null;
         tool = "paint"; activePart = null; activeTintPart = null; userMoved = false;
-        layerMode = null; spawnList = []; removedBaseKeys = new Set();
-        spawnSel = null; spawnType = null; draggingSpawn = null; spawnsDirty = false;
+        layerMode = null; activeLayer = null; ents = []; entSel = null; dragging = null;
+        for (const k of Object.keys(layerData)) delete layerData[k];
         $("addForm").classList.remove("show");
       }
 
@@ -357,7 +363,7 @@
           for (let y = y0; y <= y1; y++) { vctx.moveTo(x0 * TS, y * TS); vctx.lineTo(x1 * TS, y * TS); }
           vctx.stroke();
         }
-        drawSpawns();
+        drawEntities();
         if (hover) { vctx.strokeStyle = "#ffcc44"; vctx.lineWidth = 2 / cam.scale; vctx.strokeRect(hover.x * TS, hover.y * TS, TS, TS); }
       }
 
@@ -621,105 +627,172 @@
         }
       }
 
-      // ---- Layers: enemy spawns ---------------------------------------------
-      // Build the spawn working set from the server's merged view. Base spawns
-      // (from spawns.yaml) carry their origin tile as baseKey so a move/delete
-      // can suppress them; overlay spawns are the editor's own placements.
+      // ---- Layers: data-driven point-entity editing -------------------------
+      // A LAYER config supplies the data model; the canvas interaction (place /
+      // select / drag-move / delete) and marker drawing are shared. Coordinate
+      // convention is per-layer: spawns sit on integer tiles, gathering nodes at
+      // tile centres (x.5,y.5). `suppress` says how a base entity is hidden when
+      // moved/deleted: by "tile" (spawns) or by "id" (nodes, which carry an id).
+      const LAYERS = [
+        { id: "spawns", label: "👹 Enemy spawns", btn: "layerSpawns", panel: "spawnPanel", sel: "spawnType",
+          noun: "spawn", api: "/editor/api/spawns/save", field: "type", coordKind: "int", suppress: "tile",
+          palette: () => (D.monsterTypes || []).map((m) => ({ value: m.id, label: `${m.name} (${m.id})` })),
+          fromState: () => D.spawns || [], read: (s) => ({ type: s.type }) },
+        { id: "ore", label: "⛏️ Ore", btn: "layerOre", panel: "orePanel", sel: "oreKind",
+          noun: "ore vein", api: "/editor/api/nodes/save?layer=ore", field: "kind", coordKind: "center",
+          suppress: "id", idPrefix: "mine", approach: true,
+          palette: () => (D.oreKinds || []).map((k) => ({ value: k, label: k })),
+          fromState: () => D.ore || [], read: (n) => ({ id: n.id, kind: n.kind, ax: n.ax, ay: n.ay }) },
+      ];
+      const layerById = Object.fromEntries(LAYERS.map((l) => [l.id, l]));
+      // coordinate convention helpers
+      const coordOf = (lay, cx, cy) => lay.coordKind === "center" ? { x: cx + 0.5, y: cy + 0.5 } : { x: cx, y: cy };
+      const cellOfEnt = (lay, e) => lay.coordKind === "center" ? { cx: Math.floor(e.x), cy: Math.floor(e.y) } : { cx: e.x, cy: e.y };
+      const centerPx = (lay, e) => lay.coordKind === "center" ? { px: e.x * TS, py: e.y * TS } : { px: (e.x + 0.5) * TS, py: (e.y + 0.5) * TS };
+
+      // Build each layer's working set from the server's merged view. Base entities
+      // record their suppression key (tile or id) so move/delete can hide them.
       function initLayers() {
-        spawnList = (D.spawns || []).map((s) => ({
-          type: s.type, x: s.x, y: s.y, source: s.source,
-          baseKey: s.source === "base" ? key(s.x, s.y) : undefined,
-        }));
-        removedBaseKeys = new Set(); spawnSel = null; draggingSpawn = null; spawnsDirty = false;
-        layerMode = null;
-        spawnType = (D.monsterTypes && D.monsterTypes[0]?.id) || null;
-        const typeSel = $("spawnType");
-        typeSel.innerHTML = (D.monsterTypes || []).map((m) => `<option value="${m.id}">${m.name} (${m.id})</option>`).join("");
-        typeSel.onchange = () => { spawnType = typeSel.value; };
+        layerMode = null; activeLayer = null; ents = []; entSel = null; dragging = null;
+        for (const k of Object.keys(layerData)) delete layerData[k];
         const mapped = D.floor != null;
         $("layerPanel").style.display = mapped ? "" : "none";
         $("layerHint").textContent = mapped ? `floor ${D.floor} · ${D.zone}` : "";
-        $("spawnPanel").style.display = "none";
+        if (!mapped) { setLayer(null); return; }
+        for (const lay of LAYERS) {
+          const list = lay.fromState().map((s) => ({
+            x: s.x, y: s.y, source: s.source, ...lay.read(s),
+            baseKey: s.source === "base" ? (lay.suppress === "id" ? s.id : key(s.x, s.y)) : undefined,
+          }));
+          const opts = lay.palette();
+          layerData[lay.id] = { ents: list, removed: new Set(), dirty: false, paletteVal: opts[0]?.value ?? null };
+          const selEl = $(lay.sel);
+          selEl.innerHTML = opts.map((o) => `<option value="${o.value}">${o.label}</option>`).join("");
+          selEl.onchange = () => { layerData[lay.id].paletteVal = selEl.value; };
+          $(lay.panel).style.display = "none"; $(lay.btn).classList.remove("on");
+        }
         setLayer(null);
       }
-      function setLayer(mode) {
-        layerMode = mode;
-        if (mode) { tool = "paint"; sel = null; activePart = null; activeTintPart = null; }
-        $("layerSpawns").classList.toggle("on", mode === "spawns");
-        $("spawnPanel").style.display = mode === "spawns" ? "" : "none";
-        setTool(); buildRoster(); draw();
-        if (mode === "spawns") {
-          $("status").textContent = `Spawns layer (floor ${D.floor}/${D.zone}) — pick a monster, click to place. Drag to move, right-click or Del to delete.`;
+      function setLayer(id) {
+        layerMode = id; activeLayer = id ? layerById[id] : null;
+        if (id) { tool = "paint"; sel = null; activePart = null; activeTintPart = null; }
+        for (const lay of LAYERS) {
+          $(lay.btn).classList.toggle("on", lay.id === id);
+          $(lay.panel).style.display = lay.id === id ? "" : "none";
         }
+        ents = activeLayer ? layerData[id].ents : []; entSel = null; dragging = null;
+        setTool(); buildRoster(); draw();
+        if (activeLayer) $("status").textContent = `${activeLayer.label} layer (floor ${D.floor}/${D.zone}) — pick from the list, click to place. Drag to move, right-click or Del to delete.`;
       }
-      $("layerSpawns").onclick = () => setLayer(layerMode === "spawns" ? null : "spawns");
       // Tile tools and layer editing are mutually exclusive — picking a tile tool
       // (or roster/autotile entry) drops out of the active layer so the canvas
-      // paints again. Spawn edits stay in memory until saved.
+      // paints again. In-memory layer edits are preserved until saved.
       function clearLayer() {
         if (!layerMode) return;
-        layerMode = null; spawnSel = null; draggingSpawn = null;
-        $("layerSpawns").classList.remove("on"); $("spawnPanel").style.display = "none"; draw();
+        const id = layerMode; layerMode = null; activeLayer = null; ents = []; entSel = null; dragging = null;
+        $(layerById[id].btn).classList.remove("on"); $(layerById[id].panel).style.display = "none"; draw();
       }
+      for (const lay of LAYERS) $(lay.btn).onclick = () => setLayer(layerMode === lay.id ? null : lay.id);
 
-      // stable hue per monster type so markers are visually distinct
-      function spawnColor(type) {
-        let h = 0; for (let i = 0; i < type.length; i++) h = (h * 31 + type.charCodeAt(i)) >>> 0;
+      // stable hue per palette value so markers are visually distinct
+      function entColor(e) {
+        const s = String(e[activeLayer.field] ?? "");
+        let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
         return `hsl(${h % 360}, 70%, 55%)`;
       }
-      const spawnAtCell = (x, y) => { for (let i = spawnList.length - 1; i >= 0; i--) if (spawnList[i].x === x && spawnList[i].y === y) return spawnList[i]; return null; };
-      function placeSpawn(x, y) {
-        if (!spawnType) { $("status").textContent = "Pick a monster type first."; return; }
-        const s = { type: spawnType, x, y, source: "overlay" };
-        spawnList.push(s); spawnSel = s; spawnsDirty = true;
-        $("status").textContent = `Placed ${spawnType} at (${x},${y}). ${spawnList.length} spawn(s) on this floor.`;
+      const entLabel = (e) => String(e[activeLayer.field] ?? "");
+      const entAtCell = (cx, cy) => {
+        for (let i = ents.length - 1; i >= 0; i--) { const c = cellOfEnt(activeLayer, ents[i]); if (c.cx === cx && c.cy === cy) return ents[i]; }
+        return null;
+      };
+      // a gathering node's "approach" is a walkable neighbour you stand on to gather;
+      // auto-pick the first non-blocked 4-neighbour (fallback east). Hand-tune in YAML.
+      function deriveApproach(cx, cy) {
+        for (const [dx, dy] of [[1, 0], [0, 1], [-1, 0], [0, -1]]) {
+          const nx = cx + dx, ny = cy + dy;
+          if (nx >= 0 && ny >= 0 && nx < D.cols && ny < D.rows && !blockedChar(charAt(nx, ny))) return { ax: nx + 0.5, ay: ny + 0.5 };
+        }
+        return { ax: cx + 1.5, ay: cy + 0.5 };
       }
-      function moveSpawnTo(s, x, y) {
-        if (s.x === x && s.y === y) return;
-        if (s.source === "base") { removedBaseKeys.add(s.baseKey); s.source = "overlay"; s.baseKey = undefined; }
-        s.x = x; s.y = y; spawnsDirty = true;
+      function mintNodeId(lay, cx, cy) {
+        const stem = `${lay.idPrefix}-${D.floor}-${cx}-${cy}`;
+        const used = new Set(ents.map((e) => e.id).filter(Boolean));
+        if (!used.has(stem)) return stem;
+        for (let i = 2; ; i++) if (!used.has(`${stem}-${i}`)) return `${stem}-${i}`;
       }
-      function deleteSpawn(s) {
-        const i = spawnList.indexOf(s); if (i < 0) return;
-        if (s.source === "base") removedBaseKeys.add(s.baseKey);
-        spawnList.splice(i, 1); if (spawnSel === s) spawnSel = null; spawnsDirty = true;
-        $("status").textContent = `Deleted ${s.type} at (${s.x},${s.y}).`;
+      function placeEntity(cx, cy) {
+        const lay = activeLayer, st = layerData[lay.id];
+        if (!st.paletteVal) { $("status").textContent = `Pick a ${lay.noun} type first.`; return; }
+        const e = { ...coordOf(lay, cx, cy), source: "overlay", [lay.field]: st.paletteVal };
+        if (lay.approach) Object.assign(e, deriveApproach(cx, cy));
+        if (lay.idPrefix) e.id = mintNodeId(lay, cx, cy);
+        ents.push(e); entSel = e; st.dirty = true;
+        $("status").textContent = `Placed ${entLabel(e)} at (${cx},${cy}). ${ents.length} ${lay.noun}(s) on this floor.`;
       }
-      function drawSpawns() {
-        if (layerMode !== "spawns") return;
+      function moveEntityTo(e, cx, cy) {
+        const lay = activeLayer, st = layerData[lay.id];
+        const cur = cellOfEnt(lay, e); if (cur.cx === cx && cur.cy === cy) return;
+        if (e.source === "base") { st.removed.add(e.baseKey); e.source = "overlay"; e.baseKey = undefined; }
+        Object.assign(e, coordOf(lay, cx, cy));
+        if (lay.approach) Object.assign(e, deriveApproach(cx, cy));
+        st.dirty = true;
+      }
+      function deleteEntity(e) {
+        const lay = activeLayer, st = layerData[lay.id];
+        const i = ents.indexOf(e); if (i < 0) return;
+        if (e.source === "base") st.removed.add(e.baseKey);
+        ents.splice(i, 1); if (entSel === e) entSel = null; st.dirty = true;
+        $("status").textContent = `Deleted ${entLabel(e)}.`;
+      }
+      function drawEntities() {
+        if (!activeLayer) return;
         const r = TS * 0.32, showLabel = cam.scale > 0.45;
-        for (const s of spawnList) {
-          const cx = (s.x + 0.5) * TS, cy = (s.y + 0.5) * TS;
-          vctx.beginPath(); vctx.arc(cx, cy, r, 0, Math.PI * 2);
-          if (s.source === "overlay") { vctx.fillStyle = spawnColor(s.type); vctx.fill(); }
-          vctx.lineWidth = (s === spawnSel ? 3 : 2) / cam.scale;
-          vctx.strokeStyle = s === spawnSel ? "#ffcc44" : (s.source === "overlay" ? "#0009" : spawnColor(s.type));
+        for (const e of ents) {
+          const { px, py } = centerPx(activeLayer, e), col = entColor(e), on = e === entSel;
+          // approach tick (gathering nodes): line from the node to its standing tile
+          if (activeLayer.approach && e.ax != null) {
+            vctx.strokeStyle = on ? "#ffcc44" : "#0007"; vctx.lineWidth = 2 / cam.scale;
+            vctx.beginPath(); vctx.moveTo(px, py); vctx.lineTo(e.ax * TS, e.ay * TS); vctx.stroke();
+            vctx.beginPath(); vctx.arc(e.ax * TS, e.ay * TS, TS * 0.12, 0, Math.PI * 2); vctx.fillStyle = on ? "#ffcc44" : "#0007"; vctx.fill();
+          }
+          vctx.beginPath(); vctx.arc(px, py, r, 0, Math.PI * 2);
+          if (e.source === "overlay") { vctx.fillStyle = col; vctx.fill(); }
+          vctx.lineWidth = (on ? 3 : 2) / cam.scale;
+          vctx.strokeStyle = on ? "#ffcc44" : (e.source === "overlay" ? "#0009" : col);
           vctx.stroke();
           if (showLabel) {
             vctx.fillStyle = "#fff"; vctx.strokeStyle = "#000"; vctx.lineWidth = 3 / cam.scale;
             vctx.font = `${Math.round(TS * 0.34)}px system-ui`; vctx.textAlign = "center"; vctx.textBaseline = "top";
-            const t = s.type.length > 8 ? s.type.slice(0, 8) + "…" : s.type;
-            vctx.strokeText(t, cx, cy + r + 1); vctx.fillText(t, cx, cy + r + 1);
+            const t = entLabel(e), tt = t.length > 8 ? t.slice(0, 8) + "…" : t;
+            vctx.strokeText(tt, px, py + r + 1); vctx.fillText(tt, px, py + r + 1);
           }
         }
         vctx.textAlign = "start"; vctx.textBaseline = "alphabetic";
       }
-
-      async function saveSpawns() {
-        const overlay = spawnList.filter((s) => s.source === "overlay").map((s) => ({ type: s.type, x: s.x, y: s.y }));
-        const removed = [...removedBaseKeys].map((k) => { const [x, y] = k.split(",").map(Number); return { x, y }; });
-        $("status").textContent = "Saving spawns + rebuilding content…";
-        const res = await fetch("/editor/api/spawns/save?stage=" + encodeURIComponent(stageName), {
-          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ overlay, removed }),
-        }).then((r) => r.json());
-        if (res.ok) {
-          spawnsDirty = false;
-          $("status").textContent = `Saved ${overlay.length} editor spawn(s) (+${removed.length} suppressed) + rebuilt content. Game tab hot-reloads.`;
-          return true;
+      // The exact payload a save POSTs for a layer: overlay placements + suppressions.
+      function buildPayload(lay) {
+        const st = layerData[lay.id], over = st.ents.filter((e) => e.source === "overlay");
+        if (lay.suppress === "id") {
+          return {
+            nodes: over.map((e) => ({ id: e.id, [lay.field]: e[lay.field], x: e.x, y: e.y, ax: e.ax, ay: e.ay })),
+            removed: [...st.removed],          // base node ids
+          };
         }
-        $("status").textContent = "Spawn save FAILED:\n" + (res.error || res.log || "").slice(-600);
+        return {
+          overlay: over.map((e) => ({ [lay.field]: e[lay.field], x: e.x, y: e.y })),
+          removed: [...st.removed].map((k) => { const [x, y] = k.split(",").map(Number); return { x, y }; }),
+        };
+      }
+      async function saveLayer(lay) {
+        const st = layerData[lay.id];
+        const res = await fetch(lay.api + (lay.api.includes("?") ? "&" : "?") + "stage=" + encodeURIComponent(stageName), {
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(buildPayload(lay)),
+        }).then((r) => r.json());
+        if (res.ok) { st.dirty = false; return true; }
+        $("status").textContent = `${lay.label} save FAILED:\n` + (res.error || res.log || "").slice(-600);
         return false;
       }
+      const anyLayerDirty = () => LAYERS.some((l) => layerData[l.id]?.dirty);
 
       function paintCell(x, y) {
         if (tool === "pick") { pickAt(x, y); return; }
@@ -761,9 +834,9 @@
         if (e.button === 1 || spaceDown) { panning = true; userMoved = true; panStart = { x: e.clientX - cam.x, y: e.clientY - cam.y }; e.preventDefault(); return; }
         if (e.button !== 0) return; // right-click handled by contextmenu
         const c = cellAt(e.clientX, e.clientY); if (!c) return;
-        if (layerMode === "spawns") {
-          const hit = spawnAtCell(c.x, c.y);
-          if (hit) { spawnSel = hit; draggingSpawn = hit; } else { placeSpawn(c.x, c.y); }
+        if (activeLayer) {
+          const hit = entAtCell(c.x, c.y);
+          if (hit) { entSel = hit; dragging = hit; } else { placeEntity(c.x, c.y); }
           draw(); return;
         }
         if (tool === "tint") { tintFlood(activeTintPart, c.x, c.y); draw(); return; } // single click floods, no drag
@@ -774,14 +847,14 @@
         const c = cellAt(e.clientX, e.clientY);
         hover = c;
         if (c) $("hud").textContent = `(${c.x}, ${c.y})  '${charAt(c.x, c.y)}'  ${blockedChar(charAt(c.x, c.y)) ? "⛔ blocked" : "✓ walkable"}  ·  rot ${cellRot(c.x, c.y)}°  ·  brush ${brushRot}°`;
-        if (draggingSpawn && c) moveSpawnTo(draggingSpawn, c.x, c.y);
-        else if (painting && c && layerMode !== "spawns") paintCell(c.x, c.y);
+        if (dragging && c) moveEntityTo(dragging, c.x, c.y);
+        else if (painting && c && !activeLayer) paintCell(c.x, c.y);
         draw();
       });
-      window.addEventListener("mouseup", () => { if (painting) endAction(); painting = false; panning = false; draggingSpawn = null; });
+      window.addEventListener("mouseup", () => { if (painting) endAction(); painting = false; panning = false; dragging = null; });
       view.addEventListener("contextmenu", (e) => {
         e.preventDefault(); const c = cellAt(e.clientX, e.clientY); if (!c) return; hover = c;
-        if (layerMode === "spawns") { const s = spawnAtCell(c.x, c.y); if (s) { deleteSpawn(s); draw(); } return; }
+        if (activeLayer) { const s = entAtCell(c.x, c.y); if (s) { deleteEntity(s); draw(); } return; }
         openCtx(e.clientX, e.clientY, c);
       });
       view.addEventListener("wheel", (e) => {
@@ -827,8 +900,8 @@
         if ((e.ctrlKey || e.metaKey) && e.code === "KeyZ") { e.preventDefault(); undo(); return; }
         if ((e.ctrlKey || e.metaKey) && e.code === "KeyC") { if (hover) { e.preventDefault(); copyCell(hover); } return; }
         if ((e.ctrlKey || e.metaKey) && e.code === "KeyV") { if (hover && clipboard) { e.preventDefault(); pasteCell(hover); } return; }
-        if (e.code === "Escape") { closeCtx(); if (layerMode === "spawns") { spawnSel = null; draw(); } }
-        if ((e.code === "Delete" || e.code === "Backspace") && layerMode === "spawns" && spawnSel) { e.preventDefault(); deleteSpawn(spawnSel); draw(); }
+        if (e.code === "Escape") { closeCtx(); if (activeLayer) { entSel = null; draw(); } }
+        if ((e.code === "Delete" || e.code === "Backspace") && activeLayer && entSel) { e.preventDefault(); deleteEntity(entSel); draw(); }
         if (e.code === "Space") { spaceDown = true; view.style.cursor = "grab"; }
         if (e.code === "KeyR") { e.preventDefault(); rotateAction(); }
       });
@@ -861,11 +934,21 @@
           legendAddsOut[ch] = legendAdds[ch]; if (vocabAdds[ch]) vocabAddsOut[ch] = vocabAdds[ch];
         }
         const hasTileWork = cells.length || Object.keys(legendAddsOut).length;
-        // Spawn edits (overlay file + content rebuild) and tile edits (stage import)
+        // Layer edits (overlay files + content rebuild) and tile edits (stage import)
         // save independently. Save whatever is dirty; report a combined status.
         const done = [];
-        if (spawnsDirty) { if (await saveSpawns()) done.push("spawns"); }
-        if (!hasTileWork) { if (!done.length) $("status").textContent = "Nothing to save."; return; }
+        for (const lay of LAYERS) {
+          const st = layerData[lay.id];
+          if (st && st.dirty) {
+            const p = buildPayload(lay), cnt = (p.nodes || p.overlay).length;
+            $("status").textContent = `Saving ${lay.noun}s + rebuilding…`;
+            if (await saveLayer(lay)) done.push(`${cnt} ${lay.noun}(s)`);
+          }
+        }
+        if (!hasTileWork) {
+          $("status").textContent = done.length ? `Saved ${done.join(" + ")} + rebuilt content. Game tab hot-reloads.` : "Nothing to save.";
+          return;
+        }
         $("status").textContent = "Saving + rebuilding stage…";
         const res = await fetch("/editor/api/save?stage=" + encodeURIComponent(stageName), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cells, legendAdds: legendAddsOut, vocabAdds: vocabAddsOut }) }).then((r) => r.json());
         if (res.ok) {
@@ -893,16 +976,24 @@
           paint: (part, x, y) => paintPart(part, x, y),
           charAt: (x, y) => charAt(x, y),
           stage: () => stageName,
-          // Spawns layer seam: drive place/move/delete and read the working set +
-          // the exact payload a save would POST, without writing files.
-          setLayer, placeSpawn, deleteSpawn, moveSpawnTo,
+          // Layers seam: drive place/move/delete on the active layer (cell coords)
+          // and read the working set + the exact payload a save would POST, without
+          // writing files. setLayer(id) chooses the layer first.
+          setLayer,
           floor: () => D?.floor,
-          spawnAt: (x, y) => spawnAtCell(x, y),
-          spawns: () => spawnList.map((s) => ({ ...s })),
-          spawnPayload: () => ({
-            overlay: spawnList.filter((s) => s.source === "overlay").map((s) => ({ type: s.type, x: s.x, y: s.y })),
-            removed: [...removedBaseKeys].map((k) => { const [x, y] = k.split(",").map(Number); return { x, y }; }),
-          }),
+          place: (cx, cy) => placeEntity(cx, cy),
+          move: (e, cx, cy) => moveEntityTo(e, cx, cy),
+          del: (e) => deleteEntity(e),
+          entAt: (cx, cy) => entAtCell(cx, cy),
+          entities: () => ents.map((e) => ({ ...e })),
+          payload: () => buildPayload(activeLayer),
+          // back-compat aliases for the spawns spec
+          placeSpawn: (x, y) => placeEntity(x, y),
+          moveSpawnTo: (e, x, y) => moveEntityTo(e, x, y),
+          deleteSpawn: (e) => deleteEntity(e),
+          spawnAt: (x, y) => entAtCell(x, y),
+          spawns: () => ents.map((e) => ({ ...e })),
+          spawnPayload: () => buildPayload(activeLayer),
         };
       }
       boot();

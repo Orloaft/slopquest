@@ -162,13 +162,14 @@ const spawns = load<RawSpawns>("spawns.yaml") ?? {};
 // here, so the hand-authored, heavily-commented spawns.yaml is never rewritten.
 // Merged below: base spawns minus any suppressed tile, plus the overlay's own
 // placements. Missing file → no-op.
+function loadOptional<T>(file: string): T | null {
+  return existsSync(join(CONTENT, file)) ? load<T>(file) : null;
+}
 interface RawSpawnOverlay {
   monsters?: RawSpawns["monsters"];
   removed?: Array<{ floor?: number; x?: number; y?: number }>;
 }
-const spawnsOverlay: RawSpawnOverlay = existsSync(join(CONTENT, "spawns.editor.yaml"))
-  ? load<RawSpawnOverlay>("spawns.editor.yaml") ?? {}
-  : {};
+const spawnsOverlay = loadOptional<RawSpawnOverlay>("spawns.editor.yaml") ?? {};
 const removedSpawnKeys = new Set(
   (spawnsOverlay.removed ?? []).map((r) => `${r.floor},${r.x},${r.y}`)
 );
@@ -177,6 +178,20 @@ const mergedMonsterSpawns = [
     (s) => !removedSpawnKeys.has(`${s.at?.floor},${s.at?.x},${s.at?.y}`)
   ),
   ...(spawnsOverlay.monsters ?? [])
+];
+
+// Editor-authored mining-node overlay (content/mining-nodes.editor.yaml). Same
+// pattern as spawns, but nodes carry a unique `id`, so suppression is keyed by
+// id rather than by tile. Optional — missing file is a no-op.
+interface RawNodeOverlay<T> {
+  nodes?: T[];
+  removed?: Array<{ floor?: number; id?: string }>;
+}
+const miningOverlay = loadOptional<RawNodeOverlay<RawMiningNode>>("mining-nodes.editor.yaml") ?? {};
+const removedMiningIds = new Set((miningOverlay.removed ?? []).map((r) => r.id));
+const mergedMiningNodes = [
+  ...miningNodes.filter((m) => !removedMiningIds.has(m.id)),
+  ...(miningOverlay.nodes ?? [])
 ];
 const abilities = load<RawAbility[]>("abilities.yaml") ?? [];
 const combatAnimations = load<RawCombatAnimation[]>("combat-animations.yaml") ?? [];
@@ -300,10 +315,12 @@ for (const s of mergedMonsterSpawns) {
 for (const t of spawns.trees ?? []) {
   if (!t.type || !treeTypeIds.has(t.type)) fail("spawns.yaml", `tree spawn refs unknown type "${t.type}"`);
 }
-for (const m of miningNodes) {
+const seenMiningIds = new Set<string>();
+for (const m of mergedMiningNodes) {
   if (m.kind != null && !oreKinds.has(m.kind)) {
-    fail(`mining-nodes.yaml:${m.id ?? "?"}`, `unknown kind "${m.kind}" (known: ${[...oreKinds].join(", ")})`);
+    fail(`mining-nodes:${m.id ?? "?"}`, `unknown kind "${m.kind}" (known: ${[...oreKinds].join(", ")})`);
   }
+  if (m.id) { if (seenMiningIds.has(m.id)) fail("mining-nodes", `duplicate node id "${m.id}"`); seenMiningIds.add(m.id); }
 }
 for (const f of fishingNodes) {
   if (f.kind != null && !fishKinds.has(f.kind)) {
@@ -632,7 +649,7 @@ const FISHING_NODES = fishingNodes.map((f) => ({
   approachX: sX(f.at?.floor, f.approach?.x),
   approachY: sY(f.at?.floor, f.approach?.y)
 }));
-const MINING_NODES = miningNodes.map((m) => ({
+const MINING_NODES = mergedMiningNodes.map((m) => ({
   id: m.id,
   kind: m.kind ?? "copper",
   floor: m.at?.floor,
