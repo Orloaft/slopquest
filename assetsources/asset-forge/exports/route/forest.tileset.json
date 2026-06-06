@@ -48,7 +48,7 @@
     },
     {
       "index": 8,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
@@ -78,8 +78,8 @@
     },
     {
       "index": 14,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 15,
@@ -93,13 +93,13 @@
     },
     {
       "index": 17,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 18,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 19,
@@ -123,23 +123,23 @@
     },
     {
       "index": 23,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 24,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 25,
       "role": "deep-water",
       "blocked": true
     },
     {
-      "index": 26,
+      "index": 24,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 25,
       "role": "forest-floor",
       "blocked": false
+    },
+    {
+      "index": 26,
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 27,
@@ -148,8 +148,8 @@
     },
     {
       "index": 28,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 29,
@@ -179,27 +179,27 @@
     {
       "index": 34,
       "role": "deep-water",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 35,
-      "role": "packed-road",
+      "role": "deep-water",
       "blocked": false
     },
     {
       "index": 36,
-      "role": "deep-water",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 37,
       "role": "deep-water",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 38,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 39,
@@ -208,8 +208,8 @@
     },
     {
       "index": 40,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 41,
@@ -218,8 +218,8 @@
     },
     {
       "index": 42,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 43,
@@ -233,13 +233,13 @@
     },
     {
       "index": 45,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 46,
       "role": "deep-water",
-      "blocked": false
+      "blocked": true
     },
     {
       "index": 47,
@@ -248,18 +248,18 @@
     },
     {
       "index": 48,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 49,
-      "role": "forest-floor",
+      "role": "deep-water",
       "blocked": false
     },
     {
       "index": 50,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 51,
@@ -278,33 +278,53 @@
     },
     {
       "index": 54,
-      "role": "deep-water",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 55,
-      "role": "deep-water",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 56,
-      "role": "packed-road",
+      "role": "deep-water",
       "blocked": false
     },
     {
       "index": 57,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 58,
-      "role": "forest-floor",
+      "role": "deep-water",
       "blocked": false
     },
     {
       "index": 59,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 60,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 61,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 62,
       "role": "deep-water",
       "blocked": true
+    },
+    {
+      "index": 63,
+      "role": "packed-road",
+      "blocked": false
     }
   ]
 }

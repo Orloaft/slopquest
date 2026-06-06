@@ -64,7 +64,7 @@
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#b7932d"
+      "minimapColor": "#9f9326"
     },
     "^": {
       "role": "forest-border-canopy",
