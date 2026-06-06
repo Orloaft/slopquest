@@ -262,6 +262,48 @@
       "sightBlocked": false,
       "road": false,
       "minimapColor": "#94912f"
+    },
+    "G": {
+      "role": "plateau-grass-lit",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#b8b038"
+    },
+    "H": {
+      "role": "plateau-edge-n-lit",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#b8b038"
+    },
+    "I": {
+      "role": "plateau-corner-nw-lit",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#b8b038"
+    },
+    "J": {
+      "role": "plateau-corner-ne-lit",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#b8b038"
+    },
+    "K": {
+      "role": "plateau-edge-w-lit",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#b8b038"
+    },
+    "L": {
+      "role": "plateau-edge-e-lit",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#b8b038"
     }
   }
 }

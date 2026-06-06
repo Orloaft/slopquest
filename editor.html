@@ -63,6 +63,7 @@
         <div class="row">
           <button id="plGrass" title="Paint the walkable grass top — edges & corners auto-fit">🟩 Top</button>
           <button id="plWall" title="Paint the rock face below the top — caps, feet & corners auto-fit; more rows = taller">🟫 Wall</button>
+          <button id="plTint" title="Click a plateau top to toggle its bright elevation highlight">✨ Tint</button>
         </div>
 
         <h2>Roster <small>(click to select)</small></h2>
@@ -300,23 +301,45 @@
       // corners for the face — is derived from its neighbours and re-flows live
       // as you extend or erase. Membership is implied by which char-set a cell's
       // current char belongs to, so re-resolving is stateless.
-      const GRASS_SET = new Set(["g", "n", "A", "B", "w", "e"]);          // walkable top
+      // top has two palettes: normal yellow-green + a bright "lit" set used to
+      // highlight an elevated plateau. Both count as grass membership; the Tint
+      // tool toggles a whole top between them, preserving each cell's edge/corner.
+      const GRASS_NORMAL = ["g", "n", "A", "B", "w", "e"];
+      const GRASS_LIT    = ["G", "H", "I", "J", "K", "L"];
+      const LIT_OF  = { g: "G", n: "H", A: "I", B: "J", w: "K", e: "L" };
+      const NORM_OF = { G: "g", H: "n", I: "A", J: "B", K: "w", L: "e" };
+      const isLit = (ch) => ch in NORM_OF;
+      const normRole = (ch) => NORM_OF[ch] || ch;   // bright→normal role char; normal→itself
+      const GRASS_SET = new Set([...GRASS_NORMAL, ...GRASS_LIT]);          // walkable top
       const WALL_SET  = new Set(["c", "v", "b", "h", "i", "j", "k", "l", "o", "p", "r"]); // rock face
       const inBounds = (x, y) => x >= 0 && y >= 0 && x < D.cols && y < D.rows;
       const plMat = (x, y) => { const c = charAt(x, y); return GRASS_SET.has(c) ? "grass" : WALL_SET.has(c) ? "wall" : null; };
       const inGrass = (x, y) => inBounds(x, y) && GRASS_SET.has(charAt(x, y));
       const inWall  = (x, y) => inBounds(x, y) && WALL_SET.has(charAt(x, y));
+      // is this grass an ELEVATED plateau top (vs. lowland)? Scan straight down through
+      // the grass run; if the first non-grass cell below is a cliff WALL, the grass sits
+      // atop a face → it's a top. Lowland grass scans down into forest/ground/edge, so it
+      // never qualifies. This lets Tint stay on the plateau even when a side wall has a gap
+      // that connects the top to the surrounding grass (which would otherwise leak the tint).
+      function isElevatedTop(x, y) {
+        if (!inGrass(x, y)) return false;
+        let cy = y;
+        while (inGrass(x, cy)) cy++;        // walk to first cell below the grass run
+        return inWall(x, cy);               // top iff that cell is a cliff face
+      }
 
       // top surface: N/W/E membership picks corner (A/B), edge (n/w/e) or fill (g).
       // South is intentionally ignored — the drop below the bottom row is the face.
       function resolveGrass(x, y) {
         const N = inGrass(x, y - 1), W = inGrass(x - 1, y), E = inGrass(x + 1, y);
-        if (!N && !W) return "A";          // top-left corner
-        if (!N && !E) return "B";          // top-right corner
-        if (!N) return "n";                // top edge
-        if (!W) return "w";                // left edge
-        if (!E) return "e";                // right edge
-        return "g";                        // interior
+        let role;
+        if (!N && !W) role = "A";          // top-left corner
+        else if (!N && !E) role = "B";     // top-right corner
+        else if (!N) role = "n";           // top edge
+        else if (!W) role = "w";           // left edge
+        else if (!E) role = "e";           // right edge
+        else role = "g";                   // interior
+        return isLit(charAt(x, y)) ? LIT_OF[role] : role; // keep this cell's tint
       }
       // rock face: vertical band (cap / mid / foot) x horizontal end (L / mid / R).
       // FOOT-first: a 1-row wall is both cap and foot — render it as the foot, which
@@ -376,6 +399,28 @@
         if (mat === "grass") extendWallToMatch(x, 0);  // pull the face under the new top
       }
 
+      // flood the connected plateau top and toggle its whole palette (bright<->normal)
+      // based on the clicked cell's current tint. One click = one undoable action.
+      function tintPlateau(x, y) {
+        if (plMat(x, y) !== "grass") { $("status").textContent = "Click a plateau TOP to highlight it."; return; }
+        if (!isElevatedTop(x, y)) { $("status").textContent = "That grass isn't an elevated top (no cliff face below it) — Tint only highlights plateaus."; return; }
+        const makeLit = !isLit(charAt(x, y));
+        beginAction();
+        const stack = [[x, y]], seen = new Set(); let n = 0; const CAP = 8000;
+        while (stack.length && n < CAP) {
+          const [cx, cy] = stack.pop(), k = key(cx, cy);
+          if (seen.has(k) || !inBounds(cx, cy)) continue;
+          seen.add(k);
+          if (plMat(cx, cy) !== "grass" || !isElevatedTop(cx, cy)) continue; // stay on the elevated top; never leak into lowland grass through a wall gap
+          const role = normRole(charAt(cx, cy));
+          applyChar(cx, cy, makeLit ? LIT_OF[role] : role);
+          n++;
+          stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+        }
+        endAction();
+        $("status").textContent = `${makeLit ? "Highlighted" : "Reset"} plateau top — ${n} cell(s).`;
+      }
+
       function paintCell(x, y) {
         if (tool === "pick") { pickAt(x, y); return; }
         if (tool === "plateau") { paintPlateau(x, y, plateauMat); return; }
@@ -414,7 +459,9 @@
         closeCtx();
         if (e.button === 1 || spaceDown) { panning = true; userMoved = true; panStart = { x: e.clientX - cam.x, y: e.clientY - cam.y }; e.preventDefault(); return; }
         if (e.button !== 0) return; // right-click handled by contextmenu
-        const c = cellAt(e.clientX, e.clientY); if (c) { painting = true; beginAction(); paintCell(c.x, c.y); draw(); }
+        const c = cellAt(e.clientX, e.clientY); if (!c) return;
+        if (tool === "tint") { tintPlateau(c.x, c.y); draw(); return; } // single click floods, no drag
+        painting = true; beginAction(); paintCell(c.x, c.y); draw();
       });
       window.addEventListener("mousemove", (e) => {
         if (panning) { cam.x = e.clientX - panStart.x; cam.y = e.clientY - panStart.y; draw(); return; }
@@ -479,12 +526,14 @@
         for (const [id, t] of [["tPaint", "paint"], ["tErase", "erase"], ["tPick", "pick"]]) $(id).classList.toggle("on", tool === t);
         $("plGrass").classList.toggle("on", tool === "plateau" && plateauMat === "grass");
         $("plWall").classList.toggle("on", tool === "plateau" && plateauMat === "wall");
+        $("plTint").classList.toggle("on", tool === "tint");
       }
       $("tPaint").onclick = () => { tool = "paint"; setTool(); };
       $("tErase").onclick = () => { tool = "erase"; setTool(); };
       $("tPick").onclick = () => { tool = "pick"; setTool(); };
       $("plGrass").onclick = () => { tool = "plateau"; plateauMat = "grass"; setTool(); $("status").textContent = "Plateau TOP — paint the walkable grass; edges & corners auto-fit. Erase to reshape."; };
       $("plWall").onclick = () => { tool = "plateau"; plateauMat = "wall"; setTool(); $("status").textContent = "Plateau WALL — paint the rock face below the top; caps, feet & end-corners auto-fit. More rows = taller cliff."; };
+      $("plTint").onclick = () => { tool = "tint"; setTool(); $("status").textContent = "Tint — click a plateau top to toggle its bright elevation highlight (click again to reset)."; };
       $("tRot").onclick = rotateAction;
       $("toggleAtlas").onclick = () => $("atlasWrap").classList.toggle("show");
       for (const id of ["optCol", "optTrees", "optGrid"]) $(id).onchange = draw;
