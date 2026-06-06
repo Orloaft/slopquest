@@ -108,17 +108,11 @@ for (let k = 0; k < 30; k++) {
   const cx = 6 + Math.floor(rnd() * (C - 12));
   clump(cy, cx, 4, 10 + Math.floor(rnd() * 10));
 }
-// 5) Meandering stream (organic centreline + varying width). The banks PINCH in
-//    toward the ford so the crossing reads as a natural shallow narrowing, and the
-//    water never sits flush against the crossing (otherwise the half-tile dual-grid
-//    water graphics bleed over a 1-wide ford and drown it — it looked impassable).
-const FORD_PINCH_SPAN = 7;
+// 5) Meandering stream (organic centreline + varying width). The trail keeps its
+//    1-wide ford; the water autotiles a finished shore around it.
 for (let c = 6; c < C - 6; c++) {
   const cy = 34.5 + 1.6 * Math.sin(c / 9) + 0.9 * Math.sin(c / 4 + 1.3);
-  // 0 at the ford, ramping to 1 by FORD_PINCH_SPAN columns away
-  const pinch = Math.min(1, Math.abs(c - FORD_X) / FORD_PINCH_SPAN);
-  const hw = (1.0 + 0.9 * (0.5 + 0.5 * Math.sin(c / 6 + 0.5))) * pinch;
-  if (hw < 0.5) continue;                       // dry bank right at the crossing
+  const hw = 1.0 + 0.9 * (0.5 + 0.5 * Math.sin(c / 6 + 0.5));
   const y0 = Math.round(cy - hw), y1 = Math.round(cy + hw);
   for (let y = y0; y <= y1; y++) {
     if (y < 1 || y >= R - 1) continue;
@@ -126,12 +120,18 @@ for (let c = 6; c < C - 6; c++) {
     rows[y][c] = "~";
   }
 }
-// 6) Re-stamp the trail, then flare the ford to a clear 3-wide crossing so the
-//    bridge over the (now-pinched) stream is unmistakable and never drowned.
+// 6) Re-stamp the trail so nothing above clipped it.
 paintTrail();
-for (let y = 30; y <= 39; y++) for (let dc = -1; dc <= 1; dc++) {
-  const c = FORD_X + dc;
-  if (c > 0 && c < C - 1 && rows[y][c] !== "^") rows[y][c] = "t";
+// 7) WALKABLE SHALLOWS flanking the 1-wide ford. The player's collision box tests
+//    its four corners (canStand, ±0.28 tiles), so a 1-wide road between two water
+//    bodies is impassable — the box corners land on blocking water. The fix is to
+//    make the water EDGE walkable: cells touching the ford become 's' (shallows),
+//    which still RENDER as water (base-layer ref) but are not in isBlockedTile, so
+//    the player can wade the crossing. Road stays a single dirt tile wide.
+for (let y = 1; y < R - 1; y++) for (let c = 1; c < C - 1; c++) {
+  if (rows[y][c] !== "~") continue;
+  const touchesFord = (rows[y - 1]?.[c] === "t") || (rows[y + 1]?.[c] === "t") || (rows[y][c - 1] === "t") || (rows[y][c + 1] === "t");
+  if (touchesFord) rows[y][c] = "s";
 }
 
 const at = (r: number, c: number) => (r >= 0 && c >= 0 && r < R && c < C ? rows[r][c] : "^");
@@ -145,7 +145,8 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const n = (wn(r - 1, c) ? 1 : 0) + (wn(r + 1, c) ? 1 : 0) + (wn(r, c - 1) ? 1 : 0) + (wn(r, c + 1) ? 1 : 0);
   if (n < 2) rows[r][c] = "F";
 }
-const isW = (r: number, c: number) => at(r, c) === "~";
+// 's' (walkable shallows) renders as water, so the water autotiler treats it as water.
+const isW = (r: number, c: number) => at(r, c) === "~" || at(r, c) === "s";
 const isR = (r: number, c: number) => at(r, c) === "t";
 
 // ---- atlases (shared with Northwood) ---------------------------------------
@@ -180,6 +181,7 @@ const blocked: boolean[][] = Array.from({ length: R }, () => new Array(C).fill(f
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const ch = at(r, c);
   if (ch === "~") { kind[r][c] = "water"; blocked[r][c] = true; }
+  else if (ch === "s") { kind[r][c] = "water"; blocked[r][c] = false; } // walkable shallows
   else if (ch === "^") { kind[r][c] = "void"; blocked[r][c] = true; }
   else if (ch === ".") { kind[r][c] = "beach"; }
   else if (ch === "t") { kind[r][c] = "road"; }
@@ -190,7 +192,7 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
 const GRASS_IDX0 = 0;
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const ch = at(r, c);
-  if (ch === "~" || ch === "^" || ch === ".") continue;
+  if (ch === "~" || ch === "s" || ch === "^" || ch === ".") continue;
   blitTile(ptop, PTCOLS, GRASS_IDX0, c * ts, r * ts);
 }
 // ---- water corner-Wang dual-grid -------------------------------------------
@@ -200,13 +202,15 @@ for (let i = 0; i <= R; i++) for (let j = 0; j <= C; j++) {
 }
 // ---- roads edge-Wang -------------------------------------------------------
 // road-wang.png is NOT laid out in NESW-mask order, so the connectivity mask must
-// be remapped to the actual atlas index (verified by reading each tile's edges):
-//   straights  VERT(5)->5  HORIZ(10)->10
-//   corners    NE(3)->4  ES(6)->0  SW(12)->6  NW(9)->9
-//   T/cross    7->3  11->11  13->13  14->14  15->15 ; ends/0 fall back to a straight
-// Using the mask directly (the old bug) drew T-junctions and wrong-facing corners
-// at the bends, so the joints never blended.
-const ROAD_TILE = [5, 5, 2, 4, 5, 5, 0, 3, 12, 9, 10, 11, 6, 13, 14, 15];
+// be remapped to the actual atlas index. Verified empirically by rendering every
+// candidate tile inside each corner's real wang context (straight stubs on the
+// open sides) and picking the one whose dirt connects cleanly:
+//   straights  VERT(5)->5   HORIZ(10)->10
+//   corners    NE(3)->3   ES(6)->0   SW(12)->6   NW(9)->9
+//   T/cross    7->7  11->11  13->13  14->14  15->15 ; ends/0 fall back to a straight
+// (The trail only uses straights + the four corners.) Using the mask directly as
+// the index — the old bug — drew the ES/SW bends from the wrong "cap" tiles.
+const ROAD_TILE = [5, 5, 10, 3, 5, 5, 0, 7, 10, 9, 10, 11, 6, 13, 14, 15];
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   if (!isR(r, c)) continue;
   const m = (isR(r - 1, c) ? 1 : 0) | (isR(r, c + 1) ? 2 : 0) | (isR(r + 1, c) ? 4 : 0) | (isR(r, c - 1) ? 8 : 0);
@@ -310,14 +314,16 @@ const ROLE_BY_KIND: Record<Kind, string> = {
 const CHAR_VOCAB: Record<string, { role: string; blocked: boolean; sightBlocked: boolean; road: boolean }> = {
   F: { role: "forest-floor", blocked: false, sightBlocked: false, road: false },
   "~": { role: "deep-water", blocked: true, sightBlocked: false, road: false },
+  s: { role: "shallow-ford", blocked: false, sightBlocked: false, road: false }, // wadeable water at the crossing
   t: { role: "packed-road", blocked: false, sightBlocked: false, road: true },
   "^": { role: "forest-border-canopy", blocked: true, sightBlocked: true, road: false },
   y: { role: "tree-trunk", blocked: true, sightBlocked: true, road: false },
 };
 
+const charOf = (r: number, c: number): string => (rows[r][c] === "s" ? "s" : KIND_CHAR[kind[r][c]]);
 const charTileFreq: Record<string, Map<number, number>> = {};
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
-  const ch = KIND_CHAR[kind[r][c]];
+  const ch = charOf(r, c);
   (charTileFreq[ch] ??= new Map()).set(cellTile[r][c], (charTileFreq[ch]?.get(cellTile[r][c]) ?? 0) + 1);
 }
 const canonTile: Record<string, number> = {};
@@ -327,7 +333,7 @@ for (const ch of Object.keys(CHAR_VOCAB)) {
   canonTile[ch] = best;
 }
 
-const cellChar: string[][] = Array.from({ length: R }, (_, r) => Array.from({ length: C }, (_, c) => KIND_CHAR[kind[r][c]]));
+const cellChar: string[][] = Array.from({ length: R }, (_, r) => Array.from({ length: C }, (_, c) => charOf(r, c)));
 for (const p of PORTAL) { cellChar[p.y][p.x] = p.ch; cellTile[p.y][p.x] = grassTile; }
 for (const w of REQUIRED_WALKABLE) {
   if (CHAR_VOCAB[cellChar[w.y][w.x]]?.blocked) { cellChar[w.y][w.x] = "F"; cellTile[w.y][w.x] = grassTile; }

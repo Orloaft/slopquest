@@ -98,8 +98,8 @@
     },
     {
       "index": 18,
-      "role": "packed-road",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 19,
@@ -123,23 +123,23 @@
     },
     {
       "index": 23,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 24,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 25,
-      "role": "packed-road",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 26,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 27,
@@ -148,8 +148,8 @@
     },
     {
       "index": 28,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 29,
@@ -179,42 +179,42 @@
     {
       "index": 34,
       "role": "deep-water",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 35,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 36,
-      "role": "forest-floor",
+      "role": "deep-water",
       "blocked": false
     },
     {
       "index": 37,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 38,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 39,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 40,
       "role": "deep-water",
       "blocked": true
     },
     {
-      "index": 40,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
       "index": 41,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 42,
@@ -223,38 +223,38 @@
     },
     {
       "index": 43,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 44,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 45,
       "role": "forest-floor",
       "blocked": false
     },
     {
-      "index": 46,
+      "index": 44,
       "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 45,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 46,
+      "role": "deep-water",
       "blocked": false
     },
     {
       "index": 47,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 48,
-      "role": "forest-floor",
+      "role": "deep-water",
       "blocked": false
     },
     {
       "index": 49,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 50,
@@ -263,8 +263,8 @@
     },
     {
       "index": 51,
-      "role": "deep-water",
-      "blocked": true
+      "role": "forest-floor",
+      "blocked": false
     },
     {
       "index": 52,
@@ -273,6 +273,46 @@
     },
     {
       "index": 53,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 54,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 55,
+      "role": "deep-water",
+      "blocked": false
+    },
+    {
+      "index": 56,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 57,
+      "role": "deep-water",
+      "blocked": false
+    },
+    {
+      "index": 58,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 59,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 60,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 61,
       "role": "deep-water",
       "blocked": true
     }

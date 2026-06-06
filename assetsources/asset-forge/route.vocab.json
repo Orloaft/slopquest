@@ -52,6 +52,13 @@
       "road": false,
       "minimapColor": "#087696"
     },
+    "s": {
+      "role": "shallow-ford",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#2e8584"
+    },
     "t": {
       "role": "packed-road",
       "blocked": false,
