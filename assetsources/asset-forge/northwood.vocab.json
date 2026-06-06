@@ -199,6 +199,62 @@
       "sightBlocked": true,
       "road": false,
       "minimapColor": "#705c2b"
+    },
+    "h": {
+      "role": "cliff-wall-mid-b",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
+    },
+    "i": {
+      "role": "cliff-wall-mid-c",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
+    },
+    "j": {
+      "role": "cliff-wall-cap-l",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
+    },
+    "k": {
+      "role": "cliff-wall-cap-r",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
+    },
+    "l": {
+      "role": "cliff-wall-mid-l",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
+    },
+    "o": {
+      "role": "cliff-wall-mid-r",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
+    },
+    "p": {
+      "role": "cliff-wall-foot-l",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
+    },
+    "r": {
+      "role": "cliff-wall-foot-r",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
     }
   }
 }
