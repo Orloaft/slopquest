@@ -114,6 +114,13 @@ function editorApi(): Plugin {
           try {
             if (ts.manifest) atlasCols = readJson(path.join(stageDir, ts.manifest)).columns ?? 24;
           } catch { /* manifest optional — fall back to 24 */ }
+          // Optional per-stage blob autotile sets (road/water): bitmask→atlas-index
+          // tables proposed by tools/classify-*-blobset.py and hand-tuned in place.
+          // Absent for stages without one — the editor just omits those auto-tools.
+          let blobsets: any[] = [];
+          try {
+            blobsets = readJson(path.join(stageDir, `${def.name}.blobset.json`)).sets ?? [];
+          } catch { /* no blobset for this stage — fine */ }
           send(res, 200, {
             name: stage.name,
             cols: stage.cols,
@@ -127,6 +134,7 @@ function editorApi(): Plugin {
             ascii: stage.ascii.rows,
             base: base?.data ?? [],
             fringe: fringe?.data ?? null,
+            blobsets,
             rotations: stage.rotations ?? {},
             objects: stage.objects.map((o: any) => ({ x: o.x, y: o.y, w: o.w, h: o.h }))
           });

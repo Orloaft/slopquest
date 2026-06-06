@@ -108,6 +108,8 @@
       let map = null, mctx = null;  // offscreen pre-rendered map
       const overrides = new Map();  // "x,y" -> {char, ref, blocked}
       const legendAdds = {}, vocabAdds = {};
+      const blobChars = new Set();  // chars minted to back a blob autotile set (road/water).
+                                    // Hidden from the roster; only the ones actually painted are saved.
       let roster = [];              // {char, ref, blocked, road, sightBlocked, role, minimapColor}
       let sel = null;               // selected roster entry
       let tool = "paint";           // paint | erase | pick | autotile | tint
@@ -135,6 +137,7 @@
         overrides.clear();
         for (const k of Object.keys(legendAdds)) delete legendAdds[k];
         for (const k of Object.keys(vocabAdds)) delete vocabAdds[k];
+        blobChars.clear();
         undoStack.length = 0;
         roster = []; sel = null; brushRot = 0; hover = null;
         tool = "paint"; activePart = null; activeTintPart = null; userMoved = false;
@@ -183,11 +186,12 @@
         eraseChar = dominantChar() || "F";
         $("tErase").textContent = "Erase→" + eraseChar;
         $("stageSel").value = name;
-        computeActiveParts(); buildAutotilePanel();
         atlas = new Image(); atlas.src = D.atlasUrl;
         await atlas.decode();
         atlasRead = document.createElement("canvas"); atlasRead.width = atlas.width; atlasRead.height = atlas.height;
         atlasRead.getContext("2d").drawImage(atlas, 0, 0);
+        prepareBlobsets();                      // mint blob tile chars (needs readable atlas) before the toolbar is built
+        computeActiveParts(); buildAutotilePanel();
         map = document.createElement("canvas"); map.width = D.cols * TS; map.height = D.rows * TS; mctx = map.getContext("2d");
         mctx.imageSmoothingEnabled = false;
         buildRoster(); buildAtlas(); renderMapAll(); setTool(); resize();
@@ -203,7 +207,7 @@
         roster = [];
         const seen = new Set();
         const add = (ch) => {
-          if (seen.has(ch)) return; seen.add(ch);
+          if (seen.has(ch) || blobChars.has(ch)) return; seen.add(ch);  // blob tiles are driven by the auto-tool, not hand-picked
           const ref = legendAdds[ch] ?? D.legend[ch]; const v = vocabAdds[ch] ?? D.vocab[ch];
           if (!ref || !v) return;
           roster.push({ char: ch, ref, ...v });
@@ -465,7 +469,7 @@
       // slot straight in here once their edge tiles exist in a stage's atlas — give
       // them a `resolve: blobResolver(memberOf, bitmaskToChar)` (Phase 2).
       function terrainParts() {
-        return [
+        const parts = [
           { group: "Plateau", id: "grass", fill: "g", needs: GRASS_NORMAL,
             label: "🟩 Top", status: "Plateau TOP — paint the walkable grass; edges & corners auto-fit. Erase to reshape.",
             memberOf: inGrass, resolve: resolveGrass, afterPaint: (x, y) => extendWallToMatch(x, 0),
@@ -474,6 +478,55 @@
             label: "🟫 Wall", status: "Plateau WALL — paint the rock face below the top; caps, feet & end-corners auto-fit. More rows = taller cliff.",
             memberOf: inWall, resolve: resolveWall },
         ];
+        // Blob autotile parts (road/water) are data — one per prepared blob set on this
+        // stage. Membership = the set's own minted chars (so a stray reflow never rewrites
+        // a legacy flat-road cell), while CONNECTIVITY also counts legacy road/water chars
+        // so a freshly-painted path butts cleanly against tiles that predate the blob set.
+        for (const set of (D.blobsets || [])) {
+          if (!set._charByBitmask) continue;
+          const member = (x, y) => inBounds(x, y) && set._memberChars.has(charAt(x, y));
+          const connect = (x, y) => inBounds(x, y) && set._connectChars.has(charAt(x, y));
+          parts.push({
+            group: set.group, id: set.id, fill: set._fillChar, needs: [],
+            label: set.label || `🧩 ${set.group}`,
+            status: `${set.group} auto-tile — paint a path; straights, curves & junctions auto-fit from neighbours. Retune by editing ${stageName}.blobset.json (see docs/editor-autotile.md).`,
+            memberOf: member, resolve: blobResolver(connect, set._charByBitmask, set._fillChar),
+          });
+        }
+        return parts;
+      }
+
+      // Mint a roster-hidden char for every distinct atlas tile a blob set references,
+      // then index it by bitmask so blobResolver can pick it. Reuses an existing legend
+      // char when one already points at the same ref (e.g. the legacy flat-road tile),
+      // so the saved map never grows duplicate tiles. Must run after the atlas pixels
+      // are readable (sampleColor) and before computeActiveParts() builds the toolbar.
+      function charForRef(ref, vocabEntry) {
+        for (const [ch, r] of Object.entries(D.legend)) if (r === ref) return ch;
+        for (const [ch, r] of Object.entries(legendAdds)) if (r === ref) return ch;
+        const ch = mintChar();
+        legendAdds[ch] = ref; vocabAdds[ch] = vocabEntry; blobChars.add(ch);
+        return ch;
+      }
+      function prepareBlobsets() {
+        const legacyRoad = Object.keys(D.vocab).filter((ch) => (D.vocab[ch] || {}).road);
+        for (const set of (D.blobsets || [])) {
+          const prefix = set.atlas || ATLAS_NAME;
+          const isRoad = set.id === "road";
+          set._charByBitmask = {}; set._memberChars = new Set();
+          for (let bm = 0; bm < 16; bm++) {
+            const idx = set.tiles[bm] ?? set.tiles[String(bm)];
+            if (idx == null) continue;
+            const ref = prefix + ":" + idx;
+            const ch = charForRef(ref, {
+              role: `${set.id}-${bm}`, blocked: !!set.blocked, sightBlocked: !!set.blocked,
+              road: isRoad, minimapColor: sampleColor(ref),
+            });
+            set._charByBitmask[bm] = ch; set._memberChars.add(ch);
+          }
+          set._fillChar = set._charByBitmask[set.paintBitmask ?? 15] ?? set._charByBitmask[15];
+          set._connectChars = new Set([...set._memberChars, ...(isRoad ? legacyRoad : [])]);
+        }
       }
       function partAt(x, y) { if (!inBounds(x, y)) return null; for (const p of activePartList) if (p.memberOf(x, y)) return p; return null; }
       function paintPart(p, x, y) { applyChar(x, y, p.fill); reflowAround(x, y); p.afterPaint?.(x, y); }
@@ -654,14 +707,22 @@
       for (const id of ["optCol", "optTrees", "optGrid"]) $(id).onchange = draw;
 
       $("save").onclick = async () => {
-        if (!overrides.size && !Object.keys(legendAdds).length) { $("status").textContent = "Nothing to save."; return; }
-        $("status").textContent = "Saving + rebuilding stage…";
         const cells = [...overrides.entries()].map(([k, v]) => { const [x, y] = k.split(",").map(Number); return { x, y, char: v.char, ref: v.ref, blocked: v.blocked, rot: v.rot || 0 }; });
-        const res = await fetch("/editor/api/save?stage=" + encodeURIComponent(stageName), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cells, legendAdds, vocabAdds }) }).then((r) => r.json());
+        // Persist legend/vocab adds, but drop blob tiles that were never actually painted —
+        // otherwise every load would bloat the stage legend with all 16 road variants.
+        const used = new Set(cells.map((c) => c.char));
+        const legendAddsOut = {}, vocabAddsOut = {};
+        for (const ch of Object.keys(legendAdds)) {
+          if (blobChars.has(ch) && !used.has(ch)) continue;
+          legendAddsOut[ch] = legendAdds[ch]; if (vocabAdds[ch]) vocabAddsOut[ch] = vocabAdds[ch];
+        }
+        if (!cells.length && !Object.keys(legendAddsOut).length) { $("status").textContent = "Nothing to save."; return; }
+        $("status").textContent = "Saving + rebuilding stage…";
+        const res = await fetch("/editor/api/save?stage=" + encodeURIComponent(stageName), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cells, legendAdds: legendAddsOut, vocabAdds: vocabAddsOut }) }).then((r) => r.json());
         if (res.ok) {
           // fold saved edits into base so display stays correct, clear pending
           for (const [k, v] of overrides) { const [x, y] = k.split(",").map(Number); D.ascii[y] = D.ascii[y].slice(0, x) + v.char + D.ascii[y].slice(x + 1); D.base[y][x] = v.ref; if (D.fringe) D.fringe[y][x] = null; if (v.rot) D.rotations[k] = v.rot; else delete D.rotations[k]; }
-          Object.assign(D.legend, legendAdds); Object.assign(D.vocab, vocabAdds);
+          Object.assign(D.legend, legendAddsOut); Object.assign(D.vocab, vocabAddsOut);
           overrides.clear(); undoStack.length = 0;
           $("status").textContent = `Saved ${cells.length} cell(s) + rebuilt. Switch to the game tab — it hot-reloads.`;
         } else {
@@ -671,7 +732,20 @@
 
       window.addEventListener("resize", resize);
       new ResizeObserver(resize).observe($("stage"));
+
+      // Test seam: gated behind ?__test so it is inert in normal use. Exposes the few
+      // internals an e2e spec needs to drive autotiling deterministically (no canvas
+      // pixel math). See tests/e2e/editor-autotile.spec.ts.
+      if (new URLSearchParams(location.search).has("__test")) {
+        window.__ed = {
+          loadStage, draw,
+          parts: () => activePartList,
+          paint: (part, x, y) => paintPart(part, x, y),
+          charAt: (x, y) => charAt(x, y),
+          stage: () => stageName,
+        };
+      }
       boot();
-    </script>
+</script>
   </body>
 </html>
