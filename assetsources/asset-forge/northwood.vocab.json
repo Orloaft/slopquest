@@ -178,6 +178,27 @@
       "sightBlocked": false,
       "road": false,
       "minimapColor": "#757918"
+    },
+    "c": {
+      "role": "cliff-wall-cap",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
+    },
+    "v": {
+      "role": "cliff-wall-mid",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
+    },
+    "b": {
+      "role": "cliff-wall-foot",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#705c2b"
     }
   }
 }
