@@ -20,14 +20,14 @@
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#462e33"
+      "minimapColor": "#253027"
     },
     "4": {
       "role": "swamp-water",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#462e33"
+      "minimapColor": "#273027"
     },
     "W": {
       "role": "swamp-water",
@@ -48,56 +48,56 @@
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#3d2a22"
+      "minimapColor": "#4d4631"
     },
     "B": {
       "role": "swamp-bridge",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#5a3e26"
+      "minimapColor": "#473b23"
     },
     "o": {
       "role": "marsh-rock",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#462e33"
+      "minimapColor": "#3a2924"
     },
     "*": {
       "role": "marsh-rock",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#462e33"
+      "minimapColor": "#392823"
     },
     "n": {
       "role": "marsh-rock",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#462e33"
+      "minimapColor": "#392823"
     },
     "O": {
       "role": "marsh-rock",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#462e33"
+      "minimapColor": "#3a2924"
     },
     "M": {
       "role": "portal-marsh-exit",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#412e31"
+      "minimapColor": "#462e33"
     },
     "L": {
       "role": "portal-ledge",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#452d31"
+      "minimapColor": "#483732"
     }
   }
 }

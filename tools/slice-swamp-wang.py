@@ -54,7 +54,9 @@ def make_tileable(im, band=8):  # cross-fade opposite edges so the tile repeats 
 # base tiles (Alex-vetted coords from main.ts floor-5 picks)
 LICHEN = make_tileable(fillkeyed(grab(18, 256, 68, 68, 1.35)))   # purple2 violet cobble-moss
 WATER  = make_tileable(fillkeyed(grab(1041, 102, 74, 71, 1.2)))  # swamp water
-DIRT   = make_tileable(fillkeyed(grab(252, 261, 68, 72, 1.15)))  # warm brown-dirt trail
+# 'k' land trails -> muddy marsh soil (sheet ground tile @252,178), desaturated so it
+# reads as worn marsh ground that blends in, NOT a tan boardwalk (was 252,261 maroon).
+DIRT   = make_tileable(fillkeyed(grab(252, 178, 69, 73, 0.95)))  # muddy swamp soil
 
 def hashf(x, y):
     h = (x * 374761393 + y * 668265263) & 0xffffffff
@@ -82,25 +84,19 @@ def make_wang(land, over, feather, jit):
     return a
 
 LICHEN.save("assetsources/curated/sliced/swamp-lichen-base.png")
-make_wang(LICHEN, WATER, 0.16, 0.12).save("assetsources/curated/sliced/swamp-water-wang.png")
-make_wang(LICHEN, DIRT, 0.12, 0.10).save("assetsources/curated/sliced/swamp-path-wang.png")
+# jit slashed 0.12 -> 0.03: kills the gritty per-pixel speckle on the banks so the
+# big water reads as smooth open pools with clean corner-blended shores (2A).
+make_wang(LICHEN, WATER, 0.16, 0.03).save("assetsources/curated/sliced/swamp-water-wang.png")
+# soil feathers softly into lichen (wider feather, low jit) -> blended muddy ground.
+make_wang(LICHEN, DIRT, 0.14, 0.04).save("assetsources/curated/sliced/swamp-path-wang.png")
 
 # rock = darkened purple stone-moss
 rock = make_tileable(fillkeyed(grab(97, 177, 68, 68, 1.1)))
 ra = np.asarray(rock.convert("RGB")).astype(float) * 0.78
 Image.fromarray(ra.clip(0, 255).astype('uint8')).save("assetsources/curated/sliced/swamp-rock.png")
 
-# plank = synth weathered horizontal planks
-import math
-pl = Image.new("RGBA", (32, 32)); px = pl.load()
-for y in range(32):
-    row = y // 6
-    base = (96, 66, 40) if row % 2 == 0 else (104, 72, 44)
-    for x in range(32):
-        n = int(8 * math.sin(x * 0.7 + row))
-        r, g, b = base
-        if y % 6 == 0:  # dark groove between planks
-            r, g, b = int(r * 0.5), int(g * 0.5), int(b * 0.5)
-        px[x, y] = (max(0, min(255, r + n)), max(0, min(255, g + n)), max(0, min(255, b + n)), 255)
-pl.save("assetsources/curated/sliced/swamp-plank.png")
+# plank = REAL weathered wood-plank bridge from the sheet (ground tile @173,261),
+# replacing the old synthesized orange planks. 'B' cells are genuine bridges spanning
+# water channels (e.g. 4BBB4), so this is the "proper bridge from the swamp tileset".
+make_tileable(fillkeyed(grab(173, 261, 71, 72, 1.05))).save("assetsources/curated/sliced/swamp-plank.png")
 print("wrote swamp lichen-base / water-wang / path-wang / rock / plank")
