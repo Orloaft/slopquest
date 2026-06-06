@@ -125,7 +125,10 @@ function buildDecoCatalog(stage: any): Array<{ value: string; label: string; url
 // it for the editor only and must be kept in sync if those frames move. The
 // sheets are magenta-keyed; the editor strips the chroma key client-side
 // (mirrors chromaKeyMagenta() in main.ts) so the markers read as clean sprites.
-interface SpriteIcon { url: string; sx: number; sy: number; sw: number; sh: number }
+// sx/sy/sw/sh omitted ⇒ use the whole image (standalone prop PNGs). `tint` is a
+// hex colour multiplied over the art (deeper-ore veins). `chroma:false` skips the
+// magenta key for art that is already transparent (the herb PNGs).
+interface SpriteIcon { url: string; sx?: number; sy?: number; sw?: number; sh?: number; tint?: string; chroma?: boolean }
 
 // Families whose walk sheets share one layout. Mirrors WOODLAND_BESPOKE_FAMILIES
 // + the new-enemies montage in src/main.ts createActorFrames.
@@ -186,6 +189,37 @@ const TREE_ICON_BY_TEXTURE: Record<string, SpriteIcon> = {
   spriteTree: { url: "/northwood-trees-v1.png", sx: 35,  sy: 55, sw: 355, sh: 385 },
   spritePine: { url: "/northwood-trees-v1.png", sx: 455, sy: 50, sw: 220, sh: 390 },
 };
+
+// Ore-vein icons off /ore-rock-gathering-nodes.png. copper/tin/iron have bespoke
+// crops; deeper ores reuse the copper crop with a multiply tint — mirrors
+// ORE_VEIN_TEXTURES / ORE_VEIN_TINTS + createMiningNodeView in src/main.ts.
+const ORE_SHEET = "/ore-rock-gathering-nodes.png";
+const ORE_VEIN_CROP: Record<string, { sx: number; sy: number }> = {
+  copper: { sx: 193, sy: 107 }, tin: { sx: 193, sy: 190 }, iron: { sx: 193, sy: 273 },
+};
+const ORE_VEIN_TINT: Record<string, string> = {
+  coal: "#4a4a52", silver: "#c8cdd4", gold: "#d4af37", mithril: "#4a6fa5", adamant: "#3f7d5a",
+};
+function oreIcon(kind: string): SpriteIcon {
+  const crop = ORE_VEIN_CROP[kind] ?? ORE_VEIN_CROP.copper!;
+  const icon: SpriteIcon = { url: ORE_SHEET, sx: crop.sx, sy: crop.sy, sw: 123, sh: 66 };
+  const tint = ORE_VEIN_TINT[kind];
+  if (tint) icon.tint = tint;
+  return icon;
+}
+
+// Herb-node icons mirror createHerbNodeView in src/main.ts: mushroom-labelled and
+// quartz (mineral) nodes are procedural with no sprite (the editor keeps a ring);
+// any leveled herb shows the mire-lotus crop; "tidal" → herb-tidal; the rest →
+// herb-bloom. The bloom/field per-node hash variety collapses to bloom here.
+function herbIcon(label: string, requiredLevel: number): SpriteIcon | null {
+  const l = (label ?? "").toLowerCase();
+  if (l.includes("mushroom")) return null;
+  if (requiredLevel > 0) return { url: "/swamp-tiles.png", sx: 820, sy: 388, sw: 38, sh: 36 };
+  if (l.includes("tidal")) return { url: "/herb-tidal.png", chroma: false };
+  if (l.includes("quartz")) return null;
+  return { url: "/herb-bloom.png", chroma: false };
+}
 
 // --- Editor "Layers" feature -------------------------------------------------
 // Each editable region maps to a runtime FLOOR number + a spawn ZONE id. The
@@ -548,7 +582,7 @@ function editorApi(): Plugin {
                 if (n.requiredLevel != null) fields.requiredLevel = n.requiredLevel;
                 if (n.xp != null) fields.xp = n.xp;
                 const tag = [n.requiredLevel != null ? `L${n.requiredLevel}` : null, n.xp != null ? `${n.xp}xp` : null].filter(Boolean).join(" · ");
-                seenHerb.set(lbl, { value: lbl, label: tag ? `${lbl} (${tag})` : lbl, fields });
+                seenHerb.set(lbl, { value: lbl, label: tag ? `${lbl} (${tag})` : lbl, fields, icon: herbIcon(lbl, n.requiredLevel ?? 0) });
               }
             }
             herbTypes = [...seenHerb.values()];
@@ -593,6 +627,7 @@ function editorApi(): Plugin {
             monsterTypes,
             ore: editorOre,
             oreKinds,
+            oreIcons: Object.fromEntries(oreKinds.map((k) => [k, oreIcon(k)])),
             herb: editorHerb,
             herbTypes,
             tree: editorTrees,
