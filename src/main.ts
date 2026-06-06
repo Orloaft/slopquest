@@ -29,7 +29,7 @@ import {
   xpForLevel
 } from "./shared.ts";
 import type { ClassSpec } from "./shared.ts";
-import { NORTHWOOD_STAGE, WAYSTONE_STAGE, SWAMP_STAGE, type GeneratedStage } from "./generated/stages/index.ts";
+import { NORTHWOOD_STAGE, WAYSTONE_STAGE, SWAMP_STAGE, ROUTE_STAGE, type GeneratedStage } from "./generated/stages/index.ts";
 import { MAP_OBJECTS, isCutawayBuilding, isInsideCutawayBuilding } from "./map-objects.ts";
 import { setTrack, unlockAudio, setMusicEnabled, currentTrack } from "./audio.ts";
 import { normalizeServerMessage, type WireServerMessage } from "./wire.ts";
@@ -7172,7 +7172,7 @@ const TILE_UNDERLAY_TEXTURE: Record<string, string> = {
     "?": "tileOcean"
 };
 
-const GENERATED_STAGES: GeneratedStage[] = [NORTHWOOD_STAGE, WAYSTONE_STAGE, SWAMP_STAGE];
+const GENERATED_STAGES: GeneratedStage[] = [NORTHWOOD_STAGE, WAYSTONE_STAGE, SWAMP_STAGE, ROUTE_STAGE];
 const GENERATED_STAGES_BY_FLOOR = new Map<number, GeneratedStage>(GENERATED_STAGES.map((stage) => [stage.floor, stage]));
 
 function generatedTilesetTextureKey(stage: GeneratedStage, tilesetName: string): string {

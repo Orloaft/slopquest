@@ -148,6 +148,21 @@ monsters:
   - { type: crypt_sentinel,   at: { floor: 10, x: 51, y: 55 }, zone: deepMine }
   - { type: verdant_faultwarden, at: { floor: 9, x: 85, y: 44 }, zone: jungle }
 
+  # The Waystone Trail (Route 1, floor 11): the gentle on-ramp between Waystone
+  # and Northwood. Only the level 1-5 starter critters, clustered in the two grass
+  # "encounter clearings" beside the trail (south clearing ~x50,y52; north
+  # clearing ~x58,y16) so a fresh player can warm up before Northwood's real foes.
+  - { type: reach_hen,     at: { floor: 11, x: 50, y: 51 }, zone: route }
+  - { type: reach_hen,     at: { floor: 11, x: 53, y: 53 }, zone: route }
+  - { type: reach_hen,     at: { floor: 11, x: 47, y: 54 }, zone: route }
+  - { type: meadow_hopper, at: { floor: 11, x: 54, y: 49 }, zone: route }
+  - { type: meadow_hopper, at: { floor: 11, x: 48, y: 50 }, zone: route }
+  - { type: reach_vole,    at: { floor: 11, x: 52, y: 56 }, zone: route }
+  - { type: reach_hen,     at: { floor: 11, x: 59, y: 15 }, zone: route }
+  - { type: meadow_hopper, at: { floor: 11, x: 56, y: 18 }, zone: route }
+  - { type: reach_vole,    at: { floor: 11, x: 61, y: 17 }, zone: route }
+  - { type: rat,           at: { floor: 11, x: 57, y: 13 }, zone: route }
+
 trees:
   - { type: oak,  at: { floor: 0, x: 25.1, y: 57.0 } }
   - { type: oak,  at: { floor: 0, x: 93.5, y: 60.6 } }

@@ -239,7 +239,8 @@ const STAGE_META: Record<string, { floor: number; zone: string }> = {
   desert: { floor: 7, zone: "desert" },
   beach: { floor: 8, zone: "beach" },
   jungle: { floor: 9, zone: "jungle" },
-  deepmine: { floor: 10, zone: "deepMine" }
+  deepmine: { floor: 10, zone: "deepMine" },
+  route: { floor: 11, zone: "route" }
 };
 
 const SPAWN_OVERLAY_FILE = "content/spawns.editor.yaml";

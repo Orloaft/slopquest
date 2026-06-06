@@ -16,7 +16,7 @@
         "properties": {
           "type": { "type": "string" },
           "at": { "$ref": "#/$defs/tile" },
-          "zone": { "enum": ["southTown", "cemetery", "crypt", "woods", "northTown"] }
+          "zone": { "enum": ["southTown", "cemetery", "crypt", "woods", "northTown", "route"] }
         }
       }
     },

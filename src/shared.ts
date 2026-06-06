@@ -7,7 +7,7 @@ import {
   buildingInteriorBounds,
   isCutawayBuilding
 } from "./map-objects.ts";
-import { NORTHWOOD_STAGE, SWAMP_STAGE } from "./generated/stages/index.ts";
+import { NORTHWOOD_STAGE, SWAMP_STAGE, ROUTE_STAGE } from "./generated/stages/index.ts";
 import { PORTALS } from "./generated/catalog.ts";
 
 export {
@@ -63,11 +63,12 @@ const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
   7: ENLARGED,
   8: ENLARGED,
   9: ENLARGED,
-  10: EXPANDED // Deepdelve Mine (cave floor reached from the Searing Badlands)
+  10: EXPANDED, // Deepdelve Mine (cave floor reached from the Searing Badlands)
+  11: ENLARGED // The Waystone Trail (Route 1) — generated stage between Waystone and Northwood
 };
 // Floors authored directly at the expanded size (their content is already
 // placed in expanded coordinates, so it must NOT be scaled again).
-const AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+const AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
 const SWAMP_WATER_TILES = new Set(["W", "3", "4"]);
 const NORTHWOOD_WATER_TILES = new Set(["~", "!", "?", "=", "{", "}", "(", ")", "/", "P", "w", "Q", "V", "U", "x", "0", "J"]);
 const SWAMP_LAND_TILES = new Set(["m", "k", "B", "M", "L", "o"]);
@@ -171,7 +172,8 @@ export const ZONES: Record<ZoneId, Zone> = {
   desert: { id: "desert", label: "The Sunken Desert", floor: 7, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   beach: { id: "beach", label: "The Sunken Beach", floor: 8, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   jungle: { id: "jungle", label: "The Untamed Jungle", floor: 9, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
-  deepMine: { id: "deepMine", label: "The Deepdelve Mine", floor: 10, x1: 0, y1: 0, x2: floorCols(10) - 1, y2: floorRows(10) - 1 }
+  deepMine: { id: "deepMine", label: "The Deepdelve Mine", floor: 10, x1: 0, y1: 0, x2: floorCols(10) - 1, y2: floorRows(10) - 1 },
+  route: { id: "route", label: "The Waystone Trail", floor: 11, x1: 0, y1: 0, x2: floorCols(11) - 1, y2: floorRows(11) - 1 }
 };
 const FLOOR_TILE_CACHE = new Map<number, string[]>();
 
@@ -268,6 +270,13 @@ export function makeFloorTiles(floor: number): string[] {
   // hand-authored geometry); the legacy floor===5 fillRect block below is dead.
   if (floor === SWAMP_STAGE.floor) {
     const generated = [...SWAMP_STAGE.rows];
+    FLOOR_TILE_CACHE.set(floor, generated);
+    return generated;
+  }
+
+  // Floor 11 (The Waystone Trail / Route 1) is a generated stage like Northwood.
+  if (floor === ROUTE_STAGE.floor) {
+    const generated = [...ROUTE_STAGE.rows];
     FLOOR_TILE_CACHE.set(floor, generated);
     return generated;
   }
@@ -1009,7 +1018,8 @@ const FLOOR_EDGE: Record<number, string> = {
   6: "X", // The Searing Badlands — cliff walls
   7: "X", // The Sunken Desert — sandstone walls
   8: "I", // The Sunken Beach — open sea
-  9: "E" // The Untamed Jungle — impassable canopy
+  9: "E", // The Untamed Jungle — impassable canopy
+  11: "f" // The Waystone Trail — framed by treeline
 };
 
 // Door/portal/landmark tiles that must stay walkable even if a building
@@ -1399,12 +1409,14 @@ function portalForRaw(floor: number, x: number, y: number): Portal | null {
   const tx = Math.floor(x);
   const ty = Math.floor(y);
   const tile = tileAt(floor, tx, ty);
-  if (floor === 0 && tile === "N") return { floor: 3, x: 55.5, y: 68.5 };
+  if (floor === 0 && tile === "N") return { floor: 11, x: 55.5, y: 69.5 }; // north into the Waystone Trail (Route 1)
   if (floor === 0 && tile === "S") return { floor: 1, x: 55.5, y: 2.5 }; // arrive just inside the cemetery's north gate
   if (floor === 1 && tile === "T") return { floor: 0, x: 64.5, y: 66.5 }; // arrive at Waystone's south gate
   if (floor === 1 && tile === "C") return { floor: 2, x: 9.5, y: 7.5 }; // arrive in the crypt's entry chamber
   if (floor === 2 && tile === "T") return { floor: 1, x: 56.5, y: 37.5 }; // arrive on the cemetery's crypt-entrance apron
-  if (floor === 3 && tile === "S") return { floor: 0, x: 37.5, y: 4.5 }; // arrive on Waystone's north-gate lane
+  if (floor === 3 && tile === "S") return { floor: 11, x: 55.5, y: 2.5 }; // south into the Waystone Trail (Route 1) north gate
+  if (floor === 11 && tile === "S") return { floor: 0, x: 37.5, y: 4.5 }; // Route 1 south gate -> Waystone's north-gate lane
+  if (floor === 11 && tile === "N") return { floor: 3, x: 55.5, y: 68.5 }; // Route 1 north gate -> Northwood's south gate
   if (floor === 3 && tile === "N") return { floor: 4, x: 55.5, y: 60.5 }; // arrive at Northwatch's south gate
   if (floor === 3 && tile === "M") return { floor: 5, x: 59.5, y: 19.5 };
   if (floor === 4 && tile === "S") return { floor: 3, x: 55.5, y: 2.5 };

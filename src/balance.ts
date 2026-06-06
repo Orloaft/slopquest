@@ -91,6 +91,7 @@ export function monsterCombatLevel(monster: Monster): number {
 // which is future content. deepMine's entry chambers carry over the badlands
 // pack/burrower (L32-35) as the soft mouth, climbing to L53 in the deeps.
 export const ZONE_LEVEL_BANDS: Record<string, [number, number]> = {
+  route: [1, 5], // The Waystone Trail — the starter on-ramp before Northwood
   woods: [1, 25],
   cemetery: [11, 28],
   crypt: [11, 21],

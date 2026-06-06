@@ -1,0 +1,330 @@
+{
+  "schema": "asset-forge/tileset@1",
+  "name": "forest",
+  "image": "forest.png",
+  "tileSize": 32,
+  "columns": 24,
+  "rows": 3,
+  "tiles": [
+    {
+      "index": 0,
+      "role": "forest-border-canopy",
+      "blocked": true
+    },
+    {
+      "index": 1,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 2,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 3,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 4,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 5,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 6,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 7,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 8,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 9,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 10,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 11,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 12,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 13,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 14,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 15,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 16,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 17,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 18,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 19,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 20,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 21,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 22,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 23,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 24,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 25,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 26,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 27,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 28,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 29,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 30,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 31,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 32,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 33,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 34,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 35,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 36,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 37,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 38,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 39,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 40,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 41,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 42,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 43,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 44,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 45,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 46,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 47,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 48,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 49,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 50,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 51,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 52,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 53,
+      "role": "deep-water",
+      "blocked": true
+    },
+    {
+      "index": 54,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 55,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 56,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 57,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 58,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 59,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 60,
+      "role": "forest-floor",
+      "blocked": false
+    },
+    {
+      "index": 61,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 62,
+      "role": "packed-road",
+      "blocked": false
+    },
+    {
+      "index": 63,
+      "role": "packed-road",
+      "blocked": false
+    }
+  ]
+}

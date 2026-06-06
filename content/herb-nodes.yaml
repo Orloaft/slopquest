@@ -191,3 +191,14 @@
   label: Faultroot
   requiredLevel: 15
   xp: 42
+
+# The Waystone Trail (Route 1, floor 11): a couple of beginner Forest Herbs in the
+# trailside clearings — the player's first foraging before Northwood's glades.
+- id: herb-11-47-50
+  at: { floor: 11, x: 47.5, y: 50.5 }
+  approach: { x: 48.5, y: 50.5 }
+  label: Forest Herbs
+- id: herb-11-60-15
+  at: { floor: 11, x: 60.5, y: 15.5 }
+  approach: { x: 60.5, y: 16.5 }
+  label: Forest Herbs

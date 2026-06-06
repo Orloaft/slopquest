@@ -1,0 +1,86 @@
+{
+  "zone": "route",
+  "floor": 11,
+  "stageName": "route",
+  "description": "The Waystone Trail (Route 1): a procedurally-laid green corridor between Waystone and Northwood; trees/props are runtime sprite objects.",
+  "requiredPortals": {
+    "S": {
+      "x": 55,
+      "y": 70,
+      "to": "Waystone"
+    },
+    "N": {
+      "x": 55,
+      "y": 1,
+      "to": "Northwood"
+    }
+  },
+  "requiredWalkable": [
+    {
+      "x": 55,
+      "y": 69,
+      "label": "south gate approach"
+    },
+    {
+      "x": 55,
+      "y": 2,
+      "label": "north gate approach"
+    },
+    {
+      "x": 63,
+      "y": 33,
+      "label": "stream ford"
+    }
+  ],
+  "chars": {
+    "F": {
+      "role": "forest-floor",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#6a901c"
+    },
+    "~": {
+      "role": "deep-water",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#087696"
+    },
+    "t": {
+      "role": "packed-road",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": true,
+      "minimapColor": "#aa932a"
+    },
+    "^": {
+      "role": "forest-border-canopy",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#1a2a3a"
+    },
+    "y": {
+      "role": "tree-trunk",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#6a901c"
+    },
+    "S": {
+      "role": "portal-south",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e7d37c"
+    },
+    "N": {
+      "role": "portal-north",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false,
+      "minimapColor": "#e7d37c"
+    }
+  }
+}
