@@ -1233,38 +1233,65 @@ function create(this: Phaser.Scene): void {
       this.textures.get("searingCliffBench").setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
   }
-  // Teal canyon river ('5', floor 6). Procedural so it needs no asset and stays tunable:
-  // a teal base with deterministic ripple streaks and a lighter feathered edge so banks
-  // read as shallow foam against the rock. Water blocks movement, not sight.
+  // Teal canyon river ('5', floor 6). Procedural so it needs no asset and stays tunable.
+  // The INTERIOR tile is seamless: a teal base with smooth horizontal wave bands whose
+  // period divides TILE_SIZE, so neighbouring river cells tile into one continuous body of
+  // water (no per-tile grid). Shore foam is NOT baked into the base — it would border every
+  // cell and re-create the grid. Instead the four directional foam overlays below are drawn
+  // only on the sides of a river cell that face land (createMapChunk), so the river laps its
+  // banks like the blended water in the other stages (Pokémon/Chrono-Trigger shoreline).
+  // Water blocks movement, not sight.
   {
     const water = document.createElement("canvas");
     water.width = TILE_SIZE;
     water.height = TILE_SIZE;
     const wc = water.getContext("2d");
     if (wc) {
-      wc.fillStyle = "#2f97a3";
+      wc.fillStyle = "#2b8f9c";
       wc.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-      // ripple streaks (sine-driven, deterministic) — lighter teal highlights.
+      // Seamless wave bands: two full sine periods per tile (period = TILE_SIZE/2) so the
+      // crest/trough lines line up across cell boundaries instead of repeating a boxed motif.
       for (let y = 0; y < TILE_SIZE; y += 1) {
-        const t = Math.sin(y * 0.8) * Math.sin(y * 0.27 + 1.3);
-        if (t > 0.55) {
-          wc.fillStyle = `rgba(120,214,214,${0.10 + (t - 0.55) * 0.5})`;
+        const t = Math.sin((y / TILE_SIZE) * Math.PI * 4);
+        if (t > 0.45) {
+          wc.fillStyle = `rgba(126,216,216,${0.08 + (t - 0.45) * 0.22})`; // lit crest highlight
+          wc.fillRect(0, y, TILE_SIZE, 1);
+        } else if (t < -0.6) {
+          wc.fillStyle = `rgba(16,84,94,${0.10 + (-t - 0.6) * 0.20})`;     // shadowed trough -> depth
           wc.fillRect(0, y, TILE_SIZE, 1);
         }
-      }
-      // lighter feathered edge (shore foam) on all four sides.
-      const edge = 4;
-      for (let d = 0; d < edge; d += 1) {
-        const a = (1 - d / edge) * 0.5;
-        wc.fillStyle = `rgba(150,224,222,${a})`;
-        wc.fillRect(d, d, TILE_SIZE - 2 * d, 1);
-        wc.fillRect(d, TILE_SIZE - 1 - d, TILE_SIZE - 2 * d, 1);
-        wc.fillRect(d, d, 1, TILE_SIZE - 2 * d);
-        wc.fillRect(TILE_SIZE - 1 - d, d, 1, TILE_SIZE - 2 * d);
       }
       this.textures.addCanvas("searingRiver", water);
       this.textures.get("searingRiver").setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
+  }
+  // Directional shore-foam overlays for the canyon river ('5'). Each is transparent except a
+  // light-teal foam band hugging ONE edge and fading inward; createMapChunk stamps the N/S/E/W
+  // variant onto a river cell only on the sides facing a non-water neighbour, so foam tracks
+  // the actual coastline and convex corners wrap naturally where two edges meet.
+  {
+    const FOAM_DEPTH = 7;
+    const makeFoam = (key: string, side: "N" | "S" | "E" | "W") => {
+      const c = document.createElement("canvas");
+      c.width = TILE_SIZE;
+      c.height = TILE_SIZE;
+      const ctx = c.getContext("2d");
+      if (!ctx) return;
+      for (let d = 0; d < FOAM_DEPTH; d += 1) {
+        const a = (1 - d / FOAM_DEPTH) * 0.6; // brightest crest at the waterline, feathering in
+        ctx.fillStyle = `rgba(180,236,232,${a})`;
+        if (side === "N") ctx.fillRect(0, d, TILE_SIZE, 1);
+        else if (side === "S") ctx.fillRect(0, TILE_SIZE - 1 - d, TILE_SIZE, 1);
+        else if (side === "W") ctx.fillRect(d, 0, 1, TILE_SIZE);
+        else ctx.fillRect(TILE_SIZE - 1 - d, 0, 1, TILE_SIZE);
+      }
+      this.textures.addCanvas(key, c);
+      this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    };
+    makeFoam("searingRiverFoamN", "N");
+    makeFoam("searingRiverFoamS", "S");
+    makeFoam("searingRiverFoamE", "E");
+    makeFoam("searingRiverFoamW", "W");
   }
   makeSpriteTexture(this, "badlandsTiles", "spriteTent", 1070, 873, 92, 72);
   makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsLedge", 20, 862, 72, 86);
@@ -2061,6 +2088,26 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
           if (face.foot && y + 1 < tileBottom) {
             texture.draw("searingCliffAO", (x - tileX) * TILE_SIZE, (y + 1 - tileY) * TILE_SIZE);
           }
+        }
+      }
+    }
+    // Canyon river shore foam (floor 6): the base '5' tile is seamless, so a body of water
+    // reads as one continuous teal surface. Here we lap foam onto each river cell only on the
+    // sides that face a non-water neighbour (rock bank, canyon floor, plank bridge) — the blend
+    // the other stages get from their autotiled water. Per-cell + reads the full map grid, so
+    // foam stays correct across chunk seams. Collision is untouched (still tile-based on '5').
+    if (state.floor === 6) {
+      const isRiver = (cx: number, cy: number): boolean => state.rows[cy]?.[cx] === "5";
+      for (let y = tileY; y < tileBottom; y += 1) {
+        if (state.rows[y] === undefined) continue;
+        for (let x = tileX; x < tileRight; x += 1) {
+          if (state.rows[y]?.[x] !== "5") continue;
+          const px = (x - tileX) * TILE_SIZE;
+          const py = (y - tileY) * TILE_SIZE;
+          if (!isRiver(x, y - 1)) texture.draw("searingRiverFoamN", px, py);
+          if (!isRiver(x, y + 1)) texture.draw("searingRiverFoamS", px, py);
+          if (!isRiver(x - 1, y)) texture.draw("searingRiverFoamW", px, py);
+          if (!isRiver(x + 1, y)) texture.draw("searingRiverFoamE", px, py);
         }
       }
     }
