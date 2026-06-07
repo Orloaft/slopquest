@@ -171,7 +171,7 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     // central plaza; NPCs in npcs.yaml stand on the lanes just outside these
     // footprints. Anchors are bottom-centre tile coords in 90x60 space.
     { key: "spriteWell", x: 56.8, y: 31.8, w: 94, h: 132 }, // plaza well (north edge of plaza)
-    { key: "spriteMarket", x: 77, y: 33, w: 188, h: 84 }, // market on the east apron
+    { key: "spriteMarket", x: 77, y: 33, w: 188, h: 78 }, // market on the east apron
     { key: "spriteRedHouse", x: 44.6, y: 27.6, w: 238, h: 176 }, // NW of plaza
     { key: "spriteBlueHouse", x: 61.7, y: 26.4, w: 250, h: 180 }, // N of plaza
     { key: "spriteGreenHouse", x: 33, y: 26.4, w: 142, h: 178 }, // riverside district (west)
@@ -185,7 +185,7 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteBarrels", x: 42.5, y: 37.4, w: 58, h: 46 },
     { key: "spriteTree", x: 23, y: 57.2, w: 70, h: 90 }, // shade trees in the open meadow
     { key: "spriteTree", x: 93.1, y: 60.5, w: 62, h: 80 },
-    { key: "spritePine", x: 27.1, y: 16.3, w: 54, h: 84 },
+    { key: "spritePine", x: 27.1, y: 16.3, w: 54, h: 78 },
     { key: "spritePine", x: 95.6, y: 17.5, w: 54, h: 84 }
   ],
   1: [
@@ -431,15 +431,23 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     // sit on the authored sand/path pockets and leave the portal lanes clear.
     // Ledger-driven terrain overlays: these larger source-sheet pieces break
     // up repeated tile rows while the underlying grid keeps collision exact.
-    { key: "spriteBeachCliffLipA", x: 23.5, y: 25.7, w: 104, h: 74 },
-    { key: "spriteBeachCliffLipB", x: 34.5, y: 25.7, w: 240, h: 74 },
-    { key: "spriteBeachStairsRun4", x: 26.9, y: 27.1, w: 128, h: 82 },
-    { key: "spriteBeachCliffLipA", x: 65.4, y: 28.1, w: 160, h: 74 },
-    { key: "spriteBeachCliffLipB", x: 77.5, y: 28.1, w: 224, h: 74 },
-    { key: "spriteBeachStairsRun4", x: 70.9, y: 29.5, w: 128, h: 82 },
-    { key: "spriteBeachCliffLipB", x: 37.5, y: 42.5, w: 224, h: 74 },
-    { key: "spriteBeachCliffLipA", x: 48.3, y: 42.5, w: 104, h: 74 },
-    { key: "spriteBeachStairsRun4", x: 44, y: 43.9, w: 128, h: 82 },
+    // Cliff-lip + stair overlays, aligned onto the THREE tile ledges drawn by
+    // drawBeachLedge() in shared.ts (faceY = 20 / 22 / 34). Each lip prop sits with its
+    // base at the foot of the 2-row tile face (faceY+2) so the 3D rock front reads as the
+    // raised plateau edge, with a stair run filling the walkable gap. The underlying grid
+    // keeps collision exact; the render pass adds the sun-lip + foot-AO depth cues.
+    // Ledge 1 — NW bluff (top x18-31, faceY 20, stairs cols 20-23)
+    { key: "spriteBeachCliffLipA", x: 19.0, y: 22, w: 72, h: 78 },
+    { key: "spriteBeachStairsRun4", x: 22.0, y: 22, w: 128, h: 66 },
+    { key: "spriteBeachCliffLipB", x: 28.0, y: 22, w: 256, h: 78 },
+    // Ledge 2 — NE headland (top x51-66, faceY 22, stairs cols 56-59)
+    { key: "spriteBeachCliffLipB", x: 53.5, y: 24, w: 160, h: 78 },
+    { key: "spriteBeachStairsRun4", x: 58.0, y: 24, w: 128, h: 66 },
+    { key: "spriteBeachCliffLipB", x: 63.5, y: 24, w: 224, h: 78 },
+    // Ledge 3 — south terrace (top x27-40, faceY 34, stairs cols 34-37)
+    { key: "spriteBeachCliffLipB", x: 30.5, y: 36, w: 224, h: 78 },
+    { key: "spriteBeachStairsRun4", x: 36.0, y: 36, w: 128, h: 66 },
+    { key: "spriteBeachCliffLipA", x: 39.5, y: 36, w: 96, h: 78 },
     { key: "spriteBeachHut", x: 72.7, y: 21.4, w: 116, h: 118 }, // driftwood hut on the high east shelf
     { key: "spriteBeachCave", x: 38.5, y: 30.5, w: 104, h: 102 }, // cliff cave POI
     { key: "spriteBeachRuin", x: 63.1, y: 20.9, w: 84, h: 64 }, // broken arch on the high path (sized to art aspect)

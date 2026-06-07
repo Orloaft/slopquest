@@ -2434,6 +2434,23 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
           }
         }
       }
+      // Plateau read (parity with canyon/northwood): a warm sun-catch RIM LIP on the TOP course of
+      // each cliff face — the x/0/1 cell where the lit ledge top breaks into the drop — plus a soft
+      // lit lift on the ledge-top sand just above it. With the foot-AO shadow below, the ledge tops
+      // now read as raised plateaus instead of walls stranded on flat sand.
+      const FACE = new Set(["x", "0", "1"]);
+      for (let y = tileY; y < tileBottom; y += 1) {
+        if (state.rows[y] === undefined) continue;
+        for (let x = tileX; x < tileRight; x += 1) {
+          const here = state.rows[y]?.[x];
+          if (!here || !FACE.has(here)) continue;
+          const above = state.rows[y - 1]?.[x];
+          if (above && (FACE.has(above) || above === "|")) continue; // only the top course catches the lip
+          const px = (x - tileX) * TILE_SIZE, py = (y - tileY) * TILE_SIZE;
+          texture.draw("searingCliffLip", px, py); // sunlit break at the plateau edge
+          if (above && SAND.has(above)) texture.draw("graveMottleOverlay", px, py - TILE_SIZE, 0.14, 0xfff1d0); // sun-catch on the lip-top sand
+        }
+      }
     }
   } else {
     for (let y = tileY; y < tileBottom; y += 1) {
