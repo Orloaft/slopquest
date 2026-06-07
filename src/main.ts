@@ -1170,6 +1170,65 @@ function create(this: Phaser.Scene): void {
       makeTileTexture(this, "searingCliff", `searingCliffR${row}C${col}`, col * 32, row * 32, 32, 32, 0, true, badlandsRedshift);
   // Vertical flank walls for the E/W mesa edges (rust palette) — replaces the L-shaped col 3/4 look.
   buildCliffFlanks(this, "searing", [255, 157, 136]); // red-shifted rust highlight (was 255,201,128)
+  // De-grid the cliff rock (floor 6): a wide/tall wall — or a cluster of 1-cell massif nubs —
+  // reuses the SAME face/flank sub-tile in every cell, so the rock reads as a row of identical
+  // loaves. Bake a few deterministic variants of each sub-tile (per-tile value jitter + sparse
+  // dark pits / sun-flecks for rock grain); searingCliffFace picks one per cell by position hash,
+  // so neighbouring cells differ and the grid dissolves into sculpted rock. Geometry/alpha are
+  // untouched (no holes punched in contiguous walls), only tone varies — safe on every wall shape.
+  {
+    const bases: string[] = [];
+    for (let row = 0; row < 3; row += 1) for (let col = 0; col < 5; col += 1) bases.push(`searingCliffR${row}C${col}`);
+    bases.push("searingCliffFlankW", "searingCliffFlankE");
+    const bright = [1.0, 0.88, 1.1, 0.82]; // V0 is the unmodified tone so a lone wall still reads true
+    // Flank walls stack vertically and each tile carries the same horizontal ribs, so a tall run
+    // bands every 32px. The flank tile is vertically uniform at its edges (full-height side rim +
+    // rock-side shadow), so we can wrap-roll the rib pattern per variant to offset the bands — a
+    // stacked wall then reads as continuous ribbed rock. Faces keep their ribs (top/base/cap
+    // structure must stay put), relying on tone variation alone.
+    const flankRoll = [0, 8, 17, 25];
+    for (const baseKey of bases) {
+      const isFlank = baseKey.includes("Flank");
+      const src = this.textures.get(baseKey).getSourceImage() as CanvasImageSource;
+      for (let v = 0; v < SEARING_CLIFF_FACE_VARIANTS; v += 1) {
+        const cv = document.createElement("canvas");
+        cv.width = TILE_SIZE;
+        cv.height = TILE_SIZE;
+        const cc = cv.getContext("2d");
+        if (!cc) continue;
+        cc.imageSmoothingEnabled = false;
+        const roll = isFlank ? (flankRoll[v] ?? 0) : 0;
+        cc.drawImage(src, 0, roll);                // shifted copy
+        if (roll) cc.drawImage(src, 0, roll - TILE_SIZE); // wrap the top back in
+        const img = cc.getImageData(0, 0, TILE_SIZE, TILE_SIZE);
+        const d = img.data;
+        const b = bright[v] ?? 1.0;
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i + 3] === 0) continue;
+          d[i] = Math.min(255, Math.round(d[i]! * b));
+          d[i + 1] = Math.min(255, Math.round(d[i + 1]! * b));
+          d[i + 2] = Math.min(255, Math.round(d[i + 2]! * b));
+        }
+        // sparse rock grain — deterministic per (tile, variant) so it never shimmers on rebuild.
+        let seed = (v * 0x9e3779b1) >>> 0;
+        for (let k = 0; k < baseKey.length; k += 1) seed = (Math.imul(seed, 31) + baseKey.charCodeAt(k)) >>> 0;
+        const rnd = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
+        for (let s = 0; s < 9; s += 1) {
+          const px = Math.floor(rnd() * TILE_SIZE), py = Math.floor(rnd() * TILE_SIZE);
+          const i = (py * TILE_SIZE + px) * 4;
+          if (d[i + 3] === 0) continue;
+          if (rnd() < 0.6) { // dark pit
+            d[i] = Math.round(d[i]! * 0.72); d[i + 1] = Math.round(d[i + 1]! * 0.72); d[i + 2] = Math.round(d[i + 2]! * 0.72);
+          } else { // sun fleck
+            d[i] = Math.min(255, d[i]! + 30); d[i + 1] = Math.min(255, d[i + 1]! + 24); d[i + 2] = Math.min(255, d[i + 2]! + 16);
+          }
+        }
+        cc.putImageData(img, 0, 0);
+        this.textures.addCanvas(`${baseKey}V${v}`, cv);
+        this.textures.get(`${baseKey}V${v}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+      }
+    }
+  }
   // Contact-shadow band dropped on the canyon floor directly under each cliff lip,
   // so the foot reads grounded instead of floating (mirrors the baker's wall-foot AO).
   {
@@ -7914,6 +7973,15 @@ function buildCliffFlanks(scene: Phaser.Scene, prefix: string, rim: [number, num
 // shadow on the floor below). Returns null for any cell that should keep its base texture.
 // Collision is untouched — it stays tile-based on 'X'/'w' in shared.ts.
 const SEARING_CLIFF_MAX = 6;
+// Number of baked tone variants per cliff face/flank sub-tile (preload generates `${key}V0..N-1`).
+// Floor 6 picks one per cell by position hash so repeated rock stops reading as a grid of loaves.
+const SEARING_CLIFF_FACE_VARIANTS = 4;
+// Per-cell variant suffix for the canyon cliff sub-tiles. Only floor 6 has the baked variants
+// (the desert prefix on floor 7 keeps its single tone), so this is the empty string elsewhere.
+function searingCliffVariant(floor: number, x: number, y: number): string {
+  if (floor !== 6) return "";
+  return `V${Math.floor(edgeHash(x, y, 41) * SEARING_CLIFF_FACE_VARIANTS)}`;
+}
 // A 'w' massif body or 'X' south-lip both count as the impassable rock bulk; anything
 // else (canyon floor, flora, pit, portal, void) is "open" for cliff-edge purposes.
 function isSearingMassif(c: string | undefined): boolean {
@@ -7942,7 +8010,7 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
     // bench (never the foot or top) so the drop reads as stacked tiers. With the cap
     // at 6 the tallest columns get two benches (3 tiers); 4-5 tall faces get one.
     const bench = total >= 4 && courseFromFoot > 0 && courseFromFoot < total - 1 && courseFromFoot % 2 === 0;
-    return { key: `${reliefPrefix(state.floor)}CliffR${rowKind}C${col}`, foot: courseFromFoot === 0, top: rowKind === 0, bench };
+    return { key: `${reliefPrefix(state.floor)}CliffR${rowKind}C${col}${searingCliffVariant(state.floor, x, y)}`, foot: courseFromFoot === 0, top: rowKind === 0, bench };
   }
   // --- West/east-facing flank: a 'w' tile whose left or right neighbour is open canyon is
   // a vertical corridor wall the south system never touches; it used to fall back to the
@@ -7964,7 +8032,7 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
   // L-shaped concave-corner atlas cells. Bracket the vertical run with a lit rim at its TOP
   // (where it breaks onto the plateau) and a contact shadow at its BASE (foot) so the wall reads
   // with top-down form/recession rather than a flat uniform band.
-  return { key: `${reliefPrefix(state.floor)}CliffFlank${groundLeft ? "W" : "E"}`, foot: !flankBelow, top: !flankAbove, bench: false };
+  return { key: `${reliefPrefix(state.floor)}CliffFlank${groundLeft ? "W" : "E"}${searingCliffVariant(state.floor, x, y)}`, foot: !flankBelow, top: !flankAbove, bench: false };
 }
 
 // Per-floor texture overrides for chars shared across biomes. Floor 1 (cemetery)
