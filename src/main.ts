@@ -1031,6 +1031,7 @@ function create(this: Phaser.Scene): void {
   makeEdgeOverlays(this, "tileGrass", "grassEdge", 0, 0.5);
   makeEdgeOverlays(this, "tileDirt", "dirtEdge", 100, 0.4);
   makeEdgeOverlays(this, "tileStone", "stoneEdge", 200, 0.34);
+  makeGroundDetailDecals(this);
   makeTileTexture(this, "forestTiles", "tileForest", 24, 34, 84, 84);
   makeTileTexture(this, "forestTiles", "tileRock", 1120, 794, 84, 84);
   makeTileTexture(this, "graveyardTiles", "tileGraveDirt", 24, 34, 84, 84);
@@ -2067,6 +2068,7 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
     }
   }
   addGroundEdges(state.rows, texture, tileX, tileY, tileRight, tileBottom);
+  addGroundDetail(state.rows, texture, tileX, tileY, tileRight, tileBottom);
   chunk.add(texture);
   mapLayer.add(chunk);
   return chunk;
@@ -6207,6 +6209,119 @@ function edgeHash(x: number, y: number, salt: number): number {
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   h = (h ^ (h >>> 16)) >>> 0;
   return h / 4294967295;
+}
+
+// Sparse ground-detail decals (flowers, grass tufts, pebbles, flagstone cracks)
+// baked once, then scattered deterministically over the big flat ground fields
+// so the meadow/plaza/paths read with JRPG texture instead of one uniform tile.
+// Palette is tuned to the warm town look; kept tiny (pixel-art, NEAREST).
+const DETAIL_FLOWER_KEYS = ["detailFlower0", "detailFlower1", "detailFlower2", "detailFlower3"];
+const DETAIL_TUFT_KEYS = ["detailTuft0", "detailTuft1"];
+function makeGroundDetailDecals(scene: Phaser.Scene): void {
+  const bake = (key: string, w: number, h: number, draw: (ctx: CanvasRenderingContext2D) => void): void => {
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.imageSmoothingEnabled = false;
+    draw(ctx);
+    scene.textures.addCanvas(key, canvas);
+    scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+  };
+  const px = (ctx: CanvasRenderingContext2D, x: number, y: number, c: string, w = 1, h = 1): void => {
+    ctx.fillStyle = c;
+    ctx.fillRect(x, y, w, h);
+  };
+  // Flower: tiny stem + a 4-petal head with a contrasting centre and a dark
+  // base pixel for definition against the grass.
+  const flower = (petal: string, center: string, dark: string) => (ctx: CanvasRenderingContext2D): void => {
+    px(ctx, 5, 8, "#3f6f2c"); // stem
+    px(ctx, 5, 9, "#3f6f2c");
+    px(ctx, 4, 4, dark, 5, 4); // dark backing for petal silhouette
+    px(ctx, 4, 4, petal, 2, 2); // NW petal
+    px(ctx, 6, 4, petal, 2, 2); // NE petal
+    px(ctx, 4, 6, petal, 2, 2); // SW petal
+    px(ctx, 6, 6, petal, 2, 2); // SE petal
+    px(ctx, 5, 5, center, 2, 2); // centre
+  };
+  bake("detailFlower0", 12, 12, flower("#efe8cf", "#f2c453", "#9c8f63"));
+  bake("detailFlower1", 12, 12, flower("#f2c453", "#c8721f", "#8a6a22"));
+  bake("detailFlower2", 12, 12, flower("#e0897a", "#f2d27a", "#955046"));
+  bake("detailFlower3", 12, 12, flower("#9db4e0", "#efe8cf", "#5d6e98"));
+  // Grass tufts: a few fanned blades, dark base to light tip.
+  bake("detailTuft0", 12, 10, (ctx) => {
+    px(ctx, 3, 9, "#37642a"); px(ctx, 3, 6, "#4c8a32", 1, 3); px(ctx, 3, 5, "#6fb33f");
+    px(ctx, 5, 9, "#37642a"); px(ctx, 5, 5, "#4c8a32", 1, 4); px(ctx, 5, 4, "#7cc24a");
+    px(ctx, 7, 9, "#37642a"); px(ctx, 7, 6, "#4c8a32", 1, 3); px(ctx, 7, 5, "#6fb33f");
+  });
+  bake("detailTuft1", 12, 10, (ctx) => {
+    px(ctx, 4, 9, "#37642a"); px(ctx, 4, 6, "#4c8a32", 1, 3); px(ctx, 4, 5, "#6fb33f");
+    px(ctx, 6, 9, "#2f5824"); px(ctx, 6, 7, "#4c8a32", 1, 2); px(ctx, 6, 6, "#6fb33f");
+  });
+  // Pebbles: a couple of rounded stones, light top / dark underside.
+  bake("detailPebble", 11, 7, (ctx) => {
+    px(ctx, 1, 3, "#6f6a5f"); px(ctx, 1, 2, "#9c968a", 3, 1); px(ctx, 1, 3, "#857f73", 3, 2); px(ctx, 1, 4, "#5c574d", 3, 1);
+    px(ctx, 6, 4, "#6f6a5f"); px(ctx, 6, 3, "#9c968a", 3, 1); px(ctx, 6, 4, "#857f73", 3, 2); px(ctx, 6, 5, "#5c574d", 3, 1);
+  });
+  bake("detailPebbleDirt", 11, 7, (ctx) => {
+    px(ctx, 2, 2, "#a9956f", 3, 1); px(ctx, 2, 3, "#8a774f", 3, 2); px(ctx, 2, 5, "#5f4f33", 3, 1);
+    px(ctx, 6, 4, "#8a774f", 2, 2); px(ctx, 6, 3, "#a9956f", 2, 1);
+  });
+  // Flagstone crack: a faint hairline so the plaza/stone reads worn.
+  bake("detailCrack", 14, 6, (ctx) => {
+    ctx.globalAlpha = 0.5;
+    px(ctx, 1, 3, "#3a3128"); px(ctx, 2, 2, "#3a3128"); px(ctx, 3, 3, "#3a3128"); px(ctx, 4, 3, "#3a3128");
+    px(ctx, 5, 4, "#3a3128"); px(ctx, 6, 3, "#3a3128"); px(ctx, 7, 2, "#3a3128"); px(ctx, 8, 3, "#3a3128");
+    px(ctx, 9, 3, "#3a3128"); px(ctx, 10, 4, "#3a3128"); px(ctx, 11, 3, "#3a3128");
+    ctx.globalAlpha = 1;
+  });
+}
+
+// Pick a decal key (and whether it exists) for a tile's surface char, or null.
+function detailDecalFor(surface: string, x: number, y: number): string | null {
+  const roll = edgeHash(x, y, 911);
+  const variant = (keys: string[]): string => keys[Math.floor(edgeHash(x, y, 47) * keys.length)] ?? keys[0]!;
+  if (surface === ".") {
+    if (roll < 0.055) return variant(DETAIL_FLOWER_KEYS);
+    if (roll < 0.2) return variant(DETAIL_TUFT_KEYS);
+    return null;
+  }
+  if (surface === "p" || surface === "s") {
+    if (roll < 0.09) return "detailCrack";
+    if (roll < 0.13) return "detailPebble";
+    return null;
+  }
+  if (surface === "t" || surface === "d") {
+    if (roll < 0.15) return "detailPebbleDirt";
+    return null;
+  }
+  return null;
+}
+
+function addGroundDetail(
+  rows: string[],
+  texture: Phaser.GameObjects.RenderTexture,
+  tileX: number,
+  tileY: number,
+  tileRight: number,
+  tileBottom: number
+): void {
+  if (!scene.textures.exists("detailFlower0")) return;
+  // Northwood carries its own bespoke autotiled ground; leave it untouched.
+  if (mapRender?.floor === NORTHWOOD_STAGE.floor) return;
+  for (let y = tileY; y < tileBottom; y += 1) {
+    const row = rows[y];
+    if (row === undefined) continue;
+    for (let x = tileX; x < Math.min(tileRight, row.length); x += 1) {
+      const decal = detailDecalFor(row[x] ?? "", x, y);
+      if (!decal) continue;
+      // Keep decals away from tile edges so they don't bleed across seams.
+      const offX = 4 + Math.floor(edgeHash(x, y, 131) * 16);
+      const offY = 4 + Math.floor(edgeHash(x, y, 277) * 14);
+      texture.draw(decal, (x - tileX) * TILE_SIZE + offX, (y - tileY) * TILE_SIZE + offY);
+    }
+  }
 }
 
 // Build feathered edge overlays from a baked ground texture: 4 edges + 4 outer
