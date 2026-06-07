@@ -229,6 +229,7 @@ interface NpcEntityView extends ActorView {}
 
 interface TreeEntityView extends Phaser.GameObjects.Container {
   treeSprite: Phaser.GameObjects.Image;
+  shadow: Phaser.GameObjects.Ellipse;
   stump: Phaser.GameObjects.Rectangle;
   zone: Phaser.GameObjects.Zone;
   treeType: string;
@@ -817,6 +818,10 @@ let mapLayer: Phaser.GameObjects.Container;
 let mapDecorationLayer: Phaser.GameObjects.Container;
 let entityLayer: Phaser.GameObjects.Container;
 let fxLayer: Phaser.GameObjects.Container;
+// Subtle warm colour grade for the storybook town look; gated to town floors
+// (Waystone, Northwatch) so wilderness/dungeon floors keep their own mood.
+let paletteGrade: Phaser.GameObjects.Rectangle | undefined;
+const TOWN_FLOORS = new Set<number>([0, 4]);
 let mapRender: MapRenderState | null = null;
 const cutawayBuildingSprites: Array<{ floor: number; object: DecorationSprite; sprite: Phaser.GameObjects.Image }> = [];
 const playerViews = new Map<string, PlayerEntityView>();
@@ -1409,6 +1414,16 @@ function create(this: Phaser.Scene): void {
   mapDecorationLayer = this.add.container(0, 0);
   entityLayer = this.add.container(0, 0);
   fxLayer = this.add.container(0, 0);
+  // Screen-fixed warm grade over the whole game world (HTML HUD is unaffected;
+  // the later-added minimap renders on top, so it stays untinted). Toggled per
+  // floor in drawMap.
+  paletteGrade = this.add
+    .rectangle(0, 0, 4096, 4096, 0xffe6c4)
+    .setOrigin(0)
+    .setScrollFactor(0)
+    .setBlendMode(Phaser.BlendModes.MULTIPLY)
+    .setAlpha(0.12)
+    .setVisible(false);
   this.cameras.main.setBounds(0, 0, MAP_COLS * TILE_SIZE, MAP_ROWS * TILE_SIZE);
   this.cameras.main.setZoom(BASE_CAMERA_ZOOM);
 
@@ -1904,6 +1919,7 @@ function renderRoster(characters: CharacterRosterEntry[]): void {
 
 function drawMap(floor: number, center?: TilePoint): void {
   currentFloor = floor;
+  paletteGrade?.setVisible(TOWN_FLOORS.has(floor));
   cutawayBuildingSprites.length = 0;
   mapLayer.removeAll(true);
   mapDecorationLayer.removeAll(true);
@@ -2457,6 +2473,19 @@ function authoredTreeSpec(tree: TreeView): AuthoredTreeSpec | null {
   return northwoodTreeSpriteByTile.get(`${Math.floor(tree.x)},${Math.floor(tree.y)}`) ?? null;
 }
 
+// Per-tree deterministic flip + size jitter so a field of the same oak sprite
+// doesn't read as identical clones. Stable from tile position (no shimmer).
+function treeJitter(tree: TreeView): { flip: boolean; scale: number } {
+  const key = (salt: number): number => edgeHash(Math.round(tree.x * 7), Math.round(tree.y * 7), salt);
+  return { flip: key(23) > 0.5, scale: 0.88 + 0.24 * key(19) };
+}
+
+function applyTreeJitter(view: TreeEntityView, spec: { width: number; height: number }, tree: TreeView): void {
+  const { flip, scale } = treeJitter(tree);
+  view.treeSprite.setDisplaySize(spec.width * scale, spec.height * scale).setFlipX(flip);
+  view.shadow?.setSize(Math.max(22, spec.width * 0.5) * scale, Math.max(9, spec.width * 0.16) * scale);
+}
+
 function createTreeView(tree: TreeView): TreeEntityView {
   const view = scene.add.container(tree.x * TILE_SIZE, tree.y * TILE_SIZE) as TreeEntityView;
   const spec = authoredTreeSpec(tree) ?? treeTypeSpec(tree);
@@ -2468,18 +2497,20 @@ function createTreeView(tree: TreeView): TreeEntityView {
   attachHoverTint(zone, treeSprite);
   view.add([shadow, treeSprite, stump, zone]);
   view.treeSprite = treeSprite;
+  view.shadow = shadow;
   view.stump = stump;
   view.zone = zone;
   view.treeType = tree.type;
+  applyTreeJitter(view, spec, tree);
   return view;
 }
 
 function updateTreeViewTexture(view: TreeEntityView, tree: TreeView): void {
   const spec = authoredTreeSpec(tree) ?? treeTypeSpec(tree);
   view.treeSprite.setTexture(spec.textureKey);
-  view.treeSprite.setDisplaySize(spec.width, spec.height);
   view.zone.setSize(spec.zoneWidth, spec.zoneHeight);
   view.treeType = tree.type;
+  applyTreeJitter(view, spec, tree);
 }
 
 function treeTypeSpec(tree: TreeView): TreeType | TreeSpec {
@@ -6276,6 +6307,18 @@ function makeGroundDetailDecals(scene: Phaser.Scene): void {
     px(ctx, 9, 3, "#3a3128"); px(ctx, 10, 4, "#3a3128"); px(ctx, 11, 3, "#3a3128");
     ctx.globalAlpha = 1;
   });
+  // Plaza tonal mottle: soft warm patches (one darker, one lighter) so the big
+  // tan flagstone square reads as varied sunlit/worn paving, not a flat fill.
+  // Soft alpha edges blend across tiles without a hard square seam.
+  const mottle = (inner: string) => (ctx: CanvasRenderingContext2D): void => {
+    const grad = ctx.createRadialGradient(11, 11, 1, 11, 11, 12);
+    grad.addColorStop(0, inner);
+    grad.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 22, 22);
+  };
+  bake("plazaMottleDark", 22, 22, mottle("rgba(96,73,44,0.30)"));
+  bake("plazaMottleLight", 22, 22, mottle("rgba(255,240,209,0.24)"));
 }
 
 // Pick a decal key (and whether it exists) for a tile's surface char, or null.
@@ -6283,11 +6326,21 @@ function detailDecalFor(surface: string, x: number, y: number): string | null {
   const roll = edgeHash(x, y, 911);
   const variant = (keys: string[]): string => keys[Math.floor(edgeHash(x, y, 47) * keys.length)] ?? keys[0]!;
   if (surface === ".") {
-    if (roll < 0.055) return variant(DETAIL_FLOWER_KEYS);
-    if (roll < 0.2) return variant(DETAIL_TUFT_KEYS);
+    // Cluster flowers into loose patches (low-frequency cell hash) so the
+    // meadow reads hand-planted rather than evenly sprinkled.
+    const patch = edgeHash(Math.floor(x / 3), Math.floor(y / 3), 53);
+    const flowerChance = patch > 0.62 ? 0.16 : 0.03;
+    if (roll < flowerChance) return variant(DETAIL_FLOWER_KEYS);
+    if (roll < flowerChance + 0.14) return variant(DETAIL_TUFT_KEYS);
     return null;
   }
-  if (surface === "p" || surface === "s") {
+  if (surface === "p") {
+    if (roll < 0.13) return "plazaMottleDark";
+    if (roll < 0.26) return "plazaMottleLight";
+    if (roll < 0.31) return "detailCrack";
+    return null;
+  }
+  if (surface === "s") {
     if (roll < 0.09) return "detailCrack";
     if (roll < 0.13) return "detailPebble";
     return null;
