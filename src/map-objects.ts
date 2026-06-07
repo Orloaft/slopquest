@@ -435,12 +435,12 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     // We deliberately do NOT overlay cliff-lip / stretched stair-run sprites here: scaled
     // to fit, they squashed out of tile alignment and read as noise. Props are POIs, a
     // thinned natural scatter, and ONE wooden flight per ledge stair notch.
-    // Stair flights — one continuous flight, true aspect (no stretch), bottom-anchored at
-    // the cliff foot and spanning the 2-row face. x = notch centre, must track the
-    // drawBeachLedge() stair notches in shared.ts (cols 21-22 / 57-58 / 35-36).
-    { key: "spriteBeachStaircase", x: 22.0, y: 22, w: 54, h: 64 }, // NW bluff (faceY 20)
-    { key: "spriteBeachStaircase", x: 58.0, y: 24, w: 54, h: 64 }, // NE headland (faceY 22)
-    { key: "spriteBeachStaircase", x: 36.0, y: 36, w: 54, h: 64 }, // south terrace (faceY 34)
+    // Stair flights — one continuous flight at ~native size (no stretch), bottom-anchored at
+    // the cliff foot and spanning the 3-row face. x = notch centre, must track the
+    // drawBeachLedge() stair notches in shared.ts (cols 21-23 / 56-58 / 34-36).
+    { key: "spriteBeachStaircase", x: 22.5, y: 23, w: 78, h: 96 }, // NW bluff (faceY 20, foot 23)
+    { key: "spriteBeachStaircase", x: 57.5, y: 25, w: 78, h: 96 }, // NE headland (faceY 22, foot 25)
+    { key: "spriteBeachStaircase", x: 35.5, y: 37, w: 78, h: 96 }, // south terrace (faceY 34, foot 37)
     { key: "spriteBeachHut", x: 72.7, y: 21.4, w: 116, h: 118 }, // driftwood hut on the high east shelf
     { key: "spriteBeachCave", x: 38.5, y: 30.5, w: 104, h: 102 }, // cliff cave POI
     { key: "spriteBeachRuin", x: 63.1, y: 20.9, w: 84, h: 64 }, // broken arch on the high path (sized to art aspect)

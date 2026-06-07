@@ -801,9 +801,9 @@ export function makeFloorTiles(floor: number): string[] {
     // Raised ledges: walkable tops, connected rock-wall faces under the lip, and a
     // 2-wide walkable stair notch (a single wooden flight sprite is drawn over each in
     // MAP_OBJECTS[8] — keep the notch x/width in sync with those staircase sprites).
-    drawBeachLedge(rows, 18, 16, 14, 4, "l", [{ x: 21, w: 2 }]);
-    drawBeachLedge(rows, 51, 18, 16, 4, "l", [{ x: 57, w: 2 }]);
-    drawBeachLedge(rows, 27, 31, 14, 3, "l", [{ x: 35, w: 2 }]);
+    drawBeachLedge(rows, 18, 16, 14, 4, "l", [{ x: 21, w: 3 }]);
+    drawBeachLedge(rows, 51, 18, 16, 4, "l", [{ x: 56, w: 3 }]);
+    drawBeachLedge(rows, 27, 31, 14, 3, "l", [{ x: 34, w: 3 }]);
 
     // Rocks/ruins as hard cover and visual anchors around coves/terraces.
     for (const [x, y] of [[13, 11], [16, 34], [25, 16], [30, 23], [49, 17], [66, 27], [72, 34], [33, 43], [53, 36], [61, 13]] as Array<[number, number]>)
@@ -1182,7 +1182,7 @@ function drawBeachIsland(rows: string[][]): void {
 // drawn (MAP_OBJECTS[8], keyed to these same notch positions). We do NOT use the per-tile
 // `[`/`2`/`]` stair tiles: each sheet stair is a complete standalone flight (with its own
 // side rails), so tiling them left a gappy row of mismatched ladders.
-const BEACH_FACE_H = 2;
+const BEACH_FACE_H = 3;
 
 function drawBeachLedge(rows: string[][], x: number, y: number, w: number, topH: number, topTile: string, stairs: Array<{ x: number; w: number }>): void {
   fillRect(rows, x, y, w, topH, topTile);

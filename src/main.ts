@@ -1622,10 +1622,10 @@ function create(this: Phaser.Scene): void {
     const k = darkK + (brightK - darkK) * lum;
     return [Math.round(r * k), Math.round(g * k), Math.round(b * k)];
   };
-  makeTileTexture(this, "beachTiles", "tileBeachCliff", 596, 100, 72, 82, 0, false, beachFaceShade(0.78, 0.46));
-  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 72, 82, 0, false, beachFaceShade(0.78, 0.46));
-  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 72, 82, 0, false, beachFaceShade(0.78, 0.46));
-  makeTileTexture(this, "beachTiles", "tileBeachRockWall", 596, 128, 72, 72, 0, false, beachFaceShade(0.66, 0.36));
+  makeTileTexture(this, "beachTiles", "tileBeachCliff", 596, 100, 72, 82, 0, false, beachFaceShade(0.54, 0.3));
+  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 72, 82, 0, false, beachFaceShade(0.54, 0.3));
+  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 72, 82, 0, false, beachFaceShade(0.54, 0.3));
+  makeTileTexture(this, "beachTiles", "tileBeachRockWall", 596, 128, 72, 72, 0, false, beachFaceShade(0.4, 0.2));
   makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62, undefined, true);
   makeTileTexture(this, "beachTiles", "tileBeachShore", 1320, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1320, 100, 72, 72);
@@ -2416,16 +2416,23 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
         }
       }
     }
-    // The Sunken Beach (floor 8): a WARM low-frequency tonal mottle over the sand. Generated
-    // stages bake per-cell rotations, but the sand still reads as one repeated stamp — the same
-    // grid the cemetery had. Broad sun-bleached lifts + warm damp/shaded hollows (same noise
-    // field as the canyon) dissolve the lattice. Sand surfaces only; water/cliff untouched.
+  } else {
+    for (let y = tileY; y < tileBottom; y += 1) {
+      const row = state.rows[y];
+      if (row === undefined) continue;
+      for (let x = tileX; x < tileRight; x += 1) {
+        texture.draw(searingGroundTexture(state.floor, row[x] ?? "", x, y), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+      }
+    }
+    // The Sunken Beach (floor 8) plateau depth cues — the SAME lit-lip + foot-AO recipe Northwood
+    // uses, which is what actually sells a ledge as raised. (This block used to live in the
+    // generated-stage branch above, but beach is NOT a generated stage, so it never ran — the
+    // plateaus had no lip or cast shadow and read flat. Now it runs in the live path.)
     if (state.floor === 8) {
       const SAND = new Set(["e", "l", ";", "z", ","]);
-      // Raised faces that should cast a shadow onto the sand directly below them: cliff edges,
-      // rock walls and the stair runs. Their north edge is the lip of a higher level, so sand to
-      // their SOUTH sits in shade. This is what sells the shelf as elevated (vs. a wall on flat sand).
-      const CLIFF = new Set(["0", "1", "2", "x", "|", "[", "]"]);
+      // Cliff faces cast a shadow on the sand directly south of them (their north edge is a higher
+      // lip), which sells the shelf as elevated rather than a wall on flat sand.
+      const CLIFF = new Set(["0", "1", "x", "|"]);
       for (let y = tileY; y < tileBottom; y += 1) {
         if (state.rows[y] === undefined) continue;
         for (let x = tileX; x < tileRight; x += 1) {
@@ -2438,20 +2445,17 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
           } else if (m > 0.6) {
             texture.draw("graveMottleOverlay", px, py, ((m - 0.6) / 0.4) * 0.16, 0xfff1d0); // sun-bleached lift
           }
-          // Cast shadow: this sand tile lies at the foot of a cliff/stair run directly to its north.
+          // Cast shadow: this sand tile lies at the foot of a cliff run directly to its north.
           const north = state.rows[y - 1]?.[x];
           if (north && CLIFF.has(north)) {
-            texture.draw("beachCliffShadow", px, py, 0.34, 0x241a12); // warm cliff-base shade
-            // A fainter second step so the shade reaches ~1.5 tiles before the open sand recovers.
+            texture.draw("beachCliffShadow", px, py, 0.55, 0x1c130b); // dark cast shadow hugging the cliff base
             const south = state.rows[y + 1]?.[x];
-            if (south && SAND.has(south)) texture.draw("beachCliffShadow", px, py + TILE_SIZE, 0.16, 0x241a12);
+            if (south && SAND.has(south)) texture.draw("beachCliffShadow", px, py + TILE_SIZE, 0.28, 0x1c130b);
           }
         }
       }
-      // Plateau read (parity with canyon/northwood): a warm sun-catch RIM LIP on the TOP course of
-      // each cliff face — the x/0/1 cell where the lit ledge top breaks into the drop — plus a soft
-      // lit lift on the ledge-top sand just above it. With the foot-AO shadow below, the ledge tops
-      // now read as raised plateaus instead of walls stranded on flat sand.
+      // Warm sun-catch RIM LIP on the TOP course of each cliff face (the x/0/1 cell where the lit
+      // ledge top breaks into the drop), plus a lit lift on the ledge-top sand just above it.
       const FACE = new Set(["x", "0", "1"]);
       for (let y = tileY; y < tileBottom; y += 1) {
         if (state.rows[y] === undefined) continue;
@@ -2461,17 +2465,9 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
           const above = state.rows[y - 1]?.[x];
           if (above && (FACE.has(above) || above === "|")) continue; // only the top course catches the lip
           const px = (x - tileX) * TILE_SIZE, py = (y - tileY) * TILE_SIZE;
-          texture.draw("searingCliffLip", px, py); // sunlit break at the plateau edge
-          if (above && SAND.has(above)) texture.draw("graveMottleOverlay", px, py - TILE_SIZE, 0.14, 0xfff1d0); // sun-catch on the lip-top sand
+          texture.draw("searingCliffLip", px, py); // sunlit break at the plateau edge (pops against the dark face)
+          if (above && SAND.has(above)) texture.draw("graveMottleOverlay", px, py - TILE_SIZE, 0.22, 0xfff1d0); // sun-catch on the lip-top sand
         }
-      }
-    }
-  } else {
-    for (let y = tileY; y < tileBottom; y += 1) {
-      const row = state.rows[y];
-      if (row === undefined) continue;
-      for (let x = tileX; x < tileRight; x += 1) {
-        texture.draw(searingGroundTexture(state.floor, row[x] ?? "", x, y), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
       }
     }
     // Southgate Cemetery (floor 1): a SOMBER tonal mottle over the ground. The same low-frequency
@@ -8509,6 +8505,17 @@ const FLOOR_TILE_TEXTURE: Record<number, Record<string, string>> = {
   1: {
     r: "tileGraveMoss",
     O: "tileGraveDirt"
+  },
+  // The Sunken Beach (floor 8): cliff/rock chars must render their ROCK texture. Without this
+  // they fall through to TILE_UNDERLAY_TEXTURE in tileBaseTexture() (which lists x/0/1/| ->
+  // tileBeachShellSand as a sand underlay) and the cliff faces render as flat sand — so the
+  // plateaus were invisible. These overrides draw the actual (dark, opaque) cliff faces.
+  8: {
+    x: "tileBeachCliff",
+    "0": "tileBeachCliffLeft",
+    "1": "tileBeachCliffRight",
+    "|": "tileBeachRockWall",
+    u: "tileBeachRock"
   }
 };
 function tileBaseTexture(tile: string): string {
