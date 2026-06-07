@@ -1039,8 +1039,16 @@ function create(this: Phaser.Scene): void {
   makeGroundDetailDecals(this);
   makeTileTexture(this, "forestTiles", "tileForest", 24, 34, 84, 84);
   makeTileTexture(this, "forestTiles", "tileRock", 1120, 794, 84, 84);
-  makeTileTexture(this, "graveyardTiles", "tileGraveDirt", 24, 34, 84, 84);
-  makeTileTexture(this, "graveyardTiles", "tileGravePath", 612, 860, 84, 84);
+  makeTileTexture(this, "graveyardTiles", "tileGraveDirt", 20, 21, 84, 84);
+  makeTileTexture(this, "graveyardTiles", "tileGravePath", 635, 859, 36, 44, 2);
+  // Cemetery overgrowth: the forest tile desaturated + darkened to a somber moss
+  // so scattered patches read as graveyard moss, not vivid meadow grass (floor 1
+  // remaps "r" to this via FLOOR_TILE_TEXTURE).
+  makeTileTexture(this, "forestTiles", "tileGraveMoss", 24, 34, 84, 84, undefined, false, (r, g, b) => {
+    const lum = r * 0.32 + g * 0.55 + b * 0.13;
+    const mute = (c: number, lvl: number): number => Math.round(Math.min(255, (c * 0.4 + lum * 0.6) * lvl));
+    return [mute(r, 0.78), mute(g, 0.72), mute(b, 0.6)];
+  });
   makeTileTexture(this, "townTiles", "tileWater", 24, 248, 84, 84);
   createGeneratedStageTileTextures(this);
   makeSpriteTexture(this, "northwoodTreeSheet", "spriteTree", 35, 55, 355, 385);
@@ -6319,6 +6327,12 @@ function makeGroundDetailDecals(scene: Phaser.Scene): void {
   };
   bake("plazaMottleDark", 22, 22, mottle("rgba(96,73,44,0.30)"));
   bake("plazaMottleLight", 22, 22, mottle("rgba(255,240,209,0.24)"));
+  // Grave-dirt mottle: mossy green, shadowed earth, and pale bone-dust patches.
+  // Soft low-frequency blobs that span tiles, breaking up the repeating
+  // grave-dirt tile so the cemetery floor stops reading as a hard lattice.
+  bake("graveMottleMoss", 22, 22, mottle("rgba(74,96,52,0.32)"));
+  bake("graveMottleDark", 22, 22, mottle("rgba(36,42,30,0.36)"));
+  bake("graveMottlePale", 22, 22, mottle("rgba(150,140,116,0.20)"));
 }
 
 // Pick a decal key (and whether it exists) for a tile's surface char, or null.
@@ -6347,6 +6361,24 @@ function detailDecalFor(surface: string, x: number, y: number): string | null {
   }
   if (surface === "t" || surface === "d") {
     if (roll < 0.15) return "detailPebbleDirt";
+    return null;
+  }
+  if (surface === "g" || surface === "q" || surface === "h") {
+    // Grave dirt: mossy/earthen/pale patches plus the odd pebble or crack,
+    // clustered loosely so the bare repeating tile stops reading as a grid.
+    const patch = edgeHash(Math.floor(x / 3), Math.floor(y / 3), 67);
+    if (roll < 0.2) return patch > 0.5 ? "graveMottleMoss" : "graveMottleDark";
+    if (roll < 0.36) return "graveMottleDark";
+    if (roll < 0.48) return "graveMottlePale";
+    if (roll < 0.54) return "detailPebbleDirt";
+    if (roll < 0.59) return "detailCrack";
+    return null;
+  }
+  if (surface === "b" || surface === "c" || surface === "C") {
+    // Grave paths: worn cobble — faint cracks, pebbles, a little pale wear.
+    if (roll < 0.12) return "detailCrack";
+    if (roll < 0.2) return "detailPebble";
+    if (roll < 0.3) return "graveMottlePale";
     return null;
   }
   return null;
@@ -7888,12 +7920,23 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
   return { key: `${reliefPrefix(state.floor)}CliffFlank${groundLeft ? "W" : "E"}`, foot: !flankBelow, top: !flankAbove, bench: false };
 }
 
+// Per-floor texture overrides for chars shared across biomes. Floor 1 (cemetery)
+// remaps overgrowth "r" to somber moss and the "O" building-footprint yard to
+// grave dirt, instead of the vivid forest grass those chars default to.
+const FLOOR_TILE_TEXTURE: Record<number, Record<string, string>> = {
+  1: {
+    r: "tileGraveMoss",
+    O: "tileGraveDirt"
+  }
+};
 function tileBaseTexture(tile: string): string {
   const generatedStage = currentFloor == null ? undefined : GENERATED_STAGES_BY_FLOOR.get(currentFloor);
   const generatedTexture = generatedStage ? generatedTileTextureKey(generatedStage, tile) : undefined;
   if (generatedTexture && scene.textures.exists(generatedTexture)) return generatedTexture;
   const generatedFallback = generatedStage?.tiles[tile]?.textureKey;
   if (generatedFallback) return generatedFallback;
+  const floorOverride = currentFloor == null ? undefined : FLOOR_TILE_TEXTURE[currentFloor]?.[tile];
+  if (floorOverride) return floorOverride;
   return TILE_UNDERLAY_TEXTURE[tile] ?? TILE_BASE_TEXTURE[tile] ?? "tileGrass";
 }
 
