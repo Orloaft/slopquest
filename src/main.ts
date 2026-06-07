@@ -978,7 +978,16 @@ function create(this: Phaser.Scene): void {
   // Northwatch muster square: a clean cool-grey cobble cell (distinct from the warm `s`
   // apron). Replaces the broken magenta-keyed `p`/tileTownFloor crop that checkerboarded.
   makeTileTexture(this, "townTiles", "tileMuster", 342, 248, 84, 84);
-  makeTileTexture(this, "townTiles", "tileTownFloor", 1004, 794, 84, 84);
+  // Plaza floor: the original (1004,794) crop landed on a grass-gapped, magenta-gutter
+  // checkerboard and read as a stark green/cream grid. Build it from the clean cobble
+  // crop instead, warm-lightened into a finished tan flagstone that's distinct from the
+  // greyer stone apron around it.
+  const plazaWarm = (r: number, g: number, b: number): [number, number, number] => [
+    Math.min(255, Math.round(r * 1.28 + 24)),
+    Math.min(255, Math.round(g * 1.24 + 18)),
+    Math.min(255, Math.round(b * 1.12 + 8))
+  ];
+  makeTileTexture(this, "townTiles", "tileTownFloor", 236, 248, 84, 84, undefined, false, plazaWarm);
   makeTileTexture(this, "townTiles", "tileDirt", 236, 24, 84, 84);
   // Northwatch ground, sliced from the city-exterior-01 sheet's 54x60 grid (zero
   // magenta gutter bleed). Following the Northwood blueprint — its forest stage reads
