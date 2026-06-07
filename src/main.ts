@@ -1169,18 +1169,23 @@ function create(this: Phaser.Scene): void {
   // ground, brightened + warmed so raised rock reads as sun-hit, distinct from the
   // shadowed canyon floor below. Depth then comes from the rim lip + face, Northwood-
   // style — instead of the flat dark tileMassif that made mesas read as voids.
+  // Each top is also baked in a sun-bleached ('L') and shadowed ('D') tier so the raised
+  // plateau picks up the SAME broad tonal mottle as the canyon floor (searingGroundMottle),
+  // rather than reading as a flat brighter slab above the now-mottled floor. The shadow tier
+  // stays brighter than the floor's neutral (mesa = floor x1.22), so a top never reads as a pit.
   for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
     const src = this.textures.get(`searingGroundV${i}`).getSourceImage() as CanvasImageSource;
-    const top = document.createElement("canvas");
-    top.width = TILE_SIZE;
-    top.height = TILE_SIZE;
-    const topCtx = top.getContext("2d");
-    if (topCtx) {
+    for (const [suf, bri] of [["", 1.22], ["L", 1.34], ["D", 1.07]] as const) {
+      const top = document.createElement("canvas");
+      top.width = TILE_SIZE;
+      top.height = TILE_SIZE;
+      const topCtx = top.getContext("2d");
+      if (!topCtx) continue;
       topCtx.imageSmoothingEnabled = false;
-      topCtx.filter = "brightness(1.22) saturate(1.08)";
+      topCtx.filter = `brightness(${bri}) saturate(1.08)`;
       topCtx.drawImage(src, 0, 0);
-      this.textures.addCanvas(`searingMesaTopV${i}`, top);
-      this.textures.get(`searingMesaTopV${i}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+      this.textures.addCanvas(`searingMesaTopV${i}${suf}`, top);
+      this.textures.get(`searingMesaTopV${i}${suf}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
   }
   // Red-rock cliff faces: slice the 5col x 3row @32 atlas into 15 overlay sub-tiles.
@@ -1276,11 +1281,14 @@ function create(this: Phaser.Scene): void {
     lip.height = TILE_SIZE;
     const lipCtx = lip.getContext("2d");
     if (lipCtx) {
-      const band = 7;
+      const band = 8;
       for (let dy = 0; dy < band; dy += 1) {
-        lipCtx.fillStyle = `rgba(255,201,128,${(1 - dy / band) * 0.5})`;
+        lipCtx.fillStyle = `rgba(255,205,138,${(1 - dy / band) * 0.58})`;
         lipCtx.fillRect(0, dy, TILE_SIZE, 1);
       }
+      // Bright crest line right at the break so the plateau edge reads as a hard sunlit lip.
+      lipCtx.fillStyle = "rgba(255,236,196,0.7)";
+      lipCtx.fillRect(0, 0, TILE_SIZE, 1);
       this.textures.addCanvas("searingCliffLip", lip);
       this.textures.get("searingCliffLip").setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
@@ -7842,14 +7850,12 @@ function searingGroundTexture(floor: number, tile: string, x: number, y: number)
     const h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
     // Massif body ('w') is the raised plateau TOP — lit mesa rock, not flat dark
     // tileMassif. The cliff-face overlay then paints its exposed edges on top.
-    if (tile === "w") return `searingMesaTopV${h % SEARING_GROUND_VARIANTS}`;
-    if (SEARING_GROUND_TILES.has(tile)) {
-      // Crack variant from the per-cell hash; tonal tier from a smooth low-frequency field so
-      // sunlit / shadowed regions span many tiles instead of speckling cell-to-cell.
-      const m = searingGroundMottle(x, y);
-      const tier = m < 0.3 ? "D" : m > 0.72 ? "L" : "";
-      return `searingGroundV${h % SEARING_GROUND_VARIANTS}${tier}`;
-    }
+    // Tonal tier from a smooth low-frequency field so sunlit / shadowed regions span many tiles
+    // instead of speckling cell-to-cell; the per-cell hash still picks the crack/texture variant.
+    const m = searingGroundMottle(x, y);
+    const tier = m < 0.3 ? "D" : m > 0.72 ? "L" : "";
+    if (tile === "w") return `searingMesaTopV${h % SEARING_GROUND_VARIANTS}${tier}`;
+    if (SEARING_GROUND_TILES.has(tile)) return `searingGroundV${h % SEARING_GROUND_VARIANTS}${tier}`;
   }
   // Sunken Desert (floor 7): the massif body 'w' is the raised sandstone PLATEAU TOP — a lit
   // sand surface, not the dark borrowed badlands massif. The cliff-face overlay paints its
