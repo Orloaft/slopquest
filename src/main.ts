@@ -2170,6 +2170,13 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
           // A bench course steps back to a flat lit ledge (stacked-terrace cue);
           // every other course draws the ribbed rock face sub-tile.
           texture.draw(face.bench ? benchKey : face.key, (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+          // Volume gradient: re-stamp the SAME face tile black-tinted with alpha rising toward the
+          // base, so a tall wall reads lit-at-the-lip -> shadowed-at-the-foot (the rounded-rock CT
+          // cue). Tinting the face key masks the darkening to the rock pixels only — the transparent
+          // cap gutters stay clear. Bench ledges keep their lit tone (shade 0 there).
+          if (!face.bench && face.shade > 0) {
+            texture.draw(face.key, (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE, face.shade * SEARING_CLIFF_VOLUME_MAX, 0x000000);
+          }
           if (face.top) {
             texture.draw("searingCliffLip", (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
           }
@@ -8023,6 +8030,8 @@ const SEARING_CLIFF_MAX = 6;
 // Number of baked tone variants per cliff face/flank sub-tile (preload generates `${key}V0..N-1`).
 // Floor 6 picks one per cell by position hash so repeated rock stops reading as a grid of loaves.
 const SEARING_CLIFF_FACE_VARIANTS = 4;
+// Max black-tint alpha at the shadowed foot of a cliff face (lit lip -> dark base volume ramp).
+const SEARING_CLIFF_VOLUME_MAX = 0.42;
 // Per-cell variant suffix for the canyon cliff sub-tiles. Only floor 6 has the baked variants
 // (the desert prefix on floor 7 keeps its single tone), so this is the empty string elsewhere.
 function searingCliffVariant(floor: number, x: number, y: number): string {
@@ -8034,7 +8043,7 @@ function searingCliffVariant(floor: number, x: number, y: number): string {
 function isSearingMassif(c: string | undefined): boolean {
   return c === "w" || c === "X";
 }
-function searingCliffFace(state: MapRenderState, x: number, y: number): { key: string; foot: boolean; top: boolean; bench: boolean } | null {
+function searingCliffFace(state: MapRenderState, x: number, y: number): { key: string; foot: boolean; top: boolean; bench: boolean; shade: number } | null {
   if (state.floor !== 6 && state.floor !== 7) return null;
   const here = state.rows[y]?.[x];
   if (here !== "X" && here !== "w") return null;
@@ -8057,7 +8066,10 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
     // bench (never the foot or top) so the drop reads as stacked tiers. With the cap
     // at 6 the tallest columns get two benches (3 tiers); 4-5 tall faces get one.
     const bench = total >= 4 && courseFromFoot > 0 && courseFromFoot < total - 1 && courseFromFoot % 2 === 0;
-    return { key: `${reliefPrefix(state.floor)}CliffR${rowKind}C${col}${searingCliffVariant(state.floor, x, y)}`, foot: courseFromFoot === 0, top: rowKind === 0, bench };
+    // Volume ramp: darkest at the foot (courseFromFoot 0), lit at the top course. Short walls
+    // (no body above the lip) get a mild base-shade so they still read grounded, not flat.
+    const shade = total <= 1 ? 0.25 : 1 - courseFromFoot / Math.max(1, total - 1);
+    return { key: `${reliefPrefix(state.floor)}CliffR${rowKind}C${col}${searingCliffVariant(state.floor, x, y)}`, foot: courseFromFoot === 0, top: rowKind === 0, bench, shade };
   }
   // --- West/east-facing flank: a 'w' tile whose left or right neighbour is open canyon is
   // a vertical corridor wall the south system never touches; it used to fall back to the
@@ -8079,7 +8091,15 @@ function searingCliffFace(state: MapRenderState, x: number, y: number): { key: s
   // L-shaped concave-corner atlas cells. Bracket the vertical run with a lit rim at its TOP
   // (where it breaks onto the plateau) and a contact shadow at its BASE (foot) so the wall reads
   // with top-down form/recession rather than a flat uniform band.
-  return { key: `${reliefPrefix(state.floor)}CliffFlank${groundLeft ? "W" : "E"}${searingCliffVariant(state.floor, x, y)}`, foot: !flankBelow, top: !flankAbove, bench: false };
+  // Volume ramp over the vertical run: count the same-side flank cells above/below this one so
+  // the wall fades lit-at-top -> shadowed-at-base just like the south faces.
+  const flankCell = (yy: number): boolean =>
+    state.rows[yy]?.[x] === "w" && state.rows[yy]?.[x + side] !== undefined && !isSearingMassif(state.rows[yy]?.[x + side]);
+  let up = 0; while (flankCell(y - 1 - up)) up += 1;
+  let down = 0; while (flankCell(y + 1 + down)) down += 1;
+  const runTotal = up + 1 + down;
+  const shade = runTotal <= 1 ? 0.25 : up / Math.max(1, runTotal - 1);
+  return { key: `${reliefPrefix(state.floor)}CliffFlank${groundLeft ? "W" : "E"}${searingCliffVariant(state.floor, x, y)}`, foot: !flankBelow, top: !flankAbove, bench: false, shade };
 }
 
 // Per-floor texture overrides for chars shared across biomes. Floor 1 (cemetery)
