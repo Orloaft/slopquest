@@ -798,11 +798,12 @@ export function makeFloorTiles(floor: number): string[] {
     for (const [x, y] of [[18, 12], [22, 14], [39, 18], [48, 16], [58, 12], [72, 18], [28, 36], [53, 42], [68, 44]] as Array<[number, number]>)
       setTile(rows, x, y, ";");
 
-    // Raised ledges: walkable tops, connected rock-wall faces under the lip,
-    // and composed stairs that cut through the face as left/middle/right runs.
-    drawBeachLedge(rows, 18, 16, 14, 4, "l", [{ x: 20, w: 4 }]);
-    drawBeachLedge(rows, 51, 18, 16, 4, "l", [{ x: 56, w: 4 }]);
-    drawBeachLedge(rows, 27, 31, 14, 3, "l", [{ x: 34, w: 4 }]);
+    // Raised ledges: walkable tops, connected rock-wall faces under the lip, and a
+    // 2-wide walkable stair notch (a single wooden flight sprite is drawn over each in
+    // MAP_OBJECTS[8] — keep the notch x/width in sync with those staircase sprites).
+    drawBeachLedge(rows, 18, 16, 14, 4, "l", [{ x: 21, w: 2 }]);
+    drawBeachLedge(rows, 51, 18, 16, 4, "l", [{ x: 57, w: 2 }]);
+    drawBeachLedge(rows, 27, 31, 14, 3, "l", [{ x: 35, w: 2 }]);
 
     // Rocks/ruins as hard cover and visual anchors around coves/terraces.
     for (const [x, y] of [[13, 11], [16, 34], [25, 16], [30, 23], [49, 17], [66, 27], [72, 34], [33, 43], [53, 36], [61, 13]] as Array<[number, number]>)
@@ -1174,24 +1175,29 @@ function drawBeachIsland(rows: string[][]): void {
   for (const [y, x1, x2] of spans) fillRect(rows, x1, y, x2 - x1 + 1, 1, "e");
 }
 
+// The cliff face is BEACH_FACE_H rows tall (lit top course `x`/`0`/`1` + rock-wall `|`
+// courses beneath), so the ledge reads as a raised plateau instead of one stranded step.
+// A stair is a walkable PATH NOTCH carved straight through the whole face height — top
+// landing down to the beach with no gap — over which a single wooden-flight sprite is
+// drawn (MAP_OBJECTS[8], keyed to these same notch positions). We do NOT use the per-tile
+// `[`/`2`/`]` stair tiles: each sheet stair is a complete standalone flight (with its own
+// side rails), so tiling them left a gappy row of mismatched ladders.
+const BEACH_FACE_H = 2;
+
 function drawBeachLedge(rows: string[][], x: number, y: number, w: number, topH: number, topTile: string, stairs: Array<{ x: number; w: number }>): void {
   fillRect(rows, x, y, w, topH, topTile);
   const faceY = y + topH;
+  // Top course: lit cliff lip with end caps.
   setTile(rows, x - 1, faceY, "0");
   fillRect(rows, x, faceY, w, 1, "x");
   setTile(rows, x + w, faceY, "1");
-  fillRect(rows, x, faceY + 1, w, 1, "|");
+  // Rock-wall courses beneath the lip give the face its height.
+  for (let row = 1; row < BEACH_FACE_H; row += 1) fillRect(rows, x, faceY + row, w, 1, "|");
   for (const stair of stairs) {
-    drawBeachStairs(rows, stair.x, faceY, stair.w);
+    // Walkable path notch through every face course, plus a landing on the plateau top.
+    fillRect(rows, stair.x, faceY, stair.w, BEACH_FACE_H, "z");
     fillRect(rows, stair.x, y + topH - 1, stair.w, 1, "z");
   }
-}
-
-function drawBeachStairs(rows: string[][], x: number, y: number, w: number): void {
-  if (w < 2) return;
-  setTile(rows, x, y, "[");
-  for (let xx = x + 1; xx < x + w - 1; xx += 1) setTile(rows, xx, y, "2");
-  setTile(rows, x + w - 1, y, "]");
 }
 
 function smoothBeachShoreCornerClusters(rows: string[][]): void {

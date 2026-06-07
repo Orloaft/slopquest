@@ -429,25 +429,18 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
   8: [
     // Sunken Beach: grouped POIs instead of sparse single props. All anchors
     // sit on the authored sand/path pockets and leave the portal lanes clear.
-    // Ledger-driven terrain overlays: these larger source-sheet pieces break
-    // up repeated tile rows while the underlying grid keeps collision exact.
-    // Cliff-lip + stair overlays, aligned onto the THREE tile ledges drawn by
-    // drawBeachLedge() in shared.ts (faceY = 20 / 22 / 34). Each lip prop sits with its
-    // base at the foot of the 2-row tile face (faceY+2) so the 3D rock front reads as the
-    // raised plateau edge, with a stair run filling the walkable gap. The underlying grid
-    // keeps collision exact; the render pass adds the sun-lip + foot-AO depth cues.
-    // Ledge 1 — NW bluff (top x18-31, faceY 20, stairs cols 20-23)
-    { key: "spriteBeachCliffLipA", x: 19.0, y: 22, w: 72, h: 78 },
-    { key: "spriteBeachStairsRun4", x: 22.0, y: 22, w: 128, h: 66 },
-    { key: "spriteBeachCliffLipB", x: 28.0, y: 22, w: 256, h: 78 },
-    // Ledge 2 — NE headland (top x51-66, faceY 22, stairs cols 56-59)
-    { key: "spriteBeachCliffLipB", x: 53.5, y: 24, w: 160, h: 78 },
-    { key: "spriteBeachStairsRun4", x: 58.0, y: 24, w: 128, h: 66 },
-    { key: "spriteBeachCliffLipB", x: 63.5, y: 24, w: 224, h: 78 },
-    // Ledge 3 — south terrace (top x27-40, faceY 34, stairs cols 34-37)
-    { key: "spriteBeachCliffLipB", x: 30.5, y: 36, w: 224, h: 78 },
-    { key: "spriteBeachStairsRun4", x: 36.0, y: 36, w: 128, h: 66 },
-    { key: "spriteBeachCliffLipA", x: 39.5, y: 36, w: 96, h: 78 },
+    // The three raised plateaus are assembled ENTIRELY from tiles by drawBeachLedge()
+    // in shared.ts — stacked cliff faces + full-height stair runs that descend to the
+    // beach with no gap — and the render pass adds the sun-lip + foot-AO depth cues.
+    // We deliberately do NOT overlay cliff-lip / stretched stair-run sprites here: scaled
+    // to fit, they squashed out of tile alignment and read as noise. Props are POIs, a
+    // thinned natural scatter, and ONE wooden flight per ledge stair notch.
+    // Stair flights — one continuous flight, true aspect (no stretch), bottom-anchored at
+    // the cliff foot and spanning the 2-row face. x = notch centre, must track the
+    // drawBeachLedge() stair notches in shared.ts (cols 21-22 / 57-58 / 35-36).
+    { key: "spriteBeachStaircase", x: 22.0, y: 22, w: 54, h: 64 }, // NW bluff (faceY 20)
+    { key: "spriteBeachStaircase", x: 58.0, y: 24, w: 54, h: 64 }, // NE headland (faceY 22)
+    { key: "spriteBeachStaircase", x: 36.0, y: 36, w: 54, h: 64 }, // south terrace (faceY 34)
     { key: "spriteBeachHut", x: 72.7, y: 21.4, w: 116, h: 118 }, // driftwood hut on the high east shelf
     { key: "spriteBeachCave", x: 38.5, y: 30.5, w: 104, h: 102 }, // cliff cave POI
     { key: "spriteBeachRuin", x: 63.1, y: 20.9, w: 84, h: 64 }, // broken arch on the high path (sized to art aspect)
@@ -458,30 +451,23 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteBeachSign", x: 49.9, y: 35.3, w: 48, h: 56 },
     { key: "spriteBeachRocks", x: 37.6, y: 22.3, w: 76, h: 64 },
     { key: "spriteBeachRocks", x: 81, y: 32.2, w: 70, h: 58 },
-    { key: "spriteBeachRocks", x: 52.1, y: 43, w: 72, h: 60 },
     { key: "spriteBeachBoulder", x: 90, y: 34.1, w: 82, h: 54 },
     { key: "spriteBeachStoneWall", x: 67.1, y: 23.5, w: 86, h: 52 },
     { key: "spriteBeachFence", x: 71.5, y: 42.7, w: 136, h: 36 },
     { key: "spriteBeachWell", x: 76.8, y: 36.1, w: 56, h: 45 }, // round stone well-head (sized to art aspect)
     { key: "spriteBeachLogPile", x: 55.2, y: 36.5, w: 76, h: 44 },
-    { key: "spriteBeachLogPile", x: 70.3, y: 44.6, w: 68, h: 40 },
     { key: "spriteBeachStump", x: 46.6, y: 41.4, w: 44, h: 34 },
     { key: "spriteBeachBonePile", x: 81.2, y: 29.4, w: 50, h: 38 }, // skull pile (sized to art aspect)
     { key: "spriteBeachBarrel", x: 36.4, y: 55, w: 42, h: 52 },
     { key: "spriteBeachBarrel", x: 87.8, y: 51.1, w: 38, h: 48 },
-    { key: "spriteBeachFlowerYellow", x: 29.6, y: 27.4, w: 34, h: 26 },
+    // Thinned natural scatter — one accent per district, not a carpet.
     { key: "spriteBeachFlowerYellow", x: 44.7, y: 19, w: 32, h: 24 },
-    { key: "spriteBeachFlowerYellow", x: 88.1, y: 46.6, w: 34, h: 26 },
     { key: "spriteBeachFlowerWhite", x: 26.3, y: 39.1, w: 34, h: 26 },
     { key: "spriteBeachFlowerWhite", x: 60.3, y: 34.7, w: 34, h: 26 },
-    { key: "spriteBeachFlowerWhite", x: 73.6, y: 18.6, w: 32, h: 24 },
     { key: "spriteBeachPalm", x: 21.4, y: 16.1, w: 86, h: 72 },
-    { key: "spriteBeachPalm", x: 47.1, y: 13.7, w: 82, h: 68 },
     { key: "spriteBeachPalm", x: 66.6, y: 15.8, w: 80, h: 66 }, // high shelf grove
-    { key: "spriteBeachPalm", x: 62.9, y: 38.9, w: 74, h: 62 },
     { key: "spriteBeachPalm", x: 88.6, y: 41.3, w: 86, h: 72 }, // on the eastern spit
-    { key: "spriteBeachPalm", x: 29.9, y: 47.3, w: 82, h: 68 },
-    { key: "spriteBeachPalm", x: 92.3, y: 30.6, w: 72, h: 60 }
+    { key: "spriteBeachPalm", x: 29.9, y: 47.3, w: 82, h: 68 }
   ],
   9: [
     // Boulders clustered at the two river fords (the choke ambush points).

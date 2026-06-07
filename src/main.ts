@@ -1632,10 +1632,13 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "beachTiles", "spriteBeachCliffLipA", 528, 100, 128, 74);
   makeSpriteTexture(this, "beachTiles", "spriteBeachCliffLipB", 680, 100, 132, 74);
   makeSpriteTexture(this, "beachTiles", "spriteBeachStairsRun4", 390, 864, 288, 82);
+  // ONE wooden flight (left rail to right rail) — the sheet's "stairs" are four complete
+  // standalone flights, so we crop a single one and draw it whole over each ledge notch.
+  makeSpriteTexture(this, "beachTiles", "spriteBeachStaircase", 388, 850, 82, 99, true);
   makeSpriteTexture(this, "beachTiles", "spriteBeachHut", 1366, 860, 116, 118);
   makeSpriteTexture(this, "beachTiles", "spriteBeachDock", 642, 650, 168, 86);
   makeSpriteTexture(this, "beachTiles", "spriteBeachBoat", 560, 722, 74, 48);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachCave", 684, 861, 118, 89);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachCave", 684, 861, 118, 89, true); // defringe: kill the magenta halo around the rocky arch
   makeSpriteTexture(this, "beachTiles", "spriteBeachTent", 1040, 866, 92, 70);
   makeSpriteTexture(this, "beachTiles", "spriteBeachCampfire", 1160, 872, 72, 66);
   makeSpriteTexture(this, "beachTiles", "spriteBeachPalm", 1438, 944, 86, 72);
