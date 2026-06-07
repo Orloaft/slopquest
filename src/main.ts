@@ -1026,7 +1026,11 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "cityTiles", "spriteCityTree", 140, 358, 74, 74, true); // ornamental tree
   makeSpriteTexture(this, "cityTiles", "spriteCityBoat", 874, 446, 118, 98, true); // harbour boat
   makeSpriteTexture(this, "cityTiles", "spriteCityStall", 834, 744, 70, 56, true); // market stall
-  makeGrassEdgeOverlays(this); // grass fringe for path/plaza edges that border the meadow
+  // Ground-seam transition overlays: softer surfaces fray over the harder ones
+  // they border (grass > dirt > stone > plaza). See SURFACE_RANK / addGroundEdges.
+  makeEdgeOverlays(this, "tileGrass", "grassEdge", 0, 0.5);
+  makeEdgeOverlays(this, "tileDirt", "dirtEdge", 100, 0.4);
+  makeEdgeOverlays(this, "tileStone", "stoneEdge", 200, 0.34);
   makeTileTexture(this, "forestTiles", "tileForest", 24, 34, 84, 84);
   makeTileTexture(this, "forestTiles", "tileRock", 1120, 794, 84, 84);
   makeTileTexture(this, "graveyardTiles", "tileGraveDirt", 24, 34, 84, 84);
@@ -2068,13 +2072,12 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
   return chunk;
 }
 
-// Cells that should receive grass fringe where they border the open meadow
-// (".") — hard ground (paths/apron/plaza) plus water, so the grassy bank
-// overhangs the river/pond edge instead of stopping at a flat blue line.
-const GRASS_FRINGE_HOSTS = new Set(["t", "d", "s", "p", "~"]);
-function isMeadow(rows: string[], x: number, y: number): boolean {
-  return (rows[y]?.[x] ?? "") === ".";
-}
+// Softness ranking for ground-seam transitions: a higher-ranked (softer/more
+// natural) surface frays its edge over a lower-ranked neighbour. Water sits
+// lowest so the grassy bank overhangs it. Only surfaces with a SURFACE_EDGE
+// overlay can overhang; plaza/water never do (they just receive).
+const SURFACE_RANK: Record<string, number> = { ".": 3, t: 2, d: 2, s: 1, p: 0, "~": -1 };
+const SURFACE_EDGE: Record<string, string> = { ".": "grassEdge", t: "dirtEdge", d: "dirtEdge", s: "stoneEdge" };
 function addGroundEdges(
   rows: string[],
   texture: Phaser.GameObjects.RenderTexture,
@@ -2084,25 +2087,41 @@ function addGroundEdges(
   tileBottom: number
 ): void {
   if (!scene.textures.exists("grassEdge_N")) return;
+  // The generated Northwood stage carries its own autotiled transitions; town
+  // overlays would clash with its bespoke art, so leave it alone.
+  if (mapRender?.floor === NORTHWOOD_STAGE.floor) return;
+  // The edge prefix of a neighbour that overhangs the cell at (cx,cy), else null.
+  const overhang = (cx: number, cy: number, hostRank: number): string | null => {
+    const nc = rows[cy]?.[cx];
+    if (nc === undefined) return null;
+    const nr = SURFACE_RANK[nc];
+    if (nr === undefined || nr <= hostRank) return null;
+    return SURFACE_EDGE[nc] ?? null;
+  };
   for (let y = tileY; y < tileBottom; y += 1) {
     const row = rows[y];
     if (row === undefined) continue;
     for (let x = tileX; x < Math.min(tileRight, row.length); x += 1) {
-      if (!GRASS_FRINGE_HOSTS.has(row[x] ?? "")) continue;
+      const hostRank = SURFACE_RANK[row[x] ?? ""];
+      if (hostRank === undefined) continue;
       const px = (x - tileX) * TILE_SIZE;
       const py = (y - tileY) * TILE_SIZE;
-      const n = isMeadow(rows, x, y - 1);
-      const e = isMeadow(rows, x + 1, y);
-      const s = isMeadow(rows, x, y + 1);
-      const w = isMeadow(rows, x - 1, y);
-      if (n) texture.draw("grassEdge_N", px, py);
-      if (e) texture.draw("grassEdge_E", px, py);
-      if (s) texture.draw("grassEdge_S", px, py);
-      if (w) texture.draw("grassEdge_W", px, py);
-      if (!n && !e && isMeadow(rows, x + 1, y - 1)) texture.draw("grassEdge_NE", px, py);
-      if (!s && !e && isMeadow(rows, x + 1, y + 1)) texture.draw("grassEdge_SE", px, py);
-      if (!s && !w && isMeadow(rows, x - 1, y + 1)) texture.draw("grassEdge_SW", px, py);
-      if (!n && !w && isMeadow(rows, x - 1, y - 1)) texture.draw("grassEdge_NW", px, py);
+      const n = overhang(x, y - 1, hostRank);
+      const e = overhang(x + 1, y, hostRank);
+      const s = overhang(x, y + 1, hostRank);
+      const w = overhang(x - 1, y, hostRank);
+      if (n) texture.draw(`${n}_N`, px, py);
+      if (e) texture.draw(`${e}_E`, px, py);
+      if (s) texture.draw(`${s}_S`, px, py);
+      if (w) texture.draw(`${w}_W`, px, py);
+      const ne = overhang(x + 1, y - 1, hostRank);
+      const se = overhang(x + 1, y + 1, hostRank);
+      const sw = overhang(x - 1, y + 1, hostRank);
+      const nw = overhang(x - 1, y - 1, hostRank);
+      if (ne && !n && !e) texture.draw(`${ne}_NE`, px, py);
+      if (se && !s && !e) texture.draw(`${se}_SE`, px, py);
+      if (sw && !s && !w) texture.draw(`${sw}_SW`, px, py);
+      if (nw && !n && !w) texture.draw(`${nw}_NW`, px, py);
     }
   }
 }
@@ -6173,15 +6192,16 @@ function edgeHash(x: number, y: number, salt: number): number {
   return h / 4294967295;
 }
 
-// Build feathered grass-fringe overlays from the baked tileGrass texture: 4 edges
-// + 4 outer corners. Each is the grass texture masked to a ragged tuft band along
-// one side, so paths/plaza cells that border the meadow get grass overhanging
-// their hard edge instead of a flat pixel seam. 0/1 alpha keeps the pixel-art look.
+// Build feathered edge overlays from a baked ground texture: 4 edges + 4 outer
+// corners, each the texture masked to a ragged tuft band along one side. Softer
+// surfaces (grass > dirt > stone) draw these over the harder neighbour they
+// border, so every ground seam frays instead of stopping at a flat pixel line.
+// 0/1 alpha keeps the pixel-art look; salt varies the raggedness per surface.
 const GRASS_EDGE_SIDES = ["N", "E", "S", "W"] as const;
 const GRASS_EDGE_CORNERS = ["NE", "SE", "SW", "NW"] as const;
-function makeGrassEdgeOverlays(scene: Phaser.Scene): void {
-  const source = scene.textures.get("tileGrass").getSourceImage() as CanvasImageSource;
-  const feather = Math.round(TILE_SIZE * 0.5);
+function makeEdgeOverlays(scene: Phaser.Scene, srcKey: string, prefix: string, saltBase: number, featherFrac = 0.5): void {
+  const source = scene.textures.get(srcKey).getSourceImage() as CanvasImageSource;
+  const feather = Math.round(TILE_SIZE * featherFrac);
   const tuftAt = (lateral: number, salt: number): number => 0.4 + 0.6 * edgeHash(lateral, 0, salt);
   const keep = (dist: number, lateral: number, salt: number, x: number, y: number): boolean => {
     if (dist >= feather) return false;
@@ -6211,19 +6231,19 @@ function makeGrassEdgeOverlays(scene: Phaser.Scene): void {
     scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
   };
   GRASS_EDGE_SIDES.forEach((side, i) => {
-    build(`grassEdge_${side}`, (x, y) => {
+    build(`${prefix}_${side}`, (x, y) => {
       const dist = side === "N" ? y : side === "S" ? TILE_SIZE - 1 - y : side === "W" ? x : TILE_SIZE - 1 - x;
       const lateral = side === "N" || side === "S" ? x : y;
-      return keep(dist, lateral, i + 1, x, y);
+      return keep(dist, lateral, saltBase + i + 1, x, y);
     });
   });
   GRASS_EDGE_CORNERS.forEach((corner, i) => {
     const cx = corner.includes("E") ? TILE_SIZE - 1 : 0;
     const cy = corner.includes("N") ? 0 : TILE_SIZE - 1;
-    build(`grassEdge_${corner}`, (x, y) => {
+    build(`${prefix}_${corner}`, (x, y) => {
       const dist = Math.hypot(x - cx, y - cy);
       const lateral = Math.round(Math.atan2(y - cy, x - cx) * 6);
-      return keep(dist, lateral, i + 11, x, y);
+      return keep(dist, lateral, saltBase + i + 11, x, y);
     });
   });
 }
