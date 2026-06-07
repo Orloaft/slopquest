@@ -2068,9 +2068,10 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
   return chunk;
 }
 
-// Cells that read as "hard ground" and should receive grass fringe where they
-// border the open meadow (".").
-const GRASS_FRINGE_HOSTS = new Set(["t", "d", "s", "p"]);
+// Cells that should receive grass fringe where they border the open meadow
+// (".") — hard ground (paths/apron/plaza) plus water, so the grassy bank
+// overhangs the river/pond edge instead of stopping at a flat blue line.
+const GRASS_FRINGE_HOSTS = new Set(["t", "d", "s", "p", "~"]);
 function isMeadow(rows: string[], x: number, y: number): boolean {
   return (rows[y]?.[x] ?? "") === ".";
 }
