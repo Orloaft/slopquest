@@ -1093,19 +1093,28 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "swampTiles", "spriteCliffLedge", 714, 958, 70, 58);
   // Searing Badlands (floor 6). Crops from assetsources/rejected/badlands-biome-tiles-01.png
   // (1536x1024, magenta-keyed) — rust ground/rock/cliff/pit/ramp tiles + a frontier tent.
-  makeTileTexture(this, "badlandsTiles", "tileBadlands", 18, 99, 70, 74);
-  makeTileTexture(this, "badlandsTiles", "tileBadlandsRock", 180, 99, 73, 74);
-  makeTileTexture(this, "badlandsTiles", "tileBadlandsCracked", 98, 99, 70, 74);
-  makeTileTexture(this, "badlandsTiles", "tileBadlandsGravel", 262, 99, 72, 74);
-  makeTileTexture(this, "badlandsTiles", "tileMassif", 180, 180, 72, 74); // dark impassable rock bulk behind cliff faces
-  makeTileTexture(this, "badlandsTiles", "tileCliff", 528, 100, 68, 82);
-  makeTileTexture(this, "badlandsTiles", "tilePit", 1346, 188, 72, 70);
-  makeTileTexture(this, "badlandsTiles", "tileRamp", 392, 864, 68, 80);
+  // Red-shift pulls the rust palette off the desert's warm-orange (ground avg was (183,84,39),
+  // nearly identical to tileSand's (179,74,43)) toward deep red rock so floor 6 ≠ floor 7.
+  // Applied to BOTH the structural badlands tiles AND the painterly searingGround/cliff family
+  // below, so the WHOLE canyon reads deep-red — not just the rock furniture.
+  const badlandsRedshift = (r: number, g: number, b: number): [number, number, number] => [
+    r,
+    Math.round(g * 0.78),
+    Math.min(255, b + 8)
+  ];
+  makeTileTexture(this, "badlandsTiles", "tileBadlands", 18, 99, 70, 74, undefined, false, badlandsRedshift);
+  makeTileTexture(this, "badlandsTiles", "tileBadlandsRock", 180, 99, 73, 74, undefined, false, badlandsRedshift);
+  makeTileTexture(this, "badlandsTiles", "tileBadlandsCracked", 98, 99, 70, 74, undefined, false, badlandsRedshift);
+  makeTileTexture(this, "badlandsTiles", "tileBadlandsGravel", 262, 99, 72, 74, undefined, false, badlandsRedshift);
+  makeTileTexture(this, "badlandsTiles", "tileMassif", 180, 180, 72, 74, undefined, false, badlandsRedshift); // dark impassable rock bulk behind cliff faces
+  makeTileTexture(this, "badlandsTiles", "tileCliff", 528, 100, 68, 82, undefined, false, badlandsRedshift);
+  makeTileTexture(this, "badlandsTiles", "tilePit", 1346, 188, 72, 70, undefined, false, badlandsRedshift);
+  makeTileTexture(this, "badlandsTiles", "tileRamp", 392, 864, 68, 80, undefined, false, badlandsRedshift);
   // Painterly cracked-earth ground variants (floor 6). 16x (72x72) packed in a 1152x72
   // strip; per-tile variant is picked by position hash in searingGroundTexture() so the
   // canyon floor stops reading as a repeated grid.
   for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
-    makeTileTexture(this, "searingGround", `searingGroundV${i}`, i * 72, 0, 72, 72);
+    makeTileTexture(this, "searingGround", `searingGroundV${i}`, i * 72, 0, 72, 72, undefined, false, badlandsRedshift);
   }
   // Lit mesa-top variants (floor 6): the massif PLATEAU TOP reuses the cracked-earth
   // ground, brightened + warmed so raised rock reads as sun-hit, distinct from the
@@ -1130,9 +1139,9 @@ function create(this: Phaser.Scene): void {
   // (above the rim, cap shoulders) let the flat massif top read through behind the face.
   for (let row = 0; row < 3; row += 1)
     for (let col = 0; col < 5; col += 1)
-      makeTileTexture(this, "searingCliff", `searingCliffR${row}C${col}`, col * 32, row * 32, 32, 32, 0, true);
+      makeTileTexture(this, "searingCliff", `searingCliffR${row}C${col}`, col * 32, row * 32, 32, 32, 0, true, badlandsRedshift);
   // Vertical flank walls for the E/W mesa edges (rust palette) — replaces the L-shaped col 3/4 look.
-  buildCliffFlanks(this, "searing", [255, 201, 128]);
+  buildCliffFlanks(this, "searing", [255, 157, 136]); // red-shifted rust highlight (was 255,201,128)
   // Contact-shadow band dropped on the canyon floor directly under each cliff lip,
   // so the foot reads grounded instead of floating (mirrors the baker's wall-foot AO).
   {
@@ -6064,7 +6073,8 @@ function makeTileTexture(
   sw: number,
   sh: number,
   insetOverride?: number,
-  preserveTransparentPixels = false
+  preserveTransparentPixels = false,
+  recolor?: (r: number, g: number, b: number) => [number, number, number]
 ): void {
   const source = scene.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
   const sourceCanvas = document.createElement("canvas");
@@ -6087,6 +6097,18 @@ function makeTileTexture(
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(sourceCanvas, 0, 0, cropW, cropH, 0, 0, TILE_SIZE, TILE_SIZE);
   chromaKeyMagenta(ctx, TILE_SIZE, TILE_SIZE);
+  if (recolor) {
+    const img = ctx.getImageData(0, 0, TILE_SIZE, TILE_SIZE);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] === 0) continue;
+      const [r, g, b] = recolor(d[i]!, d[i + 1]!, d[i + 2]!);
+      d[i] = r;
+      d[i + 1] = g;
+      d[i + 2] = b;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
   if (!preserveTransparentPixels) fillTransparentPixels(ctx, TILE_SIZE, TILE_SIZE);
   scene.textures.addCanvas(newKey, canvas);
   scene.textures.get(newKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
@@ -6353,11 +6375,11 @@ function minimapTileColor(tile: string): string {
     o: "#5d6452", // boulder (blocked)
     M: "#d6ad4e", // marsh portal (landmark)
     L: "#c8a86a", // cliff ledge (landmark)
-    R: "#b5703a", // badlands ground
-    J: "#9a5e30", // badlands rock
-    "6": "#c0763a", // cracked badlands flat
-    "7": "#8f5630", // gravel badlands flat
-    w: "#5a3318", // massif (impassable dark rock)
+    R: "#b55742", // badlands ground (red-shifted to match the deep-red rock textures)
+    J: "#9a4938", // badlands rock
+    "6": "#c05c42", // cracked badlands flat
+    "7": "#8f4338", // gravel badlands flat
+    w: "#5a2820", // massif (impassable dark rock)
     X: "#5c3320", // cliff wall (blocked)
     P: "#140f0d", // pit chasm (blocked, sight-open)
     A: "#c98a4a", // ramp
