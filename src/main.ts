@@ -1611,10 +1611,21 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "beachTiles", "tileBeachStairsLeft", 390, 864, 72, 82, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachStairsMid", 462, 864, 72, 82, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachStairsRight", 606, 864, 72, 82, 0, true);
-  makeTileTexture(this, "beachTiles", "tileBeachCliff", 596, 100, 72, 82, 0, true);
-  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 72, 82, 0, true);
-  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 72, 82, 0, true);
-  makeTileTexture(this, "beachTiles", "tileBeachRockWall", 596, 128, 72, 72, 0, true);
+  // Cliff faces: the source art has light TAN sand baked between the dark boulders, so a
+  // plain row of these tiled into dark-column / tan-gap / dark-column and the plateau read
+  // flat. Fix with a luminance COMPRESS recolor — darken the bright tan hard (brightK) while
+  // barely touching the dark boulder shadows (darkK) — which flattens each tile into a solid
+  // dark rock wall that contrasts the bright sand and clearly reads as raised. Top course
+  // (lip) stays a touch lighter than the wall body. The render pass still adds lip + foot AO.
+  const beachFaceShade = (darkK: number, brightK: number) => (r: number, g: number, b: number): [number, number, number] => {
+    const lum = (r + g + b) / 765; // 0 (shadow) .. 1 (lit tan)
+    const k = darkK + (brightK - darkK) * lum;
+    return [Math.round(r * k), Math.round(g * k), Math.round(b * k)];
+  };
+  makeTileTexture(this, "beachTiles", "tileBeachCliff", 596, 100, 72, 82, 0, false, beachFaceShade(0.78, 0.46));
+  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 72, 82, 0, false, beachFaceShade(0.78, 0.46));
+  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 72, 82, 0, false, beachFaceShade(0.78, 0.46));
+  makeTileTexture(this, "beachTiles", "tileBeachRockWall", 596, 128, 72, 72, 0, false, beachFaceShade(0.66, 0.36));
   makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62, undefined, true);
   makeTileTexture(this, "beachTiles", "tileBeachShore", 1320, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1320, 100, 72, 72);
