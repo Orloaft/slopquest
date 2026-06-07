@@ -2458,12 +2458,13 @@ function authoredTreeSpec(tree: TreeView): AuthoredTreeSpec | null {
 function createTreeView(tree: TreeView): TreeEntityView {
   const view = scene.add.container(tree.x * TILE_SIZE, tree.y * TILE_SIZE) as TreeEntityView;
   const spec = authoredTreeSpec(tree) ?? treeTypeSpec(tree);
+  const shadow = scene.add.ellipse(0, 8, Math.max(22, spec.width * 0.5), Math.max(9, spec.width * 0.16), 0x000000, 0.22);
   const treeSprite = scene.add.image(0, 4, spec.textureKey).setOrigin(0.5, 1).setDisplaySize(spec.width, spec.height);
   const stump = scene.add.rectangle(0, 12, 20, 12, 0x705036).setStrokeStyle(2, 0x2d1f14).setVisible(false);
   const zone = scene.add.zone(0, -18, spec.zoneWidth, spec.zoneHeight).setInteractive({ cursor: "pointer" });
   attachZoneMenu(zone, () => startTreeCutPath(tree), `${titleCase(tree.type)} Tree`, () => treeMenuActions(tree));
   attachHoverTint(zone, treeSprite);
-  view.add([treeSprite, stump, zone]);
+  view.add([shadow, treeSprite, stump, zone]);
   view.treeSprite = treeSprite;
   view.stump = stump;
   view.zone = zone;
@@ -5163,8 +5164,24 @@ function addComposedMapObjects(
     });
 }
 
+// Objects that lie flat on the ground (a walkway, not a standing prop) get no
+// grounding shadow.
+const NO_GROUND_SHADOW = new Set<string>(["spriteBridge"]);
+
 function placeMapSprite(item: DecorationSprite, parent: Phaser.GameObjects.Container): Phaser.GameObjects.Image {
-  const sprite = scene.add.image(item.x * TILE_SIZE, item.y * TILE_SIZE, item.key).setOrigin(0.5, 1);
+  const baseX = item.x * TILE_SIZE;
+  const baseY = item.y * TILE_SIZE;
+  if (!NO_GROUND_SHADOW.has(item.key)) {
+    // Soft contact shadow at the base so the prop reads as seated on the ground
+    // rather than a flat sticker — the same grounding every character sprite
+    // already gets. Width tracks the footprint; a shallow ellipse, nudged up a
+    // hair so it tucks under the base.
+    const shadowW = Math.max(14, item.w * 0.66);
+    const shadowH = Math.max(7, Math.min(40, item.w * 0.16));
+    const shadow = scene.add.ellipse(baseX, baseY - shadowH * 0.32, shadowW, shadowH, 0x000000, 0.22);
+    parent.add(shadow);
+  }
+  const sprite = scene.add.image(baseX, baseY, item.key).setOrigin(0.5, 1);
   sprite.setDisplaySize(item.w, item.h);
   parent.add(sprite);
   return sprite;
