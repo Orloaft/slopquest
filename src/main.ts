@@ -1151,6 +1151,10 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "graveyardTiles", "spriteMausoleum", 1148, 260, 132, 170);
   makeSpriteTexture(this, "graveyardTiles", "spriteStoneWall", 20, 356, 126, 64);
   makeSpriteTexture(this, "graveyardTiles", "spriteObelisk", 806, 176, 66, 102);
+  // Cemetery landmark props (floor 1 bespoke object layer): a mourning-angel statue on a
+  // pedestal and a stone sarcophagus, for plot centrepieces and richer composition.
+  makeSpriteTexture(this, "graveyardTiles", "spriteGraveStatue", 942, 198, 50, 104, true);
+  makeSpriteTexture(this, "graveyardTiles", "spriteSarcophagus", 1022, 296, 88, 44, true);
   // Cemetery ground-clutter scatter (floor 1): small headstone/cross variants from the
   // sheet's grave-marker block, hash-scattered over grave-dirt in addTileDecorations so the
   // plots stop reading as bare expanses. Defringed (cropped from the magenta sheet).

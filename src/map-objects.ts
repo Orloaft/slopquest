@@ -198,12 +198,39 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteMausoleum", x: 79.4, y: 26.5, w: 118, h: 150 }, // eastern mausoleum
     { key: "spriteStoneWall", x: 19.6, y: 13.3, w: 112, h: 54 }, // NW plot wall
     { key: "spriteStoneWall", x: 85.6, y: 53.8, w: 112, h: 54 }, // SE plot wall
+    // Plot centrepieces: each fenced plot gets a hero monument so the eye always has a
+    // focal point (the Northwood-density lesson). Placed on grave-dirt inside the plots,
+    // clear of the path spine and gateway gaps.
+    { key: "spriteGraveStatue", x: 22, y: 22, w: 50, h: 104 }, // NW plot mourning angel
+    { key: "spriteGraveStatue", x: 22, y: 55, w: 50, h: 104 }, // SW plot mourning angel
+    { key: "spriteSarcophagus", x: 86, y: 57, w: 92, h: 46 }, // SE plot sarcophagus
+    { key: "spriteSarcophagus", x: 33, y: 16, w: 88, h: 44 }, // NW plot raised tomb
+    // Dead-tree groves — clustered, not lone, so they read as a stand. Two original
+    // anchors kept; the rest cluster near plot corners and frame the central crypt.
     { key: "spriteDeadTree", x: 17.6, y: 28.6, w: 72, h: 118 },
     { key: "spriteDeadTree", x: 90.7, y: 17.8, w: 66, h: 108 },
     { key: "spriteDeadTree", x: 29.6, y: 59.8, w: 66, h: 108 },
+    { key: "spriteDeadTree", x: 14.5, y: 24.5, w: 58, h: 96 }, // NW grove mate
+    { key: "spriteDeadTree", x: 95.5, y: 14.5, w: 58, h: 96 }, // NE grove mate
+    { key: "spriteDeadTree", x: 41, y: 40, w: 70, h: 116 }, // flanks the crypt, W
+    { key: "spriteDeadTree", x: 69, y: 41, w: 70, h: 116 }, // flanks the crypt, E
+    // Perimeter framing: a sparse dead-tree treeline + stone-wall segments along the
+    // outer dirt margins so the yard reads as a bounded graveyard (Northwood frames with
+    // trees/water). Top edge kept clear around the north gate (x55) / south gate (x56).
+    { key: "spriteDeadTree", x: 5, y: 8, w: 54, h: 90 },
+    { key: "spriteDeadTree", x: 5, y: 40, w: 54, h: 90 },
+    { key: "spriteDeadTree", x: 6, y: 67, w: 54, h: 90 },
+    { key: "spriteDeadTree", x: 104, y: 9, w: 54, h: 90 },
+    { key: "spriteDeadTree", x: 105, y: 42, w: 54, h: 90 },
+    { key: "spriteDeadTree", x: 104, y: 67, w: 54, h: 90 },
+    { key: "spriteStoneWall", x: 30, y: 68.5, w: 112, h: 50 }, // S edge wall (W of gate)
+    { key: "spriteStoneWall", x: 82, y: 68.5, w: 112, h: 50 }, // S edge wall (E of gate)
+    // Obelisks dotted through the dirt between plots.
     { key: "spriteObelisk", x: 41.3, y: 18.6, w: 38, h: 60 },
     { key: "spriteObelisk", x: 71.3, y: 49.7, w: 34, h: 54 },
-    { key: "spriteObelisk", x: 25.1, y: 48.5, w: 34, h: 54 }
+    { key: "spriteObelisk", x: 25.1, y: 48.5, w: 34, h: 54 },
+    { key: "spriteObelisk", x: 88, y: 38, w: 34, h: 54 },
+    { key: "spriteObelisk", x: 48, y: 56, w: 34, h: 54 }
   ],
   2: [
     // Ashen Crypt (bespoke 90x60) — an enclosed dungeon of stone chambers. The
