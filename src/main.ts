@@ -1126,9 +1126,9 @@ function create(this: Phaser.Scene): void {
   // Applied to BOTH the structural badlands tiles AND the painterly searingGround/cliff family
   // below, so the WHOLE canyon reads deep-red — not just the rock furniture.
   const badlandsRedshift = (r: number, g: number, b: number): [number, number, number] => [
-    r,
-    Math.round(g * 0.78),
-    Math.min(255, b + 8)
+    Math.min(255, Math.round(r * 1.06)),
+    Math.round(g * 0.62),
+    Math.round(b * 0.82)
   ];
   makeTileTexture(this, "badlandsTiles", "tileBadlands", 18, 99, 70, 74, undefined, false, badlandsRedshift);
   makeTileTexture(this, "badlandsTiles", "tileBadlandsRock", 180, 99, 73, 74, undefined, false, badlandsRedshift);
