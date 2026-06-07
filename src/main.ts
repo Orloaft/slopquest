@@ -822,6 +822,10 @@ let fxLayer: Phaser.GameObjects.Container;
 // (Waystone, Northwatch) so wilderness/dungeon floors keep their own mood.
 let paletteGrade: Phaser.GameObjects.Rectangle | undefined;
 const TOWN_FLOORS = new Set<number>([0, 4]);
+// Cemetery (floor 1) atmosphere: a screen-fixed dusk vignette + a few slow drifting
+// ground-fog banks, both gated to floor 1 in applyFloorAtmosphere / spawnCemeteryFog.
+let cemeteryVignette: Phaser.GameObjects.Image | undefined;
+let cemeteryFog: Phaser.GameObjects.Image[] = [];
 let mapRender: MapRenderState | null = null;
 const cutawayBuildingSprites: Array<{ floor: number; object: DecorationSprite; sprite: Phaser.GameObjects.Image }> = [];
 const playerViews = new Map<string, PlayerEntityView>();
@@ -1040,7 +1044,11 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "forestTiles", "tileForest", 24, 34, 84, 84);
   makeTileTexture(this, "forestTiles", "tileRock", 1120, 794, 84, 84);
   makeTileTexture(this, "graveyardTiles", "tileGraveDirt", 20, 21, 84, 84);
-  makeTileTexture(this, "graveyardTiles", "tileGravePath", 635, 859, 36, 44, 2);
+  // Grave path: the old source (635,859,36,44) was a NON-SQUARE 32x40 core stretched to a square
+  // tile -> blurry + aspect-distorted cobble. Swapped to a crisp square flagstone from the sheet's
+  // full-res ground row (608,930,56x56): laid stone slabs with moss in the joints, the right read
+  // for a graveyard walk. Square crop -> no distortion; ~48px core (inset 4) -> far sharper.
+  makeTileTexture(this, "graveyardTiles", "tileGravePath", 608, 930, 56, 56, 4);
   // Cemetery overgrowth: the forest tile desaturated + darkened to a somber moss
   // so scattered patches read as graveyard moss, not vivid meadow grass (floor 1
   // remaps "r" to this via FLOOR_TILE_TEXTURE).
@@ -1049,6 +1057,74 @@ function create(this: Phaser.Scene): void {
     const mute = (c: number, lvl: number): number => Math.round(Math.min(255, (c * 0.4 + lum * 0.6) * lvl));
     return [mute(r, 0.78), mute(g, 0.72), mute(b, 0.6)];
   });
+  // De-grid the cemetery ground (floor 1): tileGraveDirt / tileGravePath / tileGraveMoss were
+  // each a SINGLE tile stamped on every cell, so the grave path read as a perfect cobble lattice
+  // and the dirt/moss as a uniform speckle. Bake flip + grain variants of each; the floor-1
+  // ground resolver picks one per cell by position hash so the repeat dissolves. Flips (not 90deg
+  // rotation) keep each tile's top/bottom orientation so cobble courses don't fight at seams.
+  // NOTE: per-cell TONE is deliberately flat (1.0). An earlier pass shaded each variant ±10%,
+  // but a uniform brightness offset across a whole tile, picked per cell, just redraws the grid as
+  // a brightness checkerboard (the same quilt failure the marsh ground hit). Tonal variation lives
+  // at region scale instead — the broad somber mottle overlay in createMapChunk. Flips break the
+  // lattice; the mottle does the shading; no per-tile brightness steps to catch the eye.
+  {
+    const toneByV = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    const buildGroundVariants = (baseKey: string) => {
+      const src = this.textures.get(baseKey).getSourceImage() as CanvasImageSource;
+      for (let v = 0; v < GRAVE_GROUND_VARIANTS; v += 1) {
+        const cv = document.createElement("canvas");
+        cv.width = TILE_SIZE;
+        cv.height = TILE_SIZE;
+        const cc = cv.getContext("2d");
+        if (!cc) continue;
+        cc.imageSmoothingEnabled = false;
+        const flipH = (v & 1) === 1, flipV = (v & 2) === 2;
+        cc.save();
+        cc.translate(TILE_SIZE / 2, TILE_SIZE / 2);
+        cc.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+        cc.drawImage(src, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+        cc.restore();
+        const img = cc.getImageData(0, 0, TILE_SIZE, TILE_SIZE);
+        const d = img.data;
+        const b = toneByV[v] ?? 1.0;
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i + 3] === 0) continue;
+          d[i] = Math.min(255, Math.round(d[i]! * b));
+          d[i + 1] = Math.min(255, Math.round(d[i + 1]! * b));
+          d[i + 2] = Math.min(255, Math.round(d[i + 2]! * b));
+        }
+        let seed = (v * 0x9e3779b1) >>> 0;
+        for (let k = 0; k < baseKey.length; k += 1) seed = (Math.imul(seed, 31) + baseKey.charCodeAt(k)) >>> 0;
+        const rnd = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
+        for (let s = 0; s < 10; s += 1) {
+          const px = Math.floor(rnd() * TILE_SIZE), py = Math.floor(rnd() * TILE_SIZE);
+          const i = (py * TILE_SIZE + px) * 4;
+          if (d[i + 3] === 0) continue;
+          const f = rnd() < 0.6 ? 0.78 : 1.0, add = f < 1 ? 0 : 22;
+          d[i] = Math.min(255, Math.round(d[i]! * f + add));
+          d[i + 1] = Math.min(255, Math.round(d[i + 1]! * f + add));
+          d[i + 2] = Math.min(255, Math.round(d[i + 2]! * f + add));
+        }
+        cc.putImageData(img, 0, 0);
+        this.textures.addCanvas(`${baseKey}V${v}`, cv);
+        this.textures.get(`${baseKey}V${v}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+      }
+    };
+    buildGroundVariants("tileGraveDirt");
+    buildGroundVariants("tileGravePath");
+    buildGroundVariants("tileGraveMoss");
+    // Solid white stamp reused (tinted) for the somber tonal mottle overlay in createMapChunk.
+    const ov = document.createElement("canvas");
+    ov.width = TILE_SIZE;
+    ov.height = TILE_SIZE;
+    const ovc = ov.getContext("2d");
+    if (ovc) {
+      ovc.fillStyle = "#ffffff";
+      ovc.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+      this.textures.addCanvas("graveMottleOverlay", ov);
+      this.textures.get("graveMottleOverlay").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
   makeTileTexture(this, "townTiles", "tileWater", 24, 248, 84, 84);
   createGeneratedStageTileTextures(this);
   makeSpriteTexture(this, "northwoodTreeSheet", "spriteTree", 35, 55, 355, 385);
@@ -1075,6 +1151,13 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "graveyardTiles", "spriteMausoleum", 1148, 260, 132, 170);
   makeSpriteTexture(this, "graveyardTiles", "spriteStoneWall", 20, 356, 126, 64);
   makeSpriteTexture(this, "graveyardTiles", "spriteObelisk", 806, 176, 66, 102);
+  // Cemetery ground-clutter scatter (floor 1): small headstone/cross variants from the
+  // sheet's grave-marker block, hash-scattered over grave-dirt in addTileDecorations so the
+  // plots stop reading as bare expanses. Defringed (cropped from the magenta sheet).
+  makeSpriteTexture(this, "graveyardTiles", "spriteGraveCross", 610, 378, 37, 65, true);
+  makeSpriteTexture(this, "graveyardTiles", "spriteGraveCross2", 689, 450, 40, 55, true);
+  makeSpriteTexture(this, "graveyardTiles", "spriteGraveStoneB", 516, 463, 42, 55, true);
+  makeSpriteTexture(this, "graveyardTiles", "spriteGraveStoneSm", 722, 456, 32, 52, true);
   makeSpriteTexture(this, "townTiles", "spritePortal", 828, 424, 86, 132);
   makeSpriteTexture(this, "townTiles", "spriteBridge", 20, 466, 92, 56);
   makeSpriteTexture(this, "townTiles", "spriteWell", 824, 420, 94, 132);
@@ -1547,6 +1630,48 @@ function create(this: Phaser.Scene): void {
     .setBlendMode(Phaser.BlendModes.MULTIPLY)
     .setAlpha(0.12)
     .setVisible(false);
+  // Atmosphere textures: a soft dusk vignette (transparent centre -> dark frame) and a
+  // wispy fog bank, both used by the floor-1 cemetery mood pass.
+  if (!this.textures.exists("atmosVignette")) {
+    const vg = document.createElement("canvas");
+    vg.width = 256;
+    vg.height = 256;
+    const vgc = vg.getContext("2d");
+    if (vgc) {
+      const grad = vgc.createRadialGradient(128, 128, 60, 128, 128, 168);
+      grad.addColorStop(0, "rgba(6,8,16,0)");
+      grad.addColorStop(0.6, "rgba(6,8,16,0)");
+      grad.addColorStop(1, "rgba(4,6,12,0.82)");
+      vgc.fillStyle = grad;
+      vgc.fillRect(0, 0, 256, 256);
+      this.textures.addCanvas("atmosVignette", vg);
+    }
+  }
+  if (!this.textures.exists("atmosFog")) {
+    const fg = document.createElement("canvas");
+    fg.width = 128;
+    fg.height = 128;
+    const fgc = fg.getContext("2d");
+    if (fgc) {
+      const grad = fgc.createRadialGradient(64, 64, 4, 64, 64, 64);
+      grad.addColorStop(0, "rgba(196,204,220,0.5)");
+      grad.addColorStop(1, "rgba(196,204,220,0)");
+      fgc.fillStyle = grad;
+      fgc.fillRect(0, 0, 128, 128);
+      this.textures.addCanvas("atmosFog", fg);
+    }
+  }
+  cemeteryVignette = this.add
+    .image(0, 0, "atmosVignette")
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setVisible(false);
+  const sizeVignette = (): void => {
+    const cam = this.cameras.main;
+    cemeteryVignette?.setDisplaySize(cam.width, cam.height).setPosition(cam.width / 2, cam.height / 2);
+  };
+  sizeVignette();
+  this.scale.on("resize", sizeVignette);
   this.cameras.main.setBounds(0, 0, MAP_COLS * TILE_SIZE, MAP_ROWS * TILE_SIZE);
   this.cameras.main.setZoom(BASE_CAMERA_ZOOM);
 
@@ -1710,7 +1835,20 @@ function update(this: Phaser.Scene, time: number): void {
   }
   drawCompass(me.dir);
   updateFog(me, time);
+  driftCemeteryFog();
   if (!dom.mapScreen.classList.contains("hidden")) renderMapScreen(me);
+}
+
+// Creep the cemetery fog banks sideways and wrap them around the map width so the
+// mist reads as alive. Cheap: ~14 sprites, a single add per frame. Floor-1 only.
+function driftCemeteryFog(): void {
+  if (currentFloor !== 1 || cemeteryFog.length === 0 || !mapRender) return;
+  const worldW = mapRender.cols * TILE_SIZE;
+  const margin = 6 * TILE_SIZE;
+  for (const fog of cemeteryFog) {
+    fog.x += (fog.getData("vx") as number) ?? 0.1;
+    if (fog.x > worldW + margin) fog.x = -margin;
+  }
 }
 
 function ensureSocket(): void {
@@ -2042,7 +2180,7 @@ function renderRoster(characters: CharacterRosterEntry[]): void {
 
 function drawMap(floor: number, center?: TilePoint): void {
   currentFloor = floor;
-  paletteGrade?.setVisible(TOWN_FLOORS.has(floor));
+  applyFloorAtmosphere(floor);
   cutawayBuildingSprites.length = 0;
   mapLayer.removeAll(true);
   mapDecorationLayer.removeAll(true);
@@ -2055,6 +2193,47 @@ function drawMap(floor: number, center?: TilePoint): void {
   updateVisibleMapChunks(center ? center.x * TILE_SIZE : undefined, center ? center.y * TILE_SIZE : undefined);
   addTileDecorations(floor, rows, mapDecorationLayer);
   addComposedMapObjects(floor, mapDecorationLayer);
+  spawnCemeteryFog(floor, cols, rowCount);
+}
+
+// Per-floor mood: warm grade in towns, a cool dusk gloom + vignette in the cemetery,
+// nothing elsewhere (wilderness/dungeon floors keep their own look).
+function applyFloorAtmosphere(floor: number): void {
+  if (paletteGrade) {
+    if (floor === 1) {
+      paletteGrade.setFillStyle(0x6e79a8).setAlpha(0.34).setVisible(true); // cool overcast graveyard
+    } else if (TOWN_FLOORS.has(floor)) {
+      paletteGrade.setFillStyle(0xffe6c4).setAlpha(0.12).setVisible(true); // warm storybook town
+    } else {
+      paletteGrade.setVisible(false);
+    }
+  }
+  cemeteryVignette?.setVisible(floor === 1);
+}
+
+// Slow drifting ground-fog banks for the cemetery (floor 1). Soft low-alpha blobs in the
+// fx layer that creep sideways and wrap, so the graveyard reads misty. Destroyed and
+// re-seeded on every floor change; no-op (and cleared) off floor 1.
+function spawnCemeteryFog(floor: number, cols: number, rowCount: number): void {
+  cemeteryFog.forEach((f) => f.destroy());
+  cemeteryFog = [];
+  if (floor !== 1 || !scene.textures.exists("atmosFog")) return;
+  const worldW = cols * TILE_SIZE;
+  const worldH = rowCount * TILE_SIZE;
+  const COUNT = 14;
+  for (let i = 0; i < COUNT; i += 1) {
+    const h = ((i * 2654435761) ^ 0x9e37) >>> 0;
+    const fog = scene.add
+      .image(((h % 1000) / 1000) * worldW, ((((h >>> 10) % 1000) / 1000) * (worldH - 4 * TILE_SIZE)) + 2 * TILE_SIZE, "atmosFog")
+      .setOrigin(0.5)
+      .setAlpha(0.1 + ((h >>> 20) % 8) / 100) // 0.10–0.17
+      .setDepth(9000);
+    const scale = 6 + ((h >>> 4) % 5); // 6x–10x the 128px blob -> broad banks
+    fog.setScale(scale, scale * 0.5); // squashed -> low-lying ground fog
+    fog.setData("vx", 0.06 + ((h >>> 16) % 10) / 100); // px/frame drift, 0.06–0.15
+    fxLayer.add(fog);
+    cemeteryFog.push(fog);
+  }
 }
 
 function showLoadingScreen(title?: string): void {
@@ -2137,6 +2316,27 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
       if (row === undefined) continue;
       for (let x = tileX; x < tileRight; x += 1) {
         texture.draw(searingGroundTexture(state.floor, row[x] ?? "", x, y), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+      }
+    }
+    // Southgate Cemetery (floor 1): a SOMBER tonal mottle over the ground. The same low-frequency
+    // field as the canyon, but tinted cool and low-contrast (overcast graveyard, not desert sun):
+    // broad regions sink into a cool shadow, fewer/softer pale lifts. Graded alpha via tinted
+    // overlay draws -> continuous regions, not 2-level steps. Drawn before decorations/sprites, so
+    // gravestones still read on top.
+    if (state.floor === 1) {
+      for (let y = tileY; y < tileBottom; y += 1) {
+        if (state.rows[y] === undefined) continue;
+        for (let x = tileX; x < tileRight; x += 1) {
+          const ch = state.rows[y]?.[x];
+          if (!ch || !(ch in GRAVE_GROUND_BASE)) continue;
+          const m = searingGroundMottle(x, y);
+          const px = (x - tileX) * TILE_SIZE, py = (y - tileY) * TILE_SIZE;
+          if (m < 0.46) {
+            texture.draw("graveMottleOverlay", px, py, ((0.46 - m) / 0.46) * 0.34, 0x10141f); // cool shadow hollow
+          } else if (m > 0.58) {
+            texture.draw("graveMottleOverlay", px, py, ((m - 0.58) / 0.42) * 0.14, 0xd6dac4); // soft pale lift
+          }
+        }
       }
     }
     // Northwatch (floor 4): paint a stone kerb on every road (8) edge that faces a
@@ -5312,6 +5512,30 @@ function addTileDecorations(
         const ruin = MARSH_RUINS.find((r) => r[0] === x && r[1] === y);
         if (ruin) decorations.push({ key: ruin[2], x: x + 0.5, y: y + 1.0, w: ruin[3], h: ruin[4] });
       }
+      // Southgate Cemetery (floor 1) ground clutter: hash-scatter small headstones, leaning
+      // crosses, dead scrub and the odd bone-pile across open grave-dirt ('g') so the plots read
+      // populated, not bare. ~24% of cells get a prop; deterministic per-cell hash, size-jittered
+      // with a small sub-tile offset so clumps don't grid up. Non-blocking (collision untouched).
+      if (floor === 1 && tile === "g") {
+        const h = ((x * 2654435761) ^ (y * 40503)) >>> 0;
+        if (h % 100 < 24) {
+          const SCATTER: Array<[string, number, number]> = [
+            ["spriteGraveCross", 22, 40],
+            ["spriteGraveCross2", 24, 34],
+            ["spriteGraveStoneB", 26, 34],
+            ["spriteGraveStoneSm", 20, 33],
+            ["spriteGrave", 22, 30],
+            ["floraScrubDead", 15, 30],
+            ["floraScrubDead", 15, 30], // weighted: dead brush is the commonest filler
+            ["floraSkullPile", 22, 24]
+          ];
+          const [key, w, hgt] = SCATTER[(h >>> 9) % SCATTER.length]!;
+          const jit = 0.82 + ((h >>> 17) % 32) / 100; // 0.82–1.14 size jitter
+          const ox = (((h >>> 3) % 7) - 3) / 14;
+          const oy = (((h >>> 11) % 7) - 3) / 14;
+          decorations.push({ key, x: x + 0.5 + ox, y: y + 0.92 + oy, w: Math.round(w * jit), h: Math.round(hgt * jit) });
+        }
+      }
       if (tile === "+") decorations.push({ key: "floraSkullPile", x: x + 0.5, y: y + 0.85, w: 25, h: 28 }); // sun-bleached bones
       if (["N", "S", "T", "C", "M", "D", "G", "Y", "j", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
     }
@@ -7781,6 +8005,22 @@ const SEARING_GROUND_VARIANTS = 16;
 // must read as canyon ground under the sprite, not the cross-floor tileGrass default.
 const SEARING_GROUND_TILES = new Set(["R", "6", "7", "J", "D", "Z", "O", "%", "&", "@", "+"]);
 
+// Southgate Cemetery (floor 1) ground: each grave char was a single repeated tile (the cobble
+// lattice / speckle grid). Map the dirt / path / moss chars onto the flip+tone+grain variants
+// baked in preload, picked per cell by position hash so the repeat dissolves.
+const GRAVE_GROUND_VARIANTS = 6;
+const GRAVE_GROUND_BASE: Record<string, string> = {
+  g: "tileGraveDirt", q: "tileGraveDirt", h: "tileGraveDirt", O: "tileGraveDirt",
+  b: "tileGravePath", c: "tileGravePath", C: "tileGravePath",
+  r: "tileGraveMoss"
+};
+function cemeteryGroundTexture(tile: string, x: number, y: number): string | null {
+  const base = GRAVE_GROUND_BASE[tile];
+  if (!base) return null;
+  const h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
+  return `${base}V${h % GRAVE_GROUND_VARIANTS}`;
+}
+
 // Picks a deterministic painterly ground variant per cell so the Searing Badlands
 // canyon floor doesn't read as one repeated tile. Falls back to the normal resolver
 // for every other floor/tile.
@@ -7845,6 +8085,10 @@ function searingGroundMottle(x: number, y: number): number {
   return top + (bot - top) * sy;
 }
 function searingGroundTexture(floor: number, tile: string, x: number, y: number): string {
+  if (floor === 1) {
+    const grave = cemeteryGroundTexture(tile, x, y);
+    if (grave) return grave;
+  }
   if (floor === 4) {
     const city = cityGroundTexture(tile, x, y);
     if (city) return city;
