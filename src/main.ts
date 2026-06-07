@@ -1124,6 +1124,32 @@ function create(this: Phaser.Scene): void {
       this.textures.addCanvas("graveMottleOverlay", ov);
       this.textures.get("graveMottleOverlay").setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
+    // Vertical-gradient stamp (white, alpha strong at top fading to 0 by ~80% down) reused as a
+    // directional cast shadow at the foot of beach cliffs/stairs so raised edges read as elevated
+    // rather than walls floating on flat sand. Tinted dark + alpha-scaled per draw in createMapChunk.
+    const sh = document.createElement("canvas");
+    sh.width = TILE_SIZE;
+    sh.height = TILE_SIZE;
+    const shc = sh.getContext("2d");
+    if (shc) {
+      const img = shc.createImageData(TILE_SIZE, TILE_SIZE);
+      const d = img.data;
+      for (let yy = 0; yy < TILE_SIZE; yy += 1) {
+        const t = yy / (TILE_SIZE * 0.8); // 0 at top -> 1 at 80% height
+        const a = Math.max(0, 1 - t);
+        const alpha = Math.round(255 * a * a); // ease-out so the band hugs the cliff base
+        for (let xx = 0; xx < TILE_SIZE; xx += 1) {
+          const i = (yy * TILE_SIZE + xx) * 4;
+          d[i] = 255;
+          d[i + 1] = 255;
+          d[i + 2] = 255;
+          d[i + 3] = alpha;
+        }
+      }
+      shc.putImageData(img, 0, 0);
+      this.textures.addCanvas("beachCliffShadow", sh);
+      this.textures.get("beachCliffShadow").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
   }
   makeTileTexture(this, "townTiles", "tileWater", 24, 248, 84, 84);
   createGeneratedStageTileTextures(this);
@@ -1614,6 +1640,31 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "beachTiles", "spriteBeachCampfire", 1160, 872, 72, 66);
   makeSpriteTexture(this, "beachTiles", "spriteBeachPalm", 1438, 944, 86, 72);
   makeSpriteTexture(this, "beachTiles", "spriteBeachRocks", 1204, 402, 88, 74);
+  // Floor-8 props placed in MAP_OBJECTS[8] by commit a233d59 but never registered, so they
+  // rendered as Phaser's green missing-texture box. Crops keyed off the same beach sheet
+  // (RUINS, WOODEN PROPS, ROCKS and DECORATIVE blocks); defringed to drop the maroon key.
+  makeSpriteTexture(this, "beachTiles", "spriteBeachRuin", 1018, 648, 96, 72, true); // broken stone arch
+  makeSpriteTexture(this, "beachTiles", "spriteBeachStoneWall", 1228, 650, 88, 62, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachWell", 826, 742, 70, 56, true); // round stone well-head
+  makeSpriteTexture(this, "beachTiles", "spriteBeachBoulder", 1260, 390, 84, 62, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachBarrel", 507, 748, 56, 50, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachFence", 284, 747, 72, 40, true); // post-and-rail
+  makeSpriteTexture(this, "beachTiles", "spriteBeachSign", 282, 663, 50, 68, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachLogPile", 903, 489, 82, 46, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachStump", 655, 496, 68, 47, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachBonePile", 588, 488, 64, 48, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachFlowerWhite", 856, 386, 46, 46, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachFlowerYellow", 806, 386, 46, 46, true);
+  // Beach ground-clutter scatter (floor 8): grass tufts, driftwood, rocks, a crab and
+  // seaweed from the sheet's DECORATIVE GROUND DETAILS block, hash-scattered over open
+  // sand in addBeachClutter so the dunes read alive. Defringed (maroon-keyed sheet).
+  makeSpriteTexture(this, "beachTiles", "spriteBeachGrass", 576, 393, 36, 35, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachGrass2", 725, 395, 33, 34, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachShrub", 526, 447, 36, 29, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachRockSm", 917, 448, 33, 32, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachDriftwood", 527, 495, 36, 31, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachCrab", 820, 450, 35, 35, true);
+  makeSpriteTexture(this, "beachTiles", "spriteBeachSeaweed", 581, 503, 33, 31, true);
   // Untamed Jungle (floor 9). Crops from assetsources/rejected/jungle-biome-tiles.png.
   makeTileTexture(this, "jungleTiles", "tileJungle", 18, 97, 72, 74);
   makeTileTexture(this, "jungleTiles", "tileJungleWall", 524, 100, 68, 82);
@@ -2197,7 +2248,42 @@ function drawMap(floor: number, center?: TilePoint): void {
   updateVisibleMapChunks(center ? center.x * TILE_SIZE : undefined, center ? center.y * TILE_SIZE : undefined);
   addTileDecorations(floor, rows, mapDecorationLayer);
   addComposedMapObjects(floor, mapDecorationLayer);
+  addBeachClutter(floor, rows, mapDecorationLayer);
   spawnCemeteryFog(floor, cols, rowCount);
+}
+
+// Beach (floor 8) ground clutter. Generated stages skip addTileDecorations, so the dunes get
+// their own scatter pass: grass tufts, driftwood, rocks, seaweed and the odd crab hash-scattered
+// over open dry sand ('e') only — wet/ripple/path sand near the tide stay clear. ~14% of cells,
+// deterministic per-cell hash, size-jittered with sub-tile offsets. Non-blocking decoration.
+function addBeachClutter(floor: number, rows: string[], parent: Phaser.GameObjects.Container): void {
+  if (floor !== 8 || !scene.textures.exists("spriteBeachGrass")) return;
+  const SCATTER: Array<[string, number, number]> = [
+    ["spriteBeachGrass", 26, 26],
+    ["spriteBeachGrass", 26, 26], // weighted: grass tufts are the commonest beach filler
+    ["spriteBeachGrass2", 24, 25],
+    ["spriteBeachShrub", 26, 22],
+    ["spriteBeachRockSm", 24, 22],
+    ["spriteBeachDriftwood", 30, 22],
+    ["spriteBeachSeaweed", 24, 22],
+    ["spriteBeachCrab", 22, 22] // rare critter (1 of 8 weights)
+  ];
+  const decorations: DecorationSprite[] = [];
+  for (let y = 0; y < rows.length; y += 1) {
+    const row = rows[y];
+    if (row === undefined) continue;
+    for (let x = 0; x < row.length; x += 1) {
+      if (row[x] !== "e") continue;
+      const h = ((x * 2654435761) ^ (y * 40503)) >>> 0;
+      if (h % 100 >= 14) continue;
+      const [key, w, hgt] = SCATTER[(h >>> 9) % SCATTER.length]!;
+      const jit = 0.82 + ((h >>> 17) % 32) / 100; // 0.82–1.14
+      const ox = (((h >>> 3) % 7) - 3) / 14;
+      const oy = (((h >>> 11) % 7) - 3) / 14;
+      decorations.push({ key, x: x + 0.5 + ox, y: y + 0.9 + oy, w: Math.round(w * jit), h: Math.round(hgt * jit) });
+    }
+  }
+  decorations.sort((a, b) => a.y - b.y).forEach((item) => placeMapSprite(item, parent));
 }
 
 // Per-floor mood: warm grade in towns, a cool dusk gloom + vignette in the cemetery,
@@ -2206,6 +2292,8 @@ function applyFloorAtmosphere(floor: number): void {
   if (paletteGrade) {
     if (floor === 1) {
       paletteGrade.setFillStyle(0x6e79a8).setAlpha(0.34).setVisible(true); // cool overcast graveyard
+    } else if (floor === 8) {
+      paletteGrade.setFillStyle(0xffdca0).setAlpha(0.16).setVisible(true); // warm sun-drenched beach
     } else if (TOWN_FLOORS.has(floor)) {
       paletteGrade.setFillStyle(0xffe6c4).setAlpha(0.12).setVisible(true); // warm storybook town
     } else {
@@ -2311,6 +2399,39 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
           const drawKey = scene.textures.exists(key) ? key : tileBaseTexture(state.rows[y]?.[x] ?? "");
           const deg = generatedStage.rotations?.[`${x},${y}`] ?? 0;
           texture.draw(rotatedTileTextureKey(drawKey, deg), (x - tileX) * TILE_SIZE, (y - tileY) * TILE_SIZE);
+        }
+      }
+    }
+    // The Sunken Beach (floor 8): a WARM low-frequency tonal mottle over the sand. Generated
+    // stages bake per-cell rotations, but the sand still reads as one repeated stamp — the same
+    // grid the cemetery had. Broad sun-bleached lifts + warm damp/shaded hollows (same noise
+    // field as the canyon) dissolve the lattice. Sand surfaces only; water/cliff untouched.
+    if (state.floor === 8) {
+      const SAND = new Set(["e", "l", ";", "z", ","]);
+      // Raised faces that should cast a shadow onto the sand directly below them: cliff edges,
+      // rock walls and the stair runs. Their north edge is the lip of a higher level, so sand to
+      // their SOUTH sits in shade. This is what sells the shelf as elevated (vs. a wall on flat sand).
+      const CLIFF = new Set(["0", "1", "2", "x", "|", "[", "]"]);
+      for (let y = tileY; y < tileBottom; y += 1) {
+        if (state.rows[y] === undefined) continue;
+        for (let x = tileX; x < tileRight; x += 1) {
+          const ch = state.rows[y]?.[x];
+          if (!ch || !SAND.has(ch)) continue;
+          const px = (x - tileX) * TILE_SIZE, py = (y - tileY) * TILE_SIZE;
+          const m = searingGroundMottle(x, y);
+          if (m < 0.44) {
+            texture.draw("graveMottleOverlay", px, py, ((0.44 - m) / 0.44) * 0.2, 0x8a6b3e); // warm damp/shaded sand
+          } else if (m > 0.6) {
+            texture.draw("graveMottleOverlay", px, py, ((m - 0.6) / 0.4) * 0.16, 0xfff1d0); // sun-bleached lift
+          }
+          // Cast shadow: this sand tile lies at the foot of a cliff/stair run directly to its north.
+          const north = state.rows[y - 1]?.[x];
+          if (north && CLIFF.has(north)) {
+            texture.draw("beachCliffShadow", px, py, 0.34, 0x241a12); // warm cliff-base shade
+            // A fainter second step so the shade reaches ~1.5 tiles before the open sand recovers.
+            const south = state.rows[y + 1]?.[x];
+            if (south && SAND.has(south)) texture.draw("beachCliffShadow", px, py + TILE_SIZE, 0.16, 0x241a12);
+          }
         }
       }
     }

@@ -442,7 +442,7 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteBeachStairsRun4", x: 44, y: 43.9, w: 128, h: 82 },
     { key: "spriteBeachHut", x: 72.7, y: 21.4, w: 116, h: 118 }, // driftwood hut on the high east shelf
     { key: "spriteBeachCave", x: 38.5, y: 30.5, w: 104, h: 102 }, // cliff cave POI
-    { key: "spriteBeachRuin", x: 63.1, y: 20.9, w: 62, h: 82 }, // broken arch on the high path
+    { key: "spriteBeachRuin", x: 63.1, y: 20.9, w: 84, h: 64 }, // broken arch on the high path (sized to art aspect)
     { key: "spriteBeachDock", x: 40.9, y: 56.6, w: 168, h: 86 }, // southwest tidal dock
     { key: "spriteBeachBoat", x: 54, y: 57.4, w: 74, h: 48 },
     { key: "spriteBeachTent", x: 84.9, y: 47.6, w: 92, h: 70 }, // eastern spit camp
@@ -454,11 +454,11 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteBeachBoulder", x: 90, y: 34.1, w: 82, h: 54 },
     { key: "spriteBeachStoneWall", x: 67.1, y: 23.5, w: 86, h: 52 },
     { key: "spriteBeachFence", x: 71.5, y: 42.7, w: 136, h: 36 },
-    { key: "spriteBeachWell", x: 76.8, y: 36.1, w: 42, h: 60 },
+    { key: "spriteBeachWell", x: 76.8, y: 36.1, w: 56, h: 45 }, // round stone well-head (sized to art aspect)
     { key: "spriteBeachLogPile", x: 55.2, y: 36.5, w: 76, h: 44 },
     { key: "spriteBeachLogPile", x: 70.3, y: 44.6, w: 68, h: 40 },
     { key: "spriteBeachStump", x: 46.6, y: 41.4, w: 44, h: 34 },
-    { key: "spriteBeachBonePile", x: 81.2, y: 29.4, w: 50, h: 24 },
+    { key: "spriteBeachBonePile", x: 81.2, y: 29.4, w: 50, h: 38 }, // skull pile (sized to art aspect)
     { key: "spriteBeachBarrel", x: 36.4, y: 55, w: 42, h: 52 },
     { key: "spriteBeachBarrel", x: 87.8, y: 51.1, w: 38, h: 48 },
     { key: "spriteBeachFlowerYellow", x: 29.6, y: 27.4, w: 34, h: 26 },
