@@ -1144,6 +1144,27 @@ function create(this: Phaser.Scene): void {
   for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
     makeTileTexture(this, "searingGround", `searingGroundV${i}`, i * 72, 0, 72, 72, undefined, false, badlandsRedshift);
   }
+  // Large-scale tonal mottle (floor 6): the 16 cracked-earth variants vary in CRACK PATTERN but
+  // sit within ~3 luma of each other, so the canyon floor reads as one flat red sheet. Bake a
+  // sun-bleached ('L') and a shadowed ('D') tier of each variant; searingGroundTexture selects a
+  // tier from a smooth low-frequency noise field, so broad regions read as sunlit ground or
+  // shadowed hollows (the painted-terrain depth CT/Pokémon floors have) while the per-cell hash
+  // still picks the crack variant for texture variety. Cached keys -> tile dedupe still works.
+  for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
+    const src = this.textures.get(`searingGroundV${i}`).getSourceImage() as CanvasImageSource;
+    for (const [suf, bri, sat] of [["L", 1.14, 1.05], ["D", 0.82, 0.96]] as const) {
+      const cv = document.createElement("canvas");
+      cv.width = TILE_SIZE;
+      cv.height = TILE_SIZE;
+      const cc = cv.getContext("2d");
+      if (!cc) continue;
+      cc.imageSmoothingEnabled = false;
+      cc.filter = `brightness(${bri}) saturate(${sat})`;
+      cc.drawImage(src, 0, 0, TILE_SIZE, TILE_SIZE);
+      this.textures.addCanvas(`searingGroundV${i}${suf}`, cv);
+      this.textures.get(`searingGroundV${i}${suf}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
   // Lit mesa-top variants (floor 6): the massif PLATEAU TOP reuses the cracked-earth
   // ground, brightened + warmed so raised rock reads as sun-hit, distinct from the
   // shadowed canyon floor below. Depth then comes from the rim lip + face, Northwood-
@@ -7794,6 +7815,20 @@ function marshGroundTexture(tile: string, x: number, y: number): string | null {
   return null;
 }
 
+// Smooth value-noise (0..1) over tile coords for the canyon-floor tonal mottle. A ~6-tile
+// lattice with smoothstep interpolation, so the lit/shadowed ground regions are broad and soft
+// rather than per-cell noise. Deterministic (edgeHash lattice) -> stable across chunk rebuilds.
+function searingGroundMottle(x: number, y: number): number {
+  const scale = 6;
+  const fx = x / scale, fy = y / scale;
+  const x0 = Math.floor(fx), y0 = Math.floor(fy);
+  const tx = fx - x0, ty = fy - y0;
+  const sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty);
+  const n = (ix: number, iy: number) => edgeHash(ix, iy, 919);
+  const top = n(x0, y0) + (n(x0 + 1, y0) - n(x0, y0)) * sx;
+  const bot = n(x0, y0 + 1) + (n(x0 + 1, y0 + 1) - n(x0, y0 + 1)) * sx;
+  return top + (bot - top) * sy;
+}
 function searingGroundTexture(floor: number, tile: string, x: number, y: number): string {
   if (floor === 4) {
     const city = cityGroundTexture(tile, x, y);
@@ -7808,7 +7843,13 @@ function searingGroundTexture(floor: number, tile: string, x: number, y: number)
     // Massif body ('w') is the raised plateau TOP — lit mesa rock, not flat dark
     // tileMassif. The cliff-face overlay then paints its exposed edges on top.
     if (tile === "w") return `searingMesaTopV${h % SEARING_GROUND_VARIANTS}`;
-    if (SEARING_GROUND_TILES.has(tile)) return `searingGroundV${h % SEARING_GROUND_VARIANTS}`;
+    if (SEARING_GROUND_TILES.has(tile)) {
+      // Crack variant from the per-cell hash; tonal tier from a smooth low-frequency field so
+      // sunlit / shadowed regions span many tiles instead of speckling cell-to-cell.
+      const m = searingGroundMottle(x, y);
+      const tier = m < 0.3 ? "D" : m > 0.72 ? "L" : "";
+      return `searingGroundV${h % SEARING_GROUND_VARIANTS}${tier}`;
+    }
   }
   // Sunken Desert (floor 7): the massif body 'w' is the raised sandstone PLATEAU TOP — a lit
   // sand surface, not the dark borrowed badlands massif. The cliff-face overlay paints its
