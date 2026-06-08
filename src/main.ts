@@ -220,7 +220,8 @@ interface PlayerEntityView extends ActorView {
 interface MonsterEntityView extends ActorView {
   hp: Phaser.GameObjects.Rectangle;
   targetRing: Phaser.GameObjects.Ellipse;
-  aggroRing: Phaser.GameObjects.Ellipse;
+  aggroMark: Phaser.GameObjects.Text;
+  aggroActive?: boolean;
   roleBadge: Phaser.GameObjects.Text;
   statusText: Phaser.GameObjects.Text;
 }
@@ -2945,7 +2946,7 @@ function syncEntities(): void {
     view.statusText.setVisible(statusLabel.length > 0);
     view.hp.width = 36 * (monster.hp / monster.maxHp);
     view.targetRing.setVisible(me.targetId === monster.id);
-    view.aggroRing.setVisible(monster.targetId === me.id);
+    setAggroMark(view, monster.targetId === me.id);
   }
 
   for (const [id, view] of monsterViews) {
@@ -3378,7 +3379,19 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
   view.targetX = view.x;
   view.targetY = view.y;
   const targetRing = scene.add.ellipse(0, 8, 38, 20).setStrokeStyle(2, 0xf97316, 0.9).setVisible(false);
-  const aggroRing = scene.add.ellipse(0, 8, 44, 24).setStrokeStyle(2, 0xef4444, 0.95).setVisible(false);
+  // Aggro "!" that pops above the head when the monster targets you (replaces the
+  // old red ground ring, which read as visual noise). Toggled via setAggroMark().
+  const aggroMark = scene.add
+    .text(0, -66, "!", {
+      fontFamily: "Inter, ui-sans-serif, system-ui",
+      fontSize: "24px",
+      fontStyle: "bold",
+      color: "#ff3434",
+      stroke: "#2a0000",
+      strokeThickness: 5
+    })
+    .setOrigin(0.5)
+    .setVisible(false);
   const shadow = scene.add.ellipse(0, 13, 30, 12, 0x000000, 0.28);
   const actor = monsterActorSpec(monster);
   const sprite = scene.add.sprite(0, actor.yOffset, actorTextureKey(actor.family, monster.dir, 0)).setDisplaySize(actor.width, actor.height);
@@ -3400,16 +3413,49 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
     }
   });
   attachHoverTint(zone, sprite);
-  view.add([aggroRing, targetRing, shadow, sprite, nameText, roleBadge, statusText, hpBack, hp, zone]);
+  view.add([targetRing, shadow, sprite, nameText, roleBadge, statusText, hpBack, hp, zone, aggroMark]);
   view.nameText = nameText;
   view.hp = hp;
   view.targetRing = targetRing;
-  view.aggroRing = aggroRing;
+  view.aggroMark = aggroMark;
   view.roleBadge = roleBadge;
   view.statusText = statusText;
   view.sprite = sprite;
   setActorAnimation(view, actor.family, monster.dir, monster.moving, actor.width, actor.height, monster.attacking);
   return view;
+}
+
+// Toggle the aggro "!" with a pop on the rising edge only (so it animates once
+// when the monster first targets you, not every frame it stays aggressive).
+function setAggroMark(view: MonsterEntityView, active: boolean): void {
+  if (active === view.aggroActive) return;
+  view.aggroActive = active;
+  const mark = view.aggroMark;
+  scene.tweens.killTweensOf(mark);
+  if (active) {
+    mark.setVisible(true).setAlpha(1).setScale(0.2);
+    mark.y = -58;
+    scene.tweens.add({
+      targets: mark,
+      scale: 1,
+      y: -66,
+      ease: "Back.easeOut",
+      duration: 240,
+      onComplete: () => {
+        // Gentle idle bob to keep the alert legible without the noisy ground ring.
+        scene.tweens.add({ targets: mark, y: -70, duration: 620, ease: "Sine.easeInOut", yoyo: true, repeat: -1 });
+      }
+    });
+  } else {
+    scene.tweens.add({
+      targets: mark,
+      scale: 0,
+      alpha: 0,
+      duration: 130,
+      ease: "Quad.easeIn",
+      onComplete: () => mark.setVisible(false)
+    });
+  }
 }
 
 function roleBadgeText(role: MonsterView["role"]): string {
