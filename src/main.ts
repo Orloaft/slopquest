@@ -951,6 +951,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("desertTiles", "/desert-tiles.png");
   this.load.image("beachTiles", "/beach-tiles.png");
   this.load.image("jungleTiles", "/jungle-tiles.png");
+  this.load.image("dungeonTiles", "/crypt-dungeon-tiles.png"); // Deepdelve Mine (floor 10) cave art
   this.load.image("effectsSheet", "/effects.png");
   this.load.image("waterFishingSpots", "/water-fishing-spots.png");
   this.load.image("oreNodeSheet", "/ore-rock-gathering-nodes.png");
@@ -1729,6 +1730,18 @@ function create(this: Phaser.Scene): void {
   // the Northwood/beach ledges. Best-guess crop; tune visually like the beach cliff band.
   makeTileTexture(this, "jungleTiles", "tileJungleCliff", 694, 146, 72, 30);
   makeSpriteTexture(this, "jungleTiles", "spriteJungleVault", 676, 862, 120, 100);
+
+  // The Deepdelve Mine (floor 10) cave identity (M1): bespoke worked-stone floor from the Dungeon
+  // Tileset's FLOOR TILES grid (6x3 of ~70px cobble/flagstone variants at cols 19/99/178/258/...,
+  // rows 101/182/265). Four cobble variants rolled per ~3x3 region so the cave floor reads as
+  // varied worked rock instead of the reused cemetery cobble. The `#` rock wall is a rough boulder
+  // floor tile shaded dark — one cohesive stone family where walls are the same rock, unlit/solid.
+  makeTileTexture(this, "dungeonTiles", "tileMineFloor", 19, 101, 69, 71);
+  makeTileTexture(this, "dungeonTiles", "tileMineFloorB", 99, 101, 69, 71);
+  makeTileTexture(this, "dungeonTiles", "tileMineFloorC", 178, 101, 70, 71);
+  makeTileTexture(this, "dungeonTiles", "tileMineFloorD", 258, 182, 70, 71);
+  makeTileTexture(this, "dungeonTiles", "tileMineWall", 417, 101, 69, 71, undefined, false,
+    (r, g, b) => [Math.round(r * 0.52), Math.round(g * 0.52), Math.round(b * 0.52)]);
 
   mapLayer = this.add.container(0, 0);
   mapDecorationLayer = this.add.container(0, 0);
@@ -8368,10 +8381,25 @@ function jungleGroundTexture(tile: string, x: number, y: number): string | null 
   if (tile === "|") return "tileJungleCliff";
   return null;
 }
+const MINE_FLOOR = ["tileMineFloor", "tileMineFloorB", "tileMineFloorC", "tileMineFloorD"] as const;
+function mineGroundTexture(tile: string, x: number, y: number): string | null {
+  // Deepdelve Mine (floor 10) walkable rock: the spine (c), chambers (b), entry (d) and the
+  // stair landing (<) all roll one of four worked-stone variants per ~3x3 region, so the cave
+  // floor stops reading as the reused cemetery cobble/dirt.
+  if (tile === "b" || tile === "c" || tile === "d" || tile === "<") {
+    const region = ((((x / 3) | 0) * 73856093) ^ (((y / 3) | 0) * 19349663)) >>> 0;
+    return MINE_FLOOR[region % MINE_FLOOR.length]!;
+  }
+  return null;
+}
 function searingGroundTexture(floor: number, tile: string, x: number, y: number): string {
   if (floor === 9) {
     const jungle = jungleGroundTexture(tile, x, y);
     if (jungle) return jungle;
+  }
+  if (floor === 10) {
+    const mine = mineGroundTexture(tile, x, y);
+    if (mine) return mine;
   }
   if (floor === 1) {
     const grave = cemeteryGroundTexture(tile, x, y);
@@ -8652,6 +8680,14 @@ const FLOOR_TILE_TEXTURE: Record<number, Record<string, string>> = {
     "1": "tileBeachCliffRight",
     "|": "tileBeachRockWall",
     u: "tileBeachRock"
+  },
+  // The Deepdelve Mine (floor 10): solid rock (#) renders as the dark worked-stone wall instead
+  // of the flat grey tileRock speckle. Ore outcrops (r) default to a green forest bush here — map
+  // them to the rock wall as a placeholder so unmined veins read as rock; M2 gives them proper
+  // tier-coloured ore + glint.
+  10: {
+    "#": "tileMineWall",
+    r: "tileMineWall"
   }
 };
 function tileBaseTexture(tile: string): string {
