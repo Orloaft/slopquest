@@ -15,7 +15,11 @@ const REGIONS: Array<{ name: string; x: number; y: number }> = [
   { name: "4-silver-chamber", x: 54, y: 23 },
   { name: "5-gold-chamber", x: 74, y: 37 },
   { name: "6-mithril-pocket", x: 47, y: 53 },
-  { name: "7-spine-corridor", x: 16, y: 28 }
+  { name: "7-spine-corridor", x: 16, y: 28 },
+  // Vein close-ups: stand on each ore's approach tile so the vein sits ~1 tile north of centre.
+  { name: "8-copper-vein", x: 6, y: 8 },
+  { name: "9-gold-vein", x: 70, y: 34 },
+  { name: "10-mithril-vein", x: 42, y: 52 }
 ];
 
 test("Deepmine overview tour", async ({ page }) => {
@@ -27,6 +31,9 @@ test("Deepmine overview tour", async ({ page }) => {
   await page.locator("#nameInput").fill(name);
   await page.locator("#joinButton").click();
   await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.self()));
+  // Survey only — keep the player alive through the deep chambers so death dialogs never block a
+  // teleport and veins always render.
+  await page.evaluate(() => window.__TIB_E2E__?.send({ type: "chat", text: "/dev god" }));
 
   for (const region of REGIONS) {
     const sx = scaleX(10, region.x + 0.5);

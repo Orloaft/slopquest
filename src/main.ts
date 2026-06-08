@@ -1203,6 +1203,15 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "oreNodeSheet", "spriteCopperVein", 193, 107, 123, 66);
   makeSpriteTexture(this, "oreNodeSheet", "spriteTinVein", 193, 190, 123, 66);
   makeSpriteTexture(this, "oreNodeSheet", "spriteIronVein", 193, 273, 123, 66);
+  // Deeper-tier veins from the ore sheet's bespoke "full" crops. The sheet rows are
+  // copper/tin/iron/SILVER/GOLD/MITHRIL/ADAMANTITE/runite/orichalcum/deep-crystal (no coal row);
+  // pitch is ~77px and uneven, so each crop is taken from its measured content band to avoid
+  // bleeding into the neighbouring tier. Coal has no bespoke art — it reuses the iron rock crop
+  // tinted dark (see ORE_VEIN_TINTS).
+  makeSpriteTexture(this, "oreNodeSheet", "spriteSilverVein", 193, 360, 123, 58);
+  makeSpriteTexture(this, "oreNodeSheet", "spriteGoldVein", 193, 434, 123, 57);
+  makeSpriteTexture(this, "oreNodeSheet", "spriteMithrilVein", 193, 508, 123, 60);
+  makeSpriteTexture(this, "oreNodeSheet", "spriteAdamantVein", 193, 584, 123, 60);
   makeSpriteTexture(this, "graveyardTiles", "spriteGrave", 580, 360, 58, 78);
   makeSpriteTexture(this, "graveyardTiles", "spriteFence", 20, 552, 126, 66);
   makeSpriteTexture(this, "graveyardTiles", "spriteDeadTree", 548, 18, 116, 198);
@@ -3200,18 +3209,18 @@ function ensureFishingRippleTexture(): void {
 const ORE_VEIN_TEXTURES: Record<string, string> = {
   copper: "spriteCopperVein",
   tin: "spriteTinVein",
-  iron: "spriteIronVein"
+  iron: "spriteIronVein",
+  coal: "spriteIronVein", // no bespoke coal row on the sheet — iron rock crop, tinted dark below
+  silver: "spriteSilverVein",
+  gold: "spriteGoldVein",
+  mithril: "spriteMithrilVein",
+  adamant: "spriteAdamantVein"
 };
 
-// Deeper ores reuse the copper vein crop (no dedicated sheet rows yet) but are
-// tinted to their ore colour so the tier reads at a glance until bespoke vein
-// art lands. copper/tin/iron use their own sprites untinted.
+// Coal alone has no dedicated vein art, so the iron crop is tinted near-black to read as coal.
+// Every other tier uses its own untinted sprite.
 const ORE_VEIN_TINTS: Record<string, number> = {
-  coal: 0x4a4a52,
-  silver: 0xc8cdd4,
-  gold: 0xd4af37,
-  mithril: 0x4a6fa5,
-  adamant: 0x3f7d5a
+  coal: 0x3a3a40
 };
 
 function createMiningNodeView(node: MiningNodeView): MiningEntityView {
