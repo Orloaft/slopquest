@@ -47,9 +47,12 @@ const TEX: Record<string, Tex> = {
   tileBeachShellSand: [180, 99, 72, 72], tileBeachPebbleSand: [260, 99, 72, 72],
   tileBeachWetSand: [20, 180, 70, 72], tileBeachPath: [96, 402, 70, 72],
   tileBeachStairsMid: [462, 864, 72, 82, 0, true], tileBeachStairsLeft: [390, 864, 72, 82, 0, true],
-  tileBeachStairsRight: [606, 864, 72, 82, 0, true], tileBeachCliff: [596, 100, 72, 82, 0, true],
-  tileBeachCliffLeft: [528, 100, 72, 82, 0, true], tileBeachCliffRight: [740, 100, 72, 82, 0, true],
-  tileBeachRockWall: [596, 128, 72, 72, 0, true], tileBeachRock: [1048, 482, 70, 62, undefined, true],
+  tileBeachStairsRight: [606, 864, 72, 82, 0, true],
+  // Cliff faces sample the COBBLE band (y143–176) of the sandstone plateau blocks, not the sandy
+  // block-top above it (the old [.,100,72,82] rects baked the wall as sand). Mirrors main.ts.
+  tileBeachCliff: [560, 144, 72, 28, 0, true],
+  tileBeachCliffLeft: [528, 144, 52, 28, 0, true], tileBeachCliffRight: [608, 144, 52, 28, 0, true],
+  tileBeachRockWall: [560, 144, 72, 28, 0, true], tileBeachRock: [1048, 482, 70, 62, undefined, true],
   tileBeachLagoon: [1040, 92, 72, 72, 18], tileOcean: [1056, 92, 72, 72, 18],
   tileOceanRipple: [1144, 92, 72, 72, 18], tileOceanRock: [1128, 92, 72, 72, 18]
 };

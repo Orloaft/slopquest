@@ -1149,6 +1149,38 @@ function create(this: Phaser.Scene): void {
       shc.putImageData(img, 0, 0);
       this.textures.addCanvas("beachCliffShadow", sh);
       this.textures.get("beachCliffShadow").setFilter(Phaser.Textures.FilterMode.NEAREST);
+      // Directional sandstone RIM bands (white, alpha strong at the active edge -> 0 by ~11px),
+      // tinted dark per-draw to bevel the EXPOSED edges of a cliff-top so the raised sand top reads
+      // as a framed shelf rather than bleeding into the lower ground sand. One band per side; reused
+      // by the floor-8 plateau-top border pass (the S edge is left to the existing sunlit lip).
+      const makeBeachRim = (name: string, dir: "N" | "S" | "W" | "E") => {
+        const c = document.createElement("canvas");
+        c.width = TILE_SIZE;
+        c.height = TILE_SIZE;
+        const cc = c.getContext("2d");
+        if (!cc) return;
+        const im = cc.createImageData(TILE_SIZE, TILE_SIZE);
+        const dd = im.data;
+        for (let yy = 0; yy < TILE_SIZE; yy += 1) {
+          for (let xx = 0; xx < TILE_SIZE; xx += 1) {
+            const edgeDist = dir === "N" ? yy : dir === "S" ? TILE_SIZE - 1 - yy : dir === "W" ? xx : TILE_SIZE - 1 - xx;
+            const t = edgeDist / (TILE_SIZE * 0.16); // fade out by ~11px in from the edge
+            const a = Math.max(0, 1 - t);
+            const i = (yy * TILE_SIZE + xx) * 4;
+            dd[i] = 255;
+            dd[i + 1] = 255;
+            dd[i + 2] = 255;
+            dd[i + 3] = Math.round(255 * a * a); // ease-out so the band hugs the very rim
+          }
+        }
+        cc.putImageData(im, 0, 0);
+        this.textures.addCanvas(name, c);
+        this.textures.get(name).setFilter(Phaser.Textures.FilterMode.NEAREST);
+      };
+      makeBeachRim("beachTopRimN", "N");
+      makeBeachRim("beachTopRimS", "S");
+      makeBeachRim("beachTopRimW", "W");
+      makeBeachRim("beachTopRimE", "E");
     }
   }
   makeTileTexture(this, "townTiles", "tileWater", 24, 248, 84, 84);
@@ -1611,21 +1643,23 @@ function create(this: Phaser.Scene): void {
   makeTileTexture(this, "beachTiles", "tileBeachStairsLeft", 390, 864, 72, 82, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachStairsMid", 462, 864, 72, 82, 0, true);
   makeTileTexture(this, "beachTiles", "tileBeachStairsRight", 606, 864, 72, 82, 0, true);
-  // Cliff faces: the source art has light TAN sand baked between the dark boulders, so a
-  // plain row of these tiled into dark-column / tan-gap / dark-column and the plateau read
-  // flat. Fix with a luminance COMPRESS recolor — darken the bright tan hard (brightK) while
-  // barely touching the dark boulder shadows (darkK) — which flattens each tile into a solid
-  // dark rock wall that contrasts the bright sand and clearly reads as raised. Top course
-  // (lip) stays a touch lighter than the wall body. The render pass still adds lip + foot AO.
-  const beachFaceShade = (darkK: number, brightK: number) => (r: number, g: number, b: number): [number, number, number] => {
-    const lum = (r + g + b) / 765; // 0 (shadow) .. 1 (lit tan)
-    const k = darkK + (brightK - darkK) * lum;
-    return [Math.round(r * k), Math.round(g * k), Math.round(b * k)];
-  };
-  makeTileTexture(this, "beachTiles", "tileBeachCliff", 596, 100, 72, 82, 0, false, beachFaceShade(0.54, 0.3));
-  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 100, 72, 82, 0, false, beachFaceShade(0.54, 0.3));
-  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 740, 100, 72, 82, 0, false, beachFaceShade(0.54, 0.3));
-  makeTileTexture(this, "beachTiles", "tileBeachRockWall", 596, 128, 72, 72, 0, false, beachFaceShade(0.4, 0.2));
+  // Cliff faces: crop the COBBLE band (y143–176) of the sandstone plateau blocks — the old
+  // [.,100,72,82] rects sampled mostly the SANDY block-top ABOVE the face, so the wall baked as
+  // sand and the plateau read flat no matter how it was tuned. Natural cobble already contrasts
+  // the bright sand top, so no luminance hack is needed; the render pass adds the sunlit lip +
+  // foot-AO. The lower wall course (|) is mildly darkened for a lit-top → shadowed-base gradient.
+  const beachWallShade = (k: number) => (r: number, g: number, b: number): [number, number, number] => [Math.round(r * k), Math.round(g * k), Math.round(b * k)];
+  // Mid face + lower wall crop the SAME flat cobble band (above the block's rounded bottom, which
+  // dips into magenta and otherwise avg-fills into a muddy maroon seam) so stacked courses tile
+  // seamlessly — the wall is just darkened for a lit-top → shadowed-base read. Caps crop a tighter
+  // 52px window onto the block's rounded L/R ends so the SW/SE corners actually round off.
+  // x = mid face, 0/1 = rounded L/R side edges. All crop a rim-free cobble band (y144–172, clear of
+  // both the lit rim above and the magenta rounded-bottom below) so 0/1 can stack down the FULL
+  // flank without a repeating rim line — the render pass adds the sunlit lip to the top course only.
+  makeTileTexture(this, "beachTiles", "tileBeachCliff", 560, 144, 72, 28, 0, false);
+  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 144, 52, 28, 0, false);
+  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 608, 144, 52, 28, 0, false);
+  makeTileTexture(this, "beachTiles", "tileBeachRockWall", 560, 144, 72, 28, 0, false, beachWallShade(0.78));
   makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62, undefined, true);
   makeTileTexture(this, "beachTiles", "tileBeachShore", 1320, 100, 72, 72);
   makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1320, 100, 72, 72);
@@ -1681,8 +1715,19 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "beachTiles", "spriteBeachSeaweed", 581, 503, 33, 31, true);
   // Untamed Jungle (floor 9). Crops from assetsources/rejected/jungle-biome-tiles.png.
   makeTileTexture(this, "jungleTiles", "tileJungle", 18, 97, 72, 74);
+  // Lush jungle-floor VARIANTS (other leafy-foliage ground tiles from the sheet's GROUND row).
+  // The floor-9 ground picker rolls one per ~3x3 region so the canopy floor reads as varied
+  // undergrowth, not one repeated stamp. Cobble/dirt/plank/bamboo tiles are skipped on purpose.
+  makeTileTexture(this, "jungleTiles", "tileJungleB", 102, 97, 72, 74);
+  makeTileTexture(this, "jungleTiles", "tileJungleC", 184, 97, 72, 74);
+  makeTileTexture(this, "jungleTiles", "tileJungleD", 429, 182, 72, 74);
   makeTileTexture(this, "jungleTiles", "tileJungleWall", 524, 100, 68, 82);
   makeTileTexture(this, "jungleTiles", "tileJungleRiver", 1069, 100, 72, 72);
+  // Jungle cliff face (rocky, vine-draped) for ELEVATION — cropped from the sheet's CLIFF EDGES
+  // band. Plateau tops reuse the walkable jungle floor `-`; this is the vertical drop beneath them.
+  // The floor-9 relief pass adds a lit lip on the top course + foot-AO, the same recipe that sells
+  // the Northwood/beach ledges. Best-guess crop; tune visually like the beach cliff band.
+  makeTileTexture(this, "jungleTiles", "tileJungleCliff", 694, 146, 72, 30);
   makeSpriteTexture(this, "jungleTiles", "spriteJungleVault", 676, 862, 120, 100);
 
   mapLayer = this.add.container(0, 0);
@@ -2469,6 +2514,29 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
           if (above && SAND.has(above)) texture.draw("graveMottleOverlay", px, py - TILE_SIZE, 0.22, 0xfff1d0); // sun-catch on the lip-top sand
         }
       }
+      // Plateau-top BORDER: frame the raised sand top so the shelf reads as a defined platform on
+      // EVERY side, not just the front drop. Only true cliff-tops are framed: a top `l` is one whose
+      // column-run of `l` bottoms out onto a cliff face (CLIFF) — flat foraging shelves of `l` bottom
+      // out onto plain sand and stay borderless. Border the N/E/W edges where the top meets lower
+      // ground (the S edge already breaks into the lit face), beveling each exposed rim into shadow.
+      const isBeachLedgeTop = (lx: number, ly: number): boolean => {
+        if (state.rows[ly]?.[lx] !== "l") return false;
+        let yy = ly;
+        while (state.rows[yy]?.[lx] === "l") yy += 1;
+        return CLIFF.has(state.rows[yy]?.[lx] ?? "");
+      };
+      const isRaised = (ch: string | undefined): boolean => ch === "l" || ch === "z" || (ch !== undefined && CLIFF.has(ch));
+      for (let y = tileY; y < tileBottom; y += 1) {
+        if (state.rows[y] === undefined) continue;
+        for (let x = tileX; x < tileRight; x += 1) {
+          if (!isBeachLedgeTop(x, y)) continue;
+          const px = (x - tileX) * TILE_SIZE, py = (y - tileY) * TILE_SIZE;
+          if (!isRaised(state.rows[y - 1]?.[x])) texture.draw("beachTopRimN", px, py, 0.5, 0x241a0e);
+          if (!isRaised(state.rows[y + 1]?.[x])) texture.draw("beachTopRimS", px, py, 0.5, 0x241a0e);
+          if (!isRaised(state.rows[y]?.[x - 1])) texture.draw("beachTopRimW", px, py, 0.5, 0x241a0e);
+          if (!isRaised(state.rows[y]?.[x + 1])) texture.draw("beachTopRimE", px, py, 0.5, 0x241a0e);
+        }
+      }
     }
     // Southgate Cemetery (floor 1): a SOMBER tonal mottle over the ground. The same low-frequency
     // field as the canyon, but tinted cool and low-contrast (overcast graveyard, not desert sun):
@@ -2555,6 +2623,55 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
           if (!isRiver(x, y + 1)) texture.draw("searingRiverFoamS", px, py);
           if (!isRiver(x - 1, y)) texture.draw("searingRiverFoamW", px, py);
           if (!isRiver(x + 1, y)) texture.draw("searingRiverFoamE", px, py);
+        }
+      }
+    }
+    // The Untamed Jungle (floor 9) painted depth. Jungle is NOT a generated stage (it renders
+    // from high-res jungle-tiles.png crops), so — like beach — it gets its relief from a live pass
+    // rather than baked tiles. Three cues break up the flat green: (a) a low-frequency canopy
+    // mottle (deep leaf-shadow pools + sun-dappled lifts) on BOTH the floor and the canopy walls
+    // so neither reads as one repeated stamp, (b) a soft shadow the canopy casts onto the floor
+    // directly south of a wall, and (c) foam/banks where the winding river meets land. Collision is
+    // untouched (E walls + i river still block in shared.ts). Milestone 1 of the jungle overhaul;
+    // elevation geometry (cliffs/ledges/stairs) lands in a later pass.
+    if (state.floor === 9) {
+      const FLOOR = new Set(["-", "z"]);
+      const isRiverJ = (cx: number, cy: number): boolean => state.rows[cy]?.[cx] === "i";
+      for (let y = tileY; y < tileBottom; y += 1) {
+        if (state.rows[y] === undefined) continue;
+        for (let x = tileX; x < tileRight; x += 1) {
+          const ch = state.rows[y]?.[x];
+          if (!ch) continue;
+          const px = (x - tileX) * TILE_SIZE, py = (y - tileY) * TILE_SIZE;
+          const m = searingGroundMottle(x, y);
+          if (FLOOR.has(ch)) {
+            // Damp leaf-litter shade vs filtered sun-dapple on the jungle floor.
+            if (m < 0.42) texture.draw("graveMottleOverlay", px, py, ((0.42 - m) / 0.42) * 0.28, 0x102a0c);
+            else if (m > 0.62) texture.draw("graveMottleOverlay", px, py, ((m - 0.62) / 0.38) * 0.18, 0xe8f0a8);
+            // Canopy cast shadow: the wall to the north is taller foliage shading this floor cell.
+            if (state.rows[y - 1]?.[x] === "E") texture.draw("beachCliffShadow", px, py, 0.5, 0x0a1606);
+          } else if (ch === "E") {
+            // Deep canopy-shadow pools vs sun-struck leaf crowns so the wall of green varies.
+            if (m < 0.4) texture.draw("graveMottleOverlay", px, py, ((0.4 - m) / 0.4) * 0.34, 0x081604);
+            else if (m > 0.64) texture.draw("graveMottleOverlay", px, py, ((m - 0.64) / 0.36) * 0.2, 0xbfe070);
+          } else if (ch === "i") {
+            // Lap foam/banks onto each river edge that faces land (reuse the canyon-river foam).
+            if (!isRiverJ(x, y - 1)) texture.draw("searingRiverFoamN", px, py);
+            if (!isRiverJ(x, y + 1)) texture.draw("searingRiverFoamS", px, py);
+            if (!isRiverJ(x - 1, y)) texture.draw("searingRiverFoamW", px, py);
+            if (!isRiverJ(x + 1, y)) texture.draw("searingRiverFoamE", px, py);
+          } else if (ch === "|") {
+            // Jungle cliff face (`|` remapped to the jungle cliff on floor 9): a lit lip on the TOP
+            // course (where the plateau top breaks into the drop) + a contact-shadow AO onto the
+            // floor at its foot — the Northwood/beach recipe that grounds the elevation.
+            if (state.rows[y - 1]?.[x] !== "|") {
+              texture.draw("searingCliffLip", px, py); // warm sunlit break at the plateau lip
+              // Bright sun-catch on the plateau TOP just above the lip, so high ground reads clearly
+              // brighter than the lower floor (the cue that actually sells the drop, like beach).
+              if (state.rows[y - 1]?.[x] === "-") texture.draw("graveMottleOverlay", px, py - TILE_SIZE, 0.26, 0xeaffbe);
+            }
+            if (state.rows[y + 1]?.[x] !== "|" && y + 1 < tileBottom) texture.draw("searingCliffAO", px, py + TILE_SIZE);
+          }
         }
       }
     }
@@ -8236,7 +8353,26 @@ function searingGroundMottle(x: number, y: number): number {
   const bot = n(x0, y0 + 1) + (n(x0 + 1, y0 + 1) - n(x0, y0 + 1)) * sx;
   return top + (bot - top) * sy;
 }
+// Untamed Jungle (floor 9) floor variety: the walkable jungle floor `-` rolls one of four leafy
+// undergrowth tiles per ~3x3 region (cohesive blotches, not per-cell speckle) so the canopy floor
+// reads as varied foliage instead of one repeated stamp. Walls/river/path keep their textures.
+const JUNGLE_FLOOR = ["tileJungle", "tileJungleB", "tileJungleC", "tileJungleD"] as const;
+function jungleGroundTexture(tile: string, x: number, y: number): string | null {
+  if (tile === "-") {
+    const region = ((((x / 3) | 0) * 73856093) ^ (((y / 3) | 0) * 19349663)) >>> 0;
+    return JUNGLE_FLOOR[region % JUNGLE_FLOOR.length]!;
+  }
+  // Elevation: the tile vocab is saturated, so jungle cliff faces reuse `|` (a globally
+  // blocked + sight-blocking beach rock-wall char that floor 9 never uses otherwise) and
+  // remap to the jungle cliff texture here. Keeps collision correct with zero new chars.
+  if (tile === "|") return "tileJungleCliff";
+  return null;
+}
 function searingGroundTexture(floor: number, tile: string, x: number, y: number): string {
+  if (floor === 9) {
+    const jungle = jungleGroundTexture(tile, x, y);
+    if (jungle) return jungle;
+  }
   if (floor === 1) {
     const grave = cemeteryGroundTexture(tile, x, y);
     if (grave) return grave;

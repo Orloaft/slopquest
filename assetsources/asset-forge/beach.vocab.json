@@ -20,14 +20,14 @@
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#ba9261"
+      "minimapColor": "#7b5030"
     },
     "1": {
       "role": "beach-cliff-right",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#b58e5d"
+      "minimapColor": "#754d2e"
     },
     "2": {
       "role": "beach-stairs",
@@ -90,14 +90,14 @@
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#bd945f"
+      "minimapColor": "#784f2f"
     },
     "|": {
       "role": "beach-rock-wall",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#b68b57"
+      "minimapColor": "#784f2f"
     },
     "u": {
       "role": "beach-rock",

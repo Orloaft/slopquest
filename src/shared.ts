@@ -845,6 +845,10 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 44, 38, 24, 8, "-");
     fillRect(rows, 71, 38, 6, 15, "-");
     fillRect(rows, 80, 38, 17, 14, "-"); // Jungle Vault arena, reached by the sealed K gate
+    // Elevation slice (option B): raise the dead-end vault arena onto a plateau — walkable `-` top,
+    // a rocky cliff face `C` dropping along its south edge to the lower arena floor, climbable via a
+    // ramp notch. Validates the cliff/lip/AO pipeline before the full tiered re-author of the zone.
+    drawJungleLedge(rows, 80, 38, 16, 4, [{ x: 86, w: 3 }]);
     setTile(rows, 20, 42, "K"); // sealed Jungle Vault (does not transport)
   }
 
@@ -1187,17 +1191,40 @@ const BEACH_FACE_H = 3;
 function drawBeachLedge(rows: string[][], x: number, y: number, w: number, topH: number, topTile: string, stairs: Array<{ x: number; w: number }>): void {
   fillRect(rows, x, y, w, topH, topTile);
   const faceY = y + topH;
-  // Top course: lit cliff lip with end caps.
-  setTile(rows, x - 1, faceY, "0");
-  fillRect(rows, x, faceY, w, 1, "x");
-  setTile(rows, x + w, faceY, "1");
-  // Rock-wall courses beneath the lip give the face its height.
-  for (let row = 1; row < BEACH_FACE_H; row += 1) fillRect(rows, x, faceY + row, w, 1, "|");
+  // Top course: lit cliff lip with rounded end caps, kept FLUSH with the plateau top and the
+  // wall courses below (caps at x / x+w-1, not overhanging at x-1 / x+w) so all three courses
+  // share one column span — otherwise the caps jut a tile past the wall and each corner reads as
+  // a ragged L-step instead of a clean plateau edge.
+  setTile(rows, x, faceY, "0");
+  fillRect(rows, x + 1, faceY, w - 2, 1, "x");
+  setTile(rows, x + w - 1, faceY, "1");
+  // Rock-wall courses beneath the lip give the face its height. The left/right columns reuse the
+  // rounded cap tiles (0/1) down the FULL flank so the plateau sides round off instead of ending in
+  // a square `|` wall; only the interior is flat rock-wall.
+  for (let row = 1; row < BEACH_FACE_H; row += 1) {
+    setTile(rows, x, faceY + row, "0");
+    fillRect(rows, x + 1, faceY + row, w - 2, 1, "|");
+    setTile(rows, x + w - 1, faceY + row, "1");
+  }
   for (const stair of stairs) {
     // Walkable path notch through every face course, plus a landing on the plateau top.
     fillRect(rows, stair.x, faceY, stair.w, BEACH_FACE_H, "z");
     fillRect(rows, stair.x, y + topH - 1, stair.w, 1, "z");
   }
+}
+
+// Jungle elevation (option B): lay a raised plateau whose walkable top reuses the jungle floor `-`,
+// with a rocky vine-draped cliff face `C` dropping along its south edge to the lower floor. Mirrors
+// drawBeachLedge but simpler — organic jungle cliffs need no rounded L/R caps. `ramps` leave `-`
+// gaps through the face as climbable access. The floor-9 relief pass paints the lit lip + foot-AO
+// that sell the drop as a real elevation change.
+const JUNGLE_FACE_H = 3;
+function drawJungleLedge(rows: string[][], x: number, y: number, w: number, topH: number, ramps: Array<{ x: number; w: number }>): void {
+  fillRect(rows, x, y, w, topH, "-");
+  const faceY = y + topH;
+  // Cliff face reuses `|` (globally blocked; remapped to the jungle cliff texture on floor 9).
+  fillRect(rows, x, faceY, w, JUNGLE_FACE_H, "|");
+  for (const ramp of ramps) fillRect(rows, ramp.x, faceY, ramp.w, JUNGLE_FACE_H, "-"); // climbable notch through the face
 }
 
 function smoothBeachShoreCornerClusters(rows: string[][]): void {
