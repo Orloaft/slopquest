@@ -87,12 +87,72 @@ format. Lower priority — art quality is already acceptable.
 
 ## P2 — roster expansion (gaps, not quality)
 
-- **Floor 4 "Northwatch" has ZERO enemies** — biggest content hole. Needs a 3–5 enemy set.
-- **Floors 5–8 (marsh, badlands, desert, beach) have only 2 enemy types each** — thin; +2–3 each.
-- **Floor 3 "Northwood" has 22 types** — massively overstuffed vs every other floor. Candidate to
-  redistribute some woodland enemies up to Northwatch (4) once it's themed.
-- Floor 0 (Waystone hub) and the route are intentionally light/safe — leave.
+Current per-floor counts (live, from `MONSTER_SPAWNS`): 1 Cemetery **6**, 2 Crypt **4**,
+3 Northwood **22**, **4 Northwatch 0**, 5 Marsh **2**, 6 Badlands **2**, 7 Desert **2**,
+8 Beach **2**, 9 Jungle **3**, 10 Mine **5**. Target band: **~4–6 per combat floor.**
 
-### Suggested expansion direction
-Bias new enemies toward the **under-served biomes** (4–8) so difficulty pacing has variety, and
-theme floor 4 first since it's empty. Aim for ~4–6 enemies per combat floor as the target band.
+- **Floor 4 Northwatch has ZERO enemies** — biggest content hole, theme it first.
+- **Floors 5–8 have only 2 types each** — thin; +2–3 each.
+- **Floor 3 Northwood has 22 types** — overstuffed; some (dire_wolf, orc) could migrate up to the
+  Northwatch frontier instead of authoring net-new there.
+- Floor 0 (Waystone) and 11 (Route) are intentionally safe — leave.
+
+### Lore hook for cohesion
+Floors 5/7/8/9 are all **"Sunken"** zones and already carry a drowned-civilization motif
+(`sun_wraith`, `drowned_marauder`, `totem_wraith`). New enemies below lean into a **fallen empire
+swallowed by marsh/sand/sea/jungle** — its dead, its guardians, and the beasts that nest in the ruins.
+
+### Concrete expansion wishlist (inspired by fantasy-RPG bestiaries)
+Same sheet format as P0 (`enemy-directional-4x4-v2`, 384×384). `role` matches the existing vocab
+(`trash` / `elite` / `turret`=ranged caster / `ambush` / `boss`). ~20 net-new across 6 floors.
+
+#### Floor 4 — Northwatch (frontier watch-fort; **author first**)
+A fortified pass besieged from the north and rotting from within — human antagonists + northern beasts.
+
+| Enemy | Role | Art brief | Inspiration |
+|---|---|---|---|
+| **frontier_marauder** | trash | leather-clad deserter, hand-axe, fur half-cloak | bandit (RuneScape/Skyrim) |
+| **watch_defector** | elite | corrupted ex-watchman, torn tabard, spear + kite shield | fallen knight |
+| **frost_warg** | trash (pack) | pale ice-matted wolf, frost breath, paler than dire_wolf | warg (LotR) |
+| **raid_houndmaster** | turret | horn-blowing raider, throws bolas/whistles in the warg pack | beastmaster |
+| **iron_sentinel** | elite | animated suit of watch-plate, hollow glow, halberd | animated armor (Dark Souls) |
+| **Warlord Korrun** | boss | hulking raid warlord, horned helm, two-handed cleaver | warband chief |
+
+#### Floor 5 — The Sunken Marsh (+3)
+| Enemy | Role | Art brief | Inspiration |
+|---|---|---|---|
+| **bog_leech** | ambush | giant blood-leech, lunges from murk, glossy segmented body | swamp leech |
+| **marsh_hag** | turret | hunched bog-witch, ragged shawl, hurls green hexbolts | witch (Diablo) |
+| **gloom_toad** | trash | bloated venom toad, warty, tongue-lash, faint poison haze | giant toad (DnD) |
+
+#### Floor 6 — The Searing Badlands (+3)
+| Enemy | Role | Art brief | Inspiration |
+|---|---|---|---|
+| **magma_hound** | trash (pack) | obsidian-skinned beast, glowing lava cracks, ember drool | hellhound |
+| **cinder_shade** | turret | floating ember-spirit, ash robes, lobs fire motes | fire wraith |
+| **basalt_brute** | elite | slab-rock golem, cracked molten core, slow heavy slam | rock elemental |
+
+#### Floor 7 — The Sunken Desert (+3)
+| Enemy | Role | Art brief | Inspiration |
+|---|---|---|---|
+| **bone_scorpion** | ambush | giant pale scorpion, burrows + bursts, raised stinger | desert scorpion |
+| **dune_reaver** | trash | mummified tomb-raider undead, wrapped, rusted khopesh | mummy (DQ/ES) |
+| **mirage_shade** | turret | shimmering sand-djinn, half-formed torso, sand-blast | djinn/sand mage |
+
+#### Floor 8 — The Sunken Beach (+3)
+| Enemy | Role | Art brief | Inspiration |
+|---|---|---|---|
+| **tide_lurker** | trash | anglerfish-headed humanoid, dripping, barnacled spear | deep one (Lovecraft) |
+| **brine_siren** | turret | pale sea-spirit, kelp hair, sings a luring sonic blast | siren/harpy |
+| **coral_crab** | elite | armored giant crab, coral-crusted shell, big pincer guard | giant crab (tank) |
+
+#### Floor 9 — The Untamed Jungle (+2)
+| Enemy | Role | Art brief | Inspiration |
+|---|---|---|---|
+| **canopy_stalker** | ambush | sleek jungle panther, drops from above, spotted dark coat | hunting cat |
+| **blowpipe_headhunter** | turret | feral ruin-tribe hunter, bone mask, ranged dart blowpipe | jungle tribal |
+
+> Author order: **Floor 4 set first** (it's empty), then one caster + one melee per Sunken floor
+> (5→8) to lift each to ~4–5 types, then the Jungle pair. Bosses (Korrun) last. Reuse the P0
+> tinting trick where a palette swap yields a second type from one sheet (e.g. frost_warg → a
+> darker timber variant) to stretch coverage.
