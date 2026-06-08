@@ -1732,16 +1732,32 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "jungleTiles", "spriteJungleVault", 676, 862, 120, 100);
 
   // The Deepdelve Mine (floor 10) cave identity (M1): bespoke worked-stone floor from the Dungeon
-  // Tileset's FLOOR TILES grid (6x3 of ~70px cobble/flagstone variants at cols 19/99/178/258/...,
-  // rows 101/182/265). Four cobble variants rolled per ~3x3 region so the cave floor reads as
-  // varied worked rock instead of the reused cemetery cobble. The `#` rock wall is a rough boulder
-  // floor tile shaded dark — one cohesive stone family where walls are the same rock, unlit/solid.
+  // Tileset's FLOOR TILES grid (~70px cobble at col 19, row 101). A SINGLE base tile keeps the cave
+  // floor homogeneous (one consistent worked rock); it's de-gridded by flip-only variants below.
+  // The `#` rock wall is a rough boulder floor tile shaded dark — one cohesive stone family where
+  // walls are the same rock, unlit/solid.
   makeTileTexture(this, "dungeonTiles", "tileMineFloor", 19, 101, 69, 71);
-  makeTileTexture(this, "dungeonTiles", "tileMineFloorB", 99, 101, 69, 71);
-  makeTileTexture(this, "dungeonTiles", "tileMineFloorC", 178, 101, 70, 71);
-  makeTileTexture(this, "dungeonTiles", "tileMineFloorD", 258, 182, 70, 71);
   makeTileTexture(this, "dungeonTiles", "tileMineWall", 417, 101, 69, 71, undefined, false,
     (r, g, b) => [Math.round(r * 0.52), Math.round(g * 0.52), Math.round(b * 0.52)]);
+  // Homogeneous-but-not-gridded: bake flip variants of the ONE mine-floor tile (the cemetery
+  // lesson — flips break the cobble lattice at seams; per-tile TONE would just redraw the grid as a
+  // brightness checkerboard, so none is applied). The floor-10 picker rolls one per cell.
+  for (let v = 0; v < MINE_FLOOR_VARIANTS; v += 1) {
+    const cv = document.createElement("canvas");
+    cv.width = TILE_SIZE;
+    cv.height = TILE_SIZE;
+    const cc = cv.getContext("2d");
+    if (!cc) continue;
+    cc.imageSmoothingEnabled = false;
+    const flipH = (v & 1) === 1, flipV = (v & 2) === 2;
+    cc.save();
+    cc.translate(TILE_SIZE / 2, TILE_SIZE / 2);
+    cc.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+    cc.drawImage(this.textures.get("tileMineFloor").getSourceImage() as CanvasImageSource, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+    cc.restore();
+    this.textures.addCanvas(`tileMineFloorV${v}`, cv);
+    this.textures.get(`tileMineFloorV${v}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+  }
 
   mapLayer = this.add.container(0, 0);
   mapDecorationLayer = this.add.container(0, 0);
@@ -8381,14 +8397,15 @@ function jungleGroundTexture(tile: string, x: number, y: number): string | null 
   if (tile === "|") return "tileJungleCliff";
   return null;
 }
-const MINE_FLOOR = ["tileMineFloor", "tileMineFloorB", "tileMineFloorC", "tileMineFloorD"] as const;
+const MINE_FLOOR_VARIANTS = 4;
+const MINE_FLOOR = ["tileMineFloorV0", "tileMineFloorV1", "tileMineFloorV2", "tileMineFloorV3"] as const;
 function mineGroundTexture(tile: string, x: number, y: number): string | null {
-  // Deepdelve Mine (floor 10) walkable rock: the spine (c), chambers (b), entry (d) and the
-  // stair landing (<) all roll one of four worked-stone variants per ~3x3 region, so the cave
-  // floor stops reading as the reused cemetery cobble/dirt.
+  // Deepdelve Mine (floor 10) walkable rock: the spine (c), chambers (b), entry (d) and the stair
+  // landing (<) all draw the SAME worked-stone floor, picking a flip variant PER CELL so the cobble
+  // lattice dissolves at seams while the surface stays one homogeneous rock (no tonal patchwork).
   if (tile === "b" || tile === "c" || tile === "d" || tile === "<") {
-    const region = ((((x / 3) | 0) * 73856093) ^ (((y / 3) | 0) * 19349663)) >>> 0;
-    return MINE_FLOOR[region % MINE_FLOOR.length]!;
+    const h = ((x * 73856093) ^ (y * 19349663)) >>> 0;
+    return MINE_FLOOR[h % MINE_FLOOR.length]!;
   }
   return null;
 }
