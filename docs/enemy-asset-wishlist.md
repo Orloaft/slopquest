@@ -45,8 +45,8 @@ cycles are short (3–4 frames). They read fine in motion but lack real directio
 dune_skitterer, sun_wraith, reef_prowler, venomous_stalker, totem_wraith`
 
 ### TIER C — PLACEHOLDERS, replace first ⚠️
-The 16 `WOODLAND_BESPOKE_FAMILIES`. **These have full 64-frame rigs (8-dir, walk+attack) but the
-art is procedurally drawn by `tools/generate_woodland_enemy_sprites_v2.py` — flat geometric
+The `WOODLAND_BESPOKE_FAMILIES` v2 set. **These use the current 4x4 walk-only runtime contract but
+the art is procedurally drawn by `tools/generate_woodland_enemy_sprites_v2.py` — flat geometric
 blobs with dot eyes.** Examples seen: dire_wolf is a grey rectangle-on-legs; ancient_treant is a
 brown box with a green slab; ghoul/orc are green blocks. This is what "avg placeholder sprites"
 means here. **22 of the ~43 types render on these.**
@@ -55,7 +55,7 @@ means here. **22 of the ~43 types render on these.**
 
 ## P0 wishlist — replace the 16 placeholder families
 
-One sheet per family (768×768, format above). Brief is the art direction; "feeds" = types that
+One sheet per family (384×384, format above). Brief is the art direction; "feeds" = types that
 inherit it (so one good sheet fixes several enemies).
 
 | # | Family | Art brief | Feeds (types) | Floor(s) |

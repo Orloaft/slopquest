@@ -78,6 +78,10 @@ ENEMIES = [
     Enemy("grave_revenant", "Grave Revenant", "revenant", ((74, 82, 84), (181, 197, 177), (83, 139, 126))),
     Enemy("crypt_sentinel", "Crypt Sentinel", "sentinel", ((78, 76, 82), (196, 190, 165), (137, 107, 68))),
     Enemy("pale_banshee", "Pale Banshee", "banshee", ((180, 196, 204), (82, 91, 112), (139, 218, 223))),
+    Enemy("reach_hen", "Reach Hen", "hen", ((151, 112, 70), (226, 207, 160), (172, 55, 45))),
+    Enemy("meadow_hopper", "Meadow Hopper", "hopper", ((117, 158, 82), (65, 96, 62), (220, 203, 126))),
+    Enemy("reach_vole", "Reach Vole", "vole", ((117, 92, 72), (74, 57, 49), (210, 176, 137))),
+    Enemy("grave_shambler", "Grave Shambler", "shambler", ((102, 105, 92), (69, 69, 72), (188, 179, 145))),
 ]
 
 PUBLIC_COPY_SLUGS = {
@@ -97,6 +101,10 @@ PUBLIC_COPY_SLUGS = {
     "grave_revenant",
     "crypt_sentinel",
     "pale_banshee",
+    "reach_hen",
+    "meadow_hopper",
+    "reach_vole",
+    "grave_shambler",
 }
 
 
@@ -445,6 +453,79 @@ def draw_banshee(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
         rect(d, cx + 12 + atk, gy - 17, 3, 3, (246, 251, 231))
 
 
+def draw_hen(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
+    feather, belly, comb = e.colors
+    phase = math.sin(f / COLS * math.tau)
+    cx, gy = 16, 29 - int(abs(phase))
+    step = 1 if phase > 0 else -1
+    ellipse(d, cx - 8, gy - 14, 15, 12, feather)
+    ellipse(d, cx + 3, gy - 17, 7, 7, belly)
+    poly(d, [(cx + 8, gy - 14), (cx + 14, gy - 12), (cx + 8, gy - 10)], (218, 177, 72))
+    rect(d, cx + 5, gy - 21, 2, 4, comb)
+    rect(d, cx + 8, gy - 20, 2, 4, comb)
+    rect(d, cx + 6, gy - 15, 1, 1, (34, 30, 24))
+    rect(d, cx - 11, gy - 13, 5, 7, feather)
+    rect(d, cx - 5 + step, gy - 3, 2, 5, (118, 84, 49))
+    rect(d, cx + 2 - step, gy - 3, 2, 5, (118, 84, 49))
+    rect(d, cx - 6 + step, gy + 2, 4, 1, (118, 84, 49))
+    rect(d, cx + 1 - step, gy + 2, 4, 1, (118, 84, 49))
+
+
+def draw_hopper(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
+    hide, dark, belly = e.colors
+    phase = math.sin(f / COLS * math.tau)
+    hop = [0, 2, 5, 2][f]
+    stretch = 1 if f in (1, 2) else 0
+    cx, gy = 16 + (1 if f == 2 else 0), 30 - hop
+    ellipse(d, cx - 9, gy - 13 - stretch, 17, 13 + stretch, hide)
+    ellipse(d, cx + 2, gy - 18 - stretch, 8, 8, hide)
+    poly(d, [(cx + 4, gy - 18), (cx + 1, gy - 25), (cx + 7, gy - 19)], hide)
+    poly(d, [(cx + 8, gy - 18), (cx + 11, gy - 25), (cx + 10, gy - 18)], hide)
+    rect(d, cx + 6, gy - 16, 1, 1, (28, 32, 24))
+    ellipse(d, cx - 4, gy - 11, 8, 7, belly)
+    rect(d, cx - 8, gy - 3, 6, 3, dark)
+    rect(d, cx + 1 + int(phase > 0), gy - 3, 8, 3, dark)
+    rect(d, cx - 10 - int(phase > 0), gy, 7, 2, dark)
+    rect(d, cx + 5, gy, 7, 2, dark)
+
+
+def draw_vole(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
+    fur, dark, ear = e.colors
+    phase = math.sin(f / COLS * math.tau)
+    cx, gy = 16, 30 - int(abs(phase))
+    step = 1 if phase > 0 else -1
+    ellipse(d, cx - 10, gy - 12, 18, 10, fur)
+    ellipse(d, cx + 4, gy - 15, 7, 7, fur)
+    ellipse(d, cx + 5, gy - 19, 3, 4, ear)
+    rect(d, cx + 9, gy - 12, 3, 2, dark)
+    rect(d, cx + 7, gy - 14, 1, 1, (28, 24, 20))
+    rect(d, cx - 13, gy - 10, 5, 2, dark)
+    rect(d, cx - 6 + step, gy - 3, 3, 4, dark)
+    rect(d, cx + 2 - step, gy - 3, 3, 4, dark)
+    rect(d, cx - 7 + step, gy, 4, 1, dark)
+    rect(d, cx + 1 - step, gy, 4, 1, dark)
+
+
+def draw_shambler(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
+    rot, cloth, bone = e.colors
+    phase = math.sin(f / COLS * math.tau)
+    drag = [0, 1, 2, 1][f]
+    lean = 2 + drag
+    cx, gy = 16, 29 - int(abs(phase))
+    leg = 1 if phase > 0 else -1
+    poly(d, [(cx - 8 + lean, gy), (cx - 7 + lean, gy - 17), (cx + 5 + lean, gy - 16), (cx + 8 + lean, gy)], rot)
+    rect(d, cx - 5 + lean, gy - 22, 8, 7, rot)
+    rect(d, cx - 6 + lean, gy - 16, 11, 7, cloth)
+    rect(d, cx - 3 + lean, gy - 20, 1, 1, (216, 217, 178))
+    rect(d, cx + 2 + lean, gy - 20, 1, 1, (216, 217, 178))
+    poly(d, [(cx - 6 + lean, gy - 13), (cx - 13 - drag, gy - 9), (cx - 8 + lean, gy - 7)], bone)
+    poly(d, [(cx + 6 + lean, gy - 12), (cx + 14 + drag, gy - 6), (cx + 7 + lean, gy - 5)], rot)
+    rect(d, cx - 5 + leg + lean, gy - 1, 3, 6, cloth)
+    rect(d, cx + 2 - leg + lean, gy - 1, 3, 6, bone)
+    rect(d, cx - 6 + leg + lean, gy + 4, 4, 2, bone)
+    rect(d, cx + 2 - leg + lean, gy + 4, 4, 2, bone)
+
+
 DRAWERS = {
     "goblin": draw_goblin,
     "shaman": draw_goblin,
@@ -464,6 +545,10 @@ DRAWERS = {
     "revenant": draw_revenant,
     "sentinel": draw_sentinel,
     "banshee": draw_banshee,
+    "hen": draw_hen,
+    "hopper": draw_hopper,
+    "vole": draw_vole,
+    "shambler": draw_shambler,
 }
 
 
@@ -618,14 +703,42 @@ def make_contact(results: list[dict]) -> Path:
     return out
 
 
+def make_runtime_atlas(results: list[dict]) -> Path:
+    atlas = Image.new("RGBA", (COLS * CELL, ROWS * CELL * len(results)), (0, 0, 0, 0))
+    for index, item in enumerate(results):
+        alpha = Image.open(item["cleaned_alpha_sheet"]).convert("RGBA")
+        atlas.alpha_composite(alpha, (0, index * ROWS * CELL))
+    out = ROOT / "public" / "woodland-bespoke-v2-sheet.png"
+    atlas.save(out)
+    return out
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     results = [process_enemy(enemy) for enemy in ENEMIES]
     contact = make_contact(results)
-    manifest = {"pipeline": PIPELINE_SPEC, "output_root": str(OUT), "contact": str(contact), "enemies": results}
+    runtime_atlas = make_runtime_atlas(results)
+    manifest = {
+        "pipeline": PIPELINE_SPEC,
+        "output_root": str(OUT),
+        "contact": str(contact),
+        "runtime_atlas": str(runtime_atlas),
+        "runtime_atlas_order": [item["slug"] for item in results],
+        "enemies": results,
+    }
     (OUT / "woodland_bespoke_v2_manifest.json").write_text(json.dumps(manifest, indent=2))
     gif_files = [Path(item["gifs"][row]) for item in results for row in ROW_NAMES]
-    print(json.dumps({"contact": str(contact), "manifest": str(OUT / "woodland_bespoke_v2_manifest.json"), "gif_count": len(gif_files)}, indent=2))
+    print(
+        json.dumps(
+            {
+                "contact": str(contact),
+                "manifest": str(OUT / "woodland_bespoke_v2_manifest.json"),
+                "runtime_atlas": str(runtime_atlas),
+                "gif_count": len(gif_files),
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

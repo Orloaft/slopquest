@@ -37,9 +37,11 @@ test("tree depth sort", async ({ page }) => {
     if (!me || !trees.length) return null;
     trees.sort((a: any, b: any) => Math.hypot(a.x - me.x, a.y - me.y) - Math.hypot(b.x - me.x, b.y - me.y));
     const t = trees[0];
+    if (!t) return null;
     return { x: t.x, y: t.y, id: t.id };
   });
   const t = (await tree.jsonValue()) as { x: number; y: number; id: string };
+  expect(t).toBeTruthy();
 
   // BEHIND: feet ~1.4 tiles above the trunk base -> tree should draw on top.
   await teleportTo(page, 3, t.x, t.y - 1.4);

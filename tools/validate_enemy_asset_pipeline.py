@@ -42,6 +42,10 @@ PUBLIC_REQUIRED_SLUGS = {
     "grave_revenant",
     "crypt_sentinel",
     "pale_banshee",
+    "reach_hen",
+    "meadow_hopper",
+    "reach_vole",
+    "grave_shambler",
 }
 
 
@@ -86,15 +90,18 @@ def main() -> None:
     if pipeline.get("name") != PIPELINE_NAME:
         fail(f"manifest pipeline is {pipeline.get('name')!r}, expected {PIPELINE_NAME!r}")
     if tuple(pipeline.get("row_order") or ()) != ROW_NAMES:
-        fail("manifest row_order does not match walk up/right/down/left then attack up/right/down/left")
+        fail("manifest row_order does not match walk up/right/down/left")
     if pipeline.get("cell_px") != CELL or pipeline.get("columns") != COLS or pipeline.get("rows") != ROWS:
-        fail("manifest geometry does not match 96px cells, 8 columns, 8 rows")
+        fail("manifest geometry does not match 96px cells, 4 columns, 4 rows")
 
     enemies = manifest.get("enemies") or []
     by_slug = {enemy.get("slug"): enemy for enemy in enemies}
     missing = sorted(PUBLIC_REQUIRED_SLUGS - set(by_slug))
     if missing:
         fail(f"manifest missing public runtime families: {', '.join(missing)}")
+
+    runtime_atlas = Path(manifest.get("runtime_atlas") or "")
+    validate_runtime_atlas(runtime_atlas, len(enemies))
 
     for slug in sorted(PUBLIC_REQUIRED_SLUGS):
         item = by_slug[slug]
@@ -133,6 +140,17 @@ def main() -> None:
             indent=2,
         )
     )
+
+
+def validate_runtime_atlas(path: Path, family_count: int) -> None:
+    if not path.exists():
+        fail(f"missing runtime atlas {path}")
+    with Image.open(path) as im:
+        expected = (CELL * COLS, CELL * ROWS * family_count)
+        if im.size != expected:
+            fail(f"{path} is {im.size[0]}x{im.size[1]}, expected {expected[0]}x{expected[1]}")
+        if im.mode != "RGBA":
+            fail(f"{path} mode is {im.mode}, expected RGBA")
 
 
 if __name__ == "__main__":

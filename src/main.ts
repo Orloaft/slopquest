@@ -889,7 +889,11 @@ const WOODLAND_BESPOKE_FAMILIES = [
   "bog_wraith",
   "grave_revenant",
   "crypt_sentinel",
-  "pale_banshee"
+  "pale_banshee",
+  "reach_hen",
+  "meadow_hopper",
+  "reach_vole",
+  "grave_shambler"
 ] as const;
 // Northwood authored-layout tree/prop sprite catalogue ids (obj_NNN). Sprites are
 // exported to public/sprites/nw/ by tools/build-northwood-from-authored.ts and
@@ -929,9 +933,7 @@ function preload(this: Phaser.Scene): void {
   this.load.image("goblinRaiderSheet", "/goblin-raider-sheet.png");
   this.load.image("greyWolfSheet", "/grey-wolf-sheet.png");
   this.load.image("wispSheet", "/wisp-sheet.png");
-  for (const family of WOODLAND_BESPOKE_FAMILIES) {
-    this.load.image(woodlandBespokeSheetKey(family), `/${family.replaceAll("_", "-")}-sheet.png`);
-  }
+  this.load.image("woodlandBespokeSheet", "/woodland-bespoke-v2-sheet.png");
   this.load.image("newEnemiesSheet", "/new-enemies.png");
   this.load.image("swampEnemySheet", "/skitterer-spitter.png");
   this.load.image("townTiles", "/towntiles.png");
@@ -3523,13 +3525,12 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "reef_prowler") return { family: "reef_prowler", width: 54, height: 50, yOffset: -10 };
   if (monster.type === "venomous_stalker") return { family: "venomous_stalker", width: 52, height: 46, yOffset: -8, tint: 0x9fd07a };
   if (monster.type === "totem_wraith") return { family: "totem_wraith", width: 48, height: 56, yOffset: -16, tint: 0xd0b3ff };
-  // Broken Reach 1-15 starter critters & low cemetery undead — placeholder art
-  // borrowing existing families (rodent / undead) until bespoke sprites land.
-  if (monster.type === "reach_hen") return { family: "rat", width: 38, height: 28, yOffset: 1 };
-  if (monster.type === "meadow_hopper") return { family: "rat", width: 42, height: 30, yOffset: 0 };
-  if (monster.type === "reach_vole") return { family: "rat", width: 44, height: 28, yOffset: 2 };
+  // Broken Reach 1-15 starter critters & low cemetery undead.
+  if (monster.type === "reach_hen") return { family: "reach_hen", width: 38, height: 32, yOffset: -2 };
+  if (monster.type === "meadow_hopper") return { family: "meadow_hopper", width: 42, height: 38, yOffset: -5 };
+  if (monster.type === "reach_vole") return { family: "reach_vole", width: 42, height: 28, yOffset: 1 };
   if (monster.type === "restless_husk") return { family: "ghoul", width: 44, height: 52, yOffset: -12 };
-  if (monster.type === "grave_shambler") return { family: "skeleton", width: 44, height: 50, yOffset: -11 };
+  if (monster.type === "grave_shambler") return { family: "grave_shambler", width: 44, height: 52, yOffset: -12 };
   if (monster.type === "bound_wight") return { family: "grave_revenant", width: 46, height: 56, yOffset: -16 };
   // Biome enemies that shipped without a resolver entry and were silently falling
   // back to the goblin sprite below. Borrow the nearest-fitting family + a thematic
@@ -6712,26 +6713,22 @@ function createActorFrames(scene: Phaser.Scene): void {
 }
 
 function createWoodlandBespokeFrames(scene: Phaser.Scene): void {
-  // enemy-directional-4x4-v2: 384x384 sheets, 96px cells, 4 walk rows
-  // (up/right/down/left), 4 frames each. Walk-only — attacks reuse the walk pose
-  // plus shared effect overlays, so there are no attack rows to slice.
-  const directionalFrames = (): DirectionFrames => {
+  // enemy-directional-4x4-v2: 384x384 family sheets packed vertically into one
+  // runtime atlas, 96px cells, 4 walk rows (up/right/down/left), 4 frames each.
+  // Walk-only — attacks reuse the walk pose plus shared effect overlays.
+  const directionalFrames = (familyIndex: number): DirectionFrames => {
     const xs = Array.from({ length: 4 }, (_, index) => index * 96);
+    const yBase = familyIndex * 4 * 96;
     return {
-      up: spriteFrames(xs, 0 * 96, 96, 96),
-      right: spriteFrames(xs, 1 * 96, 96, 96),
-      down: spriteFrames(xs, 2 * 96, 96, 96),
-      left: spriteFrames(xs, 3 * 96, 96, 96)
+      up: spriteFrames(xs, yBase + 0 * 96, 96, 96),
+      right: spriteFrames(xs, yBase + 1 * 96, 96, 96),
+      down: spriteFrames(xs, yBase + 2 * 96, 96, 96),
+      left: spriteFrames(xs, yBase + 3 * 96, 96, 96)
     };
   };
-  for (const family of WOODLAND_BESPOKE_FAMILIES) {
-    const sourceKey = woodlandBespokeSheetKey(family);
-    createExplicitFrameSet(scene, sourceKey, family, directionalFrames());
+  for (const [index, family] of WOODLAND_BESPOKE_FAMILIES.entries()) {
+    createExplicitFrameSet(scene, "woodlandBespokeSheet", family, directionalFrames(index));
   }
-}
-
-function woodlandBespokeSheetKey(family: string): string {
-  return `${family}Sheet`;
 }
 
 // The two swamp enemies get hand-authored 4-direction walk + attack animations

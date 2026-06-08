@@ -97,10 +97,6 @@ function preloadBudget(entry: string, rootDir: string): { files: FileEntry[]; mi
     const path = match[1];
     if (path) assetPaths.add(path);
   }
-  for (const family of literalStringArray(source, "WOODLAND_BESPOKE_FAMILIES")) {
-    assetPaths.add(`/${family.replaceAll("_", "-")}-sheet.png`);
-  }
-
   const found: FileEntry[] = [];
   const missing: string[] = [];
   for (const assetPath of [...assetPaths].sort()) {
@@ -118,12 +114,6 @@ function preloadBudget(entry: string, rootDir: string): { files: FileEntry[]; mi
   }
   found.sort((a, b) => b.bytes - a.bytes);
   return { files: found, missing, totalBytes: found.reduce((sum, file) => sum + file.bytes, 0) };
-}
-
-function literalStringArray(source: string, name: string): string[] {
-  const match = source.match(new RegExp(`const\\s+${name}\\s*=\\s*\\[([\\s\\S]*?)\\]\\s+as\\s+const`));
-  if (!match?.[1]) return [];
-  return [...match[1].matchAll(/["']([^"']+)["']/g)].map((item) => item[1]!).filter(Boolean);
 }
 
 function parseArgs(args: string[]): ParsedArgs {

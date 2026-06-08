@@ -170,7 +170,7 @@ monsters:
   - { type: reach_hen,     at: { floor: 11, x: 59, y: 15 }, zone: route }
   - { type: meadow_hopper, at: { floor: 11, x: 56, y: 18 }, zone: route }
   - { type: reach_vole,    at: { floor: 11, x: 61, y: 17 }, zone: route }
-  - { type: rat,           at: { floor: 11, x: 57, y: 13 }, zone: route }
+  - { type: reach_vole,    at: { floor: 11, x: 57, y: 13 }, zone: route }
 
 trees:
   - { type: oak,  at: { floor: 0, x: 25.1, y: 57.0 } }

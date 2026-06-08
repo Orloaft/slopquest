@@ -1,0 +1,606 @@
+{
+  "source": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/reach_vole_generated_chroma.png",
+  "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid",
+  "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/reach_vole_generated_chroma_alpha.png",
+  "chroma": [
+    0,
+    255,
+    0
+  ],
+  "tolerance": 40,
+  "remove_green_halo": false,
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cell_width": 96,
+    "cell_height": 96
+  },
+  "chroma_remnant_pixels": 0,
+  "alpha_corners": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "preview_background": [
+    28,
+    32,
+    38
+  ],
+  "rows": [
+    {
+      "row": 0,
+      "name": "walk_up",
+      "frames": 4,
+      "source_boxes": [
+        [
+          9,
+          3,
+          84,
+          63
+        ],
+        [
+          105,
+          6,
+          180,
+          66
+        ],
+        [
+          201,
+          3,
+          276,
+          63
+        ],
+        [
+          297,
+          6,
+          372,
+          66
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/frame_000.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/frame_001.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/frame_002.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/frame_003.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/aligned/000_frame_000.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/aligned/001_frame_001.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/aligned/002_frame_002.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/aligned/003_frame_003.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.07,
+          0.006,
+          0.07
+        ],
+        "average_changed_fraction": 0.0487
+      },
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/walk_up_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/alignment_report.json"
+    },
+    {
+      "row": 1,
+      "name": "walk_right",
+      "frames": 4,
+      "source_boxes": [
+        [
+          9,
+          129,
+          84,
+          189
+        ],
+        [
+          105,
+          126,
+          180,
+          186
+        ],
+        [
+          201,
+          129,
+          276,
+          189
+        ],
+        [
+          297,
+          126,
+          372,
+          186
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/frame_000.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/frame_001.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/frame_002.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/frame_003.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/aligned/000_frame_000.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/aligned/001_frame_001.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/aligned/002_frame_002.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/aligned/003_frame_003.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.07,
+          0.006,
+          0.07
+        ],
+        "average_changed_fraction": 0.0487
+      },
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/walk_right_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/alignment_report.json"
+    },
+    {
+      "row": 2,
+      "name": "walk_down",
+      "frames": 4,
+      "source_boxes": [
+        [
+          9,
+          225,
+          84,
+          285
+        ],
+        [
+          105,
+          222,
+          180,
+          282
+        ],
+        [
+          201,
+          225,
+          276,
+          285
+        ],
+        [
+          297,
+          222,
+          372,
+          282
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/frame_000.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/frame_001.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/frame_002.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/frame_003.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/aligned/000_frame_000.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/aligned/001_frame_001.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/aligned/002_frame_002.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/aligned/003_frame_003.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.07,
+          0.006,
+          0.07
+        ],
+        "average_changed_fraction": 0.0487
+      },
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/walk_down_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/alignment_report.json"
+    },
+    {
+      "row": 3,
+      "name": "walk_left",
+      "frames": 4,
+      "source_boxes": [
+        [
+          12,
+          321,
+          87,
+          381
+        ],
+        [
+          108,
+          318,
+          183,
+          378
+        ],
+        [
+          204,
+          321,
+          279,
+          381
+        ],
+        [
+          300,
+          318,
+          375,
+          378
+        ]
+      ],
+      "pre_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/frame_000.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/frame_001.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/frame_002.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/frame_003.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          }
+        ]
+      },
+      "post_alignment_drift": {
+        "x": 0.0,
+        "y": 0,
+        "anchors": [
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/aligned/000_frame_000.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/aligned/001_frame_001.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/aligned/002_frame_002.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/aligned/003_frame_003.png",
+            "x": 37.5,
+            "y": 60,
+            "bbox": [
+              0,
+              0,
+              75,
+              60
+            ]
+          }
+        ]
+      },
+      "motion": {
+        "pair_changed_fraction": [
+          0.07,
+          0.006,
+          0.07
+        ],
+        "average_changed_fraction": 0.0487
+      },
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/walk_left_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/alignment_report.json"
+    }
+  ],
+  "preview_gifs": [
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_up/walk_up_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_right/walk_right_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_down/walk_down_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/walk_left/walk_left_preview.gif"
+  ]
+}
