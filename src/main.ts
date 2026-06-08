@@ -3470,6 +3470,13 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "restless_husk") return { family: "ghoul", width: 44, height: 52, yOffset: -12 };
   if (monster.type === "grave_shambler") return { family: "skeleton", width: 44, height: 50, yOffset: -11 };
   if (monster.type === "bound_wight") return { family: "grave_revenant", width: 46, height: 56, yOffset: -16 };
+  // Biome enemies that shipped without a resolver entry and were silently falling
+  // back to the goblin sprite below. Borrow the nearest-fitting family + a thematic
+  // tint until bespoke sheets land (same convention as the placeholders above).
+  if (monster.type === "crimson_burrower") return { family: "dust_burrower", width: 54, height: 46, yOffset: -6, tint: 0xff6a5c };
+  if (monster.type === "deepdelve_wight") return { family: "grave_revenant", width: 48, height: 58, yOffset: -16, tint: 0xc9a86a };
+  if (monster.type === "drowned_marauder") return { family: "ghoul", width: 48, height: 54, yOffset: -12, tint: 0x6fb0a8 };
+  if (monster.type === "verdant_faultwarden") return { family: "ancient_treant", width: 60, height: 70, yOffset: -22, tint: 0x9fd07a };
   return { family: "goblin", width: 42, height: 46, yOffset: -10 };
 }
 
