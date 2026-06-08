@@ -1,7 +1,7 @@
 {
-  "source": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/thorn_hedgehog_generated_chroma.png",
-  "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid",
-  "cleaned_image": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/thorn_hedgehog_generated_chroma_alpha.png",
+  "source": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/thorn_hedgehog_generated_chroma.png",
+  "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid",
+  "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/thorn_hedgehog_generated_chroma_alpha.png",
   "chroma": [
     0,
     255,
@@ -10,8 +10,8 @@
   "tolerance": 40,
   "remove_green_halo": false,
   "grid": {
-    "columns": 8,
-    "rows": 8,
+    "columns": 4,
+    "rows": 4,
     "cell_width": 96,
     "cell_height": 96
   },
@@ -31,7 +31,7 @@
     {
       "row": 0,
       "name": "walk_up",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           15,
@@ -43,51 +43,27 @@
           111,
           6,
           180,
-          66
+          69
         ],
         [
           207,
           9,
           276,
-          69
+          66
         ],
         [
           303,
           6,
           372,
-          66
-        ],
-        [
-          399,
-          9,
-          468,
-          66
-        ],
-        [
-          495,
-          6,
-          564,
-          66
-        ],
-        [
-          591,
-          9,
-          660,
           69
-        ],
-        [
-          687,
-          6,
-          756,
-          66
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 6,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_000.png",
             "x": 34.5,
             "y": 57,
             "bbox": [
@@ -98,40 +74,18 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_001.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_002.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_003.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_002.png",
             "x": 34.5,
             "y": 57,
             "bbox": [
@@ -142,36 +96,14 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_005.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_003.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_006.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/frame_007.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
+              63
             ]
           }
         ]
@@ -181,115 +113,67 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/000_frame_000.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
-              3,
+              6,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/001_frame_001.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/002_frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/002_frame_002.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
-              0,
+              6,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/003_frame_003.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/003_frame_003.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/004_frame_004.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/005_frame_005.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/006_frame_006.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned/007_frame_007.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
+              63
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.0428,
-          0.0406,
-          0.0428,
-          0.0428,
-          0.0428,
-          0.0406,
-          0.0428
+          0.0407,
+          0.0386,
+          0.0407
         ],
-        "average_changed_fraction": 0.0422
+        "average_changed_fraction": 0.04
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/walk_up_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/walk_up_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/alignment_report.json"
     },
     {
       "row": 1,
       "name": "walk_right",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           15,
@@ -299,53 +183,29 @@
         ],
         [
           111,
-          126,
+          123,
           180,
           186
         ],
         [
           207,
-          123,
+          126,
           276,
           183
         ],
         [
           303,
-          126,
-          372,
-          186
-        ],
-        [
-          399,
-          126,
-          468,
-          183
-        ],
-        [
-          495,
-          126,
-          564,
-          186
-        ],
-        [
-          591,
           123,
-          660,
-          183
-        ],
-        [
-          687,
-          126,
-          756,
+          372,
           186
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 6,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_000.png",
             "x": 34.5,
             "y": 57,
             "bbox": [
@@ -356,40 +216,18 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_001.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_002.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_003.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_002.png",
             "x": 34.5,
             "y": 57,
             "bbox": [
@@ -400,36 +238,14 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_005.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_003.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_006.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/frame_007.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
+              63
             ]
           }
         ]
@@ -439,115 +255,67 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/000_frame_000.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
-              3,
+              6,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/001_frame_001.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/002_frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/002_frame_002.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
-              0,
+              6,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/003_frame_003.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/003_frame_003.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/004_frame_004.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/005_frame_005.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/006_frame_006.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned/007_frame_007.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
+              63
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1669,
-          0.0406,
-          0.0428,
-          0.1669,
-          0.1669,
-          0.0406,
-          0.0428
+          0.2974,
+          0.2974,
+          0.2974
         ],
-        "average_changed_fraction": 0.0954
+        "average_changed_fraction": 0.2974
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/walk_right_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/walk_right_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/alignment_report.json"
     },
     {
       "row": 2,
       "name": "walk_down",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           15,
@@ -557,53 +325,29 @@
         ],
         [
           111,
-          222,
+          219,
           180,
           282
         ],
         [
           207,
-          219,
+          222,
           276,
           279
         ],
         [
           303,
-          222,
-          372,
-          282
-        ],
-        [
-          399,
-          222,
-          468,
-          279
-        ],
-        [
-          495,
-          222,
-          564,
-          282
-        ],
-        [
-          591,
           219,
-          660,
-          279
-        ],
-        [
-          687,
-          222,
-          756,
+          372,
           282
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 6,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_000.png",
             "x": 34.5,
             "y": 57,
             "bbox": [
@@ -614,40 +358,18 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_001.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_002.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_003.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_002.png",
             "x": 34.5,
             "y": 57,
             "bbox": [
@@ -658,36 +380,14 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_005.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_003.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_006.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/frame_007.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
+              63
             ]
           }
         ]
@@ -697,115 +397,67 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/000_frame_000.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
-              3,
+              6,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/001_frame_001.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/002_frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/002_frame_002.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
-              0,
+              6,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/003_frame_003.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/003_frame_003.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/004_frame_004.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/005_frame_005.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/006_frame_006.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned/007_frame_007.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
+              63
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1669,
-          0.0406,
-          0.0428,
-          0.1669,
-          0.1669,
-          0.0406,
-          0.0428
+          0.2974,
+          0.2974,
+          0.2974
         ],
-        "average_changed_fraction": 0.0954
+        "average_changed_fraction": 0.2974
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/walk_down_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/walk_down_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/alignment_report.json"
     },
     {
       "row": 3,
       "name": "walk_left",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           12,
@@ -815,53 +467,29 @@
         ],
         [
           108,
-          318,
+          315,
           177,
           378
         ],
         [
           204,
-          315,
+          318,
           273,
           375
         ],
         [
           300,
-          318,
-          369,
-          378
-        ],
-        [
-          396,
-          318,
-          465,
-          375
-        ],
-        [
-          492,
-          318,
-          561,
-          378
-        ],
-        [
-          588,
           315,
-          657,
-          375
-        ],
-        [
-          684,
-          318,
-          753,
+          369,
           378
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 6,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_000.png",
             "x": 34.5,
             "y": 57,
             "bbox": [
@@ -872,40 +500,18 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_001.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_002.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_003.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_002.png",
             "x": 34.5,
             "y": 57,
             "bbox": [
@@ -916,36 +522,14 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_005.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_003.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_006.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/frame_007.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
+              63
             ]
           }
         ]
@@ -955,1152 +539,68 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/000_frame_000.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
-              3,
+              6,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/001_frame_001.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/002_frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/002_frame_002.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
-              0,
+              6,
               69,
-              60
+              63
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/003_frame_003.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/003_frame_003.png",
             "x": 34.5,
-            "y": 60,
+            "y": 63,
             "bbox": [
               0,
               0,
               69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/004_frame_004.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/005_frame_005.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/006_frame_006.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned/007_frame_007.png",
-            "x": 34.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              69,
-              60
+              63
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1669,
-          0.0406,
-          0.0428,
-          0.1669,
-          0.1669,
-          0.0406,
-          0.0428
+          0.2974,
+          0.2974,
+          0.2974
         ],
-        "average_changed_fraction": 0.0954
+        "average_changed_fraction": 0.2974
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/walk_left_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/alignment_report.json"
-    },
-    {
-      "row": 4,
-      "name": "attack_up",
-      "frames": 8,
-      "source_boxes": [
-        [
-          15,
-          393,
-          96,
-          450
-        ],
-        [
-          111,
-          390,
-          192,
-          450
-        ],
-        [
-          207,
-          393,
-          288,
-          453
-        ],
-        [
-          303,
-          390,
-          384,
-          450
-        ],
-        [
-          399,
-          393,
-          480,
-          450
-        ],
-        [
-          495,
-          390,
-          576,
-          450
-        ],
-        [
-          591,
-          393,
-          672,
-          453
-        ],
-        [
-          687,
-          390,
-          768,
-          450
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 0.0,
-        "y": 3,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/frame_000.png",
-            "x": 40.5,
-            "y": 57,
-            "bbox": [
-              0,
-              0,
-              81,
-              57
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/frame_001.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/frame_002.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/frame_003.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/frame_004.png",
-            "x": 40.5,
-            "y": 57,
-            "bbox": [
-              0,
-              0,
-              81,
-              57
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/frame_005.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/frame_006.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/frame_007.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 0.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/aligned/000_frame_000.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/aligned/001_frame_001.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/aligned/002_frame_002.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/aligned/003_frame_003.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/aligned/004_frame_004.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/aligned/005_frame_005.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/aligned/006_frame_006.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/aligned/007_frame_007.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.0436,
-          0.0395,
-          0.0434,
-          0.0385,
-          0.0426,
-          0.0422,
-          0.0436
-        ],
-        "average_changed_fraction": 0.0419
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/attack_up_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/alignment_report.json"
-    },
-    {
-      "row": 5,
-      "name": "attack_right",
-      "frames": 8,
-      "source_boxes": [
-        [
-          15,
-          510,
-          96,
-          567
-        ],
-        [
-          111,
-          510,
-          192,
-          570
-        ],
-        [
-          207,
-          507,
-          288,
-          567
-        ],
-        [
-          303,
-          510,
-          384,
-          570
-        ],
-        [
-          399,
-          510,
-          480,
-          567
-        ],
-        [
-          495,
-          510,
-          576,
-          570
-        ],
-        [
-          591,
-          507,
-          672,
-          567
-        ],
-        [
-          687,
-          510,
-          768,
-          570
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 0.0,
-        "y": 3,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/frame_000.png",
-            "x": 40.5,
-            "y": 57,
-            "bbox": [
-              0,
-              0,
-              81,
-              57
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/frame_001.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/frame_002.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/frame_003.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/frame_004.png",
-            "x": 40.5,
-            "y": 57,
-            "bbox": [
-              0,
-              0,
-              81,
-              57
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/frame_005.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/frame_006.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/frame_007.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 0.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/aligned/000_frame_000.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/aligned/001_frame_001.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/aligned/002_frame_002.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/aligned/003_frame_003.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/aligned/004_frame_004.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/aligned/005_frame_005.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/aligned/006_frame_006.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/aligned/007_frame_007.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.1584,
-          0.0395,
-          0.0434,
-          0.1623,
-          0.166,
-          0.0422,
-          0.0436
-        ],
-        "average_changed_fraction": 0.0936
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/attack_right_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/alignment_report.json"
-    },
-    {
-      "row": 6,
-      "name": "attack_down",
-      "frames": 8,
-      "source_boxes": [
-        [
-          15,
-          606,
-          96,
-          663
-        ],
-        [
-          111,
-          606,
-          192,
-          666
-        ],
-        [
-          207,
-          603,
-          288,
-          663
-        ],
-        [
-          303,
-          606,
-          384,
-          666
-        ],
-        [
-          399,
-          606,
-          480,
-          663
-        ],
-        [
-          495,
-          606,
-          576,
-          666
-        ],
-        [
-          591,
-          603,
-          672,
-          663
-        ],
-        [
-          687,
-          606,
-          768,
-          666
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 0.0,
-        "y": 3,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/frame_000.png",
-            "x": 40.5,
-            "y": 57,
-            "bbox": [
-              0,
-              0,
-              81,
-              57
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/frame_001.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/frame_002.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/frame_003.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/frame_004.png",
-            "x": 40.5,
-            "y": 57,
-            "bbox": [
-              0,
-              0,
-              81,
-              57
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/frame_005.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/frame_006.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/frame_007.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 0.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/aligned/000_frame_000.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/aligned/001_frame_001.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/aligned/002_frame_002.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/aligned/003_frame_003.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/aligned/004_frame_004.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/aligned/005_frame_005.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/aligned/006_frame_006.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/aligned/007_frame_007.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.1584,
-          0.0395,
-          0.0434,
-          0.1623,
-          0.166,
-          0.0422,
-          0.0436
-        ],
-        "average_changed_fraction": 0.0936
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/attack_down_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/alignment_report.json"
-    },
-    {
-      "row": 7,
-      "name": "attack_left",
-      "frames": 8,
-      "source_boxes": [
-        [
-          0,
-          702,
-          81,
-          759
-        ],
-        [
-          96,
-          702,
-          177,
-          762
-        ],
-        [
-          192,
-          699,
-          273,
-          759
-        ],
-        [
-          288,
-          702,
-          369,
-          762
-        ],
-        [
-          384,
-          702,
-          465,
-          759
-        ],
-        [
-          480,
-          702,
-          561,
-          762
-        ],
-        [
-          576,
-          699,
-          657,
-          759
-        ],
-        [
-          672,
-          702,
-          753,
-          762
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 0.0,
-        "y": 3,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/frame_000.png",
-            "x": 40.5,
-            "y": 57,
-            "bbox": [
-              0,
-              0,
-              81,
-              57
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/frame_001.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/frame_002.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/frame_003.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/frame_004.png",
-            "x": 40.5,
-            "y": 57,
-            "bbox": [
-              0,
-              0,
-              81,
-              57
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/frame_005.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/frame_006.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/frame_007.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 0.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/aligned/000_frame_000.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/aligned/001_frame_001.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/aligned/002_frame_002.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/aligned/003_frame_003.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/aligned/004_frame_004.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              3,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/aligned/005_frame_005.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/aligned/006_frame_006.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/aligned/007_frame_007.png",
-            "x": 40.5,
-            "y": 60,
-            "bbox": [
-              0,
-              0,
-              81,
-              60
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.1584,
-          0.0395,
-          0.0434,
-          0.1623,
-          0.166,
-          0.0422,
-          0.0436
-        ],
-        "average_changed_fraction": 0.0936
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/attack_left_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/walk_left_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/alignment_report.json"
     }
   ],
   "preview_gifs": [
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/walk_up_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/walk_right_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/walk_down_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/walk_left_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_up/attack_up_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_right/attack_right_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_down/attack_down_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/attack_left/attack_left_preview.gif"
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_up/walk_up_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_right/walk_right_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_down/walk_down_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/walk_left/walk_left_preview.gif"
   ]
 }

@@ -357,6 +357,7 @@ interface E2EHooks {
   mapChunkStats: () => MapChunkStats;
   generatedStageTextureKeys: (floor: number) => Array<{ char: string; key: string; exists: boolean; ref: string }>;
   cutawayRoofAlphas: () => Array<{ floor: number; key: string; x: number; y: number; alpha: number }>;
+  frameDataUrls: (keys: string[]) => Array<{ key: string; exists: boolean; dataUrl: string | null }>;
   currentTrack: () => string | null;
   recentEvents: () => GameEvent[];
 }
@@ -737,6 +738,19 @@ if (E2E_MODE) {
         .filter((entry) => entry.sprite.active)
         .map((entry) => ({ floor: entry.floor, key: entry.object.key, x: entry.object.x, y: entry.object.y, alpha: entry.sprite.alpha })),
     currentTrack: () => currentTrack(),
+    frameDataUrls: (keys: string[]) =>
+      keys.map((key) => {
+        const exists = Boolean(scene?.textures?.exists?.(key));
+        let dataUrl: string | null = null;
+        if (exists && scene) {
+          try {
+            dataUrl = scene.textures.getBase64(key);
+          } catch {
+            dataUrl = null;
+          }
+        }
+        return { key, exists, dataUrl };
+      }),
     recentEvents: () => observedEvents.slice(-80)
   };
 }
@@ -880,21 +894,21 @@ const WOODLAND_BESPOKE_FAMILIES = [
 // exported to public/sprites/nw/ by tools/build-northwood-from-authored.ts and
 // referenced by the stage's objects[] as keys spriteNw<NNN>.
 const NORTHWOOD_SPRITE_IDS = [6, 7, 8, 22, 24, 25, 33, 34, 35, 39, 49, 53, 54, 70, 84, 85, 89, 90, 97, 105, 107, 115] as const;
-// Walk cycles are 4 frames unless a family overrides it here.
+// Walk cycles are 4 frames unless a family overrides it here. The woodland v2
+// families (enemy-directional-4x4-v2) use the default 4-frame walk-only contract;
+// their attacks reuse the walk pose plus shared effect overlays, so they have no
+// ATTACK_FAMILY entry.
 const FAMILY_WALK_FRAMES: Record<string, number> = {
-  mire_spitter: 3,
-  ...Object.fromEntries(WOODLAND_BESPOKE_FAMILIES.map((family) => [family, 8]))
+  mire_spitter: 3
 };
 // Families with a bespoke attack animation: base family -> attack texture family.
 const ATTACK_FAMILY: Record<string, string> = {
   skitterer: "skittererAtk",
-  mire_spitter: "mireSpitterAtk",
-  ...Object.fromEntries(WOODLAND_BESPOKE_FAMILIES.map((family) => [family, `${family}Atk`]))
+  mire_spitter: "mireSpitterAtk"
 };
 const ATTACK_FAMILY_FRAMES: Record<string, number> = {
   skittererAtk: 3,
-  mireSpitterAtk: 4,
-  ...Object.fromEntries(WOODLAND_BESPOKE_FAMILIES.map((family) => [`${family}Atk`, 8]))
+  mireSpitterAtk: 4
 };
 const DYNAMIC_PATH_REFRESH_MS = 350;
 const DYNAMIC_PATH_REFRESH_DISTANCE = 0.65;
@@ -1961,6 +1975,7 @@ function update(this: Phaser.Scene, time: number): void {
   }
   interpolateEntities();
   animateEntities();
+  ySortEntities();
   updateDodgeButton();
   if (hudStateVersion !== stateVersion) {
     renderHud(me);
@@ -3500,6 +3515,17 @@ function setEntityTarget(view: EntityView, x: number, y: number): void {
 
 function interpolateEntities(): void {
   for (const view of interpolatingEntityViews) easeToTarget(view);
+}
+
+// Top-down depth sort: order every entity in the shared layer by its ground/feet
+// position so things lower on screen draw on top. Each view container is placed at
+// its entity's ground tile (entity.y * TILE_SIZE), so the container `y` is a uniform
+// feet anchor across players, NPCs, monsters and trees. Result: when your feet are
+// above a tree's trunk base you render behind it (the tree's upper half covers you);
+// when your feet are below the base you render in front. Phaser's StableSort is ~O(n)
+// on the near-sorted list each frame (entities move little frame-to-frame).
+function ySortEntities(): void {
+  entityLayer.sort("y");
 }
 
 function easeToTarget(view: EntityView): void {
@@ -6589,9 +6615,14 @@ function createActorFrames(scene: Phaser.Scene): void {
   // The side art faces LEFT; right is mirrored (mirrorRightFromLeft). Front=down,
   // back=up are the two narrow frames between the side groups, repeated to 4.
   createExplicitFrameSet(scene, "ratSpiderSheet", "rat", {
-    up: spriteFrames([731, 1405, 731, 1405], 134, 50, 64), // back-facing (2 frames)
+    // The WALK row holds TWO colorways: brown (x~153-774) and grey (x~838-1446),
+    // each with 4 side frames + 1 front + 1 back. The side frames here are all
+    // brown, so the front/back must be brown too — the old [731,1405]/[650,1319]
+    // boxes alternated the brown frame with the GREY one, flickering the rat's
+    // head-on walk between two coats. Brown has a single front/back pose; repeat it.
+    up: spriteFrames([732, 732, 732, 732], 134, 50, 64), // brown back-facing
     right: spriteFrames([153, 276, 402, 523], 136, 114, 52), // mirrored from left
-    down: spriteFrames([650, 1319, 650, 1319], 134, 50, 64), // front-facing (2 frames)
+    down: spriteFrames([650, 650, 650, 650], 134, 50, 64), // brown front-facing
     left: spriteFrames([153, 276, 402, 523], 136, 114, 52) // left-facing side (4 frames)
   });
   createExplicitFrameSet(scene, "ratSpiderSheet", "spider", {
@@ -6606,7 +6637,12 @@ function createActorFrames(scene: Phaser.Scene): void {
   createExplicitFrameSet(scene, "goblinShamanSheet", "goblinShaman", uniformDirectionFrames(313, 313, 4));
   createExplicitFrameSet(scene, "goblinRaiderSheet", "goblinRaider", uniformDirectionFrames(320, 320, 4));
   createExplicitFrameSet(scene, "greyWolfSheet", "greyWolf", uniformDirectionFrames(320, 320, 4));
-  const wispRow = spriteFrames([0, 221, 442, 663], 0, 221, 443);
+  // wisp-sheet.png is an 8-col x 2-row grid (cell ~221x443): row 0 idle flames,
+  // row 1 the attack. We use the first 4 idle frames. The flame only occupies the
+  // lower-middle of the 443-tall cell (y~125-339), so slicing the full cell baked
+  // ~half the texture as empty headroom — and since frames aren't trimmed, every
+  // wisp rendered at half size, low to the ground. Bound the flame tightly (y/h).
+  const wispRow = spriteFrames([0, 221, 442, 663], 118, 221, 224);
   createExplicitFrameSet(scene, "wispSheet", "wisp", {
     up: wispRow,
     right: wispRow,
@@ -6630,19 +6666,21 @@ function createActorFrames(scene: Phaser.Scene): void {
 }
 
 function createWoodlandBespokeFrames(scene: Phaser.Scene): void {
-  const directionalFrames = (rowOffset: number): DirectionFrames => {
-    const xs = Array.from({ length: 8 }, (_, index) => index * 96);
+  // enemy-directional-4x4-v2: 384x384 sheets, 96px cells, 4 walk rows
+  // (up/right/down/left), 4 frames each. Walk-only — attacks reuse the walk pose
+  // plus shared effect overlays, so there are no attack rows to slice.
+  const directionalFrames = (): DirectionFrames => {
+    const xs = Array.from({ length: 4 }, (_, index) => index * 96);
     return {
-      up: spriteFrames(xs, (rowOffset + 0) * 96, 96, 96),
-      right: spriteFrames(xs, (rowOffset + 1) * 96, 96, 96),
-      down: spriteFrames(xs, (rowOffset + 2) * 96, 96, 96),
-      left: spriteFrames(xs, (rowOffset + 3) * 96, 96, 96)
+      up: spriteFrames(xs, 0 * 96, 96, 96),
+      right: spriteFrames(xs, 1 * 96, 96, 96),
+      down: spriteFrames(xs, 2 * 96, 96, 96),
+      left: spriteFrames(xs, 3 * 96, 96, 96)
     };
   };
   for (const family of WOODLAND_BESPOKE_FAMILIES) {
     const sourceKey = woodlandBespokeSheetKey(family);
-    createExplicitFrameSet(scene, sourceKey, family, directionalFrames(0));
-    createExplicitFrameSet(scene, sourceKey, `${family}Atk`, directionalFrames(4));
+    createExplicitFrameSet(scene, sourceKey, family, directionalFrames());
   }
 }
 

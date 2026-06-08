@@ -1,7 +1,7 @@
 {
-  "source": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/goblin_raider_generated_chroma.png",
-  "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid",
-  "cleaned_image": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/goblin_raider_generated_chroma_alpha.png",
+  "source": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/goblin_raider_generated_chroma.png",
+  "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid",
+  "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/goblin_raider_generated_chroma_alpha.png",
   "chroma": [
     0,
     255,
@@ -10,8 +10,8 @@
   "tolerance": 40,
   "remove_green_halo": false,
   "grid": {
-    "columns": 8,
-    "rows": 8,
+    "columns": 4,
+    "rows": 4,
     "cell_width": 96,
     "cell_height": 96
   },
@@ -31,7 +31,7 @@
     {
       "row": 0,
       "name": "walk_up",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           18,
@@ -47,38 +47,14 @@
         ],
         [
           210,
-          9,
+          6,
           276,
-          78
+          75
         ],
         [
           306,
           6,
           372,
-          78
-        ],
-        [
-          402,
-          6,
-          468,
-          75
-        ],
-        [
-          498,
-          6,
-          564,
-          78
-        ],
-        [
-          594,
-          9,
-          660,
-          78
-        ],
-        [
-          690,
-          6,
-          756,
           78
         ]
       ],
@@ -87,7 +63,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_000.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -98,7 +74,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -109,7 +85,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_002.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -120,51 +96,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_004.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -181,7 +113,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -192,7 +124,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/001_frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -203,29 +135,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/004_frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -236,29 +146,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/007_frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -273,23 +161,19 @@
       "motion": {
         "pair_changed_fraction": [
           0.0871,
-          0.0076,
-          0.0076,
           0.0057,
-          0.0871,
-          0.0076,
-          0.0076
+          0.0871
         ],
-        "average_changed_fraction": 0.03
+        "average_changed_fraction": 0.06
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/walk_up_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/walk_up_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/alignment_report.json"
     },
     {
       "row": 1,
       "name": "walk_right",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           18,
@@ -305,38 +189,14 @@
         ],
         [
           210,
-          114,
+          117,
           276,
-          183
+          186
         ],
         [
           306,
           114,
           372,
-          186
-        ],
-        [
-          402,
-          117,
-          468,
-          186
-        ],
-        [
-          498,
-          114,
-          564,
-          186
-        ],
-        [
-          594,
-          114,
-          660,
-          183
-        ],
-        [
-          690,
-          114,
-          756,
           186
         ]
       ],
@@ -345,7 +205,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_000.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -356,7 +216,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -367,7 +227,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_002.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -378,51 +238,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_004.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -439,7 +255,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -450,7 +266,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/001_frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -461,29 +277,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/004_frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -494,29 +288,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/007_frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -531,23 +303,19 @@
       "motion": {
         "pair_changed_fraction": [
           0.2237,
-          0.1555,
-          0.1555,
           0.1593,
-          0.2085,
-          0.1593,
-          0.1612
+          0.2085
         ],
-        "average_changed_fraction": 0.1747
+        "average_changed_fraction": 0.1972
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/walk_right_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/walk_right_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/alignment_report.json"
     },
     {
       "row": 2,
       "name": "walk_down",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           18,
@@ -563,38 +331,14 @@
         ],
         [
           210,
-          210,
+          213,
           276,
-          279
+          282
         ],
         [
           306,
           210,
           372,
-          282
-        ],
-        [
-          402,
-          213,
-          468,
-          282
-        ],
-        [
-          498,
-          210,
-          564,
-          282
-        ],
-        [
-          594,
-          210,
-          660,
-          279
-        ],
-        [
-          690,
-          210,
-          756,
           282
         ]
       ],
@@ -603,7 +347,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_000.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -614,7 +358,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -625,7 +369,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_002.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -636,51 +380,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_004.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -697,7 +397,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -708,7 +408,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/001_frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -719,29 +419,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/004_frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -752,29 +430,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/007_frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -789,23 +445,19 @@
       "motion": {
         "pair_changed_fraction": [
           0.2237,
-          0.1555,
-          0.1555,
           0.1593,
-          0.2085,
-          0.1593,
-          0.1612
+          0.2085
         ],
-        "average_changed_fraction": 0.1747
+        "average_changed_fraction": 0.1972
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/walk_down_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/walk_down_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/alignment_report.json"
     },
     {
       "row": 3,
       "name": "walk_left",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           12,
@@ -821,39 +473,15 @@
         ],
         [
           204,
-          306,
+          309,
           270,
-          375
+          378
         ],
         [
           300,
           306,
           366,
           378
-        ],
-        [
-          396,
-          309,
-          462,
-          378
-        ],
-        [
-          492,
-          306,
-          558,
-          378
-        ],
-        [
-          588,
-          306,
-          654,
-          375
-        ],
-        [
-          684,
-          306,
-          750,
-          378
         ]
       ],
       "pre_alignment_drift": {
@@ -861,7 +489,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_000.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -872,7 +500,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -883,7 +511,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_002.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -894,51 +522,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_004.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -955,7 +539,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -966,7 +550,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/001_frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -977,29 +561,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/004_frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -1010,29 +572,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/007_frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -1047,1060 +587,20 @@
       "motion": {
         "pair_changed_fraction": [
           0.2237,
-          0.1555,
-          0.1555,
           0.1593,
-          0.2085,
-          0.1593,
-          0.1612
+          0.2085
         ],
-        "average_changed_fraction": 0.1747
+        "average_changed_fraction": 0.1972
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/walk_left_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/alignment_report.json"
-    },
-    {
-      "row": 4,
-      "name": "attack_up",
-      "frames": 8,
-      "source_boxes": [
-        [
-          18,
-          390,
-          84,
-          459
-        ],
-        [
-          114,
-          390,
-          180,
-          462
-        ],
-        [
-          213,
-          393,
-          276,
-          462
-        ],
-        [
-          315,
-          387,
-          376,
-          462
-        ],
-        [
-          408,
-          387,
-          469,
-          459
-        ],
-        [
-          501,
-          390,
-          564,
-          462
-        ],
-        [
-          594,
-          393,
-          660,
-          462
-        ],
-        [
-          690,
-          390,
-          756,
-          462
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 2.5,
-        "y": 6,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/frame_000.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/frame_001.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/frame_002.png",
-            "x": 31.5,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              63,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/frame_003.png",
-            "x": 30.5,
-            "y": 75,
-            "bbox": [
-              0,
-              0,
-              61,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/frame_004.png",
-            "x": 30.5,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              61,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/frame_005.png",
-            "x": 31.5,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              63,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/frame_007.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 1.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              6,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              3,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/aligned/002_frame_002.png",
-            "x": 33.5,
-            "y": 75,
-            "bbox": [
-              2,
-              6,
-              65,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/aligned/003_frame_003.png",
-            "x": 32.5,
-            "y": 75,
-            "bbox": [
-              2,
-              0,
-              63,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/aligned/004_frame_004.png",
-            "x": 32.5,
-            "y": 75,
-            "bbox": [
-              2,
-              3,
-              63,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/aligned/005_frame_005.png",
-            "x": 33.5,
-            "y": 75,
-            "bbox": [
-              2,
-              3,
-              65,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              6,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/aligned/007_frame_007.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              3,
-              66,
-              75
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.0873,
-          0.1325,
-          0.1309,
-          0.08,
-          0.1491,
-          0.1422,
-          0.0073
-        ],
-        "average_changed_fraction": 0.1042
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/attack_up_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/alignment_report.json"
-    },
-    {
-      "row": 5,
-      "name": "attack_right",
-      "frames": 8,
-      "source_boxes": [
-        [
-          18,
-          501,
-          84,
-          570
-        ],
-        [
-          114,
-          498,
-          180,
-          570
-        ],
-        [
-          213,
-          498,
-          276,
-          567
-        ],
-        [
-          315,
-          498,
-          376,
-          573
-        ],
-        [
-          408,
-          501,
-          469,
-          573
-        ],
-        [
-          501,
-          498,
-          564,
-          570
-        ],
-        [
-          594,
-          498,
-          660,
-          567
-        ],
-        [
-          690,
-          498,
-          756,
-          570
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 2.5,
-        "y": 6,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/frame_000.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/frame_001.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/frame_002.png",
-            "x": 31.5,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              63,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/frame_003.png",
-            "x": 30.5,
-            "y": 75,
-            "bbox": [
-              0,
-              0,
-              61,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/frame_004.png",
-            "x": 30.5,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              61,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/frame_005.png",
-            "x": 31.5,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              63,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/frame_007.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 1.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              6,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              3,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/aligned/002_frame_002.png",
-            "x": 33.5,
-            "y": 75,
-            "bbox": [
-              2,
-              6,
-              65,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/aligned/003_frame_003.png",
-            "x": 32.5,
-            "y": 75,
-            "bbox": [
-              2,
-              0,
-              63,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/aligned/004_frame_004.png",
-            "x": 32.5,
-            "y": 75,
-            "bbox": [
-              2,
-              3,
-              63,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/aligned/005_frame_005.png",
-            "x": 33.5,
-            "y": 75,
-            "bbox": [
-              2,
-              3,
-              65,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              6,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/aligned/007_frame_007.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              3,
-              66,
-              75
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.2111,
-          0.222,
-          0.363,
-          0.2109,
-          0.1491,
-          0.2267,
-          0.1547
-        ],
-        "average_changed_fraction": 0.2196
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/attack_right_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/alignment_report.json"
-    },
-    {
-      "row": 6,
-      "name": "attack_down",
-      "frames": 8,
-      "source_boxes": [
-        [
-          18,
-          597,
-          84,
-          666
-        ],
-        [
-          114,
-          594,
-          180,
-          666
-        ],
-        [
-          213,
-          594,
-          276,
-          663
-        ],
-        [
-          315,
-          594,
-          376,
-          669
-        ],
-        [
-          408,
-          597,
-          469,
-          669
-        ],
-        [
-          501,
-          594,
-          564,
-          666
-        ],
-        [
-          594,
-          594,
-          660,
-          663
-        ],
-        [
-          690,
-          594,
-          756,
-          666
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 2.5,
-        "y": 6,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/frame_000.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/frame_001.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/frame_002.png",
-            "x": 31.5,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              63,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/frame_003.png",
-            "x": 30.5,
-            "y": 75,
-            "bbox": [
-              0,
-              0,
-              61,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/frame_004.png",
-            "x": 30.5,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              61,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/frame_005.png",
-            "x": 31.5,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              63,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/frame_007.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 1.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              6,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              3,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/aligned/002_frame_002.png",
-            "x": 33.5,
-            "y": 75,
-            "bbox": [
-              2,
-              6,
-              65,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/aligned/003_frame_003.png",
-            "x": 32.5,
-            "y": 75,
-            "bbox": [
-              2,
-              0,
-              63,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/aligned/004_frame_004.png",
-            "x": 32.5,
-            "y": 75,
-            "bbox": [
-              2,
-              3,
-              63,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/aligned/005_frame_005.png",
-            "x": 33.5,
-            "y": 75,
-            "bbox": [
-              2,
-              3,
-              65,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              6,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/aligned/007_frame_007.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              3,
-              66,
-              75
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.2111,
-          0.222,
-          0.363,
-          0.2109,
-          0.1491,
-          0.2267,
-          0.1547
-        ],
-        "average_changed_fraction": 0.2196
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/attack_down_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/alignment_report.json"
-    },
-    {
-      "row": 7,
-      "name": "attack_left",
-      "frames": 8,
-      "source_boxes": [
-        [
-          12,
-          693,
-          78,
-          762
-        ],
-        [
-          108,
-          690,
-          174,
-          762
-        ],
-        [
-          204,
-          690,
-          267,
-          759
-        ],
-        [
-          296,
-          690,
-          357,
-          765
-        ],
-        [
-          395,
-          693,
-          456,
-          765
-        ],
-        [
-          492,
-          690,
-          555,
-          762
-        ],
-        [
-          588,
-          690,
-          654,
-          759
-        ],
-        [
-          684,
-          690,
-          750,
-          762
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 2.5,
-        "y": 6,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/frame_000.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/frame_001.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/frame_002.png",
-            "x": 31.5,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              63,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/frame_003.png",
-            "x": 30.5,
-            "y": 75,
-            "bbox": [
-              0,
-              0,
-              61,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/frame_004.png",
-            "x": 30.5,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              61,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/frame_005.png",
-            "x": 31.5,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              63,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/frame_007.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 1.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              6,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              3,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/aligned/002_frame_002.png",
-            "x": 33.5,
-            "y": 75,
-            "bbox": [
-              2,
-              6,
-              65,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/aligned/003_frame_003.png",
-            "x": 32.5,
-            "y": 75,
-            "bbox": [
-              2,
-              0,
-              63,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/aligned/004_frame_004.png",
-            "x": 32.5,
-            "y": 75,
-            "bbox": [
-              2,
-              3,
-              63,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/aligned/005_frame_005.png",
-            "x": 33.5,
-            "y": 75,
-            "bbox": [
-              2,
-              3,
-              65,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              6,
-              66,
-              75
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/aligned/007_frame_007.png",
-            "x": 33.0,
-            "y": 75,
-            "bbox": [
-              0,
-              3,
-              66,
-              75
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.2111,
-          0.2063,
-          0.3677,
-          0.2109,
-          0.2162,
-          0.2093,
-          0.1547
-        ],
-        "average_changed_fraction": 0.2252
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/attack_left_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/walk_left_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/alignment_report.json"
     }
   ],
   "preview_gifs": [
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/walk_up_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/walk_right_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/walk_down_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/walk_left_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_up/attack_up_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_right/attack_right_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_down/attack_down_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/attack_left/attack_left_preview.gif"
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_up/walk_up_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_right/walk_right_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_down/walk_down_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/walk_left/walk_left_preview.gif"
   ]
 }

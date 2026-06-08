@@ -17,16 +17,19 @@ PROCESSOR = Path.home() / ".openclaw/workspace/skills/sprite_processor/scripts/s
 
 BG = (0, 255, 0, 255)
 CELL = 96
-COLS = 8
-ANIMATION_ROWS = ("walk", "attack")
+# v2 contract: simpler painterly-pixel style. Walk-only (4 directional rows), 4
+# frames each -> 384x384. Attacks reuse the walk pose at runtime plus the shared
+# slash/missile effect overlays, so no dedicated attack rows are generated.
+COLS = 4
+ANIMATION_ROWS = ("walk",)
 DIRECTION_ROWS = ("up", "right", "down", "left")
 ROW_NAMES = tuple(f"{anim}_{direction}" for anim in ANIMATION_ROWS for direction in DIRECTION_ROWS)
 ROWS = len(ROW_NAMES)
 SCALE = 3
-PIPELINE_NAME = "enemy-directional-8x8-v1"
+PIPELINE_NAME = "enemy-directional-4x4-v2"
 PIPELINE_SPEC = {
     "name": PIPELINE_NAME,
-    "source_reference": "goblin scout directional movement contract, extended with matching directional attack rows",
+    "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
     "cell_px": CELL,
     "columns": COLS,
     "rows": ROWS,
@@ -36,10 +39,10 @@ PIPELINE_SPEC = {
     "directions": DIRECTION_ROWS,
     "runtime_contract": {
         "walk_rows": "rows 0-3, ordered up/right/down/left",
-        "attack_rows": "rows 4-7, ordered up/right/down/left",
+        "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
         "texture_count": {
             "walk": len(DIRECTION_ROWS) * COLS,
-            "attack": len(DIRECTION_ROWS) * COLS,
+            "attack": 0,
         },
     },
 }

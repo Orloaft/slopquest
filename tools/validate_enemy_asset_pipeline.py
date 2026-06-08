@@ -10,20 +10,21 @@ from PIL import Image, ImageSequence
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "assetsources" / "curated" / "bespoke" / "woodland-enemies-v2" / "woodland_bespoke_v2_manifest.json"
 
-PIPELINE_NAME = "enemy-directional-8x8-v1"
+PIPELINE_NAME = "enemy-directional-4x4-v2"
 CELL = 96
-COLS = 8
+COLS = 4
 ROW_NAMES = (
     "walk_up",
     "walk_right",
     "walk_down",
     "walk_left",
-    "attack_up",
-    "attack_right",
-    "attack_down",
-    "attack_left",
 )
 ROWS = len(ROW_NAMES)
+# Style guard: the v2 look is "simpler painterly pixel" — a limited palette. We
+# cap the number of distinct opaque colours per sheet so over-detailed / heavily
+# anti-aliased art is rejected at the gate. Generous enough for soft painterly
+# shading; tune here if the agreed style allows more.
+MAX_SHEET_COLORS = 64
 PUBLIC_REQUIRED_SLUGS = {
     "dire_wolf",
     "orc",
@@ -65,6 +66,15 @@ def validate_sheet(path: Path) -> None:
         alpha = im.getchannel("A")
         if alpha.getbbox() is None:
             fail(f"{path} has no opaque pixels")
+        # Count distinct fully/partly opaque colours (ignore the transparent void).
+        opaque_colors = {
+            rgba[:3] for count, rgba in (im.getcolors(maxcolors=1 << 24) or []) if rgba[3] > 0
+        }
+        if len(opaque_colors) > MAX_SHEET_COLORS:
+            fail(
+                f"{path} uses {len(opaque_colors)} opaque colours, exceeds the "
+                f"limited-palette cap of {MAX_SHEET_COLORS} (style: simpler painterly pixel)"
+            )
 
 
 def main() -> None:

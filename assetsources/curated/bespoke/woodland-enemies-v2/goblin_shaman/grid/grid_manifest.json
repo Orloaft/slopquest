@@ -1,7 +1,7 @@
 {
-  "source": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/goblin_shaman_generated_chroma.png",
-  "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid",
-  "cleaned_image": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/goblin_shaman_generated_chroma_alpha.png",
+  "source": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/goblin_shaman_generated_chroma.png",
+  "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid",
+  "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/goblin_shaman_generated_chroma_alpha.png",
   "chroma": [
     0,
     255,
@@ -10,8 +10,8 @@
   "tolerance": 40,
   "remove_green_halo": false,
   "grid": {
-    "columns": 8,
-    "rows": 8,
+    "columns": 4,
+    "rows": 4,
     "cell_width": 96,
     "cell_height": 96
   },
@@ -31,7 +31,7 @@
     {
       "row": 0,
       "name": "walk_up",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           18,
@@ -47,38 +47,14 @@
         ],
         [
           210,
-          9,
+          6,
           276,
-          78
+          75
         ],
         [
           306,
           6,
           372,
-          78
-        ],
-        [
-          402,
-          6,
-          468,
-          75
-        ],
-        [
-          498,
-          6,
-          564,
-          78
-        ],
-        [
-          594,
-          9,
-          660,
-          78
-        ],
-        [
-          690,
-          6,
-          756,
           78
         ]
       ],
@@ -87,7 +63,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_000.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -98,7 +74,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -109,7 +85,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_002.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -120,51 +96,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_004.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -181,7 +113,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -192,7 +124,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/001_frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -203,29 +135,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/004_frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -236,29 +146,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/007_frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -273,23 +161,19 @@
       "motion": {
         "pair_changed_fraction": [
           0.0795,
-          0.0076,
-          0.0076,
           0.0057,
-          0.0795,
-          0.0076,
-          0.0076
+          0.0795
         ],
-        "average_changed_fraction": 0.0279
+        "average_changed_fraction": 0.0549
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/walk_up_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/walk_up_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/alignment_report.json"
     },
     {
       "row": 1,
       "name": "walk_right",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           18,
@@ -305,38 +189,14 @@
         ],
         [
           210,
-          114,
+          117,
           276,
-          183
+          186
         ],
         [
           306,
           114,
           372,
-          186
-        ],
-        [
-          402,
-          117,
-          468,
-          186
-        ],
-        [
-          498,
-          114,
-          564,
-          186
-        ],
-        [
-          594,
-          114,
-          660,
-          183
-        ],
-        [
-          690,
-          114,
-          756,
           186
         ]
       ],
@@ -345,7 +205,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_000.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -356,7 +216,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -367,7 +227,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_002.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -378,51 +238,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_004.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -439,7 +255,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -450,7 +266,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/001_frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -461,29 +277,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/004_frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -494,29 +288,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/007_frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -531,23 +303,19 @@
       "motion": {
         "pair_changed_fraction": [
           0.2045,
-          0.1439,
-          0.1439,
           0.1477,
-          0.1856,
-          0.1439,
-          0.1458
+          0.1856
         ],
-        "average_changed_fraction": 0.1593
+        "average_changed_fraction": 0.1793
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/walk_right_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/walk_right_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/alignment_report.json"
     },
     {
       "row": 2,
       "name": "walk_down",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           18,
@@ -563,38 +331,14 @@
         ],
         [
           210,
-          210,
+          213,
           276,
-          279
+          282
         ],
         [
           306,
           210,
           372,
-          282
-        ],
-        [
-          402,
-          213,
-          468,
-          282
-        ],
-        [
-          498,
-          210,
-          564,
-          282
-        ],
-        [
-          594,
-          210,
-          660,
-          279
-        ],
-        [
-          690,
-          210,
-          756,
           282
         ]
       ],
@@ -603,7 +347,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_000.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -614,7 +358,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -625,7 +369,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_002.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -636,51 +380,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_004.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -697,7 +397,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -708,7 +408,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/001_frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -719,29 +419,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/004_frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -752,29 +430,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/007_frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -789,23 +445,19 @@
       "motion": {
         "pair_changed_fraction": [
           0.2045,
-          0.1439,
-          0.1439,
           0.1477,
-          0.1856,
-          0.1439,
-          0.1458
+          0.1856
         ],
-        "average_changed_fraction": 0.1593
+        "average_changed_fraction": 0.1793
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/walk_down_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/walk_down_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/alignment_report.json"
     },
     {
       "row": 3,
       "name": "walk_left",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           12,
@@ -821,38 +473,14 @@
         ],
         [
           204,
-          306,
+          309,
           270,
-          375
+          378
         ],
         [
           300,
           306,
           366,
-          378
-        ],
-        [
-          396,
-          309,
-          462,
-          378
-        ],
-        [
-          492,
-          306,
-          558,
-          378
-        ],
-        [
-          588,
-          306,
-          654,
-          375
-        ],
-        [
-          684,
-          306,
-          750,
           378
         ]
       ],
@@ -861,7 +489,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_000.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -872,7 +500,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -883,7 +511,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_002.png",
             "x": 33.0,
             "y": 69,
             "bbox": [
@@ -894,51 +522,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_004.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_006.png",
-            "x": 33.0,
-            "y": 69,
-            "bbox": [
-              0,
-              0,
-              66,
-              69
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -955,7 +539,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -966,7 +550,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/001_frame_001.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -977,29 +561,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/004_frame_004.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -1010,29 +572,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 72,
-            "bbox": [
-              0,
-              3,
-              66,
-              72
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/007_frame_007.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 72,
             "bbox": [
@@ -1047,1060 +587,20 @@
       "motion": {
         "pair_changed_fraction": [
           0.2045,
-          0.1439,
-          0.1439,
           0.1477,
-          0.1856,
-          0.1439,
-          0.1458
+          0.1856
         ],
-        "average_changed_fraction": 0.1593
+        "average_changed_fraction": 0.1793
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/walk_left_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/alignment_report.json"
-    },
-    {
-      "row": 4,
-      "name": "attack_up",
-      "frames": 8,
-      "source_boxes": [
-        [
-          18,
-          390,
-          84,
-          474
-        ],
-        [
-          114,
-          390,
-          180,
-          477
-        ],
-        [
-          213,
-          393,
-          279,
-          480
-        ],
-        [
-          315,
-          387,
-          384,
-          480
-        ],
-        [
-          408,
-          387,
-          480,
-          480
-        ],
-        [
-          501,
-          390,
-          567,
-          480
-        ],
-        [
-          594,
-          393,
-          660,
-          477
-        ],
-        [
-          690,
-          390,
-          756,
-          477
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 3.0,
-        "y": 9,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/frame_000.png",
-            "x": 33.0,
-            "y": 84,
-            "bbox": [
-              0,
-              0,
-              66,
-              84
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/frame_001.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/frame_002.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/frame_003.png",
-            "x": 34.5,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/frame_004.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              72,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/frame_005.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/frame_006.png",
-            "x": 33.0,
-            "y": 84,
-            "bbox": [
-              0,
-              0,
-              66,
-              84
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/frame_007.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 0.5,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/aligned/000_frame_000.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              9,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/aligned/001_frame_001.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/aligned/002_frame_002.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/aligned/003_frame_003.png",
-            "x": 36.5,
-            "y": 93,
-            "bbox": [
-              2,
-              0,
-              71,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/aligned/004_frame_004.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              72,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/aligned/005_frame_005.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              3,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/aligned/006_frame_006.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              9,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/aligned/007_frame_007.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.0726,
-          0.1183,
-          0.1595,
-          0.2056,
-          0.292,
-          0.1317,
-          0.0054
-        ],
-        "average_changed_fraction": 0.1407
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/attack_up_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/alignment_report.json"
-    },
-    {
-      "row": 5,
-      "name": "attack_right",
-      "frames": 8,
-      "source_boxes": [
-        [
-          18,
-          486,
-          84,
-          570
-        ],
-        [
-          114,
-          483,
-          180,
-          570
-        ],
-        [
-          213,
-          480,
-          279,
-          567
-        ],
-        [
-          315,
-          480,
-          384,
-          573
-        ],
-        [
-          408,
-          480,
-          480,
-          573
-        ],
-        [
-          501,
-          480,
-          567,
-          570
-        ],
-        [
-          594,
-          483,
-          660,
-          567
-        ],
-        [
-          690,
-          483,
-          756,
-          570
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 3.0,
-        "y": 9,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/frame_000.png",
-            "x": 33.0,
-            "y": 84,
-            "bbox": [
-              0,
-              0,
-              66,
-              84
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/frame_001.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/frame_002.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/frame_003.png",
-            "x": 34.5,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/frame_004.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              72,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/frame_005.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/frame_006.png",
-            "x": 33.0,
-            "y": 84,
-            "bbox": [
-              0,
-              0,
-              66,
-              84
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/frame_007.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 0.5,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/aligned/000_frame_000.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              9,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/aligned/001_frame_001.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/aligned/002_frame_002.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/aligned/003_frame_003.png",
-            "x": 36.5,
-            "y": 93,
-            "bbox": [
-              2,
-              0,
-              71,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/aligned/004_frame_004.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              72,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/aligned/005_frame_005.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              3,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/aligned/006_frame_006.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              9,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/aligned/007_frame_007.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.1605,
-          0.1183,
-          0.303,
-          0.2056,
-          0.2743,
-          0.1465,
-          0.1162
-        ],
-        "average_changed_fraction": 0.1892
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/attack_right_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/alignment_report.json"
-    },
-    {
-      "row": 6,
-      "name": "attack_down",
-      "frames": 8,
-      "source_boxes": [
-        [
-          18,
-          582,
-          84,
-          666
-        ],
-        [
-          114,
-          579,
-          180,
-          666
-        ],
-        [
-          213,
-          576,
-          279,
-          663
-        ],
-        [
-          315,
-          576,
-          384,
-          669
-        ],
-        [
-          408,
-          576,
-          480,
-          669
-        ],
-        [
-          501,
-          576,
-          567,
-          666
-        ],
-        [
-          594,
-          579,
-          660,
-          663
-        ],
-        [
-          690,
-          579,
-          756,
-          666
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 3.0,
-        "y": 9,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/frame_000.png",
-            "x": 33.0,
-            "y": 84,
-            "bbox": [
-              0,
-              0,
-              66,
-              84
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/frame_001.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/frame_002.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/frame_003.png",
-            "x": 34.5,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/frame_004.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              72,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/frame_005.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/frame_006.png",
-            "x": 33.0,
-            "y": 84,
-            "bbox": [
-              0,
-              0,
-              66,
-              84
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/frame_007.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 0.5,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/aligned/000_frame_000.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              9,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/aligned/001_frame_001.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/aligned/002_frame_002.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/aligned/003_frame_003.png",
-            "x": 36.5,
-            "y": 93,
-            "bbox": [
-              2,
-              0,
-              71,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/aligned/004_frame_004.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              72,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/aligned/005_frame_005.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              3,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/aligned/006_frame_006.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              9,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/aligned/007_frame_007.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.1605,
-          0.1183,
-          0.303,
-          0.2056,
-          0.2743,
-          0.1465,
-          0.1162
-        ],
-        "average_changed_fraction": 0.1892
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/attack_down_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/alignment_report.json"
-    },
-    {
-      "row": 7,
-      "name": "attack_left",
-      "frames": 8,
-      "source_boxes": [
-        [
-          12,
-          678,
-          78,
-          762
-        ],
-        [
-          108,
-          675,
-          174,
-          762
-        ],
-        [
-          201,
-          672,
-          267,
-          759
-        ],
-        [
-          288,
-          672,
-          357,
-          765
-        ],
-        [
-          384,
-          672,
-          456,
-          765
-        ],
-        [
-          489,
-          672,
-          555,
-          762
-        ],
-        [
-          588,
-          675,
-          654,
-          759
-        ],
-        [
-          684,
-          675,
-          750,
-          762
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 3.0,
-        "y": 9,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/frame_000.png",
-            "x": 33.0,
-            "y": 84,
-            "bbox": [
-              0,
-              0,
-              66,
-              84
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/frame_001.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/frame_002.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/frame_003.png",
-            "x": 34.5,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/frame_004.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              72,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/frame_005.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/frame_006.png",
-            "x": 33.0,
-            "y": 84,
-            "bbox": [
-              0,
-              0,
-              66,
-              84
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/frame_007.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 0.5,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/aligned/000_frame_000.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              9,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/aligned/001_frame_001.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/aligned/002_frame_002.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/aligned/003_frame_003.png",
-            "x": 36.5,
-            "y": 93,
-            "bbox": [
-              2,
-              0,
-              71,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/aligned/004_frame_004.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              0,
-              0,
-              72,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/aligned/005_frame_005.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              3,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/aligned/006_frame_006.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              9,
-              69,
-              93
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/aligned/007_frame_007.png",
-            "x": 36.0,
-            "y": 93,
-            "bbox": [
-              3,
-              6,
-              69,
-              93
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.1605,
-          0.1183,
-          0.3262,
-          0.1815,
-          0.2743,
-          0.1465,
-          0.1162
-        ],
-        "average_changed_fraction": 0.1891
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/attack_left_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/walk_left_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/alignment_report.json"
     }
   ],
   "preview_gifs": [
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/walk_up_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/walk_right_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/walk_down_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/walk_left_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_up/attack_up_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_right/attack_right_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_down/attack_down_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/attack_left/attack_left_preview.gif"
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_up/walk_up_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_right/walk_right_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_down/walk_down_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/walk_left/walk_left_preview.gif"
   ]
 }

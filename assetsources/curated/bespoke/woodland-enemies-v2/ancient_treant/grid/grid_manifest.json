@@ -1,7 +1,7 @@
 {
-  "source": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_generated_chroma.png",
-  "output_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid",
-  "cleaned_image": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/ancient_treant_generated_chroma_alpha.png",
+  "source": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_generated_chroma.png",
+  "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid",
+  "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/ancient_treant_generated_chroma_alpha.png",
   "chroma": [
     0,
     255,
@@ -10,8 +10,8 @@
   "tolerance": 40,
   "remove_green_halo": false,
   "grid": {
-    "columns": 8,
-    "rows": 8,
+    "columns": 4,
+    "rows": 4,
     "cell_width": 96,
     "cell_height": 96
   },
@@ -31,7 +31,7 @@
     {
       "row": 0,
       "name": "walk_up",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           15,
@@ -43,43 +43,19 @@
           111,
           0,
           177,
-          87
+          90
         ],
         [
           207,
           0,
           273,
-          90
+          87
         ],
         [
           303,
           0,
           369,
-          87
-        ],
-        [
-          399,
-          0,
-          465,
-          87
-        ],
-        [
-          495,
-          0,
-          561,
-          87
-        ],
-        [
-          591,
-          0,
-          657,
           90
-        ],
-        [
-          687,
-          0,
-          753,
-          87
         ]
       ],
       "pre_alignment_drift": {
@@ -87,7 +63,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_000.png",
             "x": 33.0,
             "y": 87,
             "bbox": [
@@ -98,18 +74,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_001.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_001.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -120,7 +85,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_003.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_002.png",
             "x": 33.0,
             "y": 87,
             "bbox": [
@@ -131,29 +96,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_004.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_005.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_006.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_003.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -161,17 +104,6 @@
               0,
               66,
               90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_007.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
             ]
           }
         ]
@@ -181,7 +113,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -192,7 +124,18 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/001_frame_001.png",
+            "x": 33.0,
+            "y": 90,
+            "bbox": [
+              0,
+              0,
+              66,
+              90
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -203,67 +146,12 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/002_frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
               0,
               0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/004_frame_004.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/007_frame_007.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
               66,
               90
             ]
@@ -272,24 +160,20 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.0439,
+          0.0561,
           0.0167,
-          0.0182,
-          0.0061,
-          0.0439,
-          0.0167,
-          0.0182
+          0.0561
         ],
-        "average_changed_fraction": 0.0234
+        "average_changed_fraction": 0.043
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/walk_up_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/walk_up_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/alignment_report.json"
     },
     {
       "row": 1,
       "name": "walk_right",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           15,
@@ -299,44 +183,20 @@
         ],
         [
           111,
-          105,
+          102,
           177,
           192
         ],
         [
           207,
-          102,
+          105,
           273,
           192
         ],
         [
           303,
-          105,
-          369,
-          192
-        ],
-        [
-          399,
-          105,
-          465,
-          192
-        ],
-        [
-          495,
-          105,
-          561,
-          192
-        ],
-        [
-          591,
           102,
-          657,
-          192
-        ],
-        [
-          687,
-          105,
-          753,
+          369,
           192
         ]
       ],
@@ -345,7 +205,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_000.png",
             "x": 33.0,
             "y": 87,
             "bbox": [
@@ -356,18 +216,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_001.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_001.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -378,7 +227,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_003.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_002.png",
             "x": 33.0,
             "y": 87,
             "bbox": [
@@ -389,29 +238,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_004.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_005.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_006.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_003.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -419,17 +246,6 @@
               0,
               66,
               90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_007.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
             ]
           }
         ]
@@ -439,7 +255,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -450,7 +266,18 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/001_frame_001.png",
+            "x": 33.0,
+            "y": 90,
+            "bbox": [
+              0,
+              0,
+              66,
+              90
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -461,67 +288,12 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/002_frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
               0,
               0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/004_frame_004.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/007_frame_007.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
               66,
               90
             ]
@@ -530,24 +302,20 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.0439,
+          0.1515,
           0.1121,
-          0.1121,
-          0.0061,
-          0.0439,
-          0.1152,
-          0.1152
+          0.153
         ],
-        "average_changed_fraction": 0.0784
+        "average_changed_fraction": 0.1389
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/walk_right_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/walk_right_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/alignment_report.json"
     },
     {
       "row": 2,
       "name": "walk_down",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           15,
@@ -557,44 +325,20 @@
         ],
         [
           111,
-          201,
+          198,
           177,
           288
         ],
         [
           207,
-          198,
+          201,
           273,
           288
         ],
         [
           303,
-          201,
-          369,
-          288
-        ],
-        [
-          399,
-          201,
-          465,
-          288
-        ],
-        [
-          495,
-          201,
-          561,
-          288
-        ],
-        [
-          591,
           198,
-          657,
-          288
-        ],
-        [
-          687,
-          201,
-          753,
+          369,
           288
         ]
       ],
@@ -603,7 +347,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_000.png",
             "x": 33.0,
             "y": 87,
             "bbox": [
@@ -614,18 +358,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_001.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_001.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -636,7 +369,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_003.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_002.png",
             "x": 33.0,
             "y": 87,
             "bbox": [
@@ -647,29 +380,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_004.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_005.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_006.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_003.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -677,17 +388,6 @@
               0,
               66,
               90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_007.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
             ]
           }
         ]
@@ -697,7 +397,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -708,7 +408,18 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/001_frame_001.png",
+            "x": 33.0,
+            "y": 90,
+            "bbox": [
+              0,
+              0,
+              66,
+              90
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -719,67 +430,12 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/002_frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
               0,
               0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/004_frame_004.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/007_frame_007.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
               66,
               90
             ]
@@ -788,24 +444,20 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.0439,
+          0.1515,
           0.1121,
-          0.1121,
-          0.0061,
-          0.0439,
-          0.1152,
-          0.1152
+          0.153
         ],
-        "average_changed_fraction": 0.0784
+        "average_changed_fraction": 0.1389
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/walk_down_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/walk_down_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/alignment_report.json"
     },
     {
       "row": 3,
       "name": "walk_left",
-      "frames": 8,
+      "frames": 4,
       "source_boxes": [
         [
           15,
@@ -815,45 +467,21 @@
         ],
         [
           111,
-          297,
+          294,
           177,
           384
         ],
         [
           207,
-          294,
+          297,
           273,
           384
         ],
         [
           303,
-          297,
+          294,
           369,
           384
-        ],
-        [
-          399,
-          297,
-          465,
-          384
-        ],
-        [
-          495,
-          297,
-          561,
-          384
-        ],
-        [
-          591,
-          294,
-          657,
-          384
-        ],
-        [
-          687,
-          297,
-          753,
-          384
         ]
       ],
       "pre_alignment_drift": {
@@ -861,7 +489,7 @@
         "y": 3,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_000.png",
             "x": 33.0,
             "y": 87,
             "bbox": [
@@ -872,18 +500,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_001.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_001.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -894,7 +511,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_003.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_002.png",
             "x": 33.0,
             "y": 87,
             "bbox": [
@@ -905,29 +522,7 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_004.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_005.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_006.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_003.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -935,17 +530,6 @@
               0,
               66,
               90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_007.png",
-            "x": 33.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              66,
-              87
             ]
           }
         ]
@@ -955,7 +539,7 @@
         "y": 0,
         "anchors": [
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/000_frame_000.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/000_frame_000.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -966,7 +550,18 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/001_frame_001.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/001_frame_001.png",
+            "x": 33.0,
+            "y": 90,
+            "bbox": [
+              0,
+              0,
+              66,
+              90
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/002_frame_002.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
@@ -977,67 +572,12 @@
             ]
           },
           {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/002_frame_002.png",
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/003_frame_003.png",
             "x": 33.0,
             "y": 90,
             "bbox": [
               0,
               0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/004_frame_004.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/005_frame_005.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/006_frame_006.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              66,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/007_frame_007.png",
-            "x": 33.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
               66,
               90
             ]
@@ -1046,1061 +586,21 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.0439,
+          0.1515,
           0.1121,
-          0.1121,
-          0.0061,
-          0.0439,
-          0.1152,
-          0.1152
+          0.153
         ],
-        "average_changed_fraction": 0.0784
+        "average_changed_fraction": 0.1389
       },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/walk_left_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/alignment_report.json"
-    },
-    {
-      "row": 4,
-      "name": "attack_up",
-      "frames": 8,
-      "source_boxes": [
-        [
-          15,
-          384,
-          96,
-          471
-        ],
-        [
-          111,
-          384,
-          192,
-          471
-        ],
-        [
-          207,
-          384,
-          288,
-          474
-        ],
-        [
-          297,
-          384,
-          384,
-          471
-        ],
-        [
-          384,
-          384,
-          480,
-          471
-        ],
-        [
-          489,
-          384,
-          576,
-          471
-        ],
-        [
-          591,
-          384,
-          672,
-          474
-        ],
-        [
-          687,
-          384,
-          768,
-          471
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 7.5,
-        "y": 3,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/frame_000.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/frame_001.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/frame_002.png",
-            "x": 40.5,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              81,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/frame_003.png",
-            "x": 43.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              87,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/frame_004.png",
-            "x": 48.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              96,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/frame_005.png",
-            "x": 43.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              87,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/frame_006.png",
-            "x": 40.5,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              81,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/frame_007.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 1.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/aligned/000_frame_000.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/aligned/001_frame_001.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/aligned/002_frame_002.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              0,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/aligned/003_frame_003.png",
-            "x": 47.5,
-            "y": 90,
-            "bbox": [
-              4,
-              3,
-              91,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/aligned/004_frame_004.png",
-            "x": 48.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              96,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/aligned/005_frame_005.png",
-            "x": 47.5,
-            "y": 90,
-            "bbox": [
-              4,
-              3,
-              91,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/aligned/006_frame_006.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              0,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/aligned/007_frame_007.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.0302,
-          0.0229,
-          0.0774,
-          0.1361,
-          0.1382,
-          0.0778,
-          0.024
-        ],
-        "average_changed_fraction": 0.0724
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/attack_up_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/alignment_report.json"
-    },
-    {
-      "row": 5,
-      "name": "attack_right",
-      "frames": 8,
-      "source_boxes": [
-        [
-          15,
-          489,
-          96,
-          576
-        ],
-        [
-          111,
-          489,
-          192,
-          576
-        ],
-        [
-          207,
-          486,
-          288,
-          576
-        ],
-        [
-          297,
-          489,
-          384,
-          576
-        ],
-        [
-          384,
-          489,
-          480,
-          576
-        ],
-        [
-          489,
-          489,
-          576,
-          576
-        ],
-        [
-          591,
-          486,
-          672,
-          576
-        ],
-        [
-          687,
-          489,
-          768,
-          576
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 7.5,
-        "y": 3,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/frame_000.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/frame_001.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/frame_002.png",
-            "x": 40.5,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              81,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/frame_003.png",
-            "x": 43.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              87,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/frame_004.png",
-            "x": 48.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              96,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/frame_005.png",
-            "x": 43.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              87,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/frame_006.png",
-            "x": 40.5,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              81,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/frame_007.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 1.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/aligned/000_frame_000.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/aligned/001_frame_001.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/aligned/002_frame_002.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              0,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/aligned/003_frame_003.png",
-            "x": 47.5,
-            "y": 90,
-            "bbox": [
-              4,
-              3,
-              91,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/aligned/004_frame_004.png",
-            "x": 48.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              96,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/aligned/005_frame_005.png",
-            "x": 47.5,
-            "y": 90,
-            "bbox": [
-              4,
-              3,
-              91,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/aligned/006_frame_006.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              0,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/aligned/007_frame_007.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.0302,
-          0.0948,
-          0.1406,
-          0.1361,
-          0.1382,
-          0.1434,
-          0.0969
-        ],
-        "average_changed_fraction": 0.1115
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/attack_right_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/alignment_report.json"
-    },
-    {
-      "row": 6,
-      "name": "attack_down",
-      "frames": 8,
-      "source_boxes": [
-        [
-          15,
-          585,
-          96,
-          672
-        ],
-        [
-          111,
-          585,
-          192,
-          672
-        ],
-        [
-          207,
-          582,
-          288,
-          672
-        ],
-        [
-          297,
-          585,
-          384,
-          672
-        ],
-        [
-          384,
-          585,
-          480,
-          672
-        ],
-        [
-          489,
-          585,
-          576,
-          672
-        ],
-        [
-          591,
-          582,
-          672,
-          672
-        ],
-        [
-          687,
-          585,
-          768,
-          672
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 7.5,
-        "y": 3,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/frame_000.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/frame_001.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/frame_002.png",
-            "x": 40.5,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              81,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/frame_003.png",
-            "x": 43.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              87,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/frame_004.png",
-            "x": 48.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              96,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/frame_005.png",
-            "x": 43.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              87,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/frame_006.png",
-            "x": 40.5,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              81,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/frame_007.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 1.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/aligned/000_frame_000.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/aligned/001_frame_001.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/aligned/002_frame_002.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              0,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/aligned/003_frame_003.png",
-            "x": 47.5,
-            "y": 90,
-            "bbox": [
-              4,
-              3,
-              91,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/aligned/004_frame_004.png",
-            "x": 48.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              96,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/aligned/005_frame_005.png",
-            "x": 47.5,
-            "y": 90,
-            "bbox": [
-              4,
-              3,
-              91,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/aligned/006_frame_006.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              0,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/aligned/007_frame_007.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.0302,
-          0.0948,
-          0.1406,
-          0.1361,
-          0.1382,
-          0.1434,
-          0.0969
-        ],
-        "average_changed_fraction": 0.1115
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/attack_down_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/alignment_report.json"
-    },
-    {
-      "row": 7,
-      "name": "attack_left",
-      "frames": 8,
-      "source_boxes": [
-        [
-          0,
-          681,
-          81,
-          768
-        ],
-        [
-          96,
-          681,
-          177,
-          768
-        ],
-        [
-          192,
-          678,
-          273,
-          768
-        ],
-        [
-          288,
-          681,
-          375,
-          768
-        ],
-        [
-          384,
-          681,
-          480,
-          768
-        ],
-        [
-          480,
-          681,
-          567,
-          768
-        ],
-        [
-          576,
-          678,
-          657,
-          768
-        ],
-        [
-          672,
-          681,
-          753,
-          768
-        ]
-      ],
-      "pre_alignment_drift": {
-        "x": 7.5,
-        "y": 3,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/frame_000.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/frame_001.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/frame_002.png",
-            "x": 40.5,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              81,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/frame_003.png",
-            "x": 43.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              87,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/frame_004.png",
-            "x": 48.0,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              96,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/frame_005.png",
-            "x": 43.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              87,
-              87
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/frame_006.png",
-            "x": 40.5,
-            "y": 90,
-            "bbox": [
-              0,
-              0,
-              81,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/frame_007.png",
-            "x": 40.5,
-            "y": 87,
-            "bbox": [
-              0,
-              0,
-              81,
-              87
-            ]
-          }
-        ]
-      },
-      "post_alignment_drift": {
-        "x": 1.0,
-        "y": 0,
-        "anchors": [
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/aligned/000_frame_000.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/aligned/001_frame_001.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/aligned/002_frame_002.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              0,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/aligned/003_frame_003.png",
-            "x": 47.5,
-            "y": 90,
-            "bbox": [
-              4,
-              3,
-              91,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/aligned/004_frame_004.png",
-            "x": 48.0,
-            "y": 90,
-            "bbox": [
-              0,
-              3,
-              96,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/aligned/005_frame_005.png",
-            "x": 47.5,
-            "y": 90,
-            "bbox": [
-              4,
-              3,
-              91,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/aligned/006_frame_006.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              0,
-              89,
-              90
-            ]
-          },
-          {
-            "frame": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/aligned/007_frame_007.png",
-            "x": 48.5,
-            "y": 90,
-            "bbox": [
-              8,
-              3,
-              89,
-              90
-            ]
-          }
-        ]
-      },
-      "motion": {
-        "pair_changed_fraction": [
-          0.0302,
-          0.0948,
-          0.1771,
-          0.1139,
-          0.1201,
-          0.1809,
-          0.0969
-        ],
-        "average_changed_fraction": 0.1163
-      },
-      "preview_gif": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/attack_left_preview.gif",
-      "aligned_dir": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/aligned",
-      "alignment_report": "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/alignment_report.json"
+      "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/walk_left_preview.gif",
+      "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned",
+      "alignment_report": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/alignment_report.json"
     }
   ],
   "preview_gifs": [
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/walk_up_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/walk_right_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/walk_down_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/walk_left_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_up/attack_up_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_right/attack_right_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_down/attack_down_preview.gif",
-    "/home/orlovboros/projects/tib/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/attack_left/attack_left_preview.gif"
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/walk_up_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/walk_right_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/walk_down_preview.gif",
+    "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/walk_left_preview.gif"
   ]
 }

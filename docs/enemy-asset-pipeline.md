@@ -1,25 +1,36 @@
 # Enemy Asset Pipeline
 
-All new bespoke runtime enemy sprites should use the `enemy-directional-8x8-v1` contract.
+All new bespoke runtime enemy sprites should use the `enemy-directional-4x4-v2` contract.
 
-The reference behavior is the in-game goblin scout directional contract, extended with a matching attack block: movement and attacks are directional animation families, not a single row mirrored or reused for every facing.
+## Art Style: simpler painterly pixel
+
+The roster target is a **simplified painterly pixel-art** look — lower interior detail than a
+fully-rendered pixel sheet, but the same painterly family as the keeper sprites (skeleton, goblins).
+The point is small-screen readability (sprites render ~60–130px tall) and frame-to-frame
+consistency for image-model generation.
+
+- **Strong silhouette** first — the shape reads at a glance.
+- **Limited palette** — roughly 8–16 intentional colours per creature; soft painterly shading
+  within that. The pipeline enforces a hard cap of `64` distinct opaque colours per sheet
+  (`MAX_SHEET_COLORS` in `tools/validate_enemy_asset_pipeline.py`); over-detailed or heavily
+  anti-aliased art is rejected at the gate.
+- **One clear key/rim light**, minimal interior noise.
+- Side art faces **LEFT**; right is mirrored at runtime.
 
 ## Runtime Sheet Contract
 
-- Sheet size: `768x768`
+- Sheet size: `384x384`
 - Cell size: `96x96`
-- Columns: `8` frames per direction
-- Rows: `8`
+- Columns: `4` frames per direction
+- Rows: `4` (walk only)
 - Row order:
   - `walk_up`
   - `walk_right`
   - `walk_down`
   - `walk_left`
-  - `attack_up`
-  - `attack_right`
-  - `attack_down`
-  - `attack_left`
-- Runtime texture count per enemy: `32` walk frames and `32` attack frames
+- **No attack rows.** Attacks reuse the walk pose plus the shared slash/missile effect overlays
+  (`effects.png`), matching the keeper families which have no bespoke attack art.
+- Runtime texture count per enemy: `16` walk frames (4 directions × 4 frames).
 
 ## Commands
 
