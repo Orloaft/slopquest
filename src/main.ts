@@ -1741,16 +1741,17 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "jungleTiles", "spriteJungleVault", 676, 862, 120, 100);
 
   // The Deepdelve Mine (floor 10) cave identity (M1): bespoke worked-stone floor from the Dungeon
-  // Tileset's FLOOR TILES grid (~70px cobble at col 19, row 101). A SINGLE base tile keeps the cave
-  // floor homogeneous (one consistent worked rock); it's de-gridded by flip-only variants below.
-  // The `#` rock wall is a rough boulder floor tile shaded dark — one cohesive stone family where
-  // walls are the same rock, unlit/solid.
-  makeTileTexture(this, "dungeonTiles", "tileMineFloor", 19, 101, 69, 71);
+  // Tileset's FLOOR TILES grid (~70px ROUGH ROCK at col 178, row 101 — chosen over the neat cobble
+  // tiles because it has no mortar perimeter, so it tiles without a visible grid). A SINGLE base
+  // tile keeps the cave floor homogeneous; it's de-gridded by rotation variants below. The `#` rock
+  // wall is a rough boulder floor tile shaded dark — one cohesive stone family, walls unlit/solid.
+  makeTileTexture(this, "dungeonTiles", "tileMineFloor", 178, 101, 70, 71);
   makeTileTexture(this, "dungeonTiles", "tileMineWall", 417, 101, 69, 71, undefined, false,
     (r, g, b) => [Math.round(r * 0.52), Math.round(g * 0.52), Math.round(b * 0.52)]);
-  // Homogeneous-but-not-gridded: bake flip variants of the ONE mine-floor tile (the cemetery
-  // lesson — flips break the cobble lattice at seams; per-tile TONE would just redraw the grid as a
-  // brightness checkerboard, so none is applied). The floor-10 picker rolls one per cell.
+  // Homogeneous-but-seamless: bake 90deg ROTATION variants of the ONE mine-floor tile. The rock is
+  // non-directional, so rotations (unlike flips, which leave mirror-symmetry rosettes) scramble the
+  // residual repeat with no axis artifacts and no per-tile tone (tone would redraw the grid as a
+  // brightness checkerboard). The floor-10 picker rolls one per cell.
   for (let v = 0; v < MINE_FLOOR_VARIANTS; v += 1) {
     const cv = document.createElement("canvas");
     cv.width = TILE_SIZE;
@@ -1758,12 +1759,9 @@ function create(this: Phaser.Scene): void {
     const cc = cv.getContext("2d");
     if (!cc) continue;
     cc.imageSmoothingEnabled = false;
-    const flipH = (v & 1) === 1, flipV = (v & 2) === 2;
-    cc.save();
     cc.translate(TILE_SIZE / 2, TILE_SIZE / 2);
-    cc.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+    cc.rotate((v * Math.PI) / 2);
     cc.drawImage(this.textures.get("tileMineFloor").getSourceImage() as CanvasImageSource, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
-    cc.restore();
     this.textures.addCanvas(`tileMineFloorV${v}`, cv);
     this.textures.get(`tileMineFloorV${v}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
   }
