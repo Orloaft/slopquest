@@ -838,17 +838,31 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 37, 34, 31, 4, "i");
     fillRect(rows, 64, 34, 4, 31, "i");
     fillRect(rows, 37, 8, 5, 2, "-"); // upper ford
-    fillRect(rows, 37, 36, 5, 1, "-"); // lower ford
+    // (old "lower ford" removed: it was a 1-row `-` stranded inside the river trunk, connecting
+    //  nothing — the real eastern crossing is now the chokepoint ford at x53 below.)
     fillRect(rows, 42, 7, 22, 5, "-");
     fillRect(rows, 59, 7, 5, 23, "-");
     fillRect(rows, 44, 25, 20, 5, "-");
     fillRect(rows, 44, 38, 24, 8, "-");
     fillRect(rows, 71, 38, 6, 15, "-");
+    // Reclaim the eastern half: it was authored ("river forded at chokepoints") but stranded —
+    // the lower ford never spanned the bank, so the east-central clearing + east run were
+    // unreachable from the west entry. A real chokepoint ford crosses the canopy band (y30-33)
+    // and the horizontal river (y34-37), linking the reachable north clearing (y25-29) to the
+    // east-central clearing; a short slot then links the clearing to the east run. The Vault arena
+    // stays sealed (K does not transport) by design.
+    fillRect(rows, 53, 30, 3, 8, "-"); // chokepoint ford N->S over the canopy + river
+    fillRect(rows, 68, 41, 3, 3, "-"); // east-central clearing -> east run
     fillRect(rows, 80, 38, 17, 14, "-"); // Jungle Vault arena, reached by the sealed K gate
     // Elevation slice (option B): raise the dead-end vault arena onto a plateau — walkable `-` top,
     // a rocky cliff face `C` dropping along its south edge to the lower arena floor, climbable via a
     // ramp notch. Validates the cliff/lip/AO pipeline before the full tiered re-author of the zone.
     drawJungleLedge(rows, 80, 38, 16, 4, [{ x: 86, w: 3 }]);
+    // First REACHABLE tier (M3): a plateau in the now-connected east-central clearing. The
+    // chokepoint ford lands you on its top (high ground over the clearing); a ramp at x53-55 drops
+    // to the lower floor. Open `-` lanes at x44-46 (W) and x63-67 (E) keep the clearing passable
+    // around the cliff and preserve the east-run exit, so the elevation never severs a path.
+    drawJungleLedge(rows, 47, 38, 16, 2, [{ x: 53, w: 3 }]);
     setTile(rows, 20, 42, "K"); // sealed Jungle Vault (does not transport)
   }
 
