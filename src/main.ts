@@ -2711,6 +2711,50 @@ function createMapChunk(state: MapRenderState, chunkX: number, chunkY: number): 
         }
       }
     }
+    // The Deepdelve Mine (floor 10) cave lighting & depth (M3). The mine bakes no relief, so a live
+    // pass adds the cues a flat lit cave lacks: (a) a DEPTH/DANGER darkening that grows as you
+    // descend from the lit NW entry toward the deep S pockets — the safe entry stays bright, the
+    // mithril/adamant deep reads near-black; (b) a warm torch-lit wash over the safe entry chamber
+    // so it feels like a haven against the cold descent; (c) a soft contact shadow each rock wall
+    // casts onto the floor to its south, grounding the walls; (d) a low-frequency cave mottle so the
+    // floor isn't a flat wash. Veins are entities drawn above the map, so they stay bright and pop
+    // against the dark deep. Collision untouched (# / r still block in shared.ts). Torch-prop light
+    // pools land in M4.
+    if (state.floor === 10) {
+      const FLOOR = new Set(["b", "c", "d", "<"]);
+      const isRock = (cx: number, cy: number): boolean => {
+        const t = state.rows[cy]?.[cx];
+        return t === "#" || t === "r";
+      };
+      for (let y = tileY; y < tileBottom; y += 1) {
+        if (state.rows[y] === undefined) continue;
+        for (let x = tileX; x < tileRight; x += 1) {
+          const ch = state.rows[y]?.[x];
+          if (!ch) continue;
+          const px = (x - tileX) * TILE_SIZE, py = (y - tileY) * TILE_SIZE;
+          // Depth: 0 at the entry rows (~y8) -> 1 at the deepest pocket (~y56).
+          const depth = Math.max(0, Math.min(1, (y - 8) / 48));
+          const inEntry = x >= 4 && x <= 20 && y >= 4 && y <= 16; // the safe staging chamber
+          const m = searingGroundMottle(x, y);
+          if (FLOOR.has(ch)) {
+            if (inEntry) {
+              texture.draw("graveMottleOverlay", px, py, 0.13, 0xffcf9c); // warm torch-lit haven
+            } else {
+              // Cool near-black gloom that deepens with descent (gentle near the top, heavy below).
+              texture.draw("graveMottleOverlay", px, py, 0.06 + depth * 0.44, 0x05060c);
+            }
+            // Rock wall to the north casts a contact shadow onto this floor cell.
+            if (isRock(x, y - 1)) texture.draw("beachCliffShadow", px, py, 0.5, 0x04050a);
+            // Low-frequency damp/dry cave mottle so the rock floor reads uneven, not a flat wash.
+            if (m < 0.4) texture.draw("graveMottleOverlay", px, py, ((0.4 - m) / 0.4) * 0.2, 0x07090f);
+            else if (m > 0.66) texture.draw("graveMottleOverlay", px, py, ((m - 0.66) / 0.34) * 0.1, 0x6b6256);
+          } else if (ch === "#") {
+            // Walls deepen with descent too, so the deep reads as uniform gloom.
+            texture.draw("graveMottleOverlay", px, py, 0.08 + depth * 0.34, 0x04050a);
+          }
+        }
+      }
+    }
   }
   // Northwood (floor 3) painted relief. The generated stage already bakes the cliff
   // faces (L plateau top / q,o ribbed face) as atlas tiles, so we don't repaint them —
