@@ -19,7 +19,11 @@ const REGIONS: Array<{ name: string; x: number; y: number }> = [
   // Vein close-ups: stand on each ore's approach tile so the vein sits ~1 tile north of centre.
   { name: "8-copper-vein", x: 6, y: 8 },
   { name: "9-gold-vein", x: 70, y: 34 },
-  { name: "10-mithril-vein", x: 42, y: 52 }
+  { name: "10-mithril-vein", x: 42, y: 52 },
+  // Expansion annexes (G/H/I) — new chambers branched into the open rock.
+  { name: "11-G-iron-coal-annex", x: 76, y: 9 },
+  { name: "12-H-silver-annex", x: 13, y: 51 },
+  { name: "13-I-gold-mithril-annex", x: 76, y: 53 }
 ];
 
 test("Deepmine overview tour", async ({ page }) => {

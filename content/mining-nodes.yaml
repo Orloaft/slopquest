@@ -151,3 +151,35 @@
   kind: adamant
   at: { floor: 10, x: 44.5, y: 49.5 }
   approach: { x: 44.5, y: 50.5 }
+
+# Expansion annexes (G/H/I) — branch chambers carved into the open rock, each at
+# the tier of the spine chamber it hangs off (see src/shared.ts floor-10 block).
+- id: mine-10-72-6
+  kind: iron
+  at: { floor: 10, x: 72.5, y: 6.5 }
+  approach: { x: 72.5, y: 7.5 }
+
+- id: mine-10-81-12
+  kind: coal
+  at: { floor: 10, x: 81.5, y: 12.5 }
+  approach: { x: 81.5, y: 11.5 }
+
+- id: mine-10-9-48
+  kind: silver
+  at: { floor: 10, x: 9.5, y: 48.5 }
+  approach: { x: 9.5, y: 49.5 }
+
+- id: mine-10-19-54
+  kind: silver
+  at: { floor: 10, x: 19.5, y: 54.5 }
+  approach: { x: 19.5, y: 53.5 }
+
+- id: mine-10-72-51
+  kind: gold
+  at: { floor: 10, x: 72.5, y: 51.5 }
+  approach: { x: 72.5, y: 52.5 }
+
+- id: mine-10-82-56
+  kind: mithril
+  at: { floor: 10, x: 82.5, y: 56.5 }
+  approach: { x: 82.5, y: 55.5 }

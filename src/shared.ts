@@ -969,9 +969,10 @@ export function makeFloorTiles(floor: number): string[] {
   if (floor === 10) {
     // The Deepdelve Mine (bespoke 90x60) — an enclosed cave reached from the
     // Searing Badlands' copper dead-end (>). Solid rock (#) fills the bulk; a
-    // winding crypt-stone spine (c) links six worked-out chambers (b) that
+    // winding crypt-stone spine (c) links nine worked-out chambers (b) that
     // descend in ore tier: a SAFE entry chamber (d, copper/tin) -> iron -> coal
-    // -> silver -> gold -> a deepest mithril/adamant pocket. Veins sit on rock
+    // -> silver -> gold -> a deepest mithril/adamant pocket, plus three annexes
+    // (G/H/I) branching into the open rock at their neighbours' tiers. Veins sit on rock
     // outcrops (r) with a cleared standing tile beside them; danger rises with
     // depth. < returns to the badlands.
     fillRect(rows, 0, 0, 90, 60, "#"); // solid rock bulk
@@ -997,6 +998,19 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 66, 31, 18, 14, "b"); // E: gold (deep east)
     fillRect(rows, 40, 48, 16, 11, "b"); // F: mithril/adamant (deepest pocket)
 
+    // --- Expansion annexes branching off the spine into open rock, each carrying
+    // the tier of the chamber it hangs off so the descent reads the same. ---
+    // G: shallow east annex (iron/coal) — raise the x45 spine up to the top band.
+    fillRect(rows, 45, 5, 3, 10, "c"); // climb the x45 drop north to y5
+    fillRect(rows, 45, 5, 25, 3, "c"); // run east along the top toward G
+    fillRect(rows, 68, 4, 17, 12, "b"); // G: x68..84, y4..15
+    // H: deep south-west annex (silver) — drop south out of the coal chamber (C).
+    fillRect(rows, 16, 40, 3, 6, "c"); // drop from C's floor down to H
+    fillRect(rows, 5, 45, 18, 13, "b"); // H: x5..22, y45..57
+    // I: deepest south-east annex (gold/mithril) — drop south out of the gold chamber (E).
+    fillRect(rows, 78, 44, 3, 6, "c"); // drop from E's floor down to I
+    fillRect(rows, 68, 49, 18, 10, "b"); // I: x68..85, y49..58
+
     scatter(rows, "c", "r", 14, 71); // loose rubble along the corridors
     scatter(rows, "b", "r", 10, 72); // and in the chambers
 
@@ -1010,7 +1024,10 @@ export function makeFloorTiles(floor: number): string[] {
       [50, 19, 50, 20, "b"], [60, 28, 60, 27, "b"], // D: silver
       [70, 32, 70, 33, "b"], [81, 43, 81, 42, "b"], // E: gold
       [42, 50, 42, 51, "b"], [53, 57, 53, 56, "b"], // F: mithril
-      [47, 57, 47, 56, "b"], [44, 49, 44, 50, "b"] // F: adamant
+      [47, 57, 47, 56, "b"], [44, 49, 44, 50, "b"], // F: adamant
+      [72, 6, 72, 7, "b"], [81, 12, 81, 11, "b"], // G: iron, coal
+      [9, 48, 9, 49, "b"], [19, 54, 19, 53, "b"], // H: silver, silver
+      [72, 51, 72, 52, "b"], [82, 56, 82, 55, "b"] // I: gold, mithril
     ] as Array<[number, number, number, number, string]>) {
       setTile(rows, ax, ay, "r"); // the vein outcrop (blocker)
       setTile(rows, px, py, floorCh); // its standing tile, guaranteed walkable
