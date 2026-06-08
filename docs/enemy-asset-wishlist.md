@@ -91,11 +91,10 @@ Current per-floor counts (live, from `MONSTER_SPAWNS`): 1 Cemetery **6**, 2 Cryp
 3 Northwood **22**, **4 Northwatch 0**, 5 Marsh **2**, 6 Badlands **2**, 7 Desert **2**,
 8 Beach **2**, 9 Jungle **3**, 10 Mine **5**. Target band: **~4–6 per combat floor.**
 
-- **Floor 4 Northwatch has ZERO enemies** — biggest content hole, theme it first.
-- **Floors 5–8 have only 2 types each** — thin; +2–3 each.
-- **Floor 3 Northwood has 22 types** — overstuffed; some (dire_wolf, orc) could migrate up to the
-  Northwatch frontier instead of authoring net-new there.
-- Floor 0 (Waystone) and 11 (Route) are intentionally safe — leave.
+- **Floors 5–8 have only 2 types each** — thin; +2–3 each. These are the real gaps.
+- **Floor 3 Northwood has 22 types** — overstuffed vs every other floor (candidate to thin, not expand).
+- **Floor 4 Northwatch (0 enemies) is a CITY** — intentionally safe like Floor 0 (Waystone) and
+  Floor 11 (Route). Do **not** add hostiles here.
 
 ### Lore hook for cohesion
 Floors 5/7/8/9 are all **"Sunken"** zones and already carry a drowned-civilization motif
@@ -104,19 +103,7 @@ swallowed by marsh/sand/sea/jungle** — its dead, its guardians, and the beasts
 
 ### Concrete expansion wishlist (inspired by fantasy-RPG bestiaries)
 Same sheet format as P0 (`enemy-directional-4x4-v2`, 384×384). `role` matches the existing vocab
-(`trash` / `elite` / `turret`=ranged caster / `ambush` / `boss`). ~20 net-new across 6 floors.
-
-#### Floor 4 — Northwatch (frontier watch-fort; **author first**)
-A fortified pass besieged from the north and rotting from within — human antagonists + northern beasts.
-
-| Enemy | Role | Art brief | Inspiration |
-|---|---|---|---|
-| **frontier_marauder** | trash | leather-clad deserter, hand-axe, fur half-cloak | bandit (RuneScape/Skyrim) |
-| **watch_defector** | elite | corrupted ex-watchman, torn tabard, spear + kite shield | fallen knight |
-| **frost_warg** | trash (pack) | pale ice-matted wolf, frost breath, paler than dire_wolf | warg (LotR) |
-| **raid_houndmaster** | turret | horn-blowing raider, throws bolas/whistles in the warg pack | beastmaster |
-| **iron_sentinel** | elite | animated suit of watch-plate, hollow glow, halberd | animated armor (Dark Souls) |
-| **Warlord Korrun** | boss | hulking raid warlord, horned helm, two-handed cleaver | warband chief |
+(`trash` / `elite` / `turret`=ranged caster / `ambush` / `boss`). ~14 net-new across 5 combat floors.
 
 #### Floor 5 — The Sunken Marsh (+3)
 | Enemy | Role | Art brief | Inspiration |
@@ -152,7 +139,6 @@ A fortified pass besieged from the north and rotting from within — human antag
 | **canopy_stalker** | ambush | sleek jungle panther, drops from above, spotted dark coat | hunting cat |
 | **blowpipe_headhunter** | turret | feral ruin-tribe hunter, bone mask, ranged dart blowpipe | jungle tribal |
 
-> Author order: **Floor 4 set first** (it's empty), then one caster + one melee per Sunken floor
-> (5→8) to lift each to ~4–5 types, then the Jungle pair. Bosses (Korrun) last. Reuse the P0
-> tinting trick where a palette swap yields a second type from one sheet (e.g. frost_warg → a
-> darker timber variant) to stretch coverage.
+> Author order: one caster + one melee per Sunken floor (5→8) first to lift each thin floor to
+> ~4–5 types, then the Jungle pair. Reuse the P0 tinting trick where a palette swap yields a second
+> type from one sheet (e.g. a marsh `bog_leech` → a paler desert variant) to stretch coverage.
