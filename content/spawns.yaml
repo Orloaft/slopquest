@@ -146,6 +146,15 @@ monsters:
   - { type: deepdelve_wight,  at: { floor: 10, x: 78, y: 40 }, zone: deepMine }
   - { type: crypt_sentinel,   at: { floor: 10, x: 45, y: 53 }, zone: deepMine }
   - { type: crypt_sentinel,   at: { floor: 10, x: 51, y: 55 }, zone: deepMine }
+  # Expansion annexes (G/H/I): same tier-by-depth pattern — scavengers in the
+  # shallow iron/coal annex, wights in the silver/gold deeps, a sentinel guarding
+  # the deepest SE mithril vein.
+  - { type: canyon_scavenger, at: { floor: 10, x: 74, y: 8  }, zone: deepMine } # G annex
+  - { type: canyon_scavenger, at: { floor: 10, x: 79, y: 11 }, zone: deepMine } # G annex
+  - { type: deepdelve_wight,  at: { floor: 10, x: 11, y: 50 }, zone: deepMine } # H annex
+  - { type: deepdelve_wight,  at: { floor: 10, x: 17, y: 53 }, zone: deepMine } # H annex
+  - { type: deepdelve_wight,  at: { floor: 10, x: 72, y: 53 }, zone: deepMine } # I annex
+  - { type: crypt_sentinel,   at: { floor: 10, x: 81, y: 55 }, zone: deepMine } # I annex
   - { type: verdant_faultwarden, at: { floor: 9, x: 85, y: 44 }, zone: jungle }
 
   # The Waystone Trail (Route 1, floor 11): the gentle on-ramp between Waystone

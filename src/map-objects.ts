@@ -476,5 +476,53 @@ export const MAP_OBJECTS: Record<number, MapObject[]> = {
     { key: "spriteSwampBoulder", x: 36.1, y: 37, w: 44, h: 36 },
     { key: "spriteSwampBoulder", x: 42.2, y: 37, w: 40, h: 34 },
     { key: "spriteObelisk", x: 16.5, y: 42.5, w: 38, h: 60 } // tribal totem by the vault
+  ],
+  // The Deepdelve Mine interior (floor 10, bespoke 90x60). The mine-kit sprites
+  // (arch/hoist/cart/track, registered in main.ts:1556) were only ever placed on
+  // the floor-6 SURFACE entry — the worked chambers below were bare floor + veins.
+  // Dress every chamber so it reads as an active dig: a timber arch frames each
+  // chamber, a cart + rail sits on the floor, and the deep chambers get a winch
+  // hoist. All non-blocking (not in BLOCKING_OBJECT_KEYS), so corridors stay open
+  // and passability is unchanged. Coords are raw 90x60 tile centres; kept off the
+  // ore outcrops (r) and the entry stair (<). Annexes G/H/I are dressed first.
+  10: [
+    // Entry chamber (safe staging head): the winch and a cart on the rail landing.
+    { key: "spriteMineHoist", x: 13, y: 11, w: 114, h: 130 },
+    { key: "spriteMineTrack", x: 9.5, y: 13.6, w: 120, h: 69 },
+    { key: "spriteMineCart", x: 9, y: 13, w: 58, h: 60 },
+    // B — iron chamber (top).
+    { key: "spriteMineArch", x: 37, y: 9, w: 155, h: 140 },
+    { key: "spriteMineTrack", x: 35.5, y: 12.6, w: 120, h: 69 },
+    { key: "spriteMineCart", x: 35, y: 12, w: 58, h: 60 },
+    // C — coal chamber (SW).
+    { key: "spriteMineHoist", x: 19, y: 34, w: 114, h: 130 },
+    { key: "spriteMineTrack", x: 16.5, y: 37.6, w: 120, h: 69 },
+    { key: "spriteMineCart", x: 16, y: 37, w: 58, h: 60 },
+    // D — silver chamber (mid-east).
+    { key: "spriteMineArch", x: 55, y: 23, w: 155, h: 140 },
+    { key: "spriteMineTrack", x: 53.5, y: 26.6, w: 120, h: 69 },
+    { key: "spriteMineCart", x: 53, y: 26, w: 58, h: 60 },
+    // E — gold chamber (deep east).
+    { key: "spriteMineHoist", x: 74, y: 38, w: 114, h: 130 },
+    { key: "spriteMineTrack", x: 77.5, y: 35.6, w: 120, h: 69 },
+    { key: "spriteMineCart", x: 77, y: 35, w: 58, h: 60 },
+    // F — mithril/adamant pocket (deepest).
+    { key: "spriteMineArch", x: 48, y: 52, w: 155, h: 140 },
+    { key: "spriteMineCart", x: 50, y: 54, w: 58, h: 60 },
+    // G — iron/coal annex (top-right, new).
+    { key: "spriteMineArch", x: 76, y: 9, w: 155, h: 140 },
+    { key: "spriteMineHoist", x: 70, y: 11, w: 114, h: 130 },
+    { key: "spriteMineTrack", x: 78.5, y: 13.6, w: 120, h: 69 },
+    { key: "spriteMineCart", x: 78, y: 13, w: 58, h: 60 },
+    // H — silver annex (deep SW, new).
+    { key: "spriteMineHoist", x: 13, y: 51, w: 114, h: 130 },
+    { key: "spriteMineArch", x: 10, y: 54, w: 155, h: 140 },
+    { key: "spriteMineTrack", x: 16.5, y: 49.6, w: 120, h: 69 },
+    { key: "spriteMineCart", x: 16, y: 49, w: 58, h: 60 },
+    // I — gold/mithril annex (deepest SE, new).
+    { key: "spriteMineHoist", x: 76, y: 54, w: 114, h: 130 },
+    { key: "spriteMineArch", x: 73, y: 56, w: 155, h: 140 },
+    { key: "spriteMineTrack", x: 79.5, y: 52.6, w: 120, h: 69 },
+    { key: "spriteMineCart", x: 79, y: 52, w: 58, h: 60 }
   ]
 };
