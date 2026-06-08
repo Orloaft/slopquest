@@ -6583,17 +6583,24 @@ function createActorFrames(scene: Phaser.Scene): void {
   createFrameSet(scene, "playerSheet", "caster", casterRows, casterXs, 82, 96);
   createExplicitFrameSet(scene, "goblinSheet", "goblin", goblinFrames);
   createExplicitFrameSet(scene, "skeletonSheet", "skeleton", skeletonFrames);
+  // ratandspiders.png WALK rows, frame boxes measured from the magenta-keyed grid
+  // (the old boxes sat ~15px high in the gap below IDLE and used the LEFT-facing
+  // side art for the right slot, so rats/spiders walked clipped and backwards).
+  // The side art faces LEFT; right is mirrored (mirrorRightFromLeft). Front=down,
+  // back=up are the two narrow frames between the side groups, repeated to 4.
   createExplicitFrameSet(scene, "ratSpiderSheet", "rat", {
-    up: spriteFrames([700, 748, 796, 844], 126, 54, 46),
-    right: spriteFrames([132, 260, 388, 516], 124, 112, 48),
-    down: spriteFrames([612, 660, 612, 660], 126, 54, 46),
-    left: spriteFrames([132, 260, 388, 516], 124, 112, 48)
+    up: spriteFrames([731, 1405, 731, 1405], 134, 50, 64), // back-facing (2 frames)
+    right: spriteFrames([153, 276, 402, 523], 136, 114, 52), // mirrored from left
+    down: spriteFrames([650, 1319, 650, 1319], 134, 50, 64), // front-facing (2 frames)
+    left: spriteFrames([153, 276, 402, 523], 136, 114, 52) // left-facing side (4 frames)
   });
   createExplicitFrameSet(scene, "ratSpiderSheet", "spider", {
-    up: spriteFrames([708, 760, 812, 864], 686, 58, 54),
-    right: spriteFrames([128, 256, 384, 512], 678, 118, 58),
-    down: spriteFrames([616, 668, 616, 668], 686, 58, 54),
-    left: spriteFrames([128, 256, 384, 512], 678, 118, 58)
+    // The brown side/front/back frames (#0-5); the red-marked right half is an
+    // unused variant. Brown has one front + one back frame, so they hold.
+    up: spriteFrames([726, 726, 726, 726], 678, 54, 46), // back-facing
+    right: spriteFrames([156, 277, 404, 522], 680, 90, 44), // mirrored from left
+    down: spriteFrames([643, 643, 643, 643], 678, 54, 46), // front-facing
+    left: spriteFrames([156, 277, 404, 522], 680, 90, 44) // left-facing side (4 frames)
   });
   createExplicitFrameSet(scene, "goblinScoutSheet", "goblinScout", uniformDirectionFrames(281, 293, 4));
   createExplicitFrameSet(scene, "goblinShamanSheet", "goblinShaman", uniformDirectionFrames(313, 313, 4));
@@ -6819,11 +6826,12 @@ function textureAlphaStats(keys: string[]): Array<{ key: string; exists: boolean
 }
 
 function mirrorRightFromLeft(family: string): boolean {
-  return family === "knight" || family === "caster" || family === "goblin" || family === "skeleton";
+  // rat/spider side art is drawn facing LEFT, so mirror the right facing from it.
+  return family === "knight" || family === "caster" || family === "goblin" || family === "skeleton" || family === "rat" || family === "spider";
 }
 
-function mirrorLeftFromRight(family: string): boolean {
-  return family === "rat" || family === "spider";
+function mirrorLeftFromRight(_family: string): boolean {
+  return false;
 }
 
 interface AlignedFrameSpec {
