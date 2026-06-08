@@ -92,6 +92,18 @@
   at: { floor: 10, x: 17.5, y: 6.5 }
   approach: { x: 17.5, y: 7.5 }
 
+# A second copper + tin pair lower in the safe entry chamber, so a fresh miner
+# has a proper starter seam to grind (the staging cave is the only safe rock).
+- id: mine-10-6-13
+  kind: copper
+  at: { floor: 10, x: 6.5, y: 13.5 }
+  approach: { x: 6.5, y: 12.5 }
+
+- id: mine-10-17-13
+  kind: tin
+  at: { floor: 10, x: 17.5, y: 13.5 }
+  approach: { x: 17.5, y: 12.5 }
+
 - id: mine-10-32-6
   kind: iron
   at: { floor: 10, x: 32.5, y: 6.5 }
@@ -147,11 +159,6 @@
   at: { floor: 10, x: 47.5, y: 57.5 }
   approach: { x: 47.5, y: 56.5 }
 
-- id: mine-10-44-49
-  kind: adamant
-  at: { floor: 10, x: 44.5, y: 49.5 }
-  approach: { x: 44.5, y: 50.5 }
-
 # Expansion annexes (G/H/I) — branch chambers carved into the open rock, each at
 # the tier of the spine chamber it hangs off (see src/shared.ts floor-10 block).
 - id: mine-10-72-6
@@ -170,12 +177,12 @@
   approach: { x: 9.5, y: 49.5 }
 
 - id: mine-10-19-54
-  kind: silver
+  kind: gold
   at: { floor: 10, x: 19.5, y: 54.5 }
   approach: { x: 19.5, y: 53.5 }
 
 - id: mine-10-72-51
-  kind: gold
+  kind: adamant
   at: { floor: 10, x: 72.5, y: 51.5 }
   approach: { x: 72.5, y: 52.5 }
 

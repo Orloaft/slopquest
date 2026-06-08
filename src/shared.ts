@@ -1004,10 +1004,10 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 45, 5, 3, 10, "c"); // climb the x45 drop north to y5
     fillRect(rows, 45, 5, 25, 3, "c"); // run east along the top toward G
     fillRect(rows, 68, 4, 17, 12, "b"); // G: x68..84, y4..15
-    // H: deep south-west annex (silver) — drop south out of the coal chamber (C).
+    // H: deep south-west annex (silver/gold) — drop south out of the coal chamber (C).
     fillRect(rows, 16, 40, 3, 6, "c"); // drop from C's floor down to H
     fillRect(rows, 5, 45, 18, 13, "b"); // H: x5..22, y45..57
-    // I: deepest south-east annex (gold/mithril) — drop south out of the gold chamber (E).
+    // I: deepest south-east annex (adamant/mithril) — drop south out of the gold chamber (E).
     fillRect(rows, 78, 44, 3, 6, "c"); // drop from E's floor down to I
     fillRect(rows, 68, 49, 18, 10, "b"); // I: x68..85, y49..58
 
@@ -1019,15 +1019,16 @@ export function makeFloorTiles(floor: number): string[] {
     // mirror content/mining-nodes.yaml floor-10 entries (at -> approach).
     for (const [ax, ay, px, py, floorCh] of [
       [6, 6, 6, 7, "d"], [17, 6, 17, 7, "d"], // entry: copper, tin
+      [6, 13, 6, 12, "d"], [17, 13, 17, 12, "d"], // entry: copper, tin (richer safe starter)
       [32, 6, 32, 7, "b"], [41, 14, 40, 14, "b"], // B: iron
       [14, 31, 14, 32, "b"], [23, 39, 23, 38, "b"], // C: coal
       [50, 19, 50, 20, "b"], [60, 28, 60, 27, "b"], // D: silver
       [70, 32, 70, 33, "b"], [81, 43, 81, 42, "b"], // E: gold
       [42, 50, 42, 51, "b"], [53, 57, 53, 56, "b"], // F: mithril
-      [47, 57, 47, 56, "b"], [44, 49, 44, 50, "b"], // F: adamant
+      [47, 57, 47, 56, "b"], // F: adamant (the deepest pocket, richest but no longer doubled)
       [72, 6, 72, 7, "b"], [81, 12, 81, 11, "b"], // G: iron, coal
-      [9, 48, 9, 49, "b"], [19, 54, 19, 53, "b"], // H: silver, silver
-      [72, 51, 72, 52, "b"], [82, 56, 82, 55, "b"] // I: gold, mithril
+      [9, 48, 9, 49, "b"], [19, 54, 19, 53, "b"], // H: silver, gold
+      [72, 51, 72, 52, "b"], [82, 56, 82, 55, "b"] // I: adamant, mithril
     ] as Array<[number, number, number, number, string]>) {
       setTile(rows, ax, ay, "r"); // the vein outcrop (blocker)
       setTile(rows, px, py, floorCh); // its standing tile, guaranteed walkable
