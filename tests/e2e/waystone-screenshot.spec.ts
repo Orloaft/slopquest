@@ -24,6 +24,9 @@ test("Waystone floor 0 renders in-browser", async ({ page }) => {
   expect(startupKeys.has("townTiles"), "full town source sheet should not be a startup asset").toBe(false);
   expect(startupKeys.has("forestTiles"), "full forest source sheet should not be a startup asset").toBe(false);
   expect(startupKeys.has("northwoodTreeSheet"), "full Northwood tree source sheet should not be a startup asset").toBe(false);
+  expect(startupKeys.has("ratSpiderSheet"), "rat/spider source sheet should not be a startup asset").toBe(false);
+  expect(startupKeys.has("woodlandBespokeSheet"), "packed woodland actor atlas should not be a startup asset").toBe(false);
+  expect(startupKeys.has("effectsSheet"), "slim shared combat effect crops should stay available at startup").toBe(true);
   for (const key of ["tileGrass", "tileForest", "spriteTree", "spriteRedHouse", "spriteBridge"]) {
     expect(startupKeys.has(key), `${key} should be represented by a baked starter runtime crop`).toBe(true);
   }

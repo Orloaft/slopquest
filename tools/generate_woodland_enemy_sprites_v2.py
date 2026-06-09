@@ -442,16 +442,6 @@ def make_contact(results: list[dict]) -> Path:
     return out
 
 
-def make_runtime_atlas(results: list[dict]) -> Path:
-    atlas = Image.new("RGBA", (COLS * CELL, ROWS * CELL * len(results)), (0, 0, 0, 0))
-    for index, item in enumerate(results):
-        alpha = Image.open(item["cleaned_alpha_sheet"]).convert("RGBA")
-        atlas.alpha_composite(alpha, (0, index * ROWS * CELL))
-    out = ROOT / "public" / "woodland-bespoke-v2-sheet.png"
-    atlas.save(out)
-    return out
-
-
 def write_source_metadata() -> None:
     SOURCE_ROOT.mkdir(parents=True, exist_ok=True)
     (SOURCE_ROOT / "PROMPT.md").write_text(
@@ -503,7 +493,6 @@ def main() -> None:
     save_on_magenta(source_contact_alpha, NORMALIZED_CONTACT)
     results = [process_enemy(enemy, source_contact_alpha) for enemy in ENEMIES]
     contact = make_contact(results)
-    runtime_atlas = make_runtime_atlas(results)
     manifest = {
         "pipeline": PIPELINE_SPEC,
         "output_root": str(OUT),
@@ -511,8 +500,8 @@ def main() -> None:
         "imagegen_source_contact": str(SOURCE_CONTACT),
         "normalized_magenta_contact": str(NORMALIZED_CONTACT),
         "contact": str(contact),
-        "runtime_atlas": str(runtime_atlas),
-        "runtime_atlas_order": [item["slug"] for item in results],
+        "runtime_delivery": "per-enemy-public-sheets",
+        "runtime_sheet_order": [item["slug"] for item in results],
         "enemies": results,
     }
     (OUT / "woodland_bespoke_v2_manifest.json").write_text(json.dumps(manifest, indent=2))
@@ -522,7 +511,7 @@ def main() -> None:
             {
                 "contact": str(contact),
                 "manifest": str(OUT / "woodland_bespoke_v2_manifest.json"),
-                "runtime_atlas": str(runtime_atlas),
+                "runtime_delivery": "per-enemy-public-sheets",
                 "imagegen_source_contact": str(SOURCE_CONTACT),
                 "normalized_magenta_contact": str(NORMALIZED_CONTACT),
                 "gif_count": len(gif_files),

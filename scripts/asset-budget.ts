@@ -360,6 +360,8 @@ function lazyAssetGroups(entry: string, source: string, rootDir: string): Preloa
   const groups: PreloadGroup[] = [];
   const generatedStagePaths = hasGeneratedStageLazyLoader(source) ? generatedStagePublicPaths(entry, source) : [];
   if (generatedStagePaths.length > 0) groups.push(preloadGroup("lazy generated stage tilesets", generatedStagePaths, rootDir));
+  const woodlandActorPaths = hasWoodlandBespokeLazyLoop(source) ? woodlandBespokeLazyPaths(source) : [];
+  if (woodlandActorPaths.length > 0) groups.push(preloadGroup("WOODLAND_BESPOKE_FAMILIES actor sheet loop", woodlandActorPaths, rootDir));
   const runtimeLazyImagePaths = uniqueStrings([...runtimeImageAssetPaths(source, ["play-context", "background"]), ...northwoodSpriteLazyPaths(source)]);
   if (runtimeLazyImagePaths.length > 0) groups.push(preloadGroup("runtime image play-context/background assets", runtimeLazyImagePaths, rootDir));
   return groups;
@@ -385,6 +387,19 @@ function northwoodSpriteLazyPaths(source: string): string[] {
   if (!/\bGENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR\b/.test(source)) return [];
   if (!/\bNORTHWOOD_SPRITE_IDS\.map\b/.test(source)) return [];
   return northwoodSpritePreloadPaths(source);
+}
+
+function hasWoodlandBespokeLazyLoop(source: string): boolean {
+  return /\bWOODLAND_BESPOKE_FAMILIES\b/.test(source) && /\bwoodlandBespokeRuntimeAsset\b/.test(source);
+}
+
+function woodlandBespokeLazyPaths(source: string): string[] {
+  const familiesSource = source.match(/\bconst\s+WOODLAND_BESPOKE_FAMILIES\s*=\s*\[([^\]]*)\]\s*as\s+const\b/s)?.[1];
+  if (!familiesSource) return [];
+  return [...familiesSource.matchAll(/["']([^"']+)["']/g)]
+    .map((match) => match[1])
+    .filter((family): family is string => Boolean(family))
+    .map((family) => `/${family.replace(/_/g, "-")}-sheet.png`);
 }
 
 function hasGeneratedStagePreloadLoop(source: string): boolean {

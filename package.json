@@ -30,6 +30,7 @@
     "balance:combat": "node scripts/balance-combat.ts",
     "assets:budget": "node scripts/asset-budget.ts --policy config/asset-policy.json",
     "assets:budget:report": "node scripts/asset-budget.ts --policy config/asset-policy.json --report artifacts/asset-budget-report.json",
+    "assets:runtime:actors": "node tools/build-actor-effect-runtime-assets.ts",
     "assets:fix:road-corners": "node tools/harmonize-road-corners.ts",
     "assets:bridge:northwood": "node tools/build-northwood-from-authored.ts",
     "assets:northwood": "npm run assets:bridge:northwood && npm run assets:stage:northwood",

@@ -29,7 +29,7 @@ consistency for image-model generation.
   - `walk_down`
   - `walk_left`
 - **No attack rows.** Attacks reuse the walk pose plus the shared slash/missile effect overlays
-  (`effects.png`), matching the keeper families which have no bespoke attack art.
+  (`public/sprites/effects/combat-effects-runtime.png`), matching the keeper families which have no bespoke attack art.
 - Runtime texture count per enemy: `16` walk frames (4 directions × 4 frames).
 
 ## Commands
@@ -65,8 +65,9 @@ npm run check
 1. Add the enemy to `ENEMIES` in `tools/generate_woodland_enemy_sprites_v2.py`.
 2. Do not add keeper hand-art families to `ENEMIES`: `rat`, `spider`, `skeleton`, `goblin`,
    `goblin_scout`, `goblin_shaman`, `grey_wolf`, and `wisp` stay on their existing sheets.
-3. Generated `ENEMIES` are public-copied automatically and packed into
-   `public/woodland-bespoke-v2-sheet.png`.
+3. Generated `ENEMIES` are public-copied automatically to per-enemy
+   `public/<enemy>-sheet.png` files. The client streams those sheets with the
+   destination floor instead of preloading a packed atlas.
 4. Add its family to `WOODLAND_BESPOKE_FAMILIES` in `src/main.ts`.
 5. Add or update the spawn/spec mapping in `monsterActorSpec`.
 6. Run `npm run assets:enemies`.

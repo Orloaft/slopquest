@@ -17,7 +17,7 @@ All bespoke runtime enemy sprites use `enemy-directional-4x4-v2`.
 - Runtime output per enemy: `16` walk textures
 - Palette/style: simpler painterly pixel, roughly `8-16` intentional colours per creature, with a hard cap of `64` distinct opaque colours per sheet enforced by `tools/validate_enemy_asset_pipeline.py`
 
-The reference is the in-game goblin scout directional movement contract, simplified to four walk frames per direction. There are no bespoke attack rows: attacks reuse the walk pose plus shared slash/missile effect overlays from `effects.png`, matching keeper-family behavior.
+The reference is the in-game goblin scout directional movement contract, simplified to four walk frames per direction. There are no bespoke attack rows: attacks reuse the walk pose plus shared slash/missile effect overlays from `public/sprites/effects/combat-effects-runtime.png`, matching keeper-family behavior.
 
 ## Files To Start With
 
@@ -54,8 +54,8 @@ npm run check
 1. Add or update the enemy in `ENEMIES` in `tools/generate_woodland_enemy_sprites_v2.py`.
 2. Keep keeper hand-art families out of `ENEMIES`: `rat`, `spider`, `skeleton`, `goblin`,
    `goblin_scout`, `goblin_shaman`, `grey_wolf`, and `wisp`.
-3. Generated `ENEMIES` are copied to `public/<enemy>-sheet.png` by default and packed into
-   `public/woodland-bespoke-v2-sheet.png`.
+3. Generated `ENEMIES` are copied to `public/<enemy>-sheet.png` by default. The client streams
+   those per-enemy sheets with the destination floor instead of preloading a packed atlas.
 4. Add the family to `WOODLAND_BESPOKE_FAMILIES` in `src/main.ts`.
 5. Add or update its `monsterActorSpec` entry in `src/main.ts`.
 6. Update spawn/content data if needed.

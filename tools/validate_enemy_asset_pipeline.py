@@ -90,8 +90,8 @@ def main() -> None:
     if keeper_leaks:
         fail(f"keeper hand-art families must not be regenerated into v2 atlas: {', '.join(keeper_leaks)}")
 
-    runtime_atlas = Path(manifest.get("runtime_atlas") or "")
-    validate_runtime_atlas(runtime_atlas, len(enemies))
+    if manifest.get("runtime_delivery") not in (None, "per-enemy-public-sheets"):
+        fail(f"unsupported runtime_delivery {manifest.get('runtime_delivery')!r}")
 
     for item in enemies:
         slug = item.get("slug")
@@ -130,18 +130,5 @@ def main() -> None:
             indent=2,
         )
     )
-
-
-def validate_runtime_atlas(path: Path, family_count: int) -> None:
-    if not path.exists():
-        fail(f"missing runtime atlas {path}")
-    with Image.open(path) as im:
-        expected = (CELL * COLS, CELL * ROWS * family_count)
-        if im.size != expected:
-            fail(f"{path} is {im.size[0]}x{im.size[1]}, expected {expected[0]}x{expected[1]}")
-        if im.mode != "RGBA":
-            fail(f"{path} mode is {im.mode}, expected RGBA")
-
-
 if __name__ == "__main__":
     main()

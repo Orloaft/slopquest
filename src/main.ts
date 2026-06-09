@@ -12,6 +12,7 @@ import {
   MAP_ROWS,
   MINING_NODES,
   MONSTERS,
+  MONSTER_SPAWNS,
   NPCS,
   ORE_TIERS,
   SHOP,
@@ -1147,6 +1148,7 @@ const WOODLAND_BESPOKE_FAMILIES = [
   "verdant_faultwarden",
   "deepdelve_wight"
 ] as const;
+const WOODLAND_BESPOKE_FAMILY_SET = new Set<string>(WOODLAND_BESPOKE_FAMILIES);
 // Northwood authored-layout tree/prop sprite catalogue ids (obj_NNN). Sprites are
 // exported to public/sprites/nw/ by tools/build-northwood-from-authored.ts and
 // referenced by the stage's objects[] as keys spriteNw<NNN>.
@@ -1173,18 +1175,62 @@ function runtimeImageAsset(
   return { key, path, tier, label, floor, zone };
 }
 
+function actorSheetSlug(family: string): string {
+  return family.replace(/_/g, "-");
+}
+
+function woodlandBespokeSheetKey(family: string): string {
+  return `woodlandBespokeSheet:${family}`;
+}
+
+function woodlandBespokeRuntimeAsset(family: string, floor?: number): RuntimeImageAsset {
+  return runtimeImageAsset(
+    woodlandBespokeSheetKey(family),
+    `/${actorSheetSlug(family)}-sheet.png`,
+    "play-context",
+    `${actorSheetSlug(family)} actor sheet`,
+    floor
+  );
+}
+
+const RAT_SPIDER_RUNTIME_IMAGE_ASSET = runtimeImageAsset(
+  "ratSpiderSheet",
+  "/sprites/actors/rat-spider-runtime.png",
+  "play-context",
+  "rat/spider actor runtime crops",
+  3,
+  "northwood"
+);
+
+function floorActorFamilies(floor: number): { woodland: string[]; needsRatSpider: boolean } {
+  const families = new Set<string>();
+  let needsRatSpider = false;
+  for (const spawn of MONSTER_SPAWNS) {
+    if (spawn.floor !== floor) continue;
+    const family = computeMonsterActorSpec({ type: spawn.type }).family;
+    if (family === "rat" || family === "spider") needsRatSpider = true;
+    if (WOODLAND_BESPOKE_FAMILY_SET.has(family)) families.add(family);
+  }
+  return { woodland: [...families].sort(), needsRatSpider };
+}
+
+function floorActorImageAssets(floor: number): RuntimeImageAsset[] {
+  const families = floorActorFamilies(floor);
+  const assets = families.woodland.map((family) => woodlandBespokeRuntimeAsset(family, floor));
+  if (families.needsRatSpider) assets.unshift(RAT_SPIDER_RUNTIME_IMAGE_ASSET);
+  return assets;
+}
+
 const CORE_BOOTSTRAP_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("playerSheet", "/player-sheet.png", "startup", "player actor sheet"),
   runtimeImageAsset("goblinSheet", "/goblin.png", "startup", "legacy goblin actor sheet"),
   runtimeImageAsset("skeletonSheet", "/skeleton.png", "startup", "skeleton actor sheet"),
-  runtimeImageAsset("ratSpiderSheet", "/ratandspiders.png", "startup", "rat/spider actor sheet"),
   runtimeImageAsset("goblinScoutSheet", "/goblin-scout-sheet.png", "startup", "goblin scout actor sheet"),
   runtimeImageAsset("goblinShamanSheet", "/goblin-shaman-sheet.png", "startup", "goblin shaman actor sheet"),
   runtimeImageAsset("goblinRaiderSheet", "/goblin-raider-sheet.png", "startup", "goblin raider actor sheet"),
   runtimeImageAsset("greyWolfSheet", "/grey-wolf-sheet.png", "startup", "grey wolf actor sheet"),
   runtimeImageAsset("wispSheet", "/wisp-sheet.png", "startup", "wisp actor sheet"),
-  runtimeImageAsset("woodlandBespokeSheet", "/woodland-bespoke-v2-sheet.png", "startup", "woodland actor sheet"),
-  runtimeImageAsset("effectsSheet", "/effects.png", "startup", "shared combat effects")
+  runtimeImageAsset("effectsSheet", "/sprites/effects/combat-effects-runtime.png", "startup", "shared combat effects")
 ];
 
 const STARTER_RUNTIME_IMAGE_ASSETS: RuntimeImageAsset[] = [
@@ -1233,30 +1279,35 @@ const ORE_RESOURCE_IMAGE_ASSETS: RuntimeImageAsset[] = [
 ];
 
 const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
-  [11, [...FOREST_HERB_RESOURCE_IMAGE_ASSETS, CAMPFIRE_RESOURCE_IMAGE_ASSET]],
+  [11, [...floorActorImageAssets(11), ...FOREST_HERB_RESOURCE_IMAGE_ASSETS, CAMPFIRE_RESOURCE_IMAGE_ASSET]],
   [10, [
+    ...floorActorImageAssets(10),
     runtimeImageAsset("dungeonTiles", "/crypt-dungeon-tiles.png", "play-context", "Deepdelve Mine source sheet", 10, "deepmine"),
     ...ORE_RESOURCE_IMAGE_ASSETS,
     CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [9, [
+    ...floorActorImageAssets(9),
     runtimeImageAsset("jungleTiles", "/jungle-tiles.png", "play-context", "Untamed Jungle source sheet", 9, "jungle"),
     runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 9, "jungle"),
     ...FOREST_HERB_RESOURCE_IMAGE_ASSETS,
     CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [8, [
+    ...floorActorImageAssets(8),
     runtimeImageAsset("beachTiles", "/beach-tiles.png", "play-context", "Sunken Beach source sheet", 8, "beach"),
     ...TIDAL_HERB_RESOURCE_IMAGE_ASSETS,
     CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [7, [
+    ...floorActorImageAssets(7),
     runtimeImageAsset("desertTiles", "/desert-tiles.png", "play-context", "Sunken Desert source sheet", 7, "desert"),
     runtimeImageAsset("searingCliff", "/tilesets/searing-canyon-cliff.png", "play-context", "shared red-rock relief source sheet", 7, "desert"),
     runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 7, "desert"),
     CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [6, [
+    ...floorActorImageAssets(6),
     runtimeImageAsset("badlandsTiles", "/badlands-tiles.png", "play-context", "Searing Badlands source sheet", 6, "badlands"),
     runtimeImageAsset("searingGround", "/tilesets/searing-canyon-ground.png", "play-context", "Searing canyon ground sheet", 6, "badlands"),
     runtimeImageAsset("searingCliff", "/tilesets/searing-canyon-cliff.png", "play-context", "Searing canyon cliff sheet", 6, "badlands"),
@@ -1276,28 +1327,33 @@ const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>
     CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [5, [
+    ...floorActorImageAssets(5),
     runtimeImageAsset("swampTiles", "/swamp-tiles.png", "play-context", "Sunken Marsh source sheet", 5, "swamp"),
     runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 5, "swamp"),
     CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [4, [
+    ...floorActorImageAssets(4),
     runtimeImageAsset("cityTiles", "/citytiles.png", "play-context", "Northwatch city source sheet", 4, "northwatch"),
     CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [3, [
+    ...floorActorImageAssets(3),
     ...FOREST_HERB_RESOURCE_IMAGE_ASSETS,
     ...ORE_RESOURCE_IMAGE_ASSETS,
     CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [2, [
+    ...floorActorImageAssets(2),
     runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "Ashen Crypt grave prop source sheet", 2, "crypt"),
     CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [1, [
+    ...floorActorImageAssets(1),
     runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "Southgate Cemetery source sheet", 1, "cemetery"),
     CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
-  [0, [CAMPFIRE_RESOURCE_IMAGE_ASSET]]
+  [0, [...floorActorImageAssets(0), CAMPFIRE_RESOURCE_IMAGE_ASSET]]
 ]);
 
 const GENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
@@ -7629,30 +7685,6 @@ function createActorFrames(scene: Phaser.Scene): void {
   createFrameSet(scene, "playerSheet", "caster", casterRows, casterXs, 82, 96);
   createExplicitFrameSet(scene, "goblinSheet", "goblin", goblinFrames);
   createExplicitFrameSet(scene, "skeletonSheet", "skeleton", skeletonFrames);
-  // ratandspiders.png WALK rows, frame boxes measured from the magenta-keyed grid
-  // (the old boxes sat ~15px high in the gap below IDLE and used the LEFT-facing
-  // side art for the right slot, so rats/spiders walked clipped and backwards).
-  // The side art faces LEFT; right is mirrored (mirrorRightFromLeft). Front=down,
-  // back=up are the two narrow frames between the side groups, repeated to 4.
-  createExplicitFrameSet(scene, "ratSpiderSheet", "rat", {
-    // The WALK row holds TWO colorways: brown (x~153-774) and grey (x~838-1446),
-    // each with 4 side frames + 1 front + 1 back. The side frames here are all
-    // brown, so the front/back must be brown too — the old [731,1405]/[650,1319]
-    // boxes alternated the brown frame with the GREY one, flickering the rat's
-    // head-on walk between two coats. Brown has a single front/back pose; repeat it.
-    up: spriteFrames([732, 732, 732, 732], 134, 50, 64), // brown back-facing
-    right: spriteFrames([153, 276, 402, 523], 136, 114, 52), // mirrored from left
-    down: spriteFrames([650, 650, 650, 650], 134, 50, 64), // brown front-facing
-    left: spriteFrames([153, 276, 402, 523], 136, 114, 52) // left-facing side (4 frames)
-  });
-  createExplicitFrameSet(scene, "ratSpiderSheet", "spider", {
-    // The brown side/front/back frames (#0-5); the red-marked right half is an
-    // unused variant. Brown has one front + one back frame, so they hold.
-    up: spriteFrames([726, 726, 726, 726], 678, 54, 46), // back-facing
-    right: spriteFrames([156, 277, 404, 522], 680, 90, 44), // mirrored from left
-    down: spriteFrames([643, 643, 643, 643], 678, 54, 46), // front-facing
-    left: spriteFrames([156, 277, 404, 522], 680, 90, 44) // left-facing side (4 frames)
-  });
   createExplicitFrameSet(scene, "goblinScoutSheet", "goblinScout", uniformDirectionFrames(281, 293, 4));
   createExplicitFrameSet(scene, "goblinShamanSheet", "goblinShaman", uniformDirectionFrames(313, 313, 4));
   createExplicitFrameSet(scene, "goblinRaiderSheet", "goblinRaider", uniformDirectionFrames(320, 320, 4));
@@ -7669,25 +7701,37 @@ function createActorFrames(scene: Phaser.Scene): void {
     down: wispRow,
     left: wispRow
   });
-  createWoodlandBespokeFrames(scene);
 }
 
-function createWoodlandBespokeFrames(scene: Phaser.Scene): void {
-  // enemy-directional-4x4-v2: 384x384 family sheets packed vertically into one
-  // runtime atlas, 96px cells, 4 walk rows (up/right/down/left), 4 frames each.
-  // Walk-only — attacks reuse the walk pose plus shared effect overlays.
-  const directionalFrames = (familyIndex: number): DirectionFrames => {
-    const xs = Array.from({ length: 4 }, (_, index) => index * 96);
-    const yBase = familyIndex * 4 * 96;
-    return {
-      up: spriteFrames(xs, yBase + 0 * 96, 96, 96),
-      right: spriteFrames(xs, yBase + 1 * 96, 96, 96),
-      down: spriteFrames(xs, yBase + 2 * 96, 96, 96),
-      left: spriteFrames(xs, yBase + 3 * 96, 96, 96)
-    };
-  };
-  for (const [index, family] of WOODLAND_BESPOKE_FAMILIES.entries()) {
-    createExplicitFrameSet(scene, "woodlandBespokeSheet", family, directionalFrames(index));
+function createRatSpiderFrames(scene: Phaser.Scene): void {
+  if (!scene.textures.exists("ratSpiderSheet")) return;
+  if (!actorFamilyFramesReady("rat")) {
+    createExplicitFrameSet(scene, "ratSpiderSheet", "rat", {
+      up: spriteFrames([8, 8, 8, 8], 8, 50, 64),
+      right: spriteFrames([168, 306, 444, 582], 8, 114, 52),
+      down: spriteFrames([88, 88, 88, 88], 8, 50, 64),
+      left: spriteFrames([168, 306, 444, 582], 8, 114, 52)
+    });
+  }
+  if (!actorFamilyFramesReady("spider")) {
+    createExplicitFrameSet(scene, "ratSpiderSheet", "spider", {
+      up: spriteFrames([8, 8, 8, 8], 104, 54, 46),
+      right: spriteFrames([164, 286, 408, 530], 104, 90, 44),
+      down: spriteFrames([86, 86, 86, 86], 104, 54, 46),
+      left: spriteFrames([164, 286, 408, 530], 104, 90, 44)
+    });
+  }
+}
+
+function createWoodlandBespokeFrames(scene: Phaser.Scene, families: readonly string[]): void {
+  // enemy-directional-4x4-v2: per-family 384x384 sheets, 96px cells, 4 walk rows
+  // (up/right/down/left), 4 frames each. Walk-only — attacks reuse shared effects.
+  const frames = uniformDirectionFrames(96, 96, 4);
+  for (const family of families) {
+    if (actorFamilyFramesReady(family)) continue;
+    const sourceKey = woodlandBespokeSheetKey(family);
+    if (!scene.textures.exists(sourceKey)) continue;
+    createExplicitFrameSet(scene, sourceKey, family, frames);
   }
 }
 
@@ -7702,16 +7746,16 @@ function uniformDirectionFrames(cellW: number, cellH: number, frames: number): D
 }
 
 function createEffectFrames(scene: Phaser.Scene): void {
-  const slashXs = [260, 360, 480, 620, 780, 960];
-  slashXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("slash", index), x, 64, 160, 70));
+  const slashXs = [0, 176, 352, 528, 704, 880];
+  slashXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("slash", index), x, 0, 160, 70));
 
-  const missileXs = [184, 276, 386, 506, 626, 760];
-  missileXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("fireMissile", index), x, 626, 116, 62));
-  missileXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("iceMissile", index), x, 706, 116, 62));
+  const missileXs = [0, 128, 256, 384, 512, 640];
+  missileXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("fireMissile", index), x, 90, 116, 62));
+  missileXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("iceMissile", index), x, 168, 116, 62));
 
-  const burstXs = [1038, 1150, 1246, 1338];
-  burstXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("fireMissileBurst", index), x, 618, 96, 82));
-  burstXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("iceMissileBurst", index), x, 698, 96, 82));
+  const burstXs = [0, 112, 224, 336];
+  burstXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("fireMissileBurst", index), x, 246, 96, 82));
+  burstXs.forEach((x, index) => makeSpriteTexture(scene, "effectsSheet", effectFrameKey("iceMissileBurst", index), x, 344, 96, 82));
 }
 
 function effectFrameKey(family: string, frame: number): string {
@@ -7767,6 +7811,11 @@ function actorFlipX(family: string, dir: Direction): boolean {
   return (mirrorRightFromLeft(family) && dir === "right") || (mirrorLeftFromRight(family) && dir === "left");
 }
 
+function actorFamilyFramesReady(family: string): boolean {
+  const walkCount = FAMILY_WALK_FRAMES[family] ?? 4;
+  return DIRECTIONS.every((dir) => Array.from({ length: walkCount }, (_, frame) => actorFrameKey(family, dir, frame)).every((key) => Boolean(scene?.textures.exists(key))));
+}
+
 function actorFrameAnchorDrift(): Array<{ family: string; dir: Direction; driftX: number; driftY: number }> {
   if (!scene) return [];
   const families = [
@@ -7782,7 +7831,7 @@ function actorFrameAnchorDrift(): Array<{ family: string; dir: Direction; driftX
     "greyWolf",
     "wisp",
     ...WOODLAND_BESPOKE_FAMILIES
-  ];
+  ].filter((family) => actorFamilyFramesReady(family));
   return families.flatMap((family) =>
     DIRECTIONS.map((dir) => {
       const anchors = [0, 1, 2, 3].map((frame) => {
@@ -9404,6 +9453,7 @@ function ensureFloorContextAssetsLoaded(floor: number, trigger: RuntimeImageLoad
 
 function ensureFloorContextTextures(floor: number): void {
   if (floorContextTextureBuildsReady.has(floor)) return;
+  if (!ensureFloorActorTextures(floor)) return;
   if (floor === 10) {
     if (!scene.textures.exists("dungeonTiles")) return;
     buildDeepdelveMineTextures(scene);
@@ -9437,6 +9487,20 @@ function ensureFloorContextTextures(floor: number): void {
     buildNorthwatchCityTextures(scene);
   }
   floorContextTextureBuildsReady.add(floor);
+}
+
+function ensureFloorActorTextures(floor: number): boolean {
+  const families = floorActorFamilies(floor);
+  if (families.needsRatSpider) {
+    if (!scene.textures.exists("ratSpiderSheet")) return false;
+    createRatSpiderFrames(scene);
+  }
+  if (families.woodland.length > 0) {
+    const missing = families.woodland.some((family) => !scene.textures.exists(woodlandBespokeSheetKey(family)));
+    if (missing) return false;
+    createWoodlandBespokeFrames(scene, families.woodland);
+  }
+  return true;
 }
 
 function ensureGeneratedStageAssetsLoaded(floor: number, trigger: GeneratedStageLoadTrigger = "play-context"): Promise<void> {

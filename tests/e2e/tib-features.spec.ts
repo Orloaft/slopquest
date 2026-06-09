@@ -77,6 +77,19 @@ const BESPOKE_V2_TYPES = [
   "deepdelve_wight"
 ];
 
+const BESPOKE_V2_TYPES_BY_FLOOR = [...MONSTER_SPAWNS].reduce((groups, spawn) => {
+  if (!BESPOKE_V2_TYPES.includes(spawn.type)) return groups;
+  const types = groups.get(spawn.floor) ?? [];
+  if (!types.includes(spawn.type)) types.push(spawn.type);
+  groups.set(spawn.floor, types);
+  return groups;
+}, new Map<number, string[]>());
+const BESPOKE_V2_POINT_BY_FLOOR = [...MONSTER_SPAWNS].reduce((points, spawn) => {
+  if (!BESPOKE_V2_TYPES.includes(spawn.type) || points.has(spawn.floor)) return points;
+  points.set(spawn.floor, { x: spawn.x + 0.5, y: spawn.y + 0.5 });
+  return points;
+}, new Map<number, { x: number; y: number }>());
+
 test("skills, firemaking, and cooking are usable and visually present", async ({ page }) => {
   page.on("pageerror", (error) => console.error(error));
   page.on("console", (message) => {
@@ -182,6 +195,9 @@ test("mining a vein yields ore and Mining XP, and Northwood veins carry distinct
 test("actor animation frames keep a stable bottom-center anchor", async ({ page }) => {
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
+  await teleportTo(page, 3, 55.5, 36.5);
+  await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 3);
+  await waitForMonsterFrames(page, NORTHWOOD_EXPECTED_TYPES);
   const drift = await page.waitForFunction(() => {
     const rows = window.__TIB_E2E__?.actorFrameAnchorDrift?.();
     return rows?.length ? rows : null;
@@ -237,6 +253,9 @@ test("Northwood spawn table covers every enemy type and renders 4-direction fram
 
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
+  await teleportTo(page, 3, 55.5, 36.5);
+  await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 3);
+  await waitForMonsterFrames(page, NORTHWOOD_EXPECTED_TYPES);
 
   const coverage = await page.evaluate(
     (types) => window.__TIB_E2E__?.monsterTextureCoverage?.(types) ?? [],
@@ -249,19 +268,36 @@ test("Northwood spawn table covers every enemy type and renders 4-direction fram
     expect(missing, `${entry.type} (${entry.family}) missing frames`).toEqual([]);
   }
 
-  const bespokeCoverage = await page.evaluate(
-    (types) => window.__TIB_E2E__?.monsterTextureCoverage?.(types) ?? [],
-    BESPOKE_V2_TYPES
-  );
-  expect(bespokeCoverage).toHaveLength(BESPOKE_V2_TYPES.length);
-  for (const entry of bespokeCoverage) {
-    expect(entry.frames).toHaveLength(16);
-    const missingWalk = entry.frames.filter((frame) => !frame.exists);
-    expect(missingWalk, `${entry.type} (${entry.family}) missing directional walk frames`).toEqual([]);
-    expect(entry.attackFamily, `${entry.type} should reuse walk frames for attacks`).toBeUndefined();
-    expect(entry.attackFrames, `${entry.type} should not register bespoke attack frames`).toHaveLength(0);
+  for (const [floor, types] of [...BESPOKE_V2_TYPES_BY_FLOOR.entries()].sort(([a], [b]) => a - b)) {
+    const point = BESPOKE_V2_POINT_BY_FLOOR.get(floor) ?? { x: 55.5, y: 36.5 };
+    await teleportTo(page, floor, point.x, point.y);
+    await page.waitForFunction((targetFloor) => window.__TIB_E2E__?.self()?.floor === targetFloor, floor);
+    await waitForMonsterFrames(page, types);
+    const bespokeCoverage = await page.evaluate(
+      (floorTypes) => window.__TIB_E2E__?.monsterTextureCoverage?.(floorTypes) ?? [],
+      types
+    );
+    expect(bespokeCoverage).toHaveLength(types.length);
+    for (const entry of bespokeCoverage) {
+      expect(entry.frames).toHaveLength(16);
+      const missingWalk = entry.frames.filter((frame) => !frame.exists);
+      expect(missingWalk, `${entry.type} (${entry.family}) missing directional walk frames on floor ${floor}`).toEqual([]);
+      expect(entry.attackFamily, `${entry.type} should reuse walk frames for attacks`).toBeUndefined();
+      expect(entry.attackFrames, `${entry.type} should not register bespoke attack frames`).toHaveLength(0);
+    }
   }
 });
+
+async function waitForMonsterFrames(page: Page, types: string[]): Promise<void> {
+  await page.waitForFunction(
+    (monsterTypes) => {
+      const coverage = window.__TIB_E2E__?.monsterTextureCoverage?.(monsterTypes) ?? [];
+      return coverage.length === monsterTypes.length && coverage.every((entry) => entry.frames.length > 0 && entry.frames.every((frame) => frame.exists));
+    },
+    types,
+    { timeout: 10000 }
+  );
+}
 
 async function teleportTo(page: Page, floor: number, x: number, y: number): Promise<void> {
   await page.evaluate(
