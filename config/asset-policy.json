@@ -47,6 +47,17 @@
       "maxTotalBytes": 1048576,
       "maxFileBytes": 131072,
       "maxFiles": 40
+    },
+    {
+      "name": "resource-node-sprites",
+      "include": [
+        "public/sprites/resources/**",
+        "public/campfire.png",
+        "public/herb-*.png"
+      ],
+      "maxTotalBytes": 524288,
+      "maxFileBytes": 65536,
+      "maxFiles": 16
     }
   ],
   "preloadGroups": {
@@ -96,19 +107,6 @@
       "maxTotalBytes": 10485760,
       "maxFileBytes": 3145728,
       "maxFiles": 40
-    },
-    {
-      "name": "startup-gathering-props",
-      "description": "Gathering node, herb, and campfire art currently resident from startup.",
-      "include": [
-        "public/water-fishing-spots.png",
-        "public/ore-rock-gathering-nodes.png",
-        "public/campfire.png",
-        "public/herb-*.png"
-      ],
-      "maxTotalBytes": 8388608,
-      "maxFileBytes": 3145728,
-      "maxFiles": 8
     }
   ],
   "lazyClassifications": [
@@ -147,6 +145,18 @@
       "maxTotalBytes": 6291456,
       "maxFileBytes": 2097152,
       "maxFiles": 48
+    },
+    {
+      "name": "lazy/resource-node-sprites",
+      "description": "Gathering nodes and campfire art loaded through floor transitions instead of startup preload.",
+      "include": [
+        "public/sprites/resources/**",
+        "public/campfire.png",
+        "public/herb-*.png"
+      ],
+      "maxTotalBytes": 524288,
+      "maxFileBytes": 65536,
+      "maxFiles": 16
     }
   ],
   "lazyGroups": {

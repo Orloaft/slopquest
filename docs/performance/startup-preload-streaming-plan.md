@@ -14,7 +14,8 @@ The client exposes residency evidence through `window.__TIB_E2E__.assetResidency
 
 ## Current Contract
 
-- Core actor/effect/gathering sheets remain startup assets.
+- Core actor/effect sheets remain startup assets.
+- Gathering resource art no longer lives in startup preload. Ore veins use slim runtime sprites loaded with floors that expose mining nodes; herb and campfire sprites load with destination floors; fishing ripples are procedural, so the old water interaction source sheet is no longer a runtime asset.
 - Legacy hand-authored biome sheets no longer live in startup preload. Their derived texture baking is split by floor.
 - Northwatch city, Southgate Cemetery, Ashen Crypt grave props, Sunken Marsh, Searing Badlands, Sunken Desert, Sunken Beach, Untamed Jungle, and Deepdelve Mine art are now hand-authored floor-context slices: their source sheets load on the destination floor transition, then their derived tiles and props are baked before reveal.
 - Generated-stage tilesets, Waystone direct props, and Northwood direct object sprites are non-startup play-context assets.
@@ -36,4 +37,4 @@ The budget report calls out the largest preload candidates by policy group so th
 
 ## Next Reduction
 
-The old `preloaded-biomes` bucket has been eliminated. The next reductions should target shared startup art that is still genuinely global today: gathering node sheets, broad actor sheets, or first-spawn town/forest sources. Any follow-up should keep the same pattern: load the destination floor's source sheets before reveal, build derived textures idempotently, and prove residency in browser tests.
+The old `preloaded-biomes` and `startup-gathering-props` buckets have been eliminated. The next reductions should target shared startup art that is still genuinely global today: broad actor sheets or first-spawn town/forest sources. Any follow-up should keep the same pattern: load the destination floor's source sheets before reveal, build derived textures idempotently, and prove residency in browser tests.

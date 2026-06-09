@@ -1184,30 +1184,54 @@ const CORE_BOOTSTRAP_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("greyWolfSheet", "/grey-wolf-sheet.png", "startup", "grey wolf actor sheet"),
   runtimeImageAsset("wispSheet", "/wisp-sheet.png", "startup", "wisp actor sheet"),
   runtimeImageAsset("woodlandBespokeSheet", "/woodland-bespoke-v2-sheet.png", "startup", "woodland actor sheet"),
-  runtimeImageAsset("effectsSheet", "/effects.png", "startup", "shared combat effects"),
-  runtimeImageAsset("waterFishingSpots", "/water-fishing-spots.png", "startup", "shared fishing node sheet"),
-  runtimeImageAsset("oreNodeSheet", "/ore-rock-gathering-nodes.png", "startup", "shared ore node sheet"),
-  runtimeImageAsset("spriteCampfire", "/campfire.png", "startup", "shared cooking fire"),
-  runtimeImageAsset("herbBloom", "/herb-bloom.png", "startup", "shared herb node bloom"),
-  runtimeImageAsset("herbField", "/herb-field.png", "startup", "shared herb node field"),
-  runtimeImageAsset("herbTidal", "/herb-tidal.png", "startup", "shared herb node tidal")
+  runtimeImageAsset("effectsSheet", "/effects.png", "startup", "shared combat effects")
 ];
 
 const STARTER_AREA_STARTUP_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("townTiles", "/towntiles.png", "startup", "Waystone/common town source sheet", 0, "waystone")
 ];
 
+const CAMPFIRE_RESOURCE_IMAGE_ASSET = runtimeImageAsset("spriteCampfire", "/campfire.png", "play-context", "shared cooking fire");
+const FOREST_HERB_RESOURCE_IMAGE_ASSETS: RuntimeImageAsset[] = [
+  runtimeImageAsset("herbBloom", "/herb-bloom.png", "play-context", "shared herb node bloom"),
+  runtimeImageAsset("herbField", "/herb-field.png", "play-context", "shared herb node field")
+];
+const TIDAL_HERB_RESOURCE_IMAGE_ASSETS: RuntimeImageAsset[] = [
+  runtimeImageAsset("herbTidal", "/herb-tidal.png", "play-context", "shared tidal herb node")
+];
+const ORE_RESOURCE_IMAGE_ASSETS: RuntimeImageAsset[] = [
+  runtimeImageAsset("spriteCopperVein", "/sprites/resources/ore-copper.png", "play-context", "copper ore vein"),
+  runtimeImageAsset("spriteTinVein", "/sprites/resources/ore-tin.png", "play-context", "tin ore vein"),
+  runtimeImageAsset("spriteIronVein", "/sprites/resources/ore-iron.png", "play-context", "iron ore vein"),
+  runtimeImageAsset("spriteSilverVein", "/sprites/resources/ore-silver.png", "play-context", "silver ore vein"),
+  runtimeImageAsset("spriteGoldVein", "/sprites/resources/ore-gold.png", "play-context", "gold ore vein"),
+  runtimeImageAsset("spriteMithrilVein", "/sprites/resources/ore-mithril.png", "play-context", "mithril ore vein"),
+  runtimeImageAsset("spriteAdamantVein", "/sprites/resources/ore-adamant.png", "play-context", "adamant ore vein")
+];
+
 const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
-  [10, [runtimeImageAsset("dungeonTiles", "/crypt-dungeon-tiles.png", "play-context", "Deepdelve Mine source sheet", 10, "deepmine")]],
+  [11, [...FOREST_HERB_RESOURCE_IMAGE_ASSETS, CAMPFIRE_RESOURCE_IMAGE_ASSET]],
+  [10, [
+    runtimeImageAsset("dungeonTiles", "/crypt-dungeon-tiles.png", "play-context", "Deepdelve Mine source sheet", 10, "deepmine"),
+    ...ORE_RESOURCE_IMAGE_ASSETS,
+    CAMPFIRE_RESOURCE_IMAGE_ASSET
+  ]],
   [9, [
     runtimeImageAsset("jungleTiles", "/jungle-tiles.png", "play-context", "Untamed Jungle source sheet", 9, "jungle"),
-    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 9, "jungle")
+    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 9, "jungle"),
+    ...FOREST_HERB_RESOURCE_IMAGE_ASSETS,
+    CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
-  [8, [runtimeImageAsset("beachTiles", "/beach-tiles.png", "play-context", "Sunken Beach source sheet", 8, "beach")]],
+  [8, [
+    runtimeImageAsset("beachTiles", "/beach-tiles.png", "play-context", "Sunken Beach source sheet", 8, "beach"),
+    ...TIDAL_HERB_RESOURCE_IMAGE_ASSETS,
+    CAMPFIRE_RESOURCE_IMAGE_ASSET
+  ]],
   [7, [
     runtimeImageAsset("desertTiles", "/desert-tiles.png", "play-context", "Sunken Desert source sheet", 7, "desert"),
     runtimeImageAsset("searingCliff", "/tilesets/searing-canyon-cliff.png", "play-context", "shared red-rock relief source sheet", 7, "desert"),
-    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 7, "desert")
+    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 7, "desert"),
+    CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [6, [
     runtimeImageAsset("badlandsTiles", "/badlands-tiles.png", "play-context", "Searing Badlands source sheet", 6, "badlands"),
@@ -1224,17 +1248,33 @@ const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>
     runtimeImageAsset("outpostKit", "/tilesets/searing-canyon-landmarks/outpost-kit.png", "play-context", "Searing outpost kit", 6, "badlands"),
     runtimeImageAsset("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png", "play-context", "Searing cultist kit", 6, "badlands"),
     runtimeImageAsset("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png", "play-context", "Searing ritual kit", 6, "badlands"),
-    runtimeImageAsset("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png", "play-context", "Searing mine kit", 6, "badlands")
+    runtimeImageAsset("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png", "play-context", "Searing mine kit", 6, "badlands"),
+    ...ORE_RESOURCE_IMAGE_ASSETS,
+    CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
   [5, [
     runtimeImageAsset("swampTiles", "/swamp-tiles.png", "play-context", "Sunken Marsh source sheet", 5, "swamp"),
-    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 5, "swamp")
+    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 5, "swamp"),
+    CAMPFIRE_RESOURCE_IMAGE_ASSET
   ]],
-  [4, [runtimeImageAsset("cityTiles", "/citytiles.png", "play-context", "Northwatch city source sheet", 4, "northwatch")]],
-  [2, [runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "Ashen Crypt grave prop source sheet", 2, "crypt")]],
+  [4, [
+    runtimeImageAsset("cityTiles", "/citytiles.png", "play-context", "Northwatch city source sheet", 4, "northwatch"),
+    CAMPFIRE_RESOURCE_IMAGE_ASSET
+  ]],
+  [3, [
+    ...FOREST_HERB_RESOURCE_IMAGE_ASSETS,
+    ...ORE_RESOURCE_IMAGE_ASSETS,
+    CAMPFIRE_RESOURCE_IMAGE_ASSET
+  ]],
+  [2, [
+    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "Ashen Crypt grave prop source sheet", 2, "crypt"),
+    CAMPFIRE_RESOURCE_IMAGE_ASSET
+  ]],
   [1, [
-    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "Southgate Cemetery source sheet", 1, "cemetery")
-  ]]
+    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "Southgate Cemetery source sheet", 1, "cemetery"),
+    CAMPFIRE_RESOURCE_IMAGE_ASSET
+  ]],
+  [0, [CAMPFIRE_RESOURCE_IMAGE_ASSET]]
 ]);
 
 const GENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
@@ -1348,24 +1388,6 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "northwoodTreeSheet", "spriteTree", 35, 55, 355, 385);
   makeSpriteTexture(this, "northwoodTreeSheet", "spritePine", 455, 50, 220, 390);
   makeSpriteTexture(this, "forestTiles", "spriteRock", 640, 500, 92, 72);
-  makeSpriteTexture(this, "waterFishingSpots", "spriteFishingRipple", 920, 800, 70, 70);
-  // Mining nodes wired from the reviewed ore/rock gathering source sheet (see
-  // assetsources/asset-review.md). Crops are the stage-1 "rich" veins from the
-  // sheet's left ORE VEINS column — copper (row 1), tin (row 2), iron (row 3),
-  // each one row (~83px) down from the last. The sheet ships on the project
-  // magenta key, so it chroma-keys cleanly without normalization.
-  makeSpriteTexture(this, "oreNodeSheet", "spriteCopperVein", 193, 107, 123, 66);
-  makeSpriteTexture(this, "oreNodeSheet", "spriteTinVein", 193, 190, 123, 66);
-  makeSpriteTexture(this, "oreNodeSheet", "spriteIronVein", 193, 273, 123, 66);
-  // Deeper-tier veins from the ore sheet's bespoke "full" crops. The sheet rows are
-  // copper/tin/iron/SILVER/GOLD/MITHRIL/ADAMANTITE/runite/orichalcum/deep-crystal (no coal row);
-  // pitch is ~77px and uneven, so each crop is taken from its measured content band to avoid
-  // bleeding into the neighbouring tier. Coal has no bespoke art — it reuses the iron rock crop
-  // tinted dark (see ORE_VEIN_TINTS).
-  makeSpriteTexture(this, "oreNodeSheet", "spriteSilverVein", 193, 360, 123, 58);
-  makeSpriteTexture(this, "oreNodeSheet", "spriteGoldVein", 193, 434, 123, 57);
-  makeSpriteTexture(this, "oreNodeSheet", "spriteMithrilVein", 193, 508, 123, 60);
-  makeSpriteTexture(this, "oreNodeSheet", "spriteAdamantVein", 193, 584, 123, 60);
   makeSpriteTexture(this, "townTiles", "spritePortal", 828, 424, 86, 132);
   makeSpriteTexture(this, "townTiles", "spriteBridge", 20, 466, 92, 56);
   makeSpriteTexture(this, "townTiles", "spriteWell", 824, 420, 94, 132);

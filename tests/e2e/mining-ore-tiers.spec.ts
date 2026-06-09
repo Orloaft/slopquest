@@ -33,11 +33,28 @@ const IRON = { id: "mine-3-78-47", approach: { x: 97, y: 56 } };
 test("mining yields the vein's ore and gates iron behind Mining 10", async ({ page }) => {
   logErrors(page);
   await page.goto("/?e2e");
+  await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.assetResidency));
+  const bootAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  const bootStartupKeys = new Set((bootAssets?.startupImages ?? []).map((asset) => asset.key));
+  const bootRuntimeKeys = new Set((bootAssets?.runtimeImages ?? []).map((asset) => asset.key));
+  expect(bootStartupKeys.has("oreNodeSheet"), "legacy ore source sheet should not be a startup asset").toBe(false);
+  expect(bootStartupKeys.has("waterFishingSpots"), "legacy fishing source sheet should not be a startup asset").toBe(false);
+  expect(bootRuntimeKeys.has("oreNodeSheet"), "legacy ore source sheet should not be a runtime image asset").toBe(false);
+  expect(bootRuntimeKeys.has("waterFishingSpots"), "legacy fishing source sheet should not be a runtime image asset").toBe(false);
+  for (const key of ["spriteCopperVein", "spriteTinVein", "spriteIronVein", "herbBloom", "herbField", "spriteCampfire"]) {
+    expect(bootStartupKeys.has(key), `${key} should not be a startup asset`).toBe(false);
+  }
+  expect(bootAssets?.runtimeImages.find((asset) => asset.key === "spriteCopperVein")?.resident, "ore sprites should wait for a mining floor").toBe(false);
   await join(page);
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "pickaxe", qty: 1 }] }));
 
   // Copper vein at Mining 1: mining yields copper ore (not a generic ore).
   await place(page, 3, COPPER.approach.x, COPPER.approach.y);
+  await page.waitForFunction(() => {
+    const assets = window.__TIB_E2E__?.assetResidency?.();
+    const resident = (key: string): boolean => assets?.runtimeImages.find((asset) => asset.key === key)?.resident === true;
+    return ["spriteCopperVein", "spriteTinVein", "spriteIronVein", "herbBloom", "herbField", "spriteCampfire"].every(resident);
+  });
   await page.evaluate((id) => window.__TIB_E2E__?.send({ type: "mineNode", id }), COPPER.id);
   await page.waitForFunction(
     () => (window.__TIB_E2E__?.self()?.inventory ?? []).some((i) => i?.id === "copper_ore"),
