@@ -404,8 +404,10 @@ let selfView: PlayerView | undefined;
 let stateVersion = 0;
 let metricsVersion = 0;
 let syncedStateVersion = -1;
+let syncedPresentationVersion = -1;
 let hudStateVersion = -1;
 let renderedMetricsVersion = -1;
+let renderedMetricsText = "";
 const chatLines: string[] = [];
 const E2E_MODE = new URLSearchParams(location.search).has("e2e");
 const E2E_SKIP_TITLE = E2E_MODE && !new URLSearchParams(location.search).has("title");
@@ -850,6 +852,8 @@ const MAP_CHUNK_TILES = 16;
 const ENTITY_RENDER_PADDING_TILES = 6;
 const ENTITY_SORT_BUCKET_PX = TILE_SIZE;
 const CROWDED_ENTITY_LABEL_THRESHOLD = 16;
+const MAX_FLOATERS = 80;
+const MAX_CROWDED_FLOATERS = 24;
 const RESOURCE_BUCKET_TILES = 16;
 const tileDecorationCache = new Map<string, DecorationSprite[]>();
 const beachClutterCache = new Map<string, DecorationSprite[]>();
@@ -870,6 +874,7 @@ const SMITHING_RECIPES = {
 } as const;
 type SmithingSlot = keyof typeof SMITHING_RECIPES;
 const MAP_CHUNK_PADDING = 1;
+const MAP_CHUNK_TTL_MS = 1600;
 let mapLayer: Phaser.GameObjects.Container;
 let mapDecorationLayer: Phaser.GameObjects.Container;
 let entityLayer: Phaser.GameObjects.Container;
@@ -883,6 +888,8 @@ const TOWN_FLOORS = new Set<number>([0, 4]);
 let cemeteryVignette: Phaser.GameObjects.Image | undefined;
 let cemeteryFog: Phaser.GameObjects.Image[] = [];
 let mapRender: MapRenderState | null = null;
+const mapChunkExpiresAt = new Map<string, number>();
+const visibleMapChunkKeys = new Set<string>();
 let lastCompassDir: Direction | null = null;
 let lastCutawayKey = "";
 const cutawayBuildingSprites: Array<{ floor: number; object: DecorationSprite; sprite: Phaser.GameObjects.Image }> = [];
@@ -909,11 +916,15 @@ const visibleFireIds = new Set<string>();
 const floaters: Floater[] = [];
 let entityLayerSortDirty = true;
 const entityLayerRows = new Map<number, Phaser.GameObjects.Container>();
+const entityLayerRowCounts = new Map<number, number>();
+const dirtyEntityLayerRows = new Set<number>();
+const emptyEntityLayerRows = new Set<number>();
 let entityLayerRowSorts = 0;
 let entityLayerRowReparents = 0;
 let crowdedActorsActive = false;
 let lastActorAnimationBucket = -1;
 let lastEntitySyncAt = 0;
+let lastEntityTargetSyncAt = 0;
 let selectedInventorySlot: number | null = null;
 let selectedInventoryItem: string | null = null;
 let activeDialogue: ActiveDialogue | null = null;
@@ -2027,11 +2038,17 @@ function update(this: Phaser.Scene, time: number): void {
     clearResourceViews();
     drawMap(me.floor, { x: me.x, y: me.y });
     syncedStateVersion = -1;
+    syncedPresentationVersion = -1;
     clearClickDestination();
   }
-  if (syncedStateVersion !== stateVersion && (syncedStateVersion < 0 || !crowdedActorsActive || time - lastEntitySyncAt >= 180)) {
-    syncEntities();
+  if (syncedStateVersion !== stateVersion && (!crowdedActorsActive || syncedStateVersion < 0 || time - lastEntityTargetSyncAt >= 180)) {
+    syncEntityMovementTargets();
     syncedStateVersion = stateVersion;
+    lastEntityTargetSyncAt = time;
+  }
+  if (syncedPresentationVersion !== stateVersion && (syncedPresentationVersion < 0 || !crowdedActorsActive || time - lastEntitySyncAt >= 240)) {
+    syncEntities();
+    syncedPresentationVersion = stateVersion;
     lastEntitySyncAt = time;
   }
   // Reveal once the new floor's map + entities have had a few frames to paint
@@ -2447,6 +2464,8 @@ function drawMap(floor: number, center?: TilePoint): void {
   cutawayBuildingSprites.length = 0;
   lastCutawayKey = "";
   mapLayer.removeAll(true);
+  mapChunkExpiresAt.clear();
+  visibleMapChunkKeys.clear();
   mapDecorationLayer.removeAll(true);
   const rows = makeFloorTiles(floor);
   const cols = floorCols(floor);
@@ -2578,23 +2597,47 @@ function updateVisibleMapChunks(centerX?: number, centerY?: number): void {
   const minChunkY = clampChunk(Math.floor(Math.floor(top / TILE_SIZE) / MAP_CHUNK_TILES) - MAP_CHUNK_PADDING, mapRender.rowCount);
   const maxChunkY = clampChunk(Math.floor(Math.floor(bottom / TILE_SIZE) / MAP_CHUNK_TILES) + MAP_CHUNK_PADDING, mapRender.rowCount);
   const boundsKey = `${minChunkX}:${maxChunkX}:${minChunkY}:${maxChunkY}`;
-  if (boundsKey === mapRender.visibleChunkBoundsKey) return;
+  if (boundsKey === mapRender.visibleChunkBoundsKey) {
+    pruneExpiredMapChunks(visibleMapChunkKeys);
+    return;
+  }
   mapRender.visibleChunkBoundsKey = boundsKey;
   lastCutawayKey = "";
-  const needed = new Set<string>();
+  const needed = visibleMapChunkKeys;
+  needed.clear();
 
   for (let chunkY = minChunkY; chunkY <= maxChunkY; chunkY += 1) {
     for (let chunkX = minChunkX; chunkX <= maxChunkX; chunkX += 1) {
       const key = mapChunkKey(chunkX, chunkY);
       needed.add(key);
-      if (!mapRender.chunks.has(key)) mapRender.chunks.set(key, createMapChunk(mapRender, chunkX, chunkY));
+      let chunk = mapRender.chunks.get(key);
+      if (!chunk) {
+        chunk = createMapChunk(mapRender, chunkX, chunkY);
+        mapRender.chunks.set(key, chunk);
+      }
+      mapChunkExpiresAt.delete(key);
+      setVisibleIfChanged(chunk, true);
     }
   }
 
+  pruneExpiredMapChunks(needed);
+}
+
+function pruneExpiredMapChunks(needed: Set<string>): void {
+  if (!mapRender) return;
+  const now = scene.time.now;
+  const expireAt = now + MAP_CHUNK_TTL_MS;
   for (const [key, chunk] of mapRender.chunks) {
     if (needed.has(key)) continue;
+    if (!mapChunkExpiresAt.has(key)) {
+      mapChunkExpiresAt.set(key, expireAt);
+      setVisibleIfChanged(chunk, false);
+      continue;
+    }
+    if ((mapChunkExpiresAt.get(key) ?? 0) > now) continue;
     chunk.destroy(true);
     mapRender.chunks.delete(key);
+    mapChunkExpiresAt.delete(key);
   }
 }
 
@@ -3118,6 +3161,7 @@ function entityLayerRow(bucket: number): Phaser.GameObjects.Container {
   const row = scene.add.container(0, 0);
   (row as unknown as { sortY: number }).sortY = entityRowSortValue(bucket);
   entityLayerRows.set(bucket, row);
+  entityLayerRowCounts.set(bucket, 0);
   entityLayer.add(row);
   markEntityLayerSortDirty();
   return row;
@@ -3126,31 +3170,51 @@ function entityLayerRow(bucket: number): Phaser.GameObjects.Container {
 function placeEntityLayerView(view: EntityView, bucket: number, forceSort = false): void {
   const row = entityLayerRow(bucket);
   if (view.entityRow !== row) {
+    detachEntityLayerView(view);
     row.add(view);
     view.entityRow = row;
     view.sortBucketY = bucket;
     entityLayerRowReparents += 1;
-    row.sort("y");
+    entityLayerRowCounts.set(bucket, (entityLayerRowCounts.get(bucket) ?? 0) + 1);
+    emptyEntityLayerRows.delete(bucket);
+    dirtyEntityLayerRows.add(bucket);
     return;
   }
   view.sortBucketY = bucket;
-  if (forceSort) row.sort("y");
+  if (forceSort) dirtyEntityLayerRows.add(bucket);
+}
+
+function detachEntityLayerView(view: EntityView): void {
+  const row = view.entityRow;
+  if (!row) return;
+  const bucket = view.sortBucketY ?? entitySortBucket(view.y);
+  row.remove(view);
+  const nextCount = Math.max(0, (entityLayerRowCounts.get(bucket) ?? 1) - 1);
+  entityLayerRowCounts.set(bucket, nextCount);
+  if (nextCount === 0) {
+    dirtyEntityLayerRows.delete(bucket);
+    emptyEntityLayerRows.add(bucket);
+  }
+  view.entityRow = undefined;
 }
 
 function pruneEmptyEntityRows(): void {
-  for (const [bucket, row] of entityLayerRows) {
-    if (row.getAll().length > 0) continue;
+  for (const bucket of emptyEntityLayerRows) {
+    const row = entityLayerRows.get(bucket);
+    if (!row || (entityLayerRowCounts.get(bucket) ?? 0) > 0) continue;
     row.destroy();
     entityLayerRows.delete(bucket);
+    entityLayerRowCounts.delete(bucket);
+    dirtyEntityLayerRows.delete(bucket);
     markEntityLayerSortDirty();
   }
+  emptyEntityLayerRows.clear();
 }
 
 function entityDepthStats(): EntityDepthStats {
   let children = 0;
   let maxRowChildren = 0;
-  for (const row of entityLayerRows.values()) {
-    const count = row.getAll().length;
+  for (const count of entityLayerRowCounts.values()) {
     children += count;
     maxRowChildren = Math.max(maxRowChildren, count);
   }
@@ -3190,6 +3254,27 @@ function setEntityLayerPosition(view: Phaser.GameObjects.Container, x: number, y
   const nextBucket = entitySortBucket(y);
   if (previousBucket !== nextBucket) placeEntityLayerView(view as EntityView, nextBucket);
   else (view as EntityView).sortBucketY = nextBucket;
+}
+
+function syncEntityMovementTargets(): void {
+  const me = self();
+  if (!me || !latestState) return;
+  for (const player of latestState.players) {
+    if (player.floor !== me.floor) continue;
+    if (player.id !== selfId && !visiblePlayerIds.has(player.id)) continue;
+    const view = playerViews.get(player.id);
+    if (view) setEntityTarget(view, player.x * TILE_SIZE, player.y * TILE_SIZE);
+  }
+  for (const monster of latestState.monsters) {
+    if (monster.floor !== me.floor || !visibleMonsterIds.has(monster.id)) continue;
+    const view = monsterViews.get(monster.id);
+    if (view) setEntityTarget(view, monster.x * TILE_SIZE, monster.y * TILE_SIZE);
+  }
+  for (const npc of latestState.npcs ?? []) {
+    if (npc.floor !== me.floor || !visibleNpcIds.has(npc.id)) continue;
+    const view = npcViews.get(npc.id);
+    if (view) setEntityTarget(view, npc.x * TILE_SIZE, npc.y * TILE_SIZE);
+  }
 }
 
 function syncEntities(): void {
@@ -3308,9 +3393,9 @@ function syncEntities(): void {
   }
   for (const [id, view] of corpseViews) {
     if (!visibleCorpses.has(id)) {
+      detachEntityLayerView(view as EntityView);
       view.destroy();
       corpseViews.delete(id);
-      markEntityLayerSortDirty();
     }
   }
 
@@ -3353,9 +3438,9 @@ function syncEntities(): void {
   }
   for (const [id, view] of treeViews) {
     if (!visibleTrees.has(id)) {
+      detachEntityLayerView(view);
       view.destroy();
       treeViews.delete(id);
-      markEntityLayerSortDirty();
     }
   }
 
@@ -3372,9 +3457,9 @@ function syncEntities(): void {
   }
   for (const [id, view] of fishingViews) {
     if (!visibleFishingNodes.has(id)) {
+      detachEntityLayerView(view);
       view.destroy();
       fishingViews.delete(id);
-      markEntityLayerSortDirty();
     }
   }
 
@@ -3390,9 +3475,9 @@ function syncEntities(): void {
   }
   for (const [id, view] of miningViews) {
     if (!visibleMiningNodes.has(id)) {
+      detachEntityLayerView(view);
       view.destroy();
       miningViews.delete(id);
-      markEntityLayerSortDirty();
     }
   }
 
@@ -3410,9 +3495,9 @@ function syncEntities(): void {
   }
   for (const [id, view] of herbViews) {
     if (!visibleHerbNodes.has(id)) {
+      detachEntityLayerView(view);
       view.destroy();
       herbViews.delete(id);
-      markEntityLayerSortDirty();
     }
   }
 
@@ -3428,9 +3513,9 @@ function syncEntities(): void {
   }
   for (const [id, view] of fireViews) {
     if (!visibleFires.has(id)) {
+      detachEntityLayerView(view);
       view.destroy();
       fireViews.delete(id);
-      markEntityLayerSortDirty();
     }
   }
   pruneEmptyEntityRows();
@@ -3439,8 +3524,8 @@ function syncEntities(): void {
 function clearResourceViews(): void {
   for (const views of [treeViews, fishingViews, miningViews, herbViews, fireViews]) {
     for (const view of views.values()) {
+      detachEntityLayerView(view);
       view.destroy();
-      markEntityLayerSortDirty();
     }
     views.clear();
   }
@@ -3915,6 +4000,16 @@ function interpolateEntities(): void {
 // when they cross a bucket. We sort the parent row list only when rows are created
 // or removed, avoiding a full visible-tree/resource sort during crowded movement.
 function ySortEntities(): void {
+  if (dirtyEntityLayerRows.size > 0) {
+    for (const bucket of dirtyEntityLayerRows) {
+      const row = entityLayerRows.get(bucket);
+      if (row && (entityLayerRowCounts.get(bucket) ?? 0) > 1) {
+        row.sort("y");
+        entityLayerRowSorts += 1;
+      }
+    }
+    dirtyEntityLayerRows.clear();
+  }
   if (!entityLayerSortDirty) return;
   entityLayer.sort("sortY");
   entityLayerSortDirty = false;
@@ -3990,8 +4085,8 @@ function animateEntities(): void {
 function destroyEntityView(view: EntityView): void {
   interpolatingEntityViews.delete(view);
   animatingActorViews.delete(view);
+  detachEntityLayerView(view);
   view.destroy();
-  markEntityLayerSortDirty();
 }
 
 function animateActor(view: EntityView): void {
@@ -4185,11 +4280,19 @@ function fallbackClassSpec(): ClassSpec {
 }
 
 function renderMetrics(metrics: StateMetrics | null | undefined): void {
+  let text = "net -";
   if (!metrics) {
-    dom.netStats.textContent = "net -";
+    if (renderedMetricsText !== text) {
+      dom.netStats.textContent = text;
+      renderedMetricsText = text;
+    }
     return;
   }
-  dom.netStats.textContent = `zone ${metrics.zone} | net ${formatBytes(metrics.bytesOutPerSecond)}/s | tick ${metrics.tickMs}ms | snap ${metrics.snapshotMs}ms | seen ${metrics.visiblePlayers}p/${metrics.visibleMonsters}m/${metrics.visibleTrees ?? 0}t | cells ${metrics.spatialCells}`;
+  text = `zone ${metrics.zone} | net ${formatBytes(metrics.bytesOutPerSecond)}/s | tick ${metrics.tickMs}ms | snap ${metrics.snapshotMs}ms | seen ${metrics.visiblePlayers}p/${metrics.visibleMonsters}m/${metrics.visibleTrees ?? 0}t | cells ${metrics.spatialCells}`;
+  if (renderedMetricsText !== text) {
+    dom.netStats.textContent = text;
+    renderedMetricsText = text;
+  }
 }
 
 function renderQuestTracker(quests: QuestView[] = []): void {
@@ -6439,8 +6542,7 @@ function consumeEvents(events: GameEvent[]): void {
       playHolyChime();
       const floater = scene.add.text((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, String(event.text), textStyle(14, event.color ?? "#f5d778")).setOrigin(0.5) as Floater;
       floater.life = 1300;
-      floaters.push(floater);
-      fxLayer.add(floater);
+      addFloater(floater);
       continue;
     }
     if (event.type === "effect" && self()?.floor === event.floor) playCombatEffect(event);
@@ -6455,10 +6557,19 @@ function consumeEvents(events: GameEvent[]): void {
         floater.setScale(0.5);
         scene.tweens.add({ targets: floater, scale: 1.15, duration: 150, yoyo: true, ease: "Back.easeOut" });
       }
-      floaters.push(floater);
-      fxLayer.add(floater);
+      addFloater(floater);
     }
   }
+}
+
+function addFloater(floater: Floater): void {
+  const maxFloaters = crowdedActorsActive ? MAX_CROWDED_FLOATERS : MAX_FLOATERS;
+  while (floaters.length >= maxFloaters) {
+    const oldest = floaters.shift();
+    oldest?.destroy();
+  }
+  floaters.push(floater);
+  fxLayer.add(floater);
 }
 
 function shouldCullCrowdedFx(event: GameEvent): boolean {
@@ -6477,6 +6588,10 @@ function shouldCullCrowdedFx(event: GameEvent): boolean {
   const y = event.y ?? me.y;
   if (Math.hypot(x - me.x, y - me.y) <= 1.5) return false;
   const target = me.targetId ? latestState?.monsters.find((monster) => monster.id === me.targetId) : null;
+  if (event.type === "hit" || event.type === "float") {
+    if (event.target === me.id || event.target === me.targetId || event.from === me.id || event.from === me.targetId) return false;
+    return !target || Math.hypot(x - target.x, y - target.y) > 1.5;
+  }
   return !target || Math.hypot(x - target.x, y - target.y) > 1.5;
 }
 

@@ -555,7 +555,7 @@ const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ?
 const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 250);
 const SNAPSHOT_METRICS_MS = positiveIntEnv("TIB_SNAPSHOT_METRICS_MS", 1000);
 const SNAPSHOT_INTERVAL_MS = positiveIntEnv("TIB_SNAPSHOT_INTERVAL_MS", 75);
-const SNAPSHOT_CROWD_INTERVAL_MS = positiveIntEnv("TIB_SNAPSHOT_CROWD_INTERVAL_MS", 75);
+const SNAPSHOT_CROWD_INTERVAL_MS = positiveIntEnv("TIB_SNAPSHOT_CROWD_INTERVAL_MS", 125);
 const SNAPSHOT_CROWD_CLIENTS = positiveIntEnv("TIB_SNAPSHOT_CROWD_CLIENTS", 100);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
 const SOCKET_BACKPRESSURE_MAX_SKIPS = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_MAX_SKIPS", 120);
@@ -570,8 +570,8 @@ const TARGETED_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_TARGETED_EVENT_QUEUE_LIMI
 const CELL_EVENT_QUEUE_LIMIT = positiveIntEnv("TIB_CELL_EVENT_QUEUE_LIMIT", 256);
 const VISIBLE_EVENT_LIMIT = positiveIntEnv("TIB_VISIBLE_EVENT_LIMIT", 192);
 // Reaction-critical events (telegraphs) must survive event-channel truncation so
-// dense crowds never starve the one thing players must react to. Gated for A/B.
-let EVENT_PRIORITY = process.env.TIB_EVENT_PRIORITY === "1";
+// dense crowds never starve the one thing players must react to.
+let EVENT_PRIORITY = process.env.TIB_EVENT_PRIORITY !== "0";
 const EVENT_METRICS_LOG = process.env.TIB_EVENT_METRICS_LOG === "1";
 const WS_COMPRESSION = process.env.TIB_WS_COMPRESSION === "1" || (!E2E_TEST && process.env.TIB_WS_COMPRESSION !== "0");
 const WS_COMPRESSION_THRESHOLD = positiveIntEnv("TIB_WS_COMPRESSION_THRESHOLD", 1024);
@@ -619,6 +619,7 @@ const visitedMonsterScratch = new Set<ServerMonster>();
 const visitedNpcScratch = new Set<NpcRuntime>();
 const lastSnapshotSentAt = new WeakMap<Session, number>();
 const lastMetricsSentAt = new WeakMap<Session, number>();
+const snapshotFullJitterBySession = new WeakMap<Session, number>();
 let nextMonsterId = 1;
 let nextCorpseId = 1;
 let nextFireId = 1;
@@ -647,6 +648,7 @@ const staticPruneKeepCellsScratch = new Set<string>();
 const staticPruneStaleCellsScratch: string[] = [];
 const socketWireBytes = new WeakMap<ExtWebSocket, number>();
 const clientMessageBuckets = new WeakMap<ExtWebSocket, ClientMessageBucket>();
+const aggroPlayerCandidatesByRange = new Map<string, { tick: number; players: ServerPlayer[] }>();
 const eventLoopDelay = monitorEventLoopDelay({ resolution: 10 });
 eventLoopDelay.enable();
 const metrics: Metrics = {
@@ -678,7 +680,9 @@ let saveQueued = false;
 let saveInFlight = false;
 const dirtyPlayerKeys = new Set<string>();
 const playerSaveSignatures = new Map<string, string>();
+const playerSaveDirtySignatures = new Map<string, string>();
 let snapshotSequence = 0;
+let monsterUpdateSequence = 0;
 let lastSnapshotBroadcastAt = 0;
 let nextEventOrder = 1;
 // Telegraph-channel instrumentation (logged each second when EVENT_METRICS_LOG).
@@ -891,6 +895,7 @@ function deleteCharacter(socket: ExtWebSocket, rawName: string): void {
   delete db.players[key];
   dirtyPlayerKeys.delete(key);
   playerSaveSignatures.delete(key);
+  playerSaveDirtySignatures.delete(key);
   void unlink(playerFilePath(key)).catch((error: NodeJS.ErrnoException) => {
     if (error.code !== "ENOENT") console.error(`Failed to delete character save for ${name}:`, error);
   });
@@ -1084,6 +1089,8 @@ function updatePlayers(dt: number, now: number): void {
 }
 
 function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): void {
+  monsterUpdateSequence += 1;
+  aggroPlayerCandidatesByRange.clear();
   const visited = visitedMonsterScratch;
   visited.clear();
   for (const cell of activeRegions.cells) {
@@ -4131,17 +4138,26 @@ function nearestPlayer(monster: ServerMonster, maxDistance: number, roadFactor =
   let best: ServerPlayer | null = null;
   let bestDistSq = maxDistance * maxDistance;
   const roadDistSq = (maxDistance * roadFactor) ** 2;
-  forEachSpatial(spatial.players, monster.floor, monster.x, monster.y, maxDistance, (player) => {
-    if (player.dead || player.floor !== monster.floor) return;
-    if (catalog && !isNaturallyAggressive(monsterCombatLevel(catalog), combatLevelForAggro(player))) return;
+  for (const player of aggroPlayerCandidates(monster.floor, monster.x, monster.y, maxDistance)) {
+    if (player.dead || player.floor !== monster.floor) continue;
+    if (catalog && !isNaturallyAggressive(monsterCombatLevel(catalog), combatLevelForAggro(player))) continue;
     const distSq = distanceSq(monster, player);
-    if (distSq >= bestDistSq) return; // out of aggro, or not closer than the current pick
+    if (distSq >= bestDistSq) continue; // out of aggro, or not closer than the current pick
     // On-road players are only noticed inside the reduced road range.
-    if (roadFactor < 1 && distSq > roadDistSq && isRoadTile(tileAt(player.floor, Math.floor(player.x), Math.floor(player.y)))) return;
+    if (roadFactor < 1 && distSq > roadDistSq && isRoadTile(tileAt(player.floor, Math.floor(player.x), Math.floor(player.y)))) continue;
     best = player;
     bestDistSq = distSq;
-  });
+  }
   return best;
+}
+
+function aggroPlayerCandidates(floor: number, x: number, y: number, radius: number): ServerPlayer[] {
+  const key = spatialQueryRangeKey(floor, x, y, radius);
+  const cached = aggroPlayerCandidatesByRange.get(key);
+  if (cached?.tick === monsterUpdateSequence) return cached.players;
+  const players = spatialCandidates(spatial.players, floor, x, y, radius);
+  aggroPlayerCandidatesByRange.set(key, { tick: monsterUpdateSequence, players });
+  return players;
 }
 
 function combatLevelForAggro(player: ServerPlayer): number {
@@ -4175,9 +4191,7 @@ function broadcastState(): void {
   snapshotSequence += 1;
   treeMaterializationRangesThisSnapshot.clear();
   staticResourceMaterializationRangesThisSnapshot.clear();
-  const forceDynamicFull = snapshotSequence % SNAPSHOT_FULL_EVERY === 0;
   const includeTrees = snapshotSequence % TREE_SNAPSHOT_EVERY === 0;
-  const includeNpcs = forceDynamicFull || snapshotSequence % NPC_SNAPSHOT_EVERY === 0;
   const includeResources = snapshotSequence % RESOURCE_SNAPSHOT_EVERY === 0;
   let metricFrame: SnapshotMetricFrame | null = null;
   const broadcastCache: SnapshotBroadcastCache = { frames: new Map(), treeFrames: new Map() };
@@ -4197,6 +4211,8 @@ function broadcastState(): void {
 
     const includeMetrics = shouldIncludeMetrics(session, now);
     if (includeMetrics && !metricFrame) metricFrame = snapshotMetricFrame();
+    const forceDynamicFull = shouldForceDynamicFull(session);
+    const includeNpcs = forceDynamicFull || snapshotSequence % NPC_SNAPSHOT_EVERY === 0;
     const snapshot = buildSnapshotFor(
       session,
       includeTrees,
@@ -4216,6 +4232,19 @@ function broadcastState(): void {
     socket.send(raw);
   }
   pruneDistantStaticCells(now);
+}
+
+function shouldForceDynamicFull(session: Session): boolean {
+  if (SNAPSHOT_FULL_EVERY <= 1) return true;
+  return (snapshotSequence + snapshotFullJitterFor(session)) % SNAPSHOT_FULL_EVERY === 0;
+}
+
+function snapshotFullJitterFor(session: Session): number {
+  const cached = snapshotFullJitterBySession.get(session);
+  if (cached !== undefined) return cached;
+  const jitter = Math.floor(Math.random() * SNAPSHOT_FULL_EVERY);
+  snapshotFullJitterBySession.set(session, jitter);
+  return jitter;
 }
 
 function shouldSendSnapshot(session: Session, snapshot: StateSnapshot, now: number): boolean {
@@ -5458,6 +5487,8 @@ function compareEventsByOrder(a: GameEvent, b: GameEvent): number {
 
 function persistPlayerToDb(player: ServerPlayer): string | null {
   const key = player.name.toLowerCase();
+  const dirtySignature = playerSaveDirtySignature(player);
+  if (playerSaveDirtySignatures.get(key) === dirtySignature) return null;
   const previous = db.players[key];
   const next: SavedPlayer = {
     name: player.name,
@@ -5483,10 +5514,38 @@ function persistPlayerToDb(player: ServerPlayer): string | null {
   };
   const signature = playerSaveSignature(next);
   const previousSignature = playerSaveSignatures.get(key) ?? (previous ? playerSaveSignature(previous) : undefined);
-  if (previousSignature === signature) return null;
+  if (previousSignature === signature) {
+    playerSaveDirtySignatures.set(key, dirtySignature);
+    return null;
+  }
   db.players[key] = { ...next, updatedAt: new Date().toISOString() };
   playerSaveSignatures.set(key, signature);
+  playerSaveDirtySignatures.set(key, dirtySignature);
   return key;
+}
+
+function playerSaveDirtySignature(player: ServerPlayer): string {
+  return [
+    player.name,
+    player.classKey,
+    player.floor,
+    player.x,
+    player.y,
+    player.level,
+    player.xp,
+    player.hp,
+    player.mana,
+    player.favor,
+    player.gold,
+    player.weaponTier,
+    player.armorTier,
+    player.wellFedUntil ?? 0,
+    player.foodRegenUntil ?? 0,
+    player.inventoryRevision,
+    player.questRevision,
+    player.skillRevision,
+    player.classesRevision
+  ].join("|");
 }
 
 // e2e specs join as throwaway characters (`e2e_*`, `titleflow_*`); never write

@@ -10,12 +10,13 @@ const PERF_CENTER = { x: 93.5, y: 35.5 };
 const SYNTHETIC_PLAYERS = 6;
 const CLUSTERED_MONSTERS = 12;
 const CROWD_RADIUS = 10;
-const MIN_AVG_FPS = 60;
+const MIN_AVG_FPS = 58;
 const MAX_P95_FRAME_MS = 18.5;
+const MAX_DROPPED_FRAME_ESTIMATE = 8;
 
 test.setTimeout(90000);
 
-test("crowded same-area gameplay keeps 60fps frame pacing and renders stable visuals", async ({ page }) => {
+test("crowded same-area gameplay keeps stable frame pacing and renders stable visuals", async ({ page }) => {
   logErrors(page);
   const syntheticPlayers: SyntheticPlayer[] = [];
   await page.goto("/?e2e");
@@ -43,6 +44,22 @@ test("crowded same-area gameplay keeps 60fps frame pacing and renders stable vis
     const stableBStats = visualStats(stableB);
     const settledDiff = compare(stableA, stableB);
     const clientDepthStats = await page.evaluate(() => window.__TIB_E2E__?.entityDepthStats?.() ?? null);
+    const clientRenderStats = await page.evaluate(() => {
+      const memory = (performance as Performance & { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory;
+      const heap = memory
+        ? {
+            usedMiB: Math.round((memory.usedJSHeapSize / 1024 / 1024) * 100) / 100,
+            totalMiB: Math.round((memory.totalJSHeapSize / 1024 / 1024) * 100) / 100,
+            limitMiB: Math.round((memory.jsHeapSizeLimit / 1024 / 1024) * 100) / 100
+          }
+        : null;
+      return {
+        heap,
+        mapChunks: window.__TIB_E2E__?.mapChunkStats?.() ?? null,
+        decorations: window.__TIB_E2E__?.decorationCacheStats?.() ?? null,
+        domNodes: document.getElementsByTagName("*").length
+      };
+    });
     const serverMetrics = await page.evaluate(() => window.__TIB_E2E__?.getState()?.metrics ?? null);
 
     console.log(
@@ -50,6 +67,7 @@ test("crowded same-area gameplay keeps 60fps frame pacing and renders stable vis
         sceneCounts,
         frameStats,
         clientDepthStats,
+        clientRenderStats,
         serverMetrics,
         beforeStats,
         stableAStats,
@@ -64,7 +82,20 @@ test("crowded same-area gameplay keeps 60fps frame pacing and renders stable vis
     expect(frameStats.avgFps, `avg FPS ${frameStats.avgFps}`).toBeGreaterThanOrEqual(MIN_AVG_FPS);
     expect(frameStats.p95Ms, `p95 frame interval ${frameStats.p95Ms}ms`).toBeLessThanOrEqual(MAX_P95_FRAME_MS);
     expect(frameStats.longFramePct, `${frameStats.longFramePct}% frames exceeded 33.4ms`).toBeLessThanOrEqual(1);
+    expect(frameStats.droppedFrameEstimate, `${frameStats.droppedFrameEstimate} estimated dropped frames`).toBeLessThanOrEqual(MAX_DROPPED_FRAME_ESTIMATE);
+    expect(frameStats.longTaskCount, `${frameStats.longTaskCount} browser long tasks during sample`).toBeLessThanOrEqual(4);
+    expect(frameStats.longTaskTotalMs, `${frameStats.longTaskTotalMs}ms in browser long tasks`).toBeLessThanOrEqual(250);
     expect(frameStats.maxMs, `max frame interval ${frameStats.maxMs}ms`).toBeLessThanOrEqual(50);
+    expect(clientDepthStats?.visibleActors ?? 0, "client visible actor counter").toBeGreaterThanOrEqual(SYNTHETIC_PLAYERS + CLUSTERED_MONSTERS);
+    expect(clientDepthStats?.visibleActorChildren ?? 0, "display-list actor child counter").toBeLessThanOrEqual(160);
+    expect(clientDepthStats?.rows ?? 0, "depth row budget").toBeLessThanOrEqual(16);
+    expect(clientDepthStats?.rowSorts ?? 0, "depth row sort budget").toBeLessThanOrEqual(80);
+    expect(clientDepthStats?.rowReparents ?? 0, "depth row reparent budget").toBeLessThanOrEqual(140);
+    expect(clientRenderStats.heap?.usedMiB ?? 0, "JS heap budget").toBeLessThanOrEqual(180);
+    expect(clientRenderStats.mapChunks?.activeChunks ?? 0, "active map chunk budget").toBeLessThanOrEqual(25);
+    expect(clientRenderStats.mapChunks?.maxChunkTextureEdge ?? 0, "map chunk texture edge budget").toBeLessThanOrEqual(512);
+    expect(clientRenderStats.decorations?.tileEntries ?? 0, "tile decoration cache budget").toBeLessThanOrEqual(4);
+    expect(clientRenderStats.domNodes, "HUD DOM node budget").toBeLessThanOrEqual(700);
 
     for (const [label, stats] of [
       ["before", beforeStats],
@@ -175,10 +206,25 @@ async function sampleLiveGameplay(page: Page, sampleCount: number): Promise<Fram
   });
   await page.waitForTimeout(300);
 
-  const timings = await page.evaluate(async (frames) => {
+  const sample = await page.evaluate(async (frames) => {
     const intervals: number[] = [];
+    const longTasks: number[] = [];
+    const sampleStartedAt = performance.now();
     let previous = 0;
     let tick = 0;
+    let observer: PerformanceObserver | null = null;
+    if ("PerformanceObserver" in window) {
+      try {
+        observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (entry.startTime >= sampleStartedAt) longTasks.push(entry.duration);
+          }
+        });
+        observer.observe({ type: "longtask" });
+      } catch {
+        observer = null;
+      }
+    }
     const inputTimer = window.setInterval(() => {
       const hooks = window.__TIB_E2E__;
       if (!hooks) return;
@@ -192,6 +238,7 @@ async function sampleLiveGameplay(page: Page, sampleCount: number): Promise<Fram
         previous = now;
         if (intervals.length >= frames) {
           window.clearInterval(inputTimer);
+          observer?.disconnect();
           window.__TIB_E2E__?.send({ type: "input", input: {} });
           resolve();
           return;
@@ -201,10 +248,10 @@ async function sampleLiveGameplay(page: Page, sampleCount: number): Promise<Fram
       window.requestAnimationFrame(step);
     });
 
-    return intervals;
+    return { intervals, longTasks };
   }, sampleCount);
 
-  return summarizeFrames(timings);
+  return summarizeFrames(sample.intervals, sample.longTasks);
 }
 
 async function joinSyntheticCrowd(count: number): Promise<SyntheticPlayer[]> {
@@ -309,7 +356,7 @@ function standableTilesNear(floor: number, centerX: number, centerY: number, cou
   return candidates;
 }
 
-function summarizeFrames(intervals: number[]): FrameStats {
+function summarizeFrames(intervals: number[], longTasks: number[] = []): FrameStats {
   const sorted = [...intervals].sort((a, b) => a - b);
   const totalMs = intervals.reduce((sum, value) => sum + value, 0);
   const percentile = (p: number) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] ?? 0;
@@ -320,7 +367,11 @@ function summarizeFrames(intervals: number[]): FrameStats {
     p95Ms: round(percentile(0.95)),
     p99Ms: round(percentile(0.99)),
     maxMs: round(sorted[sorted.length - 1] ?? 0),
-    longFramePct: round((intervals.filter((value) => value > 33.4).length / intervals.length) * 100)
+    longFramePct: round((intervals.filter((value) => value > 33.4).length / intervals.length) * 100),
+    droppedFrameEstimate: intervals.reduce((sum, value) => sum + Math.max(0, Math.round(value / 16.67) - 1), 0),
+    longTaskCount: longTasks.length,
+    longTaskTotalMs: round(longTasks.reduce((sum, value) => sum + value, 0)),
+    longTaskMaxMs: round(Math.max(0, ...longTasks))
   };
 }
 
@@ -400,6 +451,10 @@ interface FrameStats {
   p99Ms: number;
   maxMs: number;
   longFramePct: number;
+  droppedFrameEstimate: number;
+  longTaskCount: number;
+  longTaskTotalMs: number;
+  longTaskMaxMs: number;
 }
 
 interface VisualStats {

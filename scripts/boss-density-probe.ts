@@ -30,6 +30,10 @@ const num = (k: string, d: number): number => {
   const v = opts[k];
   return typeof v === "string" && Number.isFinite(Number(v)) ? Number(v) : d;
 };
+const optionalNum = (k: string): number | null => {
+  const v = opts[k];
+  return typeof v === "string" && Number.isFinite(Number(v)) ? Number(v) : null;
+};
 
 const port = num("port", 8793);
 const url = `ws://127.0.0.1:${port}`;
@@ -149,26 +153,59 @@ setTimeout(() => {
   }
   const sorted = [...telegraphsPerBot].sort((a, b) => a - b);
   const sum = sorted.reduce((a, b) => a + b, 0);
-  console.log(
-    JSON.stringify(
-      {
-        config: { clients, durationMs, cosmeticPerTick, turrets, point: { floor: FLOOR, x: X, y: Y } },
-        connected: selfIds,
-        states,
-        errors,
-        maxVisibleMonsters,
-        sampleSelfPos,
-        eventsByType: Object.fromEntries([...eventsByType.entries()].sort((a, b) => b[1] - a[1])),
-        telegraphsReceivedPerBot: {
-          min: sorted[0] ?? 0,
-          max: sorted[sorted.length - 1] ?? 0,
-          avg: sorted.length ? Math.round((sum / sorted.length) * 10) / 10 : 0
-        },
-        serverMetric
-      },
-      null,
-      2
-    )
-  );
-  setTimeout(() => process.exit(errors ? 1 : 0), 250);
+  const report = {
+    config: { clients, durationMs, cosmeticPerTick, turrets, point: { floor: FLOOR, x: X, y: Y } },
+    connected: selfIds,
+    states,
+    errors,
+    maxVisibleMonsters,
+    sampleSelfPos,
+    eventsByType: Object.fromEntries([...eventsByType.entries()].sort((a, b) => b[1] - a[1])),
+    telegraphsReceivedPerBot: {
+      min: sorted[0] ?? 0,
+      max: sorted[sorted.length - 1] ?? 0,
+      avg: sorted.length ? Math.round((sum / sorted.length) * 10) / 10 : 0
+    },
+    serverMetric
+  };
+  const failures = thresholdFailures(report);
+  console.log(JSON.stringify(report, null, 2));
+  if (failures.length > 0) {
+    console.error("Boss-density thresholds failed:");
+    for (const failure of failures) console.error(`  - ${failure}`);
+  }
+  setTimeout(() => process.exit(errors || failures.length > 0 ? 1 : 0), 250);
 }, durationMs);
+
+function thresholdFailures(report: {
+  connected: number;
+  states: number;
+  errors: number;
+  maxVisibleMonsters: number;
+  telegraphsReceivedPerBot: { min: number; max: number; avg: number };
+  serverMetric: { eventsDroppedMax: number; snapshotMsMax: number; tickMsMax: number; stateEventsMax: number; bytesOutMaxPerSec: number };
+}): string[] {
+  const failures: string[] = [];
+  const minimums: Array<[string, number, number | null]> = [
+    ["connected", report.connected, optionalNum("min-connected")],
+    ["states", report.states, optionalNum("min-states")],
+    ["maxVisibleMonsters", report.maxVisibleMonsters, optionalNum("min-visible-monsters")],
+    ["telegraphsReceivedPerBot.min", report.telegraphsReceivedPerBot.min, optionalNum("min-telegraphs-min")],
+    ["telegraphsReceivedPerBot.avg", report.telegraphsReceivedPerBot.avg, optionalNum("min-telegraphs-avg")]
+  ];
+  for (const [label, actual, expected] of minimums) {
+    if (expected != null && actual < expected) failures.push(`${label} ${actual} < ${expected}`);
+  }
+  const maximums: Array<[string, number, number | null]> = [
+    ["errors", report.errors, optionalNum("max-errors")],
+    ["serverMetric.eventsDroppedMax", report.serverMetric.eventsDroppedMax, optionalNum("max-events-dropped")],
+    ["serverMetric.tickMsMax", report.serverMetric.tickMsMax, optionalNum("max-tick-ms")],
+    ["serverMetric.snapshotMsMax", report.serverMetric.snapshotMsMax, optionalNum("max-snapshot-ms")],
+    ["serverMetric.stateEventsMax", report.serverMetric.stateEventsMax, optionalNum("max-state-events")],
+    ["serverMetric.bytesOutMaxPerSec", report.serverMetric.bytesOutMaxPerSec, optionalNum("max-bytes-out-per-second")]
+  ];
+  for (const [label, actual, expected] of maximums) {
+    if (expected != null && actual > expected) failures.push(`${label} ${actual} > ${expected}`);
+  }
+  return failures;
+}

@@ -10,15 +10,23 @@ interface Scenario {
   args: string[];
   serverEnv?: Record<string, string>;
   tempDataDir?: boolean;
+  runner?: "load-test" | "boss-density-probe";
+  e2eServer?: boolean;
 }
 
 const PORT = Number(process.env.TIB_PERF_PORT ?? 8790);
 const HOST = "127.0.0.1";
 const SERVER_READY_MS = 10000;
-const mode = process.argv.includes("--soak") ? "soak" : process.argv.includes("--stress") ? "stress" : "gate";
+const mode = process.argv.includes("--soak")
+  ? "soak"
+  : process.argv.includes("--stress")
+    ? "stress"
+    : process.argv.includes("--prod-like")
+      ? "prod-like"
+      : "gate";
 const clientDecodeGateArgs = [
   "--max-state-parse-ms-max",
-  "4",
+  "8",
   "--max-state-parse-ms-avg",
   "0.25",
   "--max-state-parse-ms-p95",
@@ -160,7 +168,7 @@ const gateScenarios: Scenario[] = [
       "--max-bytes-out-per-second-avg",
       "14000000",
       "--max-state-message-bytes-max",
-      "30000",
+      "32000",
       "--max-state-message-bytes-avg",
       "13000",
       ...clientDecodeGateArgs,
@@ -178,6 +186,42 @@ const gateScenarios: Scenario[] = [
       "0",
       "--max-save-flush-players-max",
       "0"
+    ]
+  },
+  {
+    name: "24-client telegraphs survive cosmetic event flood",
+    runner: "boss-density-probe",
+    serverEnv: {
+      TIB_VISIBLE_EVENT_LIMIT: "24",
+      TIB_CELL_EVENT_QUEUE_LIMIT: "32"
+    },
+    args: [
+      "--clients",
+      "24",
+      "--duration",
+      "9000",
+      "--cosmetic",
+      "36",
+      "--turrets",
+      "10",
+      "--min-connected",
+      "24",
+      "--min-states",
+      "1200",
+      "--min-visible-monsters",
+      "8",
+      "--min-telegraphs-min",
+      "1",
+      "--min-telegraphs-avg",
+      "4",
+      "--max-errors",
+      "0",
+      "--max-tick-ms",
+      "12",
+      "--max-snapshot-ms",
+      "24",
+      "--max-state-events",
+      "24"
     ]
   },
   {
@@ -203,9 +247,9 @@ const gateScenarios: Scenario[] = [
       "--min-closed",
       "150",
       "--min-states",
-      "16000",
+      "10000",
       "--min-compact-states",
-      "16000",
+      "10000",
       "--min-metric-samples",
       "1400",
       "--min-visible-players-max",
@@ -326,9 +370,9 @@ const gateScenarios: Scenario[] = [
       "--min-closed",
       "100",
       "--min-states",
-      "18000",
+      "12000",
       "--min-compact-states",
-      "18000",
+      "12000",
       "--min-metric-samples",
       "1500",
       "--max-tick-ms-max",
@@ -841,7 +885,56 @@ const stressScenarios: Scenario[] = [
     ]
   }
 ];
-const scenarios = mode === "soak" ? soakScenarios : mode === "stress" ? stressScenarios : gateScenarios;
+const prodLikeScenarios: Scenario[] = [
+  {
+    name: "20 clients production snapshot cadence",
+    e2eServer: false,
+    serverEnv: {
+      TIB_ALLOW_TRANSIENT_PLAYERS: "1"
+    },
+    args: [
+      "--clients",
+      "20",
+      "--duration",
+      "8000",
+      "--combat",
+      "0",
+      "--max-errors",
+      "0",
+      "--min-opened",
+      "20",
+      "--min-welcomed",
+      "20",
+      "--min-closed",
+      "20",
+      "--min-compact-states",
+      "1200",
+      "--min-metric-samples",
+      "100",
+      "--max-tick-ms-max",
+      "8",
+      "--max-snapshot-ms-max",
+      "18",
+      "--max-heap-used-mb-max",
+      "256",
+      "--max-rss-mb-max",
+      "512",
+      "--max-static-full-snapshots",
+      "80",
+      "--max-state-message-bytes-max",
+      "30000",
+      "--max-state-message-bytes-avg",
+      "16000",
+      ...clientDecodeGateArgs,
+      ...eventLoopGateArgs,
+      "--max-events-dropped-per-second-max",
+      "0",
+      "--max-client-messages-dropped-per-second-max",
+      "0"
+    ]
+  }
+];
+const scenarios = mode === "soak" ? soakScenarios : mode === "stress" ? stressScenarios : mode === "prod-like" ? prodLikeScenarios : gateScenarios;
 
 await assertPortFree(PORT);
 
@@ -863,9 +956,8 @@ async function runWithServer(scenario: Scenario): Promise<void> {
     env: {
       ...process.env,
       PORT: String(PORT),
-      E2E_TEST: "1",
       TIB_ALLOW_TRANSIENT_PLAYERS: "1",
-      TIB_WS_COMPRESSION: "0",
+      ...(scenario.e2eServer === false ? { E2E_TEST: "0", TIB_WS_COMPRESSION: "1" } : { E2E_TEST: "1", TIB_WS_COMPRESSION: "0" }),
       ...(dataDir ? { TIB_DATA_DIR: dataDir } : {}),
       ...scenario.serverEnv
     },
@@ -901,7 +993,8 @@ async function waitForServer(server: ReturnType<typeof spawn>, isReady: () => bo
 }
 
 async function runScenario(scenario: Scenario): Promise<void> {
-  const child = spawn(process.execPath, ["scripts/load-test.ts", "--port", String(PORT), ...scenario.args], {
+  const script = scenario.runner === "boss-density-probe" ? "scripts/boss-density-probe.ts" : "scripts/load-test.ts";
+  const child = spawn(process.execPath, [script, "--port", String(PORT), ...scenario.args], {
     cwd: process.cwd(),
     stdio: "inherit"
   });

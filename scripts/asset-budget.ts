@@ -85,11 +85,18 @@ console.log(
                 files: group.files.length,
                 totalBytes: group.totalBytes,
                 totalMiB: roundMiB(group.totalBytes),
+                largest: group.files.slice(0, 8).map((file) => ({ ...file, mib: roundMiB(file.bytes) })),
                 missing: group.missing
               }))
             },
             missing: preload.missing,
-            largest: preload.files.slice(0, 12).map((file) => ({ ...file, mib: roundMiB(file.bytes) }))
+            headroomMiB: roundMiB(maxPreloadBytes - preload.totalBytes),
+            overByMiB: roundMiB(Math.max(0, preload.totalBytes - maxPreloadBytes)),
+            fileHeadroom: maxPreloadFiles - preload.files.length,
+            largest: preload.files.slice(0, 12).map((file) => ({ ...file, mib: roundMiB(file.bytes) })),
+            preloadCandidates: preloadCandidates(preload)
+              .slice(0, 12)
+              .map((file) => ({ path: file.path, group: file.group, bytes: file.bytes, mib: roundMiB(file.bytes) }))
           }
         : undefined
     },
@@ -101,7 +108,28 @@ console.log(
 if (failures.length > 0) {
   console.error("Asset budget failed:");
   for (const failure of failures) console.error(`  - ${failure}`);
+  if (preload) {
+    console.error(
+      `Preload budget: ${roundMiB(preload.totalBytes)} MiB across ${preload.files.length} files ` +
+        `(cap ${roundMiB(maxPreloadBytes)} MiB / ${maxPreloadFiles} files).`
+    );
+    const candidates = preloadCandidates(preload).slice(0, 8);
+    if (candidates.length > 0) {
+      console.error("Largest preload candidates to lazy-load or split:");
+      for (const file of candidates) console.error(`  - ${file.path} ${roundMiB(file.bytes)} MiB (${file.group})`);
+    }
+  }
   process.exit(1);
+}
+
+function preloadCandidates(preload: PreloadBudget): Array<FileEntry & { group: string }> {
+  const dynamicGroups = new Map<string, string>();
+  for (const group of preload.dynamic) {
+    for (const file of group.files) dynamicGroups.set(file.path, group.label);
+  }
+  return preload.files
+    .map((file) => ({ ...file, group: dynamicGroups.get(file.path) ?? "literal preload" }))
+    .sort((a, b) => b.bytes - a.bytes);
 }
 
 function listFiles(dir: string): FileEntry[] {
