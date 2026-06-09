@@ -46,6 +46,10 @@ test("asset budget report classifies startup preload and lazy assets", () => {
     report.preload.lazy.classificationGroups.map((group: { name: string; files: number }) => [group.name, group.files]),
     [["lazy/background-generated-stages", 1]]
   );
+  assert.equal(report.preload.lazy.headroomMiB, 0);
+  assert.equal(report.preload.lazy.fileHeadroom, 3);
+  assert.equal(report.preload.lazy.groups[0].headroomMiB, 0);
+  assert.equal(report.preload.lazy.groups[0].fileHeadroom, 3);
   assert.deepEqual(report.preload.lazy.unclassified, []);
 });
 

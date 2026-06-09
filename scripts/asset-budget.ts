@@ -132,6 +132,7 @@ const files = listFiles(root).sort((a, b) => b.bytes - a.bytes);
 const totalBytes = sumBytes(files);
 const preload = preloadEntry ? preloadBudget(preloadEntry, root) : null;
 const lazyFiles = preload ? uniqueFiles(preload.lazy.flatMap((group) => group.files)) : [];
+const lazyTotalBytes = sumBytes(lazyFiles);
 const runtimeGroups = runtimePolicyGroups(policy).map((group) => runtimeGroupReport(group, files));
 const startupClassGroups = assetClassGroups(policy.startupGroups);
 const lazyClassGroups = assetClassGroups(policy.lazyClassifications);
@@ -226,9 +227,16 @@ const report = {
         unclassifiedStartup: startupClassification ? startupClassification.unclassified.map(fileReport) : [],
         lazy: {
           files: lazyFiles.length,
-          totalBytes: sumBytes(lazyFiles),
-          totalMiB: roundMiB(sumBytes(lazyFiles)),
+          totalBytes: lazyTotalBytes,
+          totalMiB: roundMiB(lazyTotalBytes),
           budget: budgetReport(lazyBundleBudget),
+          headroomMiB:
+            lazyBundleBudget.maxTotalBytes === undefined ? null : roundMiB(lazyBundleBudget.maxTotalBytes - lazyTotalBytes),
+          overByMiB:
+            lazyBundleBudget.maxTotalBytes === undefined
+              ? null
+              : roundMiB(Math.max(0, lazyTotalBytes - lazyBundleBudget.maxTotalBytes)),
+          fileHeadroom: lazyBundleBudget.maxFiles === undefined ? null : lazyBundleBudget.maxFiles - lazyFiles.length,
           groups: preload.lazy.map((group) => preloadGroupReport(group, policy.lazyGroups)),
           classificationGroups: lazyClassification ? lazyClassification.groups.map((group) => classifiedGroupReport(group)) : [],
           unclassified: lazyClassification ? lazyClassification.unclassified.map(fileReport) : []
@@ -641,12 +649,16 @@ function fileReport(file: FileEntry): FileEntry & { mib: number } {
 }
 
 function preloadGroupReport(group: PreloadGroup, budgets: Record<string, BudgetLimit> | undefined) {
+  const budget = budgetForLabel(group.label, budgets) ?? {};
   return {
     label: group.label,
     files: group.files.length,
     totalBytes: group.totalBytes,
     totalMiB: roundMiB(group.totalBytes),
-    budget: budgetReport(budgetForLabel(group.label, budgets) ?? {}),
+    budget: budgetReport(budget),
+    headroomMiB: budget.maxTotalBytes === undefined ? null : roundMiB(budget.maxTotalBytes - group.totalBytes),
+    overByMiB: budget.maxTotalBytes === undefined ? null : roundMiB(Math.max(0, group.totalBytes - budget.maxTotalBytes)),
+    fileHeadroom: budget.maxFiles === undefined ? null : budget.maxFiles - group.files.length,
     largest: group.files.slice(0, 8).map(fileReport),
     missing: group.missing
   };

@@ -21,6 +21,8 @@ Save JSON evidence under `docs/performance/artifacts/<date>/`:
 
 - Asset budget output from `npm run assets:budget`.
 - Browser visual perf JSON from `npm run perf:visual` with a JSON reporter.
+- Repeated browser visual evidence from `npm run perf:visual:repeat -- --runs=3`
+  when a single run is close to the threshold or host load is suspected.
 - Server load JSON from the `scripts/load-test.ts` scenarios behind
   `npm run perf:gate` and `npm run perf:gate:prod`.
 - Soak and stress JSON from `npm run perf:soak` and `npm run perf:stress` when
@@ -51,7 +53,9 @@ Manual JSON sections may use `status`, `grade`, or `result` with
 
 ### Asset Budgets
 
-- Preload budget stays within `55 MiB` and `80` files.
+- Startup preload budget stays within `32 MiB` and `64` files.
+- Lazy/play-context budget stays within `32 MiB` and `128` files, with headroom
+  recorded from `artifacts/asset-budget-report.json`.
 - Runtime assets are lowercase, compressed, and deduplicated.
 - New floor, enemy, spell, and UI assets have explicit load ownership:
   preload only if needed before login or first spawn, otherwise streamed.
@@ -70,6 +74,8 @@ Manual JSON sections may use `status`, `grade`, or `result` with
 ### Browser Visual Performance
 
 - `npm run perf:visual` passes on Chromium.
+- `npm run perf:visual:repeat -- --runs=3` passes before declaring a
+  host-sensitive browser warning resolved.
 - No blank canvas, missing tiles, major overlap, or sustained camera jitter.
 - Target crowd scene holds 55-60 FPS on the reference machine.
 - Frame p95 is under `16.7 ms`; long tasks above `50 ms` are explained.

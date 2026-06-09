@@ -38,6 +38,8 @@ The client exposes residency evidence through `window.__TIB_E2E__.assetResidency
 - failures for dynamic lazy/preload groups without explicit policy budgets
 
 The budget report calls out the largest preload candidates by policy group so the next reductions are obvious.
+It also records lazy/play-context headroom for the aggregate lazy bundle and
+each dynamic lazy group, since that budget is currently the tightest one.
 
 ## Next Reduction
 
