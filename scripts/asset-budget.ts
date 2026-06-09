@@ -29,11 +29,27 @@ interface AssetPolicy {
   groups?: RuntimePolicyGroup[];
   preloadGroups?: Record<string, BudgetLimit>;
   lazyGroups?: Record<string, BudgetLimit>;
+  preloadClassification?: PreloadClassificationPolicy;
+  startupGroups?: AssetClassGroup[];
+  lazyClassifications?: AssetClassGroup[];
 }
 
 interface RuntimePolicyGroup extends BudgetLimit {
   name: string;
   include: string[];
+}
+
+interface AssetClassGroup extends BudgetLimit {
+  name: string;
+  include: string[];
+  description?: string;
+}
+
+interface PreloadClassificationPolicy {
+  requireStartupGroupMatch?: boolean;
+  requireLazyGroupMatch?: boolean;
+  requireDynamicPreloadGroupBudgets?: boolean;
+  requireDynamicLazyGroupBudgets?: boolean;
 }
 
 interface PreloadGroup {
@@ -60,6 +76,16 @@ interface RuntimeGroupReport {
   files: FileEntry[];
   totalBytes: number;
   budget: BudgetLimit;
+}
+
+interface ClassifiedGroupReport extends RuntimeGroupReport {
+  description?: string;
+}
+
+interface ClassifiedFiles {
+  groups: ClassifiedGroupReport[];
+  unclassified: FileEntry[];
+  assignments: Map<string, string>;
 }
 
 const MIB = 1024 * 1024;
@@ -107,6 +133,10 @@ const totalBytes = sumBytes(files);
 const preload = preloadEntry ? preloadBudget(preloadEntry, root) : null;
 const lazyFiles = preload ? uniqueFiles(preload.lazy.flatMap((group) => group.files)) : [];
 const runtimeGroups = runtimePolicyGroups(policy).map((group) => runtimeGroupReport(group, files));
+const startupClassGroups = assetClassGroups(policy.startupGroups);
+const lazyClassGroups = assetClassGroups(policy.lazyClassifications);
+const startupClassification = preload ? classifyFiles(preload.files, startupClassGroups) : null;
+const lazyClassification = preload ? classifyFiles(lazyFiles, lazyClassGroups) : null;
 const failures: string[] = [];
 
 enforceBudget("runtime assets", files, runtimeBudget, failures);
@@ -115,12 +145,30 @@ for (const group of runtimeGroups) enforceBudget(`runtime group "${group.name}"`
 if (preload) {
   enforceBudget("startup preload assets", preload.files, startupPreloadBudget, failures);
   enforceBudget("lazy bundle assets", lazyFiles, lazyBundleBudget, failures);
+  if (startupClassification) {
+    for (const group of startupClassification.groups) enforceBudget(`startup preload class "${group.name}"`, group.files, group.budget, failures);
+    if (shouldRequireStartupClassification(policy, startupClassGroups)) {
+      for (const file of startupClassification.unclassified) failures.push(`unclassified startup preload asset: ${file.path}`);
+    }
+  }
+  if (lazyClassification) {
+    for (const group of lazyClassification.groups) enforceBudget(`lazy asset class "${group.name}"`, group.files, group.budget, failures);
+    if (shouldRequireLazyClassification(policy, lazyClassGroups)) {
+      for (const file of lazyClassification.unclassified) failures.push(`unclassified lazy asset: ${file.path}`);
+    }
+  }
   for (const path of preload.missing) failures.push(`startup preload asset missing: ${path}`);
   for (const group of preload.dynamic) {
+    if (policy.preloadClassification?.requireDynamicPreloadGroupBudgets === true && !budgetForLabel(group.label, policy.preloadGroups)) {
+      failures.push(`startup preload dynamic group missing policy budget: ${group.label}`);
+    }
     enforcePreloadGroupBudget("startup preload group", group, policy.preloadGroups, failures);
   }
   for (const group of preload.lazy) {
     for (const path of group.missing) failures.push(`lazy asset missing: ${path} (${group.label})`);
+    if (policy.preloadClassification?.requireDynamicLazyGroupBudgets === true && !budgetForLabel(group.label, policy.lazyGroups)) {
+      failures.push(`lazy dynamic group missing policy budget: ${group.label}`);
+    }
     enforcePreloadGroupBudget("lazy bundle group", group, policy.lazyGroups, failures);
   }
 }
@@ -172,12 +220,18 @@ const report = {
           totalMiB: roundMiB(sumBytes(preload.dynamicFiles)),
           groups: preload.dynamic.map((group) => preloadGroupReport(group, policy.preloadGroups))
         },
+        startupGroups: startupClassification
+          ? startupClassification.groups.map((group) => classifiedGroupReport(group))
+          : [],
+        unclassifiedStartup: startupClassification ? startupClassification.unclassified.map(fileReport) : [],
         lazy: {
           files: lazyFiles.length,
           totalBytes: sumBytes(lazyFiles),
           totalMiB: roundMiB(sumBytes(lazyFiles)),
           budget: budgetReport(lazyBundleBudget),
-          groups: preload.lazy.map((group) => preloadGroupReport(group, policy.lazyGroups))
+          groups: preload.lazy.map((group) => preloadGroupReport(group, policy.lazyGroups)),
+          classificationGroups: lazyClassification ? lazyClassification.groups.map((group) => classifiedGroupReport(group)) : [],
+          unclassified: lazyClassification ? lazyClassification.unclassified.map(fileReport) : []
         },
         missing: preload.missing,
         headroomMiB:
@@ -188,7 +242,7 @@ const report = {
             : roundMiB(Math.max(0, preload.totalBytes - startupPreloadBudget.maxTotalBytes)),
         fileHeadroom: startupPreloadBudget.maxFiles === undefined ? null : startupPreloadBudget.maxFiles - preload.files.length,
         largest: preload.files.slice(0, 12).map(fileReport),
-        preloadCandidates: preloadCandidates(preload)
+        preloadCandidates: preloadCandidates(preload, startupClassification)
           .slice(0, 12)
           .map((file) => ({ path: file.path, group: file.group, bytes: file.bytes, mib: roundMiB(file.bytes) }))
       }
@@ -210,7 +264,7 @@ if (failures.length > 0) {
       `Preload budget: ${roundMiB(preload.totalBytes)} MiB across ${preload.files.length} files ` +
         `(cap ${roundOptionalMiB(startupPreloadBudget.maxTotalBytes)} MiB / ${startupPreloadBudget.maxFiles ?? "unlimited"} files).`
     );
-    const candidates = preloadCandidates(preload).slice(0, 8);
+    const candidates = preloadCandidates(preload, startupClassification).slice(0, 8);
     if (candidates.length > 0) {
       console.error("Largest preload candidates to lazy-load or split:");
       for (const file of candidates) console.error(`  - ${file.path} ${roundMiB(file.bytes)} MiB (${file.group})`);
@@ -219,13 +273,13 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-function preloadCandidates(preload: PreloadBudget): Array<FileEntry & { group: string }> {
+function preloadCandidates(preload: PreloadBudget, classification: ClassifiedFiles | null): Array<FileEntry & { group: string }> {
   const dynamicGroups = new Map<string, string>();
   for (const group of preload.dynamic) {
     for (const file of group.files) dynamicGroups.set(file.path, group.label);
   }
   return preload.files
-    .map((file) => ({ ...file, group: dynamicGroups.get(file.path) ?? "literal preload" }))
+    .map((file) => ({ ...file, group: classification?.assignments.get(file.path) ?? dynamicGroups.get(file.path) ?? "literal preload" }))
     .sort((a, b) => b.bytes - a.bytes);
 }
 
@@ -253,6 +307,7 @@ function preloadBudget(entry: string, rootDir: string): PreloadBudget {
     const path = match[1];
     if (path) literalAssetPaths.add(path);
   }
+  for (const path of runtimeImageAssetPaths(source, ["startup"])) literalAssetPaths.add(path);
   const dynamic = dynamicPreloadGroups(entry, source, rootDir);
   const lazy = lazyAssetGroups(entry, source, rootDir);
   const dynamicAssetPaths = new Set(dynamic.flatMap((group) => group.paths));
@@ -292,7 +347,7 @@ function resolveAssetPaths(assetPaths: string[], rootDir: string): { files: File
 
 function dynamicPreloadGroups(entry: string, source: string, rootDir: string): PreloadGroup[] {
   const groups: PreloadGroup[] = [];
-  const northwoodSpritePaths = northwoodSpritePreloadPaths(source);
+  const northwoodSpritePaths = hasNorthwoodSpritePreloadLoop(source) ? northwoodSpritePreloadPaths(source) : [];
   if (northwoodSpritePaths.length > 0) groups.push(preloadGroup("NORTHWOOD_SPRITE_IDS sprite loop", northwoodSpritePaths, rootDir));
 
   const generatedStagePaths = hasGeneratedStagePreloadLoop(source) ? generatedStagePublicPaths(entry, source) : [];
@@ -305,6 +360,8 @@ function lazyAssetGroups(entry: string, source: string, rootDir: string): Preloa
   const groups: PreloadGroup[] = [];
   const generatedStagePaths = hasGeneratedStageLazyLoader(source) ? generatedStagePublicPaths(entry, source) : [];
   if (generatedStagePaths.length > 0) groups.push(preloadGroup("lazy generated stage tilesets", generatedStagePaths, rootDir));
+  const runtimeLazyImagePaths = uniqueStrings([...runtimeImageAssetPaths(source, ["play-context", "background"]), ...northwoodSpriteLazyPaths(source)]);
+  if (runtimeLazyImagePaths.length > 0) groups.push(preloadGroup("runtime image play-context/background assets", runtimeLazyImagePaths, rootDir));
   return groups;
 }
 
@@ -320,12 +377,33 @@ function northwoodSpritePreloadPaths(source: string): string[] {
   return ids.map((id) => `/sprites/nw/obj_${String(id).padStart(3, "0")}.png`);
 }
 
+function hasNorthwoodSpritePreloadLoop(source: string): boolean {
+  return /\bthis\.load\.image\(\s*`spriteNw\$\{String\(id\)\.padStart\(3,\s*["']0["']\)\}`/.test(source);
+}
+
+function northwoodSpriteLazyPaths(source: string): string[] {
+  if (!/\bGENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR\b/.test(source)) return [];
+  if (!/\bNORTHWOOD_SPRITE_IDS\.map\b/.test(source)) return [];
+  return northwoodSpritePreloadPaths(source);
+}
+
 function hasGeneratedStagePreloadLoop(source: string): boolean {
   return /\bthis\.load\.image\(\s*generatedTilesetTextureKey\(\s*stage\s*,\s*tileset\.name\s*\)\s*,\s*tileset\.publicPath\s*\)/.test(source);
 }
 
 function hasGeneratedStageLazyLoader(source: string): boolean {
   return /\bfunction\s+ensureGeneratedStageAssetsLoaded\b/.test(source);
+}
+
+function runtimeImageAssetPaths(source: string, tiers: string[]): string[] {
+  const tierSet = new Set(tiers);
+  const paths = new Set<string>();
+  for (const match of source.matchAll(/\bruntimeImageAsset\(\s*["'][^"']+["']\s*,\s*["']([^"']+)["']\s*,\s*["']([^"']+)["']/g)) {
+    const path = match[1];
+    const tier = match[2];
+    if (path && tier && tierSet.has(tier)) paths.add(path);
+  }
+  return [...paths].sort();
 }
 
 function generatedStagePublicPaths(entry: string, source: string): string[] {
@@ -405,6 +483,10 @@ function runtimePolicyGroups(activePolicy: AssetPolicy): RuntimePolicyGroup[] {
   return (activePolicy.groups ?? []).filter((group) => group.name.length > 0 && Array.isArray(group.include) && group.include.length > 0);
 }
 
+function assetClassGroups(groups: AssetClassGroup[] | undefined): AssetClassGroup[] {
+  return (groups ?? []).filter((group) => group.name.length > 0 && Array.isArray(group.include) && group.include.length > 0);
+}
+
 function runtimeGroupReport(group: RuntimePolicyGroup, allFiles: FileEntry[]): RuntimeGroupReport {
   const groupFiles = allFiles.filter((file) => group.include.some((pattern) => matchesPattern(file.path, pattern)));
   return {
@@ -414,6 +496,48 @@ function runtimeGroupReport(group: RuntimePolicyGroup, allFiles: FileEntry[]): R
     totalBytes: sumBytes(groupFiles),
     budget: normalizeBudget(group)
   };
+}
+
+function classifyFiles(assetFiles: FileEntry[], groups: AssetClassGroup[]): ClassifiedFiles {
+  const groupFiles = new Map<string, FileEntry[]>();
+  const assignments = new Map<string, string>();
+  const unclassified: FileEntry[] = [];
+
+  for (const group of groups) groupFiles.set(group.name, []);
+
+  for (const file of assetFiles) {
+    const group = groups.find((candidate) => candidate.include.some((pattern) => matchesPattern(file.path, pattern)));
+    if (!group) {
+      unclassified.push(file);
+      continue;
+    }
+    groupFiles.get(group.name)?.push(file);
+    assignments.set(file.path, group.name);
+  }
+
+  return {
+    groups: groups.map((group) => {
+      const filesForGroup = (groupFiles.get(group.name) ?? []).sort((a, b) => b.bytes - a.bytes);
+      return {
+        name: group.name,
+        description: group.description,
+        include: group.include,
+        files: filesForGroup,
+        totalBytes: sumBytes(filesForGroup),
+        budget: normalizeBudget(group)
+      };
+    }),
+    unclassified: unclassified.sort((a, b) => b.bytes - a.bytes),
+    assignments
+  };
+}
+
+function shouldRequireStartupClassification(activePolicy: AssetPolicy, groups: AssetClassGroup[]): boolean {
+  return activePolicy.preloadClassification?.requireStartupGroupMatch === true || groups.length > 0;
+}
+
+function shouldRequireLazyClassification(activePolicy: AssetPolicy, groups: AssetClassGroup[]): boolean {
+  return activePolicy.preloadClassification?.requireLazyGroupMatch === true || groups.length > 0;
 }
 
 function matchesPattern(path: string, pattern: string): boolean {
@@ -513,6 +637,19 @@ function preloadGroupReport(group: PreloadGroup, budgets: Record<string, BudgetL
   };
 }
 
+function classifiedGroupReport(group: ClassifiedGroupReport) {
+  return {
+    name: group.name,
+    description: group.description,
+    include: group.include,
+    files: group.files.length,
+    totalBytes: group.totalBytes,
+    totalMiB: roundMiB(group.totalBytes),
+    budget: budgetReport(group.budget),
+    largest: group.files.slice(0, 8).map(fileReport)
+  };
+}
+
 function budgetReport(budget: BudgetLimit) {
   return {
     maxTotalBytes: budget.maxTotalBytes,
@@ -532,6 +669,10 @@ function uniqueFiles(assetFiles: FileEntry[]): FileEntry[] {
   const byPath = new Map<string, FileEntry>();
   for (const file of assetFiles) byPath.set(file.path, file);
   return [...byPath.values()].sort((a, b) => b.bytes - a.bytes);
+}
+
+function uniqueStrings(values: string[]): string[] {
+  return [...new Set(values)].sort();
 }
 
 function roundMiB(bytes: number): number {

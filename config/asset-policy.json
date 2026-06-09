@@ -16,7 +16,7 @@
     "lazyBundles": {
       "maxTotalBytes": 8388608,
       "maxFileBytes": 2097152,
-      "maxFiles": 16
+      "maxFiles": 64
     }
   },
   "groups": [
@@ -61,11 +61,114 @@
       "maxFiles": 12
     }
   },
+  "preloadClassification": {
+    "requireStartupGroupMatch": true,
+    "requireLazyGroupMatch": true,
+    "requireDynamicPreloadGroupBudgets": true,
+    "requireDynamicLazyGroupBudgets": true
+  },
+  "startupGroups": [
+    {
+      "name": "startup-core",
+      "description": "Player, enemy, and shared effect sheets needed before login and first spawn.",
+      "include": [
+        "public/player-sheet.png",
+        "public/goblin*.png",
+        "public/skeleton.png",
+        "public/ratandspiders.png",
+        "public/grey-wolf-sheet.png",
+        "public/wisp-sheet.png",
+        "public/woodland-bespoke-v2-sheet.png",
+        "public/effects.png"
+      ],
+      "maxTotalBytes": 14680064,
+      "maxFileBytes": 3145728,
+      "maxFiles": 16
+    },
+    {
+      "name": "starter-area",
+      "description": "Waystone and Northwood art that can appear around the first spawn route.",
+      "include": [
+        "public/towntiles.png",
+        "public/foresttiles.png",
+        "public/northwood-trees-v1.png"
+      ],
+      "maxTotalBytes": 10485760,
+      "maxFileBytes": 3145728,
+      "maxFiles": 40
+    },
+    {
+      "name": "preloaded-biomes",
+      "description": "Legacy floor tiles still preloaded while runtime streaming is being tightened.",
+      "include": [
+        "public/citytiles.png",
+        "public/graveyardtiles.png",
+        "public/dark-forest-tiles.png",
+        "public/swamp-tiles.png",
+        "public/badlands-tiles.png",
+        "public/desert-tiles.png",
+        "public/beach-tiles.png",
+        "public/jungle-tiles.png",
+        "public/crypt-dungeon-tiles.png"
+      ],
+      "maxTotalBytes": 25165824,
+      "maxFileBytes": 4194304,
+      "maxFiles": 12
+    },
+    {
+      "name": "searing-canyon-startup",
+      "description": "Floor 6 bespoke ground, cliff, flora, and landmark atlases still in startup preload.",
+      "include": [
+        "public/tilesets/searing-canyon-ground.png",
+        "public/tilesets/searing-canyon-cliff.png",
+        "public/tilesets/searing-canyon-flora/**",
+        "public/tilesets/searing-canyon-landmarks/**"
+      ],
+      "maxTotalBytes": 8388608,
+      "maxFileBytes": 2097152,
+      "maxFiles": 20
+    },
+    {
+      "name": "startup-gathering-props",
+      "description": "Gathering node, herb, and campfire art currently resident from startup.",
+      "include": [
+        "public/water-fishing-spots.png",
+        "public/ore-rock-gathering-nodes.png",
+        "public/campfire.png",
+        "public/herb-*.png"
+      ],
+      "maxTotalBytes": 8388608,
+      "maxFileBytes": 3145728,
+      "maxFiles": 8
+    }
+  ],
+  "lazyClassifications": [
+    {
+      "name": "lazy/background-generated-stages",
+      "description": "Generated stage tilesets loaded through ensureGeneratedStageAssetsLoaded rather than startup preload.",
+      "include": [
+        "public/tilesets/northwood/**",
+        "public/tilesets/waystone/**",
+        "public/tilesets/swamp/**",
+        "public/tilesets/route/**",
+        "public/waystone/**",
+        "public/sprites/nw/**"
+      ],
+      "maxTotalBytes": 6291456,
+      "maxFileBytes": 2097152,
+      "maxFiles": 48
+    }
+  ],
   "lazyGroups": {
     "lazy generated stage tilesets": {
       "maxTotalBytes": 6291456,
       "maxFileBytes": 2097152,
       "maxFiles": 12
+    },
+    "runtime image play-context/background assets": {
+      "maxTotalBytes": 4194304,
+      "maxFileBytes": 2097152,
+      "maxFiles": 40
     }
   }
 }

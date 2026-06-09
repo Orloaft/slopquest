@@ -180,6 +180,10 @@ test("Northwood loads generated stage tile textures in the browser", async ({ pa
   await page.goto("/?e2e");
   await join(page);
   await place(page, 3, 55, 36);
+  await page.waitForFunction(() => {
+    const keys = window.__TIB_E2E__?.generatedStageTextureKeys(3) ?? [];
+    return keys.length > 0 && keys.every((entry) => entry.exists);
+  });
 
   const textureKeys = await page.evaluate(() => window.__TIB_E2E__?.generatedStageTextureKeys(3) ?? []);
   expect(textureKeys.length).toBeGreaterThan(0);

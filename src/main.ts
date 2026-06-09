@@ -378,6 +378,40 @@ interface TextureResidency {
   height: number;
 }
 
+type RuntimeImageLoadTier = "startup" | "play-context" | "background";
+type RuntimeImageLoadTrigger = "startup" | "play-context" | "lazy" | "background";
+type GeneratedStageLoadTrigger = "play-context" | "background";
+
+interface RuntimeImageAsset {
+  key: string;
+  path: string;
+  tier: RuntimeImageLoadTier;
+  label: string;
+  floor?: number;
+  zone?: string;
+}
+
+interface RuntimeImageLoadRecord {
+  trigger: RuntimeImageLoadTrigger;
+  queuedAt: number;
+  loadedAt: number | null;
+}
+
+interface RuntimeImageResidency {
+  key: string;
+  path: string;
+  tier: RuntimeImageLoadTier;
+  label: string;
+  floor: number | null;
+  zone: string | null;
+  trigger: RuntimeImageLoadTrigger | null;
+  queuedAt: number | null;
+  loadedAt: number | null;
+  resident: boolean;
+  width: number;
+  height: number;
+}
+
 interface RuntimeAssetGroup {
   id: string;
   label: string;
@@ -397,6 +431,8 @@ interface RuntimeAssetGroupResidency {
   floor: number;
   zone: string;
   pending: boolean;
+  pendingTrigger: GeneratedStageLoadTrigger | null;
+  loadedBy: GeneratedStageLoadTrigger | null;
   assetsReady: boolean;
   texturesReady: boolean;
   sourceTextures: {
@@ -419,6 +455,7 @@ interface PendingLazyLoad {
   label: string;
   floor: number;
   zone: string;
+  trigger: GeneratedStageLoadTrigger;
   sourceTextureKeys: string[];
   missingSourceTextureKeys: string[];
 }
@@ -427,6 +464,8 @@ interface RuntimeAssetResidencySnapshot {
   currentFloor: number | null;
   pendingMapFloor: number | null;
   pendingLazyLoads: PendingLazyLoad[];
+  pendingBackgroundLoads: PendingLazyLoad[];
+  startupImages: RuntimeImageResidency[];
   groups: RuntimeAssetGroupResidency[];
 }
 
@@ -477,6 +516,7 @@ interface E2EHooks {
   textureResidency: (keys: string[]) => TextureResidency[];
   assetResidency: () => RuntimeAssetResidencySnapshot;
   pendingLazyLoads: () => PendingLazyLoad[];
+  pendingBackgroundLoads: () => PendingLazyLoad[];
   generatedStageTextureKeys: (floor: number) => Array<{ char: string; key: string; exists: boolean; ref: string }>;
   cutawayRoofAlphas: () => Array<{ floor: number; key: string; x: number; y: number; alpha: number }>;
   entityDepthStats: () => EntityDepthStats;
@@ -865,6 +905,7 @@ if (E2E_MODE) {
     textureResidency: (keys: string[]) => textureResidency(keys),
     assetResidency: () => runtimeAssetResidency(),
     pendingLazyLoads: () => pendingLazyLoads(),
+    pendingBackgroundLoads: () => pendingBackgroundLoads(),
     entityDepthStats: () => entityDepthStats(),
     generatedStageTextureKeys: (floor: number) => generatedStageTextureKeys(floor),
     cutawayRoofAlphas: () =>
@@ -1119,6 +1160,124 @@ const ATTACK_FAMILY: Record<string, string> = {};
 const ATTACK_FAMILY_FRAMES: Record<string, number> = {};
 const DYNAMIC_PATH_REFRESH_MS = 350;
 const DYNAMIC_PATH_REFRESH_DISTANCE = 0.65;
+
+function runtimeImageAsset(
+  key: string,
+  path: string,
+  tier: RuntimeImageLoadTier,
+  label: string,
+  floor?: number,
+  zone?: string
+): RuntimeImageAsset {
+  return { key, path, tier, label, floor, zone };
+}
+
+const CORE_BOOTSTRAP_IMAGE_ASSETS: RuntimeImageAsset[] = [
+  runtimeImageAsset("playerSheet", "/player-sheet.png", "startup", "player actor sheet"),
+  runtimeImageAsset("goblinSheet", "/goblin.png", "startup", "legacy goblin actor sheet"),
+  runtimeImageAsset("skeletonSheet", "/skeleton.png", "startup", "skeleton actor sheet"),
+  runtimeImageAsset("ratSpiderSheet", "/ratandspiders.png", "startup", "rat/spider actor sheet"),
+  runtimeImageAsset("goblinScoutSheet", "/goblin-scout-sheet.png", "startup", "goblin scout actor sheet"),
+  runtimeImageAsset("goblinShamanSheet", "/goblin-shaman-sheet.png", "startup", "goblin shaman actor sheet"),
+  runtimeImageAsset("goblinRaiderSheet", "/goblin-raider-sheet.png", "startup", "goblin raider actor sheet"),
+  runtimeImageAsset("greyWolfSheet", "/grey-wolf-sheet.png", "startup", "grey wolf actor sheet"),
+  runtimeImageAsset("wispSheet", "/wisp-sheet.png", "startup", "wisp actor sheet"),
+  runtimeImageAsset("woodlandBespokeSheet", "/woodland-bespoke-v2-sheet.png", "startup", "woodland actor sheet"),
+  runtimeImageAsset("effectsSheet", "/effects.png", "startup", "shared combat effects"),
+  runtimeImageAsset("waterFishingSpots", "/water-fishing-spots.png", "startup", "shared fishing node sheet"),
+  runtimeImageAsset("oreNodeSheet", "/ore-rock-gathering-nodes.png", "startup", "shared ore node sheet"),
+  runtimeImageAsset("spriteCampfire", "/campfire.png", "startup", "shared cooking fire"),
+  runtimeImageAsset("herbBloom", "/herb-bloom.png", "startup", "shared herb node bloom"),
+  runtimeImageAsset("herbField", "/herb-field.png", "startup", "shared herb node field"),
+  runtimeImageAsset("herbTidal", "/herb-tidal.png", "startup", "shared herb node tidal")
+];
+
+const STARTER_AREA_STARTUP_IMAGE_ASSETS: RuntimeImageAsset[] = [
+  runtimeImageAsset("townTiles", "/towntiles.png", "startup", "Waystone/common town source sheet", 0, "waystone"),
+  runtimeImageAsset("cityTiles", "/citytiles.png", "startup", "Northwatch city source sheet", 4, "northwatch")
+];
+
+const GENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
+  [
+    0,
+    [
+      runtimeImageAsset("spriteWindmill", "/waystone/windmill.png", "play-context", "Waystone windmill", 0, "waystone"),
+      runtimeImageAsset("spriteWatchtower", "/waystone/watchtower.png", "play-context", "Waystone watchtower", 0, "waystone"),
+      runtimeImageAsset("spriteCow", "/waystone/cow.png", "play-context", "Waystone cow", 0, "waystone"),
+      runtimeImageAsset("spriteGoose", "/waystone/goose.png", "play-context", "Waystone goose", 0, "waystone"),
+      runtimeImageAsset("spriteScarecrow", "/waystone/scarecrow.png", "play-context", "Waystone scarecrow", 0, "waystone"),
+      runtimeImageAsset("spriteWaystoneCave", "/waystone/cave.png", "play-context", "Waystone cave arch", 0, "waystone")
+    ]
+  ],
+  [
+    3,
+    NORTHWOOD_SPRITE_IDS.map((id) =>
+      runtimeImageAsset(
+        `spriteNw${String(id).padStart(3, "0")}`,
+        `/sprites/nw/obj_${String(id).padStart(3, "0")}.png`,
+        "play-context",
+        `Northwood object ${String(id).padStart(3, "0")}`,
+        3,
+        "northwood"
+      )
+    )
+  ]
+]);
+
+const RESIDENT_AUTHORING_IMAGE_ASSETS: RuntimeImageAsset[] = [
+  runtimeImageAsset("forestTiles", "/foresttiles.png", "startup", "resident forest source sheet"),
+  runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "startup", "resident cemetery source sheet", 1, "cemetery"),
+  runtimeImageAsset("darkForestTiles", "/dark-forest-tiles.png", "startup", "resident dark forest source sheet"),
+  runtimeImageAsset("northwoodTreeSheet", "/northwood-trees-v1.png", "startup", "resident Northwood tree sheet", 3, "northwood"),
+  runtimeImageAsset("swampTiles", "/swamp-tiles.png", "startup", "resident marsh source sheet", 5, "swamp"),
+  runtimeImageAsset("badlandsTiles", "/badlands-tiles.png", "startup", "resident badlands source sheet", 6, "badlands"),
+  runtimeImageAsset("searingGround", "/tilesets/searing-canyon-ground.png", "startup", "resident searing canyon ground sheet", 6, "badlands"),
+  runtimeImageAsset("searingCliff", "/tilesets/searing-canyon-cliff.png", "startup", "resident searing canyon cliff sheet", 6, "badlands"),
+  runtimeImageAsset("floraSaguaroLg", "/tilesets/searing-canyon-flora/saguaro_lg.png", "startup", "resident searing flora large saguaro", 6, "badlands"),
+  runtimeImageAsset("floraSaguaroMd", "/tilesets/searing-canyon-flora/saguaro_md.png", "startup", "resident searing flora medium saguaro", 6, "badlands"),
+  runtimeImageAsset("floraSaguaroSm", "/tilesets/searing-canyon-flora/saguaro_sm.png", "startup", "resident searing flora small saguaro", 6, "badlands"),
+  runtimeImageAsset("floraScrubDry", "/tilesets/searing-canyon-flora/scrub_dry.png", "startup", "resident searing dry scrub", 6, "badlands"),
+  runtimeImageAsset("floraScrubDead", "/tilesets/searing-canyon-flora/scrub_dead.png", "startup", "resident searing dead scrub", 6, "badlands"),
+  runtimeImageAsset("floraScreeLg", "/tilesets/searing-canyon-flora/scree_lg.png", "startup", "resident searing large scree", 6, "badlands"),
+  runtimeImageAsset("floraScreeSm", "/tilesets/searing-canyon-flora/scree_sm.png", "startup", "resident searing small scree", 6, "badlands"),
+  runtimeImageAsset("floraSkullPile", "/tilesets/searing-canyon-flora/skull_pile.png", "startup", "resident searing skull pile", 6, "badlands"),
+  runtimeImageAsset("outpostKit", "/tilesets/searing-canyon-landmarks/outpost-kit.png", "startup", "resident searing outpost kit", 6, "badlands"),
+  runtimeImageAsset("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png", "startup", "resident searing cultist kit", 6, "badlands"),
+  runtimeImageAsset("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png", "startup", "resident searing ritual kit", 6, "badlands"),
+  runtimeImageAsset("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png", "startup", "resident searing mine kit", 6, "badlands"),
+  runtimeImageAsset("desertTiles", "/desert-tiles.png", "startup", "resident desert source sheet", 7, "desert"),
+  runtimeImageAsset("beachTiles", "/beach-tiles.png", "startup", "resident beach source sheet", 8, "beach"),
+  runtimeImageAsset("jungleTiles", "/jungle-tiles.png", "startup", "resident jungle source sheet", 9, "jungle"),
+  runtimeImageAsset("dungeonTiles", "/crypt-dungeon-tiles.png", "startup", "resident mine/dungeon source sheet", 10, "deepmine")
+];
+
+const STARTUP_IMAGE_ASSETS = [
+  ...CORE_BOOTSTRAP_IMAGE_ASSETS,
+  ...STARTER_AREA_STARTUP_IMAGE_ASSETS,
+  ...RESIDENT_AUTHORING_IMAGE_ASSETS
+] as const;
+const runtimeImageLoadRecords = new Map<string, RuntimeImageLoadRecord>();
+
+function recordRuntimeImageLoad(asset: RuntimeImageAsset, trigger: RuntimeImageLoadTrigger): void {
+  runtimeImageLoadRecords.set(asset.key, {
+    trigger,
+    queuedAt: performance.now(),
+    loadedAt: null
+  });
+}
+
+function queueRuntimeImage(scene: Phaser.Scene, asset: RuntimeImageAsset, trigger: RuntimeImageLoadTrigger): void {
+  recordRuntimeImageLoad(asset, trigger);
+  scene.load.image(asset.key, asset.path);
+}
+
+function installRuntimeImageLoadRecorder(scene: Phaser.Scene): void {
+  scene.load.on(Phaser.Loader.Events.FILE_COMPLETE, (key: string) => {
+    const record = runtimeImageLoadRecords.get(key);
+    if (record) record.loadedAt = performance.now();
+  });
+}
+
 function itemUseKind(itemId: string | null): ItemUse["kind"] | null {
   if (!itemId) return null;
   return ITEMS[itemId]?.use?.kind ?? null;
@@ -1126,67 +1285,8 @@ function itemUseKind(itemId: string | null): ItemUse["kind"] | null {
 
 function preload(this: Phaser.Scene): void {
   scene = this;
-  this.load.image("playerSheet", "/player-sheet.png");
-  this.load.image("goblinSheet", "/goblin.png");
-  this.load.image("skeletonSheet", "/skeleton.png");
-  this.load.image("ratSpiderSheet", "/ratandspiders.png");
-  this.load.image("goblinScoutSheet", "/goblin-scout-sheet.png");
-  this.load.image("goblinShamanSheet", "/goblin-shaman-sheet.png");
-  this.load.image("goblinRaiderSheet", "/goblin-raider-sheet.png");
-  this.load.image("greyWolfSheet", "/grey-wolf-sheet.png");
-  this.load.image("wispSheet", "/wisp-sheet.png");
-  this.load.image("woodlandBespokeSheet", "/woodland-bespoke-v2-sheet.png");
-  this.load.image("townTiles", "/towntiles.png");
-  this.load.image("cityTiles", "/citytiles.png"); // SPIKE: city-exterior-01 ingest proof (Northwatch rebuild)
-  this.load.image("forestTiles", "/foresttiles.png");
-  this.load.image("graveyardTiles", "/graveyardtiles.png");
-  this.load.image("darkForestTiles", "/dark-forest-tiles.png");
-  this.load.image("northwoodTreeSheet", "/northwood-trees-v1.png");
-  this.load.image("swampTiles", "/swamp-tiles.png");
-  this.load.image("badlandsTiles", "/badlands-tiles.png");
-  // Searing Badlands (floor 6) painterly cracked-earth ground atlas (16 variants,
-  // 72x72 each) + desert flora props. Sliced by tools/slice-searing-canyon-ground-runtime.py
-  // and tools/slice-searing-canyon-m3.py; scattered/placed on the live hand-authored floor.
-  this.load.image("searingGround", "/tilesets/searing-canyon-ground.png");
-  // Red-rock cliff-face autotile (floor 6 sculpted mesa faces). 5col x 3row @32px:
-  // cols [Lcap, straight, Rcap, innerL, innerR], rows [top/rim, mid, base/foot].
-  // Painted as a multi-course south-facing overlay by createMapChunk (collision stays
-  // tile-based on 'X'/'w'). Sliced from cliff-red.png by tools/slice-searing-canyon-cliff.py.
-  this.load.image("searingCliff", "/tilesets/searing-canyon-cliff.png");
-  this.load.image("floraSaguaroLg", "/tilesets/searing-canyon-flora/saguaro_lg.png");
-  this.load.image("floraSaguaroMd", "/tilesets/searing-canyon-flora/saguaro_md.png");
-  this.load.image("floraSaguaroSm", "/tilesets/searing-canyon-flora/saguaro_sm.png");
-  this.load.image("floraScrubDry", "/tilesets/searing-canyon-flora/scrub_dry.png");
-  this.load.image("floraScrubDead", "/tilesets/searing-canyon-flora/scrub_dead.png");
-  this.load.image("floraScreeLg", "/tilesets/searing-canyon-flora/scree_lg.png");
-  this.load.image("floraScreeSm", "/tilesets/searing-canyon-flora/scree_sm.png");
-  this.load.image("floraSkullPile", "/tilesets/searing-canyon-flora/skull_pile.png");
-  this.load.image("outpostKit", "/tilesets/searing-canyon-landmarks/outpost-kit.png");
-  this.load.image("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png");
-  this.load.image("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png");
-  this.load.image("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png");
-  this.load.image("desertTiles", "/desert-tiles.png");
-  this.load.image("beachTiles", "/beach-tiles.png");
-  this.load.image("jungleTiles", "/jungle-tiles.png");
-  this.load.image("dungeonTiles", "/crypt-dungeon-tiles.png"); // Deepdelve Mine (floor 10) cave art
-  this.load.image("effectsSheet", "/effects.png");
-  this.load.image("waterFishingSpots", "/water-fishing-spots.png");
-  this.load.image("oreNodeSheet", "/ore-rock-gathering-nodes.png");
-  this.load.image("spriteCampfire", "/campfire.png");
-  this.load.image("herbBloom", "/herb-bloom.png");
-  this.load.image("herbField", "/herb-field.png");
-  this.load.image("herbTidal", "/herb-tidal.png");
-  // Northwood authored-layout tree/prop sprites (exported by tools/build-northwood-from-authored.ts).
-  for (const id of NORTHWOOD_SPRITE_IDS) {
-    this.load.image(`spriteNw${String(id).padStart(3, "0")}`, `/sprites/nw/obj_${String(id).padStart(3, "0")}.png`);
-  }
-  // Waystone (floor 0) bespoke structures, referenced by the stage objects[] keys.
-  this.load.image("spriteWindmill", "/waystone/windmill.png");
-  this.load.image("spriteWatchtower", "/waystone/watchtower.png");
-  this.load.image("spriteCow", "/waystone/cow.png");
-  this.load.image("spriteGoose", "/waystone/goose.png");
-  this.load.image("spriteScarecrow", "/waystone/scarecrow.png");
-  this.load.image("spriteWaystoneCave", "/waystone/cave.png"); // pre-cleaned cave arch (de-fringed)
+  installRuntimeImageLoadRecorder(this);
+  for (const asset of STARTUP_IMAGE_ASSETS) queueRuntimeImage(this, asset, "startup");
 }
 
 function create(this: Phaser.Scene): void {
@@ -2598,12 +2698,13 @@ function drawMap(floor: number, center?: TilePoint): void {
   addComposedMapObjects(floor, mapDecorationLayer);
   addBeachClutter(floor, rows, mapDecorationLayer);
   spawnCemeteryFog(floor, cols, rowCount);
+  scheduleGeneratedStageBackgroundWarm(floor);
 }
 
 function beginMapDraw(floor: number, center?: TilePoint): void {
   pendingMapFloor = floor;
   const token = ++pendingMapLoadToken;
-  void ensureGeneratedStageAssetsLoaded(floor).then(() => {
+  void ensureGeneratedStageAssetsLoaded(floor, "play-context").then(() => {
     if (token !== pendingMapLoadToken || pendingMapFloor !== floor) return;
     drawMap(floor, center);
     pendingMapFloor = null;
@@ -9206,8 +9307,17 @@ const GENERATED_STAGES: GeneratedStage[] = [NORTHWOOD_STAGE, WAYSTONE_STAGE, SWA
 const GENERATED_STAGES_BY_FLOOR = new Map<number, GeneratedStage>(GENERATED_STAGES.map((stage) => [stage.floor, stage]));
 const generatedStageAssetsReady = new Set<number>();
 const generatedStageAssetLoads = new Map<number, Promise<void>>();
+const generatedStageAssetLoadTriggers = new Map<number, GeneratedStageLoadTrigger>();
+const generatedStageAssetLoadedBy = new Map<number, GeneratedStageLoadTrigger>();
 const generatedStageTexturesReady = new Set<number>();
 const generatedStageRuntimeTextureKeyCache = new Map<number, string[]>();
+const scheduledGeneratedStageWarmups = new Set<string>();
+const GENERATED_STAGE_BACKGROUND_NEIGHBORS = new Map<number, number[]>([
+  [0, [11]],
+  [11, [0, 3]],
+  [3, [11, 5]],
+  [5, [3, 0]]
+]);
 
 function generatedTilesetTextureKey(stage: GeneratedStage, tilesetName: string): string {
   return `generated:${stage.zone}:${tilesetName}`;
@@ -9222,6 +9332,7 @@ function generatedStageRefTextureKey(stage: GeneratedStage, ref: string): string
 }
 
 function generatedStageAssetGroup(stage: GeneratedStage): RuntimeAssetGroup {
+  const directAssets = GENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR.get(stage.floor) ?? [];
   return {
     id: `generated-stage:${stage.floor}:${stage.zone}`,
     label: `${stage.zone} generated stage`,
@@ -9236,30 +9347,41 @@ function generatedStageAssetGroup(stage: GeneratedStage): RuntimeAssetGroup {
         key: generatedTilesetTextureKey(stage, tileset.name),
         path: tileset.publicPath as string
       }))
+      .concat(directAssets.map((asset) => ({ key: asset.key, path: asset.path })))
   };
 }
 
 const GENERATED_STAGE_ASSET_GROUPS = GENERATED_STAGES.map((stage) => generatedStageAssetGroup(stage));
 const GENERATED_STAGE_ASSET_GROUPS_BY_FLOOR = new Map<number, RuntimeAssetGroup>(GENERATED_STAGE_ASSET_GROUPS.map((group) => [group.floor, group]));
 
-function ensureGeneratedStageAssetsLoaded(floor: number): Promise<void> {
+function ensureGeneratedStageAssetsLoaded(floor: number, trigger: GeneratedStageLoadTrigger = "play-context"): Promise<void> {
   const group = GENERATED_STAGE_ASSET_GROUPS_BY_FLOOR.get(floor);
   if (!group) return Promise.resolve();
-  if (generatedStageAssetsReady.has(floor)) return Promise.resolve();
+  if (generatedStageAssetsReady.has(floor)) {
+    if (!generatedStageAssetLoadedBy.has(floor)) generatedStageAssetLoadedBy.set(floor, trigger);
+    return Promise.resolve();
+  }
   const activeLoad = generatedStageAssetLoads.get(floor);
-  if (activeLoad) return activeLoad;
+  if (activeLoad) {
+    if (trigger === "play-context") generatedStageAssetLoadTriggers.set(floor, trigger);
+    return activeLoad;
+  }
 
   const pending = group.sourceTextures.filter((asset) => !scene.textures.exists(asset.key));
 
   if (pending.length === 0) {
     generatedStageAssetsReady.add(floor);
+    generatedStageAssetLoadedBy.set(floor, trigger);
     return Promise.resolve();
   }
 
+  generatedStageAssetLoadTriggers.set(floor, trigger);
   const load = new Promise<void>((resolve) => {
     const finish = () => {
       generatedStageAssetsReady.add(floor);
+      generatedStageAssetLoadedBy.set(floor, generatedStageAssetLoadTriggers.get(floor) ?? trigger);
       generatedStageAssetLoads.delete(floor);
+      generatedStageAssetLoadTriggers.delete(floor);
       resolve();
     };
 
@@ -9276,23 +9398,86 @@ function ensureGeneratedStageAssetsLoaded(floor: number): Promise<void> {
   return load;
 }
 
+function scheduleIdleRuntimeWork(task: () => void, timeout = 2000): void {
+  const idleWindow = window as Window & {
+    requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number;
+  };
+  if (idleWindow.requestIdleCallback) idleWindow.requestIdleCallback(task, { timeout });
+  else window.setTimeout(task, 350);
+}
+
+function scheduleGeneratedStageBackgroundWarm(originFloor: number): void {
+  const neighbors = GENERATED_STAGE_BACKGROUND_NEIGHBORS.get(originFloor) ?? [];
+  neighbors.forEach((floor, index) => {
+    if (!GENERATED_STAGE_ASSET_GROUPS_BY_FLOOR.has(floor) || generatedStageAssetsReady.has(floor)) return;
+    const key = `${originFloor}->${floor}`;
+    if (scheduledGeneratedStageWarmups.has(key)) return;
+    scheduledGeneratedStageWarmups.add(key);
+    window.setTimeout(() => {
+      if (currentFloor !== originFloor || pendingMapFloor !== null || loadingFloor !== null) return;
+      scheduleIdleRuntimeWork(() => {
+        if (currentFloor !== originFloor || pendingMapFloor !== null || loadingFloor !== null) return;
+        void ensureGeneratedStageAssetsLoaded(floor, "background").then(() => {
+          scheduleIdleRuntimeWork(() => {
+            if (currentFloor === originFloor) ensureGeneratedStageTileTextures(floor);
+          });
+        });
+      });
+    }, 5000 + index * 900);
+  });
+}
+
 function runtimeAssetResidency(): RuntimeAssetResidencySnapshot {
   return {
     currentFloor,
     pendingMapFloor,
     pendingLazyLoads: pendingLazyLoads(),
+    pendingBackgroundLoads: pendingBackgroundLoads(),
+    startupImages: runtimeImageResidency(),
     groups: GENERATED_STAGE_ASSET_GROUPS.map((group) => runtimeAssetGroupResidency(group))
   };
 }
 
+function runtimeImageResidency(): RuntimeImageResidency[] {
+  return STARTUP_IMAGE_ASSETS.map((asset) => {
+    const record = runtimeImageLoadRecords.get(asset.key);
+    const texture = textureResidency([asset.key])[0] ?? { key: asset.key, exists: false, width: 0, height: 0 };
+    return {
+      key: asset.key,
+      path: asset.path,
+      tier: asset.tier,
+      label: asset.label,
+      floor: asset.floor ?? null,
+      zone: asset.zone ?? null,
+      trigger: record?.trigger ?? null,
+      queuedAt: record?.queuedAt ?? null,
+      loadedAt: record?.loadedAt ?? null,
+      resident: texture.exists,
+      width: texture.width,
+      height: texture.height
+    };
+  });
+}
+
 function pendingLazyLoads(): PendingLazyLoad[] {
-  return GENERATED_STAGE_ASSET_GROUPS.filter((group) => generatedStageAssetLoads.has(group.floor)).map((group) => {
+  return pendingGeneratedStageLoads("play-context");
+}
+
+function pendingBackgroundLoads(): PendingLazyLoad[] {
+  return pendingGeneratedStageLoads("background");
+}
+
+function pendingGeneratedStageLoads(trigger: GeneratedStageLoadTrigger): PendingLazyLoad[] {
+  return GENERATED_STAGE_ASSET_GROUPS.filter(
+    (group) => generatedStageAssetLoads.has(group.floor) && generatedStageAssetLoadTriggers.get(group.floor) === trigger
+  ).map((group) => {
     const sourceResidency = textureResidency(group.sourceTextures.map((asset) => asset.key));
     return {
       id: group.id,
       label: group.label,
       floor: group.floor,
       zone: group.zone,
+      trigger,
       sourceTextureKeys: sourceResidency.map((entry) => entry.key),
       missingSourceTextureKeys: sourceResidency.filter((entry) => !entry.exists).map((entry) => entry.key)
     };
@@ -9316,6 +9501,8 @@ function runtimeAssetGroupResidency(group: RuntimeAssetGroup): RuntimeAssetGroup
     floor: group.floor,
     zone: group.zone,
     pending: generatedStageAssetLoads.has(group.floor),
+    pendingTrigger: generatedStageAssetLoadTriggers.get(group.floor) ?? null,
+    loadedBy: generatedStageAssetLoadedBy.get(group.floor) ?? null,
     assetsReady: generatedStageAssetsReady.has(group.floor),
     texturesReady: generatedStageTexturesReady.has(group.floor),
     sourceTextures: {
