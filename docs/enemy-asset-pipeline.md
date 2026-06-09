@@ -63,11 +63,14 @@ npm run check
 ## Adding An Enemy
 
 1. Add the enemy to `ENEMIES` in `tools/generate_woodland_enemy_sprites_v2.py`.
-2. If it should be loaded by the game, add the slug to `PUBLIC_COPY_SLUGS`.
-3. Add its family to `WOODLAND_BESPOKE_FAMILIES` in `src/main.ts`.
-4. Add or update the spawn/spec mapping in `monsterActorSpec`.
-5. Run `npm run assets:enemies`.
-6. Run `npm run check`.
-7. Provide the changed enemy's one-row inspection GIFs for review.
+2. Do not add keeper hand-art families to `ENEMIES`: `rat`, `spider`, `skeleton`, `goblin`,
+   `goblin_scout`, `goblin_shaman`, `grey_wolf`, and `wisp` stay on their existing sheets.
+3. Generated `ENEMIES` are public-copied automatically and packed into
+   `public/woodland-bespoke-v2-sheet.png`.
+4. Add its family to `WOODLAND_BESPOKE_FAMILIES` in `src/main.ts`.
+5. Add or update the spawn/spec mapping in `monsterActorSpec`.
+6. Run `npm run assets:enemies`.
+7. Run `npm run check`.
+8. Provide the changed enemy's one-row inspection GIFs for review.
 
 Do not hand-copy partial sheets into `public/`. The public runtime sheet should be copied from the cleaned alpha output recorded in the manifest.

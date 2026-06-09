@@ -52,14 +52,17 @@ npm run check
 ## When Adding Or Changing An Enemy
 
 1. Add or update the enemy in `ENEMIES` in `tools/generate_woodland_enemy_sprites_v2.py`.
-2. If the game should load the sheet at runtime, include its slug in `PUBLIC_COPY_SLUGS`.
-3. Add the family to `WOODLAND_BESPOKE_FAMILIES` in `src/main.ts`.
-4. Add or update its `monsterActorSpec` entry in `src/main.ts`.
-5. Update spawn/content data if needed.
-6. Run `npm run assets:enemies`.
-7. Run `npm run check`.
-8. Inspect the contact sheet and per-row GIFs before calling the work done.
-9. Send or surface the new enemy's per-row GIF previews for review. Each preview must animate exactly one walk/direction row, never multiple directions at once.
+2. Keep keeper hand-art families out of `ENEMIES`: `rat`, `spider`, `skeleton`, `goblin`,
+   `goblin_scout`, `goblin_shaman`, `grey_wolf`, and `wisp`.
+3. Generated `ENEMIES` are copied to `public/<enemy>-sheet.png` by default and packed into
+   `public/woodland-bespoke-v2-sheet.png`.
+4. Add the family to `WOODLAND_BESPOKE_FAMILIES` in `src/main.ts`.
+5. Add or update its `monsterActorSpec` entry in `src/main.ts`.
+6. Update spawn/content data if needed.
+7. Run `npm run assets:enemies`.
+8. Run `npm run check`.
+9. Inspect the contact sheet and per-row GIFs before calling the work done.
+10. Send or surface the new enemy's per-row GIF previews for review. Each preview must animate exactly one walk/direction row, never multiple directions at once.
 
 ## Common Mistakes To Avoid
 

@@ -25,27 +25,15 @@ ROWS = len(ROW_NAMES)
 # anti-aliased art is rejected at the gate. Generous enough for soft painterly
 # shading; tune here if the agreed style allows more.
 MAX_SHEET_COLORS = 64
-PUBLIC_REQUIRED_SLUGS = {
-    "dire_wolf",
-    "orc",
-    "ghoul",
-    "wild_boar",
-    "thorn_hedgehog",
-    "forest_spider",
-    "forest_slime",
-    "mushroom_brute",
-    "sapling_deer",
-    "ancient_treant",
-    "bone_druid",
-    "forest_pixie",
-    "bog_wraith",
-    "grave_revenant",
-    "crypt_sentinel",
-    "pale_banshee",
-    "reach_hen",
-    "meadow_hopper",
-    "reach_vole",
-    "grave_shambler",
+KEEPER_ART_SLUGS = {
+    "goblin",
+    "goblin_scout",
+    "goblin_shaman",
+    "grey_wolf",
+    "rat",
+    "skeleton",
+    "spider",
+    "wisp",
 }
 
 
@@ -96,15 +84,17 @@ def main() -> None:
 
     enemies = manifest.get("enemies") or []
     by_slug = {enemy.get("slug"): enemy for enemy in enemies}
-    missing = sorted(PUBLIC_REQUIRED_SLUGS - set(by_slug))
-    if missing:
-        fail(f"manifest missing public runtime families: {', '.join(missing)}")
+    if len(by_slug) != len(enemies):
+        fail("manifest contains duplicate or missing enemy slugs")
+    keeper_leaks = sorted(KEEPER_ART_SLUGS & set(by_slug))
+    if keeper_leaks:
+        fail(f"keeper hand-art families must not be regenerated into v2 atlas: {', '.join(keeper_leaks)}")
 
     runtime_atlas = Path(manifest.get("runtime_atlas") or "")
     validate_runtime_atlas(runtime_atlas, len(enemies))
 
-    for slug in sorted(PUBLIC_REQUIRED_SLUGS):
-        item = by_slug[slug]
+    for item in enemies:
+        slug = item.get("slug")
         if item.get("pipeline") != PIPELINE_NAME:
             fail(f"{slug} has pipeline {item.get('pipeline')!r}, expected {PIPELINE_NAME!r}")
 
@@ -133,7 +123,7 @@ def main() -> None:
         json.dumps(
             {
                 "pipeline": PIPELINE_NAME,
-                "checked_public_sheets": len(PUBLIC_REQUIRED_SLUGS),
+                "checked_public_sheets": len(enemies),
                 "sheet_size": f"{CELL * COLS}x{CELL * ROWS}",
                 "row_order": ROW_NAMES,
             },

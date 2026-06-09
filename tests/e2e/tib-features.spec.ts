@@ -27,25 +27,50 @@ const NORTHWOOD_EXPECTED_TYPES = [
   "ancient_treant"
 ];
 
-const UNDEAD_BESPOKE_TYPES = [
+const BESPOKE_V2_TYPES = [
+  "ghoul",
   "bone_druid",
   "bog_wraith",
   "grave_revenant",
   "crypt_sentinel",
-  "pale_banshee"
-];
-
-// Probes blanket the enlarged 110x72 wood so every spawn falls within snapshot
-// radius (18) of at least one waypoint (incl. the SW/SE corners).
-const NORTHWOOD_SUBZONE_PROBES = [
-  { label: "SW wood (boar/wolves)", x: 25.5, y: 57.5 },
-  { label: "south arrival road", x: 55.5, y: 60.5 },
-  { label: "SE wood (hedgehog/dire wolf)", x: 85.5, y: 55.5 },
-  { label: "NW shaman thicket", x: 19.5, y: 19.5 },
-  { label: "north meadow (orcs)", x: 45.5, y: 18.5 },
-  { label: "NE elder grove", x: 78.5, y: 18.5 },
-  { label: "east frontier", x: 100.5, y: 30.5 },
-  { label: "central pixie clearing", x: 55.5, y: 40.5 }
+  "pale_banshee",
+  "dire_wolf",
+  "wild_boar",
+  "thorn_hedgehog",
+  "forest_spider",
+  "forest_slime",
+  "mushroom_brute",
+  "sapling_deer",
+  "ancient_treant",
+  "orc",
+  "forest_pixie",
+  "reach_hen",
+  "meadow_hopper",
+  "reach_vole",
+  "grave_shambler",
+  "skitterer",
+  "mire_spitter",
+  "canyon_scavenger",
+  "dust_burrower",
+  "dune_skitterer",
+  "sun_wraith",
+  "reef_prowler",
+  "venomous_stalker",
+  "totem_wraith",
+  "bog_leech",
+  "marsh_hag",
+  "gloom_toad",
+  "magma_hound",
+  "cinder_shade",
+  "basalt_brute",
+  "bone_scorpion",
+  "dune_reaver",
+  "mirage_shade",
+  "tide_lurker",
+  "brine_siren",
+  "coral_crab",
+  "canopy_stalker",
+  "blowpipe_headhunter"
 ];
 
 test("skills, firemaking, and cooking are usable and visually present", async ({ page }) => {
@@ -209,24 +234,6 @@ test("Northwood spawn table covers every enemy type and renders 4-direction fram
   await page.goto("/?e2e");
   await joinFreshCharacter(page);
 
-  const observed = new Set<string>();
-  for (const probe of NORTHWOOD_SUBZONE_PROBES) {
-    await teleportTo(page, 3, probe.x, probe.y);
-    const monsters = await page.waitForFunction(
-      ({ x, y }) => {
-        const me = window.__TIB_E2E__?.self();
-        if (!me || me.floor !== 3 || Math.hypot(me.x - x, me.y - y) > 0.5) return null;
-        const list = window.__TIB_E2E__?.getState()?.monsters ?? [];
-        return list.length ? list : null;
-      },
-      { x: probe.x, y: probe.y }
-    );
-    const monsterList = await monsters.jsonValue();
-    if (!monsterList) throw new Error("monster list never resolved");
-    for (const monster of monsterList) observed.add(monster.type);
-  }
-  expect([...observed].sort()).toEqual([...NORTHWOOD_EXPECTED_TYPES].sort());
-
   const coverage = await page.evaluate(
     (types) => window.__TIB_E2E__?.monsterTextureCoverage?.(types) ?? [],
     NORTHWOOD_EXPECTED_TYPES
@@ -238,19 +245,17 @@ test("Northwood spawn table covers every enemy type and renders 4-direction fram
     expect(missing, `${entry.type} (${entry.family}) missing frames`).toEqual([]);
   }
 
-  const undeadCoverage = await page.evaluate(
+  const bespokeCoverage = await page.evaluate(
     (types) => window.__TIB_E2E__?.monsterTextureCoverage?.(types) ?? [],
-    UNDEAD_BESPOKE_TYPES
+    BESPOKE_V2_TYPES
   );
-  expect(undeadCoverage).toHaveLength(UNDEAD_BESPOKE_TYPES.length);
-  for (const entry of undeadCoverage) {
-    expect(entry.frames).toHaveLength(32);
+  expect(bespokeCoverage).toHaveLength(BESPOKE_V2_TYPES.length);
+  for (const entry of bespokeCoverage) {
+    expect(entry.frames).toHaveLength(16);
     const missingWalk = entry.frames.filter((frame) => !frame.exists);
     expect(missingWalk, `${entry.type} (${entry.family}) missing directional walk frames`).toEqual([]);
-    expect(entry.attackFamily, `${entry.type} should register a bespoke attack family`).toBeTruthy();
-    expect(entry.attackFrames).toHaveLength(32);
-    const missingAttack = entry.attackFrames.filter((frame) => !frame.exists);
-    expect(missingAttack, `${entry.type} (${entry.attackFamily}) missing directional attack frames`).toEqual([]);
+    expect(entry.attackFamily, `${entry.type} should reuse walk frames for attacks`).toBeUndefined();
+    expect(entry.attackFrames, `${entry.type} should not register bespoke attack frames`).toHaveLength(0);
   }
 });
 

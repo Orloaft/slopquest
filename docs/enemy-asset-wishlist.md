@@ -5,6 +5,10 @@ _Generated 2026-06-08. Source of truth: `src/main.ts` (`monsterActorSpec`, `crea
 Quality tiers below were assessed by EYE from rendered contact sheets
 (`artifacts/enemy-contact/fam-*.png`), not by frame count._
 
+_Status update: the v2 pipeline now covers the placeholder families, the former `new-enemies.png`
+families, and the concrete P2 expansion enemies listed below. Keeper hand-art families remain on
+their original sheets._
+
 ## Roster at a glance
 
 - **~43 enemy types** across **12 floors (0–11)**, drawn by **33 sprite families**.

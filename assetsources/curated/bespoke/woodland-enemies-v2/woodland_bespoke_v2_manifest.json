@@ -1,7 +1,7 @@
 {
   "pipeline": {
     "name": "enemy-directional-4x4-v2",
-    "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+    "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
     "cell_px": 96,
     "columns": 4,
     "rows": 4,
@@ -34,255 +34,58 @@
   "contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/woodland_bespoke_v2_contact.png",
   "runtime_atlas": "/mnt/nxt-dev/tib-gathering/public/woodland-bespoke-v2-sheet.png",
   "runtime_atlas_order": [
-    "goblin_raider",
-    "goblin_scout",
-    "goblin_shaman",
-    "orc",
     "ghoul",
-    "grey_wolf",
-    "dire_wolf",
+    "grave_revenant",
+    "pale_banshee",
+    "crypt_sentinel",
     "wild_boar",
     "thorn_hedgehog",
     "forest_spider",
     "forest_slime",
-    "mushroom_brute",
     "sapling_deer",
-    "ancient_treant",
-    "bone_druid",
+    "mushroom_brute",
+    "dire_wolf",
+    "orc",
     "forest_pixie",
+    "bone_druid",
     "bog_wraith",
-    "grave_revenant",
-    "crypt_sentinel",
-    "pale_banshee",
+    "ancient_treant",
     "reach_hen",
     "meadow_hopper",
     "reach_vole",
-    "grave_shambler"
+    "grave_shambler",
+    "skitterer",
+    "mire_spitter",
+    "canyon_scavenger",
+    "dust_burrower",
+    "dune_skitterer",
+    "sun_wraith",
+    "reef_prowler",
+    "venomous_stalker",
+    "totem_wraith",
+    "bog_leech",
+    "marsh_hag",
+    "gloom_toad",
+    "magma_hound",
+    "cinder_shade",
+    "basalt_brute",
+    "bone_scorpion",
+    "dune_reaver",
+    "mirage_shade",
+    "tide_lurker",
+    "brine_siren",
+    "coral_crab",
+    "canopy_stalker",
+    "blowpipe_headhunter"
   ],
   "enemies": [
-    {
-      "slug": "goblin_raider",
-      "label": "Goblin Raider",
-      "pipeline": "enemy-directional-4x4-v2",
-      "sheet_contract": {
-        "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
-        "cell_px": 96,
-        "columns": 4,
-        "rows": 4,
-        "row_order": [
-          "walk_up",
-          "walk_right",
-          "walk_down",
-          "walk_left"
-        ],
-        "frames_per_direction": 4,
-        "animations": [
-          "walk"
-        ],
-        "directions": [
-          "up",
-          "right",
-          "down",
-          "left"
-        ],
-        "runtime_contract": {
-          "walk_rows": "rows 0-3, ordered up/right/down/left",
-          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
-          "texture_count": {
-            "walk": 16,
-            "attack": 0
-          }
-        }
-      },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/goblin_raider_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/goblin_raider_generated_chroma_alpha.png",
-      "public_sheet": null,
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/grid/grid_manifest.json",
-      "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/goblin_raider_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/goblin_raider_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/goblin_raider_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_raider/goblin_raider_walk_left_inspection.gif"
-      },
-      "chroma_remnant_pixels": 0,
-      "alpha_corners": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "single_subject_cells": true
-    },
-    {
-      "slug": "goblin_scout",
-      "label": "Goblin Scout",
-      "pipeline": "enemy-directional-4x4-v2",
-      "sheet_contract": {
-        "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
-        "cell_px": 96,
-        "columns": 4,
-        "rows": 4,
-        "row_order": [
-          "walk_up",
-          "walk_right",
-          "walk_down",
-          "walk_left"
-        ],
-        "frames_per_direction": 4,
-        "animations": [
-          "walk"
-        ],
-        "directions": [
-          "up",
-          "right",
-          "down",
-          "left"
-        ],
-        "runtime_contract": {
-          "walk_rows": "rows 0-3, ordered up/right/down/left",
-          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
-          "texture_count": {
-            "walk": 16,
-            "attack": 0
-          }
-        }
-      },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/goblin_scout_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/grid/goblin_scout_generated_chroma_alpha.png",
-      "public_sheet": null,
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/grid/grid_manifest.json",
-      "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/goblin_scout_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/goblin_scout_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/goblin_scout_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_scout/goblin_scout_walk_left_inspection.gif"
-      },
-      "chroma_remnant_pixels": 0,
-      "alpha_corners": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "single_subject_cells": true
-    },
-    {
-      "slug": "goblin_shaman",
-      "label": "Goblin Shaman",
-      "pipeline": "enemy-directional-4x4-v2",
-      "sheet_contract": {
-        "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
-        "cell_px": 96,
-        "columns": 4,
-        "rows": 4,
-        "row_order": [
-          "walk_up",
-          "walk_right",
-          "walk_down",
-          "walk_left"
-        ],
-        "frames_per_direction": 4,
-        "animations": [
-          "walk"
-        ],
-        "directions": [
-          "up",
-          "right",
-          "down",
-          "left"
-        ],
-        "runtime_contract": {
-          "walk_rows": "rows 0-3, ordered up/right/down/left",
-          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
-          "texture_count": {
-            "walk": 16,
-            "attack": 0
-          }
-        }
-      },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/goblin_shaman_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/goblin_shaman_generated_chroma_alpha.png",
-      "public_sheet": null,
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/grid/grid_manifest.json",
-      "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/goblin_shaman_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/goblin_shaman_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/goblin_shaman_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/goblin_shaman/goblin_shaman_walk_left_inspection.gif"
-      },
-      "chroma_remnant_pixels": 0,
-      "alpha_corners": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "single_subject_cells": true
-    },
-    {
-      "slug": "orc",
-      "label": "Cave Orc",
-      "pipeline": "enemy-directional-4x4-v2",
-      "sheet_contract": {
-        "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
-        "cell_px": 96,
-        "columns": 4,
-        "rows": 4,
-        "row_order": [
-          "walk_up",
-          "walk_right",
-          "walk_down",
-          "walk_left"
-        ],
-        "frames_per_direction": 4,
-        "animations": [
-          "walk"
-        ],
-        "directions": [
-          "up",
-          "right",
-          "down",
-          "left"
-        ],
-        "runtime_contract": {
-          "walk_rows": "rows 0-3, ordered up/right/down/left",
-          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
-          "texture_count": {
-            "walk": 16,
-            "attack": 0
-          }
-        }
-      },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/grid/orc_generated_chroma_alpha.png",
-      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/orc-sheet.png",
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/grid/grid_manifest.json",
-      "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_walk_left_inspection.gif"
-      },
-      "chroma_remnant_pixels": 0,
-      "alpha_corners": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "single_subject_cells": true
-    },
     {
       "slug": "ghoul",
       "label": "Crypt Ghoul",
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -331,12 +134,12 @@
       "single_subject_cells": true
     },
     {
-      "slug": "grey_wolf",
-      "label": "Grey Wolf",
+      "slug": "grave_revenant",
+      "label": "Grave Revenant",
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -365,15 +168,15 @@
           }
         }
       },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grey_wolf_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grid/grey_wolf_generated_chroma_alpha.png",
-      "public_sheet": null,
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grid/grid_manifest.json",
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/grave_revenant_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/grave-revenant-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/grid_manifest.json",
       "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grey_wolf_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grey_wolf_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grey_wolf_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grey_wolf/grey_wolf_walk_left_inspection.gif"
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_walk_left_inspection.gif"
       },
       "chroma_remnant_pixels": 0,
       "alpha_corners": [
@@ -385,12 +188,12 @@
       "single_subject_cells": true
     },
     {
-      "slug": "dire_wolf",
-      "label": "Dire Wolf",
+      "slug": "pale_banshee",
+      "label": "Pale Banshee",
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -419,15 +222,69 @@
           }
         }
       },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/grid/dire_wolf_generated_chroma_alpha.png",
-      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/dire-wolf-sheet.png",
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/grid/grid_manifest.json",
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/grid/pale_banshee_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/pale-banshee-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/grid/grid_manifest.json",
       "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_walk_left_inspection.gif"
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "crypt_sentinel",
+      "label": "Crypt Sentinel",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/crypt_sentinel_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/crypt-sentinel-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_walk_left_inspection.gif"
       },
       "chroma_remnant_pixels": 0,
       "alpha_corners": [
@@ -444,7 +301,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -498,7 +355,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -552,7 +409,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -606,7 +463,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -655,66 +512,12 @@
       "single_subject_cells": true
     },
     {
-      "slug": "mushroom_brute",
-      "label": "Mushroom Brute",
-      "pipeline": "enemy-directional-4x4-v2",
-      "sheet_contract": {
-        "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
-        "cell_px": 96,
-        "columns": 4,
-        "rows": 4,
-        "row_order": [
-          "walk_up",
-          "walk_right",
-          "walk_down",
-          "walk_left"
-        ],
-        "frames_per_direction": 4,
-        "animations": [
-          "walk"
-        ],
-        "directions": [
-          "up",
-          "right",
-          "down",
-          "left"
-        ],
-        "runtime_contract": {
-          "walk_rows": "rows 0-3, ordered up/right/down/left",
-          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
-          "texture_count": {
-            "walk": 16,
-            "attack": 0
-          }
-        }
-      },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/grid/mushroom_brute_generated_chroma_alpha.png",
-      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/mushroom-brute-sheet.png",
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/grid/grid_manifest.json",
-      "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_walk_left_inspection.gif"
-      },
-      "chroma_remnant_pixels": 0,
-      "alpha_corners": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "single_subject_cells": true
-    },
-    {
       "slug": "sapling_deer",
       "label": "Sapling Deer",
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -763,12 +566,12 @@
       "single_subject_cells": true
     },
     {
-      "slug": "ancient_treant",
-      "label": "Ancient Treant",
+      "slug": "mushroom_brute",
+      "label": "Mushroom Brute",
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -797,15 +600,15 @@
           }
         }
       },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/ancient_treant_generated_chroma_alpha.png",
-      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/ancient-treant-sheet.png",
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/grid_manifest.json",
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/grid/mushroom_brute_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/mushroom-brute-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/grid/grid_manifest.json",
       "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_walk_left_inspection.gif"
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_walk_left_inspection.gif"
       },
       "chroma_remnant_pixels": 0,
       "alpha_corners": [
@@ -817,12 +620,12 @@
       "single_subject_cells": true
     },
     {
-      "slug": "bone_druid",
-      "label": "Bone Druid",
+      "slug": "dire_wolf",
+      "label": "Dire Wolf",
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -851,15 +654,69 @@
           }
         }
       },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/grid/bone_druid_generated_chroma_alpha.png",
-      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/bone-druid-sheet.png",
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/grid/grid_manifest.json",
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/grid/dire_wolf_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/dire-wolf-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/grid/grid_manifest.json",
       "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_walk_left_inspection.gif"
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "orc",
+      "label": "Cave Orc",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/grid/orc_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/orc-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_walk_left_inspection.gif"
       },
       "chroma_remnant_pixels": 0,
       "alpha_corners": [
@@ -876,7 +733,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -925,12 +782,66 @@
       "single_subject_cells": true
     },
     {
+      "slug": "bone_druid",
+      "label": "Bone Druid",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/grid/bone_druid_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/bone-druid-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
       "slug": "bog_wraith",
       "label": "Bog Wraith",
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -979,12 +890,12 @@
       "single_subject_cells": true
     },
     {
-      "slug": "grave_revenant",
-      "label": "Grave Revenant",
+      "slug": "ancient_treant",
+      "label": "Ancient Treant",
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1013,123 +924,15 @@
           }
         }
       },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/grave_revenant_generated_chroma_alpha.png",
-      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/grave-revenant-sheet.png",
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/grid_manifest.json",
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/ancient_treant_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/ancient-treant-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/grid_manifest.json",
       "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_walk_left_inspection.gif"
-      },
-      "chroma_remnant_pixels": 0,
-      "alpha_corners": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "single_subject_cells": true
-    },
-    {
-      "slug": "crypt_sentinel",
-      "label": "Crypt Sentinel",
-      "pipeline": "enemy-directional-4x4-v2",
-      "sheet_contract": {
-        "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
-        "cell_px": 96,
-        "columns": 4,
-        "rows": 4,
-        "row_order": [
-          "walk_up",
-          "walk_right",
-          "walk_down",
-          "walk_left"
-        ],
-        "frames_per_direction": 4,
-        "animations": [
-          "walk"
-        ],
-        "directions": [
-          "up",
-          "right",
-          "down",
-          "left"
-        ],
-        "runtime_contract": {
-          "walk_rows": "rows 0-3, ordered up/right/down/left",
-          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
-          "texture_count": {
-            "walk": 16,
-            "attack": 0
-          }
-        }
-      },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/crypt_sentinel_generated_chroma_alpha.png",
-      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/crypt-sentinel-sheet.png",
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/grid_manifest.json",
-      "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_walk_left_inspection.gif"
-      },
-      "chroma_remnant_pixels": 0,
-      "alpha_corners": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "single_subject_cells": true
-    },
-    {
-      "slug": "pale_banshee",
-      "label": "Pale Banshee",
-      "pipeline": "enemy-directional-4x4-v2",
-      "sheet_contract": {
-        "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
-        "cell_px": 96,
-        "columns": 4,
-        "rows": 4,
-        "row_order": [
-          "walk_up",
-          "walk_right",
-          "walk_down",
-          "walk_left"
-        ],
-        "frames_per_direction": 4,
-        "animations": [
-          "walk"
-        ],
-        "directions": [
-          "up",
-          "right",
-          "down",
-          "left"
-        ],
-        "runtime_contract": {
-          "walk_rows": "rows 0-3, ordered up/right/down/left",
-          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
-          "texture_count": {
-            "walk": 16,
-            "attack": 0
-          }
-        }
-      },
-      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_generated_chroma.png",
-      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/grid/pale_banshee_generated_chroma_alpha.png",
-      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/pale-banshee-sheet.png",
-      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/grid/grid_manifest.json",
-      "gifs": {
-        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_walk_up_inspection.gif",
-        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_walk_right_inspection.gif",
-        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_walk_down_inspection.gif",
-        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_walk_left_inspection.gif"
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_walk_left_inspection.gif"
       },
       "chroma_remnant_pixels": 0,
       "alpha_corners": [
@@ -1146,7 +949,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1200,7 +1003,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1254,7 +1057,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1308,7 +1111,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1346,6 +1149,1248 @@
         "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grave_shambler_walk_right_inspection.gif",
         "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grave_shambler_walk_down_inspection.gif",
         "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grave_shambler_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "skitterer",
+      "label": "Skitterer",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/skitterer/skitterer_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/skitterer/grid/skitterer_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/skitterer-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/skitterer/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/skitterer/skitterer_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/skitterer/skitterer_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/skitterer/skitterer_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/skitterer/skitterer_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "mire_spitter",
+      "label": "Mire Spitter",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mire_spitter/mire_spitter_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mire_spitter/grid/mire_spitter_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/mire-spitter-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mire_spitter/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mire_spitter/mire_spitter_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mire_spitter/mire_spitter_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mire_spitter/mire_spitter_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mire_spitter/mire_spitter_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "canyon_scavenger",
+      "label": "Canyon Scavenger",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canyon_scavenger/canyon_scavenger_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canyon_scavenger/grid/canyon_scavenger_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/canyon-scavenger-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canyon_scavenger/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canyon_scavenger/canyon_scavenger_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canyon_scavenger/canyon_scavenger_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canyon_scavenger/canyon_scavenger_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canyon_scavenger/canyon_scavenger_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "dust_burrower",
+      "label": "Dust Burrower",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dust_burrower/dust_burrower_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dust_burrower/grid/dust_burrower_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/dust-burrower-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dust_burrower/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dust_burrower/dust_burrower_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dust_burrower/dust_burrower_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dust_burrower/dust_burrower_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dust_burrower/dust_burrower_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "dune_skitterer",
+      "label": "Dune Skitterer",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_skitterer/dune_skitterer_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_skitterer/grid/dune_skitterer_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/dune-skitterer-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_skitterer/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_skitterer/dune_skitterer_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_skitterer/dune_skitterer_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_skitterer/dune_skitterer_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_skitterer/dune_skitterer_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "sun_wraith",
+      "label": "Sun-Scorched Wraith",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sun_wraith/sun_wraith_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sun_wraith/grid/sun_wraith_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/sun-wraith-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sun_wraith/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sun_wraith/sun_wraith_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sun_wraith/sun_wraith_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sun_wraith/sun_wraith_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sun_wraith/sun_wraith_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "reef_prowler",
+      "label": "Reef Prowler",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reef_prowler/reef_prowler_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reef_prowler/grid/reef_prowler_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/reef-prowler-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reef_prowler/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reef_prowler/reef_prowler_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reef_prowler/reef_prowler_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reef_prowler/reef_prowler_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reef_prowler/reef_prowler_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "venomous_stalker",
+      "label": "Venomous Stalker",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/venomous_stalker/venomous_stalker_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/venomous_stalker/grid/venomous_stalker_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/venomous-stalker-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/venomous_stalker/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/venomous_stalker/venomous_stalker_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/venomous_stalker/venomous_stalker_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/venomous_stalker/venomous_stalker_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/venomous_stalker/venomous_stalker_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "totem_wraith",
+      "label": "Ancient Totem Wraith",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/totem_wraith/totem_wraith_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/totem_wraith/grid/totem_wraith_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/totem-wraith-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/totem_wraith/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/totem_wraith/totem_wraith_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/totem_wraith/totem_wraith_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/totem_wraith/totem_wraith_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/totem_wraith/totem_wraith_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "bog_leech",
+      "label": "Bog Leech",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_leech/bog_leech_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_leech/grid/bog_leech_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/bog-leech-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_leech/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_leech/bog_leech_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_leech/bog_leech_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_leech/bog_leech_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_leech/bog_leech_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "marsh_hag",
+      "label": "Marsh Hag",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/marsh_hag_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/marsh_hag_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/marsh-hag-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/marsh_hag_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/marsh_hag_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/marsh_hag_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/marsh_hag_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "gloom_toad",
+      "label": "Gloom Toad",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/gloom_toad/gloom_toad_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/gloom_toad/grid/gloom_toad_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/gloom-toad-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/gloom_toad/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/gloom_toad/gloom_toad_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/gloom_toad/gloom_toad_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/gloom_toad/gloom_toad_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/gloom_toad/gloom_toad_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "magma_hound",
+      "label": "Magma Hound",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/magma_hound/magma_hound_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/magma_hound/grid/magma_hound_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/magma-hound-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/magma_hound/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/magma_hound/magma_hound_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/magma_hound/magma_hound_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/magma_hound/magma_hound_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/magma_hound/magma_hound_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "cinder_shade",
+      "label": "Cinder Shade",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/cinder_shade/cinder_shade_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/cinder_shade/grid/cinder_shade_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/cinder-shade-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/cinder_shade/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/cinder_shade/cinder_shade_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/cinder_shade/cinder_shade_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/cinder_shade/cinder_shade_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/cinder_shade/cinder_shade_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "basalt_brute",
+      "label": "Basalt Brute",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/basalt_brute/basalt_brute_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/basalt_brute/grid/basalt_brute_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/basalt-brute-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/basalt_brute/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/basalt_brute/basalt_brute_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/basalt_brute/basalt_brute_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/basalt_brute/basalt_brute_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/basalt_brute/basalt_brute_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "bone_scorpion",
+      "label": "Bone Scorpion",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_scorpion/bone_scorpion_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_scorpion/grid/bone_scorpion_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/bone-scorpion-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_scorpion/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_scorpion/bone_scorpion_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_scorpion/bone_scorpion_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_scorpion/bone_scorpion_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_scorpion/bone_scorpion_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "dune_reaver",
+      "label": "Dune Reaver",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_reaver/dune_reaver_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_reaver/grid/dune_reaver_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/dune-reaver-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_reaver/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_reaver/dune_reaver_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_reaver/dune_reaver_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_reaver/dune_reaver_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_reaver/dune_reaver_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "mirage_shade",
+      "label": "Mirage Shade",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/mirage_shade_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/grid/mirage_shade_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/mirage-shade-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/mirage_shade_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/mirage_shade_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/mirage_shade_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/mirage_shade_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "tide_lurker",
+      "label": "Tide Lurker",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/tide_lurker_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/tide_lurker_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/tide-lurker-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/tide_lurker_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/tide_lurker_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/tide_lurker_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/tide_lurker_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "brine_siren",
+      "label": "Brine Siren",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/brine_siren/brine_siren_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/brine_siren/grid/brine_siren_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/brine-siren-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/brine_siren/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/brine_siren/brine_siren_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/brine_siren/brine_siren_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/brine_siren/brine_siren_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/brine_siren/brine_siren_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "coral_crab",
+      "label": "Coral Crab",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/coral_crab/coral_crab_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/coral_crab/grid/coral_crab_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/coral-crab-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/coral_crab/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/coral_crab/coral_crab_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/coral_crab/coral_crab_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/coral_crab/coral_crab_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/coral_crab/coral_crab_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "canopy_stalker",
+      "label": "Canopy Stalker",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/canopy_stalker_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/canopy_stalker_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/canopy-stalker-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/canopy_stalker_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/canopy_stalker_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/canopy_stalker_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/canopy_stalker_walk_left_inspection.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "blowpipe_headhunter",
+      "label": "Blowpipe Headhunter",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/blowpipe_headhunter/blowpipe_headhunter_generated_chroma.png",
+      "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/blowpipe_headhunter/grid/blowpipe_headhunter_generated_chroma_alpha.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/blowpipe-headhunter-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/blowpipe_headhunter/grid/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/blowpipe_headhunter/blowpipe_headhunter_walk_up_inspection.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/blowpipe_headhunter/blowpipe_headhunter_walk_right_inspection.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/blowpipe_headhunter/blowpipe_headhunter_walk_down_inspection.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/blowpipe_headhunter/blowpipe_headhunter_walk_left_inspection.gif"
       },
       "chroma_remnant_pixels": 0,
       "alpha_corners": [

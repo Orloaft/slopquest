@@ -100,6 +100,11 @@ monsters:
   - { type: mire_spitter,  at: { floor: 5, x: 71, y: 31 }, zone: marsh }
   - { type: mire_spitter,  at: { floor: 5, x: 37, y: 24 }, zone: marsh }
   - { type: mire_spitter,  at: { floor: 5, x: 24, y: 38 }, zone: marsh }
+  - { type: bog_leech,     at: { floor: 5, x: 49, y: 34 }, zone: marsh }
+  - { type: bog_leech,     at: { floor: 5, x: 65, y: 42 }, zone: marsh }
+  - { type: marsh_hag,     at: { floor: 5, x: 58, y: 36 }, zone: marsh }
+  - { type: gloom_toad,    at: { floor: 5, x: 45, y: 30 }, zone: marsh }
+  - { type: gloom_toad,    at: { floor: 5, x: 28, y: 45 }, zone: marsh }
   # The Searing Badlands (floor 6): scavengers patrol in pairs (pack aggro);
   # dust burrowers lie hidden until a player steps on them.
   - { type: canyon_scavenger, at: { floor: 6, x: 10,  y: 40 }, zone: badlands }
@@ -108,6 +113,10 @@ monsters:
   - { type: canyon_scavenger, at: { floor: 6, x: 54, y: 41 }, zone: badlands }
   - { type: dust_burrower,    at: { floor: 6, x: 29, y: 22 }, zone: badlands }
   - { type: dust_burrower,    at: { floor: 6, x: 43, y: 40 }, zone: badlands }
+  - { type: magma_hound,       at: { floor: 6, x: 16, y: 42 }, zone: badlands }
+  - { type: magma_hound,       at: { floor: 6, x: 56, y: 44 }, zone: badlands }
+  - { type: cinder_shade,      at: { floor: 6, x: 33, y: 18 }, zone: badlands }
+  - { type: basalt_brute,      at: { floor: 6, x: 66, y: 42 }, zone: badlands }
   # The Sunken Desert (floor 7): fast dune skitterers + ruin-bound sun wraiths.
   - { type: dune_skitterer, at: { floor: 7, x: 29, y: 14 }, zone: desert }
   - { type: dune_skitterer, at: { floor: 7, x: 44, y: 22 }, zone: desert }
@@ -115,12 +124,18 @@ monsters:
   - { type: dune_skitterer, at: { floor: 7, x: 68, y: 32 }, zone: desert }
   - { type: sun_wraith,     at: { floor: 7, x: 37, y: 22 }, zone: desert }
   - { type: sun_wraith,     at: { floor: 7, x: 64, y: 26 }, zone: desert }
+  - { type: bone_scorpion,  at: { floor: 7, x: 50, y: 33 }, zone: desert }
+  - { type: dune_reaver,    at: { floor: 7, x: 35, y: 28 }, zone: desert }
+  - { type: mirage_shade,   at: { floor: 7, x: 58, y: 22 }, zone: desert }
   # The Sunken Beach (floor 8): fast reef prowlers harry the open sand while
   # drowned marauders rise heavy off the salt-ruin road.
   - { type: reef_prowler,    at: { floor: 8, x: 20, y: 24 }, zone: beach }
   - { type: reef_prowler,    at: { floor: 8, x: 42, y: 14 }, zone: beach }
   - { type: reef_prowler,    at: { floor: 8, x: 71, y: 29 }, zone: beach }
   - { type: reef_prowler,    at: { floor: 8, x: 85, y: 35 }, zone: beach }
+  - { type: tide_lurker,     at: { floor: 8, x: 25, y: 32 }, zone: beach }
+  - { type: brine_siren,     at: { floor: 8, x: 62, y: 28 }, zone: beach }
+  - { type: coral_crab,      at: { floor: 8, x: 77, y: 40 }, zone: beach }
   - { type: drowned_marauder, at: { floor: 8, x: 55, y: 40 }, zone: beach }
   - { type: drowned_marauder, at: { floor: 8, x: 30, y: 46 }, zone: beach }
   # The Untamed Jungle (floor 9): hidden stalkers ambush; totem wraiths fire down paths.
@@ -128,6 +143,8 @@ monsters:
   - { type: venomous_stalker, at: { floor: 9, x: 46, y: 11  }, zone: jungle }
   - { type: totem_wraith,     at: { floor: 9, x: 26, y: 10  }, zone: jungle }
   - { type: totem_wraith,     at: { floor: 9, x: 60, y: 26 }, zone: jungle }
+  - { type: canopy_stalker,   at: { floor: 9, x: 35, y: 36 }, zone: jungle }
+  - { type: blowpipe_headhunter, at: { floor: 9, x: 72, y: 28 }, zone: jungle }
   # The Deepdelve Mine (floor 10): danger rises with depth. Cave scavengers
   # patrol the iron/coal chambers in pairs; burrowers ambush the mid corridors;
   # deepdelve wights haunt the silver/gold deeps; crypt sentinels guard the

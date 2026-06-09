@@ -874,26 +874,49 @@ const ATTACK_FRAME_MS = 110;
 // Keep this aligned with docs/enemy-asset-pipeline.md and validate with
 // `npm run assets:enemies:check` after adding an enemy.
 const WOODLAND_BESPOKE_FAMILIES = [
-  "dire_wolf",
-  "orc",
   "ghoul",
+  "grave_revenant",
+  "pale_banshee",
+  "crypt_sentinel",
   "wild_boar",
   "thorn_hedgehog",
   "forest_spider",
   "forest_slime",
-  "mushroom_brute",
   "sapling_deer",
-  "ancient_treant",
-  "bone_druid",
+  "mushroom_brute",
+  "dire_wolf",
+  "orc",
   "forest_pixie",
+  "bone_druid",
   "bog_wraith",
-  "grave_revenant",
-  "crypt_sentinel",
-  "pale_banshee",
+  "ancient_treant",
   "reach_hen",
   "meadow_hopper",
   "reach_vole",
-  "grave_shambler"
+  "grave_shambler",
+  "skitterer",
+  "mire_spitter",
+  "canyon_scavenger",
+  "dust_burrower",
+  "dune_skitterer",
+  "sun_wraith",
+  "reef_prowler",
+  "venomous_stalker",
+  "totem_wraith",
+  "bog_leech",
+  "marsh_hag",
+  "gloom_toad",
+  "magma_hound",
+  "cinder_shade",
+  "basalt_brute",
+  "bone_scorpion",
+  "dune_reaver",
+  "mirage_shade",
+  "tide_lurker",
+  "brine_siren",
+  "coral_crab",
+  "canopy_stalker",
+  "blowpipe_headhunter"
 ] as const;
 // Northwood authored-layout tree/prop sprite catalogue ids (obj_NNN). Sprites are
 // exported to public/sprites/nw/ by tools/build-northwood-from-authored.ts and
@@ -903,18 +926,10 @@ const NORTHWOOD_SPRITE_IDS = [6, 7, 8, 22, 24, 25, 33, 34, 35, 39, 49, 53, 54, 7
 // families (enemy-directional-4x4-v2) use the default 4-frame walk-only contract;
 // their attacks reuse the walk pose plus shared effect overlays, so they have no
 // ATTACK_FAMILY entry.
-const FAMILY_WALK_FRAMES: Record<string, number> = {
-  mire_spitter: 3
-};
+const FAMILY_WALK_FRAMES: Record<string, number> = {};
 // Families with a bespoke attack animation: base family -> attack texture family.
-const ATTACK_FAMILY: Record<string, string> = {
-  skitterer: "skittererAtk",
-  mire_spitter: "mireSpitterAtk"
-};
-const ATTACK_FAMILY_FRAMES: Record<string, number> = {
-  skittererAtk: 3,
-  mireSpitterAtk: 4
-};
+const ATTACK_FAMILY: Record<string, string> = {};
+const ATTACK_FAMILY_FRAMES: Record<string, number> = {};
 const DYNAMIC_PATH_REFRESH_MS = 350;
 const DYNAMIC_PATH_REFRESH_DISTANCE = 0.65;
 function itemUseKind(itemId: string | null): ItemUse["kind"] | null {
@@ -934,8 +949,6 @@ function preload(this: Phaser.Scene): void {
   this.load.image("greyWolfSheet", "/grey-wolf-sheet.png");
   this.load.image("wispSheet", "/wisp-sheet.png");
   this.load.image("woodlandBespokeSheet", "/woodland-bespoke-v2-sheet.png");
-  this.load.image("newEnemiesSheet", "/new-enemies.png");
-  this.load.image("swampEnemySheet", "/skitterer-spitter.png");
   this.load.image("townTiles", "/towntiles.png");
   this.load.image("cityTiles", "/citytiles.png"); // SPIKE: city-exterior-01 ingest proof (Northwatch rebuild)
   this.load.image("forestTiles", "/foresttiles.png");
@@ -3515,7 +3528,7 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "grave_revenant") return { family: "grave_revenant", width: 46, height: 56, yOffset: -16 };
   if (monster.type === "crypt_sentinel") return { family: "crypt_sentinel", width: 52, height: 60, yOffset: -17 };
   if (monster.type === "pale_banshee") return { family: "pale_banshee", width: 44, height: 60, yOffset: -19 };
-  // New-area monsters (montage families in /new-enemies.png).
+  // New-area monsters from the enemy-directional-4x4-v2 atlas.
   if (monster.type === "skitterer") return { family: "skitterer", width: 50, height: 44, yOffset: -6 };
   if (monster.type === "mire_spitter") return { family: "mire_spitter", width: 50, height: 56, yOffset: -16 };
   if (monster.type === "canyon_scavenger") return { family: "canyon_scavenger", width: 52, height: 56, yOffset: -14 };
@@ -3525,6 +3538,20 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "reef_prowler") return { family: "reef_prowler", width: 54, height: 50, yOffset: -10 };
   if (monster.type === "venomous_stalker") return { family: "venomous_stalker", width: 52, height: 46, yOffset: -8, tint: 0x9fd07a };
   if (monster.type === "totem_wraith") return { family: "totem_wraith", width: 48, height: 56, yOffset: -16, tint: 0xd0b3ff };
+  if (monster.type === "bog_leech") return { family: "bog_leech", width: 52, height: 34, yOffset: -4 };
+  if (monster.type === "marsh_hag") return { family: "marsh_hag", width: 46, height: 58, yOffset: -17 };
+  if (monster.type === "gloom_toad") return { family: "gloom_toad", width: 50, height: 42, yOffset: -8 };
+  if (monster.type === "magma_hound") return { family: "magma_hound", width: 58, height: 44, yOffset: -8 };
+  if (monster.type === "cinder_shade") return { family: "cinder_shade", width: 46, height: 58, yOffset: -18 };
+  if (monster.type === "basalt_brute") return { family: "basalt_brute", width: 60, height: 64, yOffset: -20 };
+  if (monster.type === "bone_scorpion") return { family: "bone_scorpion", width: 58, height: 38, yOffset: -5 };
+  if (monster.type === "dune_reaver") return { family: "dune_reaver", width: 46, height: 56, yOffset: -16 };
+  if (monster.type === "mirage_shade") return { family: "mirage_shade", width: 46, height: 58, yOffset: -18 };
+  if (monster.type === "tide_lurker") return { family: "tide_lurker", width: 50, height: 56, yOffset: -15 };
+  if (monster.type === "brine_siren") return { family: "brine_siren", width: 44, height: 58, yOffset: -18 };
+  if (monster.type === "coral_crab") return { family: "coral_crab", width: 58, height: 38, yOffset: -4 };
+  if (monster.type === "canopy_stalker") return { family: "canopy_stalker", width: 58, height: 42, yOffset: -8 };
+  if (monster.type === "blowpipe_headhunter") return { family: "blowpipe_headhunter", width: 44, height: 54, yOffset: -14 };
   // Broken Reach 1-15 starter critters & low cemetery undead.
   if (monster.type === "reach_hen") return { family: "reach_hen", width: 38, height: 32, yOffset: -2 };
   if (monster.type === "meadow_hopper") return { family: "meadow_hopper", width: 42, height: 38, yOffset: -5 };
@@ -6697,19 +6724,6 @@ function createActorFrames(scene: Phaser.Scene): void {
     left: wispRow
   });
   createWoodlandBespokeFrames(scene);
-  // The remaining new-area monsters share one montage sheet (public/new-enemies.png):
-  // a 4-frame walk row per family, the same frames used for all four facings.
-  const newEnemyFamilies = [
-    "canyon_scavenger", "dust_burrower", "dune_skitterer",
-    "sun_wraith", "reef_prowler", "venomous_stalker", "totem_wraith"
-  ];
-  newEnemyFamilies.forEach((family, r) => {
-    // These sit on rows 2..8 of the sheet (rows 0..1 were the now-bespoke swamp pair).
-    const frames = spriteFrames([0, 64, 128, 192], (r + 2) * 56, 64, 56);
-    createExplicitFrameSet(scene, "newEnemiesSheet", family, { up: frames, right: frames, down: frames, left: frames });
-  });
-
-  createSwampEnemyFrames(scene);
 }
 
 function createWoodlandBespokeFrames(scene: Phaser.Scene): void {
@@ -6729,44 +6743,6 @@ function createWoodlandBespokeFrames(scene: Phaser.Scene): void {
   for (const [index, family] of WOODLAND_BESPOKE_FAMILIES.entries()) {
     createExplicitFrameSet(scene, "woodlandBespokeSheet", family, directionalFrames(index));
   }
-}
-
-// The two swamp enemies get hand-authored 4-direction walk + attack animations
-// from public/skitterer-spitter.png (magenta-keyed at runtime). The Skitterer
-// walks in 4 frames and attacks in 3; the Mire Spitter walks in 3 and spits in 4.
-function createSwampEnemyFrames(scene: Phaser.Scene): void {
-  // Movement block (top of sheet): UP/RIGHT/DOWN/LEFT row y-bands.
-  const moveY: Record<Direction, number> = { up: 58, right: 163, down: 274, left: 372 };
-  const moveH: Record<Direction, number> = { up: 102, right: 100, down: 96, left: 100 };
-  const skitterMoveXs = [257, 357, 457, 557];
-  const spitterMoveXs = [683, 789, 895];
-  const skitterMove: DirectionFrames = {} as DirectionFrames;
-  const spitterMove: DirectionFrames = {} as DirectionFrames;
-  for (const dir of DIRECTIONS) {
-    skitterMove[dir] = spriteFrames(skitterMoveXs, moveY[dir], 88, moveH[dir]);
-    spitterMove[dir] = spriteFrames(spitterMoveXs, moveY[dir], 100, moveH[dir]);
-  }
-  createExplicitFrameSet(scene, "swampEnemySheet", "skitterer", skitterMove);
-  createExplicitFrameSet(scene, "swampEnemySheet", "mire_spitter", spitterMove);
-
-  // Attack block (bottom of sheet): UP/RIGHT/DOWN/LEFT row y-bands.
-  const atkY: Record<Direction, number> = { up: 559, right: 673, down: 772, left: 884 };
-  const atkH: Record<Direction, number> = { up: 100, right: 100, down: 98, left: 104 };
-  const skitterAtkXs = [252, 353, 454];
-  const skitterAtk: DirectionFrames = {} as DirectionFrames;
-  const spitterAtk: DirectionFrames = {} as DirectionFrames;
-  for (const dir of DIRECTIONS) {
-    skitterAtk[dir] = spriteFrames(skitterAtkXs, atkY[dir], 96, atkH[dir]);
-    // The spit frames pack tighter and the final lash-out frame is wider.
-    spitterAtk[dir] = [
-      { x: 570, y: atkY[dir], w: 94, h: atkH[dir] },
-      { x: 672, y: atkY[dir], w: 92, h: atkH[dir] },
-      { x: 773, y: atkY[dir], w: 102, h: atkH[dir] },
-      { x: 876, y: atkY[dir], w: 120, h: atkH[dir] }
-    ];
-  }
-  createExplicitFrameSet(scene, "swampEnemySheet", "skittererAtk", skitterAtk);
-  createExplicitFrameSet(scene, "swampEnemySheet", "mireSpitterAtk", spitterAtk);
 }
 
 function uniformDirectionFrames(cellW: number, cellH: number, frames: number): DirectionFrames {

@@ -488,6 +488,51 @@
   slowPct: 20
   slowMs: 1500
 
+- id: bog_leech
+  name: Bog Leech
+  role: ambush
+  description: "a glossy blood-leech that lunges from the black marsh"
+  maxHp: 62
+  speed: 2.6
+  damage: [10, 14]
+  attackMs: 1000
+  xp: 48
+  gold: [14, 28]
+  aggro: 6
+  range: 1
+  burrow: true
+  stunMs: 1200
+
+- id: marsh_hag
+  name: Marsh Hag
+  role: turret
+  description: "a hunched bog-witch muttering hexes through reed and fog"
+  maxHp: 70
+  speed: 0
+  damage: [6, 9]
+  attackMs: 1900
+  xp: 58
+  gold: [18, 36]
+  aggro: 6
+  range: 5
+  ranged: true
+  projectileAnimation: projectile.bolt.curse
+  weakenPct: 25
+  weakenMs: 2600
+
+- id: gloom_toad
+  name: Gloom Toad
+  role: trash
+  description: "a bloated venom toad with a snapping tongue and poison haze"
+  maxHp: 58
+  speed: 2.3
+  damage: [9, 13]
+  attackMs: 950
+  xp: 43
+  gold: [12, 24]
+  aggro: 6
+  range: 1
+
 # --- The Searing Badlands (floor 6) ---
 - id: canyon_scavenger
   name: Canyon Scavenger
@@ -518,6 +563,51 @@
   range: 1
   burrow: true
   stunMs: 1200
+
+- id: magma_hound
+  name: Magma Hound
+  role: pack
+  description: "an obsidian-skinned pack beast drooling embers through lava cracks"
+  maxHp: 82
+  speed: 3.1
+  damage: [12, 18]
+  attackMs: 900
+  xp: 78
+  gold: [22, 44]
+  aggro: 6
+  range: 1
+  pack: true
+
+- id: cinder_shade
+  name: Cinder Shade
+  role: turret
+  description: "a floating ash-spirit that throws slow fire motes from the heat shimmer"
+  maxHp: 110
+  speed: 0
+  damage: [7, 13]
+  attackMs: 1900
+  xp: 84
+  gold: [24, 48]
+  aggro: 7
+  range: 6
+  ranged: true
+  projectileAnimation: projectile.orb.fire
+  slowPct: 15
+  slowMs: 1200
+
+- id: basalt_brute
+  name: Basalt Brute
+  role: elite
+  description: "a slab-rock brute with a cracked molten core"
+  maxHp: 106
+  speed: 1.5
+  damage: [12, 17]
+  attackMs: 1450
+  xp: 92
+  gold: [28, 56]
+  aggro: 6
+  range: 1.05
+  armor: 2
 
 - id: crimson_burrower
   name: Crimson Burrower
@@ -591,6 +681,56 @@
   weakenPct: 35
   weakenMs: 4000
 
+- id: bone_scorpion
+  name: Bone Scorpion
+  role: ambush
+  description: "a pale desert scorpion that bursts from the sand with a raised stinger"
+  maxHp: 72
+  speed: 2.6
+  damage: [14, 19]
+  attackMs: 1000
+  xp: 88
+  gold: [18, 36]
+  aggro: 6
+  range: 1
+  armor: 1
+  burrow: true
+  stunMs: 1200
+
+- id: dune_reaver
+  name: Dune Reaver
+  role: trash
+  description: "a mummified tomb-raider dragging a rusted desert blade"
+  maxHp: 106
+  speed: 2.4
+  damage: [17, 26]
+  attackMs: 1050
+  xp: 92
+  isUnholy: true
+  faithXp: 36
+  gold: [18, 36]
+  aggro: 6.5
+  range: 1
+
+- id: mirage_shade
+  name: Mirage Shade
+  role: turret
+  description: "a half-formed sand spirit that lashes out through shimmering air"
+  maxHp: 120
+  speed: 0
+  damage: [9, 18]
+  attackMs: 1900
+  xp: 96
+  isUnholy: true
+  faithXp: 38
+  gold: [20, 40]
+  aggro: 7
+  range: 6
+  ranged: true
+  projectileAnimation: projectile.orb.fire
+  weakenPct: 25
+  weakenMs: 3000
+
 # --- The Sunken Beach (floor 8) ---
 - id: reef_prowler
   name: Reef Prowler
@@ -603,6 +743,52 @@
   gold: [16, 32]
   aggro: 9
   range: 1
+
+- id: tide_lurker
+  name: Tide Lurker
+  role: trash
+  description: "a barnacled spear-carrier with an anglerfish head and dripping gills"
+  maxHp: 92
+  speed: 3.2
+  damage: [17, 28]
+  attackMs: 950
+  xp: 96
+  gold: [18, 36]
+  aggro: 8
+  range: 1
+
+- id: brine_siren
+  name: Brine Siren
+  role: turret
+  description: "a pale sea-spirit with kelp hair and a luring sonic cry"
+  maxHp: 130
+  speed: 0
+  damage: [11, 22]
+  attackMs: 1750
+  xp: 108
+  isUnholy: true
+  faithXp: 40
+  gold: [22, 44]
+  aggro: 7
+  range: 6
+  ranged: true
+  projectileAnimation: projectile.shard.frost
+  slowPct: 20
+  slowMs: 1600
+
+- id: coral_crab
+  name: Coral Crab
+  role: elite
+  description: "a giant crab in coral-crusted armor with one oversized guard claw"
+  maxHp: 124
+  speed: 1.4
+  damage: [15, 23]
+  attackMs: 1200
+  xp: 112
+  gold: [24, 48]
+  aggro: 6.5
+  range: 1.1
+  armor: 4
 
 - id: drowned_marauder
   name: Drowned Marauder
@@ -657,6 +843,38 @@
   drops:
     - item: black_ledger
       chance: 0.5
+
+- id: canopy_stalker
+  name: Canopy Stalker
+  role: ambush
+  description: "a dark jungle cat that drops from the leaves before its prey can turn"
+  maxHp: 92
+  speed: 3.4
+  damage: [19, 31]
+  attackMs: 1000
+  xp: 116
+  gold: [24, 46]
+  aggro: 6
+  range: 1
+  burrow: true
+  stunMs: 900
+
+- id: blowpipe_headhunter
+  name: Blowpipe Headhunter
+  role: turret
+  description: "a ruin-tribe hunter in a bone mask, firing darts from the undergrowth"
+  maxHp: 120
+  speed: 0
+  damage: [16, 28]
+  attackMs: 1650
+  xp: 118
+  gold: [24, 48]
+  aggro: 7
+  range: 6
+  ranged: true
+  projectileAnimation: projectile.bolt.curse
+  slowPct: 20
+  slowMs: 1600
 
 - id: verdant_faultwarden
   name: Verdant Faultwarden
