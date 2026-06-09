@@ -82,6 +82,7 @@ ENEMIES = [
     Enemy("mire_spitter", "Mire Spitter", "toad", ((71, 116, 82), (37, 68, 59), (159, 217, 116))),
     Enemy("canyon_scavenger", "Canyon Scavenger", "hound", ((137, 82, 54), (77, 49, 42), (225, 171, 91))),
     Enemy("dust_burrower", "Dust Burrower", "burrower", ((141, 102, 63), (91, 64, 47), (219, 181, 112))),
+    Enemy("crimson_burrower", "Crimson Burrower", "burrower", ((152, 62, 54), (83, 41, 45), (231, 105, 76))),
     Enemy("dune_skitterer", "Dune Skitterer", "skitterer", ((159, 124, 70), (91, 68, 45), (234, 198, 118))),
     Enemy("sun_wraith", "Sun-Scorched Wraith", "wraith", ((166, 104, 58), (91, 57, 45), (238, 184, 88))),
     Enemy("reef_prowler", "Reef Prowler", "prowler", ((64, 119, 128), (38, 67, 80), (178, 222, 197))),
@@ -97,10 +98,13 @@ ENEMIES = [
     Enemy("dune_reaver", "Dune Reaver", "mummy", ((183, 154, 103), (91, 66, 55), (213, 194, 144))),
     Enemy("mirage_shade", "Mirage Shade", "wraith", ((151, 131, 95), (73, 67, 71), (116, 207, 220))),
     Enemy("tide_lurker", "Tide Lurker", "lurker", ((62, 111, 121), (43, 68, 79), (178, 199, 151))),
+    Enemy("drowned_marauder", "Drowned Marauder", "ghoul", ((70, 126, 121), (43, 72, 78), (166, 209, 180))),
     Enemy("brine_siren", "Brine Siren", "siren", ((126, 169, 173), (55, 82, 100), (213, 223, 190))),
     Enemy("coral_crab", "Coral Crab", "crab", ((158, 86, 71), (87, 53, 58), (231, 149, 125))),
     Enemy("canopy_stalker", "Canopy Stalker", "panther", ((50, 62, 48), (28, 35, 31), (145, 161, 76))),
     Enemy("blowpipe_headhunter", "Blowpipe Headhunter", "headhunter", ((121, 78, 55), (54, 83, 48), (218, 206, 164))),
+    Enemy("verdant_faultwarden", "Verdant Faultwarden", "treant", ((87, 77, 56), (75, 128, 67), (183, 203, 91))),
+    Enemy("deepdelve_wight", "Deepdelve Wight", "revenant", ((85, 76, 70), (193, 169, 112), (137, 111, 71))),
 ]
 
 PUBLIC_COPY_SLUGS = {enemy.slug for enemy in ENEMIES}

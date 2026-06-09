@@ -52,6 +52,7 @@ const BESPOKE_V2_TYPES = [
   "mire_spitter",
   "canyon_scavenger",
   "dust_burrower",
+  "crimson_burrower",
   "dune_skitterer",
   "sun_wraith",
   "reef_prowler",
@@ -67,10 +68,13 @@ const BESPOKE_V2_TYPES = [
   "dune_reaver",
   "mirage_shade",
   "tide_lurker",
+  "drowned_marauder",
   "brine_siren",
   "coral_crab",
   "canopy_stalker",
-  "blowpipe_headhunter"
+  "blowpipe_headhunter",
+  "verdant_faultwarden",
+  "deepdelve_wight"
 ];
 
 test("skills, firemaking, and cooking are usable and visually present", async ({ page }) => {

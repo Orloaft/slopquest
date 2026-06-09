@@ -898,6 +898,7 @@ const WOODLAND_BESPOKE_FAMILIES = [
   "mire_spitter",
   "canyon_scavenger",
   "dust_burrower",
+  "crimson_burrower",
   "dune_skitterer",
   "sun_wraith",
   "reef_prowler",
@@ -913,10 +914,13 @@ const WOODLAND_BESPOKE_FAMILIES = [
   "dune_reaver",
   "mirage_shade",
   "tide_lurker",
+  "drowned_marauder",
   "brine_siren",
   "coral_crab",
   "canopy_stalker",
-  "blowpipe_headhunter"
+  "blowpipe_headhunter",
+  "verdant_faultwarden",
+  "deepdelve_wight"
 ] as const;
 // Northwood authored-layout tree/prop sprite catalogue ids (obj_NNN). Sprites are
 // exported to public/sprites/nw/ by tools/build-northwood-from-authored.ts and
@@ -3510,6 +3514,7 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "ghoul") return { family: "ghoul", width: 46, height: 54, yOffset: -13 };
   if (monster.type === "boss") return { family: "skeleton", width: 62, height: 66, yOffset: -18, tint: 0xff8a5c };
   if (monster.type === "orc") return { family: "orc", width: 56, height: 60, yOffset: -17 };
+  if (monster.type === "goblin") return { family: "goblin", width: 42, height: 46, yOffset: -10 };
   if (monster.type === "goblin_scout") return { family: "goblinScout", width: 42, height: 52, yOffset: -14 };
   if (monster.type === "goblin_shaman") return { family: "goblinShaman", width: 46, height: 56, yOffset: -16 };
   if (monster.type === "wolf") return { family: "greyWolf", width: 58, height: 44, yOffset: -8 };
@@ -3533,11 +3538,12 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "mire_spitter") return { family: "mire_spitter", width: 50, height: 56, yOffset: -16 };
   if (monster.type === "canyon_scavenger") return { family: "canyon_scavenger", width: 52, height: 56, yOffset: -14 };
   if (monster.type === "dust_burrower") return { family: "dust_burrower", width: 54, height: 46, yOffset: -6 };
+  if (monster.type === "crimson_burrower") return { family: "crimson_burrower", width: 54, height: 46, yOffset: -6 };
   if (monster.type === "dune_skitterer") return { family: "dune_skitterer", width: 50, height: 48, yOffset: -10 };
-  if (monster.type === "sun_wraith") return { family: "sun_wraith", width: 50, height: 56, yOffset: -16, tint: 0xffd98a };
+  if (monster.type === "sun_wraith") return { family: "sun_wraith", width: 50, height: 56, yOffset: -16 };
   if (monster.type === "reef_prowler") return { family: "reef_prowler", width: 54, height: 50, yOffset: -10 };
-  if (monster.type === "venomous_stalker") return { family: "venomous_stalker", width: 52, height: 46, yOffset: -8, tint: 0x9fd07a };
-  if (monster.type === "totem_wraith") return { family: "totem_wraith", width: 48, height: 56, yOffset: -16, tint: 0xd0b3ff };
+  if (monster.type === "venomous_stalker") return { family: "venomous_stalker", width: 52, height: 46, yOffset: -8 };
+  if (monster.type === "totem_wraith") return { family: "totem_wraith", width: 48, height: 56, yOffset: -16 };
   if (monster.type === "bog_leech") return { family: "bog_leech", width: 52, height: 34, yOffset: -4 };
   if (monster.type === "marsh_hag") return { family: "marsh_hag", width: 46, height: 58, yOffset: -17 };
   if (monster.type === "gloom_toad") return { family: "gloom_toad", width: 50, height: 42, yOffset: -8 };
@@ -3548,10 +3554,13 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "dune_reaver") return { family: "dune_reaver", width: 46, height: 56, yOffset: -16 };
   if (monster.type === "mirage_shade") return { family: "mirage_shade", width: 46, height: 58, yOffset: -18 };
   if (monster.type === "tide_lurker") return { family: "tide_lurker", width: 50, height: 56, yOffset: -15 };
+  if (monster.type === "drowned_marauder") return { family: "drowned_marauder", width: 48, height: 54, yOffset: -12 };
   if (monster.type === "brine_siren") return { family: "brine_siren", width: 44, height: 58, yOffset: -18 };
   if (monster.type === "coral_crab") return { family: "coral_crab", width: 58, height: 38, yOffset: -4 };
   if (monster.type === "canopy_stalker") return { family: "canopy_stalker", width: 58, height: 42, yOffset: -8 };
   if (monster.type === "blowpipe_headhunter") return { family: "blowpipe_headhunter", width: 44, height: 54, yOffset: -14 };
+  if (monster.type === "verdant_faultwarden") return { family: "verdant_faultwarden", width: 60, height: 70, yOffset: -22 };
+  if (monster.type === "deepdelve_wight") return { family: "deepdelve_wight", width: 48, height: 58, yOffset: -16 };
   // Broken Reach 1-15 starter critters & low cemetery undead.
   if (monster.type === "reach_hen") return { family: "reach_hen", width: 38, height: 32, yOffset: -2 };
   if (monster.type === "meadow_hopper") return { family: "meadow_hopper", width: 42, height: 38, yOffset: -5 };
@@ -3559,13 +3568,6 @@ function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "restless_husk") return { family: "ghoul", width: 44, height: 52, yOffset: -12 };
   if (monster.type === "grave_shambler") return { family: "grave_shambler", width: 44, height: 52, yOffset: -12 };
   if (monster.type === "bound_wight") return { family: "grave_revenant", width: 46, height: 56, yOffset: -16 };
-  // Biome enemies that shipped without a resolver entry and were silently falling
-  // back to the goblin sprite below. Borrow the nearest-fitting family + a thematic
-  // tint until bespoke sheets land (same convention as the placeholders above).
-  if (monster.type === "crimson_burrower") return { family: "dust_burrower", width: 54, height: 46, yOffset: -6, tint: 0xff6a5c };
-  if (monster.type === "deepdelve_wight") return { family: "grave_revenant", width: 48, height: 58, yOffset: -16, tint: 0xc9a86a };
-  if (monster.type === "drowned_marauder") return { family: "ghoul", width: 48, height: 54, yOffset: -12, tint: 0x6fb0a8 };
-  if (monster.type === "verdant_faultwarden") return { family: "ancient_treant", width: 60, height: 70, yOffset: -22, tint: 0x9fd07a };
   return { family: "goblin", width: 42, height: 46, yOffset: -10 };
 }
 

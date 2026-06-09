@@ -11,7 +11,7 @@ their original sheets._
 
 ## Roster at a glance
 
-- **~43 enemy types** across **12 floors (0–11)**, drawn by **33 sprite families**.
+- **47 v2 enemy sheets** plus keeper hand-art families across **12 floors (0–11)**.
 - Three art pipelines of **very different quality** — frame count does NOT track quality.
 
 ## Sheet format (target for any new asset) — `enemy-directional-4x4-v2`
@@ -45,7 +45,7 @@ The `/new-enemies.png` montage families. Art is solid detailed pixel art, but ea
 effectively **single-pose** — the same facing is shown for all four directions, and animation
 cycles are short (3–4 frames). They read fine in motion but lack real directional turns.
 
-`skitterer, mire_spitter, canyon_scavenger, dust_burrower (+crimson_burrower, tinted),
+`skitterer, mire_spitter, canyon_scavenger, dust_burrower, crimson_burrower,
 dune_skitterer, sun_wraith, reef_prowler, venomous_stalker, totem_wraith`
 
 ### TIER C — PLACEHOLDERS, replace first ⚠️
@@ -53,7 +53,7 @@ The `WOODLAND_BESPOKE_FAMILIES` v2 set. **These use the current 4x4 walk-only ru
 the art is procedurally drawn by `tools/generate_woodland_enemy_sprites_v2.py` — flat geometric
 blobs with dot eyes.** Examples seen: dire_wolf is a grey rectangle-on-legs; ancient_treant is a
 brown box with a green slab; ghoul/orc are green blocks. This is what "avg placeholder sprites"
-means here. **22 of the ~43 types render on these.**
+means here. The v2 pipeline now emits **47 public sheets**.
 
 ---
 
@@ -64,8 +64,8 @@ inherit it (so one good sheet fixes several enemies).
 
 | # | Family | Art brief | Feeds (types) | Floor(s) |
 |---|---|---|---|---|
-| 1 | **ghoul** | hunched rotting undead, grey-green flesh, lank limbs | ghoul, restless_husk, drowned_marauder (tinted) | cemetery 1 / beach 8 |
-| 2 | **grave_revenant** | armored undead warrior, tattered cloak, faint glow | grave_revenant, bound_wight, deepdelve_wight (tinted) | cemetery 1 / crypt 2 / mine 10 |
+| 1 | **ghoul** | hunched rotting undead, grey-green flesh, lank limbs | ghoul, restless_husk | cemetery 1 |
+| 2 | **grave_revenant** | armored undead warrior, tattered cloak, faint glow | grave_revenant, bound_wight | cemetery 1 / crypt 2 |
 | 3 | **pale_banshee** | floating wailing ghost, pale tattered shroud | pale_banshee | cemetery 1 |
 | 4 | **crypt_sentinel** | heavy armored tomb guardian, stone+iron, glowing eyes | crypt_sentinel | crypt 2 / mine 10 |
 | 5 | **dire_wolf** | large dark winter wolf, layered fur, snarl | dire_wolf | woods 3 |
@@ -76,7 +76,7 @@ inherit it (so one good sheet fixes several enemies).
 | 10 | **forest_slime** | translucent green ooze, wobble, leaf bits inside | forest_slime | woods 3 |
 | 11 | **sapling_deer** | spirit deer, bark-skin, moss antlers | sapling_deer | woods 3 |
 | 12 | **mushroom_brute** | fungal colossus, cap-helmet, spore puffs | mushroom_brute | woods 3 |
-| 13 | **ancient_treant** | walking tree guardian, gnarled bark, leaf crown | ancient_treant, verdant_faultwarden (boss, tinted) | woods 3 / jungle 9 |
+| 13 | **ancient_treant** | walking tree guardian, gnarled bark, leaf crown | ancient_treant | woods 3 |
 | 14 | **bone_druid** | skeletal caster, antler staff, ritual robes | bone_druid | woods 3 |
 | 15 | **forest_pixie** | tiny winged fae, glow trail | forest_pixie | woods 3 |
 | 16 | **bog_wraith** | dripping marsh spirit, muddy vapor body | bog_wraith | woods 3 |
