@@ -821,6 +821,8 @@ let currentFloor: number | null = null;
 let loadingFloor: number | null = null;
 let loadingStartedAt = 0;
 let loadingFrames = 0;
+let pendingMapFloor: number | null = null;
+let pendingMapLoadToken = 0;
 const LOADING_MIN_MS = E2E_MODE ? 180 : 450;
 const LOADING_MIN_FRAMES = E2E_MODE ? 3 : 5;
 let clickDestination: PathDestination | null = null;
@@ -1065,11 +1067,6 @@ function preload(this: Phaser.Scene): void {
   this.load.image("spriteGoose", "/waystone/goose.png");
   this.load.image("spriteScarecrow", "/waystone/scarecrow.png");
   this.load.image("spriteWaystoneCave", "/waystone/cave.png"); // pre-cleaned cave arch (de-fringed)
-  for (const stage of GENERATED_STAGES) {
-    for (const tileset of stage.tilesets) {
-      if (tileset.publicPath) this.load.image(generatedTilesetTextureKey(stage, tileset.name), tileset.publicPath);
-    }
-  }
 }
 
 function create(this: Phaser.Scene): void {
@@ -2030,16 +2027,19 @@ function update(this: Phaser.Scene, time: number): void {
   if (!me) return;
   applyZoneMusic(me);
   if (currentFloor !== me.floor) {
-    // Cover the transition until the destination is built and rendered.
-    showLoadingScreen(zoneTitleForFloor(me.floor));
-    loadingFloor = me.floor;
-    loadingStartedAt = performance.now();
-    loadingFrames = 0;
-    clearResourceViews();
-    drawMap(me.floor, { x: me.x, y: me.y });
-    syncedStateVersion = -1;
-    syncedPresentationVersion = -1;
-    clearClickDestination();
+    if (pendingMapFloor !== me.floor) {
+      // Cover the transition until the destination assets are loaded, built, and rendered.
+      showLoadingScreen(zoneTitleForFloor(me.floor));
+      loadingFloor = me.floor;
+      loadingStartedAt = performance.now();
+      loadingFrames = 0;
+      clearResourceViews();
+      beginMapDraw(me.floor, { x: me.x, y: me.y });
+      syncedStateVersion = -1;
+      syncedPresentationVersion = -1;
+      clearClickDestination();
+    }
+    return;
   }
   if (syncedStateVersion !== stateVersion && (!crowdedActorsActive || syncedStateVersion < 0 || time - lastEntityTargetSyncAt >= 180)) {
     syncEntityMovementTargets();
@@ -2478,6 +2478,16 @@ function drawMap(floor: number, center?: TilePoint): void {
   addComposedMapObjects(floor, mapDecorationLayer);
   addBeachClutter(floor, rows, mapDecorationLayer);
   spawnCemeteryFog(floor, cols, rowCount);
+}
+
+function beginMapDraw(floor: number, center?: TilePoint): void {
+  pendingMapFloor = floor;
+  const token = ++pendingMapLoadToken;
+  void ensureGeneratedStageAssetsLoaded(floor).then(() => {
+    if (token !== pendingMapLoadToken || pendingMapFloor !== floor) return;
+    drawMap(floor, center);
+    pendingMapFloor = null;
+  });
 }
 
 // Beach (floor 8) ground clutter. Generated stages skip addTileDecorations, so the dunes get
@@ -8848,6 +8858,8 @@ const TILE_UNDERLAY_TEXTURE: Record<string, string> = {
 
 const GENERATED_STAGES: GeneratedStage[] = [NORTHWOOD_STAGE, WAYSTONE_STAGE, SWAMP_STAGE, ROUTE_STAGE];
 const GENERATED_STAGES_BY_FLOOR = new Map<number, GeneratedStage>(GENERATED_STAGES.map((stage) => [stage.floor, stage]));
+const generatedStageAssetsReady = new Set<number>();
+const generatedStageAssetLoads = new Map<number, Promise<void>>();
 const generatedStageTexturesReady = new Set<number>();
 
 function generatedTilesetTextureKey(stage: GeneratedStage, tilesetName: string): string {
@@ -8860,6 +8872,45 @@ function generatedTileTextureKey(stage: GeneratedStage, tile: string): string {
 
 function generatedStageRefTextureKey(stage: GeneratedStage, ref: string): string {
   return `generated:${stage.zone}:ref:${ref}`;
+}
+
+function ensureGeneratedStageAssetsLoaded(floor: number): Promise<void> {
+  const stage = GENERATED_STAGES_BY_FLOOR.get(floor);
+  if (!stage) return Promise.resolve();
+  if (generatedStageAssetsReady.has(floor)) return Promise.resolve();
+  const activeLoad = generatedStageAssetLoads.get(floor);
+  if (activeLoad) return activeLoad;
+
+  const pending = stage.tilesets
+    .filter((tileset) => tileset.publicPath && !scene.textures.exists(generatedTilesetTextureKey(stage, tileset.name)))
+    .map((tileset) => ({
+      key: generatedTilesetTextureKey(stage, tileset.name),
+      path: tileset.publicPath as string
+    }));
+
+  if (pending.length === 0) {
+    generatedStageAssetsReady.add(floor);
+    return Promise.resolve();
+  }
+
+  const load = new Promise<void>((resolve) => {
+    const finish = () => {
+      generatedStageAssetsReady.add(floor);
+      generatedStageAssetLoads.delete(floor);
+      resolve();
+    };
+
+    const loader = scene.load;
+    for (const asset of pending) loader.image(asset.key, asset.path);
+    loader.once(Phaser.Loader.Events.COMPLETE, finish);
+    loader.once("loaderror", (file: { key?: string; src?: string }) => {
+      console.warn(`Generated stage asset failed to load: ${file.key ?? "unknown"} ${file.src ?? ""}`.trim());
+    });
+    if (!loader.isLoading()) loader.start();
+  });
+
+  generatedStageAssetLoads.set(floor, load);
+  return load;
 }
 
 // Lazily bakes (and caches) a rotated variant of an already-sliced tile texture.

@@ -24,6 +24,7 @@ interface PreloadBudget {
   literalFiles: FileEntry[];
   dynamicFiles: FileEntry[];
   dynamic: PreloadGroup[];
+  lazy: PreloadGroup[];
   missing: string[];
   totalBytes: number;
 }
@@ -50,6 +51,9 @@ if (preload) {
   if (preload.totalBytes > maxPreloadBytes) failures.push(`preloaded assets ${preload.totalBytes} > ${maxPreloadBytes}`);
   if (preload.files.length > maxPreloadFiles) failures.push(`preloaded asset file count ${preload.files.length} > ${maxPreloadFiles}`);
   for (const path of preload.missing) failures.push(`preloaded asset missing: ${path}`);
+  for (const group of preload.lazy) {
+    for (const path of group.missing) failures.push(`lazy asset missing: ${path} (${group.label})`);
+  }
 }
 
 console.log(
@@ -81,6 +85,19 @@ console.log(
               totalBytes: sumBytes(preload.dynamicFiles),
               totalMiB: roundMiB(sumBytes(preload.dynamicFiles)),
               groups: preload.dynamic.map((group) => ({
+                label: group.label,
+                files: group.files.length,
+                totalBytes: group.totalBytes,
+                totalMiB: roundMiB(group.totalBytes),
+                largest: group.files.slice(0, 8).map((file) => ({ ...file, mib: roundMiB(file.bytes) })),
+                missing: group.missing
+              }))
+            },
+            lazy: {
+              files: preload.lazy.reduce((sum, group) => sum + group.files.length, 0),
+              totalBytes: preload.lazy.reduce((sum, group) => sum + group.totalBytes, 0),
+              totalMiB: roundMiB(preload.lazy.reduce((sum, group) => sum + group.totalBytes, 0)),
+              groups: preload.lazy.map((group) => ({
                 label: group.label,
                 files: group.files.length,
                 totalBytes: group.totalBytes,
@@ -158,6 +175,7 @@ function preloadBudget(entry: string, rootDir: string): PreloadBudget {
     if (path) literalAssetPaths.add(path);
   }
   const dynamic = dynamicPreloadGroups(entry, source, rootDir);
+  const lazy = lazyAssetGroups(entry, source, rootDir);
   const dynamicAssetPaths = new Set(dynamic.flatMap((group) => group.paths));
   const assetPaths = new Set([...literalAssetPaths, ...dynamicAssetPaths]);
   const resolved = resolveAssetPaths([...assetPaths], rootDir);
@@ -168,6 +186,7 @@ function preloadBudget(entry: string, rootDir: string): PreloadBudget {
     literalFiles,
     dynamicFiles,
     dynamic,
+    lazy,
     missing: resolved.missing,
     totalBytes: sumBytes(resolved.files)
   };
@@ -197,9 +216,16 @@ function dynamicPreloadGroups(entry: string, source: string, rootDir: string): P
   const northwoodSpritePaths = northwoodSpritePreloadPaths(source);
   if (northwoodSpritePaths.length > 0) groups.push(preloadGroup("NORTHWOOD_SPRITE_IDS sprite loop", northwoodSpritePaths, rootDir));
 
-  const generatedStagePaths = generatedStagePreloadPaths(entry, source);
+  const generatedStagePaths = hasGeneratedStagePreloadLoop(source) ? generatedStagePublicPaths(entry, source) : [];
   if (generatedStagePaths.length > 0) groups.push(preloadGroup("GENERATED_STAGES tileset.publicPath loop", generatedStagePaths, rootDir));
 
+  return groups;
+}
+
+function lazyAssetGroups(entry: string, source: string, rootDir: string): PreloadGroup[] {
+  const groups: PreloadGroup[] = [];
+  const generatedStagePaths = hasGeneratedStageLazyLoader(source) ? generatedStagePublicPaths(entry, source) : [];
+  if (generatedStagePaths.length > 0) groups.push(preloadGroup("lazy generated stage tilesets", generatedStagePaths, rootDir));
   return groups;
 }
 
@@ -215,7 +241,15 @@ function northwoodSpritePreloadPaths(source: string): string[] {
   return ids.map((id) => `/sprites/nw/obj_${String(id).padStart(3, "0")}.png`);
 }
 
-function generatedStagePreloadPaths(entry: string, source: string): string[] {
+function hasGeneratedStagePreloadLoop(source: string): boolean {
+  return /\bthis\.load\.image\(\s*generatedTilesetTextureKey\(\s*stage\s*,\s*tileset\.name\s*\)\s*,\s*tileset\.publicPath\s*\)/.test(source);
+}
+
+function hasGeneratedStageLazyLoader(source: string): boolean {
+  return /\bfunction\s+ensureGeneratedStageAssetsLoaded\b/.test(source);
+}
+
+function generatedStagePublicPaths(entry: string, source: string): string[] {
   const stageListSource = source.match(/\bconst\s+GENERATED_STAGES\s*:\s*GeneratedStage\[\]\s*=\s*\[([^\]]*)\]/s)?.[1];
   if (!stageListSource) return [];
 
