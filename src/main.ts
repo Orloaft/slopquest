@@ -466,6 +466,7 @@ interface RuntimeAssetResidencySnapshot {
   pendingLazyLoads: PendingLazyLoad[];
   pendingBackgroundLoads: PendingLazyLoad[];
   startupImages: RuntimeImageResidency[];
+  runtimeImages: RuntimeImageResidency[];
   groups: RuntimeAssetGroupResidency[];
 }
 
@@ -1193,9 +1194,12 @@ const CORE_BOOTSTRAP_IMAGE_ASSETS: RuntimeImageAsset[] = [
 ];
 
 const STARTER_AREA_STARTUP_IMAGE_ASSETS: RuntimeImageAsset[] = [
-  runtimeImageAsset("townTiles", "/towntiles.png", "startup", "Waystone/common town source sheet", 0, "waystone"),
-  runtimeImageAsset("cityTiles", "/citytiles.png", "startup", "Northwatch city source sheet", 4, "northwatch")
+  runtimeImageAsset("townTiles", "/towntiles.png", "startup", "Waystone/common town source sheet", 0, "waystone")
 ];
+
+const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
+  [4, [runtimeImageAsset("cityTiles", "/citytiles.png", "play-context", "Northwatch city source sheet", 4, "northwatch")]]
+]);
 
 const GENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
   [
@@ -1256,7 +1260,11 @@ const STARTUP_IMAGE_ASSETS = [
   ...STARTER_AREA_STARTUP_IMAGE_ASSETS,
   ...RESIDENT_AUTHORING_IMAGE_ASSETS
 ] as const;
+const FLOOR_CONTEXT_IMAGE_ASSETS: RuntimeImageAsset[] = [...FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR.values()].flat();
 const runtimeImageLoadRecords = new Map<string, RuntimeImageLoadRecord>();
+const floorContextAssetLoads = new Map<number, Promise<void>>();
+const floorContextAssetsReady = new Set<number>();
+const floorContextTextureBuildsReady = new Set<number>();
 
 function recordRuntimeImageLoad(asset: RuntimeImageAsset, trigger: RuntimeImageLoadTrigger): void {
   runtimeImageLoadRecords.set(asset.key, {
@@ -1311,43 +1319,6 @@ function create(this: Phaser.Scene): void {
   ];
   makeTileTexture(this, "townTiles", "tileTownFloor", 236, 248, 84, 84, undefined, false, plazaWarm);
   makeTileTexture(this, "townTiles", "tileDirt", 236, 24, 84, 84);
-  // Northwatch ground, sliced from the city-exterior-01 sheet's 54x60 grid (zero
-  // magenta gutter bleed). Following the Northwood blueprint — its forest stage reads
-  // well because the road/grass tiles are warm-toned and PER-CELL varied (no flat
-  // repeated grid) with baked road->grass edges. So here:
-  //   - roads = warm TAN paved cobble (ground r0c5), matching the mockup's sandy streets
-  //     instead of the old cool-grey r0c0 cobble;
-  //   - grass = three green variants, hash-scattered per cell (cityGrassTexture) so the
-  //     open blocks stop reading as one flat tile;
-  //   - a procedural stone CURB is then painted on every road edge that faces grass
-  //     (buildCityCurbs + the floor-4 pass in createMapChunk), the depth cue the flat
-  //     crops lack — the dark-lined grey kerb that lines every street in the mockup.
-  makeTileTexture(this, "cityTiles", "tileCityRoad", 300, 77, 54, 60); // warm tan paved street
-  makeTileTexture(this, "cityTiles", "tileCityCobble", 17, 77, 54, 60); // legacy grey cobble (fallback)
-  makeTileTexture(this, "cityTiles", "tileCityGrass", 74, 140, 54, 60); // grass variant 0 (lush green)
-  makeTileTexture(this, "cityTiles", "tileCityGrass1", 356, 77, 54, 60); // variant 1 (mossy + pebbles)
-  makeTileTexture(this, "cityTiles", "tileCityGrass2", 356, 140, 54, 60); // variant 2 (tufted)
-  buildCityCurbs(this); // procedural N/E/S/W kerb overlays for road<->grass edges
-  // Moat water: the city water cells carry a stone curb, but the 10px tile inset
-  // crops past it to the open water inside -> a clean blue moat tile.
-  makeTileTexture(this, "cityTiles", "tileCityMoat", 996, 83, 54, 57);
-  // Curtain wall: grey stone face from the CITY WALL SET battlement (matches the
-  // tower stone). The crenellated-top art tiles awkwardly when stacked, so we use
-  // the solid masonry face for a clean curtain-wall band in any direction.
-  makeTileTexture(this, "cityTiles", "tileCityWall", 650, 948, 54, 54);
-  // Round corner tower (red conical roof) — cut without inset, so defringe=true
-  // strips the dark-magenta anti-alias halo around the silhouette.
-  makeSpriteTexture(this, "cityTiles", "spriteCityTowerRed", 1298, 318, 48, 108, true);
-  // --- City buildings (districts) — all defringed. ---
-  makeSpriteTexture(this, "cityTiles", "spriteCityHouseA", 428, 306, 126, 136, true); // wide red-roof
-  makeSpriteTexture(this, "cityTiles", "spriteCityHouseB", 556, 304, 74, 138, true); // tall red-roof
-  makeSpriteTexture(this, "cityTiles", "spriteCityHouseC", 714, 304, 78, 138, true); // shop house
-  makeSpriteTexture(this, "cityTiles", "spriteCityHouseD", 880, 306, 84, 136, true); // blue-roof
-  makeSpriteTexture(this, "cityTiles", "spriteCityCathedral", 864, 560, 156, 156, true); // blue-dome cathedral
-  makeSpriteTexture(this, "cityTiles", "spriteCityHall", 1024, 546, 150, 168, true); // columned town hall
-  makeSpriteTexture(this, "cityTiles", "spriteCityTree", 140, 358, 74, 74, true); // ornamental tree
-  makeSpriteTexture(this, "cityTiles", "spriteCityBoat", 874, 446, 118, 98, true); // harbour boat
-  makeSpriteTexture(this, "cityTiles", "spriteCityStall", 834, 744, 70, 56, true); // market stall
   // Ground-seam transition overlays: softer surfaces fray over the harder ones
   // they border (grass > dirt > stone > plaza). See SURFACE_RANK / addGroundEdges.
   makeEdgeOverlays(this, "tileGrass", "grassEdge", 0, 0.5);
@@ -2217,6 +2188,31 @@ function create(this: Phaser.Scene): void {
   refreshKeyboardCapture();
 }
 
+function buildNorthwatchCityTextures(scene: Phaser.Scene): void {
+  if (scene.textures.exists("tileCityRoad")) return;
+  // Northwatch ground, sliced from the city-exterior-01 sheet's 54x60 grid (zero
+  // magenta gutter bleed). Following the Northwood blueprint: warm TAN road, three
+  // grass variants, then procedural road->grass curbs to sell the city mockup's depth.
+  makeTileTexture(scene, "cityTiles", "tileCityRoad", 300, 77, 54, 60);
+  makeTileTexture(scene, "cityTiles", "tileCityCobble", 17, 77, 54, 60);
+  makeTileTexture(scene, "cityTiles", "tileCityGrass", 74, 140, 54, 60);
+  makeTileTexture(scene, "cityTiles", "tileCityGrass1", 356, 77, 54, 60);
+  makeTileTexture(scene, "cityTiles", "tileCityGrass2", 356, 140, 54, 60);
+  buildCityCurbs(scene);
+  makeTileTexture(scene, "cityTiles", "tileCityMoat", 996, 83, 54, 57);
+  makeTileTexture(scene, "cityTiles", "tileCityWall", 650, 948, 54, 54);
+  makeSpriteTexture(scene, "cityTiles", "spriteCityTowerRed", 1298, 318, 48, 108, true);
+  makeSpriteTexture(scene, "cityTiles", "spriteCityHouseA", 428, 306, 126, 136, true);
+  makeSpriteTexture(scene, "cityTiles", "spriteCityHouseB", 556, 304, 74, 138, true);
+  makeSpriteTexture(scene, "cityTiles", "spriteCityHouseC", 714, 304, 78, 138, true);
+  makeSpriteTexture(scene, "cityTiles", "spriteCityHouseD", 880, 306, 84, 136, true);
+  makeSpriteTexture(scene, "cityTiles", "spriteCityCathedral", 864, 560, 156, 156, true);
+  makeSpriteTexture(scene, "cityTiles", "spriteCityHall", 1024, 546, 150, 168, true);
+  makeSpriteTexture(scene, "cityTiles", "spriteCityTree", 140, 358, 74, 74, true);
+  makeSpriteTexture(scene, "cityTiles", "spriteCityBoat", 874, 446, 118, 98, true);
+  makeSpriteTexture(scene, "cityTiles", "spriteCityStall", 834, 744, 70, 56, true);
+}
+
 // Pixel separation of the two active touch pointers on the previous pointermove,
 // used to derive pinch-zoom deltas. Null whenever fewer than two are down.
 let lastPinchDistance: number | null = null;
@@ -2679,6 +2675,7 @@ function renderRoster(characters: CharacterRosterEntry[]): void {
 
 function drawMap(floor: number, center?: TilePoint): void {
   currentFloor = floor;
+  ensureFloorContextTextures(floor);
   ensureGeneratedStageTileTextures(floor);
   applyFloorAtmosphere(floor);
   cutawayBuildingSprites.length = 0;
@@ -2704,7 +2701,7 @@ function drawMap(floor: number, center?: TilePoint): void {
 function beginMapDraw(floor: number, center?: TilePoint): void {
   pendingMapFloor = floor;
   const token = ++pendingMapLoadToken;
-  void ensureGeneratedStageAssetsLoaded(floor, "play-context").then(() => {
+  void ensureFloorContextAssetsLoaded(floor, "play-context").then(() => ensureGeneratedStageAssetsLoaded(floor, "play-context")).then(() => {
     if (token !== pendingMapLoadToken || pendingMapFloor !== floor) return;
     drawMap(floor, center);
     pendingMapFloor = null;
@@ -9354,6 +9351,59 @@ function generatedStageAssetGroup(stage: GeneratedStage): RuntimeAssetGroup {
 const GENERATED_STAGE_ASSET_GROUPS = GENERATED_STAGES.map((stage) => generatedStageAssetGroup(stage));
 const GENERATED_STAGE_ASSET_GROUPS_BY_FLOOR = new Map<number, RuntimeAssetGroup>(GENERATED_STAGE_ASSET_GROUPS.map((group) => [group.floor, group]));
 
+function ensureFloorContextAssetsLoaded(floor: number, trigger: RuntimeImageLoadTrigger = "play-context"): Promise<void> {
+  const assets = FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR.get(floor) ?? [];
+  if (assets.length === 0) return Promise.resolve();
+  if (floorContextAssetsReady.has(floor) && assets.every((asset) => scene.textures.exists(asset.key))) return Promise.resolve();
+  const activeLoad = floorContextAssetLoads.get(floor);
+  if (activeLoad) return activeLoad;
+
+  if (scene.load.isLoading()) {
+    const delayedLoad = new Promise<void>((resolve) => {
+      scene.load.once(Phaser.Loader.Events.COMPLETE, () => {
+        floorContextAssetLoads.delete(floor);
+        resolve(ensureFloorContextAssetsLoaded(floor, trigger));
+      });
+    });
+    floorContextAssetLoads.set(floor, delayedLoad);
+    return delayedLoad;
+  }
+
+  const pending = assets.filter((asset) => !scene.textures.exists(asset.key));
+  if (pending.length === 0) {
+    floorContextAssetsReady.add(floor);
+    return Promise.resolve();
+  }
+
+  const load = new Promise<void>((resolve) => {
+    const finish = () => {
+      floorContextAssetsReady.add(floor);
+      floorContextAssetLoads.delete(floor);
+      resolve();
+    };
+
+    const loader = scene.load;
+    for (const asset of pending) queueRuntimeImage(scene, asset, trigger);
+    loader.once(Phaser.Loader.Events.COMPLETE, finish);
+    loader.once("loaderror", (file: { key?: string; src?: string }) => {
+      console.warn(`Floor context asset failed to load: ${file.key ?? "unknown"} ${file.src ?? ""}`.trim());
+    });
+    loader.start();
+  });
+
+  floorContextAssetLoads.set(floor, load);
+  return load;
+}
+
+function ensureFloorContextTextures(floor: number): void {
+  if (floorContextTextureBuildsReady.has(floor)) return;
+  if (floor === 4) {
+    if (!scene.textures.exists("cityTiles")) return;
+    buildNorthwatchCityTextures(scene);
+  }
+  floorContextTextureBuildsReady.add(floor);
+}
+
 function ensureGeneratedStageAssetsLoaded(floor: number, trigger: GeneratedStageLoadTrigger = "play-context"): Promise<void> {
   const group = GENERATED_STAGE_ASSET_GROUPS_BY_FLOOR.get(floor);
   if (!group) return Promise.resolve();
@@ -9433,13 +9483,14 @@ function runtimeAssetResidency(): RuntimeAssetResidencySnapshot {
     pendingMapFloor,
     pendingLazyLoads: pendingLazyLoads(),
     pendingBackgroundLoads: pendingBackgroundLoads(),
-    startupImages: runtimeImageResidency(),
+    startupImages: runtimeImageResidency(STARTUP_IMAGE_ASSETS),
+    runtimeImages: runtimeImageResidency(FLOOR_CONTEXT_IMAGE_ASSETS),
     groups: GENERATED_STAGE_ASSET_GROUPS.map((group) => runtimeAssetGroupResidency(group))
   };
 }
 
-function runtimeImageResidency(): RuntimeImageResidency[] {
-  return STARTUP_IMAGE_ASSETS.map((asset) => {
+function runtimeImageResidency(assets: readonly RuntimeImageAsset[]): RuntimeImageResidency[] {
+  return assets.map((asset) => {
     const record = runtimeImageLoadRecords.get(asset.key);
     const texture = textureResidency([asset.key])[0] ?? { key: asset.key, exists: false, width: 0, height: 0 };
     return {

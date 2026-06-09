@@ -37,12 +37,25 @@ test("travel loop: forest east portal -> badlands, and the ledge -> Northwatch",
   logErrors(page);
   await page.goto("/?e2e");
   await join(page);
+  const startupAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  expect(startupAssets?.startupImages.some((asset) => asset.key === "cityTiles"), "Northwatch city sheet should not be a startup asset").toBe(false);
+  const startupCity = startupAssets?.runtimeImages.find((asset) => asset.key === "cityTiles");
+  expect(startupCity?.tier).toBe("play-context");
+  expect(startupCity?.resident, "Northwatch city sheet should wait for floor-context loading").toBe(false);
 
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 108.5, y: 35.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 6, null, { timeout: 8000 });
 
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 95.5), y: scaleY(6, 16.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 4, null, { timeout: 8000 });
+  await page.waitForFunction(() => {
+    const textures = window.__TIB_E2E__?.textureResidency?.(["cityTiles", "tileCityRoad", "cityCurbN", "spriteCityHall"]) ?? [];
+    return textures.length === 4 && textures.every((texture) => texture.exists && texture.width > 0 && texture.height > 0);
+  });
+  const northwatchAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  const loadedCity = northwatchAssets?.runtimeImages.find((asset) => asset.key === "cityTiles");
+  expect(loadedCity?.trigger).toBe("play-context");
+  expect(loadedCity?.resident, "Northwatch city sheet should be resident after traveling to floor 4").toBe(true);
 });
 
 test("a Dust Burrower ambushes from hiding, stunning the player", async ({ page }) => {

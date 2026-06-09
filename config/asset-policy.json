@@ -10,12 +10,12 @@
       "maxFiles": 500
     },
     "startupPreload": {
-      "maxTotalBytes": 57671680,
+      "maxTotalBytes": 54525952,
       "maxFiles": 80
     },
     "lazyBundles": {
       "maxTotalBytes": 8388608,
-      "maxFileBytes": 2097152,
+      "maxFileBytes": 4194304,
       "maxFiles": 64
     }
   },
@@ -101,7 +101,6 @@
       "name": "preloaded-biomes",
       "description": "Legacy floor tiles still preloaded while runtime streaming is being tightened.",
       "include": [
-        "public/citytiles.png",
         "public/graveyardtiles.png",
         "public/dark-forest-tiles.png",
         "public/swamp-tiles.png",
@@ -111,7 +110,7 @@
         "public/jungle-tiles.png",
         "public/crypt-dungeon-tiles.png"
       ],
-      "maxTotalBytes": 25165824,
+      "maxTotalBytes": 23068672,
       "maxFileBytes": 4194304,
       "maxFiles": 12
     },
@@ -144,6 +143,16 @@
   ],
   "lazyClassifications": [
     {
+      "name": "lazy/floor-context-biomes",
+      "description": "Hand-authored biome sheets loaded through floor transitions instead of startup preload.",
+      "include": [
+        "public/citytiles.png"
+      ],
+      "maxTotalBytes": 4194304,
+      "maxFileBytes": 4194304,
+      "maxFiles": 4
+    },
+    {
       "name": "lazy/background-generated-stages",
       "description": "Generated stage tilesets loaded through ensureGeneratedStageAssetsLoaded rather than startup preload.",
       "include": [
@@ -167,7 +176,7 @@
     },
     "runtime image play-context/background assets": {
       "maxTotalBytes": 4194304,
-      "maxFileBytes": 2097152,
+      "maxFileBytes": 4194304,
       "maxFiles": 40
     }
   }
