@@ -40,6 +40,9 @@ interface Summary {
 type SummaryMetric =
   | "tickMs"
   | "snapshotMs"
+  | "pathfindingMs"
+  | "pathfindingQueriesPerSecond"
+  | "pathfindingVisitedPerSecond"
   | "eventLoopDelayMs"
   | "eventLoopDelayP95Ms"
   | "eventLoopDelayMaxMs"
@@ -85,6 +88,12 @@ const simulatedBackpressureMs = Math.max(75, Math.floor(Number(options["simulate
 const oversizedClientMessageBytes = Math.max(0, Math.floor(Number(options["oversized-client-message-bytes"] ?? 0)));
 const oversizedClientMessage =
   oversizedClientMessageBytes > 0 ? JSON.stringify({ type: "input", input: randomInput(), pad: "x".repeat(oversizedClientMessageBytes) }) : "";
+const spawnMonsterCount = Math.max(0, Math.floor(Number(options["spawn-monsters"] ?? 0)));
+const spawnMonsterRadius = Math.max(1, Number(options["spawn-monster-radius"] ?? 6));
+const spawnMonsterTypes = String(options["spawn-monster-types"] ?? "wolf,grave_shambler,bound_wight,restless_husk")
+  .split(",")
+  .map((type) => type.trim())
+  .filter(Boolean);
 const combatZones = String(options.zones ?? "cemetery,crypt,woods")
   .split(",")
   .map((z) => z.trim())
@@ -116,6 +125,9 @@ const stats = {
 const observed = {
   tickMs: [] as number[],
   snapshotMs: [] as number[],
+  pathfindingMs: [] as number[],
+  pathfindingQueriesPerSecond: [] as number[],
+  pathfindingVisitedPerSecond: [] as number[],
   eventLoopDelayMs: [] as number[],
   eventLoopDelayP95Ms: [] as number[],
   eventLoopDelayMaxMs: [] as number[],
@@ -232,6 +244,9 @@ function openClient(index: number): void {
       if (eventBurstCount > 0 && index < eventBurstClients) {
         setTimeout(() => emitEventBurst(socket), eventBurstAfterMs);
       }
+      if (spawnMonsterCount > 0 && index === 0) {
+        setTimeout(() => spawnMonsterPack(socket), 350);
+      }
       if (index < simulatedBackpressureClients) {
         socket.send(JSON.stringify({ type: "e2eSimulateBackpressure", durationMs: simulatedBackpressureMs }));
       }
@@ -283,6 +298,26 @@ function maybeTargetMonster(socket: WebSocket, message: LoadMessage): void {
   state.targetId = target.id;
   state.lastTargetAt = now;
   socket.send(JSON.stringify({ type: "target", id: target.id }));
+}
+
+function spawnMonsterPack(socket: WebSocket): void {
+  if (socket.readyState !== WebSocket.OPEN || spawnMonsterTypes.length === 0) return;
+  const anchor = combatAssignments.get(0) ?? { floor: 3, x: 16.5, y: 20.5 };
+  for (let i = 0; i < spawnMonsterCount; i += 1) {
+    const ring = Math.floor(i / 12);
+    const angle = (i % 12) * ((Math.PI * 2) / 12) + ring * 0.37;
+    const radius = 1.6 + (ring % 4) * Math.min(1.5, spawnMonsterRadius / 4);
+    const type = spawnMonsterTypes[i % spawnMonsterTypes.length];
+    socket.send(
+      JSON.stringify({
+        type: "e2eSpawnMonster",
+        monster: type,
+        floor: anchor.floor,
+        x: Math.round(anchor.x + Math.cos(angle) * radius),
+        y: Math.round(anchor.y + Math.sin(angle) * radius)
+      })
+    );
+  }
 }
 
 function nearestMonster(player: PlayerView, monsters: MonsterView[]): MonsterView | undefined {
@@ -353,6 +388,13 @@ function recordMetrics(m: Partial<StateMetrics>): void {
   observed.metricSamples += 1;
   if (typeof m.tickMs === "number") observed.tickMs.push(m.tickMs);
   if (typeof m.snapshotMs === "number") observed.snapshotMs.push(m.snapshotMs);
+  if (typeof m.pathfindingMs === "number") observed.pathfindingMs.push(m.pathfindingMs);
+  if (typeof m.pathfindingQueriesPerSecond === "number") {
+    observed.pathfindingQueriesPerSecond.push(m.pathfindingQueriesPerSecond);
+  }
+  if (typeof m.pathfindingVisitedPerSecond === "number") {
+    observed.pathfindingVisitedPerSecond.push(m.pathfindingVisitedPerSecond);
+  }
   if (typeof m.eventLoopDelayMs === "number") observed.eventLoopDelayMs.push(m.eventLoopDelayMs);
   if (typeof m.eventLoopDelayP95Ms === "number") observed.eventLoopDelayP95Ms.push(m.eventLoopDelayP95Ms);
   if (typeof m.eventLoopDelayMaxMs === "number") observed.eventLoopDelayMaxMs.push(m.eventLoopDelayMaxMs);
@@ -465,6 +507,9 @@ function thresholdFailuresFor(report: ReturnType<typeof buildReportShape>): stri
   const metricNames: SummaryMetric[] = [
     "tickMs",
     "snapshotMs",
+    "pathfindingMs",
+    "pathfindingQueriesPerSecond",
+    "pathfindingVisitedPerSecond",
     "eventLoopDelayMs",
     "eventLoopDelayP95Ms",
     "eventLoopDelayMaxMs",
@@ -578,6 +623,11 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
         afterMs: eventBurstAfterMs,
         spread: eventBurstSpread
       },
+      spawnedMonsters: {
+        count: spawnMonsterCount,
+        radius: spawnMonsterRadius,
+        types: spawnMonsterTypes
+      },
       simulatedBackpressure: {
         clients: simulatedBackpressureClients,
         durationMs: simulatedBackpressureMs
@@ -599,6 +649,9 @@ function buildReportShape(combatZoneCounts: Record<string, number>) {
     perTick: {
       tickMs: summarize(observed.tickMs),
       snapshotMs: summarize(observed.snapshotMs),
+      pathfindingMs: summarize(observed.pathfindingMs),
+      pathfindingQueriesPerSecond: summarize(observed.pathfindingQueriesPerSecond),
+      pathfindingVisitedPerSecond: summarize(observed.pathfindingVisitedPerSecond),
       eventLoopDelayMs: summarize(observed.eventLoopDelayMs),
       eventLoopDelayP95Ms: summarize(observed.eventLoopDelayP95Ms),
       eventLoopDelayMaxMs: summarize(observed.eventLoopDelayMaxMs),

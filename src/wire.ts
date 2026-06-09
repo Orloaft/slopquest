@@ -198,6 +198,9 @@ interface CompactStateMetrics {
   rss: number;
   tm: number;
   sm: number;
+  pm?: number;
+  pq?: number;
+  pv?: number;
   eld: number;
   elp: number;
   elm: number;
@@ -743,6 +746,9 @@ function compactStateMetrics(metrics: StateMetrics): CompactStateMetrics {
     rss: metrics.rssMb,
     tm: metrics.tickMs,
     sm: metrics.snapshotMs,
+    pm: metrics.pathfindingMs,
+    pq: metrics.pathfindingQueriesPerSecond,
+    pv: metrics.pathfindingVisitedPerSecond,
     eld: metrics.eventLoopDelayMs,
     elp: metrics.eventLoopDelayP95Ms,
     elm: metrics.eventLoopDelayMaxMs,
@@ -784,6 +790,9 @@ function expandStateMetrics(metrics: CompactStateMetrics | StateMetrics): StateM
     rssMb: metrics.rss,
     tickMs: metrics.tm,
     snapshotMs: metrics.sm,
+    pathfindingMs: metrics.pm ?? 0,
+    pathfindingQueriesPerSecond: metrics.pq ?? 0,
+    pathfindingVisitedPerSecond: metrics.pv ?? 0,
     eventLoopDelayMs: metrics.eld,
     eventLoopDelayP95Ms: metrics.elp,
     eventLoopDelayMaxMs: metrics.elm,

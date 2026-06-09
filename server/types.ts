@@ -161,6 +161,11 @@ export interface ServerMonster {
   zone: string;
   wanderTarget: Vec2 | null;
   wanderNextAt: number;
+  pathTargetX?: number;
+  pathTargetY?: number;
+  pathNextX?: number;
+  pathNextY?: number;
+  pathNextAt?: number;
   // Status effects applied by player abilities (timestamps in performance.now ms).
   tauntUntil?: number;
   tauntBy?: string;
@@ -313,6 +318,11 @@ export interface MetricWindow {
 export interface Metrics {
   tickWindow: MetricWindow;
   snapshotWindow: MetricWindow;
+  pathfindingWindow: MetricWindow;
+  pathfindingQueriesThisSecond: number;
+  pathfindingQueriesPerSecond: number;
+  pathfindingVisitedThisSecond: number;
+  pathfindingVisitedPerSecond: number;
   bytesOutThisSecond: number;
   bytesOutPerSecond: number;
   wireBytesOutPerSecond: number;

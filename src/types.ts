@@ -279,6 +279,9 @@ export interface StateMetrics {
   rssMb: number;
   tickMs: number;
   snapshotMs: number;
+  pathfindingMs: number;
+  pathfindingQueriesPerSecond: number;
+  pathfindingVisitedPerSecond: number;
   eventLoopDelayMs: number;
   eventLoopDelayP95Ms: number;
   eventLoopDelayMaxMs: number;

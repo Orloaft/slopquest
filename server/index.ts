@@ -218,6 +218,15 @@ interface SpatialCellRef {
   cy: number;
 }
 
+interface MonsterPathContext {
+  cols: number;
+  rows: number;
+  stamp: number;
+  seen: Uint32Array;
+  parent: Int32Array;
+  queue: Int32Array;
+}
+
 type SnapshotEntity =
   | PlayerView
   | MonsterView
@@ -271,6 +280,9 @@ interface SnapshotMetricFrame {
   rssMb: number;
   tickMs: number;
   snapshotMs: number;
+  pathfindingMs: number;
+  pathfindingQueriesPerSecond: number;
+  pathfindingVisitedPerSecond: number;
   eventLoopDelayMs: number;
   eventLoopDelayP95Ms: number;
   eventLoopDelayMaxMs: number;
@@ -525,6 +537,12 @@ const MONSTER_RANGED_WINDUP_MS = 420;
 const MONSTER_RANGED_EVADE_RADIUS = 1.15;
 const MONSTER_LEASH_RADIUS = 12;
 const MONSTER_LEASH_REGEN_PER_SEC = 18;
+const MONSTER_PATH_REPATH_MS = 260;
+const MONSTER_PATH_TARGET_EPSILON = 0.85;
+const MONSTER_PATH_MAX_VISITED = 96;
+const MONSTER_PATH_DIRECT_RETRY_SQ = 0.0025;
+const MONSTER_PATH_DX = [1, -1, 0, 0] as const;
+const MONSTER_PATH_DY = [0, 0, 1, -1] as const;
 const THREAT_DECAY_PER_SEC = 1.5;
 const THREAT_FORCED_TAUNT = 10000;
 const THREAT_ASSIST_RADIUS = 7;
@@ -642,6 +660,7 @@ const eventOrder = new WeakMap<GameEvent, number>();
 const materializedTreeCells = new Set<string>();
 const materializedStaticResourceCells = new Set<string>();
 const spatialQueryCellCache = new Map<string, SpatialCellRef[]>();
+const monsterPathContexts = new Map<string, MonsterPathContext>();
 const treeMaterializationRangesThisSnapshot = new Set<string>();
 const staticResourceMaterializationRangesThisSnapshot = new Set<string>();
 const staticPruneKeepCellsScratch = new Set<string>();
@@ -654,6 +673,11 @@ eventLoopDelay.enable();
 const metrics: Metrics = {
   tickWindow: createMetricWindow(),
   snapshotWindow: createMetricWindow(),
+  pathfindingWindow: createMetricWindow(),
+  pathfindingQueriesThisSecond: 0,
+  pathfindingQueriesPerSecond: 0,
+  pathfindingVisitedThisSecond: 0,
+  pathfindingVisitedPerSecond: 0,
   bytesOutThisSecond: 0,
   bytesOutPerSecond: 0,
   wireBytesOutPerSecond: 0,
@@ -1189,11 +1213,7 @@ function updateMonsters(dt: number, now: number, activeRegions: ActiveRegions): 
     }
 
     if (distSq > rangeSq && !frozen && !snared && !staggered) {
-      const dist = Math.sqrt(distSq);
-      const dx = (target.x - monster.x) / dist;
-      const dy = (target.y - monster.y) / dist;
-      const speedMult = slowed ? monster.slowMult ?? 0.6 : 1;
-      moveEntity(monster, dx * catalog.speed * speedMult * dt, dy * catalog.speed * speedMult * dt);
+      chaseMonster(monster, target, catalog, dt, now, slowed);
       updateMonsterCell(monster, oldFloor, oldX, oldY);
     }
 
@@ -1229,6 +1249,7 @@ function leashMonster(monster: ServerMonster, catalog: Monster, dt: number, now:
   monster.heavyResolveAt = 0;
   monster.heavyTargetId = undefined;
   monster.wanderTarget = null;
+  clearMonsterPath(monster);
   monster.attackUntil = 0;
   monster.moving = true;
   if (monster.hp < monster.maxHp) monster.hp = clamp(monster.hp + MONSTER_LEASH_REGEN_PER_SEC * dt, 0, monster.maxHp);
@@ -1253,6 +1274,7 @@ function clearMonsterCombatState(monster: ServerMonster): void {
   monster.rangedResolveAt = 0;
   monster.rangedTargetId = undefined;
   monster.rangedDamage = 0;
+  clearMonsterPath(monster);
   monster.threat.clear();
 }
 
@@ -3943,6 +3965,7 @@ function respawnMonster(monster: ServerMonster): void {
   monster.heavyTargetId = undefined;
   monster.wanderTarget = null;
   monster.wanderNextAt = performance.now() + roll([1000, 3500]);
+  clearMonsterPath(monster);
   clearMonsterCombatState(monster);
   monster.snareUntil = 0;
   monster.freezeUntil = 0;
@@ -4081,6 +4104,145 @@ function moveEntity(entity: { floor: number; x: number; y: number; dir: Directio
   const movedX = entity.x - oldX;
   const movedY = entity.y - oldY;
   entity.moving = movedX * movedX + movedY * movedY > 0.000001;
+}
+
+function chaseMonster(monster: ServerMonster, target: ServerPlayer, catalog: Monster, dt: number, now: number, slowed: boolean): void {
+  const oldX = monster.x;
+  const oldY = monster.y;
+  const dist = Math.max(0.001, distance(monster, target));
+  const speedMult = slowed ? monster.slowMult ?? 0.6 : 1;
+  const step = catalog.speed * speedMult * dt;
+  if (hasLineOfSight(monster.floor, monster.x, monster.y, target.x, target.y)) {
+    moveEntity(monster, ((target.x - monster.x) / dist) * step, ((target.y - monster.y) / dist) * step);
+    if (distanceSq({ x: oldX, y: oldY }, monster) > MONSTER_PATH_DIRECT_RETRY_SQ) {
+      clearMonsterPath(monster);
+      return;
+    }
+  }
+
+  const next = monsterNextPathStep(monster, target, now);
+  if (!next) return;
+  const pathDist = Math.max(0.001, Math.hypot(next.x - monster.x, next.y - monster.y));
+  moveEntity(monster, ((next.x - monster.x) / pathDist) * step, ((next.y - monster.y) / pathDist) * step);
+}
+
+function monsterNextPathStep(monster: ServerMonster, target: ServerPlayer, now: number): Vec2 | null {
+  if (
+    monster.pathNextX !== undefined &&
+    monster.pathNextY !== undefined &&
+    monster.pathTargetX !== undefined &&
+    monster.pathTargetY !== undefined &&
+    now < (monster.pathNextAt ?? 0) &&
+    Math.hypot(target.x - monster.pathTargetX, target.y - monster.pathTargetY) <= MONSTER_PATH_TARGET_EPSILON
+  ) {
+    return { x: monster.pathNextX, y: monster.pathNextY };
+  }
+
+  const started = performance.now();
+  const step = findMonsterPathStep(monster.floor, monster.x, monster.y, target.x, target.y);
+  recordSample(metrics.pathfindingWindow, performance.now() - started);
+  metrics.pathfindingQueriesThisSecond += 1;
+  monster.pathTargetX = target.x;
+  monster.pathTargetY = target.y;
+  monster.pathNextX = step?.x;
+  monster.pathNextY = step?.y;
+  monster.pathNextAt = now + MONSTER_PATH_REPATH_MS;
+  return step;
+}
+
+function findMonsterPathStep(floor: number, fromX: number, fromY: number, toX: number, toY: number): Vec2 | null {
+  const ctx = monsterPathContextFor(floor);
+  const startX = clamp(Math.floor(fromX), 0, ctx.cols - 1);
+  const startY = clamp(Math.floor(fromY), 0, ctx.rows - 1);
+  const goalX = clamp(Math.floor(toX), 0, ctx.cols - 1);
+  const goalY = clamp(Math.floor(toY), 0, ctx.rows - 1);
+  const start = startY * ctx.cols + startX;
+  const goal = goalY * ctx.cols + goalX;
+  if (start === goal) return null;
+
+  ctx.stamp += 1;
+  if (ctx.stamp >= 0xffffffff) {
+    ctx.stamp = 1;
+    ctx.seen.fill(0);
+  }
+  ctx.seen[start] = ctx.stamp;
+  ctx.parent[start] = -1;
+  let head = 0;
+  let tail = 0;
+  let best = start;
+  let bestDistSq = tileDistSq(startX, startY, goalX, goalY);
+  let visited = 0;
+  ctx.queue[tail++] = start;
+
+  while (head < tail && visited < MONSTER_PATH_MAX_VISITED) {
+    const cell = ctx.queue[head++]!;
+    visited += 1;
+    if (cell === goal) {
+      best = cell;
+      break;
+    }
+    const cx = cell % ctx.cols;
+    const cy = Math.floor(cell / ctx.cols);
+    for (let i = 0; i < MONSTER_PATH_DX.length; i += 1) {
+      const nx = cx + MONSTER_PATH_DX[i]!;
+      const ny = cy + MONSTER_PATH_DY[i]!;
+      if (nx < 0 || ny < 0 || nx >= ctx.cols || ny >= ctx.rows) continue;
+      if (!canStand(floor, nx + 0.5, ny + 0.5)) continue;
+      const next = ny * ctx.cols + nx;
+      if (ctx.seen[next] === ctx.stamp) continue;
+      ctx.seen[next] = ctx.stamp;
+      ctx.parent[next] = cell;
+      ctx.queue[tail++] = next;
+      const distSq = tileDistSq(nx, ny, goalX, goalY);
+      if (distSq < bestDistSq) {
+        bestDistSq = distSq;
+        best = next;
+      }
+    }
+  }
+  metrics.pathfindingVisitedThisSecond += visited;
+  if (best === start) return null;
+
+  let step = best;
+  let parent = ctx.parent[step] ?? -1;
+  while (parent !== start && parent >= 0) {
+    step = parent;
+    parent = ctx.parent[step] ?? -1;
+  }
+  return { x: (step % ctx.cols) + 0.5, y: Math.floor(step / ctx.cols) + 0.5 };
+}
+
+function monsterPathContextFor(floor: number): MonsterPathContext {
+  const cols = floorCols(floor);
+  const rows = floorRows(floor);
+  const key = `${cols}x${rows}`;
+  const cached = monsterPathContexts.get(key);
+  if (cached) return cached;
+  const maxCells = cols * rows;
+  const context: MonsterPathContext = {
+    cols,
+    rows,
+    stamp: 0,
+    seen: new Uint32Array(maxCells),
+    parent: new Int32Array(maxCells),
+    queue: new Int32Array(maxCells)
+  };
+  monsterPathContexts.set(key, context);
+  return context;
+}
+
+function tileDistSq(ax: number, ay: number, bx: number, by: number): number {
+  const dx = ax - bx;
+  const dy = ay - by;
+  return dx * dx + dy * dy;
+}
+
+function clearMonsterPath(monster: ServerMonster): void {
+  monster.pathTargetX = undefined;
+  monster.pathTargetY = undefined;
+  monster.pathNextX = undefined;
+  monster.pathNextY = undefined;
+  monster.pathNextAt = 0;
 }
 
 function canStand(floor: number, x: number, y: number): boolean {
@@ -4330,6 +4492,9 @@ function snapshotMetricFrame(): SnapshotMetricFrame {
     rssMb: round(memory.rss / 1024 / 1024),
     tickMs: round(metricAverage(metrics.tickWindow)),
     snapshotMs: round(metricAverage(metrics.snapshotWindow)),
+    pathfindingMs: round(metricAverage(metrics.pathfindingWindow)),
+    pathfindingQueriesPerSecond: metrics.pathfindingQueriesPerSecond,
+    pathfindingVisitedPerSecond: metrics.pathfindingVisitedPerSecond,
     eventLoopDelayMs: metrics.eventLoopDelayMs,
     eventLoopDelayP95Ms: metrics.eventLoopDelayP95Ms,
     eventLoopDelayMaxMs: metrics.eventLoopDelayMaxMs,
@@ -4527,6 +4692,9 @@ function buildSnapshotFor(
       rssMb: metricFrame.rssMb,
       tickMs: metricFrame.tickMs,
       snapshotMs: metricFrame.snapshotMs,
+      pathfindingMs: metricFrame.pathfindingMs,
+      pathfindingQueriesPerSecond: metricFrame.pathfindingQueriesPerSecond,
+      pathfindingVisitedPerSecond: metricFrame.pathfindingVisitedPerSecond,
       eventLoopDelayMs: metricFrame.eventLoopDelayMs,
       eventLoopDelayP95Ms: metricFrame.eventLoopDelayP95Ms,
       eventLoopDelayMaxMs: metricFrame.eventLoopDelayMaxMs,
@@ -6309,6 +6477,8 @@ function updateByteMetric(): void {
   metrics.socketsTerminatedBackpressurePerSecond = metrics.socketsTerminatedBackpressureThisSecond;
   metrics.eventsDroppedPerSecond = metrics.eventsDroppedThisSecond;
   metrics.clientMessagesDroppedPerSecond = metrics.clientMessagesDroppedThisSecond;
+  metrics.pathfindingQueriesPerSecond = metrics.pathfindingQueriesThisSecond;
+  metrics.pathfindingVisitedPerSecond = metrics.pathfindingVisitedThisSecond;
   metrics.eventLoopDelayMs = nsToMs(eventLoopDelay.mean);
   metrics.eventLoopDelayP95Ms = nsToMs(eventLoopDelay.percentile(95));
   metrics.eventLoopDelayMaxMs = nsToMs(eventLoopDelay.max);
@@ -6319,6 +6489,8 @@ function updateByteMetric(): void {
   metrics.socketsTerminatedBackpressureThisSecond = 0;
   metrics.eventsDroppedThisSecond = 0;
   metrics.clientMessagesDroppedThisSecond = 0;
+  metrics.pathfindingQueriesThisSecond = 0;
+  metrics.pathfindingVisitedThisSecond = 0;
   metrics.lastBytesAt = now;
 }
 
