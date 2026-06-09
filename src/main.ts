@@ -1198,6 +1198,7 @@ const STARTER_AREA_STARTUP_IMAGE_ASSETS: RuntimeImageAsset[] = [
 ];
 
 const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
+  [8, [runtimeImageAsset("beachTiles", "/beach-tiles.png", "play-context", "Sunken Beach source sheet", 8, "beach")]],
   [7, [runtimeImageAsset("desertTiles", "/desert-tiles.png", "play-context", "Sunken Desert source sheet", 7, "desert")]],
   [5, [runtimeImageAsset("swampTiles", "/swamp-tiles.png", "play-context", "Sunken Marsh source sheet", 5, "swamp")]],
   [4, [runtimeImageAsset("cityTiles", "/citytiles.png", "play-context", "Northwatch city source sheet", 4, "northwatch")]]
@@ -1250,7 +1251,6 @@ const RESIDENT_AUTHORING_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png", "startup", "resident searing cultist kit", 6, "badlands"),
   runtimeImageAsset("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png", "startup", "resident searing ritual kit", 6, "badlands"),
   runtimeImageAsset("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png", "startup", "resident searing mine kit", 6, "badlands"),
-  runtimeImageAsset("beachTiles", "/beach-tiles.png", "startup", "resident beach source sheet", 8, "beach"),
   runtimeImageAsset("jungleTiles", "/jungle-tiles.png", "startup", "resident jungle source sheet", 9, "jungle"),
   runtimeImageAsset("dungeonTiles", "/crypt-dungeon-tiles.png", "startup", "resident mine/dungeon source sheet", 10, "deepmine")
 ];
@@ -1806,87 +1806,6 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "mineKit", "spriteMineHoist", 653, 121, 407, 463);
   makeSpriteTexture(this, "mineKit", "spriteMineCart", 1162, 241, 327, 336);
   makeSpriteTexture(this, "mineKit", "spriteMineTrack", 1601, 293, 467, 268);
-  // Sunken Beach (floor 8). Crops from assetsources/rejected/beach-biome-tiles.png.
-  makeTileTexture(this, "beachTiles", "tileBeachSand", 20, 99, 70, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachRippleSand", 100, 99, 70, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShellSand", 180, 99, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachPebbleSand", 260, 99, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachWetSand", 20, 180, 70, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachPath", 96, 402, 70, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachStairs", 390, 864, 72, 82, 0, true);
-  makeTileTexture(this, "beachTiles", "tileBeachStairsLeft", 390, 864, 72, 82, 0, true);
-  makeTileTexture(this, "beachTiles", "tileBeachStairsMid", 462, 864, 72, 82, 0, true);
-  makeTileTexture(this, "beachTiles", "tileBeachStairsRight", 606, 864, 72, 82, 0, true);
-  // Cliff faces: crop the COBBLE band (y143–176) of the sandstone plateau blocks — the old
-  // [.,100,72,82] rects sampled mostly the SANDY block-top ABOVE the face, so the wall baked as
-  // sand and the plateau read flat no matter how it was tuned. Natural cobble already contrasts
-  // the bright sand top, so no luminance hack is needed; the render pass adds the sunlit lip +
-  // foot-AO. The lower wall course (|) is mildly darkened for a lit-top → shadowed-base gradient.
-  const beachWallShade = (k: number) => (r: number, g: number, b: number): [number, number, number] => [Math.round(r * k), Math.round(g * k), Math.round(b * k)];
-  // Mid face + lower wall crop the SAME flat cobble band (above the block's rounded bottom, which
-  // dips into magenta and otherwise avg-fills into a muddy maroon seam) so stacked courses tile
-  // seamlessly — the wall is just darkened for a lit-top → shadowed-base read. Caps crop a tighter
-  // 52px window onto the block's rounded L/R ends so the SW/SE corners actually round off.
-  // x = mid face, 0/1 = rounded L/R side edges. All crop a rim-free cobble band (y144–172, clear of
-  // both the lit rim above and the magenta rounded-bottom below) so 0/1 can stack down the FULL
-  // flank without a repeating rim line — the render pass adds the sunlit lip to the top course only.
-  makeTileTexture(this, "beachTiles", "tileBeachCliff", 560, 144, 72, 28, 0, false);
-  makeTileTexture(this, "beachTiles", "tileBeachCliffLeft", 528, 144, 52, 28, 0, false);
-  makeTileTexture(this, "beachTiles", "tileBeachCliffRight", 608, 144, 52, 28, 0, false);
-  makeTileTexture(this, "beachTiles", "tileBeachRockWall", 560, 144, 72, 28, 0, false, beachWallShade(0.78));
-  makeTileTexture(this, "beachTiles", "tileBeachRock", 1048, 482, 70, 62, undefined, true);
-  makeTileTexture(this, "beachTiles", "tileBeachShore", 1320, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreNorth", 1320, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreEast", 1232, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreSouth", 1056, 260, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreWest", 1408, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerNW", 1232, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerNE", 1320, 100, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSW", 1320, 260, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachShoreCornerSE", 1408, 260, 72, 72);
-  makeTileTexture(this, "beachTiles", "tileBeachLagoon", 1040, 92, 72, 72, 18);
-  makeTileTexture(this, "beachTiles", "tileOcean", 1056, 92, 72, 72, 18);
-  makeTileTexture(this, "beachTiles", "tileOceanRipple", 1144, 92, 72, 72, 18);
-  makeTileTexture(this, "beachTiles", "tileOceanRock", 1128, 92, 72, 72, 18);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachCliffLipA", 528, 100, 128, 74);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachCliffLipB", 680, 100, 132, 74);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachStairsRun4", 390, 864, 288, 82);
-  // ONE wooden flight (left rail to right rail) — the sheet's "stairs" are four complete
-  // standalone flights, so we crop a single one and draw it whole over each ledge notch.
-  makeSpriteTexture(this, "beachTiles", "spriteBeachStaircase", 388, 850, 82, 99, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachHut", 1366, 860, 116, 118);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachDock", 642, 650, 168, 86);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachBoat", 560, 722, 74, 48);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachCave", 684, 861, 118, 89, true); // defringe: kill the magenta halo around the rocky arch
-  makeSpriteTexture(this, "beachTiles", "spriteBeachTent", 1040, 866, 92, 70);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachCampfire", 1160, 872, 72, 66);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachPalm", 1438, 944, 86, 72);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachRocks", 1204, 402, 88, 74);
-  // Floor-8 props placed in MAP_OBJECTS[8] by commit a233d59 but never registered, so they
-  // rendered as Phaser's green missing-texture box. Crops keyed off the same beach sheet
-  // (RUINS, WOODEN PROPS, ROCKS and DECORATIVE blocks); defringed to drop the maroon key.
-  makeSpriteTexture(this, "beachTiles", "spriteBeachRuin", 1018, 648, 96, 72, true); // broken stone arch
-  makeSpriteTexture(this, "beachTiles", "spriteBeachStoneWall", 1228, 650, 88, 62, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachWell", 826, 742, 70, 56, true); // round stone well-head
-  makeSpriteTexture(this, "beachTiles", "spriteBeachBoulder", 1260, 390, 84, 62, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachBarrel", 507, 748, 56, 50, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachFence", 284, 747, 72, 40, true); // post-and-rail
-  makeSpriteTexture(this, "beachTiles", "spriteBeachSign", 282, 663, 50, 68, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachLogPile", 903, 489, 82, 46, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachStump", 655, 496, 68, 47, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachBonePile", 588, 488, 64, 48, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachFlowerWhite", 856, 386, 46, 46, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachFlowerYellow", 806, 386, 46, 46, true);
-  // Beach ground-clutter scatter (floor 8): grass tufts, driftwood, rocks, a crab and
-  // seaweed from the sheet's DECORATIVE GROUND DETAILS block, hash-scattered over open
-  // sand in addBeachClutter so the dunes read alive. Defringed (maroon-keyed sheet).
-  makeSpriteTexture(this, "beachTiles", "spriteBeachGrass", 576, 393, 36, 35, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachGrass2", 725, 395, 33, 34, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachShrub", 526, 447, 36, 29, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachRockSm", 917, 448, 33, 32, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachDriftwood", 527, 495, 36, 31, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachCrab", 820, 450, 35, 35, true);
-  makeSpriteTexture(this, "beachTiles", "spriteBeachSeaweed", 581, 503, 33, 31, true);
   // Untamed Jungle (floor 9). Crops from assetsources/rejected/jungle-biome-tiles.png.
   makeTileTexture(this, "jungleTiles", "tileJungle", 18, 97, 72, 74);
   // Lush jungle-floor VARIANTS (other leafy-foliage ground tiles from the sheet's GROUND row).
@@ -2068,6 +1987,73 @@ function create(this: Phaser.Scene): void {
   zoomKeys.NUMPAD_SUBTRACT?.on("down", () => { if (!isTextEntryFocused()) nudgeUserZoom(1 / ZOOM_KEY_STEP); });
 
   refreshKeyboardCapture();
+}
+
+function buildSunkenBeachTextures(scene: Phaser.Scene): void {
+  if (scene.textures.exists("tileBeachSand")) return;
+  // Sunken Beach (floor 8). Crops from assetsources/rejected/beach-biome-tiles.png.
+  makeTileTexture(scene, "beachTiles", "tileBeachSand", 20, 99, 70, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachRippleSand", 100, 99, 70, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachShellSand", 180, 99, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachPebbleSand", 260, 99, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachWetSand", 20, 180, 70, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachPath", 96, 402, 70, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachStairs", 390, 864, 72, 82, 0, true);
+  makeTileTexture(scene, "beachTiles", "tileBeachStairsLeft", 390, 864, 72, 82, 0, true);
+  makeTileTexture(scene, "beachTiles", "tileBeachStairsMid", 462, 864, 72, 82, 0, true);
+  makeTileTexture(scene, "beachTiles", "tileBeachStairsRight", 606, 864, 72, 82, 0, true);
+  // Cliff faces: crop the COBBLE band (y143-176) of the sandstone plateau blocks. The lower
+  // wall course is mildly darkened for a lit-top -> shadowed-base gradient.
+  const beachWallShade = (k: number) => (r: number, g: number, b: number): [number, number, number] => [Math.round(r * k), Math.round(g * k), Math.round(b * k)];
+  makeTileTexture(scene, "beachTiles", "tileBeachCliff", 560, 144, 72, 28, 0, false);
+  makeTileTexture(scene, "beachTiles", "tileBeachCliffLeft", 528, 144, 52, 28, 0, false);
+  makeTileTexture(scene, "beachTiles", "tileBeachCliffRight", 608, 144, 52, 28, 0, false);
+  makeTileTexture(scene, "beachTiles", "tileBeachRockWall", 560, 144, 72, 28, 0, false, beachWallShade(0.78));
+  makeTileTexture(scene, "beachTiles", "tileBeachRock", 1048, 482, 70, 62, undefined, true);
+  makeTileTexture(scene, "beachTiles", "tileBeachShore", 1320, 100, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachShoreNorth", 1320, 100, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachShoreEast", 1232, 100, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachShoreSouth", 1056, 260, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachShoreWest", 1408, 100, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachShoreCornerNW", 1232, 100, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachShoreCornerNE", 1320, 100, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachShoreCornerSW", 1320, 260, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachShoreCornerSE", 1408, 260, 72, 72);
+  makeTileTexture(scene, "beachTiles", "tileBeachLagoon", 1040, 92, 72, 72, 18);
+  makeTileTexture(scene, "beachTiles", "tileOcean", 1056, 92, 72, 72, 18);
+  makeTileTexture(scene, "beachTiles", "tileOceanRipple", 1144, 92, 72, 72, 18);
+  makeTileTexture(scene, "beachTiles", "tileOceanRock", 1128, 92, 72, 72, 18);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachCliffLipA", 528, 100, 128, 74);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachCliffLipB", 680, 100, 132, 74);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachStairsRun4", 390, 864, 288, 82);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachStaircase", 388, 850, 82, 99, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachHut", 1366, 860, 116, 118);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachDock", 642, 650, 168, 86);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachBoat", 560, 722, 74, 48);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachCave", 684, 861, 118, 89, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachTent", 1040, 866, 92, 70);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachCampfire", 1160, 872, 72, 66);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachPalm", 1438, 944, 86, 72);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachRocks", 1204, 402, 88, 74);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachRuin", 1018, 648, 96, 72, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachStoneWall", 1228, 650, 88, 62, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachWell", 826, 742, 70, 56, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachBoulder", 1260, 390, 84, 62, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachBarrel", 507, 748, 56, 50, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachFence", 284, 747, 72, 40, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachSign", 282, 663, 50, 68, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachLogPile", 903, 489, 82, 46, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachStump", 655, 496, 68, 47, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachBonePile", 588, 488, 64, 48, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachFlowerWhite", 856, 386, 46, 46, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachFlowerYellow", 806, 386, 46, 46, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachGrass", 576, 393, 36, 35, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachGrass2", 725, 395, 33, 34, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachShrub", 526, 447, 36, 29, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachRockSm", 917, 448, 33, 32, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachDriftwood", 527, 495, 36, 31, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachCrab", 820, 450, 35, 35, true);
+  makeSpriteTexture(scene, "beachTiles", "spriteBeachSeaweed", 581, 503, 33, 31, true);
 }
 
 function buildSunkenDesertTextures(scene: Phaser.Scene): void {
@@ -9405,6 +9391,10 @@ function ensureFloorContextAssetsLoaded(floor: number, trigger: RuntimeImageLoad
 
 function ensureFloorContextTextures(floor: number): void {
   if (floorContextTextureBuildsReady.has(floor)) return;
+  if (floor === 8) {
+    if (!scene.textures.exists("beachTiles")) return;
+    buildSunkenBeachTextures(scene);
+  }
   if (floor === 7) {
     if (!scene.textures.exists("desertTiles")) return;
     buildSunkenDesertTextures(scene);

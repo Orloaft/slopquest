@@ -18,12 +18,11 @@ test("coast tile semantics: ocean/river block movement not sight; jungle wall bl
   expect(isSightBlocked("E")).toBe(true);
 });
 
-test("beach ledges use composed stairs and rock-wall faces", () => {
+test("beach ledges use cliff caps and rock-wall faces", () => {
   const rows = makeFloorTiles(8);
-  const stairRuns = [[20, 20], [56, 22], [34, 34]] as Array<[number, number]>;
-  for (const [x, y] of stairRuns) {
-    expect(rows[y]?.slice(x, x + 4)).toBe("[22]");
-  }
+  expect(rows[20]?.slice(20, 24)).toBe("xzzz");
+  expect(rows[22]?.slice(56, 60)).toBe("zzzx");
+  expect(rows[34]?.slice(34, 38)).toBe("zzzx");
   expect(rows[21]?.slice(18, 32)).toContain("|");
   expect(rows[23]?.slice(51, 67)).toContain("|");
   expect(rows[35]?.slice(27, 41)).toContain("|");
@@ -59,9 +58,22 @@ test("travel chain: desert -> beach -> jungle, and beach -> desert back", async 
   logErrors(page);
   await page.goto("/?e2e");
   await join(page);
+  const startupAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  expect(startupAssets?.startupImages.some((asset) => asset.key === "beachTiles"), "Sunken Beach sheet should not be a startup asset").toBe(false);
+  const startupBeach = startupAssets?.runtimeImages.find((asset) => asset.key === "beachTiles");
+  expect(startupBeach?.tier).toBe("play-context");
+  expect(startupBeach?.resident, "Sunken Beach sheet should wait for floor-context loading").toBe(false);
 
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: p.x, y: p.y }), { x: scaleX(7, 1.5), y: scaleY(7, 38.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 8, null, { timeout: 8000 });
+  await page.waitForFunction(() => {
+    const textures = window.__TIB_E2E__?.textureResidency?.(["beachTiles", "tileBeachSand", "tileOcean", "spriteBeachPalm"]) ?? [];
+    return textures.length === 4 && textures.every((texture) => texture.exists && texture.width > 0 && texture.height > 0);
+  });
+  const beachAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  const loadedBeach = beachAssets?.runtimeImages.find((asset) => asset.key === "beachTiles");
+  expect(loadedBeach?.trigger).toBe("play-context");
+  expect(loadedBeach?.resident, "Sunken Beach sheet should be resident after traveling to floor 8").toBe(true);
 
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 8, x: p.x, y: p.y }), { x: scaleX(8, 61.5), y: scaleY(8, 17.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 9, null, { timeout: 8000 });
