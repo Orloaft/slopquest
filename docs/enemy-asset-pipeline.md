@@ -15,7 +15,7 @@ consistency for image-model generation.
   (`MAX_SHEET_COLORS` in `tools/validate_enemy_asset_pipeline.py`); over-detailed or heavily
   anti-aliased art is rejected at the gate.
 - **One clear key/rim light**, minimal interior noise.
-- Side art faces **LEFT**; right is mirrored at runtime.
+- Use explicit art for all four rows; do not depend on runtime mirroring for bespoke v2 families.
 
 ## Runtime Sheet Contract
 

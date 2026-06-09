@@ -38,7 +38,7 @@ Hand-authored montage sheets, 4-direction × 4-frame walk. Look good.
 
 ### TIER B — good art, weak animation (upgrade later, not urgent)
 The `/new-enemies.png` montage families. Art is solid detailed pixel art, but each is
-effectively **single-pose** — the same facing is shown for all four directions, and walk/attack
+effectively **single-pose** — the same facing is shown for all four directions, and animation
 cycles are short (3–4 frames). They read fine in motion but lack real directional turns.
 
 `skitterer, mire_spitter, canyon_scavenger, dust_burrower (+crimson_burrower, tinted),
@@ -77,13 +77,13 @@ inherit it (so one good sheet fixes several enemies).
 | 15 | **forest_pixie** | tiny winged fae, glow trail | forest_pixie | woods 3 |
 | 16 | **bog_wraith** | dripping marsh spirit, muddy vapor body | bog_wraith | woods 3 |
 
-> Note for the imagen agent: image models struggle to emit a clean 8×8 sprite grid directly. Two
+> Note for the imagen agent: image models struggle to emit a clean 4×4 sprite grid directly. Two
 > workable routes — (a) generate a single 96px hero frame + a style sheet per family, then rig/animate
 > in the existing pipeline; or (b) generate per-frame and assemble. Decide before batch-running.
 
 ## P1 wishlist — directional/animation upgrade for Tier B (9 families)
-Re-pose the `new-enemies.png` creatures into true 4-direction + walk/attack cycles. Same sheet
-format. Lower priority — art quality is already acceptable.
+Re-pose the `new-enemies.png` creatures into true 4-direction walk cycles. Same sheet format.
+Lower priority — art quality is already acceptable.
 
 ## P2 — roster expansion (gaps, not quality)
 
