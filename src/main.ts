@@ -708,7 +708,10 @@ if (E2E_MODE) {
       if (cam) cam.setZoom(cameraZoomForFloor(self()?.floor ?? null));
     },
     stateVersion: () => stateVersion,
-    viewCounts: () => ({ trees: treeViews.size, npcs: npcViews.size }),
+    viewCounts: () => ({
+      trees: latestState?.trees?.filter((tree) => tree.floor === self()?.floor).length ?? treeViews.size,
+      npcs: latestState?.npcs?.filter((npc) => npc.floor === self()?.floor).length ?? npcViews.size
+    }),
     actorFrameAnchorDrift: () => actorFrameAnchorDrift(),
     textureAlphaStats: (keys: string[]) => textureAlphaStats(keys),
     monsterTextureCoverage: (types?: string[]) =>
@@ -814,6 +817,7 @@ let holdMoveLastRepathAt = 0;
 const HOLD_MOVE_REPATH_MS = 80;
 const MINIMAP_DRAW_MS = 100;
 const MAP_CHUNK_TILES = 16;
+const ENTITY_RENDER_PADDING_TILES = 10;
 
 const SMITHING_RECIPES = {
   weapon: [
@@ -842,6 +846,8 @@ const TOWN_FLOORS = new Set<number>([0, 4]);
 let cemeteryVignette: Phaser.GameObjects.Image | undefined;
 let cemeteryFog: Phaser.GameObjects.Image[] = [];
 let mapRender: MapRenderState | null = null;
+let lastCompassDir: Direction | null = null;
+let lastCutawayKey = "";
 const cutawayBuildingSprites: Array<{ floor: number; object: DecorationSprite; sprite: Phaser.GameObjects.Image }> = [];
 const playerViews = new Map<string, PlayerEntityView>();
 const monsterViews = new Map<string, MonsterEntityView>();
@@ -2018,7 +2024,10 @@ function update(this: Phaser.Scene, time: number): void {
     drawMinimap(me);
     lastMinimapDrawAt = time;
   }
-  drawCompass(me.dir);
+  if (lastCompassDir !== me.dir) {
+    drawCompass(me.dir);
+    lastCompassDir = me.dir;
+  }
   updateFog(me, time);
   driftCemeteryFog();
   if (!dom.mapScreen.classList.contains("hidden")) renderMapScreen(me);
@@ -2367,6 +2376,7 @@ function drawMap(floor: number, center?: TilePoint): void {
   currentFloor = floor;
   applyFloorAtmosphere(floor);
   cutawayBuildingSprites.length = 0;
+  lastCutawayKey = "";
   mapLayer.removeAll(true);
   mapDecorationLayer.removeAll(true);
   const rows = makeFloorTiles(floor);
@@ -2490,6 +2500,7 @@ function updateVisibleMapChunks(centerX?: number, centerY?: number): void {
   const boundsKey = `${minChunkX}:${maxChunkX}:${minChunkY}:${maxChunkY}`;
   if (boundsKey === mapRender.visibleChunkBoundsKey) return;
   mapRender.visibleChunkBoundsKey = boundsKey;
+  lastCutawayKey = "";
   const needed = new Set<string>();
 
   for (let chunkY = minChunkY; chunkY <= maxChunkY; chunkY += 1) {
@@ -2895,9 +2906,36 @@ function mapChunkStats(): MapChunkStats {
   };
 }
 
+interface RenderBounds {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+function entityRenderBounds(): RenderBounds {
+  const camera = scene.cameras.main;
+  const view = camera.worldView;
+  const pad = ENTITY_RENDER_PADDING_TILES * TILE_SIZE;
+  return {
+    left: view.x - pad,
+    right: view.right + pad,
+    top: view.y - pad,
+    bottom: view.bottom + pad
+  };
+}
+
+function isWorldPointRenderable(x: number, y: number, bounds: RenderBounds): boolean {
+  return x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom;
+}
+
+function setTextIfChanged(text: Phaser.GameObjects.Text, value: string): void {
+  if (text.text !== value) text.setText(value);
+}
 function syncEntities(): void {
   const me = self();
   if (!me || !latestState) return;
+  const renderBounds = entityRenderBounds();
   const visiblePlayers = visiblePlayerIds;
   const visibleMonsters = visibleMonsterIds;
   const visibleCorpses = visibleCorpseIds;
@@ -2919,6 +2957,7 @@ function syncEntities(): void {
 
   for (const player of latestState.players) {
     if (player.floor !== me.floor) continue;
+    if (player.id !== selfId && !isWorldPointRenderable(player.x * TILE_SIZE, player.y * TILE_SIZE, renderBounds)) continue;
     visiblePlayers.add(player.id);
     let view = playerViews.get(player.id);
     if (!view) {
@@ -2929,7 +2968,7 @@ function syncEntities(): void {
     setEntityTarget(view, player.x * TILE_SIZE, player.y * TILE_SIZE);
     setActorAnimation(view, "knight", player.dir, player.moving || (player.action != null && ["woodcutting", "fishing", "mining", "cooking"].includes(player.action.type)), 40, 48);
     view.setAlpha(player.dead ? 0.45 : 1);
-    view.nameText.setText(player.name);
+    setTextIfChanged(view.nameText, player.name);
     view.hp.width = 34 * (player.hp / player.maxHp);
     view.targetRing.setVisible(player.id === selfId);
   }
@@ -2943,6 +2982,7 @@ function syncEntities(): void {
 
   for (const monster of latestState.monsters) {
     if (monster.floor !== me.floor) continue;
+    if (!isWorldPointRenderable(monster.x * TILE_SIZE, monster.y * TILE_SIZE, renderBounds)) continue;
     visibleMonsters.add(monster.id);
     let view = monsterViews.get(monster.id);
     if (!view) {
@@ -2956,12 +2996,12 @@ function syncEntities(): void {
     view.sprite.y = actor.yOffset;
     view.sprite.clearTint();
     if (actor.tint) view.sprite.setTint(actor.tint);
-    view.nameText.setText(monster.name);
-    view.roleBadge.setText(roleBadgeText(monster.role));
+    setTextIfChanged(view.nameText, monster.name);
+    setTextIfChanged(view.roleBadge, roleBadgeText(monster.role));
     view.roleBadge.setColor(roleBadgeColor(monster.role));
     view.roleBadge.setVisible(monster.role !== "trash");
     const statusLabel = monsterStatusLabel(monster);
-    view.statusText.setText(statusLabel);
+    setTextIfChanged(view.statusText, statusLabel);
     view.statusText.setVisible(statusLabel.length > 0);
     view.hp.width = 36 * (monster.hp / monster.maxHp);
     view.targetRing.setVisible(me.targetId === monster.id);
@@ -2977,6 +3017,7 @@ function syncEntities(): void {
 
   for (const corpse of latestState.corpses) {
     if (corpse.floor !== me.floor) continue;
+    if (!isWorldPointRenderable(corpse.x * TILE_SIZE, corpse.y * TILE_SIZE, renderBounds)) continue;
     visibleCorpses.add(corpse.id);
     let view = corpseViews.get(corpse.id);
     if (!view) {
@@ -3011,6 +3052,7 @@ function syncEntities(): void {
 
   for (const npc of latestState.npcs ?? []) {
     if (npc.floor !== me.floor) continue;
+    if (!isWorldPointRenderable(npc.x * TILE_SIZE, npc.y * TILE_SIZE, renderBounds)) continue;
     visibleNpcs.add(npc.id);
     let view = npcViews.get(npc.id);
     if (!view) {
@@ -3020,7 +3062,7 @@ function syncEntities(): void {
     }
     setEntityTarget(view, npc.x * TILE_SIZE, npc.y * TILE_SIZE);
     setActorAnimation(view, npc.role === "quest" ? "caster" : "knight", npc.dir, npc.moving, 40, 48);
-    view.nameText.setText(npc.name);
+    setTextIfChanged(view.nameText, npc.name);
   }
   for (const [id, view] of npcViews) {
     if (!visibleNpcs.has(id)) {
@@ -3031,6 +3073,7 @@ function syncEntities(): void {
 
   for (const tree of latestState.trees ?? []) {
     if (tree.floor !== me.floor) continue;
+    if (!isWorldPointRenderable(tree.x * TILE_SIZE, tree.y * TILE_SIZE, renderBounds)) continue;
     visibleTrees.add(tree.id);
     let view = treeViews.get(tree.id);
     if (!view) {
@@ -3055,6 +3098,7 @@ function syncEntities(): void {
 
   for (const node of latestState.fishingNodes ?? []) {
     if (node.floor !== me.floor) continue;
+    if (!isWorldPointRenderable(node.x * TILE_SIZE, node.y * TILE_SIZE, renderBounds)) continue;
     visibleFishingNodes.add(node.id);
     let view = fishingViews.get(node.id);
     if (!view) {
@@ -3074,6 +3118,7 @@ function syncEntities(): void {
 
   for (const node of latestState.miningNodes ?? []) {
     if (node.floor !== me.floor) continue;
+    if (!isWorldPointRenderable(node.x * TILE_SIZE, node.y * TILE_SIZE, renderBounds)) continue;
     visibleMiningNodes.add(node.id);
     let view = miningViews.get(node.id);
     if (!view) {
@@ -3092,6 +3137,7 @@ function syncEntities(): void {
 
   for (const node of latestState.herbNodes ?? []) {
     if (node.floor !== me.floor) continue;
+    if (!isWorldPointRenderable(node.x * TILE_SIZE, node.y * TILE_SIZE, renderBounds)) continue;
     visibleHerbNodes.add(node.id);
     let view = herbViews.get(node.id);
     if (!view) {
@@ -3112,6 +3158,7 @@ function syncEntities(): void {
 
   for (const fire of latestState.fires ?? []) {
     if (fire.floor !== me.floor) continue;
+    if (!isWorldPointRenderable(fire.x * TILE_SIZE, fire.y * TILE_SIZE, renderBounds)) continue;
     visibleFires.add(fire.id);
     let view = fireViews.get(fire.id);
     if (!view) {
@@ -6054,6 +6101,11 @@ function placeMapSprite(item: DecorationSprite, parent: Phaser.GameObjects.Conta
 
 function updateCutawayBuildingRoofs(me: PlayerView): void {
   if (!cutawayBuildingSprites.length) return;
+  const tileX = Math.floor(me.x);
+  const tileY = Math.floor(me.y);
+  const key = `${me.floor}:${tileX}:${tileY}:${cutawayBuildingSprites.length}`;
+  if (key === lastCutawayKey) return;
+  lastCutawayKey = key;
   for (let i = cutawayBuildingSprites.length - 1; i >= 0; i -= 1) {
     const entry = cutawayBuildingSprites[i];
     if (!entry || !entry.sprite.active) {
@@ -6063,10 +6115,10 @@ function updateCutawayBuildingRoofs(me: PlayerView): void {
     const inside = entry.floor === me.floor && isInsideCutawayBuilding(entry.object, me.x, me.y);
     if (inside) {
       entry.sprite.setCrop();
-      entry.sprite.setAlpha(0);
+      if (entry.sprite.alpha !== 0) entry.sprite.setAlpha(0);
     } else {
       entry.sprite.setCrop();
-      entry.sprite.setAlpha(1);
+      if (entry.sprite.alpha !== 1) entry.sprite.setAlpha(1);
     }
   }
 }
