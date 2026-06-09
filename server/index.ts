@@ -551,9 +551,12 @@ const DOT_STATUS_MULT_BY_ROLE = {
 const TREE_SNAPSHOT_EVERY = positiveIntEnv("TIB_TREE_SNAPSHOT_EVERY", E2E_TEST ? 5 : 10);
 const NPC_SNAPSHOT_EVERY = positiveIntEnv("TIB_NPC_SNAPSHOT_EVERY", 1);
 const RESOURCE_SNAPSHOT_EVERY = positiveIntEnv("TIB_RESOURCE_SNAPSHOT_EVERY", E2E_TEST ? 1 : 5);
-const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 80);
-const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 1000);
+const SNAPSHOT_FULL_EVERY = positiveIntEnv("TIB_SNAPSHOT_FULL_EVERY", E2E_TEST ? 20 : 160);
+const SNAPSHOT_HEARTBEAT_MS = positiveIntEnv("TIB_SNAPSHOT_HEARTBEAT_MS", 250);
 const SNAPSHOT_METRICS_MS = positiveIntEnv("TIB_SNAPSHOT_METRICS_MS", 1000);
+const SNAPSHOT_INTERVAL_MS = positiveIntEnv("TIB_SNAPSHOT_INTERVAL_MS", 75);
+const SNAPSHOT_CROWD_INTERVAL_MS = positiveIntEnv("TIB_SNAPSHOT_CROWD_INTERVAL_MS", 75);
+const SNAPSHOT_CROWD_CLIENTS = positiveIntEnv("TIB_SNAPSHOT_CROWD_CLIENTS", 100);
 const SOCKET_BACKPRESSURE_BYTES = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_BYTES", 512 * 1024);
 const SOCKET_BACKPRESSURE_MAX_SKIPS = positiveIntEnv("TIB_SOCKET_BACKPRESSURE_MAX_SKIPS", 120);
 const CLIENT_MESSAGE_LIMIT_PER_SECOND = positiveIntEnv("TIB_CLIENT_MESSAGE_LIMIT_PER_SECOND", 40);
@@ -675,6 +678,7 @@ let saveInFlight = false;
 const dirtyPlayerKeys = new Set<string>();
 const playerSaveSignatures = new Map<string, string>();
 let snapshotSequence = 0;
+let lastSnapshotBroadcastAt = 0;
 let nextEventOrder = 1;
 // Telegraph-channel instrumentation (logged each second when EVENT_METRICS_LOG).
 let telegraphsEmittedThisSecond = 0;
@@ -695,8 +699,7 @@ const wss = new WebSocketServer({
   perMessageDeflate: WS_COMPRESSION
     ? {
         clientNoContextTakeover: true,
-        concurrencyLimit: 8,
-        serverNoContextTakeover: true,
+        concurrencyLimit: 16,
         threshold: WS_COMPRESSION_THRESHOLD
       }
     : false
@@ -801,13 +804,17 @@ setInterval(() => {
 }, 50);
 
 setInterval(() => {
+  const now = performance.now();
+  const interval = clients.size >= SNAPSHOT_CROWD_CLIENTS ? SNAPSHOT_CROWD_INTERVAL_MS : SNAPSHOT_INTERVAL_MS;
+  if (interval > SNAPSHOT_INTERVAL_MS && now - lastSnapshotBroadcastAt < interval) return;
+  lastSnapshotBroadcastAt = now;
   const started = performance.now();
   broadcastState();
   recordSample(metrics.snapshotWindow, performance.now() - started);
   globalEvents.length = 0;
   targetedEventsByPlayer.clear();
   eventsByCell.clear();
-}, 75);
+}, SNAPSHOT_INTERVAL_MS);
 
 setInterval(() => {
   persistOnlinePlayers();
@@ -4788,8 +4795,8 @@ function buildPlayerPublicSignature(player: ServerPlayer, action: ActionView | n
   hash = hashString(hash, player.name);
   hash = hashString(hash, player.classKey);
   hash = hashNumber(hash, player.floor);
-  hash = hashNumber(hash, round(player.x));
-  hash = hashNumber(hash, round(player.y));
+  hash = hashNumber(hash, roundPublicPosition(player.x));
+  hash = hashNumber(hash, roundPublicPosition(player.y));
   hash = hashString(hash, player.dir);
   hash = hashBool(hash, player.moving);
   hash = hashNumber(hash, Math.round(player.hp));
@@ -5085,14 +5092,12 @@ function serializePlayerPublic(player: ServerPlayer, action: ActionView | null, 
     name: player.name,
     classKey: player.classKey,
     floor: player.floor,
-    x: round(player.x),
-    y: round(player.y),
+    x: roundPublicPosition(player.x),
+    y: roundPublicPosition(player.y),
     dir: player.dir,
     moving: player.moving,
     hp: Math.round(player.hp),
     maxHp: player.maxHp,
-    favor: Math.round(player.favor),
-    maxFavor: player.maxFavor,
     dead: player.dead,
     action
   } as PlayerView;
@@ -6312,4 +6317,8 @@ function optionalPositiveIntEnv(name: string): number | null {
 
 function round(value: number): number {
   return Math.round(value * 100) / 100;
+}
+
+function roundPublicPosition(value: number): number {
+  return Math.round(value * 10) / 10;
 }

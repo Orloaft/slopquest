@@ -314,6 +314,13 @@ interface MapChunkStats {
   maxChunkTextureEdge: number;
 }
 
+interface DecorationCacheStats {
+  tileEntries: number;
+  beachEntries: number;
+  tileBuilds: number;
+  beachBuilds: number;
+}
+
 interface BoundingBox {
   x: number;
   y: number;
@@ -356,6 +363,7 @@ interface E2EHooks {
     attackFrames: Array<{ dir: Direction; frame: number; key: string; exists: boolean }>;
   }>;
   mapChunkStats: () => MapChunkStats;
+  decorationCacheStats: () => DecorationCacheStats;
   generatedStageTextureKeys: (floor: number) => Array<{ char: string; key: string; exists: boolean; ref: string }>;
   cutawayRoofAlphas: () => Array<{ floor: number; key: string; x: number; y: number; alpha: number }>;
   frameDataUrls: (keys: string[]) => Array<{ key: string; exists: boolean; dataUrl: string | null }>;
@@ -736,6 +744,7 @@ if (E2E_MODE) {
         return { type, family: spec.family, frames, attackFamily, attackFrames };
       }),
     mapChunkStats: () => mapChunkStats(),
+    decorationCacheStats: () => decorationCacheStats(),
     generatedStageTextureKeys: (floor: number) => generatedStageTextureKeys(floor),
     cutawayRoofAlphas: () =>
       cutawayBuildingSprites
@@ -819,6 +828,10 @@ const MINIMAP_DRAW_MS = 100;
 const MAP_CHUNK_TILES = 16;
 const ENTITY_RENDER_PADDING_TILES = 10;
 const RESOURCE_BUCKET_TILES = 16;
+const tileDecorationCache = new Map<string, DecorationSprite[]>();
+const beachClutterCache = new Map<string, DecorationSprite[]>();
+let tileDecorationBuilds = 0;
+let beachClutterBuilds = 0;
 
 const SMITHING_RECIPES = {
   weapon: [
@@ -2084,7 +2097,7 @@ function mergeStateSnapshot(previous: StateSnapshot | null, next: StateSnapshot)
     // on the intervening metrics-less snapshots so the net-stats line doesn't
     // flicker to "net -" between updates.
     metrics: snapshot.metrics ?? previous.metrics,
-    players: mergeEntityViews(previous.players, snapshot.players, snapshot.removedPlayerIds, snapshot.playersFull),
+    players: mergePlayerViews(previous.players, snapshot.players, snapshot.removedPlayerIds, snapshot.playersFull),
     monsters: mergeEntityViews(previous.monsters, snapshot.monsters, snapshot.removedMonsterIds, snapshot.monstersFull),
     corpses: mergeEntityViews(previous.corpses, snapshot.corpses, snapshot.removedCorpseIds, snapshot.corpsesFull),
     npcs: mergeEntityViews(previous.npcs, snapshot.npcs, snapshot.removedNpcIds, snapshot.npcsFull),
@@ -2174,6 +2187,29 @@ function mergeEntityViews<T extends { id: string }>(previous: T[], updates: T[],
   for (const id of removedIds) byId.delete(id);
   for (const item of updates) byId.set(item.id, item);
   return [...byId.values()];
+}
+
+function mergePlayerViews(previous: PlayerView[], updates: PlayerView[], removedIds: string[] = [], full = true): PlayerView[] {
+  if (full) return updates;
+  if (updates.length === 0 && removedIds.length === 0) return previous;
+  if (previous.length === 0) return updates;
+  const byId = new Map<string, PlayerView>();
+  for (const item of previous) byId.set(item.id, item);
+  for (const id of removedIds) byId.delete(id);
+  for (const item of updates) {
+    const existing = byId.get(item.id);
+    byId.set(item.id, existing ? mergePlayerView(existing, item) : item);
+  }
+  return [...byId.values()];
+}
+
+function mergePlayerView(previous: PlayerView, update: PlayerView): PlayerView {
+  return {
+    ...previous,
+    ...update,
+    name: update.name ?? previous.name,
+    classKey: update.classKey ?? previous.classKey
+  };
 }
 
 function zoneTrackFor(me: PlayerView): string {
@@ -2401,6 +2437,14 @@ function drawMap(floor: number, center?: TilePoint): void {
 // deterministic per-cell hash, size-jittered with sub-tile offsets. Non-blocking decoration.
 function addBeachClutter(floor: number, rows: string[], parent: Phaser.GameObjects.Container): void {
   if (floor !== 8 || !scene.textures.exists("spriteBeachGrass")) return;
+  placeMapSprites(getBeachClutterDecorations(floor, rows), parent);
+}
+
+function getBeachClutterDecorations(floor: number, rows: string[]): DecorationSprite[] {
+  const key = `${floor}:${rows.length}:${rows[0]?.length ?? 0}`;
+  const cached = beachClutterCache.get(key);
+  if (cached) return cached;
+
   const SCATTER: Array<[string, number, number]> = [
     ["spriteBeachGrass", 26, 26],
     ["spriteBeachGrass", 26, 26], // weighted: grass tufts are the commonest beach filler
@@ -2426,7 +2470,10 @@ function addBeachClutter(floor: number, rows: string[], parent: Phaser.GameObjec
       decorations.push({ key, x: x + 0.5 + ox, y: y + 0.9 + oy, w: Math.round(w * jit), h: Math.round(hgt * jit) });
     }
   }
-  decorations.sort((a, b) => a.y - b.y).forEach((item) => placeMapSprite(item, parent));
+  decorations.sort((a, b) => a.y - b.y);
+  beachClutterBuilds += 1;
+  beachClutterCache.set(key, decorations);
+  return decorations;
 }
 
 // Per-floor mood: warm grade in towns, a cool dusk gloom + vignette in the cemetery,
@@ -6054,7 +6101,14 @@ function addTileDecorations(
   toX = rows[0]?.length ?? 0,
   toY = rows.length
 ): void {
-  if (GENERATED_STAGES_BY_FLOOR.has(floor)) return;
+  placeMapSprites(getTileDecorations(floor, rows, fromX, fromY, toX, toY), parent);
+}
+
+function getTileDecorations(floor: number, rows: string[], fromX: number, fromY: number, toX: number, toY: number): DecorationSprite[] {
+  if (GENERATED_STAGES_BY_FLOOR.has(floor)) return [];
+  const key = `${floor}:${fromX}:${fromY}:${toX}:${toY}:${rows.length}:${rows[0]?.length ?? 0}`;
+  const cached = tileDecorationCache.get(key);
+  if (cached) return cached;
 
   const decorations: DecorationSprite[] = [];
   for (let y = fromY; y < toY; y += 1) {
@@ -6142,7 +6196,10 @@ function addTileDecorations(
       if (["N", "S", "T", "C", "M", "D", "G", "Y", "j", ">", "<"].includes(tile)) decorations.push({ key: "spritePortal", x: x + 0.5, y: y + 1.2, w: 34, h: 52 });
     }
   }
-  decorations.sort((a, b) => a.y - b.y).forEach((item) => placeMapSprite(item, parent));
+  decorations.sort((a, b) => a.y - b.y);
+  tileDecorationBuilds += 1;
+  tileDecorationCache.set(key, decorations);
+  return decorations;
 }
 
 function addComposedMapObjects(
@@ -6176,6 +6233,19 @@ function addComposedMapObjects(
 // Objects that lie flat on the ground (a walkway, not a standing prop) get no
 // grounding shadow.
 const NO_GROUND_SHADOW = new Set<string>(["spriteBridge"]);
+
+function placeMapSprites(decorations: DecorationSprite[], parent: Phaser.GameObjects.Container): void {
+  decorations.forEach((item) => placeMapSprite(item, parent));
+}
+
+function decorationCacheStats(): DecorationCacheStats {
+  return {
+    tileEntries: tileDecorationCache.size,
+    beachEntries: beachClutterCache.size,
+    tileBuilds: tileDecorationBuilds,
+    beachBuilds: beachClutterBuilds
+  };
+}
 
 function placeMapSprite(item: DecorationSprite, parent: Phaser.GameObjects.Container): Phaser.GameObjects.Image {
   const baseX = item.x * TILE_SIZE;

@@ -18,8 +18,8 @@ import type {
 
 interface CompactPlayerView {
   i: string;
-  n: string;
-  c: string;
+  n?: string;
+  c?: string;
   f: number;
   x: number;
   y: number;
@@ -49,6 +49,18 @@ interface CompactPlayerView {
   wt?: number;
   mw?: number;
 }
+
+type CompactPlayerDeltaView = [
+  i: string,
+  f: number,
+  x: number,
+  y: number,
+  d: PlayerView["dir"],
+  h: number,
+  mh: number,
+  fl?: number,
+  ac?: ActionView
+];
 
 interface CompactMonsterView {
   i: string;
@@ -91,6 +103,17 @@ interface CompactTreeView {
   y: number;
   a?: 1;
 }
+
+type CompactTreeTuple = [
+  i: string,
+  t: string,
+  l: string,
+  rl: number,
+  f: number,
+  x: number,
+  y: number,
+  a?: 1
+];
 
 interface CompactFishingNodeView {
   i: string;
@@ -195,7 +218,7 @@ interface CompactStateMetrics {
 
 export interface CompactStateSnapshot {
   type: "state";
-  p?: CompactPlayerView[] | StateSnapshot["players"];
+  p?: Array<CompactPlayerView | CompactPlayerDeltaView> | StateSnapshot["players"];
   pF?: 1 | true;
   pR?: StateSnapshot["removedPlayerIds"];
   m?: CompactMonsterView[] | StateSnapshot["monsters"];
@@ -207,7 +230,7 @@ export interface CompactStateSnapshot {
   n?: CompactNpcView[] | StateSnapshot["npcs"];
   nF?: 1 | true;
   nR?: StateSnapshot["removedNpcIds"];
-  t?: CompactTreeView[] | StateSnapshot["trees"];
+  t?: Array<CompactTreeView | CompactTreeTuple> | StateSnapshot["trees"];
   tF?: 1 | true;
   tR?: StateSnapshot["removedTreeIds"];
   fn?: CompactFishingNodeView[] | StateSnapshot["fishingNodes"];
@@ -243,7 +266,7 @@ const MONSTER_STATUS_BITS = ["taunt", "snare", "freeze", "burn", "slow", "inaccu
 
 export function compactStateSnapshot(snapshot: StateSnapshot): CompactStateSnapshot {
   const wire: CompactStateSnapshot = { type: "state" };
-  if (snapshot.players.length > 0) wire.p = snapshot.players.map(compactPlayerView);
+  if (snapshot.players.length > 0) wire.p = snapshot.players.map((player) => compactPlayerView(player, Boolean(snapshot.playersFull)));
   if (snapshot.playersFull) wire.pF = 1;
   if (snapshot.removedPlayerIds.length > 0) wire.pR = snapshot.removedPlayerIds;
   if (snapshot.monsters.length > 0) wire.m = snapshot.monsters.map(compactMonsterView);
@@ -320,13 +343,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function compactPlayerView(player: PlayerView): CompactPlayerView {
-  const cached = compactPlayerViewCache.get(player);
+function compactPlayerView(player: PlayerView, full = true): CompactPlayerView | CompactPlayerDeltaView {
+  const cached = full ? compactPlayerViewCache.get(player) : undefined;
   if (cached) return cached;
+  if (!full && player.inventory === undefined && player.abilities === undefined && player.unlockedClasses === undefined) {
+    const flags = (player.moving ? 1 : 0) | (player.dead ? 2 : 0);
+    const compact: CompactPlayerDeltaView = [player.id, player.floor, player.x, player.y, player.dir, player.hp, player.maxHp];
+    if (flags || player.action) compact.push(flags);
+    if (player.action) compact.push(player.action);
+    return compact;
+  }
   const compact: CompactPlayerView = {
     i: player.id,
-    n: player.name,
-    c: player.classKey,
     f: player.floor,
     x: player.x,
     y: player.y,
@@ -334,6 +362,8 @@ function compactPlayerView(player: PlayerView): CompactPlayerView {
     h: player.hp,
     mh: player.maxHp
   };
+  if (full) compact.n = player.name;
+  if (full || player.inventory !== undefined || player.abilities !== undefined || player.unlockedClasses !== undefined) compact.c = player.classKey;
   if (player.moving) compact.mo = 1;
   if (player.mana !== undefined) compact.ma = player.mana;
   if (player.maxMana !== undefined) compact.mma = player.maxMana;
@@ -346,7 +376,7 @@ function compactPlayerView(player: PlayerView): CompactPlayerView {
   if (player.armorTier !== undefined) compact.ar = player.armorTier;
   if (player.targetId !== undefined) compact.tg = player.targetId;
   if (player.dead) compact.de = 1;
-  if (player.action !== undefined) compact.ac = player.action;
+  if (player.action != null) compact.ac = player.action;
   if (player.buffs !== undefined) compact.b = player.buffs;
   if (player.inventory !== undefined) compact.inv = player.inventory;
   if (player.buyback !== undefined) compact.bb = player.buyback;
@@ -356,11 +386,26 @@ function compactPlayerView(player: PlayerView): CompactPlayerView {
   if (player.unlockedClasses !== undefined) compact.uc = player.unlockedClasses;
   if (player.weight !== undefined) compact.wt = player.weight;
   if (player.maxWeight !== undefined) compact.mw = player.maxWeight;
-  compactPlayerViewCache.set(player, compact);
+  if (full) compactPlayerViewCache.set(player, compact);
   return compact;
 }
 
-function expandPlayerView(player: CompactPlayerView | PlayerView): PlayerView {
+function expandPlayerView(player: CompactPlayerView | CompactPlayerDeltaView | PlayerView): PlayerView {
+  if (Array.isArray(player)) {
+    const flags = player[7] ?? 0;
+    return {
+      id: player[0],
+      floor: player[1],
+      x: player[2],
+      y: player[3],
+      dir: player[4],
+      hp: player[5],
+      maxHp: player[6],
+      moving: Boolean(flags & 1),
+      dead: Boolean(flags & 2),
+      action: player[8]
+    } as PlayerView;
+  }
   if ("id" in player) return player;
   return {
     id: player.i,
@@ -502,24 +547,28 @@ function expandNpcView(npc: CompactNpcView | NpcView): NpcView {
   };
 }
 
-function compactTreeView(tree: TreeView): CompactTreeView {
+function compactTreeView(tree: TreeView): CompactTreeView | CompactTreeTuple {
   const cached = compactTreeViewCache.get(tree);
   if (cached) return cached;
-  const compact: CompactTreeView = {
-    i: tree.id,
-    t: tree.type,
-    l: tree.label,
-    rl: tree.requiredLevel,
-    f: tree.floor,
-    x: tree.x,
-    y: tree.y
-  };
-  if (tree.active) compact.a = 1;
-  compactTreeViewCache.set(tree, compact);
+  const compact: CompactTreeTuple = [tree.id, tree.type, tree.label, tree.requiredLevel, tree.floor, tree.x, tree.y];
+  if (tree.active) compact.push(1);
+  compactTreeViewCache.set(tree, compact as unknown as CompactTreeView);
   return compact;
 }
 
-function expandTreeView(tree: CompactTreeView | TreeView): TreeView {
+function expandTreeView(tree: CompactTreeView | CompactTreeTuple | TreeView): TreeView {
+  if (Array.isArray(tree)) {
+    return {
+      id: tree[0],
+      type: tree[1],
+      label: tree[2],
+      requiredLevel: tree[3],
+      floor: tree[4],
+      x: tree[5],
+      y: tree[6],
+      active: Boolean(tree[7])
+    };
+  }
   if ("id" in tree) return tree;
   return {
     id: tree.i,
