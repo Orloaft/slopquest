@@ -575,6 +575,7 @@ let EVENT_PRIORITY = process.env.TIB_EVENT_PRIORITY === "1";
 const EVENT_METRICS_LOG = process.env.TIB_EVENT_METRICS_LOG === "1";
 const WS_COMPRESSION = process.env.TIB_WS_COMPRESSION === "1" || (!E2E_TEST && process.env.TIB_WS_COMPRESSION !== "0");
 const WS_COMPRESSION_THRESHOLD = positiveIntEnv("TIB_WS_COMPRESSION_THRESHOLD", 1024);
+const WS_COMPRESSION_CONCURRENCY = positiveIntEnv("TIB_WS_COMPRESSION_CONCURRENCY", 8);
 mkdirSync(DATA_DIR, { recursive: true });
 mkdirSync(PLAYER_DIR, { recursive: true });
 
@@ -699,7 +700,7 @@ const wss = new WebSocketServer({
   perMessageDeflate: WS_COMPRESSION
     ? {
         clientNoContextTakeover: true,
-        concurrencyLimit: 16,
+        concurrencyLimit: WS_COMPRESSION_CONCURRENCY,
         threshold: WS_COMPRESSION_THRESHOLD
       }
     : false

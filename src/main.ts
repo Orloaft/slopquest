@@ -196,6 +196,8 @@ interface DialogueLine {
 interface EntityView extends Phaser.GameObjects.Container {
   targetX?: number;
   targetY?: number;
+  sortBucketY?: number;
+  entityRow?: Phaser.GameObjects.Container;
   animFamily?: string;
   animDir?: Direction;
   animMoving?: boolean;
@@ -204,24 +206,30 @@ interface EntityView extends Phaser.GameObjects.Container {
   animHeight?: number;
   currentFrameKey?: string;
   currentFlipX?: boolean;
-  sprite?: Phaser.GameObjects.Sprite;
+  sprite?: Phaser.GameObjects.Sprite | Phaser.GameObjects.Image;
 }
 
 interface ActorView extends EntityView {
   nameText: Phaser.GameObjects.Text;
   sprite: Phaser.GameObjects.Sprite;
+  shadow: Phaser.GameObjects.Ellipse;
+  crowdImportant?: boolean;
 }
 
 interface PlayerEntityView extends ActorView {
   hp: Phaser.GameObjects.Rectangle;
+  hpBack: Phaser.GameObjects.Rectangle;
   targetRing: Phaser.GameObjects.Ellipse;
 }
 
 interface MonsterEntityView extends ActorView {
   hp: Phaser.GameObjects.Rectangle;
+  hpBack: Phaser.GameObjects.Rectangle;
   targetRing: Phaser.GameObjects.Ellipse;
   aggroMark: Phaser.GameObjects.Text;
   aggroActive?: boolean;
+  actorType?: string;
+  actorTint?: number;
   roleBadge: Phaser.GameObjects.Text;
   statusText: Phaser.GameObjects.Text;
 }
@@ -314,6 +322,17 @@ interface MapChunkStats {
   maxChunkTextureEdge: number;
 }
 
+interface EntityDepthStats {
+  rows: number;
+  children: number;
+  maxRowChildren: number;
+  rowSorts: number;
+  rowReparents: number;
+  visibleActors: number;
+  visibleActorChildren: number;
+  crowdedActors: boolean;
+}
+
 interface DecorationCacheStats {
   tileEntries: number;
   beachEntries: number;
@@ -366,6 +385,7 @@ interface E2EHooks {
   decorationCacheStats: () => DecorationCacheStats;
   generatedStageTextureKeys: (floor: number) => Array<{ char: string; key: string; exists: boolean; ref: string }>;
   cutawayRoofAlphas: () => Array<{ floor: number; key: string; x: number; y: number; alpha: number }>;
+  entityDepthStats: () => EntityDepthStats;
   frameDataUrls: (keys: string[]) => Array<{ key: string; exists: boolean; dataUrl: string | null }>;
   currentTrack: () => string | null;
   recentEvents: () => GameEvent[];
@@ -745,6 +765,7 @@ if (E2E_MODE) {
       }),
     mapChunkStats: () => mapChunkStats(),
     decorationCacheStats: () => decorationCacheStats(),
+    entityDepthStats: () => entityDepthStats(),
     generatedStageTextureKeys: (floor: number) => generatedStageTextureKeys(floor),
     cutawayRoofAlphas: () =>
       cutawayBuildingSprites
@@ -826,7 +847,9 @@ let holdMoveLastRepathAt = 0;
 const HOLD_MOVE_REPATH_MS = 80;
 const MINIMAP_DRAW_MS = 100;
 const MAP_CHUNK_TILES = 16;
-const ENTITY_RENDER_PADDING_TILES = 10;
+const ENTITY_RENDER_PADDING_TILES = 6;
+const ENTITY_SORT_BUCKET_PX = TILE_SIZE;
+const CROWDED_ENTITY_LABEL_THRESHOLD = 16;
 const RESOURCE_BUCKET_TILES = 16;
 const tileDecorationCache = new Map<string, DecorationSprite[]>();
 const beachClutterCache = new Map<string, DecorationSprite[]>();
@@ -885,6 +908,12 @@ const visibleHerbNodeIds = new Set<string>();
 const visibleFireIds = new Set<string>();
 const floaters: Floater[] = [];
 let entityLayerSortDirty = true;
+const entityLayerRows = new Map<number, Phaser.GameObjects.Container>();
+let entityLayerRowSorts = 0;
+let entityLayerRowReparents = 0;
+let crowdedActorsActive = false;
+let lastActorAnimationBucket = -1;
+let lastEntitySyncAt = 0;
 let selectedInventorySlot: number | null = null;
 let selectedInventoryItem: string | null = null;
 let activeDialogue: ActiveDialogue | null = null;
@@ -2000,9 +2029,10 @@ function update(this: Phaser.Scene, time: number): void {
     syncedStateVersion = -1;
     clearClickDestination();
   }
-  if (syncedStateVersion !== stateVersion) {
+  if (syncedStateVersion !== stateVersion && (syncedStateVersion < 0 || !crowdedActorsActive || time - lastEntitySyncAt >= 180)) {
     syncEntities();
     syncedStateVersion = stateVersion;
+    lastEntitySyncAt = time;
   }
   // Reveal once the new floor's map + entities have had a few frames to paint
   // (and the screen has been up a minimum beat so it doesn't just flash).
@@ -3054,20 +3084,116 @@ function setTextIfChanged(text: Phaser.GameObjects.Text, value: string): void {
   if (text.text !== value) text.setText(value);
 }
 
+function setVisibleIfChanged(gameObject: Phaser.GameObjects.Components.Visible, visible: boolean): void {
+  if (gameObject.visible !== visible) gameObject.setVisible(visible);
+}
+
+function setAlphaIfChanged(gameObject: Phaser.GameObjects.Components.AlphaSingle, alpha: number): void {
+  if (gameObject.alpha !== alpha) gameObject.setAlpha(alpha);
+}
+
+function setRectangleWidthIfChanged(rectangle: Phaser.GameObjects.Rectangle, width: number): void {
+  if (rectangle.width !== width) rectangle.width = width;
+}
+
+function setTextColorIfChanged(text: Phaser.GameObjects.Text, color: string): void {
+  if (text.style.color !== color) text.setColor(color);
+}
+
 function markEntityLayerSortDirty(): void {
   entityLayerSortDirty = true;
 }
 
-function addEntityLayerView(view: Phaser.GameObjects.GameObject): void {
-  entityLayer.add(view);
+function addEntityLayerView(view: EntityView): void {
+  placeEntityLayerView(view, entitySortBucket(view.y), true);
+}
+
+function entitySortBucket(y: number): number {
+  return Math.floor(y / ENTITY_SORT_BUCKET_PX);
+}
+
+function entityRowSortValue(bucket: number): number {
+  return bucket * ENTITY_SORT_BUCKET_PX;
+}
+
+function entityLayerRow(bucket: number): Phaser.GameObjects.Container {
+  const existing = entityLayerRows.get(bucket);
+  if (existing) return existing;
+  const row = scene.add.container(0, 0);
+  (row as unknown as { sortY: number }).sortY = entityRowSortValue(bucket);
+  entityLayerRows.set(bucket, row);
+  entityLayer.add(row);
   markEntityLayerSortDirty();
+  return row;
+}
+
+function placeEntityLayerView(view: EntityView, bucket: number, forceSort = false): void {
+  const row = entityLayerRow(bucket);
+  if (view.entityRow !== row) {
+    row.add(view);
+    view.entityRow = row;
+    view.sortBucketY = bucket;
+    entityLayerRowReparents += 1;
+    row.sort("y");
+    return;
+  }
+  view.sortBucketY = bucket;
+  if (forceSort) row.sort("y");
+}
+
+function pruneEmptyEntityRows(): void {
+  for (const [bucket, row] of entityLayerRows) {
+    if (row.getAll().length > 0) continue;
+    row.destroy();
+    entityLayerRows.delete(bucket);
+    markEntityLayerSortDirty();
+  }
+}
+
+function entityDepthStats(): EntityDepthStats {
+  let children = 0;
+  let maxRowChildren = 0;
+  for (const row of entityLayerRows.values()) {
+    const count = row.getAll().length;
+    children += count;
+    maxRowChildren = Math.max(maxRowChildren, count);
+  }
+  let visibleActorChildren = 0;
+  for (const [id, view] of playerViews) {
+    if (!visiblePlayerIds.has(id)) continue;
+    visibleActorChildren += visibleContainerChildren(view);
+  }
+  for (const [id, view] of monsterViews) {
+    if (!visibleMonsterIds.has(id)) continue;
+    visibleActorChildren += visibleContainerChildren(view);
+  }
+  return {
+    rows: entityLayerRows.size,
+    children,
+    maxRowChildren,
+    rowSorts: entityLayerRowSorts,
+    rowReparents: entityLayerRowReparents,
+    visibleActors: visiblePlayerIds.size + visibleMonsterIds.size,
+    visibleActorChildren,
+    crowdedActors: crowdedActorsActive
+  };
+}
+
+function visibleContainerChildren(container: Phaser.GameObjects.Container): number {
+  let visible = 0;
+  for (const child of container.getAll()) {
+    if ((child as unknown as Phaser.GameObjects.Components.Visible).visible) visible += 1;
+  }
+  return visible;
 }
 
 function setEntityLayerPosition(view: Phaser.GameObjects.Container, x: number, y: number): void {
   if (view.x === x && view.y === y) return;
-  const yChanged = view.y !== y;
+  const previousBucket = (view as EntityView).sortBucketY ?? entitySortBucket(view.y);
   view.setPosition(x, y);
-  if (yChanged) markEntityLayerSortDirty();
+  const nextBucket = entitySortBucket(y);
+  if (previousBucket !== nextBucket) placeEntityLayerView(view as EntityView, nextBucket);
+  else (view as EntityView).sortBucketY = nextBucket;
 }
 
 function syncEntities(): void {
@@ -3105,10 +3231,10 @@ function syncEntities(): void {
     }
     setEntityTarget(view, player.x * TILE_SIZE, player.y * TILE_SIZE);
     setActorAnimation(view, "knight", player.dir, player.moving || (player.action != null && ["woodcutting", "fishing", "mining", "cooking"].includes(player.action.type)), 40, 48);
-    view.setAlpha(player.dead ? 0.45 : 1);
+    setAlphaIfChanged(view, player.dead ? 0.45 : 1);
     setTextIfChanged(view.nameText, player.name);
-    view.hp.width = 34 * (player.hp / player.maxHp);
-    view.targetRing.setVisible(player.id === selfId);
+    setRectangleWidthIfChanged(view.hp, 34 * (player.hp / player.maxHp));
+    setVisibleIfChanged(view.targetRing, player.id === selfId);
   }
 
   for (const [id, view] of playerViews) {
@@ -3131,18 +3257,22 @@ function syncEntities(): void {
     setEntityTarget(view, monster.x * TILE_SIZE, monster.y * TILE_SIZE);
     const actor = monsterActorSpec(monster);
     setActorAnimation(view, actor.family, monster.dir, monster.moving, actor.width, actor.height, monster.attacking);
-    view.sprite.y = actor.yOffset;
-    view.sprite.clearTint();
-    if (actor.tint) view.sprite.setTint(actor.tint);
+    if (view.actorType !== monster.type) {
+      view.sprite.y = actor.yOffset;
+      if (view.actorTint !== actor.tint) {
+        view.sprite.clearTint();
+        if (actor.tint) view.sprite.setTint(actor.tint);
+        view.actorTint = actor.tint;
+      }
+      view.actorType = monster.type;
+    }
     setTextIfChanged(view.nameText, monster.name);
     setTextIfChanged(view.roleBadge, roleBadgeText(monster.role));
-    view.roleBadge.setColor(roleBadgeColor(monster.role));
-    view.roleBadge.setVisible(monster.role !== "trash");
+    setTextColorIfChanged(view.roleBadge, roleBadgeColor(monster.role));
     const statusLabel = monsterStatusLabel(monster);
     setTextIfChanged(view.statusText, statusLabel);
-    view.statusText.setVisible(statusLabel.length > 0);
-    view.hp.width = 36 * (monster.hp / monster.maxHp);
-    view.targetRing.setVisible(me.targetId === monster.id);
+    setRectangleWidthIfChanged(view.hp, 36 * (monster.hp / monster.maxHp));
+    setVisibleIfChanged(view.targetRing, me.targetId === monster.id);
     setAggroMark(view, monster.targetId === me.id);
   }
 
@@ -3152,6 +3282,8 @@ function syncEntities(): void {
       monsterViews.delete(id);
     }
   }
+
+  updateCrowdedActorLabels(me);
 
   for (const corpse of latestState.corpses) {
     if (corpse.floor !== me.floor) continue;
@@ -3308,6 +3440,7 @@ function syncEntities(): void {
       markEntityLayerSortDirty();
     }
   }
+  pruneEmptyEntityRows();
 }
 
 function clearResourceViews(): void {
@@ -3317,6 +3450,37 @@ function clearResourceViews(): void {
       markEntityLayerSortDirty();
     }
     views.clear();
+  }
+}
+
+function updateCrowdedActorLabels(me: PlayerView): void {
+  const crowdPressure = visiblePlayerIds.size + visibleMonsterIds.size + visibleNpcIds.size + visibleCorpseIds.size;
+  const crowded = crowdPressure >= CROWDED_ENTITY_LABEL_THRESHOLD;
+  crowdedActorsActive = crowded;
+  for (const [id, view] of playerViews) {
+    if (!visiblePlayerIds.has(id)) continue;
+    const important = id === selfId || me.targetId === id;
+    view.crowdImportant = important;
+    const showDetails = !crowded;
+    setVisibleIfChanged(view.nameText, showDetails);
+    setVisibleIfChanged(view.hp, showDetails);
+    setVisibleIfChanged(view.hpBack, showDetails);
+    setVisibleIfChanged(view.shadow, showDetails);
+    setVisibleIfChanged(view.targetRing, id === selfId || me.targetId === id);
+  }
+  for (const [id, view] of monsterViews) {
+    if (!visibleMonsterIds.has(id)) continue;
+    const majorRole = view.roleBadge.text === "BOSS" || view.roleBadge.text === "ELITE";
+    const important = me.targetId === id || majorRole;
+    view.crowdImportant = important;
+    const showDetails = !crowded || important;
+    setVisibleIfChanged(view.nameText, showDetails);
+    setVisibleIfChanged(view.roleBadge, view.roleBadge.text.length > 0 && showDetails);
+    setVisibleIfChanged(view.statusText, view.statusText.text.length > 0 && showDetails);
+    setVisibleIfChanged(view.hp, showDetails);
+    setVisibleIfChanged(view.hpBack, showDetails);
+    setVisibleIfChanged(view.shadow, showDetails);
+    setVisibleIfChanged(view.targetRing, me.targetId === id);
   }
 }
 
@@ -3334,8 +3498,10 @@ function createPlayerView(player: PlayerView): PlayerEntityView {
   view.add([targetRing, shadow, sprite, nameText, hpBack, hp]);
   view.nameText = nameText;
   view.hp = hp;
+  view.hpBack = hpBack;
   view.targetRing = targetRing;
   view.sprite = sprite;
+  view.shadow = shadow;
   setActorAnimation(view, family, player.dir, player.moving, 40, 48);
   return view;
 }
@@ -3364,6 +3530,7 @@ function createNpcView(npc: NpcView): NpcEntityView {
   view.add([shadow, sprite, nameText, zone]);
   view.nameText = nameText;
   view.sprite = sprite;
+  view.shadow = shadow;
   setActorAnimation(view, family, npc.dir, npc.moving, 40, 48);
   return view;
 }
@@ -3619,11 +3786,15 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
   view.add([targetRing, shadow, sprite, nameText, roleBadge, statusText, hpBack, hp, zone, aggroMark]);
   view.nameText = nameText;
   view.hp = hp;
+  view.hpBack = hpBack;
   view.targetRing = targetRing;
   view.aggroMark = aggroMark;
   view.roleBadge = roleBadge;
   view.statusText = statusText;
   view.sprite = sprite;
+  view.shadow = shadow;
+  view.actorType = monster.type;
+  view.actorTint = actor.tint;
   setActorAnimation(view, actor.family, monster.dir, monster.moving, actor.width, actor.height, monster.attacking);
   return view;
 }
@@ -3691,7 +3862,17 @@ function monsterStatusLabel(monster: MonsterView): string {
   return "";
 }
 
+const monsterActorSpecCache = new Map<string, MonsterActorSpec>();
+
 function monsterActorSpec(monster: { type: string }): MonsterActorSpec {
+  const cached = monsterActorSpecCache.get(monster.type);
+  if (cached) return cached;
+  const spec = computeMonsterActorSpec(monster);
+  monsterActorSpecCache.set(monster.type, spec);
+  return spec;
+}
+
+function computeMonsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "rat") return { family: "rat", width: 44, height: 28, yOffset: 2 };
   if (monster.type === "spider") return { family: "spider", width: 48, height: 34, yOffset: -1 };
   if (monster.type === "skeleton") return { family: "skeleton", width: 42, height: 48, yOffset: -10 };
@@ -3761,10 +3942,7 @@ function setEntityTarget(view: EntityView, x: number, y: number): void {
   const distanceSq = dx * dx + dy * dy;
   const snapDistance = TILE_SIZE * 3;
   if (distanceSq > snapDistance * snapDistance || distanceSq < 0.01) {
-    const yChanged = view.y !== y;
-    view.x = x;
-    view.y = y;
-    if (yChanged) markEntityLayerSortDirty();
+    setEntityLayerPosition(view, x, y);
     view.targetX = undefined;
     view.targetY = undefined;
     interpolatingEntityViews.delete(view);
@@ -3779,17 +3957,15 @@ function interpolateEntities(): void {
   for (const view of interpolatingEntityViews) easeToTarget(view);
 }
 
-// Top-down depth sort: order every entity in the shared layer by its ground/feet
-// position so things lower on screen draw on top. Each view container is placed at
-// its entity's ground tile (entity.y * TILE_SIZE), so the container `y` is a uniform
-// feet anchor across players, NPCs, monsters and trees. Result: when your feet are
-// above a tree's trunk base you render behind it (the tree's upper half covers you);
-// when your feet are below the base you render in front. The layer is only sorted
-// after a y-position, add, or remove changes that order; idle frames skip it.
+// Top-down depth sort: entities live inside coarse row containers keyed by their
+// ground/feet Y. Static resources stay in their row; moving actors only reparent
+// when they cross a bucket. We sort the parent row list only when rows are created
+// or removed, avoiding a full visible-tree/resource sort during crowded movement.
 function ySortEntities(): void {
   if (!entityLayerSortDirty) return;
-  entityLayer.sort("y");
+  entityLayer.sort("sortY");
   entityLayerSortDirty = false;
+  entityLayerRowSorts += 1;
 }
 
 function easeToTarget(view: EntityView): void {
@@ -3799,17 +3975,18 @@ function easeToTarget(view: EntityView): void {
   const dx = targetX - view.x;
   const dy = targetY - view.y;
   if (dx * dx + dy * dy < 0.01) {
-    view.x = targetX;
-    view.y = targetY;
+    setEntityLayerPosition(view, targetX, targetY);
     view.targetX = undefined;
     view.targetY = undefined;
     interpolatingEntityViews.delete(view);
     return;
   }
-  const previousY = view.y;
+  const previousBucket = view.sortBucketY ?? entitySortBucket(view.y);
   view.x += dx * 0.32;
   view.y += dy * 0.32;
-  if (view.y !== previousY) markEntityLayerSortDirty();
+  const nextBucket = entitySortBucket(view.y);
+  if (previousBucket !== nextBucket) placeEntityLayerView(view, nextBucket);
+  else view.sortBucketY = nextBucket;
 }
 
 function setActorAnimation(view: EntityView, family: string, dir: Direction = "down", moving = false, width = 40, height = 48, attacking = false): void {
@@ -3843,7 +4020,14 @@ function setActorAnimation(view: EntityView, family: string, dir: Direction = "d
 }
 
 function animateEntities(): void {
-  for (const view of animatingActorViews) animateActor(view);
+  const actorAnimationBucket = Math.floor(scene.time.now / (crowdedActorsActive ? 240 : 55));
+  if (actorAnimationBucket !== lastActorAnimationBucket) {
+    for (const view of animatingActorViews) {
+      if (crowdedActorsActive && (view as ActorView).crowdImportant === false) continue;
+      animateActor(view);
+    }
+    lastActorAnimationBucket = actorAnimationBucket;
+  }
   for (const view of fireViews.values()) {
     if (!view.flame) continue;
     view.flame.setScale(1 + Math.sin(scene.time.now / 95) * 0.08, 1 + Math.cos(scene.time.now / 120) * 0.06);
@@ -6297,6 +6481,7 @@ function consumeEvents(events: GameEvent[]): void {
     if (event.type === "system") addSystemLine(String(event.text));
     if (event.type === "chat") addChat(String(event.text));
     if (event.type === "dialogue") openDialogue(event);
+    if (crowdedActorsActive && shouldCullCrowdedFx(event)) continue;
     if (event.type === "faith_deed" && self()?.floor === event.floor) {
       playHolyChime();
       const floater = scene.add.text((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, String(event.text), textStyle(14, event.color ?? "#f5d778")).setOrigin(0.5) as Floater;
@@ -6321,6 +6506,25 @@ function consumeEvents(events: GameEvent[]): void {
       fxLayer.add(floater);
     }
   }
+}
+
+function shouldCullCrowdedFx(event: GameEvent): boolean {
+  if (
+    event.type !== "effect" &&
+    event.type !== "ability_vfx" &&
+    event.type !== "projectile" &&
+    event.type !== "hit" &&
+    event.type !== "float"
+  ) {
+    return false;
+  }
+  const me = self();
+  if (!me || event.floor !== me.floor) return true;
+  const x = event.x ?? me.x;
+  const y = event.y ?? me.y;
+  if (Math.hypot(x - me.x, y - me.y) <= 1.5) return false;
+  const target = me.targetId ? latestState?.monsters.find((monster) => monster.id === me.targetId) : null;
+  return !target || Math.hypot(x - target.x, y - target.y) > 1.5;
 }
 
 function playTelegraph(event: GameEvent): void {
