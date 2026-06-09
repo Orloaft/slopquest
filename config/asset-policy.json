@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "2026-06-09",
+  "root": "public",
+  "preloadEntry": "src/main.ts",
+  "budgets": {
+    "runtime": {
+      "maxTotalBytes": 104857600,
+      "maxFileBytes": 5242880,
+      "maxFiles": 500
+    },
+    "startupPreload": {
+      "maxTotalBytes": 57671680,
+      "maxFiles": 80
+    },
+    "lazyBundles": {
+      "maxTotalBytes": 8388608,
+      "maxFileBytes": 2097152,
+      "maxFiles": 16
+    }
+  },
+  "groups": [
+    {
+      "name": "runtime-music",
+      "include": ["public/music/**"],
+      "maxTotalBytes": 33554432,
+      "maxFileBytes": 5242880,
+      "maxFiles": 20
+    },
+    {
+      "name": "generated-stage-tilesets",
+      "include": ["public/tilesets/**"],
+      "maxTotalBytes": 12582912,
+      "maxFileBytes": 2097152,
+      "maxFiles": 40
+    },
+    {
+      "name": "item-skill-ui-icons",
+      "include": ["public/icons/**"],
+      "maxTotalBytes": 1048576,
+      "maxFileBytes": 65536,
+      "maxFiles": 80
+    },
+    {
+      "name": "northwood-object-sprites",
+      "include": ["public/sprites/nw/**"],
+      "maxTotalBytes": 1048576,
+      "maxFileBytes": 131072,
+      "maxFiles": 40
+    }
+  ],
+  "preloadGroups": {
+    "NORTHWOOD_SPRITE_IDS sprite loop": {
+      "maxTotalBytes": 1048576,
+      "maxFileBytes": 131072,
+      "maxFiles": 40
+    },
+    "GENERATED_STAGES tileset.publicPath loop": {
+      "maxTotalBytes": 6291456,
+      "maxFileBytes": 2097152,
+      "maxFiles": 12
+    }
+  },
+  "lazyGroups": {
+    "lazy generated stage tilesets": {
+      "maxTotalBytes": 6291456,
+      "maxFileBytes": 2097152,
+      "maxFiles": 12
+    }
+  }
+}
