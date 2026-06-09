@@ -1198,6 +1198,7 @@ const STARTER_AREA_STARTUP_IMAGE_ASSETS: RuntimeImageAsset[] = [
 ];
 
 const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
+  [5, [runtimeImageAsset("swampTiles", "/swamp-tiles.png", "play-context", "Sunken Marsh source sheet", 5, "swamp")]],
   [4, [runtimeImageAsset("cityTiles", "/citytiles.png", "play-context", "Northwatch city source sheet", 4, "northwatch")]]
 ]);
 
@@ -1233,7 +1234,6 @@ const RESIDENT_AUTHORING_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "startup", "resident cemetery source sheet", 1, "cemetery"),
   runtimeImageAsset("darkForestTiles", "/dark-forest-tiles.png", "startup", "resident dark forest source sheet"),
   runtimeImageAsset("northwoodTreeSheet", "/northwood-trees-v1.png", "startup", "resident Northwood tree sheet", 3, "northwood"),
-  runtimeImageAsset("swampTiles", "/swamp-tiles.png", "startup", "resident marsh source sheet", 5, "swamp"),
   runtimeImageAsset("badlandsTiles", "/badlands-tiles.png", "startup", "resident badlands source sheet", 6, "badlands"),
   runtimeImageAsset("searingGround", "/tilesets/searing-canyon-ground.png", "startup", "resident searing canyon ground sheet", 6, "badlands"),
   runtimeImageAsset("searingCliff", "/tilesets/searing-canyon-cliff.png", "startup", "resident searing canyon cliff sheet", 6, "badlands"),
@@ -1523,39 +1523,6 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "townTiles", "spriteSign", 616, 420, 74, 90);
   makeSpriteTexture(this, "townTiles", "spriteLamp", 912, 424, 38, 136);
   makeSpriteTexture(this, "townTiles", "spriteBarrels", 1200, 700, 90, 70);
-  // Sunken Marsh (floor 5). Crops dialed in from assetsources/deferred/swamp-biome-tiles.png
-  // (1536x1024, magenta-keyed) — ground/dirt/water tiles, a plank bridge, and swamp props.
-  makeTileTexture(this, "swampTiles", "tileMarsh", 18, 98, 69, 72);
-  makeTileTexture(this, "swampTiles", "tileSwampDirt", 97, 98, 67, 72);
-  // Purple lichen-moss ground variants (floor 5 only). Alex's target mockup makes
-  // the swamp PURPLE — dense violet/magenta lichen carpeting the land, olive as accent
-  // — so the marsh ground (char m/o) hash-scatters across these instead of the one flat
-  // olive tileMarsh. cityGroundTexture-style per-cell pick lives in marshGroundTexture().
-  makeTileTexture(this, "swampTiles", "tileMarshPurple0", 255, 256, 68, 68); // magenta-veined lichen
-  makeTileTexture(this, "swampTiles", "tileMarshPurple1", 97, 177, 68, 68); // purple stone-moss
-  makeTileTexture(this, "swampTiles", "tileMarshPurple2", 18, 256, 68, 68); // violet cobble-moss
-  makeTileTexture(this, "swampTiles", "tileMarshPurple3", 333, 256, 68, 68); // dark soil + purple specks
-  makeTileTexture(this, "swampTiles", "tileMarshPath", 252, 261, 68, 72); // warm brown-dirt trail (PATHS & ROAD EDGES) — the "tan" tone the mockup threads through the purple
-  makeTileTexture(this, "swampTiles", "tileSwampWater", 1041, 102, 74, 71);
-  makeTileTexture(this, "swampTiles", "tileSwampWaterMottle", 1129, 102, 74, 71);
-  makeTileTexture(this, "swampTiles", "tileSwampWaterEdge", 1217, 102, 82, 71);
-  buildSwampBridge(this); // tileBridge — procedural weathered planks (the sheet's bridge is a side-railing with a transparent deck, which keyed to magenta)
-  makeSpriteTexture(this, "swampTiles", "spriteSwampBoulder", 1150, 392, 62, 50);
-  makeSpriteTexture(this, "swampTiles", "spriteMireLotus", 820, 388, 38, 36);
-  makeSpriteTexture(this, "swampTiles", "spriteSwampReeds", 1448, 944, 72, 72);
-  makeSpriteTexture(this, "swampTiles", "spriteSwampLog", 886, 476, 112, 50);
-  // Dense swamp undergrowth — scattered non-blocking onto floor-5 marsh land so the
-  // biome reads packed like the target mockup instead of bare causeways (addTileDecorations).
-  makeSpriteTexture(this, "swampTiles", "spriteSwampBramble0", 524, 556, 76, 56, true);
-  makeSpriteTexture(this, "swampTiles", "spriteSwampBramble1", 616, 552, 76, 64, true);
-  makeSpriteTexture(this, "swampTiles", "spriteSwampBramble2", 876, 556, 68, 60, true);
-  makeSpriteTexture(this, "swampTiles", "spriteSwampStump", 664, 500, 56, 40, true);
-  // Drowned-temple ruins (floor 5) — the mockup's identity is a sunken stone ruin in the
-  // purple mire. RUINS & STONE STRUCTURES row on the swamp sheet; placed as non-blocking
-  // landmark scenery at fixed marsh anchors (MARSH_RUINS) so collision/pathing are untouched.
-  makeSpriteTexture(this, "swampTiles", "spriteRuinArch", 1043, 635, 94, 101, true);
-  makeSpriteTexture(this, "swampTiles", "spriteRuinPillar", 827, 635, 34, 100, true);
-  makeSpriteTexture(this, "swampTiles", "spriteCliffLedge", 714, 958, 70, 58);
   // Searing Badlands (floor 6). Crops from assetsources/rejected/badlands-biome-tiles-01.png
   // (1536x1024, magenta-keyed) — rust ground/rock/cliff/pit/ramp tiles + a frontier tent.
   // Red-shift pulls the rust palette off the desert's warm-orange (ground avg was (183,84,39),
@@ -2186,6 +2153,43 @@ function create(this: Phaser.Scene): void {
   zoomKeys.NUMPAD_SUBTRACT?.on("down", () => { if (!isTextEntryFocused()) nudgeUserZoom(1 / ZOOM_KEY_STEP); });
 
   refreshKeyboardCapture();
+}
+
+function buildSunkenMarshTextures(scene: Phaser.Scene): void {
+  if (scene.textures.exists("tileMarsh")) return;
+  // Sunken Marsh (floor 5). Crops dialed in from assetsources/deferred/swamp-biome-tiles.png
+  // (1536x1024, magenta-keyed) — ground/dirt/water tiles, a plank bridge, and swamp props.
+  makeTileTexture(scene, "swampTiles", "tileMarsh", 18, 98, 69, 72);
+  makeTileTexture(scene, "swampTiles", "tileSwampDirt", 97, 98, 67, 72);
+  // Purple lichen-moss ground variants (floor 5 only). Alex's target mockup makes
+  // the swamp PURPLE — dense violet/magenta lichen carpeting the land, olive as accent
+  // — so the marsh ground (char m/o) hash-scatters across these instead of the one flat
+  // olive tileMarsh. cityGroundTexture-style per-cell pick lives in marshGroundTexture().
+  makeTileTexture(scene, "swampTiles", "tileMarshPurple0", 255, 256, 68, 68); // magenta-veined lichen
+  makeTileTexture(scene, "swampTiles", "tileMarshPurple1", 97, 177, 68, 68); // purple stone-moss
+  makeTileTexture(scene, "swampTiles", "tileMarshPurple2", 18, 256, 68, 68); // violet cobble-moss
+  makeTileTexture(scene, "swampTiles", "tileMarshPurple3", 333, 256, 68, 68); // dark soil + purple specks
+  makeTileTexture(scene, "swampTiles", "tileMarshPath", 252, 261, 68, 72); // warm brown-dirt trail (PATHS & ROAD EDGES) — the "tan" tone the mockup threads through the purple
+  makeTileTexture(scene, "swampTiles", "tileSwampWater", 1041, 102, 74, 71);
+  makeTileTexture(scene, "swampTiles", "tileSwampWaterMottle", 1129, 102, 74, 71);
+  makeTileTexture(scene, "swampTiles", "tileSwampWaterEdge", 1217, 102, 82, 71);
+  buildSwampBridge(scene); // tileBridge — procedural weathered planks (the sheet's bridge is a side-railing with a transparent deck, which keyed to magenta)
+  makeSpriteTexture(scene, "swampTiles", "spriteSwampBoulder", 1150, 392, 62, 50);
+  makeSpriteTexture(scene, "swampTiles", "spriteMireLotus", 820, 388, 38, 36);
+  makeSpriteTexture(scene, "swampTiles", "spriteSwampReeds", 1448, 944, 72, 72);
+  makeSpriteTexture(scene, "swampTiles", "spriteSwampLog", 886, 476, 112, 50);
+  // Dense swamp undergrowth — scattered non-blocking onto floor-5 marsh land so the
+  // biome reads packed like the target mockup instead of bare causeways (addTileDecorations).
+  makeSpriteTexture(scene, "swampTiles", "spriteSwampBramble0", 524, 556, 76, 56, true);
+  makeSpriteTexture(scene, "swampTiles", "spriteSwampBramble1", 616, 552, 76, 64, true);
+  makeSpriteTexture(scene, "swampTiles", "spriteSwampBramble2", 876, 556, 68, 60, true);
+  makeSpriteTexture(scene, "swampTiles", "spriteSwampStump", 664, 500, 56, 40, true);
+  // Drowned-temple ruins (floor 5) — the mockup's identity is a sunken stone ruin in the
+  // purple mire. RUINS & STONE STRUCTURES row on the swamp sheet; placed as non-blocking
+  // landmark scenery at fixed marsh anchors (MARSH_RUINS) so collision/pathing are untouched.
+  makeSpriteTexture(scene, "swampTiles", "spriteRuinArch", 1043, 635, 94, 101, true);
+  makeSpriteTexture(scene, "swampTiles", "spriteRuinPillar", 827, 635, 34, 100, true);
+  makeSpriteTexture(scene, "swampTiles", "spriteCliffLedge", 714, 958, 70, 58);
 }
 
 function buildNorthwatchCityTextures(scene: Phaser.Scene): void {
@@ -9397,6 +9401,10 @@ function ensureFloorContextAssetsLoaded(floor: number, trigger: RuntimeImageLoad
 
 function ensureFloorContextTextures(floor: number): void {
   if (floorContextTextureBuildsReady.has(floor)) return;
+  if (floor === 5) {
+    if (!scene.textures.exists("swampTiles")) return;
+    buildSunkenMarshTextures(scene);
+  }
   if (floor === 4) {
     if (!scene.textures.exists("cityTiles")) return;
     buildNorthwatchCityTextures(scene);

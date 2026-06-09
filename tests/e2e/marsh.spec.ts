@@ -33,10 +33,23 @@ test("travel loop: forest west portal -> marsh, and the cliff ledge -> Waystone"
   logErrors(page);
   await page.goto("/?e2e");
   await join(page);
+  const startupAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  expect(startupAssets?.startupImages.some((asset) => asset.key === "swampTiles"), "Sunken Marsh sheet should not be a startup asset").toBe(false);
+  const startupSwamp = startupAssets?.runtimeImages.find((asset) => asset.key === "swampTiles");
+  expect(startupSwamp?.tier).toBe("play-context");
+  expect(startupSwamp?.resident, "Sunken Marsh sheet should wait for floor-context loading").toBe(false);
 
   // Step the forest's west-edge portal into the Sunken Marsh (floor 5).
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 1.5, y: 36.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 5, null, { timeout: 8000 });
+  await page.waitForFunction(() => {
+    const textures = window.__TIB_E2E__?.textureResidency?.(["swampTiles", "tileMarsh", "tileBridge", "spriteRuinArch"]) ?? [];
+    return textures.length === 4 && textures.every((texture) => texture.exists && texture.width > 0 && texture.height > 0);
+  });
+  const marshAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  const loadedSwamp = marshAssets?.runtimeImages.find((asset) => asset.key === "swampTiles");
+  expect(loadedSwamp?.trigger).toBe("play-context");
+  expect(loadedSwamp?.resident, "Sunken Marsh sheet should be resident after traveling to floor 5").toBe(true);
 
   // The cliff ledge in the hut clearing drops one-way into northern Waystone (floor 0).
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 5, x: p.x, y: p.y }), { x: scaleX(5, 7.5), y: scaleY(5, 16.5) });
