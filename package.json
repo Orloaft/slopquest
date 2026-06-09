@@ -23,6 +23,7 @@
     "perf:visual": "playwright test tests/e2e/render-performance.spec.ts --project=chromium",
     "perf:soak": "node scripts/perf-gate.ts --soak",
     "perf:stress": "node scripts/perf-gate.ts --stress",
+    "perf:reassess": "node scripts/perf-reassess.ts",
     "check:perf": "npm run assets:budget && npm run perf:visual && npm run perf:gate && npm run perf:gate:prod",
     "balance:areas": "node scripts/balance-areas.ts",
     "balance:bands": "node scripts/balance-bands.ts",

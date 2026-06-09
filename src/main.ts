@@ -263,6 +263,37 @@ interface FireEntityView extends Phaser.GameObjects.Container {
 
 interface Floater extends Phaser.GameObjects.Text {
   life: number;
+  maxLife: number;
+}
+
+interface RenderFxStats {
+  activeFloaters: number;
+  pooledFloaters: number;
+  floaterCreated: number;
+  floaterReused: number;
+  floaterReleased: number;
+  floaterEvicted: number;
+  crowdedFxCulled: number;
+  activeFx: number;
+  pooledSprites: number;
+  pooledShapes: number;
+  pooledProjectiles: number;
+  fxCreated: number;
+  fxReused: number;
+  fxReleased: number;
+}
+
+interface PooledFxObject extends Phaser.GameObjects.GameObject {
+  active: boolean;
+  setActive(value: boolean): this;
+  setVisible(value: boolean): this;
+  setAlpha?(value: number): this;
+  setScale?(x: number, y?: number): this;
+}
+
+interface PooledProjectile extends Phaser.GameObjects.Container {
+  poolKey: string;
+  configured?: boolean;
 }
 
 type HotbarSlot =
@@ -340,6 +371,65 @@ interface DecorationCacheStats {
   beachBuilds: number;
 }
 
+interface TextureResidency {
+  key: string;
+  exists: boolean;
+  width: number;
+  height: number;
+}
+
+interface RuntimeAssetGroup {
+  id: string;
+  label: string;
+  kind: "generated-stage";
+  load: "lazy";
+  floor: number;
+  zone: string;
+  stage: GeneratedStage;
+  sourceTextures: Array<{ key: string; path: string }>;
+}
+
+interface RuntimeAssetGroupResidency {
+  id: string;
+  label: string;
+  kind: RuntimeAssetGroup["kind"];
+  load: RuntimeAssetGroup["load"];
+  floor: number;
+  zone: string;
+  pending: boolean;
+  assetsReady: boolean;
+  texturesReady: boolean;
+  sourceTextures: {
+    total: number;
+    resident: number;
+    missingCount: number;
+    missingKeys: string[];
+  };
+  generatedTextures: {
+    total: number;
+    resident: number;
+    missingCount: number;
+    missingKeys: string[];
+  };
+  resident: boolean;
+}
+
+interface PendingLazyLoad {
+  id: string;
+  label: string;
+  floor: number;
+  zone: string;
+  sourceTextureKeys: string[];
+  missingSourceTextureKeys: string[];
+}
+
+interface RuntimeAssetResidencySnapshot {
+  currentFloor: number | null;
+  pendingMapFloor: number | null;
+  pendingLazyLoads: PendingLazyLoad[];
+  groups: RuntimeAssetGroupResidency[];
+}
+
 interface BoundingBox {
   x: number;
   y: number;
@@ -383,6 +473,10 @@ interface E2EHooks {
   }>;
   mapChunkStats: () => MapChunkStats;
   decorationCacheStats: () => DecorationCacheStats;
+  renderFxStats: () => RenderFxStats;
+  textureResidency: (keys: string[]) => TextureResidency[];
+  assetResidency: () => RuntimeAssetResidencySnapshot;
+  pendingLazyLoads: () => PendingLazyLoad[];
   generatedStageTextureKeys: (floor: number) => Array<{ char: string; key: string; exists: boolean; ref: string }>;
   cutawayRoofAlphas: () => Array<{ floor: number; key: string; x: number; y: number; alpha: number }>;
   entityDepthStats: () => EntityDepthStats;
@@ -767,6 +861,10 @@ if (E2E_MODE) {
       }),
     mapChunkStats: () => mapChunkStats(),
     decorationCacheStats: () => decorationCacheStats(),
+    renderFxStats: () => renderFxStats(),
+    textureResidency: (keys: string[]) => textureResidency(keys),
+    assetResidency: () => runtimeAssetResidency(),
+    pendingLazyLoads: () => pendingLazyLoads(),
     entityDepthStats: () => entityDepthStats(),
     generatedStageTextureKeys: (floor: number) => generatedStageTextureKeys(floor),
     cutawayRoofAlphas: () =>
@@ -854,8 +952,13 @@ const MAP_CHUNK_TILES = 16;
 const ENTITY_RENDER_PADDING_TILES = 6;
 const ENTITY_SORT_BUCKET_PX = TILE_SIZE;
 const CROWDED_ENTITY_LABEL_THRESHOLD = 16;
+const CROWDED_EXTRA_MONSTER_RENDER_BUDGET = 4;
 const MAX_FLOATERS = 80;
 const MAX_CROWDED_FLOATERS = 24;
+const MAX_POOLED_FLOATERS = 96;
+const MAX_POOLED_SPRITES = 48;
+const MAX_POOLED_SHAPES = 64;
+const MAX_POOLED_PROJECTILES = 32;
 const RESOURCE_BUCKET_TILES = 16;
 const tileDecorationCache = new Map<string, DecorationSprite[]>();
 const beachClutterCache = new Map<string, DecorationSprite[]>();
@@ -916,6 +1019,23 @@ const visibleMiningNodeIds = new Set<string>();
 const visibleHerbNodeIds = new Set<string>();
 const visibleFireIds = new Set<string>();
 const floaters: Floater[] = [];
+const floaterPool: Floater[] = [];
+const pooledSprites = new Map<string, Phaser.GameObjects.Sprite[]>();
+const pooledEllipses: Phaser.GameObjects.Ellipse[] = [];
+const pooledCircles: Phaser.GameObjects.Arc[] = [];
+const pooledLines: Phaser.GameObjects.Line[] = [];
+const pooledProjectiles = new Map<string, PooledProjectile[]>();
+const activeFxObjects = new Set<PooledFxObject>();
+const renderFxCounters = {
+  floaterCreated: 0,
+  floaterReused: 0,
+  floaterReleased: 0,
+  floaterEvicted: 0,
+  crowdedFxCulled: 0,
+  fxCreated: 0,
+  fxReused: 0,
+  fxReleased: 0
+};
 let entityLayerSortDirty = true;
 const entityLayerRows = new Map<number, Phaser.GameObjects.Container>();
 const entityLayerRowCounts = new Map<number, number>();
@@ -3249,6 +3369,25 @@ function entityDepthStats(): EntityDepthStats {
   };
 }
 
+function renderFxStats(): RenderFxStats {
+  return {
+    activeFloaters: floaters.length,
+    pooledFloaters: floaterPool.length,
+    floaterCreated: renderFxCounters.floaterCreated,
+    floaterReused: renderFxCounters.floaterReused,
+    floaterReleased: renderFxCounters.floaterReleased,
+    floaterEvicted: renderFxCounters.floaterEvicted,
+    crowdedFxCulled: renderFxCounters.crowdedFxCulled,
+    activeFx: activeFxObjects.size,
+    pooledSprites: pooledCount(pooledSprites),
+    pooledShapes: pooledEllipses.length + pooledCircles.length + pooledLines.length,
+    pooledProjectiles: pooledCount(pooledProjectiles),
+    fxCreated: renderFxCounters.fxCreated,
+    fxReused: renderFxCounters.fxReused,
+    fxReleased: renderFxCounters.fxReleased
+  };
+}
+
 function visibleContainerChildren(container: Phaser.GameObjects.Container): number {
   let visible = 0;
   for (const child of container.getAll()) {
@@ -3309,6 +3448,7 @@ function syncEntities(): void {
   visibleMiningNodes.clear();
   visibleHerbNodes.clear();
   visibleFires.clear();
+  crowdedActorsActive = renderCrowdPressure(latestState, me.floor, renderBounds) >= CROWDED_ENTITY_LABEL_THRESHOLD;
 
   for (const player of latestState.players) {
     if (player.floor !== me.floor) continue;
@@ -3335,9 +3475,13 @@ function syncEntities(): void {
     }
   }
 
+  let crowdedRenderedExtraMonsters = 0;
   for (const monster of latestState.monsters) {
     if (monster.floor !== me.floor) continue;
     if (!isWorldPointRenderable(monster.x * TILE_SIZE, monster.y * TILE_SIZE, renderBounds)) continue;
+    const targetImportant = me.targetId === monster.id;
+    if (crowdedActorsActive && !targetImportant && crowdedRenderedExtraMonsters >= CROWDED_EXTRA_MONSTER_RENDER_BUDGET) continue;
+    if (!targetImportant) crowdedRenderedExtraMonsters += 1;
     visibleMonsters.add(monster.id);
     let view = monsterViews.get(monster.id);
     if (!view) {
@@ -3357,7 +3501,7 @@ function syncEntities(): void {
       }
       view.actorType = monster.type;
     }
-    const monsterImportant = me.targetId === monster.id || monster.targetId === me.id;
+    const monsterImportant = targetImportant || monster.targetId === me.id;
     view.crowdImportant = monsterImportant;
     if (!crowdedActorsActive || monsterImportant) setRectangleWidthIfChanged(view.hp, 36 * (monster.hp / monster.maxHp));
     setVisibleIfChanged(view.targetRing, me.targetId === monster.id);
@@ -3531,6 +3675,17 @@ function syncEntities(): void {
   pruneEmptyEntityRows();
 }
 
+function renderCrowdPressure(state: StateSnapshot, floor: number, renderBounds: RenderBounds): number {
+  const renderable = (item: { floor: number; x: number; y: number }) =>
+    item.floor === floor && isWorldPointRenderable(item.x * TILE_SIZE, item.y * TILE_SIZE, renderBounds);
+  return (
+    state.players.filter(renderable).length +
+    state.monsters.filter(renderable).length +
+    state.npcs.filter(renderable).length +
+    state.corpses.filter(renderable).length
+  );
+}
+
 function clearResourceViews(): void {
   for (const views of [treeViews, fishingViews, miningViews, herbViews, fireViews]) {
     for (const view of views.values()) {
@@ -3543,7 +3698,7 @@ function clearResourceViews(): void {
 
 function updateCrowdedActorLabels(me: PlayerView): void {
   const crowdPressure = visiblePlayerIds.size + visibleMonsterIds.size + visibleNpcIds.size + visibleCorpseIds.size;
-  const crowded = crowdPressure >= CROWDED_ENTITY_LABEL_THRESHOLD;
+  const crowded = crowdedActorsActive || crowdPressure >= CROWDED_ENTITY_LABEL_THRESHOLD;
   crowdedActorsActive = crowded;
   for (const [id, view] of playerViews) {
     if (!visiblePlayerIds.has(id)) continue;
@@ -6547,12 +6702,13 @@ function consumeEvents(events: GameEvent[]): void {
     if (event.type === "system") addSystemLine(String(event.text));
     if (event.type === "chat") addChat(String(event.text));
     if (event.type === "dialogue") openDialogue(event);
-    if (crowdedActorsActive && shouldCullCrowdedFx(event)) continue;
+    if (crowdedActorsActive && shouldCullCrowdedFx(event)) {
+      renderFxCounters.crowdedFxCulled += 1;
+      continue;
+    }
     if (event.type === "faith_deed" && self()?.floor === event.floor) {
       playHolyChime();
-      const floater = scene.add.text((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, String(event.text), textStyle(14, event.color ?? "#f5d778")).setOrigin(0.5) as Floater;
-      floater.life = 1300;
-      addFloater(floater);
+      addFloater((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, String(event.text), 14, event.color ?? "#f5d778", 1300);
       continue;
     }
     if (event.type === "effect" && self()?.floor === event.floor) playCombatEffect(event);
@@ -6561,25 +6717,27 @@ function consumeEvents(events: GameEvent[]): void {
     if (event.type === "projectile" && self()?.floor === event.floor) playProjectile(event);
     if ((event.type === "hit" || event.type === "float") && self()?.floor === event.floor) {
       const crit = event.crit === true;
-      const floater = scene.add.text((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, crit ? `${event.text}!` : String(event.text), textStyle(crit ? 21 : 13, event.color ?? "#fff")).setOrigin(0.5) as Floater;
-      floater.life = crit ? 1200 : 1000;
+      const floater = addFloater((event.x ?? 0) * TILE_SIZE, (event.y ?? 0) * TILE_SIZE, crit ? `${event.text}!` : String(event.text), crit ? 21 : 13, event.color ?? "#fff", crit ? 1200 : 1000);
       if (crit) {
         floater.setScale(0.5);
         scene.tweens.add({ targets: floater, scale: 1.15, duration: 150, yoyo: true, ease: "Back.easeOut" });
       }
-      addFloater(floater);
     }
   }
 }
 
-function addFloater(floater: Floater): void {
+function addFloater(x: number, y: number, text: string, size: number, color: string, life: number): Floater {
   const maxFloaters = crowdedActorsActive ? MAX_CROWDED_FLOATERS : MAX_FLOATERS;
   while (floaters.length >= maxFloaters) {
     const oldest = floaters.shift();
-    oldest?.destroy();
+    if (oldest) {
+      renderFxCounters.floaterEvicted += 1;
+      releaseFloater(oldest);
+    }
   }
+  const floater = acquireFloater(x, y, text, size, color, life);
   floaters.push(floater);
-  fxLayer.add(floater);
+  return floater;
 }
 
 function shouldCullCrowdedFx(event: GameEvent): boolean {
@@ -6605,21 +6763,208 @@ function shouldCullCrowdedFx(event: GameEvent): boolean {
   return !target || Math.hypot(x - target.x, y - target.y) > 1.5;
 }
 
+function acquireFloater(x: number, y: number, text: string, size: number, color: string, life: number): Floater {
+  const pooled = floaterPool.pop();
+  const floater = pooled ?? (scene.add.text(0, 0, "", textStyle(size, color)).setOrigin(0.5) as Floater);
+  if (pooled) renderFxCounters.floaterReused += 1;
+  else renderFxCounters.floaterCreated += 1;
+  if (!floater.parentContainer) fxLayer.add(floater);
+  floater.setPosition(x, y);
+  floater.setText(text);
+  floater.setStyle(textStyle(size, color));
+  floater.setOrigin(0.5);
+  floater.setAlpha(1);
+  floater.setScale(1);
+  floater.setRotation(0);
+  floater.setActive(true).setVisible(true);
+  floater.life = life;
+  floater.maxLife = life;
+  return floater;
+}
+
+function releaseFloater(floater: Floater): void {
+  scene.tweens.killTweensOf(floater);
+  floater.setActive(false).setVisible(false).setAlpha(0).setScale(1).setRotation(0);
+  floater.setText("");
+  floater.life = 0;
+  floater.maxLife = 0;
+  if (floaterPool.length < MAX_POOLED_FLOATERS) {
+    fxLayer.remove(floater, false);
+    floaterPool.push(floater);
+    renderFxCounters.floaterReleased += 1;
+  } else {
+    floater.destroy();
+  }
+}
+
+function pooledCount<T>(pool: Map<string, T[]>): number {
+  let count = 0;
+  for (const items of pool.values()) count += items.length;
+  return count;
+}
+
+function acquireSpriteFx(poolKey: string, textureKey: string, x: number, y: number): Phaser.GameObjects.Sprite {
+  const pool = pooledSprites.get(poolKey) ?? [];
+  pooledSprites.set(poolKey, pool);
+  const pooled = pool.pop();
+  const sprite = pooled ?? scene.add.sprite(0, 0, textureKey);
+  if (pooled) renderFxCounters.fxReused += 1;
+  else renderFxCounters.fxCreated += 1;
+  if (!sprite.parentContainer) fxLayer.add(sprite);
+  sprite.setTexture(textureKey);
+  sprite.setPosition(x, y);
+  sprite.setOrigin(0.5);
+  sprite.setAlpha(1);
+  sprite.setScale(1);
+  sprite.setRotation(0);
+  sprite.setActive(true).setVisible(true);
+  activeFxObjects.add(sprite as PooledFxObject);
+  return sprite;
+}
+
+function releaseSpriteFx(poolKey: string, sprite: Phaser.GameObjects.Sprite): void {
+  scene.tweens.killTweensOf(sprite);
+  sprite.setActive(false).setVisible(false).setAlpha(0).setScale(1).setRotation(0);
+  activeFxObjects.delete(sprite as PooledFxObject);
+  const pool = pooledSprites.get(poolKey) ?? [];
+  pooledSprites.set(poolKey, pool);
+  if (pooledCount(pooledSprites) < MAX_POOLED_SPRITES) {
+    fxLayer.remove(sprite, false);
+    pool.push(sprite);
+    renderFxCounters.fxReleased += 1;
+  } else {
+    sprite.destroy();
+  }
+}
+
+function acquireEllipseFx(x: number, y: number, width: number, height: number, fill: number, alpha: number, strokeWidth = 0, strokeColor = fill, strokeAlpha = 1): Phaser.GameObjects.Ellipse {
+  const pooled = pooledEllipses.pop();
+  const ellipse = pooled ?? scene.add.ellipse(0, 0, 1, 1, fill, alpha);
+  if (pooled) renderFxCounters.fxReused += 1;
+  else renderFxCounters.fxCreated += 1;
+  if (!ellipse.parentContainer) fxLayer.add(ellipse);
+  ellipse.setPosition(x, y);
+  ellipse.setSize(width, height);
+  ellipse.setFillStyle(fill, alpha);
+  if (strokeWidth > 0) ellipse.setStrokeStyle(strokeWidth, strokeColor, strokeAlpha);
+  else ellipse.setStrokeStyle();
+  ellipse.setAlpha(1);
+  ellipse.setScale(1);
+  ellipse.setRotation(0);
+  ellipse.setActive(true).setVisible(true);
+  activeFxObjects.add(ellipse as PooledFxObject);
+  return ellipse;
+}
+
+function releaseEllipseFx(ellipse: Phaser.GameObjects.Ellipse): void {
+  releaseShapeFx(ellipse, pooledEllipses, MAX_POOLED_SHAPES);
+}
+
+function acquireCircleFx(x: number, y: number, radius: number, fill: number, alpha: number, strokeWidth = 0, strokeColor = fill, strokeAlpha = 1): Phaser.GameObjects.Arc {
+  const pooled = pooledCircles.pop();
+  const circle = pooled ?? scene.add.circle(0, 0, 1, fill, alpha);
+  if (pooled) renderFxCounters.fxReused += 1;
+  else renderFxCounters.fxCreated += 1;
+  if (!circle.parentContainer) fxLayer.add(circle);
+  circle.setPosition(x, y);
+  circle.setRadius(radius);
+  circle.setFillStyle(fill, alpha);
+  if (strokeWidth > 0) circle.setStrokeStyle(strokeWidth, strokeColor, strokeAlpha);
+  else circle.setStrokeStyle();
+  circle.setAlpha(1);
+  circle.setScale(1);
+  circle.setRotation(0);
+  circle.setActive(true).setVisible(true);
+  activeFxObjects.add(circle as PooledFxObject);
+  return circle;
+}
+
+function releaseCircleFx(circle: Phaser.GameObjects.Arc): void {
+  releaseShapeFx(circle, pooledCircles, MAX_POOLED_SHAPES);
+}
+
+function acquireLineFx(x1: number, y1: number, x2: number, y2: number, color: number, alpha: number, startWidth: number, endWidth: number): Phaser.GameObjects.Line {
+  const pooled = pooledLines.pop();
+  const line = pooled ?? scene.add.line(0, 0, 0, 0, 1, 1, color, alpha);
+  if (pooled) renderFxCounters.fxReused += 1;
+  else renderFxCounters.fxCreated += 1;
+  if (!line.parentContainer) fxLayer.add(line);
+  line.setTo(x1, y1, x2, y2);
+  line.setStrokeStyle(startWidth, color, alpha);
+  line.setLineWidth(startWidth, endWidth);
+  line.setAlpha(1);
+  line.setScale(1);
+  line.setRotation(0);
+  line.setActive(true).setVisible(true);
+  activeFxObjects.add(line as PooledFxObject);
+  return line;
+}
+
+function releaseLineFx(line: Phaser.GameObjects.Line): void {
+  releaseShapeFx(line, pooledLines, MAX_POOLED_SHAPES);
+}
+
+function releaseShapeFx<T extends PooledFxObject>(shape: T, pool: T[], maxPool: number): void {
+  scene.tweens.killTweensOf(shape);
+  shape.setActive(false).setVisible(false);
+  shape.setAlpha?.(0);
+  shape.setScale?.(1);
+  activeFxObjects.delete(shape);
+  if (pool.length < maxPool) {
+    fxLayer.remove(shape, false);
+    pool.push(shape);
+    renderFxCounters.fxReleased += 1;
+  } else {
+    shape.destroy();
+  }
+}
+
+function acquireProjectileFx(poolKey: string, x: number, y: number, angle: number): PooledProjectile {
+  const pool = pooledProjectiles.get(poolKey) ?? [];
+  pooledProjectiles.set(poolKey, pool);
+  const pooled = pool.pop();
+  const projectile = pooled ?? (scene.add.container(0, 0) as PooledProjectile);
+  if (pooled) renderFxCounters.fxReused += 1;
+  else renderFxCounters.fxCreated += 1;
+  projectile.poolKey = poolKey;
+  projectile.setPosition(x, y);
+  projectile.setRotation(angle);
+  projectile.setAlpha(1);
+  projectile.setScale(1);
+  projectile.setActive(true).setVisible(true);
+  if (!projectile.parentContainer) fxLayer.add(projectile);
+  activeFxObjects.add(projectile as PooledFxObject);
+  return projectile;
+}
+
+function releaseProjectileFx(projectile: PooledProjectile): void {
+  scene.tweens.killTweensOf(projectile);
+  projectile.setActive(false).setVisible(false).setAlpha(0).setScale(1).setRotation(0);
+  activeFxObjects.delete(projectile as PooledFxObject);
+  const pool = pooledProjectiles.get(projectile.poolKey) ?? [];
+  pooledProjectiles.set(projectile.poolKey, pool);
+  if (pooledCount(pooledProjectiles) < MAX_POOLED_PROJECTILES) {
+    fxLayer.remove(projectile, false);
+    pool.push(projectile);
+    renderFxCounters.fxReleased += 1;
+  } else {
+    projectile.destroy();
+  }
+}
+
 function playTelegraph(event: GameEvent): void {
   const x = (event.x ?? 0) * TILE_SIZE;
   const y = (event.y ?? 0) * TILE_SIZE;
   const radius = Math.max(0.4, event.scale ?? 1.6) * TILE_SIZE;
   const color = hexColorToNumber(event.color, 0xf0b24a);
   const duration = event.durationMs ?? 800;
-  const warning = scene.add.ellipse(x, y + 8, radius * 2, radius, color, 0.18).setStrokeStyle(3, color, 0.95);
-  const inner = scene.add.ellipse(x, y + 8, radius * 1.35, radius * 0.68, color, 0.12).setStrokeStyle(1, color, 0.65);
-  fxLayer.add(warning);
-  fxLayer.add(inner);
+  const warning = acquireEllipseFx(x, y + 8, radius * 2, radius, color, 0.18, 3, color, 0.95);
+  const inner = acquireEllipseFx(x, y + 8, radius * 1.35, radius * 0.68, color, 0.12, 1, color, 0.65);
   scene.tweens.add({ targets: warning, alpha: 0.35, scale: 0.88, yoyo: true, repeat: 2, duration: Math.max(90, duration / 4), ease: "Sine.easeInOut" });
   scene.tweens.add({ targets: inner, alpha: 0.55, scale: 0.72, duration, ease: "Quad.easeIn" });
   scene.time.delayedCall(duration, () => {
-    warning.destroy();
-    inner.destroy();
+    releaseEllipseFx(warning);
+    releaseEllipseFx(inner);
   });
 }
 
@@ -6848,23 +7193,20 @@ function playCombatEffect(event: GameEvent): void {
 
   if (event.text === "dash") {
     // i-frame shimmer: a quick expanding ring where the dodge began.
-    const ring = scene.add.ellipse(targetX, targetY + 8, 30, 16, 0xbfe9ff, 0.3).setStrokeStyle(2, 0xbfe9ff, 0.9);
-    fxLayer.add(ring);
-    scene.tweens.add({ targets: ring, alpha: 0, scaleX: 2.2, scaleY: 1.6, duration: event.durationMs ?? 350, ease: "Quad.easeOut", onComplete: () => ring.destroy() });
+    const ring = acquireEllipseFx(targetX, targetY + 8, 30, 16, 0xbfe9ff, 0.3, 2, 0xbfe9ff, 0.9);
+    scene.tweens.add({ targets: ring, alpha: 0, scaleX: 2.2, scaleY: 1.6, duration: event.durationMs ?? 350, ease: "Quad.easeOut", onComplete: () => releaseEllipseFx(ring) });
     return;
   }
 
   if (event.text === "fish") {
-    const splash = scene.add.ellipse(targetX, targetY + 12, 38, 16, 0x8fd8ff, 0.48).setStrokeStyle(2, 0xbbeeff);
-    fxLayer.add(splash);
-    scene.tweens.add({ targets: splash, alpha: 0, scale: 1.7, duration: 520, onComplete: () => splash.destroy() });
+    const splash = acquireEllipseFx(targetX, targetY + 12, 38, 16, 0x8fd8ff, 0.48, 2, 0xbbeeff);
+    scene.tweens.add({ targets: splash, alpha: 0, scale: 1.7, duration: 520, onComplete: () => releaseEllipseFx(splash) });
     return;
   }
 
   if (event.text === "fire") {
-    const spark = scene.add.circle(targetX, targetY, 12, 0xffb23d, 0.72);
-    fxLayer.add(spark);
-    scene.tweens.add({ targets: spark, alpha: 0, scale: 2.2, duration: 420, onComplete: () => spark.destroy() });
+    const spark = acquireCircleFx(targetX, targetY, 12, 0xffb23d, 0.72);
+    scene.tweens.add({ targets: spark, alpha: 0, scale: 2.2, duration: 420, onComplete: () => releaseCircleFx(spark) });
     return;
   }
 
@@ -6873,10 +7215,9 @@ function playCombatEffect(event: GameEvent): void {
 
   if (renderer === "fire_missile" || renderer === "ice_missile" || (!combatAnimation && (event.text === "bolt" || event.text === "flare" || event.text === "frost"))) {
     const family = renderer === "fire_missile" || event.text === "flare" ? "fireMissile" : "iceMissile";
-    const missile = scene.add.sprite(fromX, fromY, effectFrameKey(family, 0)).setOrigin(0.5);
+    const missile = acquireSpriteFx(`missile:${family}`, effectFrameKey(family, 0), fromX, fromY);
     missile.setDisplaySize(58, 28);
     missile.setRotation(angle);
-    fxLayer.add(missile);
     scene.tweens.add({
       targets: missile,
       x: targetX,
@@ -6888,7 +7229,7 @@ function playCombatEffect(event: GameEvent): void {
         missile.setTexture(effectFrameKey(family, frame));
       },
       onComplete: () => {
-        missile.destroy();
+        releaseSpriteFx(`missile:${family}`, missile);
         playBurst(family, targetX, targetY);
       }
     });
@@ -6932,29 +7273,25 @@ function playAbilityVfx(event: GameEvent): void {
   }
 
   if (kind === "impact_ring") {
-    const ring = scene.add.ellipse(x, y + 4, 34 * scale, 18 * scale, color, 0.18).setStrokeStyle(Math.max(2, 3 * scale), color, 0.95);
-    fxLayer.add(ring);
-    scene.tweens.add({ targets: ring, alpha: 0, scale: 1.8, duration, ease: "Quad.easeOut", onComplete: () => ring.destroy() });
+    const ring = acquireEllipseFx(x, y + 4, 34 * scale, 18 * scale, color, 0.18, Math.max(2, 3 * scale), color, 0.95);
+    scene.tweens.add({ targets: ring, alpha: 0, scale: 1.8, duration, ease: "Quad.easeOut", onComplete: () => releaseEllipseFx(ring) });
     return;
   }
 
   if (kind === "ground_burst") {
-    const burst = scene.add.circle(x, y + 10, 18 * scale, color, 0.32).setStrokeStyle(2, color, 0.85);
-    fxLayer.add(burst);
-    scene.tweens.add({ targets: burst, alpha: 0, scale: 2.3, duration, ease: "Cubic.easeOut", onComplete: () => burst.destroy() });
+    const burst = acquireCircleFx(x, y + 10, 18 * scale, color, 0.32, 2, color, 0.85);
+    scene.tweens.add({ targets: burst, alpha: 0, scale: 2.3, duration, ease: "Cubic.easeOut", onComplete: () => releaseCircleFx(burst) });
     return;
   }
 
   if (kind === "projectile_trail" || kind === "path") {
-    const trail = scene.add.line(0, 0, fromX, fromY, x, y, color, 0.55).setLineWidth(4 * scale, 1 * scale);
-    fxLayer.add(trail);
-    scene.tweens.add({ targets: trail, alpha: 0, duration, ease: "Quad.easeOut", onComplete: () => trail.destroy() });
+    const trail = acquireLineFx(fromX, fromY, x, y, color, 0.55, 4 * scale, 1 * scale);
+    scene.tweens.add({ targets: trail, alpha: 0, duration, ease: "Quad.easeOut", onComplete: () => releaseLineFx(trail) });
     return;
   }
 
-  const pulse = scene.add.circle(x, y, 14 * scale, color, 0.28).setStrokeStyle(2, color, 0.9);
-  fxLayer.add(pulse);
-  scene.tweens.add({ targets: pulse, alpha: 0, scale: 2, duration, ease: "Quad.easeOut", onComplete: () => pulse.destroy() });
+  const pulse = acquireCircleFx(x, y, 14 * scale, color, 0.28, 2, color, 0.9);
+  scene.tweens.add({ targets: pulse, alpha: 0, scale: 2, duration, ease: "Quad.easeOut", onComplete: () => releaseCircleFx(pulse) });
 }
 
 function playPrimitiveProjectile(
@@ -6970,44 +7307,47 @@ function playPrimitiveProjectile(
   const angle = Phaser.Math.Angle.Between(fromX, fromY, targetX, targetY);
   const fill = projectileFill(renderer, color);
   const stroke = projectileStroke(renderer);
-  const projectile = scene.add.container(fromX, fromY).setRotation(angle);
-  fxLayer.add(projectile);
+  const poolKey = `projectile:${renderer}:${fill}:${stroke}`;
+  const projectile = acquireProjectileFx(poolKey, fromX, fromY, angle);
 
-  if (renderer === "arrow_heavy") {
-    projectile.add(scene.add.rectangle(-2, 0, 28, 4, fill).setStrokeStyle(1, stroke));
-    projectile.add(scene.add.triangle(14, 0, 0, -6, 0, 6, 10, 0, 0xd8d0b8).setStrokeStyle(1, stroke));
-    projectile.add(scene.add.rectangle(-16, -4, 7, 2, 0x8a5630));
-    projectile.add(scene.add.rectangle(-16, 4, 7, 2, 0x8a5630));
-  } else if (renderer === "arrow_poison") {
-    projectile.add(scene.add.rectangle(-2, 0, 22, 3, 0xc8d9a0).setStrokeStyle(1, 0x426b2f));
-    projectile.add(scene.add.triangle(12, 0, 0, -4, 0, 4, 9, 0, 0x9ad36b).setStrokeStyle(1, 0x315a27));
-    projectile.add(scene.add.circle(4, 0, 3, 0x7bd45a, 0.65));
-  } else if (renderer === "arcane_lance") {
-    projectile.add(scene.add.ellipse(0, 0, 30, 8, fill, 0.75).setStrokeStyle(2, stroke, 0.9));
-    projectile.add(scene.add.circle(11, 0, 5, 0xf2e8ff, 0.95));
-    projectile.add(scene.add.ellipse(-17, 0, 18, 5, fill, 0.32));
-  } else if (renderer === "frost_shard") {
-    projectile.add(scene.add.triangle(4, 0, -12, -7, -12, 7, 18, 0, fill).setStrokeStyle(2, 0xf2fbff, 0.95));
-    projectile.add(scene.add.triangle(-10, 0, -24, -3, -24, 3, -8, 0, 0x7ecfff, 0.4));
-  } else if (renderer === "fire_orb") {
-    projectile.add(scene.add.circle(7, 0, 8, fill, 0.9).setStrokeStyle(2, 0xfff0a0, 0.85));
-    projectile.add(scene.add.circle(-5, 0, 6, 0xff623d, 0.45));
-    projectile.add(scene.add.circle(-15, 0, 4, 0xffb23d, 0.28));
-  } else if (renderer === "curse_bolt") {
-    projectile.add(scene.add.polygon(4, 0, [-12, 0, -2, -9, 16, 0, -2, 9], fill, 0.82).setStrokeStyle(2, stroke, 0.9));
-    projectile.add(scene.add.circle(-12, 0, 5, fill, 0.28));
-  } else if (renderer === "flask") {
-    projectile.add(scene.add.circle(4, 0, 7, fill, 0.85).setStrokeStyle(2, stroke));
-    projectile.add(scene.add.rectangle(-5, 0, 9, 4, 0xd7c9a4).setStrokeStyle(1, stroke));
-  } else if (renderer === "spit") {
-    projectile.add(scene.add.ellipse(2, 0, 18, 10, fill, 0.75).setStrokeStyle(1, stroke));
-    projectile.add(scene.add.circle(-10, 0, 4, fill, 0.35));
-  } else if (renderer === "arcane") {
-    projectile.add(scene.add.rectangle(0, 0, 24, 5, fill).setStrokeStyle(1, stroke));
-    projectile.add(scene.add.circle(10, 0, 4, 0xf2e8ff, 0.8));
-  } else {
-    projectile.add(scene.add.rectangle(0, 0, 20, 3, fill).setStrokeStyle(1, stroke));
-    projectile.add(scene.add.triangle(11, 0, 0, -4, 0, 4, 8, 0, fill).setStrokeStyle(1, stroke));
+  if (!projectile.configured) {
+    if (renderer === "arrow_heavy") {
+      projectile.add(scene.add.rectangle(-2, 0, 28, 4, fill).setStrokeStyle(1, stroke));
+      projectile.add(scene.add.triangle(14, 0, 0, -6, 0, 6, 10, 0, 0xd8d0b8).setStrokeStyle(1, stroke));
+      projectile.add(scene.add.rectangle(-16, -4, 7, 2, 0x8a5630));
+      projectile.add(scene.add.rectangle(-16, 4, 7, 2, 0x8a5630));
+    } else if (renderer === "arrow_poison") {
+      projectile.add(scene.add.rectangle(-2, 0, 22, 3, 0xc8d9a0).setStrokeStyle(1, 0x426b2f));
+      projectile.add(scene.add.triangle(12, 0, 0, -4, 0, 4, 9, 0, 0x9ad36b).setStrokeStyle(1, 0x315a27));
+      projectile.add(scene.add.circle(4, 0, 3, 0x7bd45a, 0.65));
+    } else if (renderer === "arcane_lance") {
+      projectile.add(scene.add.ellipse(0, 0, 30, 8, fill, 0.75).setStrokeStyle(2, stroke, 0.9));
+      projectile.add(scene.add.circle(11, 0, 5, 0xf2e8ff, 0.95));
+      projectile.add(scene.add.ellipse(-17, 0, 18, 5, fill, 0.32));
+    } else if (renderer === "frost_shard") {
+      projectile.add(scene.add.triangle(4, 0, -12, -7, -12, 7, 18, 0, fill).setStrokeStyle(2, 0xf2fbff, 0.95));
+      projectile.add(scene.add.triangle(-10, 0, -24, -3, -24, 3, -8, 0, 0x7ecfff, 0.4));
+    } else if (renderer === "fire_orb") {
+      projectile.add(scene.add.circle(7, 0, 8, fill, 0.9).setStrokeStyle(2, 0xfff0a0, 0.85));
+      projectile.add(scene.add.circle(-5, 0, 6, 0xff623d, 0.45));
+      projectile.add(scene.add.circle(-15, 0, 4, 0xffb23d, 0.28));
+    } else if (renderer === "curse_bolt") {
+      projectile.add(scene.add.polygon(4, 0, [-12, 0, -2, -9, 16, 0, -2, 9], fill, 0.82).setStrokeStyle(2, stroke, 0.9));
+      projectile.add(scene.add.circle(-12, 0, 5, fill, 0.28));
+    } else if (renderer === "flask") {
+      projectile.add(scene.add.circle(4, 0, 7, fill, 0.85).setStrokeStyle(2, stroke));
+      projectile.add(scene.add.rectangle(-5, 0, 9, 4, 0xd7c9a4).setStrokeStyle(1, stroke));
+    } else if (renderer === "spit") {
+      projectile.add(scene.add.ellipse(2, 0, 18, 10, fill, 0.75).setStrokeStyle(1, stroke));
+      projectile.add(scene.add.circle(-10, 0, 4, fill, 0.35));
+    } else if (renderer === "arcane") {
+      projectile.add(scene.add.rectangle(0, 0, 24, 5, fill).setStrokeStyle(1, stroke));
+      projectile.add(scene.add.circle(10, 0, 4, 0xf2e8ff, 0.8));
+    } else {
+      projectile.add(scene.add.rectangle(0, 0, 20, 3, fill).setStrokeStyle(1, stroke));
+      projectile.add(scene.add.triangle(11, 0, 0, -4, 0, 4, 8, 0, fill).setStrokeStyle(1, stroke));
+    }
+    projectile.configured = true;
   }
 
   scene.tweens.add({
@@ -7017,7 +7357,7 @@ function playPrimitiveProjectile(
     duration,
     ease: "Quad.easeIn",
     onComplete: () => {
-      projectile.destroy();
+      releaseProjectileFx(projectile);
       onComplete?.();
     }
   });
@@ -7052,9 +7392,8 @@ function playPrimitiveProjectileImpact(renderer: string, x: number, y: number, c
   }
   const fill = projectileFill(renderer, color);
   const scale = renderer === "arrow_heavy" ? 0.8 : renderer === "curse_bolt" ? 1.05 : 0.9;
-  const ring = scene.add.ellipse(x, y + 4, 34 * scale, 18 * scale, fill, 0.18).setStrokeStyle(2, fill, 0.85);
-  fxLayer.add(ring);
-  scene.tweens.add({ targets: ring, alpha: 0, scale: 1.75, duration: 260, ease: "Quad.easeOut", onComplete: () => ring.destroy() });
+  const ring = acquireEllipseFx(x, y + 4, 34 * scale, 18 * scale, fill, 0.18, 2, fill, 0.85);
+  scene.tweens.add({ targets: ring, alpha: 0, scale: 1.75, duration: 260, ease: "Quad.easeOut", onComplete: () => releaseEllipseFx(ring) });
 }
 
 function combatAnimationForEvent(event: GameEvent): CombatAnimationSpec | null {
@@ -7065,10 +7404,9 @@ function combatAnimationForEvent(event: GameEvent): CombatAnimationSpec | null {
 }
 
 function playSlash(x: number, y: number, angle: number): void {
-  const slash = scene.add.sprite(x, y, effectFrameKey("slash", 0)).setOrigin(0.5);
+  const slash = acquireSpriteFx("slash", effectFrameKey("slash", 0), x, y);
   slash.setDisplaySize(76, 44);
   slash.setRotation(angle);
-  fxLayer.add(slash);
   let frame = 0;
   const timer = scene.time.addEvent({
     delay: 45,
@@ -7076,7 +7414,7 @@ function playSlash(x: number, y: number, angle: number): void {
     callback: () => {
       frame += 1;
       if (frame >= 6) {
-        slash.destroy();
+        releaseSpriteFx("slash", slash);
         timer.remove();
         return;
       }
@@ -7091,9 +7429,9 @@ function hexColorToNumber(color: string | null | undefined, fallback: number): n
 }
 
 function playBurst(family: string, x: number, y: number): void {
-  const burst = scene.add.sprite(x, y, effectFrameKey(`${family}Burst`, 0)).setOrigin(0.5);
+  const poolKey = `burst:${family}`;
+  const burst = acquireSpriteFx(poolKey, effectFrameKey(`${family}Burst`, 0), x, y);
   burst.setDisplaySize(58, 58);
-  fxLayer.add(burst);
   let frame = 0;
   const timer = scene.time.addEvent({
     delay: 55,
@@ -7101,7 +7439,7 @@ function playBurst(family: string, x: number, y: number): void {
     callback: () => {
       frame += 1;
       if (frame >= 4) {
-        burst.destroy();
+        releaseSpriteFx(poolKey, burst);
         timer.remove();
         return;
       }
@@ -7116,10 +7454,10 @@ function updateFloaters(): void {
     if (!floater) continue;
     floater.y -= 0.45;
     floater.life -= scene.game.loop.delta;
-    floater.setAlpha(Math.max(0, floater.life / 1000));
+    floater.setAlpha(Math.max(0, floater.life / Math.max(1, floater.maxLife)));
     if (floater.life <= 0) {
-      floater.destroy();
       floaters.splice(i, 1);
+      releaseFloater(floater);
     }
   }
 }
@@ -7382,6 +7720,14 @@ function textureAlphaStats(keys: string[]): Array<{ key: string; exists: boolean
       }
     }
     return { key, exists: true, width, height, opaque, edgeOpaque, darkEdgeOpaque };
+  });
+}
+
+function textureResidency(keys: string[]): TextureResidency[] {
+  return keys.map((key) => {
+    if (!scene?.textures.exists(key)) return { key, exists: false, width: 0, height: 0 };
+    const image = scene.textures.get(key).getSourceImage() as HTMLImageElement | HTMLCanvasElement;
+    return { key, exists: true, width: image.width ?? 0, height: image.height ?? 0 };
   });
 }
 
@@ -8861,6 +9207,7 @@ const GENERATED_STAGES_BY_FLOOR = new Map<number, GeneratedStage>(GENERATED_STAG
 const generatedStageAssetsReady = new Set<number>();
 const generatedStageAssetLoads = new Map<number, Promise<void>>();
 const generatedStageTexturesReady = new Set<number>();
+const generatedStageRuntimeTextureKeyCache = new Map<number, string[]>();
 
 function generatedTilesetTextureKey(stage: GeneratedStage, tilesetName: string): string {
   return `generated:${stage.zone}:${tilesetName}`;
@@ -8874,19 +9221,35 @@ function generatedStageRefTextureKey(stage: GeneratedStage, ref: string): string
   return `generated:${stage.zone}:ref:${ref}`;
 }
 
+function generatedStageAssetGroup(stage: GeneratedStage): RuntimeAssetGroup {
+  return {
+    id: `generated-stage:${stage.floor}:${stage.zone}`,
+    label: `${stage.zone} generated stage`,
+    kind: "generated-stage",
+    load: "lazy",
+    floor: stage.floor,
+    zone: stage.zone,
+    stage,
+    sourceTextures: stage.tilesets
+      .filter((tileset) => Boolean(tileset.publicPath))
+      .map((tileset) => ({
+        key: generatedTilesetTextureKey(stage, tileset.name),
+        path: tileset.publicPath as string
+      }))
+  };
+}
+
+const GENERATED_STAGE_ASSET_GROUPS = GENERATED_STAGES.map((stage) => generatedStageAssetGroup(stage));
+const GENERATED_STAGE_ASSET_GROUPS_BY_FLOOR = new Map<number, RuntimeAssetGroup>(GENERATED_STAGE_ASSET_GROUPS.map((group) => [group.floor, group]));
+
 function ensureGeneratedStageAssetsLoaded(floor: number): Promise<void> {
-  const stage = GENERATED_STAGES_BY_FLOOR.get(floor);
-  if (!stage) return Promise.resolve();
+  const group = GENERATED_STAGE_ASSET_GROUPS_BY_FLOOR.get(floor);
+  if (!group) return Promise.resolve();
   if (generatedStageAssetsReady.has(floor)) return Promise.resolve();
   const activeLoad = generatedStageAssetLoads.get(floor);
   if (activeLoad) return activeLoad;
 
-  const pending = stage.tilesets
-    .filter((tileset) => tileset.publicPath && !scene.textures.exists(generatedTilesetTextureKey(stage, tileset.name)))
-    .map((tileset) => ({
-      key: generatedTilesetTextureKey(stage, tileset.name),
-      path: tileset.publicPath as string
-    }));
+  const pending = group.sourceTextures.filter((asset) => !scene.textures.exists(asset.key));
 
   if (pending.length === 0) {
     generatedStageAssetsReady.add(floor);
@@ -8911,6 +9274,88 @@ function ensureGeneratedStageAssetsLoaded(floor: number): Promise<void> {
 
   generatedStageAssetLoads.set(floor, load);
   return load;
+}
+
+function runtimeAssetResidency(): RuntimeAssetResidencySnapshot {
+  return {
+    currentFloor,
+    pendingMapFloor,
+    pendingLazyLoads: pendingLazyLoads(),
+    groups: GENERATED_STAGE_ASSET_GROUPS.map((group) => runtimeAssetGroupResidency(group))
+  };
+}
+
+function pendingLazyLoads(): PendingLazyLoad[] {
+  return GENERATED_STAGE_ASSET_GROUPS.filter((group) => generatedStageAssetLoads.has(group.floor)).map((group) => {
+    const sourceResidency = textureResidency(group.sourceTextures.map((asset) => asset.key));
+    return {
+      id: group.id,
+      label: group.label,
+      floor: group.floor,
+      zone: group.zone,
+      sourceTextureKeys: sourceResidency.map((entry) => entry.key),
+      missingSourceTextureKeys: sourceResidency.filter((entry) => !entry.exists).map((entry) => entry.key)
+    };
+  });
+}
+
+function runtimeAssetGroupResidency(group: RuntimeAssetGroup): RuntimeAssetGroupResidency {
+  const sourceKeys = group.sourceTextures.map((asset) => asset.key);
+  const sourceResidency = textureResidency(sourceKeys);
+  const generatedKeys = generatedStageRuntimeTextureKeys(group.stage);
+  const generatedResidency = textureResidency(generatedKeys);
+  const residentSourceCount = sourceResidency.filter((entry) => entry.exists).length;
+  const residentGeneratedCount = generatedResidency.filter((entry) => entry.exists).length;
+  const missingSourceKeys = sourceResidency.filter((entry) => !entry.exists).map((entry) => entry.key);
+  const missingGeneratedKeys = generatedResidency.filter((entry) => !entry.exists).map((entry) => entry.key);
+  return {
+    id: group.id,
+    label: group.label,
+    kind: group.kind,
+    load: group.load,
+    floor: group.floor,
+    zone: group.zone,
+    pending: generatedStageAssetLoads.has(group.floor),
+    assetsReady: generatedStageAssetsReady.has(group.floor),
+    texturesReady: generatedStageTexturesReady.has(group.floor),
+    sourceTextures: {
+      total: sourceResidency.length,
+      resident: residentSourceCount,
+      missingCount: missingSourceKeys.length,
+      missingKeys: missingSourceKeys.slice(0, 12)
+    },
+    generatedTextures: {
+      total: generatedResidency.length,
+      resident: residentGeneratedCount,
+      missingCount: missingGeneratedKeys.length,
+      missingKeys: missingGeneratedKeys.slice(0, 12)
+    },
+    resident:
+      sourceResidency.length > 0 &&
+      generatedResidency.length > 0 &&
+      residentSourceCount === sourceResidency.length &&
+      residentGeneratedCount === generatedResidency.length
+  };
+}
+
+function generatedStageRuntimeTextureKeys(stage: GeneratedStage): string[] {
+  const cached = generatedStageRuntimeTextureKeyCache.get(stage.floor);
+  if (cached) return cached;
+  const keys = new Set<string>();
+  for (const [char, tile] of Object.entries(stage.tiles)) {
+    keys.add(generatedTileTextureKey(stage, char));
+    keys.add(generatedStageRefTextureKey(stage, tile.ref));
+  }
+  for (const layer of stage.layers ?? []) {
+    for (const row of layer.data) {
+      for (const ref of row) {
+        if (ref) keys.add(generatedStageRefTextureKey(stage, ref));
+      }
+    }
+  }
+  const textureKeys = [...keys].sort();
+  generatedStageRuntimeTextureKeyCache.set(stage.floor, textureKeys);
+  return textureKeys;
 }
 
 // Lazily bakes (and caches) a rotated variant of an already-sliced tile texture.

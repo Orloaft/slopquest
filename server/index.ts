@@ -3323,6 +3323,7 @@ function emitE2EEvents(
     x?: number;
     y?: number;
     spread?: number;
+    eventKind?: "effect" | "float";
   }
 ): void {
   if (!E2E_TEST) return;
@@ -3334,7 +3335,13 @@ function emitE2EEvents(
   for (let i = 0; i < count; i += 1) {
     const angle = i * 2.399963229728653;
     const radius = spread <= 0 ? 0 : ((i % 17) / 16) * spread;
-    event("effect", "e2e_burst", x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, floor, "#ffffff", player.id);
+    const eventX = x + Math.cos(angle) * radius;
+    const eventY = y + Math.sin(angle) * radius;
+    if (message.eventKind === "float") {
+      event("float", "Pool", eventX, eventY, floor, "#ffffff", player.id);
+    } else {
+      event("effect", "e2e_burst", eventX, eventY, floor, "#ffffff", player.id);
+    }
   }
 }
 

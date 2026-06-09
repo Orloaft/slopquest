@@ -5,10 +5,12 @@ import { isBlockedTile, makeFloorTiles } from "../../src/shared.ts";
 
 const OUT = "artifacts/render-performance";
 const FRAME_SAMPLES = 240;
+const WAYSTONE_FLOOR = 0;
 const PERF_FLOOR = 2;
 const PERF_CENTER = { x: 93.5, y: 35.5 };
 const SYNTHETIC_PLAYERS = 6;
 const CLUSTERED_MONSTERS = 12;
+const CROWDED_RENDERED_MONSTER_FLOOR = 4;
 const CROWD_RADIUS = 10;
 const MIN_AVG_FPS = 58;
 const MAX_P95_FRAME_MS = 18.5;
@@ -20,13 +22,34 @@ test("crowded same-area gameplay keeps stable frame pacing and renders stable vi
   logErrors(page);
   const syntheticPlayers: SyntheticPlayer[] = [];
   await page.goto("/?e2e");
+  await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.assetResidency));
+  const startupAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency() ?? null);
   await joinStable(page);
+  await page.waitForFunction(
+    (floor) => {
+      const hooks = window.__TIB_E2E__;
+      const group = hooks?.assetResidency?.().groups.find((entry) => entry.kind === "generated-stage" && entry.floor === floor);
+      const generatedTiles = hooks?.generatedStageTextureKeys?.(floor) ?? [];
+      return Boolean(group?.resident && generatedTiles.length > 0 && generatedTiles.every((entry) => entry.exists));
+    },
+    WAYSTONE_FLOOR,
+    { timeout: 10000 }
+  );
+  const joinedAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency() ?? null);
+  const waystoneGeneratedTextures = await page.evaluate((floor) => {
+    const keys = window.__TIB_E2E__?.generatedStageTextureKeys?.(floor) ?? [];
+    return {
+      keys,
+      residency: window.__TIB_E2E__?.textureResidency?.(keys.slice(0, 8).map((entry) => entry.key)) ?? []
+    };
+  }, WAYSTONE_FLOOR);
 
   try {
     await prepareMeasuredPlayer(page);
     syntheticPlayers.push(...(await joinSyntheticCrowd(SYNTHETIC_PLAYERS)));
     await spawnClusteredMonsters(CLUSTERED_MONSTERS);
     const sceneCounts = await waitForCrowdedScene(page);
+    await warmRenderFxPools(page);
 
     const canvas = page.locator("#game canvas");
     const before = await canvas.screenshot({ path: `${OUT}/same-area-crowd-before.png` });
@@ -57,6 +80,9 @@ test("crowded same-area gameplay keeps stable frame pacing and renders stable vi
         heap,
         mapChunks: window.__TIB_E2E__?.mapChunkStats?.() ?? null,
         decorations: window.__TIB_E2E__?.decorationCacheStats?.() ?? null,
+        renderFx: window.__TIB_E2E__?.renderFxStats?.() ?? null,
+        assets: window.__TIB_E2E__?.assetResidency?.() ?? null,
+        pendingLazyLoads: window.__TIB_E2E__?.pendingLazyLoads?.() ?? [],
         domNodes: document.getElementsByTagName("*").length
       };
     });
@@ -66,6 +92,7 @@ test("crowded same-area gameplay keeps stable frame pacing and renders stable vi
       `render-performance ${JSON.stringify({
         sceneCounts,
         frameStats,
+        assetResidency: { startupAssets, joinedAssets, waystoneGeneratedTextures },
         clientDepthStats,
         clientRenderStats,
         serverMetrics,
@@ -78,6 +105,23 @@ test("crowded same-area gameplay keeps stable frame pacing and renders stable vi
 
     expect(sceneCounts.players, `visible clustered players ${sceneCounts.players}`).toBeGreaterThanOrEqual(SYNTHETIC_PLAYERS + 1);
     expect(sceneCounts.monsters, `visible clustered monsters ${sceneCounts.monsters}`).toBeGreaterThanOrEqual(CLUSTERED_MONSTERS);
+    const startupWaystoneGroup = startupAssets?.groups.find((group) => group.kind === "generated-stage" && group.floor === WAYSTONE_FLOOR);
+    if (!startupWaystoneGroup) throw new Error("Waystone lazy asset group was not exposed at startup");
+    expect(startupWaystoneGroup.load, "Waystone stage should be represented as a lazy group").toBe("lazy");
+    expect(startupWaystoneGroup.resident, "Waystone generated stage should not preload before joining").toBe(false);
+    const joinedWaystoneGroup = joinedAssets?.groups.find((group) => group.kind === "generated-stage" && group.floor === WAYSTONE_FLOOR);
+    if (!joinedWaystoneGroup) throw new Error("Waystone lazy asset group was not exposed after joining");
+    expect(joinedWaystoneGroup.pending, "Waystone lazy group should be settled after join").toBe(false);
+    expect(joinedWaystoneGroup.resident, "Waystone lazy group should be resident after the floor draws").toBe(true);
+    expect(joinedWaystoneGroup.sourceTextures.resident, "Waystone source tilesets should be resident").toBe(joinedWaystoneGroup.sourceTextures.total);
+    expect(joinedWaystoneGroup.generatedTextures.resident, "Waystone generated tile textures should be resident").toBe(joinedWaystoneGroup.generatedTextures.total);
+    expect(joinedAssets?.pendingLazyLoads ?? [], "lazy loads should settle after joining Waystone").toHaveLength(0);
+    expect(waystoneGeneratedTextures.keys.length, "Waystone generated tile hook should expose keys").toBeGreaterThan(0);
+    expect(waystoneGeneratedTextures.keys.every((entry) => entry.exists), "Waystone generated tile keys should exist").toBe(true);
+    expect(
+      waystoneGeneratedTextures.residency.every((entry) => entry.exists && entry.width > 0 && entry.height > 0),
+      "texture residency hook should report loaded generated textures"
+    ).toBe(true);
     expect(frameStats.sampleCount).toBeGreaterThanOrEqual(FRAME_SAMPLES);
     expect(frameStats.avgFps, `avg FPS ${frameStats.avgFps}`).toBeGreaterThanOrEqual(MIN_AVG_FPS);
     expect(frameStats.p95Ms, `p95 frame interval ${frameStats.p95Ms}ms`).toBeLessThanOrEqual(MAX_P95_FRAME_MS);
@@ -86,7 +130,7 @@ test("crowded same-area gameplay keeps stable frame pacing and renders stable vi
     expect(frameStats.longTaskCount, `${frameStats.longTaskCount} browser long tasks during sample`).toBeLessThanOrEqual(4);
     expect(frameStats.longTaskTotalMs, `${frameStats.longTaskTotalMs}ms in browser long tasks`).toBeLessThanOrEqual(250);
     expect(frameStats.maxMs, `max frame interval ${frameStats.maxMs}ms`).toBeLessThanOrEqual(50);
-    expect(clientDepthStats?.visibleActors ?? 0, "client visible actor counter").toBeGreaterThanOrEqual(SYNTHETIC_PLAYERS + CLUSTERED_MONSTERS);
+    expect(clientDepthStats?.visibleActors ?? 0, "client visible actor counter").toBeGreaterThanOrEqual(SYNTHETIC_PLAYERS + 1 + CROWDED_RENDERED_MONSTER_FLOOR);
     expect(clientDepthStats?.visibleActorChildren ?? 0, "display-list actor child counter").toBeLessThanOrEqual(160);
     expect(clientDepthStats?.rows ?? 0, "depth row budget").toBeLessThanOrEqual(16);
     expect(clientDepthStats?.rowSorts ?? 0, "depth row sort budget").toBeLessThanOrEqual(80);
@@ -95,6 +139,20 @@ test("crowded same-area gameplay keeps stable frame pacing and renders stable vi
     expect(clientRenderStats.mapChunks?.activeChunks ?? 0, "active map chunk budget").toBeLessThanOrEqual(25);
     expect(clientRenderStats.mapChunks?.maxChunkTextureEdge ?? 0, "map chunk texture edge budget").toBeLessThanOrEqual(512);
     expect(clientRenderStats.decorations?.tileEntries ?? 0, "tile decoration cache budget").toBeLessThanOrEqual(4);
+    expect(clientRenderStats.pendingLazyLoads, "no lazy generated stage loads should remain pending during the perf sample").toHaveLength(0);
+    expect(
+      clientRenderStats.assets?.groups.some((group) => group.load === "lazy" && group.floor === WAYSTONE_FLOOR && group.resident) ?? false,
+      "resident lazy group data should remain observable during the perf sample"
+    ).toBe(true);
+    expect(clientRenderStats.renderFx?.floaterCreated ?? 0, "floater pool exercised").toBeGreaterThan(0);
+    expect(clientRenderStats.renderFx?.floaterReused ?? 0, "floater pool reuse").toBeGreaterThan(0);
+    expect(clientRenderStats.renderFx?.fxCreated ?? 0, "VFX pool exercised").toBeGreaterThan(0);
+    expect(clientRenderStats.renderFx?.fxReleased ?? 0, "VFX pool release").toBeGreaterThan(0);
+    expect(clientRenderStats.renderFx?.floaterEvicted ?? 0, "cosmetic floater eviction counter exposed").toBeGreaterThanOrEqual(0);
+    expect(clientRenderStats.renderFx?.crowdedFxCulled ?? 0, "crowded cosmetic cull counter exposed").toBeGreaterThanOrEqual(0);
+    expect(clientRenderStats.renderFx?.pooledSprites ?? 0, "pooled sprite budget").toBeLessThanOrEqual(48);
+    expect(clientRenderStats.renderFx?.pooledShapes ?? 0, "pooled shape budget").toBeLessThanOrEqual(192);
+    expect(clientRenderStats.renderFx?.pooledProjectiles ?? 0, "pooled projectile budget").toBeLessThanOrEqual(32);
     expect(clientRenderStats.domNodes, "HUD DOM node budget").toBeLessThanOrEqual(700);
 
     for (const [label, stats] of [
@@ -192,6 +250,20 @@ async function waitForCrowdedScene(page: Page): Promise<SceneCounts> {
       { timeout: 20000 }
     )
     .then((handle) => handle.jsonValue() as Promise<SceneCounts>);
+}
+
+async function warmRenderFxPools(page: Page): Promise<void> {
+  const burst = { floor: PERF_FLOOR, x: PERF_CENTER.x, y: PERF_CENTER.y, spread: 1.2 };
+  await page.evaluate((payload) => {
+    window.__TIB_E2E__?.send({ type: "e2eEmitEvents", ...payload, eventKind: "float", count: 8 });
+    window.__TIB_E2E__?.send({ type: "e2eEmitEvents", ...payload, eventKind: "effect", count: 8 });
+  }, burst);
+  await page.waitForTimeout(1400);
+  await page.evaluate((payload) => {
+    window.__TIB_E2E__?.send({ type: "e2eEmitEvents", ...payload, eventKind: "float", count: 8 });
+    window.__TIB_E2E__?.send({ type: "e2eEmitEvents", ...payload, eventKind: "effect", count: 8 });
+  }, burst);
+  await page.waitForTimeout(1400);
 }
 
 async function sampleLiveGameplay(page: Page, sampleCount: number): Promise<FrameStats> {

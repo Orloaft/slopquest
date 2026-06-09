@@ -1,0 +1,30 @@
+{
+  "assetBudgets": {
+    "status": "pass",
+    "summary": "Policy-driven asset budget passed: runtime 89.80 MiB / 100 MiB across 200 / 500 files; startup preload 51.79 MiB / 55 MiB across 71 / 80 files; lazy generated-stage bundles 2.22 MiB / 8 MiB across 4 / 16 files."
+  },
+  "streaming": {
+    "status": "pass",
+    "summary": "Generated-stage asset groups are explicitly lazy and observable. The browser run showed Waystone source textures moving from 0/1 resident at startup to 1/1 after join, generated textures moving from 0/361 to 361/361, and pending lazy loads settling to []."
+  },
+  "browserVisualPerf": {
+    "status": "warn",
+    "summary": "Current Chromium visual gate is not production-proven on this loaded host: avg FPS 52.75 vs 58 required, p95 33.3ms, dropped-frame estimate 33, long tasks 0. The asset residency and visual nonblank/stability assertions passed before the FPS assertion failed."
+  },
+  "serverGates": {
+    "status": "pass",
+    "summary": "npm run perf:gate and npm run perf:gate:prod passed. Dense 30-client/72-monster movement stayed at tick max 1.89ms, snapshot max 8.47ms, pathfinding max 0.03ms, zero drops. The 150-client compressed crowd stayed at tick max 0.51ms, snapshot max 19.8ms, wire avg about 0.56 MiB/s, zero drops. Prod-like 20-client cadence stayed at tick max 0.49ms and snapshot max 5.06ms."
+  },
+  "soakStress": {
+    "status": "warn",
+    "summary": "Dedicated perf:soak and perf:stress were not run in this reassessment. Gate/stress-like scenarios passed, but long-session memory slope is still unproven."
+  },
+  "memory": {
+    "status": "pass",
+    "summary": "Server gate memory remained well below caps: 150-client compressed crowd heap max 69.38 MiB and RSS max 246.5 MiB; prod-like heap max 30.7 MiB and RSS max 132.01 MiB; save queues returned to zero."
+  },
+  "stackPivot": {
+    "status": "warn",
+    "summary": "No full stack pivot is justified by server or asset data. The serious open decision remains browser rendering headroom: keep the web stack, but revisit a WebGL/Pixi-style playfield migration if quiet-host visual gates keep missing 58-60 FPS after streaming and batching work."
+  }
+}

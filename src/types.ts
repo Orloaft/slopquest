@@ -410,7 +410,7 @@ export type ClientMessage =
       forceDodge?: boolean;
       forceCrit?: boolean;
     }
-  | { type: "e2eEmitEvents"; count?: number; floor?: number; x?: number; y?: number; spread?: number }
+  | { type: "e2eEmitEvents"; count?: number; floor?: number; x?: number; y?: number; spread?: number; eventKind?: "effect" | "float" }
   | { type: "e2eSimulateBackpressure"; durationMs?: number }
   | { type: "e2eSpawnMonster"; monster?: string; floor?: number; x?: number; y?: number; zone?: string }
   | { type: "eatItem"; item: string }
