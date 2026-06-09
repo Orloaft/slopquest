@@ -10,11 +10,11 @@
       "maxFiles": 500
     },
     "startupPreload": {
-      "maxTotalBytes": 44040192,
+      "maxTotalBytes": 40894464,
       "maxFiles": 80
     },
     "lazyBundles": {
-      "maxTotalBytes": 16777216,
+      "maxTotalBytes": 19922944,
       "maxFileBytes": 4194304,
       "maxFiles": 64
     }
@@ -104,10 +104,9 @@
         "public/graveyardtiles.png",
         "public/dark-forest-tiles.png",
         "public/badlands-tiles.png",
-        "public/jungle-tiles.png",
         "public/crypt-dungeon-tiles.png"
       ],
-      "maxTotalBytes": 14680064,
+      "maxTotalBytes": 11534336,
       "maxFileBytes": 4194304,
       "maxFiles": 12
     },
@@ -146,11 +145,12 @@
         "public/citytiles.png",
         "public/swamp-tiles.png",
         "public/desert-tiles.png",
-        "public/beach-tiles.png"
+        "public/beach-tiles.png",
+        "public/jungle-tiles.png"
       ],
-      "maxTotalBytes": 13631488,
+      "maxTotalBytes": 16777216,
       "maxFileBytes": 4194304,
-      "maxFiles": 4
+      "maxFiles": 5
     },
     {
       "name": "lazy/background-generated-stages",
@@ -175,7 +175,7 @@
       "maxFiles": 12
     },
     "runtime image play-context/background assets": {
-      "maxTotalBytes": 13631488,
+      "maxTotalBytes": 16777216,
       "maxFileBytes": 4194304,
       "maxFiles": 40
     }

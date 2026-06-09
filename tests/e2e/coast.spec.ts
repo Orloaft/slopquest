@@ -63,6 +63,10 @@ test("travel chain: desert -> beach -> jungle, and beach -> desert back", async 
   const startupBeach = startupAssets?.runtimeImages.find((asset) => asset.key === "beachTiles");
   expect(startupBeach?.tier).toBe("play-context");
   expect(startupBeach?.resident, "Sunken Beach sheet should wait for floor-context loading").toBe(false);
+  expect(startupAssets?.startupImages.some((asset) => asset.key === "jungleTiles"), "Untamed Jungle sheet should not be a startup asset").toBe(false);
+  const startupJungle = startupAssets?.runtimeImages.find((asset) => asset.key === "jungleTiles");
+  expect(startupJungle?.tier).toBe("play-context");
+  expect(startupJungle?.resident, "Untamed Jungle sheet should wait for floor-context loading").toBe(false);
 
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: p.x, y: p.y }), { x: scaleX(7, 1.5), y: scaleY(7, 38.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 8, null, { timeout: 8000 });
@@ -77,6 +81,14 @@ test("travel chain: desert -> beach -> jungle, and beach -> desert back", async 
 
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 8, x: p.x, y: p.y }), { x: scaleX(8, 61.5), y: scaleY(8, 17.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 9, null, { timeout: 8000 });
+  await page.waitForFunction(() => {
+    const textures = window.__TIB_E2E__?.textureResidency?.(["jungleTiles", "tileJungle", "tileJungleCliff", "spriteJungleVault"]) ?? [];
+    return textures.length === 4 && textures.every((texture) => texture.exists && texture.width > 0 && texture.height > 0);
+  });
+  const jungleAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  const loadedJungle = jungleAssets?.runtimeImages.find((asset) => asset.key === "jungleTiles");
+  expect(loadedJungle?.trigger).toBe("play-context");
+  expect(loadedJungle?.resident, "Untamed Jungle sheet should be resident after traveling to floor 9").toBe(true);
 
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 8, x: p.x, y: p.y }), { x: scaleX(8, 31.5), y: scaleY(8, 1.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 7, null, { timeout: 8000 });

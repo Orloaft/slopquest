@@ -1198,6 +1198,7 @@ const STARTER_AREA_STARTUP_IMAGE_ASSETS: RuntimeImageAsset[] = [
 ];
 
 const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
+  [9, [runtimeImageAsset("jungleTiles", "/jungle-tiles.png", "play-context", "Untamed Jungle source sheet", 9, "jungle")]],
   [8, [runtimeImageAsset("beachTiles", "/beach-tiles.png", "play-context", "Sunken Beach source sheet", 8, "beach")]],
   [7, [runtimeImageAsset("desertTiles", "/desert-tiles.png", "play-context", "Sunken Desert source sheet", 7, "desert")]],
   [5, [runtimeImageAsset("swampTiles", "/swamp-tiles.png", "play-context", "Sunken Marsh source sheet", 5, "swamp")]],
@@ -1251,7 +1252,6 @@ const RESIDENT_AUTHORING_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png", "startup", "resident searing cultist kit", 6, "badlands"),
   runtimeImageAsset("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png", "startup", "resident searing ritual kit", 6, "badlands"),
   runtimeImageAsset("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png", "startup", "resident searing mine kit", 6, "badlands"),
-  runtimeImageAsset("jungleTiles", "/jungle-tiles.png", "startup", "resident jungle source sheet", 9, "jungle"),
   runtimeImageAsset("dungeonTiles", "/crypt-dungeon-tiles.png", "startup", "resident mine/dungeon source sheet", 10, "deepmine")
 ];
 
@@ -1806,23 +1806,6 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "mineKit", "spriteMineHoist", 653, 121, 407, 463);
   makeSpriteTexture(this, "mineKit", "spriteMineCart", 1162, 241, 327, 336);
   makeSpriteTexture(this, "mineKit", "spriteMineTrack", 1601, 293, 467, 268);
-  // Untamed Jungle (floor 9). Crops from assetsources/rejected/jungle-biome-tiles.png.
-  makeTileTexture(this, "jungleTiles", "tileJungle", 18, 97, 72, 74);
-  // Lush jungle-floor VARIANTS (other leafy-foliage ground tiles from the sheet's GROUND row).
-  // The floor-9 ground picker rolls one per ~3x3 region so the canopy floor reads as varied
-  // undergrowth, not one repeated stamp. Cobble/dirt/plank/bamboo tiles are skipped on purpose.
-  makeTileTexture(this, "jungleTiles", "tileJungleB", 102, 97, 72, 74);
-  makeTileTexture(this, "jungleTiles", "tileJungleC", 184, 97, 72, 74);
-  makeTileTexture(this, "jungleTiles", "tileJungleD", 429, 182, 72, 74);
-  makeTileTexture(this, "jungleTiles", "tileJungleWall", 524, 100, 68, 82);
-  makeTileTexture(this, "jungleTiles", "tileJungleRiver", 1069, 100, 72, 72);
-  // Jungle cliff face (rocky, vine-draped) for ELEVATION — cropped from the sheet's CLIFF EDGES
-  // band. Plateau tops reuse the walkable jungle floor `-`; this is the vertical drop beneath them.
-  // The floor-9 relief pass adds a lit lip on the top course + foot-AO, the same recipe that sells
-  // the Northwood/beach ledges. Best-guess crop; tune visually like the beach cliff band.
-  makeTileTexture(this, "jungleTiles", "tileJungleCliff", 694, 146, 72, 30);
-  makeSpriteTexture(this, "jungleTiles", "spriteJungleVault", 676, 862, 120, 100);
-
   // The Deepdelve Mine (floor 10) cave identity (M1): bespoke worked-stone floor from the Dungeon
   // Tileset's FLOOR TILES grid (~70px ROUGH ROCK at col 178, row 101 — chosen over the neat cobble
   // tiles because it has no mortar perimeter, so it tiles without a visible grid). A SINGLE base
@@ -1987,6 +1970,20 @@ function create(this: Phaser.Scene): void {
   zoomKeys.NUMPAD_SUBTRACT?.on("down", () => { if (!isTextEntryFocused()) nudgeUserZoom(1 / ZOOM_KEY_STEP); });
 
   refreshKeyboardCapture();
+}
+
+function buildUntamedJungleTextures(scene: Phaser.Scene): void {
+  if (scene.textures.exists("tileJungle")) return;
+  // Untamed Jungle (floor 9). Crops from assetsources/rejected/jungle-biome-tiles.png.
+  makeTileTexture(scene, "jungleTiles", "tileJungle", 18, 97, 72, 74);
+  // Lush floor variants used by jungleGroundTexture().
+  makeTileTexture(scene, "jungleTiles", "tileJungleB", 102, 97, 72, 74);
+  makeTileTexture(scene, "jungleTiles", "tileJungleC", 184, 97, 72, 74);
+  makeTileTexture(scene, "jungleTiles", "tileJungleD", 429, 182, 72, 74);
+  makeTileTexture(scene, "jungleTiles", "tileJungleWall", 524, 100, 68, 82);
+  makeTileTexture(scene, "jungleTiles", "tileJungleRiver", 1069, 100, 72, 72);
+  makeTileTexture(scene, "jungleTiles", "tileJungleCliff", 694, 146, 72, 30);
+  makeSpriteTexture(scene, "jungleTiles", "spriteJungleVault", 676, 862, 120, 100);
 }
 
 function buildSunkenBeachTextures(scene: Phaser.Scene): void {
@@ -2814,10 +2811,11 @@ function updateVisibleMapChunks(centerX?: number, centerY?: number): void {
   const top = centerY === undefined ? view.y : centerY - fallbackHeight / 2;
   const bottom = centerY === undefined ? view.bottom : centerY + fallbackHeight / 2;
 
-  const minChunkX = clampChunk(Math.floor(Math.floor(left / TILE_SIZE) / MAP_CHUNK_TILES) - MAP_CHUNK_PADDING, mapRender.cols);
-  const maxChunkX = clampChunk(Math.floor(Math.floor(right / TILE_SIZE) / MAP_CHUNK_TILES) + MAP_CHUNK_PADDING, mapRender.cols);
-  const minChunkY = clampChunk(Math.floor(Math.floor(top / TILE_SIZE) / MAP_CHUNK_TILES) - MAP_CHUNK_PADDING, mapRender.rowCount);
-  const maxChunkY = clampChunk(Math.floor(Math.floor(bottom / TILE_SIZE) / MAP_CHUNK_TILES) + MAP_CHUNK_PADDING, mapRender.rowCount);
+  const chunkPadding = crowdedActorsActive ? 0 : MAP_CHUNK_PADDING;
+  const minChunkX = clampChunk(Math.floor(Math.floor(left / TILE_SIZE) / MAP_CHUNK_TILES) - chunkPadding, mapRender.cols);
+  const maxChunkX = clampChunk(Math.floor(Math.floor(right / TILE_SIZE) / MAP_CHUNK_TILES) + chunkPadding, mapRender.cols);
+  const minChunkY = clampChunk(Math.floor(Math.floor(top / TILE_SIZE) / MAP_CHUNK_TILES) - chunkPadding, mapRender.rowCount);
+  const maxChunkY = clampChunk(Math.floor(Math.floor(bottom / TILE_SIZE) / MAP_CHUNK_TILES) + chunkPadding, mapRender.rowCount);
   const boundsKey = `${minChunkX}:${maxChunkX}:${minChunkY}:${maxChunkY}`;
   if (boundsKey === mapRender.visibleChunkBoundsKey) {
     pruneExpiredMapChunks(visibleMapChunkKeys);
@@ -3768,14 +3766,20 @@ function syncEntities(): void {
 }
 
 function renderCrowdPressure(state: StateSnapshot, floor: number, renderBounds: RenderBounds): number {
-  const renderable = (item: { floor: number; x: number; y: number }) =>
-    item.floor === floor && isWorldPointRenderable(item.x * TILE_SIZE, item.y * TILE_SIZE, renderBounds);
-  return (
-    state.players.filter(renderable).length +
-    state.monsters.filter(renderable).length +
-    state.npcs.filter(renderable).length +
-    state.corpses.filter(renderable).length
-  );
+  let count = 0;
+  for (const player of state.players) {
+    if (player.floor === floor && isWorldPointRenderable(player.x * TILE_SIZE, player.y * TILE_SIZE, renderBounds)) count += 1;
+  }
+  for (const monster of state.monsters) {
+    if (monster.floor === floor && isWorldPointRenderable(monster.x * TILE_SIZE, monster.y * TILE_SIZE, renderBounds)) count += 1;
+  }
+  for (const npc of state.npcs) {
+    if (npc.floor === floor && isWorldPointRenderable(npc.x * TILE_SIZE, npc.y * TILE_SIZE, renderBounds)) count += 1;
+  }
+  for (const corpse of state.corpses) {
+    if (corpse.floor === floor && isWorldPointRenderable(corpse.x * TILE_SIZE, corpse.y * TILE_SIZE, renderBounds)) count += 1;
+  }
+  return count;
 }
 
 function clearResourceViews(): void {
@@ -9391,6 +9395,10 @@ function ensureFloorContextAssetsLoaded(floor: number, trigger: RuntimeImageLoad
 
 function ensureFloorContextTextures(floor: number): void {
   if (floorContextTextureBuildsReady.has(floor)) return;
+  if (floor === 9) {
+    if (!scene.textures.exists("jungleTiles")) return;
+    buildUntamedJungleTextures(scene);
+  }
   if (floor === 8) {
     if (!scene.textures.exists("beachTiles")) return;
     buildSunkenBeachTextures(scene);
