@@ -305,6 +305,27 @@ interface PlayerSnapshotCandidate {
   distSq: number;
 }
 
+interface SnapshotInterestFrame {
+  players: ServerPlayer[];
+  monsters: ServerMonster[];
+  corpses: Corpse[];
+  npcs: NpcRuntime[];
+  fires: Fire[];
+  events: GameEvent[];
+  fishingNodes?: FishingNodeRuntime[];
+  miningNodes?: MiningNodeRuntime[];
+  herbNodes?: HerbNodeRuntime[];
+}
+
+interface TreeSnapshotInterestFrame {
+  trees: TreeNodeRuntime[];
+}
+
+interface SnapshotBroadcastCache {
+  frames: Map<string, SnapshotInterestFrame>;
+  treeFrames: Map<string, TreeSnapshotInterestFrame>;
+}
+
 type SnapshotCache = Record<SnapshotCategory, SnapshotCategoryCache>;
 type WireStateSnapshot = CompactStateSnapshot;
 
@@ -609,6 +630,9 @@ const EMPTY_FISHING_NODE_VIEWS: FishingNodeView[] = [];
 const EMPTY_MINING_NODE_VIEWS: MiningNodeView[] = [];
 const EMPTY_HERB_NODE_VIEWS: HerbNodeView[] = [];
 const EMPTY_FIRE_VIEWS: FireView[] = [];
+const EMPTY_FISHING_NODE_RUNTIME: FishingNodeRuntime[] = [];
+const EMPTY_MINING_NODE_RUNTIME: MiningNodeRuntime[] = [];
+const EMPTY_HERB_NODE_RUNTIME: HerbNodeRuntime[] = [];
 const eventOrder = new WeakMap<GameEvent, number>();
 const materializedTreeCells = new Set<string>();
 const materializedStaticResourceCells = new Set<string>();
@@ -4148,6 +4172,7 @@ function broadcastState(): void {
   const includeNpcs = forceDynamicFull || snapshotSequence % NPC_SNAPSHOT_EVERY === 0;
   const includeResources = snapshotSequence % RESOURCE_SNAPSHOT_EVERY === 0;
   let metricFrame: SnapshotMetricFrame | null = null;
+  const broadcastCache: SnapshotBroadcastCache = { frames: new Map(), treeFrames: new Map() };
   for (const session of clients.values()) {
     const { socket } = session;
     if (socket.readyState !== socket.OPEN) continue;
@@ -4171,7 +4196,8 @@ function broadcastState(): void {
       includeResources,
       forceDynamicFull,
       includeMetrics ? metricFrame : null,
-      now
+      now,
+      broadcastCache
     );
     if (!shouldSendSnapshot(session, snapshot, now)) continue;
     const raw = JSON.stringify(compactSnapshotForWire(snapshot));
@@ -4293,10 +4319,12 @@ function buildSnapshotFor(
   includeResources: boolean,
   forceDynamicFull: boolean,
   metricFrame: SnapshotMetricFrame | null,
-  now: number
+  now: number,
+  broadcastCache: SnapshotBroadcastCache
 ): StateSnapshot {
   const viewer = session.player;
   const cache = snapshotCacheFor(session);
+  const interestFrame = snapshotInterestFrameFor(broadcastCache, viewer);
   const includeTreesForSession = includeTrees || !cache.trees.initialized;
   const includeFishingNodesForSession = includeResources || !cache.fishingNodes.initialized;
   const includeMiningNodesForSession = includeResources || !cache.miningNodes.initialized;
@@ -4317,70 +4345,70 @@ function buildSnapshotFor(
     keepNearestPlayerCandidate(playerCandidateHeap, player, distSq, MAX_VISIBLE_PLAYERS);
   };
   let includedViewer = false;
-  forEachSpatial(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (player) => {
-    if (player.id !== viewer.id && !inInterestRange(viewer, player)) return;
+  for (const player of interestFrame.players) {
+    if (player.id !== viewer.id && !inInterestRange(viewer, player)) continue;
     if (player.id === viewer.id) includedViewer = true;
     keepPlayerCandidate(player, player.id === viewer.id ? -1 : distanceSq(viewer, player));
-  });
+  }
   if (!includedViewer) keepPlayerCandidate(viewer, -1);
   if (playerCandidateHeap) playerCandidates = drainSortedPlayerCandidateHeap(playerCandidateHeap);
   const players = serializeVisiblePlayers(viewer, playerCandidates, now);
 
   const visibleMonsters: MonsterView[] = [];
-  forEachSpatial(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (monster) => {
-    if (monster.deadUntil || monster.hidden || !inInterestRange(viewer, monster)) return;
+  for (const monster of interestFrame.monsters) {
+    if (monster.deadUntil || monster.hidden || !inInterestRange(viewer, monster)) continue;
     visibleMonsters.push(serializeMonster(monster, now));
-  });
+  }
 
   const visibleCorpses: CorpseView[] = corpses.size === 0 ? EMPTY_CORPSE_VIEWS : [];
   if (corpses.size !== 0) {
-    forEachSpatial(spatial.corpses, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (corpse) => {
-      if (!inInterestRange(viewer, corpse)) return;
+    for (const corpse of interestFrame.corpses) {
+      if (!inInterestRange(viewer, corpse)) continue;
       visibleCorpses.push(corpse);
-    });
+    }
   }
 
   const visibleNpcs: NpcView[] = includeNpcs ? [] : EMPTY_NPC_VIEWS;
   if (includeNpcs) {
-    forEachSpatial(spatial.npcs, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (npc) => {
-      if (!inInterestRange(viewer, npc)) return;
+    for (const npc of interestFrame.npcs) {
+      if (!inInterestRange(viewer, npc)) continue;
       visibleNpcs.push(serializeNpc(npc));
-    });
+    }
   }
 
   const visibleTrees: TreeView[] = includeTreesForSession ? [] : EMPTY_TREE_VIEWS;
   if (includeTreesForSession) {
-    materializeTreeCellsNear(viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS);
-    forEachSpatial(staticSpatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS, (tree) => {
-      if (!inTreeInterestRange(viewer, tree)) return;
+    const treeFrame = treeSnapshotInterestFrameFor(broadcastCache, viewer);
+    for (const tree of treeFrame.trees) {
+      if (!inTreeInterestRange(viewer, tree)) continue;
       visibleTrees.push(serializeTree(tree));
-    });
+    }
   }
 
-  if (includeStaticResourcesForSession) materializeStaticResourceCellsNear(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS);
+  if (includeStaticResourcesForSession) populateStaticResourceInterestFrame(interestFrame, viewer);
   const visibleFishingNodes: FishingNodeView[] = includeFishingNodesForSession ? [] : EMPTY_FISHING_NODE_VIEWS;
   if (includeFishingNodesForSession) {
-    forEachSpatial(staticSpatial.fishingNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
+    for (const node of interestFrame.fishingNodes ?? EMPTY_FISHING_NODE_RUNTIME) {
       if (inInterestRange(viewer, node)) visibleFishingNodes.push(serializeFishingNode(node));
-    });
+    }
   }
   const visibleMiningNodes: MiningNodeView[] = includeMiningNodesForSession ? [] : EMPTY_MINING_NODE_VIEWS;
   if (includeMiningNodesForSession) {
-    forEachSpatial(staticSpatial.miningNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
+    for (const node of interestFrame.miningNodes ?? EMPTY_MINING_NODE_RUNTIME) {
       if (inInterestRange(viewer, node)) visibleMiningNodes.push(serializeMiningNode(node));
-    });
+    }
   }
   const visibleHerbNodes: HerbNodeView[] = includeHerbNodesForSession ? [] : EMPTY_HERB_NODE_VIEWS;
   if (includeHerbNodesForSession) {
-    forEachSpatial(staticSpatial.herbNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (node) => {
+    for (const node of interestFrame.herbNodes ?? EMPTY_HERB_NODE_RUNTIME) {
       if (inInterestRange(viewer, node)) visibleHerbNodes.push(serializeHerbNode(node));
-    });
+    }
   }
   const visibleFires: FireView[] = fires.size === 0 ? EMPTY_FIRE_VIEWS : [];
   if (fires.size !== 0) {
-    forEachSpatial(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (fire) => {
+    for (const fire of interestFrame.fires) {
       if (inInterestRange(viewer, fire)) visibleFires.push(serializeFire(fire, now));
-    });
+    }
   }
   const playersDelta = snapshotDelta(cache.players, players, playerViewSignature, forceDynamicFull);
   const monstersDelta = snapshotDelta(cache.monsters, visibleMonsters, monsterViewSignature, forceDynamicFull);
@@ -4439,7 +4467,7 @@ function buildSnapshotFor(
     fires: firesDelta.items,
     firesFull: firesDelta.full,
     removedFireIds: firesDelta.removedIds,
-    events: visibleEventsFor(viewer)
+    events: visibleEventsFor(viewer, interestFrame.events)
   };
   if (metricFrame) {
     snapshot.metrics = {
@@ -4489,6 +4517,59 @@ function residentStaticResourceCount(): number {
 
 function dynamicEntityCount(): number {
   return clients.size + monsters.size + corpses.size + npcs.size + fires.size;
+}
+
+function snapshotInterestFrameFor(cache: SnapshotBroadcastCache, viewer: ServerPlayer): SnapshotInterestFrame {
+  const key = spatialQueryRangeKey(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS);
+  const cached = cache.frames.get(key);
+  if (cached) return cached;
+  const frame: SnapshotInterestFrame = {
+    players: spatialCandidates(spatial.players, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS),
+    monsters: spatialCandidates(spatial.monsters, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS),
+    corpses: corpses.size === 0 ? [] : spatialCandidates(spatial.corpses, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS),
+    npcs: spatialCandidates(spatial.npcs, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS),
+    fires: fires.size === 0 ? [] : spatialCandidates(spatial.fires, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS),
+    events: eventCellCandidates(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)
+  };
+  cache.frames.set(key, frame);
+  return frame;
+}
+
+function treeSnapshotInterestFrameFor(cache: SnapshotBroadcastCache, viewer: ServerPlayer): TreeSnapshotInterestFrame {
+  const key = spatialQueryRangeKey(viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS);
+  const cached = cache.treeFrames.get(key);
+  if (cached) return cached;
+  materializeTreeCellsNear(viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS);
+  const frame = {
+    trees: spatialCandidates(staticSpatial.trees, viewer.floor, viewer.x, viewer.y, TREE_SNAPSHOT_RADIUS)
+  };
+  cache.treeFrames.set(key, frame);
+  return frame;
+}
+
+function populateStaticResourceInterestFrame(frame: SnapshotInterestFrame, viewer: ServerPlayer): void {
+  if (frame.fishingNodes && frame.miningNodes && frame.herbNodes) return;
+  materializeStaticResourceCellsNear(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS);
+  frame.fishingNodes = spatialCandidates(staticSpatial.fishingNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS);
+  frame.miningNodes = spatialCandidates(staticSpatial.miningNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS);
+  frame.herbNodes = spatialCandidates(staticSpatial.herbNodes, viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS);
+}
+
+function spatialCandidates<T>(index: Map<string, T[]>, floor: number, x: number, y: number, radius: number): T[] {
+  const candidates: T[] = [];
+  forEachSpatial(index, floor, x, y, radius, (item) => {
+    candidates.push(item);
+  });
+  return candidates;
+}
+
+function eventCellCandidates(floor: number, x: number, y: number, radius: number): GameEvent[] {
+  if (eventsByCell.size === 0) return EMPTY_EVENTS;
+  const candidates: GameEvent[] = [];
+  forEachEventCell(floor, x, y, radius, (item) => {
+    candidates.push(item);
+  });
+  return candidates;
 }
 
 function snapshotCacheEntryCounts(): { total: number; peak: number } {
@@ -5250,10 +5331,10 @@ function eventVisibleTo(viewer: ServerPlayer, item: GameEvent): boolean {
   return inInterestRange(viewer, { floor: item.floor, x: item.x, y: item.y });
 }
 
-function visibleEventsFor(viewer: ServerPlayer): GameEvent[] {
+function visibleEventsFor(viewer: ServerPlayer, cellEvents: GameEvent[] = eventCellCandidates(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS)): GameEvent[] {
   const targeted = targetedEventsByPlayer.get(viewer.id);
   if (globalEvents.length === 0 && !targeted && eventsByCell.size === 0) return EMPTY_EVENTS;
-  if (EVENT_PRIORITY) return visibleEventsForPrioritized(viewer, targeted);
+  if (EVENT_PRIORITY) return visibleEventsForPrioritized(viewer, targeted, cellEvents);
   if (eventsByCell.size === 0) {
     if (globalEvents.length === 0) return boundedEventList(targeted ?? EMPTY_EVENTS);
     if (!targeted) return boundedEventList(globalEvents);
@@ -5266,17 +5347,17 @@ function visibleEventsFor(viewer: ServerPlayer): GameEvent[] {
   const visible: GameEvent[] = [];
   appendEventsUntilLimit(visible, targeted);
   appendEventsUntilLimit(visible, globalEvents);
-  forEachEventCell(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (item) => {
-    if (visible.length >= VISIBLE_EVENT_LIMIT || !eventVisibleTo(viewer, item)) return;
+  for (const item of cellEvents) {
+    if (visible.length >= VISIBLE_EVENT_LIMIT || !eventVisibleTo(viewer, item)) continue;
     visible.push(item);
-  });
+  }
   if (visible.length > 1) visible.sort(compareEventsByOrder);
   return visible;
 }
 
 // Priority-aware assembly: keep a bounded best-candidate heap so high-priority
 // telegraphs survive cosmetic floods without sorting every visible candidate.
-function visibleEventsForPrioritized(viewer: ServerPlayer, targeted: GameEvent[] | undefined): GameEvent[] {
+function visibleEventsForPrioritized(viewer: ServerPlayer, targeted: GameEvent[] | undefined, cellEvents: GameEvent[]): GameEvent[] {
   let selected: GameEvent[] = [];
   let heap: MinHeap<PrioritizedEventCandidate> | null = null;
   const keepCandidate = (item: GameEvent): void => {
@@ -5293,9 +5374,9 @@ function visibleEventsForPrioritized(viewer: ServerPlayer, targeted: GameEvent[]
 
   if (targeted) for (const item of targeted) keepCandidate(item);
   for (const item of globalEvents) keepCandidate(item);
-  forEachEventCell(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (item) => {
+  for (const item of cellEvents) {
     if (eventVisibleTo(viewer, item)) keepCandidate(item);
-  });
+  }
   if (!heap) {
     if (selected.length > 1) selected.sort(compareEventsByOrder);
     return selected;

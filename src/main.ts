@@ -818,6 +818,7 @@ const HOLD_MOVE_REPATH_MS = 80;
 const MINIMAP_DRAW_MS = 100;
 const MAP_CHUNK_TILES = 16;
 const ENTITY_RENDER_PADDING_TILES = 10;
+const RESOURCE_BUCKET_TILES = 16;
 
 const SMITHING_RECIPES = {
   weapon: [
@@ -1226,7 +1227,6 @@ function create(this: Phaser.Scene): void {
     }
   }
   makeTileTexture(this, "townTiles", "tileWater", 24, 248, 84, 84);
-  createGeneratedStageTileTextures(this);
   makeSpriteTexture(this, "northwoodTreeSheet", "spriteTree", 35, 55, 355, 385);
   makeSpriteTexture(this, "northwoodTreeSheet", "spritePine", 455, 50, 220, 390);
   makeSpriteTexture(this, "forestTiles", "spriteRock", 640, 500, 92, 72);
@@ -2376,6 +2376,7 @@ function renderRoster(characters: CharacterRosterEntry[]): void {
 
 function drawMap(floor: number, center?: TilePoint): void {
   currentFloor = floor;
+  ensureGeneratedStageTileTextures(floor);
   applyFloorAtmosphere(floor);
   cutawayBuildingSprites.length = 0;
   lastCutawayKey = "";
@@ -2915,6 +2916,24 @@ interface RenderBounds {
   bottom: number;
 }
 
+interface SpatialResourceEntity {
+  id: string;
+  floor: number;
+  x: number;
+  y: number;
+}
+
+interface SpatialResourceIndex<T extends SpatialResourceEntity> {
+  source: readonly T[];
+  buckets: Map<string, T[]>;
+}
+
+const treeResourceIndex = createSpatialResourceIndexCache<TreeView>();
+const fishingResourceIndex = createSpatialResourceIndexCache<FishingNodeView>();
+const miningResourceIndex = createSpatialResourceIndexCache<MiningNodeView>();
+const herbResourceIndex = createSpatialResourceIndexCache<HerbNodeView>();
+const fireResourceIndex = createSpatialResourceIndexCache<FireView>();
+
 function entityRenderBounds(): RenderBounds {
   const camera = scene.cameras.main;
   const view = camera.worldView;
@@ -2925,6 +2944,59 @@ function entityRenderBounds(): RenderBounds {
     top: view.y - pad,
     bottom: view.bottom + pad
   };
+}
+
+function createSpatialResourceIndexCache<T extends SpatialResourceEntity>(): { index: SpatialResourceIndex<T> | null } {
+  return { index: null };
+}
+
+function spatialBucketKey(floor: number, bucketX: number, bucketY: number): string {
+  return `${floor}:${bucketX}:${bucketY}`;
+}
+
+function spatialBucketCoord(tileCoord: number): number {
+  return Math.floor(tileCoord / RESOURCE_BUCKET_TILES);
+}
+
+function spatialResourceIndex<T extends SpatialResourceEntity>(
+  cache: { index: SpatialResourceIndex<T> | null },
+  source: readonly T[]
+): SpatialResourceIndex<T> {
+  if (cache.index?.source === source) return cache.index;
+  const index: SpatialResourceIndex<T> = { source, buckets: new Map() };
+  for (const item of source) {
+    const key = spatialBucketKey(item.floor, spatialBucketCoord(item.x), spatialBucketCoord(item.y));
+    const bucket = index.buckets.get(key);
+    if (bucket) bucket.push(item);
+    else index.buckets.set(key, [item]);
+  }
+  cache.index = index;
+  return index;
+}
+
+function visibleSpatialResources<T extends SpatialResourceEntity>(
+  cache: { index: SpatialResourceIndex<T> | null },
+  source: readonly T[],
+  floor: number,
+  bounds: RenderBounds
+): T[] {
+  const index = spatialResourceIndex(cache, source);
+  const minBucketX = spatialBucketCoord(bounds.left / TILE_SIZE);
+  const maxBucketX = spatialBucketCoord(bounds.right / TILE_SIZE);
+  const minBucketY = spatialBucketCoord(bounds.top / TILE_SIZE);
+  const maxBucketY = spatialBucketCoord(bounds.bottom / TILE_SIZE);
+  const visible: T[] = [];
+  for (let bucketY = minBucketY; bucketY <= maxBucketY; bucketY += 1) {
+    for (let bucketX = minBucketX; bucketX <= maxBucketX; bucketX += 1) {
+      const bucket = index.buckets.get(spatialBucketKey(floor, bucketX, bucketY));
+      if (!bucket) continue;
+      for (const item of bucket) {
+        if (isWorldPointRenderable(item.x * TILE_SIZE, item.y * TILE_SIZE, bounds)) visible.push(item);
+      }
+    }
+  }
+  visible.sort((a, b) => a.y - b.y || a.x - b.x);
+  return visible;
 }
 
 function isWorldPointRenderable(x: number, y: number, bounds: RenderBounds): boolean {
@@ -3091,9 +3163,7 @@ function syncEntities(): void {
     }
   }
 
-  for (const tree of latestState.trees ?? []) {
-    if (tree.floor !== me.floor) continue;
-    if (!isWorldPointRenderable(tree.x * TILE_SIZE, tree.y * TILE_SIZE, renderBounds)) continue;
+  for (const tree of visibleSpatialResources(treeResourceIndex, latestState.trees ?? [], me.floor, renderBounds)) {
     visibleTrees.add(tree.id);
     let view = treeViews.get(tree.id);
     if (!view) {
@@ -3117,9 +3187,7 @@ function syncEntities(): void {
     }
   }
 
-  for (const node of latestState.fishingNodes ?? []) {
-    if (node.floor !== me.floor) continue;
-    if (!isWorldPointRenderable(node.x * TILE_SIZE, node.y * TILE_SIZE, renderBounds)) continue;
+  for (const node of visibleSpatialResources(fishingResourceIndex, latestState.fishingNodes ?? [], me.floor, renderBounds)) {
     visibleFishingNodes.add(node.id);
     let view = fishingViews.get(node.id);
     if (!view) {
@@ -3138,9 +3206,7 @@ function syncEntities(): void {
     }
   }
 
-  for (const node of latestState.miningNodes ?? []) {
-    if (node.floor !== me.floor) continue;
-    if (!isWorldPointRenderable(node.x * TILE_SIZE, node.y * TILE_SIZE, renderBounds)) continue;
+  for (const node of visibleSpatialResources(miningResourceIndex, latestState.miningNodes ?? [], me.floor, renderBounds)) {
     visibleMiningNodes.add(node.id);
     let view = miningViews.get(node.id);
     if (!view) {
@@ -3158,9 +3224,7 @@ function syncEntities(): void {
     }
   }
 
-  for (const node of latestState.herbNodes ?? []) {
-    if (node.floor !== me.floor) continue;
-    if (!isWorldPointRenderable(node.x * TILE_SIZE, node.y * TILE_SIZE, renderBounds)) continue;
+  for (const node of visibleSpatialResources(herbResourceIndex, latestState.herbNodes ?? [], me.floor, renderBounds)) {
     visibleHerbNodes.add(node.id);
     let view = herbViews.get(node.id);
     if (!view) {
@@ -3180,9 +3244,7 @@ function syncEntities(): void {
     }
   }
 
-  for (const fire of latestState.fires ?? []) {
-    if (fire.floor !== me.floor) continue;
-    if (!isWorldPointRenderable(fire.x * TILE_SIZE, fire.y * TILE_SIZE, renderBounds)) continue;
+  for (const fire of visibleSpatialResources(fireResourceIndex, latestState.fires ?? [], me.floor, renderBounds)) {
     visibleFires.add(fire.id);
     let view = fireViews.get(fire.id);
     if (!view) {
@@ -8444,6 +8506,7 @@ const TILE_UNDERLAY_TEXTURE: Record<string, string> = {
 
 const GENERATED_STAGES: GeneratedStage[] = [NORTHWOOD_STAGE, WAYSTONE_STAGE, SWAMP_STAGE, ROUTE_STAGE];
 const GENERATED_STAGES_BY_FLOOR = new Map<number, GeneratedStage>(GENERATED_STAGES.map((stage) => [stage.floor, stage]));
+const generatedStageTexturesReady = new Set<number>();
 
 function generatedTilesetTextureKey(stage: GeneratedStage, tilesetName: string): string {
   return `generated:${stage.zone}:${tilesetName}`;
@@ -8481,42 +8544,47 @@ function rotatedTileTextureKey(baseKey: string, deg: number): string {
   return key;
 }
 
-function createGeneratedStageTileTextures(phaserScene: Phaser.Scene): void {
-  for (const stage of GENERATED_STAGES) {
-    const refs = new Set<string>();
-    for (const [char, tile] of Object.entries(stage.tiles)) {
-      refs.add(tile.ref);
-      const [tilesetName, rawIndex] = tile.ref.split(":");
-      const index = Number(rawIndex);
-      if (!tilesetName || !Number.isInteger(index)) continue;
-      const sourceKey = generatedTilesetTextureKey(stage, tilesetName);
-      if (!phaserScene.textures.exists(sourceKey)) continue;
-      const source = phaserScene.textures.get(sourceKey).getSourceImage() as HTMLImageElement | HTMLCanvasElement;
-      const columns = Math.max(1, Math.floor(source.width / stage.tileSize));
-      const sx = (index % columns) * stage.tileSize;
-      const sy = Math.floor(index / columns) * stage.tileSize;
-      makeTileTexture(phaserScene, sourceKey, generatedTileTextureKey(stage, char), sx, sy, stage.tileSize, stage.tileSize, 0, true);
-    }
-    for (const layer of stage.layers ?? []) {
-      for (const row of layer.data) {
-        for (const ref of row) {
-          if (ref) refs.add(ref);
-        }
+function ensureGeneratedStageTileTextures(floor: number): void {
+  const stage = GENERATED_STAGES_BY_FLOOR.get(floor);
+  if (!stage || generatedStageTexturesReady.has(floor)) return;
+  createGeneratedStageTileTextures(scene, stage);
+  generatedStageTexturesReady.add(floor);
+}
+
+function createGeneratedStageTileTextures(phaserScene: Phaser.Scene, stage: GeneratedStage): void {
+  const refs = new Set<string>();
+  for (const [char, tile] of Object.entries(stage.tiles)) {
+    refs.add(tile.ref);
+    const [tilesetName, rawIndex] = tile.ref.split(":");
+    const index = Number(rawIndex);
+    if (!tilesetName || !Number.isInteger(index)) continue;
+    const sourceKey = generatedTilesetTextureKey(stage, tilesetName);
+    if (!phaserScene.textures.exists(sourceKey)) continue;
+    const source = phaserScene.textures.get(sourceKey).getSourceImage() as HTMLImageElement | HTMLCanvasElement;
+    const columns = Math.max(1, Math.floor(source.width / stage.tileSize));
+    const sx = (index % columns) * stage.tileSize;
+    const sy = Math.floor(index / columns) * stage.tileSize;
+    makeTileTexture(phaserScene, sourceKey, generatedTileTextureKey(stage, char), sx, sy, stage.tileSize, stage.tileSize, 0, true);
+  }
+  for (const layer of stage.layers ?? []) {
+    for (const row of layer.data) {
+      for (const ref of row) {
+        if (ref) refs.add(ref);
       }
     }
-    for (const ref of refs) {
-      const [tilesetName, rawIndex] = ref.split(":");
-      const index = Number(rawIndex);
-      if (!tilesetName || !Number.isInteger(index)) continue;
-      const sourceKey = generatedTilesetTextureKey(stage, tilesetName);
-      const textureKey = generatedStageRefTextureKey(stage, ref);
-      if (!phaserScene.textures.exists(sourceKey) || phaserScene.textures.exists(textureKey)) continue;
-      const source = phaserScene.textures.get(sourceKey).getSourceImage() as HTMLImageElement | HTMLCanvasElement;
-      const columns = Math.max(1, Math.floor(source.width / stage.tileSize));
-      const sx = (index % columns) * stage.tileSize;
-      const sy = Math.floor(index / columns) * stage.tileSize;
-      makeTileTexture(phaserScene, sourceKey, textureKey, sx, sy, stage.tileSize, stage.tileSize, 0, true);
-    }
+  }
+  for (const ref of refs) {
+    const [tilesetName, rawIndex] = ref.split(":");
+    const index = Number(rawIndex);
+    if (!tilesetName || !Number.isInteger(index)) continue;
+    const sourceKey = generatedTilesetTextureKey(stage, tilesetName);
+    const textureKey = generatedStageRefTextureKey(stage, ref);
+    if (!phaserScene.textures.exists(sourceKey) || phaserScene.textures.exists(textureKey)) continue;
+    const source = phaserScene.textures.get(sourceKey).getSourceImage() as HTMLImageElement | HTMLCanvasElement;
+    const columns = Math.max(1, Math.floor(source.width / stage.tileSize));
+    const sx = (index % columns) * stage.tileSize;
+    const sy = Math.floor(index / columns) * stage.tileSize;
+    makeTileTexture(phaserScene, sourceKey, textureKey, sx, sy, stage.tileSize, stage.tileSize, 0, true);
   }
 }
 
