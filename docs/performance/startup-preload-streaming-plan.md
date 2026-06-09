@@ -16,7 +16,7 @@ The client exposes residency evidence through `window.__TIB_E2E__.assetResidency
 
 - Core actor/effect/gathering sheets remain startup assets.
 - Legacy hand-authored biome sheets remain in `preloaded-biomes` until their derived texture baking is split by floor.
-- Northwatch city, Sunken Marsh, Sunken Desert, Sunken Beach, and Untamed Jungle art are now hand-authored floor-context slices: their source sheets load on the destination floor transition, then their derived tiles and props are baked before reveal.
+- Northwatch city, Sunken Marsh, Sunken Desert, Sunken Beach, Untamed Jungle, and Deepdelve Mine art are now hand-authored floor-context slices: their source sheets load on the destination floor transition, then their derived tiles and props are baked before reveal.
 - Generated-stage tilesets, Waystone direct props, and Northwood direct object sprites are non-startup play-context assets.
 - Adjacent generated stages warm in the background only after the active floor is settled, and warmups cancel if the player changes floors or a transition is active.
 
@@ -36,4 +36,4 @@ The budget report calls out the largest preload candidates by policy group so th
 
 ## Next Reduction
 
-The largest remaining startup bucket is `preloaded-biomes`. Shrinking it safely requires continuing to split the old scene-wide texture baking in `create()` into idempotent floor-specific texture builders. Northwatch/city, Sunken Marsh, Sunken Desert, Sunken Beach, and Untamed Jungle are now split; next candidates are cemetery and deepmine. Searing canyon also needs a separate floor-context pass for its ground, cliff, flora, and landmark kits.
+The largest remaining startup bucket is `preloaded-biomes`. Shrinking it safely requires continuing to split the old scene-wide texture baking in `create()` into idempotent floor-specific texture builders. Northwatch/city, Sunken Marsh, Sunken Desert, Sunken Beach, Untamed Jungle, and Deepdelve Mine are now split; the next remaining biome candidate is cemetery. Searing canyon also needs a separate floor-context pass for its ground, cliff, flora, and landmark kits.

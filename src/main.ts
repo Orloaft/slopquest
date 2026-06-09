@@ -1198,6 +1198,7 @@ const STARTER_AREA_STARTUP_IMAGE_ASSETS: RuntimeImageAsset[] = [
 ];
 
 const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
+  [10, [runtimeImageAsset("dungeonTiles", "/crypt-dungeon-tiles.png", "play-context", "Deepdelve Mine source sheet", 10, "deepmine")]],
   [9, [runtimeImageAsset("jungleTiles", "/jungle-tiles.png", "play-context", "Untamed Jungle source sheet", 9, "jungle")]],
   [8, [runtimeImageAsset("beachTiles", "/beach-tiles.png", "play-context", "Sunken Beach source sheet", 8, "beach")]],
   [7, [runtimeImageAsset("desertTiles", "/desert-tiles.png", "play-context", "Sunken Desert source sheet", 7, "desert")]],
@@ -1251,8 +1252,7 @@ const RESIDENT_AUTHORING_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("outpostKit", "/tilesets/searing-canyon-landmarks/outpost-kit.png", "startup", "resident searing outpost kit", 6, "badlands"),
   runtimeImageAsset("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png", "startup", "resident searing cultist kit", 6, "badlands"),
   runtimeImageAsset("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png", "startup", "resident searing ritual kit", 6, "badlands"),
-  runtimeImageAsset("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png", "startup", "resident searing mine kit", 6, "badlands"),
-  runtimeImageAsset("dungeonTiles", "/crypt-dungeon-tiles.png", "startup", "resident mine/dungeon source sheet", 10, "deepmine")
+  runtimeImageAsset("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png", "startup", "resident searing mine kit", 6, "badlands")
 ];
 
 const STARTUP_IMAGE_ASSETS = [
@@ -1806,32 +1806,6 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "mineKit", "spriteMineHoist", 653, 121, 407, 463);
   makeSpriteTexture(this, "mineKit", "spriteMineCart", 1162, 241, 327, 336);
   makeSpriteTexture(this, "mineKit", "spriteMineTrack", 1601, 293, 467, 268);
-  // The Deepdelve Mine (floor 10) cave identity (M1): bespoke worked-stone floor from the Dungeon
-  // Tileset's FLOOR TILES grid (~70px ROUGH ROCK at col 178, row 101 — chosen over the neat cobble
-  // tiles because it has no mortar perimeter, so it tiles without a visible grid). A SINGLE base
-  // tile keeps the cave floor homogeneous; it's de-gridded by rotation variants below. The `#` rock
-  // wall is a rough boulder floor tile shaded dark — one cohesive stone family, walls unlit/solid.
-  makeTileTexture(this, "dungeonTiles", "tileMineFloor", 178, 101, 70, 71);
-  makeTileTexture(this, "dungeonTiles", "tileMineWall", 417, 101, 69, 71, undefined, false,
-    (r, g, b) => [Math.round(r * 0.52), Math.round(g * 0.52), Math.round(b * 0.52)]);
-  // Homogeneous-but-seamless: bake 90deg ROTATION variants of the ONE mine-floor tile. The rock is
-  // non-directional, so rotations (unlike flips, which leave mirror-symmetry rosettes) scramble the
-  // residual repeat with no axis artifacts and no per-tile tone (tone would redraw the grid as a
-  // brightness checkerboard). The floor-10 picker rolls one per cell.
-  for (let v = 0; v < MINE_FLOOR_VARIANTS; v += 1) {
-    const cv = document.createElement("canvas");
-    cv.width = TILE_SIZE;
-    cv.height = TILE_SIZE;
-    const cc = cv.getContext("2d");
-    if (!cc) continue;
-    cc.imageSmoothingEnabled = false;
-    cc.translate(TILE_SIZE / 2, TILE_SIZE / 2);
-    cc.rotate((v * Math.PI) / 2);
-    cc.drawImage(this.textures.get("tileMineFloor").getSourceImage() as CanvasImageSource, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
-    this.textures.addCanvas(`tileMineFloorV${v}`, cv);
-    this.textures.get(`tileMineFloorV${v}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
-  }
-
   mapLayer = this.add.container(0, 0);
   mapDecorationLayer = this.add.container(0, 0);
   entityLayer = this.add.container(0, 0);
@@ -1984,6 +1958,27 @@ function buildUntamedJungleTextures(scene: Phaser.Scene): void {
   makeTileTexture(scene, "jungleTiles", "tileJungleRiver", 1069, 100, 72, 72);
   makeTileTexture(scene, "jungleTiles", "tileJungleCliff", 694, 146, 72, 30);
   makeSpriteTexture(scene, "jungleTiles", "spriteJungleVault", 676, 862, 120, 100);
+}
+
+function buildDeepdelveMineTextures(scene: Phaser.Scene): void {
+  if (scene.textures.exists("tileMineFloor")) return;
+  // Deepdelve Mine (floor 10). Crops from the Dungeon Tileset rough rock floor/wall.
+  makeTileTexture(scene, "dungeonTiles", "tileMineFloor", 178, 101, 70, 71);
+  makeTileTexture(scene, "dungeonTiles", "tileMineWall", 417, 101, 69, 71, undefined, false,
+    (r, g, b) => [Math.round(r * 0.52), Math.round(g * 0.52), Math.round(b * 0.52)]);
+  for (let v = 0; v < MINE_FLOOR_VARIANTS; v += 1) {
+    const cv = document.createElement("canvas");
+    cv.width = TILE_SIZE;
+    cv.height = TILE_SIZE;
+    const cc = cv.getContext("2d");
+    if (!cc) continue;
+    cc.imageSmoothingEnabled = false;
+    cc.translate(TILE_SIZE / 2, TILE_SIZE / 2);
+    cc.rotate((v * Math.PI) / 2);
+    cc.drawImage(scene.textures.get("tileMineFloor").getSourceImage() as CanvasImageSource, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+    scene.textures.addCanvas(`tileMineFloorV${v}`, cv);
+    scene.textures.get(`tileMineFloorV${v}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+  }
 }
 
 function buildSunkenBeachTextures(scene: Phaser.Scene): void {
@@ -9395,6 +9390,10 @@ function ensureFloorContextAssetsLoaded(floor: number, trigger: RuntimeImageLoad
 
 function ensureFloorContextTextures(floor: number): void {
   if (floorContextTextureBuildsReady.has(floor)) return;
+  if (floor === 10) {
+    if (!scene.textures.exists("dungeonTiles")) return;
+    buildDeepdelveMineTextures(scene);
+  }
   if (floor === 9) {
     if (!scene.textures.exists("jungleTiles")) return;
     buildUntamedJungleTextures(scene);

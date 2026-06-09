@@ -14,11 +14,24 @@ test("descend the badlands shaft, mine tiered cave ore, gate mithril behind Mini
   logErrors(page);
   await page.goto("/?e2e");
   await join(page);
+  const startupAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  expect(startupAssets?.startupImages.some((asset) => asset.key === "dungeonTiles"), "Deepdelve Mine sheet should not be a startup asset").toBe(false);
+  const startupDungeon = startupAssets?.runtimeImages.find((asset) => asset.key === "dungeonTiles");
+  expect(startupDungeon?.tier).toBe("play-context");
+  expect(startupDungeon?.resident, "Deepdelve Mine sheet should wait for floor-context loading").toBe(false);
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", items: [{ id: "pickaxe", qty: 1 }] }));
 
   // Step onto the badlands copper-dead-end shaft (>) and drop into the mine.
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 6, x: 11.5, y: 53.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 10, null, { timeout: 8000 });
+  await page.waitForFunction(() => {
+    const textures = window.__TIB_E2E__?.textureResidency?.(["dungeonTiles", "tileMineFloor", "tileMineFloorV0", "tileMineWall"]) ?? [];
+    return textures.length === 4 && textures.every((texture) => texture.exists && texture.width > 0 && texture.height > 0);
+  });
+  const deepmineAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  const loadedDungeon = deepmineAssets?.runtimeImages.find((asset) => asset.key === "dungeonTiles");
+  expect(loadedDungeon?.trigger).toBe("play-context");
+  expect(loadedDungeon?.resident, "Deepdelve Mine sheet should be resident after descending to floor 10").toBe(true);
 
   // Entry chamber copper vein: mineable at Mining 1.
   await place(page, 10, 6, 7);
