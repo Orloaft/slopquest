@@ -1198,6 +1198,7 @@ const STARTER_AREA_STARTUP_IMAGE_ASSETS: RuntimeImageAsset[] = [
 ];
 
 const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
+  [7, [runtimeImageAsset("desertTiles", "/desert-tiles.png", "play-context", "Sunken Desert source sheet", 7, "desert")]],
   [5, [runtimeImageAsset("swampTiles", "/swamp-tiles.png", "play-context", "Sunken Marsh source sheet", 5, "swamp")]],
   [4, [runtimeImageAsset("cityTiles", "/citytiles.png", "play-context", "Northwatch city source sheet", 4, "northwatch")]]
 ]);
@@ -1249,7 +1250,6 @@ const RESIDENT_AUTHORING_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png", "startup", "resident searing cultist kit", 6, "badlands"),
   runtimeImageAsset("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png", "startup", "resident searing ritual kit", 6, "badlands"),
   runtimeImageAsset("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png", "startup", "resident searing mine kit", 6, "badlands"),
-  runtimeImageAsset("desertTiles", "/desert-tiles.png", "startup", "resident desert source sheet", 7, "desert"),
   runtimeImageAsset("beachTiles", "/beach-tiles.png", "startup", "resident beach source sheet", 8, "beach"),
   runtimeImageAsset("jungleTiles", "/jungle-tiles.png", "startup", "resident jungle source sheet", 9, "jungle"),
   runtimeImageAsset("dungeonTiles", "/crypt-dungeon-tiles.png", "startup", "resident mine/dungeon source sheet", 10, "deepmine")
@@ -1806,91 +1806,6 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "mineKit", "spriteMineHoist", 653, 121, 407, 463);
   makeSpriteTexture(this, "mineKit", "spriteMineCart", 1162, 241, 327, 336);
   makeSpriteTexture(this, "mineKit", "spriteMineTrack", 1601, 293, 467, 268);
-  // Sunken Desert (floor 7). Crops from assetsources/rejected/desert-biome-tiles.png
-  // (1536x1024, magenta-keyed) — sand/quicksand/oasis tiles + palm, market tent, ledge.
-  makeTileTexture(this, "desertTiles", "tileSand", 25, 101, 71, 73);
-  makeTileTexture(this, "desertTiles", "tileQuicksand", 1344, 188, 70, 70);
-  makeTileTexture(this, "desertTiles", "tileOasisWater", 98, 862, 70, 72);
-  makeSpriteTexture(this, "desertTiles", "spriteOutpostTent", 1364, 854, 104, 84);
-  makeSpriteTexture(this, "desertTiles", "spritePalm", 1456, 958, 62, 58);
-  makeSpriteTexture(this, "desertTiles", "spriteDesertLedge", 22, 856, 66, 86);
-  // --- Sunken Desert (floor 7) painted relief: sandstone palette. Reuses the floor-6
-  // badlands relief engine (lit mesa tops, ribbed faces, rim lip, strata bench, foot AO)
-  // with a sandstone recolour — same geometry, warmer/lighter tan hue so the canyon reads
-  // as sandstone, not rust badlands. No new art: tops brighten tileSand, faces hue-shift the
-  // already-sliced searing cliff sub-tiles, and the lip/AO are shared (palette-neutral warm).
-  {
-    // Lit sandstone plateau top: tileSand brightened/warmed so raised rock reads sun-hit vs
-    // the shadowed sand floor below (mirrors searingMesaTop made from the cracked-earth ground).
-    const sand = this.textures.get("tileSand").getSourceImage() as CanvasImageSource;
-    const top = document.createElement("canvas");
-    top.width = TILE_SIZE;
-    top.height = TILE_SIZE;
-    const topCtx = top.getContext("2d");
-    if (topCtx) {
-      topCtx.imageSmoothingEnabled = false;
-      topCtx.filter = "brightness(1.28) saturate(1.12)";
-      topCtx.drawImage(sand, 0, 0, TILE_SIZE, TILE_SIZE);
-      // Warm the lit plateau top so it reads sun-hit and clearly WARMER than the shadowed
-      // cliff face below — the lit-top vs shadowed-face temperature split is the single biggest
-      // elevation-readability lever (per the 2D-cliff art research).
-      topCtx.filter = "none";
-      topCtx.globalCompositeOperation = "overlay";
-      topCtx.fillStyle = "rgba(255,176,88,0.12)";
-      topCtx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-      topCtx.globalCompositeOperation = "source-over";
-      this.textures.addCanvas("desertMesaTop", top);
-      this.textures.get("desertMesaTop").setFilter(Phaser.Textures.FilterMode.NEAREST);
-    }
-    // Sandstone cliff faces: recolour each of the 15 searing red-rock slices toward tan/gold
-    // (sepia base + slight saturate/brightness) so the proven ribbing reads as sandstone.
-    // Alpha (transparent gutters above the rim / cap shoulders) is preserved by the filter.
-    for (let row = 0; row < 3; row += 1)
-      for (let col = 0; col < 5; col += 1) {
-        const src = this.textures.get(`searingCliffR${row}C${col}`).getSourceImage() as CanvasImageSource;
-        const c = document.createElement("canvas");
-        c.width = 32;
-        c.height = 32;
-        const cx = c.getContext("2d");
-        if (cx) {
-          cx.imageSmoothingEnabled = false;
-          // Shadowed sandstone face: DARKER + slightly cooler/less-warm than the lit plateau
-          // top (was brightness 1.12 — brighter than the top, which flattened the drop). The
-          // top↔face value+temperature delta is what makes the cliff read as a real drop.
-          cx.filter = "sepia(0.38) saturate(1.12) brightness(0.8)";
-          cx.drawImage(src, 0, 0);
-          this.textures.addCanvas(`desertCliffR${row}C${col}`, c);
-          this.textures.get(`desertCliffR${row}C${col}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
-        }
-      }
-    // Vertical flank walls for the E/W mesa edges (sandstone palette).
-    buildCliffFlanks(this, "desert", [255, 224, 168]);
-    // Strata bench for the desert face: the sandstone ledge surface (desertMesaTop) with a
-    // sun-catch rim on top and a contact shadow at its foot (same recipe as searingCliffBench).
-    {
-      const bench = document.createElement("canvas");
-      bench.width = TILE_SIZE;
-      bench.height = TILE_SIZE;
-      const bctx = bench.getContext("2d");
-      if (bctx) {
-        bctx.imageSmoothingEnabled = false;
-        const ledge = this.textures.get("desertMesaTop").getSourceImage() as CanvasImageSource;
-        bctx.drawImage(ledge, 0, 0, TILE_SIZE, TILE_SIZE);
-        const rim = 7;
-        for (let dy = 0; dy < rim; dy += 1) {
-          bctx.fillStyle = `rgba(255,224,168,${(1 - dy / rim) * 0.5})`;
-          bctx.fillRect(0, dy, TILE_SIZE, 1);
-        }
-        const shade = 11;
-        for (let dy = 0; dy < shade; dy += 1) {
-          bctx.fillStyle = `rgba(0,0,0,${(1 - dy / shade) * 0.4})`;
-          bctx.fillRect(0, TILE_SIZE - 1 - dy, TILE_SIZE, 1);
-        }
-        this.textures.addCanvas("desertCliffBench", bench);
-        this.textures.get("desertCliffBench").setFilter(Phaser.Textures.FilterMode.NEAREST);
-      }
-    }
-  }
   // Sunken Beach (floor 8). Crops from assetsources/rejected/beach-biome-tiles.png.
   makeTileTexture(this, "beachTiles", "tileBeachSand", 20, 99, 70, 72);
   makeTileTexture(this, "beachTiles", "tileBeachRippleSand", 100, 99, 70, 72);
@@ -2153,6 +2068,95 @@ function create(this: Phaser.Scene): void {
   zoomKeys.NUMPAD_SUBTRACT?.on("down", () => { if (!isTextEntryFocused()) nudgeUserZoom(1 / ZOOM_KEY_STEP); });
 
   refreshKeyboardCapture();
+}
+
+function buildSunkenDesertTextures(scene: Phaser.Scene): void {
+  if (scene.textures.exists("tileSand")) return;
+  // Sunken Desert (floor 7). Crops from assetsources/rejected/desert-biome-tiles.png
+  // (1536x1024, magenta-keyed) — sand/quicksand/oasis tiles + palm, market tent, ledge.
+  makeTileTexture(scene, "desertTiles", "tileSand", 25, 101, 71, 73);
+  makeTileTexture(scene, "desertTiles", "tileQuicksand", 1344, 188, 70, 70);
+  makeTileTexture(scene, "desertTiles", "tileOasisWater", 98, 862, 70, 72);
+  makeSpriteTexture(scene, "desertTiles", "spriteOutpostTent", 1364, 854, 104, 84);
+  makeSpriteTexture(scene, "desertTiles", "spritePalm", 1456, 958, 62, 58);
+  makeSpriteTexture(scene, "desertTiles", "spriteDesertLedge", 22, 856, 66, 86);
+  // Sunken Desert (floor 7) painted relief: sandstone palette. Reuses the floor-6
+  // badlands relief engine (lit mesa tops, ribbed faces, rim lip, strata bench, foot AO)
+  // with a sandstone recolour — same geometry, warmer/lighter tan hue so the canyon reads
+  // as sandstone, not rust badlands. No new art: tops brighten tileSand, faces hue-shift the
+  // already-sliced searing cliff sub-tiles, and the lip/AO are shared (palette-neutral warm).
+  {
+    // Lit sandstone plateau top: tileSand brightened/warmed so raised rock reads sun-hit vs
+    // the shadowed sand floor below (mirrors searingMesaTop made from the cracked-earth ground).
+    const sand = scene.textures.get("tileSand").getSourceImage() as CanvasImageSource;
+    const top = document.createElement("canvas");
+    top.width = TILE_SIZE;
+    top.height = TILE_SIZE;
+    const topCtx = top.getContext("2d");
+    if (topCtx) {
+      topCtx.imageSmoothingEnabled = false;
+      topCtx.filter = "brightness(1.28) saturate(1.12)";
+      topCtx.drawImage(sand, 0, 0, TILE_SIZE, TILE_SIZE);
+      // Warm the lit plateau top so it reads sun-hit and clearly WARMER than the shadowed
+      // cliff face below — the lit-top vs shadowed-face temperature split is the single biggest
+      // elevation-readability lever (per the 2D-cliff art research).
+      topCtx.filter = "none";
+      topCtx.globalCompositeOperation = "overlay";
+      topCtx.fillStyle = "rgba(255,176,88,0.12)";
+      topCtx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+      topCtx.globalCompositeOperation = "source-over";
+      scene.textures.addCanvas("desertMesaTop", top);
+      scene.textures.get("desertMesaTop").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+    // Sandstone cliff faces: recolour each of the 15 searing red-rock slices toward tan/gold
+    // (sepia base + slight saturate/brightness) so the proven ribbing reads as sandstone.
+    // Alpha (transparent gutters above the rim / cap shoulders) is preserved by the filter.
+    for (let row = 0; row < 3; row += 1)
+      for (let col = 0; col < 5; col += 1) {
+        const src = scene.textures.get(`searingCliffR${row}C${col}`).getSourceImage() as CanvasImageSource;
+        const c = document.createElement("canvas");
+        c.width = 32;
+        c.height = 32;
+        const cx = c.getContext("2d");
+        if (cx) {
+          cx.imageSmoothingEnabled = false;
+          // Shadowed sandstone face: DARKER + slightly cooler/less-warm than the lit plateau
+          // top (was brightness 1.12 — brighter than the top, which flattened the drop). The
+          // top↔face value+temperature delta is what makes the cliff read as a real drop.
+          cx.filter = "sepia(0.38) saturate(1.12) brightness(0.8)";
+          cx.drawImage(src, 0, 0);
+          scene.textures.addCanvas(`desertCliffR${row}C${col}`, c);
+          scene.textures.get(`desertCliffR${row}C${col}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+        }
+      }
+    // Vertical flank walls for the E/W mesa edges (sandstone palette).
+    buildCliffFlanks(scene, "desert", [255, 224, 168]);
+    // Strata bench for the desert face: the sandstone ledge surface (desertMesaTop) with a
+    // sun-catch rim on top and a contact shadow at its foot (same recipe as searingCliffBench).
+    {
+      const bench = document.createElement("canvas");
+      bench.width = TILE_SIZE;
+      bench.height = TILE_SIZE;
+      const bctx = bench.getContext("2d");
+      if (bctx) {
+        bctx.imageSmoothingEnabled = false;
+        const ledge = scene.textures.get("desertMesaTop").getSourceImage() as CanvasImageSource;
+        bctx.drawImage(ledge, 0, 0, TILE_SIZE, TILE_SIZE);
+        const rim = 7;
+        for (let dy = 0; dy < rim; dy += 1) {
+          bctx.fillStyle = `rgba(255,224,168,${(1 - dy / rim) * 0.5})`;
+          bctx.fillRect(0, dy, TILE_SIZE, 1);
+        }
+        const shade = 11;
+        for (let dy = 0; dy < shade; dy += 1) {
+          bctx.fillStyle = `rgba(0,0,0,${(1 - dy / shade) * 0.4})`;
+          bctx.fillRect(0, TILE_SIZE - 1 - dy, TILE_SIZE, 1);
+        }
+        scene.textures.addCanvas("desertCliffBench", bench);
+        scene.textures.get("desertCliffBench").setFilter(Phaser.Textures.FilterMode.NEAREST);
+      }
+    }
+  }
 }
 
 function buildSunkenMarshTextures(scene: Phaser.Scene): void {
@@ -9401,6 +9405,10 @@ function ensureFloorContextAssetsLoaded(floor: number, trigger: RuntimeImageLoad
 
 function ensureFloorContextTextures(floor: number): void {
   if (floorContextTextureBuildsReady.has(floor)) return;
+  if (floor === 7) {
+    if (!scene.textures.exists("desertTiles")) return;
+    buildSunkenDesertTextures(scene);
+  }
   if (floor === 5) {
     if (!scene.textures.exists("swampTiles")) return;
     buildSunkenMarshTextures(scene);

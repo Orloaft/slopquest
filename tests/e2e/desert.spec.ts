@@ -14,6 +14,11 @@ test("travel loop: cemetery south portal -> desert, and the oasis passage -> Way
   logErrors(page);
   await page.goto("/?e2e");
   await join(page);
+  const startupAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  expect(startupAssets?.startupImages.some((asset) => asset.key === "desertTiles"), "Sunken Desert sheet should not be a startup asset").toBe(false);
+  const startupDesert = startupAssets?.runtimeImages.find((asset) => asset.key === "desertTiles");
+  expect(startupDesert?.tier).toBe("play-context");
+  expect(startupDesert?.resident, "Sunken Desert sheet should wait for floor-context loading").toBe(false);
 
   await page.evaluate(() =>
     window.__TIB_E2E__?.send({
@@ -26,6 +31,14 @@ test("travel loop: cemetery south portal -> desert, and the oasis passage -> Way
   );
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 1, x: p.x, y: p.y }), { x: scaleX(1, 56.5), y: scaleY(1, 70.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 7, null, { timeout: 8000 });
+  await page.waitForFunction(() => {
+    const textures = window.__TIB_E2E__?.textureResidency?.(["desertTiles", "tileSand", "desertMesaTop", "spritePalm"]) ?? [];
+    return textures.length === 4 && textures.every((texture) => texture.exists && texture.width > 0 && texture.height > 0);
+  });
+  const desertAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  const loadedDesert = desertAssets?.runtimeImages.find((asset) => asset.key === "desertTiles");
+  expect(loadedDesert?.trigger).toBe("play-context");
+  expect(loadedDesert?.resident, "Sunken Desert sheet should be resident after traveling to floor 7").toBe(true);
 
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 7, x: p.x, y: p.y }), { x: scaleX(7, 31.5), y: scaleY(7, 59.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 0, null, { timeout: 8000 });

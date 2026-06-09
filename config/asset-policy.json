@@ -10,11 +10,11 @@
       "maxFiles": 500
     },
     "startupPreload": {
-      "maxTotalBytes": 50331648,
+      "maxTotalBytes": 47185920,
       "maxFiles": 80
     },
     "lazyBundles": {
-      "maxTotalBytes": 10485760,
+      "maxTotalBytes": 13631488,
       "maxFileBytes": 4194304,
       "maxFiles": 64
     }
@@ -104,12 +104,11 @@
         "public/graveyardtiles.png",
         "public/dark-forest-tiles.png",
         "public/badlands-tiles.png",
-        "public/desert-tiles.png",
         "public/beach-tiles.png",
         "public/jungle-tiles.png",
         "public/crypt-dungeon-tiles.png"
       ],
-      "maxTotalBytes": 20971520,
+      "maxTotalBytes": 17825792,
       "maxFileBytes": 4194304,
       "maxFiles": 12
     },
@@ -146,9 +145,10 @@
       "description": "Hand-authored biome sheets loaded through floor transitions instead of startup preload.",
       "include": [
         "public/citytiles.png",
-        "public/swamp-tiles.png"
+        "public/swamp-tiles.png",
+        "public/desert-tiles.png"
       ],
-      "maxTotalBytes": 7340032,
+      "maxTotalBytes": 10485760,
       "maxFileBytes": 4194304,
       "maxFiles": 4
     },
@@ -175,7 +175,7 @@
       "maxFiles": 12
     },
     "runtime image play-context/background assets": {
-      "maxTotalBytes": 7340032,
+      "maxTotalBytes": 10485760,
       "maxFileBytes": 4194304,
       "maxFiles": 40
     }
