@@ -38,8 +38,8 @@ for (const layer of stage.layers as Array<{ data: Array<Array<string | null>> }>
 // objects (bottom-center, y-sorted). `src` is preview metadata: a bespoke {file}
 // or an atlas sub-rect {atlas,sx,sy,sw,sh} matching main.ts makeSpriteTexture.
 const ATLAS_FILE: Record<string, string> = {
-  townTiles: "public/towntiles.png", beachTiles: "public/beach-tiles.png",
-  graveyardTiles: "public/graveyardtiles.png", northwoodTreeSheet: "public/northwood-trees-v1.png",
+  townTiles: "assetsources/towntiles.png", beachTiles: "public/beach-tiles.png",
+  graveyardTiles: "public/graveyardtiles.png", northwoodTreeSheet: "assetsources/curated/bespoke/northwood-trees-v1/northwood-trees-source-alpha.png",
 };
 const atlases = new Map<string, PNG>();
 const loadAtlas = (f: string) => { if (!atlases.has(f)) atlases.set(f, PNG.sync.read(readFileSync(nodePath.join(repoRoot, f)))); return atlases.get(f)!; };

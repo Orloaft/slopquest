@@ -15,6 +15,7 @@ The client exposes residency evidence through `window.__TIB_E2E__.assetResidency
 ## Current Contract
 
 - Core actor/effect sheets remain startup assets.
+- First-spawn town/forest art no longer preloads the full public source sheets. The client starts with small baked runtime crops for shared starter tiles, house/prop sprites, trees, rocks, and the cemetery moss tile; the original source sheets stay in `assetsources/`.
 - Gathering resource art no longer lives in startup preload. Ore veins use slim runtime sprites loaded with floors that expose mining nodes; herb and campfire sprites load with destination floors; fishing ripples are procedural, so the old water interaction source sheet is no longer a runtime asset.
 - Legacy hand-authored biome sheets no longer live in startup preload. Their derived texture baking is split by floor.
 - Northwatch city, Southgate Cemetery, Ashen Crypt grave props, Sunken Marsh, Searing Badlands, Sunken Desert, Sunken Beach, Untamed Jungle, and Deepdelve Mine art are now hand-authored floor-context slices: their source sheets load on the destination floor transition, then their derived tiles and props are baked before reveal.
@@ -37,4 +38,4 @@ The budget report calls out the largest preload candidates by policy group so th
 
 ## Next Reduction
 
-The old `preloaded-biomes` and `startup-gathering-props` buckets have been eliminated. The next reductions should target shared startup art that is still genuinely global today: broad actor sheets or first-spawn town/forest sources. Any follow-up should keep the same pattern: load the destination floor's source sheets before reveal, build derived textures idempotently, and prove residency in browser tests.
+The old `preloaded-biomes`, `startup-gathering-props`, and full-sheet first-spawn town/forest buckets have been eliminated. The next reductions should target shared startup art that is still genuinely global today, especially broad actor/effect sheets. Any follow-up should keep the same pattern: load the destination floor's source sheets before reveal or replace oversized source sheets with slim runtime crops, build derived textures idempotently, and prove residency in browser tests.

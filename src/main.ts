@@ -1187,8 +1187,31 @@ const CORE_BOOTSTRAP_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("effectsSheet", "/effects.png", "startup", "shared combat effects")
 ];
 
-const STARTER_AREA_STARTUP_IMAGE_ASSETS: RuntimeImageAsset[] = [
-  runtimeImageAsset("townTiles", "/towntiles.png", "startup", "Waystone/common town source sheet", 0, "waystone")
+const STARTER_RUNTIME_IMAGE_ASSETS: RuntimeImageAsset[] = [
+  runtimeImageAsset("tileGrass", "/sprites/starter/tile-grass.png", "startup", "starter grass tile", 0, "waystone"),
+  runtimeImageAsset("tileGrassWorn", "/sprites/starter/tile-grass-worn.png", "startup", "starter worn grass tile", 0, "waystone"),
+  runtimeImageAsset("tileStone", "/sprites/starter/tile-stone.png", "startup", "starter stone tile", 0, "waystone"),
+  runtimeImageAsset("tileMuster", "/sprites/starter/tile-muster.png", "startup", "starter muster stone tile", 0, "waystone"),
+  runtimeImageAsset("tileTownFloor", "/sprites/starter/tile-town-floor.png", "startup", "starter plaza floor tile", 0, "waystone"),
+  runtimeImageAsset("tileDirt", "/sprites/starter/tile-dirt.png", "startup", "starter dirt tile", 0, "waystone"),
+  runtimeImageAsset("tileWater", "/sprites/starter/tile-water.png", "startup", "starter water tile", 0, "waystone"),
+  runtimeImageAsset("tileForest", "/sprites/starter/tile-forest.png", "startup", "resident forest tile", 3, "northwood"),
+  runtimeImageAsset("tileRock", "/sprites/starter/tile-rock.png", "startup", "resident rock tile", 3, "northwood"),
+  runtimeImageAsset("tileGraveMoss", "/sprites/starter/tile-grave-moss.png", "startup", "shared grave moss tile"),
+  runtimeImageAsset("spriteTree", "/sprites/starter/sprite-tree.png", "startup", "resident broadleaf tree sprite", 3, "northwood"),
+  runtimeImageAsset("spritePine", "/sprites/starter/sprite-pine.png", "startup", "resident pine tree sprite", 3, "northwood"),
+  runtimeImageAsset("spriteRock", "/sprites/starter/sprite-rock.png", "startup", "resident rock sprite", 3, "northwood"),
+  runtimeImageAsset("spritePortal", "/sprites/starter/sprite-portal.png", "startup", "starter portal sprite", 0, "waystone"),
+  runtimeImageAsset("spriteBridge", "/sprites/starter/sprite-bridge.png", "startup", "starter bridge sprite", 0, "waystone"),
+  runtimeImageAsset("spriteWell", "/sprites/starter/sprite-well.png", "startup", "starter well sprite", 0, "waystone"),
+  runtimeImageAsset("spriteRedHouse", "/sprites/starter/sprite-red-house.png", "startup", "starter red house sprite", 0, "waystone"),
+  runtimeImageAsset("spriteBlueHouse", "/sprites/starter/sprite-blue-house.png", "startup", "starter blue house sprite", 0, "waystone"),
+  runtimeImageAsset("spriteGreenHouse", "/sprites/starter/sprite-green-house.png", "startup", "starter green house sprite", 0, "waystone"),
+  runtimeImageAsset("spriteThatchHouse", "/sprites/starter/sprite-thatch-house.png", "startup", "starter thatch house sprite", 0, "waystone"),
+  runtimeImageAsset("spriteMarket", "/sprites/starter/sprite-market.png", "startup", "starter market sprite", 0, "waystone"),
+  runtimeImageAsset("spriteSign", "/sprites/starter/sprite-sign.png", "startup", "starter sign sprite", 0, "waystone"),
+  runtimeImageAsset("spriteLamp", "/sprites/starter/sprite-lamp.png", "startup", "starter lamp sprite", 0, "waystone"),
+  runtimeImageAsset("spriteBarrels", "/sprites/starter/sprite-barrels.png", "startup", "starter barrels sprite", 0, "waystone")
 ];
 
 const CAMPFIRE_RESOURCE_IMAGE_ASSET = runtimeImageAsset("spriteCampfire", "/campfire.png", "play-context", "shared cooking fire");
@@ -1304,15 +1327,9 @@ const GENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImag
   ]
 ]);
 
-const RESIDENT_AUTHORING_IMAGE_ASSETS: RuntimeImageAsset[] = [
-  runtimeImageAsset("forestTiles", "/foresttiles.png", "startup", "resident forest source sheet"),
-  runtimeImageAsset("northwoodTreeSheet", "/northwood-trees-v1.png", "startup", "resident Northwood tree sheet", 3, "northwood")
-];
-
 const STARTUP_IMAGE_ASSETS = [
   ...CORE_BOOTSTRAP_IMAGE_ASSETS,
-  ...STARTER_AREA_STARTUP_IMAGE_ASSETS,
-  ...RESIDENT_AUTHORING_IMAGE_ASSETS
+  ...STARTER_RUNTIME_IMAGE_ASSETS
 ] as const;
 const FLOOR_CONTEXT_IMAGE_ASSETS: RuntimeImageAsset[] = [
   ...new Map([...FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR.values()].flat().map((asset): [string, RuntimeImageAsset] => [asset.key, asset])).values()
@@ -1356,49 +1373,15 @@ function preload(this: Phaser.Scene): void {
 function create(this: Phaser.Scene): void {
   createActorFrames(this);
   createEffectFrames(this);
-  makeTileTexture(this, "townTiles", "tileGrass", 24, 24, 84, 84);
-  // Worn/scuffed grass variant — scattered into Northwatch's clearing so the open
-  // ground reads with natural variation instead of one flat green tile.
-  makeTileTexture(this, "townTiles", "tileGrassWorn", 130, 24, 84, 84);
-  makeTileTexture(this, "townTiles", "tileStone", 236, 248, 84, 84);
-  // Northwatch muster square: a clean cool-grey cobble cell (distinct from the warm `s`
-  // apron). Replaces the broken magenta-keyed `p`/tileTownFloor crop that checkerboarded.
-  makeTileTexture(this, "townTiles", "tileMuster", 342, 248, 84, 84);
-  // Plaza floor: the original (1004,794) crop landed on a grass-gapped, magenta-gutter
-  // checkerboard and read as a stark green/cream grid. Build it from the clean cobble
-  // crop instead, warm-lightened into a finished tan flagstone that's distinct from the
-  // greyer stone apron around it.
-  const plazaWarm = (r: number, g: number, b: number): [number, number, number] => [
-    Math.min(255, Math.round(r * 1.28 + 24)),
-    Math.min(255, Math.round(g * 1.24 + 18)),
-    Math.min(255, Math.round(b * 1.12 + 8))
-  ];
-  makeTileTexture(this, "townTiles", "tileTownFloor", 236, 248, 84, 84, undefined, false, plazaWarm);
-  makeTileTexture(this, "townTiles", "tileDirt", 236, 24, 84, 84);
+  // Starter terrain/prop keys are small baked runtime crops generated by
+  // tools/build-starter-runtime-assets.ts, not the old public source sheets.
   // Ground-seam transition overlays: softer surfaces fray over the harder ones
   // they border (grass > dirt > stone > plaza). See SURFACE_RANK / addGroundEdges.
   makeEdgeOverlays(this, "tileGrass", "grassEdge", 0, 0.5);
   makeEdgeOverlays(this, "tileDirt", "dirtEdge", 100, 0.4);
   makeEdgeOverlays(this, "tileStone", "stoneEdge", 200, 0.34);
   makeGroundDetailDecals(this);
-  makeTileTexture(this, "forestTiles", "tileForest", 24, 34, 84, 84);
-  makeTileTexture(this, "forestTiles", "tileRock", 1120, 794, 84, 84);
   buildSharedTerrainOverlayTextures(this);
-  makeTileTexture(this, "townTiles", "tileWater", 24, 248, 84, 84);
-  makeSpriteTexture(this, "northwoodTreeSheet", "spriteTree", 35, 55, 355, 385);
-  makeSpriteTexture(this, "northwoodTreeSheet", "spritePine", 455, 50, 220, 390);
-  makeSpriteTexture(this, "forestTiles", "spriteRock", 640, 500, 92, 72);
-  makeSpriteTexture(this, "townTiles", "spritePortal", 828, 424, 86, 132);
-  makeSpriteTexture(this, "townTiles", "spriteBridge", 20, 466, 92, 56);
-  makeSpriteTexture(this, "townTiles", "spriteWell", 824, 420, 94, 132);
-  makeSpriteTexture(this, "townTiles", "spriteRedHouse", 996, 22, 238, 176);
-  makeSpriteTexture(this, "townTiles", "spriteBlueHouse", 996, 374, 250, 180);
-  makeSpriteTexture(this, "townTiles", "spriteGreenHouse", 1272, 374, 142, 178);
-  makeSpriteTexture(this, "townTiles", "spriteThatchHouse", 1294, 24, 130, 176);
-  makeSpriteTexture(this, "townTiles", "spriteMarket", 1208, 786, 188, 84);
-  makeSpriteTexture(this, "townTiles", "spriteSign", 616, 420, 74, 90);
-  makeSpriteTexture(this, "townTiles", "spriteLamp", 912, 424, 38, 136);
-  makeSpriteTexture(this, "townTiles", "spriteBarrels", 1200, 700, 90, 70);
   mapLayer = this.add.container(0, 0);
   mapDecorationLayer = this.add.container(0, 0);
   entityLayer = this.add.container(0, 0);
@@ -1909,11 +1892,8 @@ function buildSouthgateCemeteryTextures(scene: Phaser.Scene): void {
   // Grave path: a square flagstone crop from the sheet's full-res ground row,
   // avoiding the stretched non-square cobble crop that blurred the path.
   makeTileTexture(scene, "graveyardTiles", "tileGravePath", 608, 930, 56, 56, 4);
-  makeTileTexture(scene, "forestTiles", "tileGraveMoss", 24, 34, 84, 84, undefined, false, (r, g, b) => {
-    const lum = r * 0.32 + g * 0.55 + b * 0.13;
-    const mute = (c: number, lvl: number): number => Math.round(Math.min(255, (c * 0.4 + lum * 0.6) * lvl));
-    return [mute(r, 0.78), mute(g, 0.72), mute(b, 0.6)];
-  });
+  // `tileGraveMoss` is a starter-runtime crop now, so the cemetery no longer
+  // needs the full forest source sheet just to tint one shared ground tile.
 
   const toneByV = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
   const buildGroundVariants = (baseKey: string) => {

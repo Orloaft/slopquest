@@ -49,6 +49,13 @@
       "maxFiles": 40
     },
     {
+      "name": "starter-runtime-crops",
+      "include": ["public/sprites/starter/**"],
+      "maxTotalBytes": 2097152,
+      "maxFileBytes": 262144,
+      "maxFiles": 32
+    },
+    {
       "name": "resource-node-sprites",
       "include": [
         "public/sprites/resources/**",
@@ -98,15 +105,11 @@
     },
     {
       "name": "starter-area",
-      "description": "Waystone and Northwood art that can appear around the first spawn route.",
-      "include": [
-        "public/towntiles.png",
-        "public/foresttiles.png",
-        "public/northwood-trees-v1.png"
-      ],
-      "maxTotalBytes": 10485760,
-      "maxFileBytes": 3145728,
-      "maxFiles": 40
+      "description": "Baked Waystone and Northwood runtime crops needed around the first spawn route.",
+      "include": ["public/sprites/starter/**"],
+      "maxTotalBytes": 2097152,
+      "maxFileBytes": 262144,
+      "maxFiles": 32
     }
   ],
   "lazyClassifications": [

@@ -14,8 +14,8 @@ test("Waystone south gate streams Southgate Cemetery art before reveal", async (
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 0, x: 64.5, y: 70.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 1, null, { timeout: 8000 });
   await page.waitForFunction(() => {
-    const textures = window.__TIB_E2E__?.textureResidency?.(["graveyardTiles", "tileGraveDirt", "tileGravePath", "spriteCrypt", "spriteFence", "spriteObelisk"]) ?? [];
-    return textures.length === 6 && textures.every((texture) => texture.exists && texture.width > 0 && texture.height > 0);
+    const textures = window.__TIB_E2E__?.textureResidency?.(["graveyardTiles", "tileGraveDirt", "tileGravePath", "tileGraveMoss", "spriteCrypt", "spriteFence", "spriteObelisk"]) ?? [];
+    return textures.length === 7 && textures.every((texture) => texture.exists && texture.width > 0 && texture.height > 0);
   });
   const cemeteryAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
   const loadedGraveyard = cemeteryAssets?.runtimeImages.find((asset) => asset.key === "graveyardTiles");

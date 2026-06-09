@@ -19,6 +19,15 @@ test("Waystone floor 0 renders in-browser", async ({ page }) => {
   const floor = await page.evaluate(() => (window as any).__TIB_E2E__.self()?.floor);
   expect(floor).toBe(0);
 
+  const assets = await page.evaluate(() => (window as any).__TIB_E2E__?.assetResidency?.() ?? null);
+  const startupKeys = new Set((assets?.startupImages ?? []).map((asset: { key: string }) => asset.key));
+  expect(startupKeys.has("townTiles"), "full town source sheet should not be a startup asset").toBe(false);
+  expect(startupKeys.has("forestTiles"), "full forest source sheet should not be a startup asset").toBe(false);
+  expect(startupKeys.has("northwoodTreeSheet"), "full Northwood tree source sheet should not be a startup asset").toBe(false);
+  for (const key of ["tileGrass", "tileForest", "spriteTree", "spriteRedHouse", "spriteBridge"]) {
+    expect(startupKeys.has(key), `${key} should be represented by a baked starter runtime crop`).toBe(true);
+  }
+
   // let textures load + camera settle, then capture
   await page.waitForTimeout(2500);
   await page.screenshot({ path: "artifacts/waystone-ingame.png" });
