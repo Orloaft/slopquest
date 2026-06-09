@@ -210,13 +210,13 @@ interface EntityView extends Phaser.GameObjects.Container {
 }
 
 interface ActorView extends EntityView {
-  nameText: Phaser.GameObjects.Text;
   sprite: Phaser.GameObjects.Sprite;
   shadow: Phaser.GameObjects.Ellipse;
   crowdImportant?: boolean;
 }
 
 interface PlayerEntityView extends ActorView {
+  nameText: Phaser.GameObjects.Text;
   hp: Phaser.GameObjects.Rectangle;
   hpBack: Phaser.GameObjects.Rectangle;
   targetRing: Phaser.GameObjects.Ellipse;
@@ -230,11 +230,11 @@ interface MonsterEntityView extends ActorView {
   aggroActive?: boolean;
   actorType?: string;
   actorTint?: number;
-  roleBadge: Phaser.GameObjects.Text;
-  statusText: Phaser.GameObjects.Text;
 }
 
-interface NpcEntityView extends ActorView {}
+interface NpcEntityView extends ActorView {
+  nameText: Phaser.GameObjects.Text;
+}
 
 interface TreeEntityView extends Phaser.GameObjects.Container {
   treeSprite: Phaser.GameObjects.Image;
@@ -3096,10 +3096,6 @@ function setRectangleWidthIfChanged(rectangle: Phaser.GameObjects.Rectangle, wid
   if (rectangle.width !== width) rectangle.width = width;
 }
 
-function setTextColorIfChanged(text: Phaser.GameObjects.Text, color: string): void {
-  if (text.style.color !== color) text.setColor(color);
-}
-
 function markEntityLayerSortDirty(): void {
   entityLayerSortDirty = true;
 }
@@ -3266,12 +3262,9 @@ function syncEntities(): void {
       }
       view.actorType = monster.type;
     }
-    setTextIfChanged(view.nameText, monster.name);
-    setTextIfChanged(view.roleBadge, roleBadgeText(monster.role));
-    setTextColorIfChanged(view.roleBadge, roleBadgeColor(monster.role));
-    const statusLabel = monsterStatusLabel(monster);
-    setTextIfChanged(view.statusText, statusLabel);
-    setRectangleWidthIfChanged(view.hp, 36 * (monster.hp / monster.maxHp));
+    const monsterImportant = me.targetId === monster.id || monster.targetId === me.id;
+    view.crowdImportant = monsterImportant;
+    if (!crowdedActorsActive || monsterImportant) setRectangleWidthIfChanged(view.hp, 36 * (monster.hp / monster.maxHp));
     setVisibleIfChanged(view.targetRing, me.targetId === monster.id);
     setAggroMark(view, monster.targetId === me.id);
   }
@@ -3470,13 +3463,9 @@ function updateCrowdedActorLabels(me: PlayerView): void {
   }
   for (const [id, view] of monsterViews) {
     if (!visibleMonsterIds.has(id)) continue;
-    const majorRole = view.roleBadge.text === "BOSS" || view.roleBadge.text === "ELITE";
-    const important = me.targetId === id || majorRole;
+    const important = me.targetId === id || view.aggroActive === true;
     view.crowdImportant = important;
     const showDetails = !crowded || important;
-    setVisibleIfChanged(view.nameText, showDetails);
-    setVisibleIfChanged(view.roleBadge, view.roleBadge.text.length > 0 && showDetails);
-    setVisibleIfChanged(view.statusText, view.statusText.text.length > 0 && showDetails);
     setVisibleIfChanged(view.hp, showDetails);
     setVisibleIfChanged(view.hpBack, showDetails);
     setVisibleIfChanged(view.shadow, showDetails);
@@ -3766,9 +3755,6 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
   const actor = monsterActorSpec(monster);
   const sprite = scene.add.sprite(0, actor.yOffset, actorTextureKey(actor.family, monster.dir, 0)).setDisplaySize(actor.width, actor.height);
   if (actor.tint) sprite.setTint(actor.tint);
-  const nameText = scene.add.text(0, -45, monster.name, textStyle(11, "#f8ead0")).setOrigin(0.5);
-  const roleBadge = scene.add.text(0, -58, roleBadgeText(monster.role), textStyle(10, roleBadgeColor(monster.role))).setOrigin(0.5).setVisible(monster.role !== "trash");
-  const statusText = scene.add.text(0, -21, "", textStyle(9, "#fde68a")).setOrigin(0.5).setVisible(false);
   const hpBack = scene.add.rectangle(-18, -32, 36, 4, 0x191d1a).setOrigin(0, 0.5);
   const hp = scene.add.rectangle(-18, -32, 36, 4, 0xef4444).setOrigin(0, 0.5);
   const zone = scene.add.zone(0, 0, 54, 56).setInteractive({ cursor: "pointer" });
@@ -3783,14 +3769,11 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
     }
   });
   attachHoverTint(zone, sprite);
-  view.add([targetRing, shadow, sprite, nameText, roleBadge, statusText, hpBack, hp, zone, aggroMark]);
-  view.nameText = nameText;
+  view.add([targetRing, shadow, sprite, hpBack, hp, zone, aggroMark]);
   view.hp = hp;
   view.hpBack = hpBack;
   view.targetRing = targetRing;
   view.aggroMark = aggroMark;
-  view.roleBadge = roleBadge;
-  view.statusText = statusText;
   view.sprite = sprite;
   view.shadow = shadow;
   view.actorType = monster.type;
@@ -3830,36 +3813,6 @@ function setAggroMark(view: MonsterEntityView, active: boolean): void {
       onComplete: () => mark.setVisible(false)
     });
   }
-}
-
-function roleBadgeText(role: MonsterView["role"]): string {
-  if (role === "boss") return "BOSS";
-  if (role === "elite") return "ELITE";
-  if (role === "turret") return "CAST";
-  if (role === "ambush") return "AMB";
-  if (role === "pack") return "PACK";
-  return "";
-}
-
-function roleBadgeColor(role: MonsterView["role"]): string {
-  if (role === "boss") return "#ffb4a2";
-  if (role === "elite") return "#fcd34d";
-  if (role === "turret") return "#a5f3fc";
-  if (role === "ambush") return "#c4b5fd";
-  if (role === "pack") return "#bbf7d0";
-  return "#f8ead0";
-}
-
-function monsterStatusLabel(monster: MonsterView): string {
-  const statuses = monster.statuses ?? [];
-  if (statuses.includes("aiming")) return "AIM";
-  if (statuses.includes("taunt")) return "TAUNT";
-  if (statuses.includes("freeze")) return "FREEZE";
-  if (statuses.includes("snare")) return "SNARE";
-  if (statuses.includes("burn")) return "BURN";
-  if (statuses.includes("slow")) return "SLOW";
-  if (statuses.includes("inaccurate")) return "BLIND";
-  return "";
 }
 
 const monsterActorSpecCache = new Map<string, MonsterActorSpec>();
