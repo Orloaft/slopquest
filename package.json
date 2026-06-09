@@ -19,6 +19,7 @@
     "server": "node server/index.ts",
     "load:test": "node scripts/load-test.ts",
     "perf:gate": "node scripts/perf-gate.ts",
+    "perf:visual": "playwright test tests/e2e/render-performance.spec.ts --project=chromium",
     "perf:soak": "node scripts/perf-gate.ts --soak",
     "perf:stress": "node scripts/perf-gate.ts --stress",
     "balance:areas": "node scripts/balance-areas.ts",
