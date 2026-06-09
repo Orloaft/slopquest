@@ -1199,11 +1199,24 @@ const STARTER_AREA_STARTUP_IMAGE_ASSETS: RuntimeImageAsset[] = [
 
 const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
   [10, [runtimeImageAsset("dungeonTiles", "/crypt-dungeon-tiles.png", "play-context", "Deepdelve Mine source sheet", 10, "deepmine")]],
-  [9, [runtimeImageAsset("jungleTiles", "/jungle-tiles.png", "play-context", "Untamed Jungle source sheet", 9, "jungle")]],
+  [9, [
+    runtimeImageAsset("jungleTiles", "/jungle-tiles.png", "play-context", "Untamed Jungle source sheet", 9, "jungle"),
+    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 9, "jungle")
+  ]],
   [8, [runtimeImageAsset("beachTiles", "/beach-tiles.png", "play-context", "Sunken Beach source sheet", 8, "beach")]],
-  [7, [runtimeImageAsset("desertTiles", "/desert-tiles.png", "play-context", "Sunken Desert source sheet", 7, "desert")]],
-  [5, [runtimeImageAsset("swampTiles", "/swamp-tiles.png", "play-context", "Sunken Marsh source sheet", 5, "swamp")]],
-  [4, [runtimeImageAsset("cityTiles", "/citytiles.png", "play-context", "Northwatch city source sheet", 4, "northwatch")]]
+  [7, [
+    runtimeImageAsset("desertTiles", "/desert-tiles.png", "play-context", "Sunken Desert source sheet", 7, "desert"),
+    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 7, "desert")
+  ]],
+  [5, [
+    runtimeImageAsset("swampTiles", "/swamp-tiles.png", "play-context", "Sunken Marsh source sheet", 5, "swamp"),
+    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 5, "swamp")
+  ]],
+  [4, [runtimeImageAsset("cityTiles", "/citytiles.png", "play-context", "Northwatch city source sheet", 4, "northwatch")]],
+  [2, [runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "Ashen Crypt grave prop source sheet", 2, "crypt")]],
+  [1, [
+    runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "Southgate Cemetery source sheet", 1, "cemetery")
+  ]]
 ]);
 
 const GENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>([
@@ -1235,8 +1248,6 @@ const GENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImag
 
 const RESIDENT_AUTHORING_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("forestTiles", "/foresttiles.png", "startup", "resident forest source sheet"),
-  runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "startup", "resident cemetery source sheet", 1, "cemetery"),
-  runtimeImageAsset("darkForestTiles", "/dark-forest-tiles.png", "startup", "resident dark forest source sheet"),
   runtimeImageAsset("northwoodTreeSheet", "/northwood-trees-v1.png", "startup", "resident Northwood tree sheet", 3, "northwood"),
   runtimeImageAsset("badlandsTiles", "/badlands-tiles.png", "startup", "resident badlands source sheet", 6, "badlands"),
   runtimeImageAsset("searingGround", "/tilesets/searing-canyon-ground.png", "startup", "resident searing canyon ground sheet", 6, "badlands"),
@@ -1260,7 +1271,9 @@ const STARTUP_IMAGE_ASSETS = [
   ...STARTER_AREA_STARTUP_IMAGE_ASSETS,
   ...RESIDENT_AUTHORING_IMAGE_ASSETS
 ] as const;
-const FLOOR_CONTEXT_IMAGE_ASSETS: RuntimeImageAsset[] = [...FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR.values()].flat();
+const FLOOR_CONTEXT_IMAGE_ASSETS: RuntimeImageAsset[] = [
+  ...new Map([...FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR.values()].flat().map((asset): [string, RuntimeImageAsset] => [asset.key, asset])).values()
+];
 const runtimeImageLoadRecords = new Map<string, RuntimeImageLoadRecord>();
 const floorContextAssetLoads = new Map<number, Promise<void>>();
 const floorContextAssetsReady = new Set<number>();
@@ -1327,155 +1340,11 @@ function create(this: Phaser.Scene): void {
   makeGroundDetailDecals(this);
   makeTileTexture(this, "forestTiles", "tileForest", 24, 34, 84, 84);
   makeTileTexture(this, "forestTiles", "tileRock", 1120, 794, 84, 84);
-  makeTileTexture(this, "graveyardTiles", "tileGraveDirt", 20, 21, 84, 84);
-  // Grave path: the old source (635,859,36,44) was a NON-SQUARE 32x40 core stretched to a square
-  // tile -> blurry + aspect-distorted cobble. Swapped to a crisp square flagstone from the sheet's
-  // full-res ground row (608,930,56x56): laid stone slabs with moss in the joints, the right read
-  // for a graveyard walk. Square crop -> no distortion; ~48px core (inset 4) -> far sharper.
-  makeTileTexture(this, "graveyardTiles", "tileGravePath", 608, 930, 56, 56, 4);
-  // Cemetery overgrowth: the forest tile desaturated + darkened to a somber moss
-  // so scattered patches read as graveyard moss, not vivid meadow grass (floor 1
-  // remaps "r" to this via FLOOR_TILE_TEXTURE).
-  makeTileTexture(this, "forestTiles", "tileGraveMoss", 24, 34, 84, 84, undefined, false, (r, g, b) => {
-    const lum = r * 0.32 + g * 0.55 + b * 0.13;
-    const mute = (c: number, lvl: number): number => Math.round(Math.min(255, (c * 0.4 + lum * 0.6) * lvl));
-    return [mute(r, 0.78), mute(g, 0.72), mute(b, 0.6)];
-  });
-  // De-grid the cemetery ground (floor 1): tileGraveDirt / tileGravePath / tileGraveMoss were
-  // each a SINGLE tile stamped on every cell, so the grave path read as a perfect cobble lattice
-  // and the dirt/moss as a uniform speckle. Bake flip + grain variants of each; the floor-1
-  // ground resolver picks one per cell by position hash so the repeat dissolves. Flips (not 90deg
-  // rotation) keep each tile's top/bottom orientation so cobble courses don't fight at seams.
-  // NOTE: per-cell TONE is deliberately flat (1.0). An earlier pass shaded each variant ±10%,
-  // but a uniform brightness offset across a whole tile, picked per cell, just redraws the grid as
-  // a brightness checkerboard (the same quilt failure the marsh ground hit). Tonal variation lives
-  // at region scale instead — the broad somber mottle overlay in createMapChunk. Flips break the
-  // lattice; the mottle does the shading; no per-tile brightness steps to catch the eye.
-  {
-    const toneByV = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
-    const buildGroundVariants = (baseKey: string) => {
-      const src = this.textures.get(baseKey).getSourceImage() as CanvasImageSource;
-      for (let v = 0; v < GRAVE_GROUND_VARIANTS; v += 1) {
-        const cv = document.createElement("canvas");
-        cv.width = TILE_SIZE;
-        cv.height = TILE_SIZE;
-        const cc = cv.getContext("2d");
-        if (!cc) continue;
-        cc.imageSmoothingEnabled = false;
-        const flipH = (v & 1) === 1, flipV = (v & 2) === 2;
-        cc.save();
-        cc.translate(TILE_SIZE / 2, TILE_SIZE / 2);
-        cc.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-        cc.drawImage(src, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
-        cc.restore();
-        const img = cc.getImageData(0, 0, TILE_SIZE, TILE_SIZE);
-        const d = img.data;
-        const b = toneByV[v] ?? 1.0;
-        for (let i = 0; i < d.length; i += 4) {
-          if (d[i + 3] === 0) continue;
-          d[i] = Math.min(255, Math.round(d[i]! * b));
-          d[i + 1] = Math.min(255, Math.round(d[i + 1]! * b));
-          d[i + 2] = Math.min(255, Math.round(d[i + 2]! * b));
-        }
-        let seed = (v * 0x9e3779b1) >>> 0;
-        for (let k = 0; k < baseKey.length; k += 1) seed = (Math.imul(seed, 31) + baseKey.charCodeAt(k)) >>> 0;
-        const rnd = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
-        for (let s = 0; s < 10; s += 1) {
-          const px = Math.floor(rnd() * TILE_SIZE), py = Math.floor(rnd() * TILE_SIZE);
-          const i = (py * TILE_SIZE + px) * 4;
-          if (d[i + 3] === 0) continue;
-          const f = rnd() < 0.6 ? 0.78 : 1.0, add = f < 1 ? 0 : 22;
-          d[i] = Math.min(255, Math.round(d[i]! * f + add));
-          d[i + 1] = Math.min(255, Math.round(d[i + 1]! * f + add));
-          d[i + 2] = Math.min(255, Math.round(d[i + 2]! * f + add));
-        }
-        cc.putImageData(img, 0, 0);
-        this.textures.addCanvas(`${baseKey}V${v}`, cv);
-        this.textures.get(`${baseKey}V${v}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
-      }
-    };
-    buildGroundVariants("tileGraveDirt");
-    buildGroundVariants("tileGravePath");
-    buildGroundVariants("tileGraveMoss");
-    // Solid white stamp reused (tinted) for the somber tonal mottle overlay in createMapChunk.
-    const ov = document.createElement("canvas");
-    ov.width = TILE_SIZE;
-    ov.height = TILE_SIZE;
-    const ovc = ov.getContext("2d");
-    if (ovc) {
-      ovc.fillStyle = "#ffffff";
-      ovc.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-      this.textures.addCanvas("graveMottleOverlay", ov);
-      this.textures.get("graveMottleOverlay").setFilter(Phaser.Textures.FilterMode.NEAREST);
-    }
-    // Vertical-gradient stamp (white, alpha strong at top fading to 0 by ~80% down) reused as a
-    // directional cast shadow at the foot of beach cliffs/stairs so raised edges read as elevated
-    // rather than walls floating on flat sand. Tinted dark + alpha-scaled per draw in createMapChunk.
-    const sh = document.createElement("canvas");
-    sh.width = TILE_SIZE;
-    sh.height = TILE_SIZE;
-    const shc = sh.getContext("2d");
-    if (shc) {
-      const img = shc.createImageData(TILE_SIZE, TILE_SIZE);
-      const d = img.data;
-      for (let yy = 0; yy < TILE_SIZE; yy += 1) {
-        const t = yy / (TILE_SIZE * 0.8); // 0 at top -> 1 at 80% height
-        const a = Math.max(0, 1 - t);
-        const alpha = Math.round(255 * a * a); // ease-out so the band hugs the cliff base
-        for (let xx = 0; xx < TILE_SIZE; xx += 1) {
-          const i = (yy * TILE_SIZE + xx) * 4;
-          d[i] = 255;
-          d[i + 1] = 255;
-          d[i + 2] = 255;
-          d[i + 3] = alpha;
-        }
-      }
-      shc.putImageData(img, 0, 0);
-      this.textures.addCanvas("beachCliffShadow", sh);
-      this.textures.get("beachCliffShadow").setFilter(Phaser.Textures.FilterMode.NEAREST);
-      // Directional sandstone RIM bands (white, alpha strong at the active edge -> 0 by ~11px),
-      // tinted dark per-draw to bevel the EXPOSED edges of a cliff-top so the raised sand top reads
-      // as a framed shelf rather than bleeding into the lower ground sand. One band per side; reused
-      // by the floor-8 plateau-top border pass (the S edge is left to the existing sunlit lip).
-      const makeBeachRim = (name: string, dir: "N" | "S" | "W" | "E") => {
-        const c = document.createElement("canvas");
-        c.width = TILE_SIZE;
-        c.height = TILE_SIZE;
-        const cc = c.getContext("2d");
-        if (!cc) return;
-        const im = cc.createImageData(TILE_SIZE, TILE_SIZE);
-        const dd = im.data;
-        for (let yy = 0; yy < TILE_SIZE; yy += 1) {
-          for (let xx = 0; xx < TILE_SIZE; xx += 1) {
-            const edgeDist = dir === "N" ? yy : dir === "S" ? TILE_SIZE - 1 - yy : dir === "W" ? xx : TILE_SIZE - 1 - xx;
-            const t = edgeDist / (TILE_SIZE * 0.16); // fade out by ~11px in from the edge
-            const a = Math.max(0, 1 - t);
-            const i = (yy * TILE_SIZE + xx) * 4;
-            dd[i] = 255;
-            dd[i + 1] = 255;
-            dd[i + 2] = 255;
-            dd[i + 3] = Math.round(255 * a * a); // ease-out so the band hugs the very rim
-          }
-        }
-        cc.putImageData(im, 0, 0);
-        this.textures.addCanvas(name, c);
-        this.textures.get(name).setFilter(Phaser.Textures.FilterMode.NEAREST);
-      };
-      makeBeachRim("beachTopRimN", "N");
-      makeBeachRim("beachTopRimS", "S");
-      makeBeachRim("beachTopRimW", "W");
-      makeBeachRim("beachTopRimE", "E");
-    }
-  }
+  buildSharedTerrainOverlayTextures(this);
   makeTileTexture(this, "townTiles", "tileWater", 24, 248, 84, 84);
   makeSpriteTexture(this, "northwoodTreeSheet", "spriteTree", 35, 55, 355, 385);
   makeSpriteTexture(this, "northwoodTreeSheet", "spritePine", 455, 50, 220, 390);
   makeSpriteTexture(this, "forestTiles", "spriteRock", 640, 500, 92, 72);
-  // First sprite wired from the reviewed dark-forest source sheet (see
-  // assetsources/asset-review.md). Background normalized to the project magenta
-  // key before copying into public/. Crop is the boulder cluster in the sheet's
-  // "ROCKS & BOULDERS" block.
-  makeSpriteTexture(this, "darkForestTiles", "spriteBoulder", 1128, 590, 42, 54);
   makeSpriteTexture(this, "waterFishingSpots", "spriteFishingRipple", 920, 800, 70, 70);
   // Mining nodes wired from the reviewed ore/rock gathering source sheet (see
   // assetsources/asset-review.md). Crops are the stage-1 "rich" veins from the
@@ -1494,24 +1363,6 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "oreNodeSheet", "spriteGoldVein", 193, 434, 123, 57);
   makeSpriteTexture(this, "oreNodeSheet", "spriteMithrilVein", 193, 508, 123, 60);
   makeSpriteTexture(this, "oreNodeSheet", "spriteAdamantVein", 193, 584, 123, 60);
-  makeSpriteTexture(this, "graveyardTiles", "spriteGrave", 580, 360, 58, 78);
-  makeSpriteTexture(this, "graveyardTiles", "spriteFence", 20, 552, 126, 66);
-  makeSpriteTexture(this, "graveyardTiles", "spriteDeadTree", 548, 18, 116, 198);
-  makeSpriteTexture(this, "graveyardTiles", "spriteCrypt", 1164, 18, 116, 202);
-  makeSpriteTexture(this, "graveyardTiles", "spriteMausoleum", 1148, 260, 132, 170);
-  makeSpriteTexture(this, "graveyardTiles", "spriteStoneWall", 20, 356, 126, 64);
-  makeSpriteTexture(this, "graveyardTiles", "spriteObelisk", 806, 176, 66, 102);
-  // Cemetery landmark props (floor 1 bespoke object layer): a mourning-angel statue on a
-  // pedestal and a stone sarcophagus, for plot centrepieces and richer composition.
-  makeSpriteTexture(this, "graveyardTiles", "spriteGraveStatue", 942, 198, 50, 104, true);
-  makeSpriteTexture(this, "graveyardTiles", "spriteSarcophagus", 1022, 296, 88, 44, true);
-  // Cemetery ground-clutter scatter (floor 1): small headstone/cross variants from the
-  // sheet's grave-marker block, hash-scattered over grave-dirt in addTileDecorations so the
-  // plots stop reading as bare expanses. Defringed (cropped from the magenta sheet).
-  makeSpriteTexture(this, "graveyardTiles", "spriteGraveCross", 610, 378, 37, 65, true);
-  makeSpriteTexture(this, "graveyardTiles", "spriteGraveCross2", 689, 450, 40, 55, true);
-  makeSpriteTexture(this, "graveyardTiles", "spriteGraveStoneB", 516, 463, 42, 55, true);
-  makeSpriteTexture(this, "graveyardTiles", "spriteGraveStoneSm", 722, 456, 32, 52, true);
   makeSpriteTexture(this, "townTiles", "spritePortal", 828, 424, 86, 132);
   makeSpriteTexture(this, "townTiles", "spriteBridge", 20, 466, 92, 56);
   makeSpriteTexture(this, "townTiles", "spriteWell", 824, 420, 94, 132);
@@ -1944,6 +1795,153 @@ function create(this: Phaser.Scene): void {
   zoomKeys.NUMPAD_SUBTRACT?.on("down", () => { if (!isTextEntryFocused()) nudgeUserZoom(1 / ZOOM_KEY_STEP); });
 
   refreshKeyboardCapture();
+}
+
+function buildSharedTerrainOverlayTextures(scene: Phaser.Scene): void {
+  if (!scene.textures.exists("graveMottleOverlay")) {
+    const ov = document.createElement("canvas");
+    ov.width = TILE_SIZE;
+    ov.height = TILE_SIZE;
+    const ovc = ov.getContext("2d");
+    if (ovc) {
+      ovc.fillStyle = "#ffffff";
+      ovc.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+      scene.textures.addCanvas("graveMottleOverlay", ov);
+      scene.textures.get("graveMottleOverlay").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
+
+  if (!scene.textures.exists("beachCliffShadow")) {
+    const sh = document.createElement("canvas");
+    sh.width = TILE_SIZE;
+    sh.height = TILE_SIZE;
+    const shc = sh.getContext("2d");
+    if (shc) {
+      const img = shc.createImageData(TILE_SIZE, TILE_SIZE);
+      const d = img.data;
+      for (let yy = 0; yy < TILE_SIZE; yy += 1) {
+        const t = yy / (TILE_SIZE * 0.8);
+        const a = Math.max(0, 1 - t);
+        const alpha = Math.round(255 * a * a);
+        for (let xx = 0; xx < TILE_SIZE; xx += 1) {
+          const i = (yy * TILE_SIZE + xx) * 4;
+          d[i] = 255;
+          d[i + 1] = 255;
+          d[i + 2] = 255;
+          d[i + 3] = alpha;
+        }
+      }
+      shc.putImageData(img, 0, 0);
+      scene.textures.addCanvas("beachCliffShadow", sh);
+      scene.textures.get("beachCliffShadow").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
+
+  const makeBeachRim = (name: string, dir: "N" | "S" | "W" | "E") => {
+    if (scene.textures.exists(name)) return;
+    const c = document.createElement("canvas");
+    c.width = TILE_SIZE;
+    c.height = TILE_SIZE;
+    const cc = c.getContext("2d");
+    if (!cc) return;
+    const im = cc.createImageData(TILE_SIZE, TILE_SIZE);
+    const dd = im.data;
+    for (let yy = 0; yy < TILE_SIZE; yy += 1) {
+      for (let xx = 0; xx < TILE_SIZE; xx += 1) {
+        const edgeDist = dir === "N" ? yy : dir === "S" ? TILE_SIZE - 1 - yy : dir === "W" ? xx : TILE_SIZE - 1 - xx;
+        const t = edgeDist / (TILE_SIZE * 0.16);
+        const a = Math.max(0, 1 - t);
+        const i = (yy * TILE_SIZE + xx) * 4;
+        dd[i] = 255;
+        dd[i + 1] = 255;
+        dd[i + 2] = 255;
+        dd[i + 3] = Math.round(255 * a * a);
+      }
+    }
+    cc.putImageData(im, 0, 0);
+    scene.textures.addCanvas(name, c);
+    scene.textures.get(name).setFilter(Phaser.Textures.FilterMode.NEAREST);
+  };
+  makeBeachRim("beachTopRimN", "N");
+  makeBeachRim("beachTopRimS", "S");
+  makeBeachRim("beachTopRimW", "W");
+  makeBeachRim("beachTopRimE", "E");
+}
+
+function buildSouthgateCemeteryTextures(scene: Phaser.Scene): void {
+  if (scene.textures.exists("tileGraveDirt")) return;
+  makeTileTexture(scene, "graveyardTiles", "tileGraveDirt", 20, 21, 84, 84);
+  // Grave path: a square flagstone crop from the sheet's full-res ground row,
+  // avoiding the stretched non-square cobble crop that blurred the path.
+  makeTileTexture(scene, "graveyardTiles", "tileGravePath", 608, 930, 56, 56, 4);
+  makeTileTexture(scene, "forestTiles", "tileGraveMoss", 24, 34, 84, 84, undefined, false, (r, g, b) => {
+    const lum = r * 0.32 + g * 0.55 + b * 0.13;
+    const mute = (c: number, lvl: number): number => Math.round(Math.min(255, (c * 0.4 + lum * 0.6) * lvl));
+    return [mute(r, 0.78), mute(g, 0.72), mute(b, 0.6)];
+  });
+
+  const toneByV = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+  const buildGroundVariants = (baseKey: string) => {
+    const src = scene.textures.get(baseKey).getSourceImage() as CanvasImageSource;
+    for (let v = 0; v < GRAVE_GROUND_VARIANTS; v += 1) {
+      const cv = document.createElement("canvas");
+      cv.width = TILE_SIZE;
+      cv.height = TILE_SIZE;
+      const cc = cv.getContext("2d");
+      if (!cc) continue;
+      cc.imageSmoothingEnabled = false;
+      const flipH = (v & 1) === 1, flipV = (v & 2) === 2;
+      cc.save();
+      cc.translate(TILE_SIZE / 2, TILE_SIZE / 2);
+      cc.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+      cc.drawImage(src, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+      cc.restore();
+      const img = cc.getImageData(0, 0, TILE_SIZE, TILE_SIZE);
+      const d = img.data;
+      const b = toneByV[v] ?? 1.0;
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] === 0) continue;
+        d[i] = Math.min(255, Math.round(d[i]! * b));
+        d[i + 1] = Math.min(255, Math.round(d[i + 1]! * b));
+        d[i + 2] = Math.min(255, Math.round(d[i + 2]! * b));
+      }
+      let seed = (v * 0x9e3779b1) >>> 0;
+      for (let k = 0; k < baseKey.length; k += 1) seed = (Math.imul(seed, 31) + baseKey.charCodeAt(k)) >>> 0;
+      const rnd = () => {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        return seed / 4294967296;
+      };
+      for (let s = 0; s < 10; s += 1) {
+        const px = Math.floor(rnd() * TILE_SIZE), py = Math.floor(rnd() * TILE_SIZE);
+        const i = (py * TILE_SIZE + px) * 4;
+        if (d[i + 3] === 0) continue;
+        const f = rnd() < 0.6 ? 0.78 : 1.0, add = f < 1 ? 0 : 22;
+        d[i] = Math.min(255, Math.round(d[i]! * f + add));
+        d[i + 1] = Math.min(255, Math.round(d[i + 1]! * f + add));
+        d[i + 2] = Math.min(255, Math.round(d[i + 2]! * f + add));
+      }
+      cc.putImageData(img, 0, 0);
+      scene.textures.addCanvas(`${baseKey}V${v}`, cv);
+      scene.textures.get(`${baseKey}V${v}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  };
+  buildGroundVariants("tileGraveDirt");
+  buildGroundVariants("tileGravePath");
+  buildGroundVariants("tileGraveMoss");
+
+  makeSpriteTexture(scene, "graveyardTiles", "spriteGrave", 580, 360, 58, 78);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteFence", 20, 552, 126, 66);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteDeadTree", 548, 18, 116, 198);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteCrypt", 1164, 18, 116, 202);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteMausoleum", 1148, 260, 132, 170);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteStoneWall", 20, 356, 126, 64);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteObelisk", 806, 176, 66, 102);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteGraveStatue", 942, 198, 50, 104, true);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteSarcophagus", 1022, 296, 88, 44, true);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteGraveCross", 610, 378, 37, 65, true);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteGraveCross2", 689, 450, 40, 55, true);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteGraveStoneB", 516, 463, 42, 55, true);
+  makeSpriteTexture(scene, "graveyardTiles", "spriteGraveStoneSm", 722, 456, 32, 52, true);
 }
 
 function buildUntamedJungleTextures(scene: Phaser.Scene): void {
@@ -9397,6 +9395,10 @@ function ensureFloorContextTextures(floor: number): void {
   if (floor === 9) {
     if (!scene.textures.exists("jungleTiles")) return;
     buildUntamedJungleTextures(scene);
+  }
+  if (floor === 9 || floor === 7 || floor === 5 || floor === 2 || floor === 1) {
+    if (!scene.textures.exists("graveyardTiles")) return;
+    buildSouthgateCemeteryTextures(scene);
   }
   if (floor === 8) {
     if (!scene.textures.exists("beachTiles")) return;

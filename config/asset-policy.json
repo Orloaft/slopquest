@@ -101,13 +101,11 @@
       "name": "preloaded-biomes",
       "description": "Legacy floor tiles still preloaded while runtime streaming is being tightened.",
       "include": [
-        "public/graveyardtiles.png",
-        "public/dark-forest-tiles.png",
         "public/badlands-tiles.png"
       ],
-      "maxTotalBytes": 8388608,
+      "maxTotalBytes": 4194304,
       "maxFileBytes": 4194304,
-      "maxFiles": 12
+      "maxFiles": 4
     },
     {
       "name": "searing-canyon-startup",
@@ -146,11 +144,12 @@
         "public/desert-tiles.png",
         "public/beach-tiles.png",
         "public/jungle-tiles.png",
-        "public/crypt-dungeon-tiles.png"
+        "public/crypt-dungeon-tiles.png",
+        "public/graveyardtiles.png"
       ],
       "maxTotalBytes": 19922944,
       "maxFileBytes": 4194304,
-      "maxFiles": 6
+      "maxFiles": 7
     },
     {
       "name": "lazy/background-generated-stages",
@@ -175,7 +174,7 @@
       "maxFiles": 12
     },
     "runtime image play-context/background assets": {
-      "maxTotalBytes": 19922944,
+      "maxTotalBytes": 22020096,
       "maxFileBytes": 4194304,
       "maxFiles": 40
     }
