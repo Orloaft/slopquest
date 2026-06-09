@@ -1206,7 +1206,25 @@ const FLOOR_CONTEXT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImageAsset[]>
   [8, [runtimeImageAsset("beachTiles", "/beach-tiles.png", "play-context", "Sunken Beach source sheet", 8, "beach")]],
   [7, [
     runtimeImageAsset("desertTiles", "/desert-tiles.png", "play-context", "Sunken Desert source sheet", 7, "desert"),
+    runtimeImageAsset("searingCliff", "/tilesets/searing-canyon-cliff.png", "play-context", "shared red-rock relief source sheet", 7, "desert"),
     runtimeImageAsset("graveyardTiles", "/graveyardtiles.png", "play-context", "shared grave marker prop source sheet", 7, "desert")
+  ]],
+  [6, [
+    runtimeImageAsset("badlandsTiles", "/badlands-tiles.png", "play-context", "Searing Badlands source sheet", 6, "badlands"),
+    runtimeImageAsset("searingGround", "/tilesets/searing-canyon-ground.png", "play-context", "Searing canyon ground sheet", 6, "badlands"),
+    runtimeImageAsset("searingCliff", "/tilesets/searing-canyon-cliff.png", "play-context", "Searing canyon cliff sheet", 6, "badlands"),
+    runtimeImageAsset("floraSaguaroLg", "/tilesets/searing-canyon-flora/saguaro_lg.png", "play-context", "Searing flora large saguaro", 6, "badlands"),
+    runtimeImageAsset("floraSaguaroMd", "/tilesets/searing-canyon-flora/saguaro_md.png", "play-context", "Searing flora medium saguaro", 6, "badlands"),
+    runtimeImageAsset("floraSaguaroSm", "/tilesets/searing-canyon-flora/saguaro_sm.png", "play-context", "Searing flora small saguaro", 6, "badlands"),
+    runtimeImageAsset("floraScrubDry", "/tilesets/searing-canyon-flora/scrub_dry.png", "play-context", "Searing dry scrub", 6, "badlands"),
+    runtimeImageAsset("floraScrubDead", "/tilesets/searing-canyon-flora/scrub_dead.png", "play-context", "Searing dead scrub", 6, "badlands"),
+    runtimeImageAsset("floraScreeLg", "/tilesets/searing-canyon-flora/scree_lg.png", "play-context", "Searing large scree", 6, "badlands"),
+    runtimeImageAsset("floraScreeSm", "/tilesets/searing-canyon-flora/scree_sm.png", "play-context", "Searing small scree", 6, "badlands"),
+    runtimeImageAsset("floraSkullPile", "/tilesets/searing-canyon-flora/skull_pile.png", "play-context", "Searing skull pile", 6, "badlands"),
+    runtimeImageAsset("outpostKit", "/tilesets/searing-canyon-landmarks/outpost-kit.png", "play-context", "Searing outpost kit", 6, "badlands"),
+    runtimeImageAsset("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png", "play-context", "Searing cultist kit", 6, "badlands"),
+    runtimeImageAsset("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png", "play-context", "Searing ritual kit", 6, "badlands"),
+    runtimeImageAsset("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png", "play-context", "Searing mine kit", 6, "badlands")
   ]],
   [5, [
     runtimeImageAsset("swampTiles", "/swamp-tiles.png", "play-context", "Sunken Marsh source sheet", 5, "swamp"),
@@ -1248,22 +1266,7 @@ const GENERATED_STAGE_DIRECT_IMAGE_ASSETS_BY_FLOOR = new Map<number, RuntimeImag
 
 const RESIDENT_AUTHORING_IMAGE_ASSETS: RuntimeImageAsset[] = [
   runtimeImageAsset("forestTiles", "/foresttiles.png", "startup", "resident forest source sheet"),
-  runtimeImageAsset("northwoodTreeSheet", "/northwood-trees-v1.png", "startup", "resident Northwood tree sheet", 3, "northwood"),
-  runtimeImageAsset("badlandsTiles", "/badlands-tiles.png", "startup", "resident badlands source sheet", 6, "badlands"),
-  runtimeImageAsset("searingGround", "/tilesets/searing-canyon-ground.png", "startup", "resident searing canyon ground sheet", 6, "badlands"),
-  runtimeImageAsset("searingCliff", "/tilesets/searing-canyon-cliff.png", "startup", "resident searing canyon cliff sheet", 6, "badlands"),
-  runtimeImageAsset("floraSaguaroLg", "/tilesets/searing-canyon-flora/saguaro_lg.png", "startup", "resident searing flora large saguaro", 6, "badlands"),
-  runtimeImageAsset("floraSaguaroMd", "/tilesets/searing-canyon-flora/saguaro_md.png", "startup", "resident searing flora medium saguaro", 6, "badlands"),
-  runtimeImageAsset("floraSaguaroSm", "/tilesets/searing-canyon-flora/saguaro_sm.png", "startup", "resident searing flora small saguaro", 6, "badlands"),
-  runtimeImageAsset("floraScrubDry", "/tilesets/searing-canyon-flora/scrub_dry.png", "startup", "resident searing dry scrub", 6, "badlands"),
-  runtimeImageAsset("floraScrubDead", "/tilesets/searing-canyon-flora/scrub_dead.png", "startup", "resident searing dead scrub", 6, "badlands"),
-  runtimeImageAsset("floraScreeLg", "/tilesets/searing-canyon-flora/scree_lg.png", "startup", "resident searing large scree", 6, "badlands"),
-  runtimeImageAsset("floraScreeSm", "/tilesets/searing-canyon-flora/scree_sm.png", "startup", "resident searing small scree", 6, "badlands"),
-  runtimeImageAsset("floraSkullPile", "/tilesets/searing-canyon-flora/skull_pile.png", "startup", "resident searing skull pile", 6, "badlands"),
-  runtimeImageAsset("outpostKit", "/tilesets/searing-canyon-landmarks/outpost-kit.png", "startup", "resident searing outpost kit", 6, "badlands"),
-  runtimeImageAsset("cultistKit", "/tilesets/searing-canyon-landmarks/cultist-kit.png", "startup", "resident searing cultist kit", 6, "badlands"),
-  runtimeImageAsset("ritualKit", "/tilesets/searing-canyon-landmarks/ritual-kit.png", "startup", "resident searing ritual kit", 6, "badlands"),
-  runtimeImageAsset("mineKit", "/tilesets/searing-canyon-landmarks/mine-kit.png", "startup", "resident searing mine kit", 6, "badlands")
+  runtimeImageAsset("northwoodTreeSheet", "/northwood-trees-v1.png", "startup", "resident Northwood tree sheet", 3, "northwood")
 ];
 
 const STARTUP_IMAGE_ASSETS = [
@@ -1374,289 +1377,6 @@ function create(this: Phaser.Scene): void {
   makeSpriteTexture(this, "townTiles", "spriteSign", 616, 420, 74, 90);
   makeSpriteTexture(this, "townTiles", "spriteLamp", 912, 424, 38, 136);
   makeSpriteTexture(this, "townTiles", "spriteBarrels", 1200, 700, 90, 70);
-  // Searing Badlands (floor 6). Crops from assetsources/rejected/badlands-biome-tiles-01.png
-  // (1536x1024, magenta-keyed) — rust ground/rock/cliff/pit/ramp tiles + a frontier tent.
-  // Red-shift pulls the rust palette off the desert's warm-orange (ground avg was (183,84,39),
-  // nearly identical to tileSand's (179,74,43)) toward deep red rock so floor 6 ≠ floor 7.
-  // Applied to BOTH the structural badlands tiles AND the painterly searingGround/cliff family
-  // below, so the WHOLE canyon reads deep-red — not just the rock furniture.
-  const badlandsRedshift = (r: number, g: number, b: number): [number, number, number] => [
-    Math.min(255, Math.round(r * 1.06)),
-    Math.round(g * 0.62),
-    Math.round(b * 0.82)
-  ];
-  makeTileTexture(this, "badlandsTiles", "tileBadlands", 18, 99, 70, 74, undefined, false, badlandsRedshift);
-  makeTileTexture(this, "badlandsTiles", "tileBadlandsRock", 180, 99, 73, 74, undefined, false, badlandsRedshift);
-  makeTileTexture(this, "badlandsTiles", "tileBadlandsCracked", 98, 99, 70, 74, undefined, false, badlandsRedshift);
-  makeTileTexture(this, "badlandsTiles", "tileBadlandsGravel", 262, 99, 72, 74, undefined, false, badlandsRedshift);
-  makeTileTexture(this, "badlandsTiles", "tileMassif", 180, 180, 72, 74, undefined, false, badlandsRedshift); // dark impassable rock bulk behind cliff faces
-  makeTileTexture(this, "badlandsTiles", "tileCliff", 528, 100, 68, 82, undefined, false, badlandsRedshift);
-  makeTileTexture(this, "badlandsTiles", "tilePit", 1346, 188, 72, 70, undefined, false, badlandsRedshift);
-  makeTileTexture(this, "badlandsTiles", "tileRamp", 392, 864, 68, 80, undefined, false, badlandsRedshift);
-  // Painterly cracked-earth ground variants (floor 6). 16x (72x72) packed in a 1152x72
-  // strip; per-tile variant is picked by position hash in searingGroundTexture() so the
-  // canyon floor stops reading as a repeated grid.
-  for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
-    makeTileTexture(this, "searingGround", `searingGroundV${i}`, i * 72, 0, 72, 72, undefined, false, badlandsRedshift);
-  }
-  // Large-scale tonal mottle (floor 6): the 16 cracked-earth variants vary in CRACK PATTERN but
-  // sit within ~3 luma of each other, so the canyon floor reads as one flat red sheet. Bake a
-  // sun-bleached ('L') and a shadowed ('D') tier of each variant; searingGroundTexture selects a
-  // tier from a smooth low-frequency noise field, so broad regions read as sunlit ground or
-  // shadowed hollows (the painted-terrain depth CT/Pokémon floors have) while the per-cell hash
-  // still picks the crack variant for texture variety. Cached keys -> tile dedupe still works.
-  for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
-    const src = this.textures.get(`searingGroundV${i}`).getSourceImage() as CanvasImageSource;
-    for (const [suf, bri, sat] of [["L", 1.14, 1.05], ["D", 0.82, 0.96]] as const) {
-      const cv = document.createElement("canvas");
-      cv.width = TILE_SIZE;
-      cv.height = TILE_SIZE;
-      const cc = cv.getContext("2d");
-      if (!cc) continue;
-      cc.imageSmoothingEnabled = false;
-      cc.filter = `brightness(${bri}) saturate(${sat})`;
-      cc.drawImage(src, 0, 0, TILE_SIZE, TILE_SIZE);
-      this.textures.addCanvas(`searingGroundV${i}${suf}`, cv);
-      this.textures.get(`searingGroundV${i}${suf}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
-    }
-  }
-  // Lit mesa-top variants (floor 6): the massif PLATEAU TOP reuses the cracked-earth
-  // ground, brightened + warmed so raised rock reads as sun-hit, distinct from the
-  // shadowed canyon floor below. Depth then comes from the rim lip + face, Northwood-
-  // style — instead of the flat dark tileMassif that made mesas read as voids.
-  // Each top is also baked in a sun-bleached ('L') and shadowed ('D') tier so the raised
-  // plateau picks up the SAME broad tonal mottle as the canyon floor (searingGroundMottle),
-  // rather than reading as a flat brighter slab above the now-mottled floor. The shadow tier
-  // stays brighter than the floor's neutral (mesa = floor x1.22), so a top never reads as a pit.
-  for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
-    const src = this.textures.get(`searingGroundV${i}`).getSourceImage() as CanvasImageSource;
-    for (const [suf, bri] of [["", 1.22], ["L", 1.34], ["D", 1.07]] as const) {
-      const top = document.createElement("canvas");
-      top.width = TILE_SIZE;
-      top.height = TILE_SIZE;
-      const topCtx = top.getContext("2d");
-      if (!topCtx) continue;
-      topCtx.imageSmoothingEnabled = false;
-      topCtx.filter = `brightness(${bri}) saturate(1.08)`;
-      topCtx.drawImage(src, 0, 0);
-      this.textures.addCanvas(`searingMesaTopV${i}${suf}`, top);
-      this.textures.get(`searingMesaTopV${i}${suf}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
-    }
-  }
-  // Red-rock cliff faces: slice the 5col x 3row @32 atlas into 15 overlay sub-tiles.
-  // inset 0 + preserveTransparent so cap edges stay aligned and the transparent gutters
-  // (above the rim, cap shoulders) let the flat massif top read through behind the face.
-  for (let row = 0; row < 3; row += 1)
-    for (let col = 0; col < 5; col += 1)
-      makeTileTexture(this, "searingCliff", `searingCliffR${row}C${col}`, col * 32, row * 32, 32, 32, 0, true, badlandsRedshift);
-  // Vertical flank walls for the E/W mesa edges (rust palette) — replaces the L-shaped col 3/4 look.
-  buildCliffFlanks(this, "searing", [255, 157, 136]); // red-shifted rust highlight (was 255,201,128)
-  // De-grid the cliff rock (floor 6): a wide/tall wall — or a cluster of 1-cell massif nubs —
-  // reuses the SAME face/flank sub-tile in every cell, so the rock reads as a row of identical
-  // loaves. Bake a few deterministic variants of each sub-tile (per-tile value jitter + sparse
-  // dark pits / sun-flecks for rock grain); searingCliffFace picks one per cell by position hash,
-  // so neighbouring cells differ and the grid dissolves into sculpted rock. Geometry/alpha are
-  // untouched (no holes punched in contiguous walls), only tone varies — safe on every wall shape.
-  {
-    const bases: string[] = [];
-    for (let row = 0; row < 3; row += 1) for (let col = 0; col < 5; col += 1) bases.push(`searingCliffR${row}C${col}`);
-    bases.push("searingCliffFlankW", "searingCliffFlankE");
-    const bright = [1.0, 0.88, 1.1, 0.82]; // V0 is the unmodified tone so a lone wall still reads true
-    // Flank walls stack vertically and each tile carries the same horizontal ribs, so a tall run
-    // bands every 32px. The flank tile is vertically uniform at its edges (full-height side rim +
-    // rock-side shadow), so we can wrap-roll the rib pattern per variant to offset the bands — a
-    // stacked wall then reads as continuous ribbed rock. Faces keep their ribs (top/base/cap
-    // structure must stay put), relying on tone variation alone.
-    const flankRoll = [0, 8, 17, 25];
-    for (const baseKey of bases) {
-      const isFlank = baseKey.includes("Flank");
-      const src = this.textures.get(baseKey).getSourceImage() as CanvasImageSource;
-      for (let v = 0; v < SEARING_CLIFF_FACE_VARIANTS; v += 1) {
-        const cv = document.createElement("canvas");
-        cv.width = TILE_SIZE;
-        cv.height = TILE_SIZE;
-        const cc = cv.getContext("2d");
-        if (!cc) continue;
-        cc.imageSmoothingEnabled = false;
-        const roll = isFlank ? (flankRoll[v] ?? 0) : 0;
-        cc.drawImage(src, 0, roll);                // shifted copy
-        if (roll) cc.drawImage(src, 0, roll - TILE_SIZE); // wrap the top back in
-        const img = cc.getImageData(0, 0, TILE_SIZE, TILE_SIZE);
-        const d = img.data;
-        const b = bright[v] ?? 1.0;
-        for (let i = 0; i < d.length; i += 4) {
-          if (d[i + 3] === 0) continue;
-          d[i] = Math.min(255, Math.round(d[i]! * b));
-          d[i + 1] = Math.min(255, Math.round(d[i + 1]! * b));
-          d[i + 2] = Math.min(255, Math.round(d[i + 2]! * b));
-        }
-        // sparse rock grain — deterministic per (tile, variant) so it never shimmers on rebuild.
-        let seed = (v * 0x9e3779b1) >>> 0;
-        for (let k = 0; k < baseKey.length; k += 1) seed = (Math.imul(seed, 31) + baseKey.charCodeAt(k)) >>> 0;
-        const rnd = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
-        for (let s = 0; s < 9; s += 1) {
-          const px = Math.floor(rnd() * TILE_SIZE), py = Math.floor(rnd() * TILE_SIZE);
-          const i = (py * TILE_SIZE + px) * 4;
-          if (d[i + 3] === 0) continue;
-          if (rnd() < 0.6) { // dark pit
-            d[i] = Math.round(d[i]! * 0.72); d[i + 1] = Math.round(d[i + 1]! * 0.72); d[i + 2] = Math.round(d[i + 2]! * 0.72);
-          } else { // sun fleck
-            d[i] = Math.min(255, d[i]! + 30); d[i + 1] = Math.min(255, d[i + 1]! + 24); d[i + 2] = Math.min(255, d[i + 2]! + 16);
-          }
-        }
-        cc.putImageData(img, 0, 0);
-        this.textures.addCanvas(`${baseKey}V${v}`, cv);
-        this.textures.get(`${baseKey}V${v}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
-      }
-    }
-  }
-  // Contact-shadow band dropped on the canyon floor directly under each cliff lip,
-  // so the foot reads grounded instead of floating (mirrors the baker's wall-foot AO).
-  {
-    const ao = document.createElement("canvas");
-    ao.width = TILE_SIZE;
-    ao.height = TILE_SIZE;
-    const aoCtx = ao.getContext("2d");
-    if (aoCtx) {
-      const band = 15;
-      for (let dy = 0; dy < band; dy += 1) {
-        aoCtx.fillStyle = `rgba(0,0,0,${(1 - dy / band) * 0.42})`;
-        aoCtx.fillRect(0, dy, TILE_SIZE, 1);
-      }
-      this.textures.addCanvas("searingCliffAO", ao);
-      this.textures.get("searingCliffAO").setFilter(Phaser.Textures.FilterMode.NEAREST);
-    }
-  }
-  // Bright sun-catch rim lip laid on the TOP course of each cliff face — the highlight
-  // line where the lit plateau breaks into the drop. This is Northwood's strongest depth
-  // cue; without it the red-rock face blended into the mesa top above it.
-  {
-    const lip = document.createElement("canvas");
-    lip.width = TILE_SIZE;
-    lip.height = TILE_SIZE;
-    const lipCtx = lip.getContext("2d");
-    if (lipCtx) {
-      const band = 8;
-      for (let dy = 0; dy < band; dy += 1) {
-        lipCtx.fillStyle = `rgba(255,205,138,${(1 - dy / band) * 0.58})`;
-        lipCtx.fillRect(0, dy, TILE_SIZE, 1);
-      }
-      // Bright crest line right at the break so the plateau edge reads as a hard sunlit lip.
-      lipCtx.fillStyle = "rgba(255,236,196,0.7)";
-      lipCtx.fillRect(0, 0, TILE_SIZE, 1);
-      this.textures.addCanvas("searingCliffLip", lip);
-      this.textures.get("searingCliffLip").setFilter(Phaser.Textures.FilterMode.NEAREST);
-    }
-  }
-  // Strata bench: a flat lit ledge stamped one course into a tall face so the drop
-  // reads as STACKED TERRACES instead of one monolithic wall (the Northwood depth
-  // cue). Procedural like the lip/AO — no new art: the lit mesa-top cracked earth is
-  // the ledge surface, a sun-catch rim marks where the upper face breaks onto it, and
-  // a contact shadow at its foot grounds the lower face below.
-  {
-    const bench = document.createElement("canvas");
-    bench.width = TILE_SIZE;
-    bench.height = TILE_SIZE;
-    const bctx = bench.getContext("2d");
-    if (bctx) {
-      bctx.imageSmoothingEnabled = false;
-      const ledge = this.textures.get("searingMesaTopV0").getSourceImage() as CanvasImageSource;
-      bctx.drawImage(ledge, 0, 0, TILE_SIZE, TILE_SIZE);
-      const rim = 7;
-      for (let dy = 0; dy < rim; dy += 1) {
-        bctx.fillStyle = `rgba(255,201,128,${(1 - dy / rim) * 0.5})`;
-        bctx.fillRect(0, dy, TILE_SIZE, 1);
-      }
-      const shade = 11;
-      for (let dy = 0; dy < shade; dy += 1) {
-        bctx.fillStyle = `rgba(0,0,0,${(1 - dy / shade) * 0.4})`;
-        bctx.fillRect(0, TILE_SIZE - 1 - dy, TILE_SIZE, 1);
-      }
-      this.textures.addCanvas("searingCliffBench", bench);
-      this.textures.get("searingCliffBench").setFilter(Phaser.Textures.FilterMode.NEAREST);
-    }
-  }
-  // Teal canyon river ('5', floor 6). Procedural so it needs no asset and stays tunable.
-  // The INTERIOR tile is seamless: a teal base with smooth horizontal wave bands whose
-  // period divides TILE_SIZE, so neighbouring river cells tile into one continuous body of
-  // water (no per-tile grid). Shore foam is NOT baked into the base — it would border every
-  // cell and re-create the grid. Instead the four directional foam overlays below are drawn
-  // only on the sides of a river cell that face land (createMapChunk), so the river laps its
-  // banks like the blended water in the other stages (Pokémon/Chrono-Trigger shoreline).
-  // Water blocks movement, not sight.
-  {
-    const water = document.createElement("canvas");
-    water.width = TILE_SIZE;
-    water.height = TILE_SIZE;
-    const wc = water.getContext("2d");
-    if (wc) {
-      wc.fillStyle = "#2b8f9c";
-      wc.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-      // Seamless wave bands: two full sine periods per tile (period = TILE_SIZE/2) so the
-      // crest/trough lines line up across cell boundaries instead of repeating a boxed motif.
-      for (let y = 0; y < TILE_SIZE; y += 1) {
-        const t = Math.sin((y / TILE_SIZE) * Math.PI * 4);
-        if (t > 0.45) {
-          wc.fillStyle = `rgba(126,216,216,${0.08 + (t - 0.45) * 0.22})`; // lit crest highlight
-          wc.fillRect(0, y, TILE_SIZE, 1);
-        } else if (t < -0.6) {
-          wc.fillStyle = `rgba(16,84,94,${0.10 + (-t - 0.6) * 0.20})`;     // shadowed trough -> depth
-          wc.fillRect(0, y, TILE_SIZE, 1);
-        }
-      }
-      this.textures.addCanvas("searingRiver", water);
-      this.textures.get("searingRiver").setFilter(Phaser.Textures.FilterMode.NEAREST);
-    }
-  }
-  // Directional shore-foam overlays for the canyon river ('5'). Each is transparent except a
-  // light-teal foam band hugging ONE edge and fading inward; createMapChunk stamps the N/S/E/W
-  // variant onto a river cell only on the sides facing a non-water neighbour, so foam tracks
-  // the actual coastline and convex corners wrap naturally where two edges meet.
-  {
-    const FOAM_DEPTH = 7;
-    const makeFoam = (key: string, side: "N" | "S" | "E" | "W") => {
-      const c = document.createElement("canvas");
-      c.width = TILE_SIZE;
-      c.height = TILE_SIZE;
-      const ctx = c.getContext("2d");
-      if (!ctx) return;
-      for (let d = 0; d < FOAM_DEPTH; d += 1) {
-        const a = (1 - d / FOAM_DEPTH) * 0.6; // brightest crest at the waterline, feathering in
-        ctx.fillStyle = `rgba(180,236,232,${a})`;
-        if (side === "N") ctx.fillRect(0, d, TILE_SIZE, 1);
-        else if (side === "S") ctx.fillRect(0, TILE_SIZE - 1 - d, TILE_SIZE, 1);
-        else if (side === "W") ctx.fillRect(d, 0, 1, TILE_SIZE);
-        else ctx.fillRect(TILE_SIZE - 1 - d, 0, 1, TILE_SIZE);
-      }
-      this.textures.addCanvas(key, c);
-      this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
-    };
-    makeFoam("searingRiverFoamN", "N");
-    makeFoam("searingRiverFoamS", "S");
-    makeFoam("searingRiverFoamE", "E");
-    makeFoam("searingRiverFoamW", "W");
-  }
-  makeSpriteTexture(this, "badlandsTiles", "spriteTent", 1070, 873, 92, 72);
-  makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsLedge", 20, 862, 72, 86);
-  makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsBoulder", 1248, 388, 98, 80);
-  makeSpriteTexture(this, "badlandsTiles", "spriteBadlandsShard", 1368, 392, 104, 70);
-  // Searing Badlands landmark kits (floor 6). Crop boxes profiled by
-  // tools/slice-searing-canyon-landmarks.py from the magenta-keyed kit sheets;
-  // sheets chroma-key cleanly via makeSpriteTexture. Placed in MAP_OBJECTS[6].
-  makeSpriteTexture(this, "outpostKit", "spriteOutpostPalisade", 60, 220, 557, 381);
-  makeSpriteTexture(this, "outpostKit", "spriteRaiderTent", 706, 73, 451, 569);
-  makeSpriteTexture(this, "outpostKit", "spriteOutpostWatchtower", 1262, 40, 333, 628);
-  makeSpriteTexture(this, "outpostKit", "spriteOutpostTotem", 1805, 102, 209, 526);
-  makeSpriteTexture(this, "cultistKit", "spriteCultistTent", 107, 79, 610, 651);
-  makeSpriteTexture(this, "cultistKit", "spriteCultistCampfire", 847, 322, 433, 396);
-  makeSpriteTexture(this, "cultistKit", "spriteCultistTotem", 1487, 58, 285, 664);
-  makeSpriteTexture(this, "ritualKit", "spriteRitualFloor", 54, 207, 508, 484);
-  makeSpriteTexture(this, "ritualKit", "spriteRitualCore", 646, 224, 478, 467);
-  makeSpriteTexture(this, "ritualKit", "spriteRitualArch", 1192, 211, 539, 470);
-  makeSpriteTexture(this, "mineKit", "spriteMineArch", 57, 120, 523, 473);
-  makeSpriteTexture(this, "mineKit", "spriteMineHoist", 653, 121, 407, 463);
-  makeSpriteTexture(this, "mineKit", "spriteMineCart", 1162, 241, 327, 336);
-  makeSpriteTexture(this, "mineKit", "spriteMineTrack", 1601, 293, 467, 268);
   mapLayer = this.add.container(0, 0);
   mapDecorationLayer = this.add.container(0, 0);
   entityLayer = this.add.container(0, 0);
@@ -1866,6 +1586,299 @@ function buildSharedTerrainOverlayTextures(scene: Phaser.Scene): void {
   makeBeachRim("beachTopRimS", "S");
   makeBeachRim("beachTopRimW", "W");
   makeBeachRim("beachTopRimE", "E");
+
+  // Shared relief overlays reused by Searing Badlands, Sunken Desert, Sunken Beach,
+  // Untamed Jungle, and generated Northwood. Keep these procedural textures resident
+  // even while the floor-specific source sheets stream on demand.
+  if (!scene.textures.exists("searingCliffAO")) {
+    const ao = document.createElement("canvas");
+    ao.width = TILE_SIZE;
+    ao.height = TILE_SIZE;
+    const aoCtx = ao.getContext("2d");
+    if (aoCtx) {
+      const band = 15;
+      for (let dy = 0; dy < band; dy += 1) {
+        aoCtx.fillStyle = `rgba(0,0,0,${(1 - dy / band) * 0.42})`;
+        aoCtx.fillRect(0, dy, TILE_SIZE, 1);
+      }
+      scene.textures.addCanvas("searingCliffAO", ao);
+      scene.textures.get("searingCliffAO").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
+
+  if (!scene.textures.exists("searingCliffLip")) {
+    const lip = document.createElement("canvas");
+    lip.width = TILE_SIZE;
+    lip.height = TILE_SIZE;
+    const lipCtx = lip.getContext("2d");
+    if (lipCtx) {
+      const band = 8;
+      for (let dy = 0; dy < band; dy += 1) {
+        lipCtx.fillStyle = `rgba(255,205,138,${(1 - dy / band) * 0.58})`;
+        lipCtx.fillRect(0, dy, TILE_SIZE, 1);
+      }
+      lipCtx.fillStyle = "rgba(255,236,196,0.7)";
+      lipCtx.fillRect(0, 0, TILE_SIZE, 1);
+      scene.textures.addCanvas("searingCliffLip", lip);
+      scene.textures.get("searingCliffLip").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
+
+  const makeFoam = (key: string, side: "N" | "S" | "E" | "W") => {
+    if (scene.textures.exists(key)) return;
+    const foamDepth = 7;
+    const c = document.createElement("canvas");
+    c.width = TILE_SIZE;
+    c.height = TILE_SIZE;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    for (let d = 0; d < foamDepth; d += 1) {
+      const a = (1 - d / foamDepth) * 0.6;
+      ctx.fillStyle = `rgba(180,236,232,${a})`;
+      if (side === "N") ctx.fillRect(0, d, TILE_SIZE, 1);
+      else if (side === "S") ctx.fillRect(0, TILE_SIZE - 1 - d, TILE_SIZE, 1);
+      else if (side === "W") ctx.fillRect(d, 0, 1, TILE_SIZE);
+      else ctx.fillRect(TILE_SIZE - 1 - d, 0, 1, TILE_SIZE);
+    }
+    scene.textures.addCanvas(key, c);
+    scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+  };
+  makeFoam("searingRiverFoamN", "N");
+  makeFoam("searingRiverFoamS", "S");
+  makeFoam("searingRiverFoamE", "E");
+  makeFoam("searingRiverFoamW", "W");
+}
+
+function badlandsRedshift(r: number, g: number, b: number): [number, number, number] {
+  return [
+    Math.min(255, Math.round(r * 1.06)),
+    Math.round(g * 0.62),
+    Math.round(b * 0.82)
+  ];
+}
+
+function buildSearingCliffSourceTextures(scene: Phaser.Scene): void {
+  if (scene.textures.exists("searingCliffR0C0")) return;
+  if (!scene.textures.exists("searingCliff")) return;
+  // Red-rock cliff faces: slice the 5col x 3row @32 atlas into 15 overlay sub-tiles.
+  // inset 0 + preserveTransparent so cap edges stay aligned and the transparent gutters
+  // (above the rim, cap shoulders) let the flat massif top read through behind the face.
+  for (let row = 0; row < 3; row += 1) {
+    for (let col = 0; col < 5; col += 1) {
+      makeTileTexture(scene, "searingCliff", `searingCliffR${row}C${col}`, col * 32, row * 32, 32, 32, 0, true, badlandsRedshift);
+    }
+  }
+}
+
+function buildSearingCliffVariantTextures(scene: Phaser.Scene): void {
+  if (scene.textures.exists("searingCliffR0C0V0")) return;
+  buildSearingCliffSourceTextures(scene);
+  if (!scene.textures.exists("searingCliffR0C0")) return;
+
+  // Vertical flank walls for the E/W mesa edges (rust palette) — replaces the L-shaped col 3/4 look.
+  if (!scene.textures.exists("searingCliffFlankW")) buildCliffFlanks(scene, "searing", [255, 157, 136]); // red-shifted rust highlight (was 255,201,128)
+
+  // De-grid the cliff rock (floor 6): a wide/tall wall — or a cluster of 1-cell massif nubs —
+  // reuses the SAME face/flank sub-tile in every cell, so the rock reads as a row of identical
+  // loaves. Bake a few deterministic variants of each sub-tile (per-tile value jitter + sparse
+  // dark pits / sun-flecks for rock grain); searingCliffFace picks one per cell by position hash,
+  // so neighbouring cells differ and the grid dissolves into sculpted rock.
+  const bases: string[] = [];
+  for (let row = 0; row < 3; row += 1) for (let col = 0; col < 5; col += 1) bases.push(`searingCliffR${row}C${col}`);
+  bases.push("searingCliffFlankW", "searingCliffFlankE");
+  const bright = [1.0, 0.88, 1.1, 0.82]; // V0 is the unmodified tone so a lone wall still reads true
+  const flankRoll = [0, 8, 17, 25];
+  for (const baseKey of bases) {
+    const isFlank = baseKey.includes("Flank");
+    const src = scene.textures.get(baseKey).getSourceImage() as CanvasImageSource;
+    for (let v = 0; v < SEARING_CLIFF_FACE_VARIANTS; v += 1) {
+      const cv = document.createElement("canvas");
+      cv.width = TILE_SIZE;
+      cv.height = TILE_SIZE;
+      const cc = cv.getContext("2d");
+      if (!cc) continue;
+      cc.imageSmoothingEnabled = false;
+      const roll = isFlank ? (flankRoll[v] ?? 0) : 0;
+      cc.drawImage(src, 0, roll);
+      if (roll) cc.drawImage(src, 0, roll - TILE_SIZE);
+      const img = cc.getImageData(0, 0, TILE_SIZE, TILE_SIZE);
+      const d = img.data;
+      const b = bright[v] ?? 1.0;
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] === 0) continue;
+        d[i] = Math.min(255, Math.round(d[i]! * b));
+        d[i + 1] = Math.min(255, Math.round(d[i + 1]! * b));
+        d[i + 2] = Math.min(255, Math.round(d[i + 2]! * b));
+      }
+      // sparse rock grain — deterministic per (tile, variant) so it never shimmers on rebuild.
+      let seed = (v * 0x9e3779b1) >>> 0;
+      for (let k = 0; k < baseKey.length; k += 1) seed = (Math.imul(seed, 31) + baseKey.charCodeAt(k)) >>> 0;
+      const rnd = () => {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        return seed / 4294967296;
+      };
+      for (let s = 0; s < 9; s += 1) {
+        const px = Math.floor(rnd() * TILE_SIZE), py = Math.floor(rnd() * TILE_SIZE);
+        const i = (py * TILE_SIZE + px) * 4;
+        if (d[i + 3] === 0) continue;
+        if (rnd() < 0.6) {
+          d[i] = Math.round(d[i]! * 0.72);
+          d[i + 1] = Math.round(d[i + 1]! * 0.72);
+          d[i + 2] = Math.round(d[i + 2]! * 0.72);
+        } else {
+          d[i] = Math.min(255, d[i]! + 30);
+          d[i + 1] = Math.min(255, d[i + 1]! + 24);
+          d[i + 2] = Math.min(255, d[i + 2]! + 16);
+        }
+      }
+      cc.putImageData(img, 0, 0);
+      scene.textures.addCanvas(`${baseKey}V${v}`, cv);
+      scene.textures.get(`${baseKey}V${v}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
+}
+
+function buildSearingBadlandsTextures(scene: Phaser.Scene): void {
+  if (scene.textures.exists("tileBadlands")) return;
+  if (!["badlandsTiles", "searingGround", "searingCliff", "outpostKit", "cultistKit", "ritualKit", "mineKit"].every((key) => scene.textures.exists(key))) return;
+
+  buildSharedTerrainOverlayTextures(scene);
+
+  // Searing Badlands (floor 6). Crops from assetsources/rejected/badlands-biome-tiles-01.png
+  // (1536x1024, magenta-keyed) — rust ground/rock/cliff/pit/ramp tiles + a frontier tent.
+  // Red-shift pulls the rust palette off the desert's warm-orange (ground avg was (183,84,39),
+  // nearly identical to tileSand's (179,74,43)) toward deep red rock so floor 6 != floor 7.
+  // Applied to BOTH the structural badlands tiles AND the painterly searingGround/cliff family
+  // below, so the WHOLE canyon reads deep-red — not just the rock furniture.
+  makeTileTexture(scene, "badlandsTiles", "tileBadlands", 18, 99, 70, 74, undefined, false, badlandsRedshift);
+  makeTileTexture(scene, "badlandsTiles", "tileBadlandsRock", 180, 99, 73, 74, undefined, false, badlandsRedshift);
+  makeTileTexture(scene, "badlandsTiles", "tileBadlandsCracked", 98, 99, 70, 74, undefined, false, badlandsRedshift);
+  makeTileTexture(scene, "badlandsTiles", "tileBadlandsGravel", 262, 99, 72, 74, undefined, false, badlandsRedshift);
+  makeTileTexture(scene, "badlandsTiles", "tileMassif", 180, 180, 72, 74, undefined, false, badlandsRedshift); // dark impassable rock bulk behind cliff faces
+  makeTileTexture(scene, "badlandsTiles", "tileCliff", 528, 100, 68, 82, undefined, false, badlandsRedshift);
+  makeTileTexture(scene, "badlandsTiles", "tilePit", 1346, 188, 72, 70, undefined, false, badlandsRedshift);
+  makeTileTexture(scene, "badlandsTiles", "tileRamp", 392, 864, 68, 80, undefined, false, badlandsRedshift);
+
+  // Painterly cracked-earth ground variants (floor 6). 16x (72x72) packed in a 1152x72
+  // strip; per-tile variant is picked by position hash in searingGroundTexture() so the
+  // canyon floor stops reading as a repeated grid.
+  for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
+    makeTileTexture(scene, "searingGround", `searingGroundV${i}`, i * 72, 0, 72, 72, undefined, false, badlandsRedshift);
+  }
+  // Large-scale tonal mottle (floor 6): the 16 cracked-earth variants vary in CRACK PATTERN but
+  // sit within ~3 luma of each other, so the canyon floor reads as one flat red sheet. Bake a
+  // sun-bleached ('L') and a shadowed ('D') tier of each variant; searingGroundTexture selects a
+  // tier from a smooth low-frequency noise field, so broad regions read as sunlit ground or
+  // shadowed hollows (the painted-terrain depth CT/Pokemon floors have) while the per-cell hash
+  // still picks the crack variant for texture variety. Cached keys -> tile dedupe still works.
+  for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
+    const src = scene.textures.get(`searingGroundV${i}`).getSourceImage() as CanvasImageSource;
+    for (const [suf, bri, sat] of [["L", 1.14, 1.05], ["D", 0.82, 0.96]] as const) {
+      const cv = document.createElement("canvas");
+      cv.width = TILE_SIZE;
+      cv.height = TILE_SIZE;
+      const cc = cv.getContext("2d");
+      if (!cc) continue;
+      cc.imageSmoothingEnabled = false;
+      cc.filter = `brightness(${bri}) saturate(${sat})`;
+      cc.drawImage(src, 0, 0, TILE_SIZE, TILE_SIZE);
+      scene.textures.addCanvas(`searingGroundV${i}${suf}`, cv);
+      scene.textures.get(`searingGroundV${i}${suf}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
+  // Lit mesa-top variants (floor 6): the massif PLATEAU TOP reuses the cracked-earth
+  // ground, brightened + warmed so raised rock reads as sun-hit, distinct from the
+  // shadowed canyon floor below. Depth then comes from the rim lip + face, Northwood-
+  // style — instead of the flat dark tileMassif that made mesas read as voids.
+  for (let i = 0; i < SEARING_GROUND_VARIANTS; i += 1) {
+    const src = scene.textures.get(`searingGroundV${i}`).getSourceImage() as CanvasImageSource;
+    for (const [suf, bri] of [["", 1.22], ["L", 1.34], ["D", 1.07]] as const) {
+      const top = document.createElement("canvas");
+      top.width = TILE_SIZE;
+      top.height = TILE_SIZE;
+      const topCtx = top.getContext("2d");
+      if (!topCtx) continue;
+      topCtx.imageSmoothingEnabled = false;
+      topCtx.filter = `brightness(${bri}) saturate(1.08)`;
+      topCtx.drawImage(src, 0, 0);
+      scene.textures.addCanvas(`searingMesaTopV${i}${suf}`, top);
+      scene.textures.get(`searingMesaTopV${i}${suf}`).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
+
+  buildSearingCliffVariantTextures(scene);
+
+  // Strata bench: a flat lit ledge stamped one course into a tall face so the drop
+  // reads as stacked terraces instead of one monolithic wall.
+  {
+    const bench = document.createElement("canvas");
+    bench.width = TILE_SIZE;
+    bench.height = TILE_SIZE;
+    const bctx = bench.getContext("2d");
+    if (bctx) {
+      bctx.imageSmoothingEnabled = false;
+      const ledge = scene.textures.get("searingMesaTopV0").getSourceImage() as CanvasImageSource;
+      bctx.drawImage(ledge, 0, 0, TILE_SIZE, TILE_SIZE);
+      const rim = 7;
+      for (let dy = 0; dy < rim; dy += 1) {
+        bctx.fillStyle = `rgba(255,201,128,${(1 - dy / rim) * 0.5})`;
+        bctx.fillRect(0, dy, TILE_SIZE, 1);
+      }
+      const shade = 11;
+      for (let dy = 0; dy < shade; dy += 1) {
+        bctx.fillStyle = `rgba(0,0,0,${(1 - dy / shade) * 0.4})`;
+        bctx.fillRect(0, TILE_SIZE - 1 - dy, TILE_SIZE, 1);
+      }
+      scene.textures.addCanvas("searingCliffBench", bench);
+      scene.textures.get("searingCliffBench").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
+
+  // Teal canyon river ('5', floor 6). Procedural so it needs no asset and stays tunable.
+  {
+    const water = document.createElement("canvas");
+    water.width = TILE_SIZE;
+    water.height = TILE_SIZE;
+    const wc = water.getContext("2d");
+    if (wc) {
+      wc.fillStyle = "#2b8f9c";
+      wc.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+      for (let y = 0; y < TILE_SIZE; y += 1) {
+        const t = Math.sin((y / TILE_SIZE) * Math.PI * 4);
+        if (t > 0.45) {
+          wc.fillStyle = `rgba(126,216,216,${0.08 + (t - 0.45) * 0.22})`;
+          wc.fillRect(0, y, TILE_SIZE, 1);
+        } else if (t < -0.6) {
+          wc.fillStyle = `rgba(16,84,94,${0.10 + (-t - 0.6) * 0.20})`;
+          wc.fillRect(0, y, TILE_SIZE, 1);
+        }
+      }
+      scene.textures.addCanvas("searingRiver", water);
+      scene.textures.get("searingRiver").setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+  }
+
+  makeSpriteTexture(scene, "badlandsTiles", "spriteTent", 1070, 873, 92, 72);
+  makeSpriteTexture(scene, "badlandsTiles", "spriteBadlandsLedge", 20, 862, 72, 86);
+  makeSpriteTexture(scene, "badlandsTiles", "spriteBadlandsBoulder", 1248, 388, 98, 80);
+  makeSpriteTexture(scene, "badlandsTiles", "spriteBadlandsShard", 1368, 392, 104, 70);
+  // Searing Badlands landmark kits (floor 6). Crop boxes profiled by
+  // tools/slice-searing-canyon-landmarks.py from the magenta-keyed kit sheets;
+  // sheets chroma-key cleanly via makeSpriteTexture. Placed in MAP_OBJECTS[6].
+  makeSpriteTexture(scene, "outpostKit", "spriteOutpostPalisade", 60, 220, 557, 381);
+  makeSpriteTexture(scene, "outpostKit", "spriteRaiderTent", 706, 73, 451, 569);
+  makeSpriteTexture(scene, "outpostKit", "spriteOutpostWatchtower", 1262, 40, 333, 628);
+  makeSpriteTexture(scene, "outpostKit", "spriteOutpostTotem", 1805, 102, 209, 526);
+  makeSpriteTexture(scene, "cultistKit", "spriteCultistTent", 107, 79, 610, 651);
+  makeSpriteTexture(scene, "cultistKit", "spriteCultistCampfire", 847, 322, 433, 396);
+  makeSpriteTexture(scene, "cultistKit", "spriteCultistTotem", 1487, 58, 285, 664);
+  makeSpriteTexture(scene, "ritualKit", "spriteRitualFloor", 54, 207, 508, 484);
+  makeSpriteTexture(scene, "ritualKit", "spriteRitualCore", 646, 224, 478, 467);
+  makeSpriteTexture(scene, "ritualKit", "spriteRitualArch", 1192, 211, 539, 470);
+  makeSpriteTexture(scene, "mineKit", "spriteMineArch", 57, 120, 523, 473);
+  makeSpriteTexture(scene, "mineKit", "spriteMineHoist", 653, 121, 407, 463);
+  makeSpriteTexture(scene, "mineKit", "spriteMineCart", 1162, 241, 327, 336);
+  makeSpriteTexture(scene, "mineKit", "spriteMineTrack", 1601, 293, 467, 268);
 }
 
 function buildSouthgateCemeteryTextures(scene: Phaser.Scene): void {
@@ -2048,6 +2061,7 @@ function buildSunkenBeachTextures(scene: Phaser.Scene): void {
 
 function buildSunkenDesertTextures(scene: Phaser.Scene): void {
   if (scene.textures.exists("tileSand")) return;
+  buildSearingCliffSourceTextures(scene);
   // Sunken Desert (floor 7). Crops from assetsources/rejected/desert-biome-tiles.png
   // (1536x1024, magenta-keyed) — sand/quicksand/oasis tiles + palm, market tent, ledge.
   makeTileTexture(scene, "desertTiles", "tileSand", 25, 101, 71, 73);
@@ -9405,8 +9419,12 @@ function ensureFloorContextTextures(floor: number): void {
     buildSunkenBeachTextures(scene);
   }
   if (floor === 7) {
-    if (!scene.textures.exists("desertTiles")) return;
+    if (!scene.textures.exists("desertTiles") || !scene.textures.exists("searingCliff")) return;
     buildSunkenDesertTextures(scene);
+  }
+  if (floor === 6) {
+    if (!["badlandsTiles", "searingGround", "searingCliff", "outpostKit", "cultistKit", "ritualKit", "mineKit"].every((key) => scene.textures.exists(key))) return;
+    buildSearingBadlandsTextures(scene);
   }
   if (floor === 5) {
     if (!scene.textures.exists("swampTiles")) return;

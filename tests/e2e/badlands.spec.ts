@@ -42,9 +42,26 @@ test("travel loop: forest east portal -> badlands, and the ledge -> Northwatch",
   const startupCity = startupAssets?.runtimeImages.find((asset) => asset.key === "cityTiles");
   expect(startupCity?.tier).toBe("play-context");
   expect(startupCity?.resident, "Northwatch city sheet should wait for floor-context loading").toBe(false);
+  const badlandsKeys = ["badlandsTiles", "searingGround", "searingCliff", "outpostKit", "cultistKit", "ritualKit", "mineKit"];
+  for (const key of badlandsKeys) {
+    expect(startupAssets?.startupImages.some((asset) => asset.key === key), `${key} should not be a startup asset`).toBe(false);
+    const startupBadlandsAsset = startupAssets?.runtimeImages.find((asset) => asset.key === key);
+    expect(startupBadlandsAsset?.tier).toBe("play-context");
+    expect(startupBadlandsAsset?.resident, `${key} should wait for floor-context loading`).toBe(false);
+  }
 
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 3, x: 108.5, y: 35.5 }));
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 6, null, { timeout: 8000 });
+  await page.waitForFunction(() => {
+    const textures = window.__TIB_E2E__?.textureResidency?.(["badlandsTiles", "searingGroundV0", "searingMesaTopV0", "searingCliffR0C0V0", "searingRiver", "spriteOutpostPalisade"]) ?? [];
+    return textures.length === 6 && textures.every((texture) => texture.exists && texture.width > 0 && texture.height > 0);
+  });
+  const badlandsAssets = await page.evaluate(() => window.__TIB_E2E__?.assetResidency?.() ?? null);
+  for (const key of badlandsKeys) {
+    const loadedBadlandsAsset = badlandsAssets?.runtimeImages.find((asset) => asset.key === key);
+    expect(loadedBadlandsAsset?.trigger).toBe("play-context");
+    expect(loadedBadlandsAsset?.resident, `${key} should be resident after traveling to floor 6`).toBe(true);
+  }
 
   await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: 6, x: p.x, y: p.y }), { x: scaleX(6, 95.5), y: scaleY(6, 16.5) });
   await page.waitForFunction(() => window.__TIB_E2E__?.self()?.floor === 4, null, { timeout: 8000 });

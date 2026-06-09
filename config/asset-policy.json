@@ -10,13 +10,13 @@
       "maxFiles": 500
     },
     "startupPreload": {
-      "maxTotalBytes": 38797312,
-      "maxFiles": 80
+      "maxTotalBytes": 33554432,
+      "maxFiles": 64
     },
     "lazyBundles": {
-      "maxTotalBytes": 23068672,
+      "maxTotalBytes": 31457280,
       "maxFileBytes": 4194304,
-      "maxFiles": 64
+      "maxFiles": 80
     }
   },
   "groups": [
@@ -98,29 +98,6 @@
       "maxFiles": 40
     },
     {
-      "name": "preloaded-biomes",
-      "description": "Legacy floor tiles still preloaded while runtime streaming is being tightened.",
-      "include": [
-        "public/badlands-tiles.png"
-      ],
-      "maxTotalBytes": 4194304,
-      "maxFileBytes": 4194304,
-      "maxFiles": 4
-    },
-    {
-      "name": "searing-canyon-startup",
-      "description": "Floor 6 bespoke ground, cliff, flora, and landmark atlases still in startup preload.",
-      "include": [
-        "public/tilesets/searing-canyon-ground.png",
-        "public/tilesets/searing-canyon-cliff.png",
-        "public/tilesets/searing-canyon-flora/**",
-        "public/tilesets/searing-canyon-landmarks/**"
-      ],
-      "maxTotalBytes": 8388608,
-      "maxFileBytes": 2097152,
-      "maxFiles": 20
-    },
-    {
       "name": "startup-gathering-props",
       "description": "Gathering node, herb, and campfire art currently resident from startup.",
       "include": [
@@ -141,15 +118,20 @@
       "include": [
         "public/citytiles.png",
         "public/swamp-tiles.png",
+        "public/badlands-tiles.png",
         "public/desert-tiles.png",
         "public/beach-tiles.png",
         "public/jungle-tiles.png",
         "public/crypt-dungeon-tiles.png",
-        "public/graveyardtiles.png"
+        "public/graveyardtiles.png",
+        "public/tilesets/searing-canyon-ground.png",
+        "public/tilesets/searing-canyon-cliff.png",
+        "public/tilesets/searing-canyon-flora/**",
+        "public/tilesets/searing-canyon-landmarks/**"
       ],
-      "maxTotalBytes": 19922944,
+      "maxTotalBytes": 29360128,
       "maxFileBytes": 4194304,
-      "maxFiles": 7
+      "maxFiles": 24
     },
     {
       "name": "lazy/background-generated-stages",
@@ -174,9 +156,9 @@
       "maxFiles": 12
     },
     "runtime image play-context/background assets": {
-      "maxTotalBytes": 22020096,
+      "maxTotalBytes": 30408704,
       "maxFileBytes": 4194304,
-      "maxFiles": 40
+      "maxFiles": 64
     }
   }
 }
