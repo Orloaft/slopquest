@@ -3,11 +3,11 @@
   "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid",
   "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/ancient_treant_generated_chroma_alpha.png",
   "chroma": [
-    0,
     255,
-    0
+    0,
+    255
   ],
-  "tolerance": 40,
+  "tolerance": 0,
   "remove_green_halo": false,
   "grid": {
     "columns": 4,
@@ -34,76 +34,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          15,
-          0,
-          81,
+          16,
+          1,
+          77,
           87
         ],
         [
-          111,
+          113,
           0,
-          177,
-          90
+          174,
+          85
         ],
         [
-          207,
-          0,
-          273,
+          210,
+          1,
+          271,
           87
         ],
         [
-          303,
+          305,
           0,
-          369,
-          90
+          366,
+          85
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 1,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_000.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
               0,
-              66,
-              87
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 85,
             "bbox": [
               0,
               0,
-              66,
-              90
+              61,
+              85
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_002.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
               0,
-              66,
-              87
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 85,
             "bbox": [
               0,
               0,
-              66,
-              90
+              61,
+              85
             ]
           }
         ]
@@ -114,57 +114,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              0,
-              66,
-              90
+              1,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              0,
-              66,
-              90
+              1,
+              61,
+              86
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.0561,
-          0.0167,
-          0.0561
+          0.008,
+          0.008,
+          0.008
         ],
-        "average_changed_fraction": 0.043
+        "average_changed_fraction": 0.008
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/walk_up_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_up/aligned",
@@ -177,75 +177,75 @@
       "source_boxes": [
         [
           15,
-          105,
-          81,
-          192
+          97,
+          76,
+          183
         ],
         [
-          111,
-          102,
-          177,
-          192
+          113,
+          96,
+          174,
+          181
         ],
         [
-          207,
-          105,
-          273,
-          192
+          211,
+          97,
+          272,
+          183
         ],
         [
-          303,
-          102,
-          369,
-          192
+          305,
+          96,
+          366,
+          181
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 1,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_000.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
               0,
-              66,
-              87
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 85,
             "bbox": [
               0,
               0,
-              66,
-              90
+              61,
+              85
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_002.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
               0,
-              66,
-              87
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 85,
             "bbox": [
               0,
               0,
-              66,
-              90
+              61,
+              85
             ]
           }
         ]
@@ -256,57 +256,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              0,
-              66,
-              90
+              1,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              0,
-              66,
-              90
+              1,
+              61,
+              86
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1515,
-          0.1121,
-          0.153
+          0.0078,
+          0.0078,
+          0.0078
         ],
-        "average_changed_fraction": 0.1389
+        "average_changed_fraction": 0.0078
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/walk_right_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_right/aligned",
@@ -318,76 +318,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          15,
-          201,
-          81,
-          288
+          16,
+          193,
+          77,
+          279
         ],
         [
-          111,
-          198,
-          177,
-          288
+          113,
+          192,
+          174,
+          277
         ],
         [
-          207,
-          201,
-          273,
-          288
+          210,
+          193,
+          271,
+          279
         ],
         [
-          303,
-          198,
-          369,
-          288
+          305,
+          192,
+          366,
+          277
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 1,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_000.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
               0,
-              66,
-              87
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 85,
             "bbox": [
               0,
               0,
-              66,
-              90
+              61,
+              85
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_002.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
               0,
-              66,
-              87
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 85,
             "bbox": [
               0,
               0,
-              66,
-              90
+              61,
+              85
             ]
           }
         ]
@@ -398,57 +398,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              0,
-              66,
-              90
+              1,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              0,
-              66,
-              90
+              1,
+              61,
+              86
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1515,
-          0.1121,
-          0.153
+          0.0078,
+          0.0078,
+          0.0078
         ],
-        "average_changed_fraction": 0.1389
+        "average_changed_fraction": 0.0078
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/walk_down_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_down/aligned",
@@ -460,76 +460,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          15,
-          297,
-          81,
-          384
+          19,
+          289,
+          80,
+          375
         ],
         [
-          111,
-          294,
-          177,
-          384
+          113,
+          288,
+          174,
+          373
         ],
         [
           207,
-          297,
-          273,
-          384
+          289,
+          268,
+          375
         ],
         [
-          303,
-          294,
-          369,
-          384
+          305,
+          288,
+          366,
+          373
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 1,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_000.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
               0,
-              66,
-              87
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 85,
             "bbox": [
               0,
               0,
-              66,
-              90
+              61,
+              85
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_002.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
               0,
-              66,
-              87
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 85,
             "bbox": [
               0,
               0,
-              66,
-              90
+              61,
+              85
             ]
           }
         ]
@@ -540,57 +540,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              0,
-              66,
-              90
+              1,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              61,
+              86
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 30.5,
+            "y": 86,
             "bbox": [
               0,
-              0,
-              66,
-              90
+              1,
+              61,
+              86
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1515,
-          0.1121,
-          0.153
+          0.0078,
+          0.0078,
+          0.0078
         ],
-        "average_changed_fraction": 0.1389
+        "average_changed_fraction": 0.0078
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/walk_left_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/walk_left/aligned",

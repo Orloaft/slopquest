@@ -1,104 +1,104 @@
 {
   "anchor_mode": "bottom_center",
   "canvas": {
-    "width": 93,
+    "width": 63,
     "height": 78
   },
   "pre_alignment_drift": {
-    "x": 5.5,
-    "y": 3,
+    "x": 0.0,
+    "y": 0,
     "anchors": [
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/frame_000.png",
-        "x": 41.0,
-        "y": 75,
-        "bbox": [
-          0,
-          0,
-          82,
-          75
-        ]
-      },
-      {
-        "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/frame_001.png",
-        "x": 44.0,
+        "x": 31.5,
         "y": 78,
         "bbox": [
           0,
           0,
-          88,
+          63,
+          78
+        ]
+      },
+      {
+        "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/frame_001.png",
+        "x": 31.5,
+        "y": 78,
+        "bbox": [
+          0,
+          0,
+          63,
           78
         ]
       },
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/frame_002.png",
-        "x": 46.5,
-        "y": 75,
-        "bbox": [
-          0,
-          0,
-          93,
-          75
-        ]
-      },
-      {
-        "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/frame_003.png",
-        "x": 44.0,
+        "x": 31.5,
         "y": 78,
         "bbox": [
           0,
           0,
-          88,
+          63,
+          78
+        ]
+      },
+      {
+        "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/frame_003.png",
+        "x": 31.5,
+        "y": 78,
+        "bbox": [
+          0,
+          0,
+          63,
           78
         ]
       }
     ]
   },
   "post_alignment_drift": {
-    "x": 0.5,
+    "x": 0.0,
     "y": 0,
     "anchors": [
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/aligned/000_frame_000.png",
-        "x": 47.0,
+        "x": 31.5,
         "y": 78,
         "bbox": [
-          6,
-          3,
-          88,
+          0,
+          0,
+          63,
           78
         ]
       },
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/aligned/001_frame_001.png",
-        "x": 47.0,
+        "x": 31.5,
         "y": 78,
         "bbox": [
-          3,
           0,
-          91,
+          0,
+          63,
           78
         ]
       },
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/aligned/002_frame_002.png",
-        "x": 46.5,
+        "x": 31.5,
         "y": 78,
         "bbox": [
           0,
-          3,
-          93,
+          0,
+          63,
           78
         ]
       },
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/aligned/003_frame_003.png",
-        "x": 47.0,
+        "x": 31.5,
         "y": 78,
         "bbox": [
-          3,
           0,
-          91,
+          0,
+          63,
           78
         ]
       }
@@ -106,11 +106,11 @@
   },
   "motion": {
     "pair_changed_fraction": [
-      0.1873,
-      0.1679,
-      0.184
+      0.0004,
+      0.0004,
+      0.0004
     ],
-    "average_changed_fraction": 0.1797
+    "average_changed_fraction": 0.0004
   },
   "preview_background": [
     28,
@@ -130,29 +130,29 @@
       "source_bbox": [
         0,
         0,
-        82,
-        75
+        63,
+        78
       ],
       "anchor": [
-        41.0,
-        75
+        31.5,
+        78
       ],
-      "dx": 6,
-      "dy": 3
+      "dx": 0,
+      "dy": 0
     },
     {
       "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/frame_001.png",
       "source_bbox": [
         0,
         0,
-        88,
+        63,
         78
       ],
       "anchor": [
-        44.0,
+        31.5,
         78
       ],
-      "dx": 3,
+      "dx": 0,
       "dy": 0
     },
     {
@@ -160,29 +160,29 @@
       "source_bbox": [
         0,
         0,
-        93,
-        75
+        63,
+        78
       ],
       "anchor": [
-        46.5,
-        75
+        31.5,
+        78
       ],
       "dx": 0,
-      "dy": 3
+      "dy": 0
     },
     {
       "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/walk_right/frame_003.png",
       "source_bbox": [
         0,
         0,
-        88,
+        63,
         78
       ],
       "anchor": [
-        44.0,
+        31.5,
         78
       ],
-      "dx": 3,
+      "dx": 0,
       "dy": 0
     }
   ]

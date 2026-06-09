@@ -3,11 +3,11 @@
   "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid",
   "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/canopy_stalker_generated_chroma_alpha.png",
   "chroma": [
-    0,
     255,
-    0
+    0,
+    255
   ],
-  "tolerance": 40,
+  "tolerance": 0,
   "remove_green_halo": false,
   "grid": {
     "columns": 4,
@@ -34,28 +34,28 @@
       "frames": 4,
       "source_boxes": [
         [
-          12,
-          0,
-          96,
-          75
+          15,
+          5,
+          79,
+          87
         ],
         [
-          108,
-          6,
-          192,
-          81
+          112,
+          3,
+          176,
+          85
         ],
         [
-          204,
-          0,
-          288,
-          75
+          209,
+          5,
+          273,
+          87
         ],
         [
-          300,
-          6,
-          384,
-          81
+          304,
+          3,
+          368,
+          85
         ]
       ],
       "pre_alignment_drift": {
@@ -64,46 +64,46 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_up/frame_000.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_up/frame_001.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_up/frame_002.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_up/frame_003.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           }
         ]
@@ -114,57 +114,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_up/aligned/000_frame_000.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_up/aligned/001_frame_001.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_up/aligned/002_frame_002.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_up/aligned/003_frame_003.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1386,
-          0.0057,
-          0.1386
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.0943
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_up/walk_up_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_up/aligned",
@@ -176,28 +176,28 @@
       "frames": 4,
       "source_boxes": [
         [
-          12,
-          117,
-          96,
-          192
+          14,
+          101,
+          78,
+          183
         ],
         [
-          108,
-          111,
-          192,
-          186
+          112,
+          99,
+          176,
+          181
         ],
         [
-          204,
-          117,
-          288,
-          192
+          210,
+          101,
+          274,
+          183
         ],
         [
-          300,
-          111,
-          384,
-          186
+          304,
+          99,
+          368,
+          181
         ]
       ],
       "pre_alignment_drift": {
@@ -206,46 +206,46 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_right/frame_000.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_right/frame_001.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_right/frame_002.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_right/frame_003.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           }
         ]
@@ -256,57 +256,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_right/aligned/000_frame_000.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_right/aligned/001_frame_001.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_right/aligned/002_frame_002.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_right/aligned/003_frame_003.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1386,
-          0.0057,
-          0.1386
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.0943
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_right/walk_right_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_right/aligned",
@@ -318,28 +318,28 @@
       "frames": 4,
       "source_boxes": [
         [
-          12,
-          213,
-          96,
-          288
+          15,
+          197,
+          79,
+          279
         ],
         [
-          108,
-          207,
-          192,
-          282
+          112,
+          195,
+          176,
+          277
         ],
         [
-          204,
-          213,
-          288,
-          288
+          209,
+          197,
+          273,
+          279
         ],
         [
-          300,
-          207,
-          384,
-          282
+          304,
+          195,
+          368,
+          277
         ]
       ],
       "pre_alignment_drift": {
@@ -348,46 +348,46 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_down/frame_000.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_down/frame_001.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_down/frame_002.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_down/frame_003.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           }
         ]
@@ -398,57 +398,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_down/aligned/000_frame_000.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_down/aligned/001_frame_001.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_down/aligned/002_frame_002.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_down/aligned/003_frame_003.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1386,
-          0.0057,
-          0.1386
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.0943
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_down/walk_down_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_down/aligned",
@@ -460,28 +460,28 @@
       "frames": 4,
       "source_boxes": [
         [
-          0,
-          309,
-          84,
-          384
+          18,
+          293,
+          82,
+          375
         ],
         [
-          96,
-          303,
-          180,
-          378
+          112,
+          291,
+          176,
+          373
         ],
         [
-          192,
-          309,
-          276,
-          384
+          206,
+          293,
+          270,
+          375
         ],
         [
-          288,
-          303,
-          372,
-          378
+          304,
+          291,
+          368,
+          373
         ]
       ],
       "pre_alignment_drift": {
@@ -490,46 +490,46 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_left/frame_000.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_left/frame_001.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_left/frame_002.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_left/frame_003.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           }
         ]
@@ -540,57 +540,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_left/aligned/000_frame_000.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_left/aligned/001_frame_001.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_left/aligned/002_frame_002.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_left/aligned/003_frame_003.png",
-            "x": 42.0,
-            "y": 75,
+            "x": 32.0,
+            "y": 82,
             "bbox": [
               0,
               0,
-              84,
-              75
+              64,
+              82
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1386,
-          0.0057,
-          0.1386
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.0943
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_left/walk_left_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/walk_left/aligned",

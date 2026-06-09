@@ -3,11 +3,11 @@
   "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid",
   "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/marsh_hag_generated_chroma_alpha.png",
   "chroma": [
-    0,
     255,
-    0
+    0,
+    255
   ],
-  "tolerance": 40,
+  "tolerance": 0,
   "remove_green_halo": false,
   "grid": {
     "columns": 4,
@@ -34,75 +34,75 @@
       "frames": 4,
       "source_boxes": [
         [
-          24,
+          11,
           9,
-          78,
-          81
+          82,
+          87
         ],
         [
-          120,
-          6,
-          174,
-          84
+          108,
+          7,
+          179,
+          85
         ],
         [
-          216,
+          205,
           9,
-          270,
-          81
+          276,
+          87
         ],
         [
-          312,
-          6,
-          366,
-          84
+          300,
+          7,
+          371,
+          85
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 6,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/frame_000.png",
-            "x": 27.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              54,
-              72
-            ]
-          },
-          {
-            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/frame_001.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
+              78
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/frame_001.png",
+            "x": 35.5,
+            "y": 78,
+            "bbox": [
+              0,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/frame_002.png",
-            "x": 27.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              54,
-              72
-            ]
-          },
-          {
-            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/frame_003.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
+              78
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/frame_003.png",
+            "x": 35.5,
+            "y": 78,
+            "bbox": [
+              0,
+              0,
+              71,
               78
             ]
           }
@@ -114,45 +114,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/aligned/000_frame_000.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
-              6,
-              54,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/aligned/001_frame_001.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/aligned/002_frame_002.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
-              6,
-              54,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/aligned/003_frame_003.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
               78
             ]
           }
@@ -160,11 +160,11 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.0085,
-          0.0064,
-          0.0085
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.0078
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/walk_up_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_up/aligned",
@@ -176,75 +176,75 @@
       "frames": 4,
       "source_boxes": [
         [
-          24,
-          111,
-          78,
+          10,
+          105,
+          81,
           183
         ],
         [
-          120,
           108,
-          174,
-          186
+          103,
+          179,
+          181
         ],
         [
-          216,
-          111,
-          270,
+          206,
+          105,
+          277,
           183
         ],
         [
-          312,
-          108,
-          366,
-          186
+          300,
+          103,
+          371,
+          181
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 6,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/frame_000.png",
-            "x": 27.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              54,
-              72
-            ]
-          },
-          {
-            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/frame_001.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
+              78
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/frame_001.png",
+            "x": 35.5,
+            "y": 78,
+            "bbox": [
+              0,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/frame_002.png",
-            "x": 27.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              54,
-              72
-            ]
-          },
-          {
-            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/frame_003.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
+              78
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/frame_003.png",
+            "x": 35.5,
+            "y": 78,
+            "bbox": [
+              0,
+              0,
+              71,
               78
             ]
           }
@@ -256,45 +256,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/aligned/000_frame_000.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
-              6,
-              54,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/aligned/001_frame_001.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/aligned/002_frame_002.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
-              6,
-              54,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/aligned/003_frame_003.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
               78
             ]
           }
@@ -302,11 +302,11 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.2016,
-          0.1994,
-          0.2016
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.2009
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/walk_right_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_right/aligned",
@@ -318,75 +318,75 @@
       "frames": 4,
       "source_boxes": [
         [
-          24,
-          207,
-          78,
+          11,
+          201,
+          82,
           279
         ],
         [
-          120,
-          204,
-          174,
-          282
+          108,
+          199,
+          179,
+          277
         ],
         [
-          216,
-          207,
-          270,
+          205,
+          201,
+          276,
           279
         ],
         [
-          312,
-          204,
-          366,
-          282
+          300,
+          199,
+          371,
+          277
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 6,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/frame_000.png",
-            "x": 27.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              54,
-              72
-            ]
-          },
-          {
-            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/frame_001.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
+              78
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/frame_001.png",
+            "x": 35.5,
+            "y": 78,
+            "bbox": [
+              0,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/frame_002.png",
-            "x": 27.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              54,
-              72
-            ]
-          },
-          {
-            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/frame_003.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
+              78
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/frame_003.png",
+            "x": 35.5,
+            "y": 78,
+            "bbox": [
+              0,
+              0,
+              71,
               78
             ]
           }
@@ -398,45 +398,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/aligned/000_frame_000.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
-              6,
-              54,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/aligned/001_frame_001.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/aligned/002_frame_002.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
-              6,
-              54,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/aligned/003_frame_003.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
               78
             ]
           }
@@ -444,11 +444,11 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.2016,
-          0.1994,
-          0.2016
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.2009
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/walk_down_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_down/aligned",
@@ -460,75 +460,75 @@
       "frames": 4,
       "source_boxes": [
         [
-          18,
-          303,
-          72,
+          14,
+          297,
+          85,
           375
         ],
         [
-          114,
-          300,
-          168,
-          378
+          108,
+          295,
+          179,
+          373
         ],
         [
-          210,
-          303,
-          264,
+          202,
+          297,
+          273,
           375
         ],
         [
-          306,
           300,
-          360,
-          378
+          295,
+          371,
+          373
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 6,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/frame_000.png",
-            "x": 27.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              54,
-              72
-            ]
-          },
-          {
-            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/frame_001.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
+              78
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/frame_001.png",
+            "x": 35.5,
+            "y": 78,
+            "bbox": [
+              0,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/frame_002.png",
-            "x": 27.0,
-            "y": 72,
-            "bbox": [
-              0,
-              0,
-              54,
-              72
-            ]
-          },
-          {
-            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/frame_003.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
+              78
+            ]
+          },
+          {
+            "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/frame_003.png",
+            "x": 35.5,
+            "y": 78,
+            "bbox": [
+              0,
+              0,
+              71,
               78
             ]
           }
@@ -540,45 +540,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/aligned/000_frame_000.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
-              6,
-              54,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/aligned/001_frame_001.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/aligned/002_frame_002.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
-              6,
-              54,
+              0,
+              71,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/aligned/003_frame_003.png",
-            "x": 27.0,
+            "x": 35.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              54,
+              71,
               78
             ]
           }
@@ -586,11 +586,11 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.2016,
-          0.1994,
-          0.2016
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.2009
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/walk_left_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/walk_left/aligned",

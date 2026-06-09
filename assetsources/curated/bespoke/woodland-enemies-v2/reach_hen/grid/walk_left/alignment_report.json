@@ -1,8 +1,8 @@
 {
   "anchor_mode": "bottom_center",
   "canvas": {
-    "width": 76,
-    "height": 72
+    "width": 49,
+    "height": 71
   },
   "pre_alignment_drift": {
     "x": 0.0,
@@ -10,46 +10,46 @@
     "anchors": [
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_hen/grid/walk_left/frame_000.png",
-        "x": 38.0,
-        "y": 72,
+        "x": 24.5,
+        "y": 71,
         "bbox": [
           0,
           0,
-          76,
-          72
+          49,
+          71
         ]
       },
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_hen/grid/walk_left/frame_001.png",
-        "x": 38.0,
-        "y": 72,
+        "x": 24.5,
+        "y": 71,
         "bbox": [
           0,
           0,
-          76,
-          72
+          49,
+          71
         ]
       },
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_hen/grid/walk_left/frame_002.png",
-        "x": 38.0,
-        "y": 72,
+        "x": 24.5,
+        "y": 71,
         "bbox": [
           0,
           0,
-          76,
-          72
+          49,
+          71
         ]
       },
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_hen/grid/walk_left/frame_003.png",
-        "x": 38.0,
-        "y": 72,
+        "x": 24.5,
+        "y": 71,
         "bbox": [
           0,
           0,
-          76,
-          72
+          49,
+          71
         ]
       }
     ]
@@ -60,57 +60,57 @@
     "anchors": [
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_hen/grid/walk_left/aligned/000_frame_000.png",
-        "x": 38.0,
-        "y": 72,
+        "x": 24.5,
+        "y": 71,
         "bbox": [
           0,
           0,
-          76,
-          72
+          49,
+          71
         ]
       },
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_hen/grid/walk_left/aligned/001_frame_001.png",
-        "x": 38.0,
-        "y": 72,
+        "x": 24.5,
+        "y": 71,
         "bbox": [
           0,
           0,
-          76,
-          72
+          49,
+          71
         ]
       },
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_hen/grid/walk_left/aligned/002_frame_002.png",
-        "x": 38.0,
-        "y": 72,
+        "x": 24.5,
+        "y": 71,
         "bbox": [
           0,
           0,
-          76,
-          72
+          49,
+          71
         ]
       },
       {
         "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_hen/grid/walk_left/aligned/003_frame_003.png",
-        "x": 38.0,
-        "y": 72,
+        "x": 24.5,
+        "y": 71,
         "bbox": [
           0,
           0,
-          76,
-          72
+          49,
+          71
         ]
       }
     ]
   },
   "motion": {
     "pair_changed_fraction": [
-      0.0839,
-      0.0049,
-      0.0839
+      0.0006,
+      0.0006,
+      0.0006
     ],
-    "average_changed_fraction": 0.0576
+    "average_changed_fraction": 0.0006
   },
   "preview_background": [
     28,
@@ -130,12 +130,12 @@
       "source_bbox": [
         0,
         0,
-        76,
-        72
+        49,
+        71
       ],
       "anchor": [
-        38.0,
-        72
+        24.5,
+        71
       ],
       "dx": 0,
       "dy": 0
@@ -145,12 +145,12 @@
       "source_bbox": [
         0,
         0,
-        76,
-        72
+        49,
+        71
       ],
       "anchor": [
-        38.0,
-        72
+        24.5,
+        71
       ],
       "dx": 0,
       "dy": 0
@@ -160,12 +160,12 @@
       "source_bbox": [
         0,
         0,
-        76,
-        72
+        49,
+        71
       ],
       "anchor": [
-        38.0,
-        72
+        24.5,
+        71
       ],
       "dx": 0,
       "dy": 0
@@ -175,12 +175,12 @@
       "source_bbox": [
         0,
         0,
-        76,
-        72
+        49,
+        71
       ],
       "anchor": [
-        38.0,
-        72
+        24.5,
+        71
       ],
       "dx": 0,
       "dy": 0

@@ -10,16 +10,20 @@ import path from "node:path";
 const OUT = path.join(process.cwd(), "artifacts", "enemy-contact");
 
 const TYPES = [
-  "rat", "spider", "skeleton", "ghoul", "boss", "orc", "goblin", "goblin_scout",
-  "goblin_shaman", "wolf", "wisp", "dire_wolf", "wild_boar", "thorn_hedgehog",
-  "forest_spider", "forest_slime", "mushroom_brute", "sapling_deer",
-  "ancient_treant", "bone_druid", "forest_pixie", "bog_wraith", "grave_revenant",
-  "crypt_sentinel", "pale_banshee", "skitterer", "mire_spitter",
-  "canyon_scavenger", "dust_burrower", "dune_skitterer", "sun_wraith",
-  "reef_prowler", "venomous_stalker", "totem_wraith", "reach_hen",
-  "meadow_hopper", "reach_vole", "restless_husk", "grave_shambler",
-  "bound_wight", "crimson_burrower", "deepdelve_wight", "verdant_faultwarden",
-  "drowned_marauder"
+  "rat", "spider", "skeleton", "boss", "goblin", "goblin_scout",
+  "goblin_shaman", "wolf", "wisp", "ghoul", "bone_druid", "bog_wraith",
+  "grave_revenant", "crypt_sentinel", "pale_banshee", "dire_wolf",
+  "wild_boar", "thorn_hedgehog", "forest_spider", "forest_slime",
+  "mushroom_brute", "sapling_deer", "ancient_treant", "orc",
+  "forest_pixie", "reach_hen", "meadow_hopper", "reach_vole",
+  "grave_shambler", "skitterer", "mire_spitter", "canyon_scavenger",
+  "dust_burrower", "crimson_burrower", "dune_skitterer", "sun_wraith",
+  "reef_prowler", "venomous_stalker", "totem_wraith", "bog_leech",
+  "marsh_hag", "gloom_toad", "magma_hound", "cinder_shade",
+  "basalt_brute", "bone_scorpion", "dune_reaver", "mirage_shade",
+  "tide_lurker", "drowned_marauder", "brine_siren", "coral_crab",
+  "canopy_stalker", "blowpipe_headhunter", "verdant_faultwarden",
+  "deepdelve_wight"
 ];
 
 test("enemy contact grid", async ({ page }) => {

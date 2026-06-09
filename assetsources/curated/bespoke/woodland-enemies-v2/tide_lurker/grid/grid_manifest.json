@@ -3,11 +3,11 @@
   "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid",
   "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/tide_lurker_generated_chroma_alpha.png",
   "chroma": [
-    0,
     255,
-    0
+    0,
+    255
   ],
-  "tolerance": 40,
+  "tolerance": 0,
   "remove_green_halo": false,
   "grid": {
     "columns": 4,
@@ -34,76 +34,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          18,
-          6,
-          84,
-          75
+          12,
+          9,
+          82,
+          87
         ],
         [
-          114,
-          6,
-          180,
-          78
+          109,
+          7,
+          179,
+          85
         ],
         [
-          210,
-          6,
+          206,
+          9,
           276,
-          75
+          87
         ],
         [
-          306,
-          6,
-          372,
-          78
+          301,
+          7,
+          371,
+          85
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_up/frame_000.png",
-            "x": 33.0,
-            "y": 69,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              69
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_up/frame_001.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_up/frame_002.png",
-            "x": 33.0,
-            "y": 69,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              69
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_up/frame_003.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           }
         ]
@@ -114,57 +114,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_up/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
-              3,
-              66,
-              72
+              0,
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_up/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_up/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
-              3,
-              66,
-              72
+              0,
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_up/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.0871,
-          0.0057,
-          0.0871
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.06
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_up/walk_up_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_up/aligned",
@@ -176,76 +176,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          18,
-          117,
-          84,
-          186
+          11,
+          105,
+          81,
+          183
         ],
         [
-          114,
-          114,
-          180,
-          186
+          109,
+          103,
+          179,
+          181
         ],
         [
-          210,
-          117,
-          276,
-          186
+          207,
+          105,
+          277,
+          183
         ],
         [
-          306,
-          114,
-          372,
-          186
+          301,
+          103,
+          371,
+          181
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_right/frame_000.png",
-            "x": 33.0,
-            "y": 69,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              69
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_right/frame_001.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_right/frame_002.png",
-            "x": 33.0,
-            "y": 69,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              69
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_right/frame_003.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           }
         ]
@@ -256,57 +256,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_right/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
-              3,
-              66,
-              72
+              0,
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_right/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_right/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
-              3,
-              66,
-              72
+              0,
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_right/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.2237,
-          0.1593,
-          0.2085
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.1972
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_right/walk_right_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_right/aligned",
@@ -318,76 +318,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          18,
-          213,
-          84,
-          282
+          12,
+          201,
+          82,
+          279
         ],
         [
-          114,
-          210,
-          180,
-          282
+          109,
+          199,
+          179,
+          277
         ],
         [
-          210,
-          213,
+          206,
+          201,
           276,
-          282
+          279
         ],
         [
-          306,
-          210,
-          372,
-          282
+          301,
+          199,
+          371,
+          277
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_down/frame_000.png",
-            "x": 33.0,
-            "y": 69,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              69
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_down/frame_001.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_down/frame_002.png",
-            "x": 33.0,
-            "y": 69,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              69
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_down/frame_003.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           }
         ]
@@ -398,57 +398,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_down/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
-              3,
-              66,
-              72
+              0,
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_down/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_down/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
-              3,
-              66,
-              72
+              0,
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_down/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.2237,
-          0.1593,
-          0.2085
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.1972
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_down/walk_down_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_down/aligned",
@@ -460,76 +460,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          12,
-          309,
-          78,
-          378
+          15,
+          297,
+          85,
+          375
         ],
         [
-          108,
-          306,
-          174,
-          378
+          109,
+          295,
+          179,
+          373
         ],
         [
-          204,
-          309,
-          270,
-          378
+          203,
+          297,
+          273,
+          375
         ],
         [
-          300,
-          306,
-          366,
-          378
+          301,
+          295,
+          371,
+          373
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_left/frame_000.png",
-            "x": 33.0,
-            "y": 69,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              69
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_left/frame_001.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_left/frame_002.png",
-            "x": 33.0,
-            "y": 69,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              69
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_left/frame_003.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           }
         ]
@@ -540,57 +540,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_left/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
-              3,
-              66,
-              72
+              0,
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_left/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_left/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
-              3,
-              66,
-              72
+              0,
+              70,
+              78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_left/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 72,
+            "x": 35.0,
+            "y": 78,
             "bbox": [
               0,
               0,
-              66,
-              72
+              70,
+              78
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.2237,
-          0.1593,
-          0.2085
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.1972
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_left/walk_left_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/walk_left/aligned",

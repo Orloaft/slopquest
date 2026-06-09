@@ -1,7 +1,7 @@
 {
   "pipeline": {
     "name": "enemy-directional-4x4-v2",
-    "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+    "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
     "cell_px": 96,
     "columns": 4,
     "rows": 4,
@@ -31,6 +31,9 @@
     }
   },
   "output_root": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2",
+  "imagegen_source_root": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen",
+  "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+  "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
   "contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/woodland_bespoke_v2_contact.png",
   "runtime_atlas": "/mnt/nxt-dev/tib-gathering/public/woodland-bespoke-v2-sheet.png",
   "runtime_atlas_order": [
@@ -89,7 +92,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -118,6 +121,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 0,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/ghoul/ghoul_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ghoul/ghoul_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ghoul/grid/ghoul_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/ghoul-sheet.png",
@@ -143,7 +150,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -172,6 +179,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 1,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/grave_revenant/grave_revenant_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grave_revenant_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/grave_revenant_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/grave-revenant-sheet.png",
@@ -197,7 +208,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -226,6 +237,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 2,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/pale_banshee/pale_banshee_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/pale_banshee_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/pale_banshee/grid/pale_banshee_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/pale-banshee-sheet.png",
@@ -251,7 +266,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -280,6 +295,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 3,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/crypt_sentinel/crypt_sentinel_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/crypt_sentinel_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crypt_sentinel/grid/crypt_sentinel_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/crypt-sentinel-sheet.png",
@@ -305,7 +324,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -334,6 +353,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 4,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/wild_boar/wild_boar_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/wild_boar/wild_boar_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/wild_boar/grid/wild_boar_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/wild-boar-sheet.png",
@@ -359,7 +382,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -388,6 +411,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 5,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/thorn_hedgehog/thorn_hedgehog_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/thorn_hedgehog_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/thorn_hedgehog/grid/thorn_hedgehog_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/thorn-hedgehog-sheet.png",
@@ -413,7 +440,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -442,6 +469,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 6,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/forest_spider/forest_spider_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/forest_spider/forest_spider_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/forest_spider/grid/forest_spider_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/forest-spider-sheet.png",
@@ -467,7 +498,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -496,6 +527,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 7,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/forest_slime/forest_slime_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/forest_slime/forest_slime_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/forest_slime/grid/forest_slime_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/forest-slime-sheet.png",
@@ -521,7 +556,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -550,6 +585,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 8,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/sapling_deer/sapling_deer_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/sapling_deer_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/sapling_deer_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/sapling-deer-sheet.png",
@@ -575,7 +614,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -604,6 +643,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 9,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/mushroom_brute/mushroom_brute_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/mushroom_brute_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mushroom_brute/grid/mushroom_brute_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/mushroom-brute-sheet.png",
@@ -629,7 +672,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -658,6 +701,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 10,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/dire_wolf/dire_wolf_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/dire_wolf_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dire_wolf/grid/dire_wolf_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/dire-wolf-sheet.png",
@@ -683,7 +730,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -712,6 +759,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 11,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/orc/orc_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/orc_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/orc/grid/orc_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/orc-sheet.png",
@@ -737,7 +788,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -766,6 +817,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 12,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/forest_pixie/forest_pixie_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/forest_pixie_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/grid/forest_pixie_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/forest-pixie-sheet.png",
@@ -791,7 +846,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -820,6 +875,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 13,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/bone_druid/bone_druid_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/bone_druid_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_druid/grid/bone_druid_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/bone-druid-sheet.png",
@@ -845,7 +904,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -874,6 +933,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 14,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/bog_wraith/bog_wraith_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/bog_wraith_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_wraith/grid/bog_wraith_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/bog-wraith-sheet.png",
@@ -899,7 +962,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -928,6 +991,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 15,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/ancient_treant/ancient_treant_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/ancient_treant_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ancient_treant/grid/ancient_treant_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/ancient-treant-sheet.png",
@@ -953,7 +1020,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -982,6 +1049,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 16,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/reach_hen/reach_hen_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_hen/reach_hen_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_hen/grid/reach_hen_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/reach-hen-sheet.png",
@@ -1007,7 +1078,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1036,6 +1107,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 17,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/meadow_hopper/meadow_hopper_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/meadow_hopper/meadow_hopper_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/meadow_hopper/grid/meadow_hopper_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/meadow-hopper-sheet.png",
@@ -1061,7 +1136,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1090,6 +1165,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 18,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/reach_vole/reach_vole_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/reach_vole_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reach_vole/grid/reach_vole_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/reach-vole-sheet.png",
@@ -1115,7 +1194,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1144,6 +1223,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 19,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/grave_shambler/grave_shambler_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grave_shambler_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_shambler/grid/grave_shambler_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/grave-shambler-sheet.png",
@@ -1169,7 +1252,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1198,6 +1281,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 20,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/skitterer/skitterer_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/skitterer/skitterer_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/skitterer/grid/skitterer_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/skitterer-sheet.png",
@@ -1223,7 +1310,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1252,6 +1339,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 21,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/mire_spitter/mire_spitter_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mire_spitter/mire_spitter_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mire_spitter/grid/mire_spitter_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/mire-spitter-sheet.png",
@@ -1277,7 +1368,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1306,6 +1397,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 22,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/canyon_scavenger/canyon_scavenger_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canyon_scavenger/canyon_scavenger_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canyon_scavenger/grid/canyon_scavenger_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/canyon-scavenger-sheet.png",
@@ -1331,7 +1426,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1360,6 +1455,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 23,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/dust_burrower/dust_burrower_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dust_burrower/dust_burrower_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dust_burrower/grid/dust_burrower_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/dust-burrower-sheet.png",
@@ -1385,7 +1484,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1414,6 +1513,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 24,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/crimson_burrower/crimson_burrower_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crimson_burrower/crimson_burrower_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/crimson_burrower/grid/crimson_burrower_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/crimson-burrower-sheet.png",
@@ -1439,7 +1542,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1468,6 +1571,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 25,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/dune_skitterer/dune_skitterer_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_skitterer/dune_skitterer_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_skitterer/grid/dune_skitterer_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/dune-skitterer-sheet.png",
@@ -1493,7 +1600,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1522,6 +1629,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 26,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/sun_wraith/sun_wraith_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sun_wraith/sun_wraith_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sun_wraith/grid/sun_wraith_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/sun-wraith-sheet.png",
@@ -1547,7 +1658,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1576,6 +1687,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 27,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/reef_prowler/reef_prowler_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reef_prowler/reef_prowler_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/reef_prowler/grid/reef_prowler_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/reef-prowler-sheet.png",
@@ -1601,7 +1716,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1630,6 +1745,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 28,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/venomous_stalker/venomous_stalker_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/venomous_stalker/venomous_stalker_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/venomous_stalker/grid/venomous_stalker_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/venomous-stalker-sheet.png",
@@ -1655,7 +1774,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1684,6 +1803,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 29,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/totem_wraith/totem_wraith_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/totem_wraith/totem_wraith_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/totem_wraith/grid/totem_wraith_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/totem-wraith-sheet.png",
@@ -1709,7 +1832,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1738,6 +1861,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 30,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/bog_leech/bog_leech_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_leech/bog_leech_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bog_leech/grid/bog_leech_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/bog-leech-sheet.png",
@@ -1763,7 +1890,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1792,6 +1919,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 31,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/marsh_hag/marsh_hag_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/marsh_hag_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/marsh_hag/grid/marsh_hag_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/marsh-hag-sheet.png",
@@ -1817,7 +1948,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1846,6 +1977,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 32,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/gloom_toad/gloom_toad_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/gloom_toad/gloom_toad_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/gloom_toad/grid/gloom_toad_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/gloom-toad-sheet.png",
@@ -1871,7 +2006,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1900,6 +2035,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 33,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/magma_hound/magma_hound_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/magma_hound/magma_hound_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/magma_hound/grid/magma_hound_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/magma-hound-sheet.png",
@@ -1925,7 +2064,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -1954,6 +2093,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 34,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/cinder_shade/cinder_shade_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/cinder_shade/cinder_shade_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/cinder_shade/grid/cinder_shade_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/cinder-shade-sheet.png",
@@ -1979,7 +2122,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2008,6 +2151,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 35,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/basalt_brute/basalt_brute_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/basalt_brute/basalt_brute_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/basalt_brute/grid/basalt_brute_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/basalt-brute-sheet.png",
@@ -2033,7 +2180,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2062,6 +2209,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 36,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/bone_scorpion/bone_scorpion_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_scorpion/bone_scorpion_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bone_scorpion/grid/bone_scorpion_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/bone-scorpion-sheet.png",
@@ -2087,7 +2238,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2116,6 +2267,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 37,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/dune_reaver/dune_reaver_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_reaver/dune_reaver_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/dune_reaver/grid/dune_reaver_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/dune-reaver-sheet.png",
@@ -2141,7 +2296,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2170,6 +2325,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 38,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/mirage_shade/mirage_shade_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/mirage_shade_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/grid/mirage_shade_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/mirage-shade-sheet.png",
@@ -2195,7 +2354,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2224,6 +2383,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 39,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tide_lurker/tide_lurker_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/tide_lurker_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/tide_lurker/grid/tide_lurker_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/tide-lurker-sheet.png",
@@ -2249,7 +2412,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2278,6 +2441,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 40,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/drowned_marauder/drowned_marauder_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/drowned_marauder/drowned_marauder_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/drowned_marauder/grid/drowned_marauder_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/drowned-marauder-sheet.png",
@@ -2303,7 +2470,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2332,6 +2499,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 41,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/brine_siren/brine_siren_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/brine_siren/brine_siren_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/brine_siren/grid/brine_siren_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/brine-siren-sheet.png",
@@ -2357,7 +2528,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2386,6 +2557,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 42,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/coral_crab/coral_crab_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/coral_crab/coral_crab_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/coral_crab/grid/coral_crab_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/coral-crab-sheet.png",
@@ -2411,7 +2586,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2440,6 +2615,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 43,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/canopy_stalker/canopy_stalker_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/canopy_stalker_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/canopy_stalker/grid/canopy_stalker_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/canopy-stalker-sheet.png",
@@ -2465,7 +2644,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2494,6 +2673,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 44,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/blowpipe_headhunter/blowpipe_headhunter_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/blowpipe_headhunter/blowpipe_headhunter_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/blowpipe_headhunter/grid/blowpipe_headhunter_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/blowpipe-headhunter-sheet.png",
@@ -2519,7 +2702,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2548,6 +2731,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 45,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/verdant_faultwarden/verdant_faultwarden_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/verdant_faultwarden_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/verdant_faultwarden_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/verdant-faultwarden-sheet.png",
@@ -2573,7 +2760,7 @@
       "pipeline": "enemy-directional-4x4-v2",
       "sheet_contract": {
         "name": "enemy-directional-4x4-v2",
-        "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
         "cell_px": 96,
         "columns": 4,
         "rows": 4,
@@ -2602,6 +2789,10 @@
           }
         }
       },
+      "imagegen_source_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png",
+      "normalized_magenta_contact": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png",
+      "source_index": 46,
+      "source_cutout": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/enemy-directional-4x4-v2-imagegen/deepdelve_wight/deepdelve_wight_imagegen_cutout_alpha.png",
       "generated_chroma": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/deepdelve_wight/deepdelve_wight_generated_chroma.png",
       "cleaned_alpha_sheet": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/deepdelve_wight/grid/deepdelve_wight_generated_chroma_alpha.png",
       "public_sheet": "/mnt/nxt-dev/tib-gathering/public/deepdelve-wight-sheet.png",

@@ -2,34 +2,46 @@
 from __future__ import annotations
 
 import json
-import math
 import shutil
 import subprocess
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageSequence
+from PIL import Image, ImageEnhance, ImageSequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "assetsources" / "curated" / "bespoke" / "woodland-enemies-v2"
+SOURCE_ROOT = (
+    ROOT
+    / "assetsources"
+    / "curated"
+    / "bespoke"
+    / "enemy-directional-4x4-v2-imagegen"
+)
+SOURCE_CONTACT = SOURCE_ROOT / "tib-enemy-source-contact-sheet-v3-magenta-simplified-original.png"
+NORMALIZED_CONTACT = SOURCE_ROOT / "tib-enemy-source-contact-sheet-v3-magenta-simplified-exact-magenta.png"
 PROCESSOR = Path.home() / ".openclaw/workspace/skills/sprite_processor/scripts/sprite_processor.py"
 
-BG = (0, 255, 0, 255)
+MAGENTA_RGB = (255, 0, 255)
+MAGENTA = (*MAGENTA_RGB, 255)
 CELL = 96
-# v2 contract: simpler painterly-pixel style. Walk-only (4 directional rows), 4
-# frames each -> 384x384. Attacks reuse the walk pose at runtime plus the shared
-# slash/missile effect overlays, so no dedicated attack rows are generated.
 COLS = 4
+CONTACT_COLS = 8
+CONTACT_ROWS = 6
 ANIMATION_ROWS = ("walk",)
 DIRECTION_ROWS = ("up", "right", "down", "left")
 ROW_NAMES = tuple(f"{anim}_{direction}" for anim in ANIMATION_ROWS for direction in DIRECTION_ROWS)
 ROWS = len(ROW_NAMES)
-SCALE = 3
 PIPELINE_NAME = "enemy-directional-4x4-v2"
 PIPELINE_SPEC = {
     "name": PIPELINE_NAME,
-    "source_reference": "Imagen style reference plus the goblin scout directional walk contract, simplified to a 4-frame walk-only grid; attacks reuse walk + shared effect overlays",
+    "source_reference": (
+        "Image-generated simplified enemy contact sheet on bright magenta chroma; "
+        "locally normalized to exact #ff00ff, keyed to alpha, and packed into the "
+        "walk-only 4-direction runtime contract."
+    ),
     "cell_px": CELL,
     "columns": COLS,
     "rows": ROWS,
@@ -53,536 +65,223 @@ Image.MAX_IMAGE_PIXELS = None
 class Enemy:
     slug: str
     label: str
-    kind: str
-    colors: tuple[tuple[int, int, int], tuple[int, int, int], tuple[int, int, int]]
+    source_index: int
+    max_size: tuple[int, int] = (76, 78)
 
 
 ENEMIES = [
-    Enemy("ghoul", "Crypt Ghoul", "ghoul", ((105, 124, 99), (55, 68, 60), (184, 204, 159))),
-    Enemy("grave_revenant", "Grave Revenant", "revenant", ((74, 82, 84), (181, 197, 177), (83, 139, 126))),
-    Enemy("pale_banshee", "Pale Banshee", "banshee", ((180, 196, 204), (82, 91, 112), (139, 218, 223))),
-    Enemy("crypt_sentinel", "Crypt Sentinel", "sentinel", ((78, 76, 82), (196, 190, 165), (137, 107, 68))),
-    Enemy("wild_boar", "Wild Boar", "boar", ((116, 75, 50), (76, 49, 37), (218, 202, 160))),
-    Enemy("thorn_hedgehog", "Thorn Hedgehog", "hedgehog", ((111, 87, 54), (64, 91, 47), (178, 156, 96))),
-    Enemy("forest_spider", "Forest Spider", "spider", ((61, 67, 61), (32, 38, 35), (156, 65, 63))),
-    Enemy("forest_slime", "Forest Slime", "slime", ((57, 137, 101), (32, 88, 72), (140, 218, 173))),
-    Enemy("sapling_deer", "Sapling Deer", "deer", ((142, 102, 58), (71, 117, 64), (221, 185, 112))),
-    Enemy("mushroom_brute", "Mushroom Brute", "mushroom", ((150, 64, 62), (232, 216, 185), (91, 64, 48))),
-    Enemy("dire_wolf", "Dire Wolf", "wolf", ((82, 88, 97), (45, 50, 59), (190, 61, 55))),
-    Enemy("orc", "Cave Orc", "orc", ((92, 103, 58), (68, 51, 48), (217, 211, 187))),
-    Enemy("forest_pixie", "Forest Pixie", "pixie", ((106, 104, 177), (226, 190, 94), (112, 205, 177))),
-    Enemy("bone_druid", "Bone Druid", "druid", ((91, 84, 77), (216, 209, 181), (74, 100, 57))),
-    Enemy("bog_wraith", "Bog Wraith", "wraith", ((62, 92, 95), (37, 58, 66), (118, 183, 179))),
-    Enemy("ancient_treant", "Ancient Treant", "treant", ((104, 72, 44), (62, 113, 57), (173, 133, 78))),
-    Enemy("reach_hen", "Reach Hen", "hen", ((151, 112, 70), (226, 207, 160), (172, 55, 45))),
-    Enemy("meadow_hopper", "Meadow Hopper", "hopper", ((117, 158, 82), (65, 96, 62), (220, 203, 126))),
-    Enemy("reach_vole", "Reach Vole", "vole", ((117, 92, 72), (74, 57, 49), (210, 176, 137))),
-    Enemy("grave_shambler", "Grave Shambler", "shambler", ((102, 105, 92), (69, 69, 72), (188, 179, 145))),
-    Enemy("skitterer", "Skitterer", "skitterer", ((71, 88, 69), (34, 44, 38), (167, 91, 71))),
-    Enemy("mire_spitter", "Mire Spitter", "toad", ((71, 116, 82), (37, 68, 59), (159, 217, 116))),
-    Enemy("canyon_scavenger", "Canyon Scavenger", "hound", ((137, 82, 54), (77, 49, 42), (225, 171, 91))),
-    Enemy("dust_burrower", "Dust Burrower", "burrower", ((141, 102, 63), (91, 64, 47), (219, 181, 112))),
-    Enemy("crimson_burrower", "Crimson Burrower", "burrower", ((152, 62, 54), (83, 41, 45), (231, 105, 76))),
-    Enemy("dune_skitterer", "Dune Skitterer", "skitterer", ((159, 124, 70), (91, 68, 45), (234, 198, 118))),
-    Enemy("sun_wraith", "Sun-Scorched Wraith", "wraith", ((166, 104, 58), (91, 57, 45), (238, 184, 88))),
-    Enemy("reef_prowler", "Reef Prowler", "prowler", ((64, 119, 128), (38, 67, 80), (178, 222, 197))),
-    Enemy("venomous_stalker", "Venomous Stalker", "stalker", ((62, 102, 58), (36, 58, 40), (166, 219, 91))),
-    Enemy("totem_wraith", "Ancient Totem Wraith", "wraith", ((95, 75, 122), (48, 42, 70), (195, 155, 230))),
-    Enemy("bog_leech", "Bog Leech", "leech", ((92, 55, 64), (47, 34, 42), (184, 83, 88))),
-    Enemy("marsh_hag", "Marsh Hag", "hag", ((87, 105, 73), (62, 55, 70), (164, 204, 87))),
-    Enemy("gloom_toad", "Gloom Toad", "toad", ((91, 128, 69), (48, 71, 46), (211, 173, 74))),
-    Enemy("magma_hound", "Magma Hound", "hound", ((53, 49, 47), (30, 29, 31), (232, 94, 48))),
-    Enemy("cinder_shade", "Cinder Shade", "wraith", ((100, 72, 67), (52, 45, 48), (239, 124, 63))),
-    Enemy("basalt_brute", "Basalt Brute", "golem", ((71, 67, 67), (41, 40, 43), (225, 92, 50))),
-    Enemy("bone_scorpion", "Bone Scorpion", "scorpion", ((207, 193, 151), (121, 95, 67), (230, 219, 178))),
-    Enemy("dune_reaver", "Dune Reaver", "mummy", ((183, 154, 103), (91, 66, 55), (213, 194, 144))),
-    Enemy("mirage_shade", "Mirage Shade", "wraith", ((151, 131, 95), (73, 67, 71), (116, 207, 220))),
-    Enemy("tide_lurker", "Tide Lurker", "lurker", ((62, 111, 121), (43, 68, 79), (178, 199, 151))),
-    Enemy("drowned_marauder", "Drowned Marauder", "ghoul", ((70, 126, 121), (43, 72, 78), (166, 209, 180))),
-    Enemy("brine_siren", "Brine Siren", "siren", ((126, 169, 173), (55, 82, 100), (213, 223, 190))),
-    Enemy("coral_crab", "Coral Crab", "crab", ((158, 86, 71), (87, 53, 58), (231, 149, 125))),
-    Enemy("canopy_stalker", "Canopy Stalker", "panther", ((50, 62, 48), (28, 35, 31), (145, 161, 76))),
-    Enemy("blowpipe_headhunter", "Blowpipe Headhunter", "headhunter", ((121, 78, 55), (54, 83, 48), (218, 206, 164))),
-    Enemy("verdant_faultwarden", "Verdant Faultwarden", "treant", ((87, 77, 56), (75, 128, 67), (183, 203, 91))),
-    Enemy("deepdelve_wight", "Deepdelve Wight", "revenant", ((85, 76, 70), (193, 169, 112), (137, 111, 71))),
+    Enemy("ghoul", "Crypt Ghoul", 0),
+    Enemy("grave_revenant", "Grave Revenant", 1),
+    Enemy("pale_banshee", "Pale Banshee", 2),
+    Enemy("crypt_sentinel", "Crypt Sentinel", 3, (82, 82)),
+    Enemy("wild_boar", "Wild Boar", 4),
+    Enemy("thorn_hedgehog", "Thorn Hedgehog", 5),
+    Enemy("forest_spider", "Forest Spider", 6, (82, 76)),
+    Enemy("forest_slime", "Forest Slime", 7),
+    Enemy("sapling_deer", "Sapling Deer", 8, (80, 82)),
+    Enemy("mushroom_brute", "Mushroom Brute", 9, (82, 82)),
+    Enemy("dire_wolf", "Dire Wolf", 10, (84, 78)),
+    Enemy("orc", "Cave Orc", 11, (80, 82)),
+    Enemy("forest_pixie", "Forest Pixie", 12, (68, 78)),
+    Enemy("bone_druid", "Bone Druid", 13, (82, 82)),
+    Enemy("bog_wraith", "Bog Wraith", 14, (78, 82)),
+    Enemy("ancient_treant", "Ancient Treant", 15, (84, 86)),
+    Enemy("reach_hen", "Reach Hen", 16, (68, 72)),
+    Enemy("meadow_hopper", "Meadow Hopper", 17, (70, 70)),
+    Enemy("reach_vole", "Reach Vole", 18, (70, 70)),
+    Enemy("grave_shambler", "Grave Shambler", 19),
+    Enemy("skitterer", "Skitterer", 20, (82, 76)),
+    Enemy("mire_spitter", "Mire Spitter", 21),
+    Enemy("canyon_scavenger", "Canyon Scavenger", 22, (78, 82)),
+    Enemy("dust_burrower", "Dust Burrower", 23, (82, 72)),
+    Enemy("crimson_burrower", "Crimson Burrower", 24, (82, 72)),
+    Enemy("dune_skitterer", "Dune Skitterer", 25, (82, 76)),
+    Enemy("sun_wraith", "Sun-Scorched Wraith", 26),
+    Enemy("reef_prowler", "Reef Prowler", 27),
+    Enemy("venomous_stalker", "Venomous Stalker", 28, (82, 82)),
+    Enemy("totem_wraith", "Ancient Totem Wraith", 29),
+    Enemy("bog_leech", "Bog Leech", 30, (84, 72)),
+    Enemy("marsh_hag", "Marsh Hag", 31),
+    Enemy("gloom_toad", "Gloom Toad", 32, (82, 76)),
+    Enemy("magma_hound", "Magma Hound", 33, (84, 78)),
+    Enemy("cinder_shade", "Cinder Shade", 34),
+    Enemy("basalt_brute", "Basalt Brute", 35, (84, 86)),
+    Enemy("bone_scorpion", "Bone Scorpion", 36, (84, 78)),
+    Enemy("dune_reaver", "Dune Reaver", 37),
+    Enemy("mirage_shade", "Mirage Shade", 38),
+    Enemy("tide_lurker", "Tide Lurker", 39),
+    Enemy("drowned_marauder", "Drowned Marauder", 40),
+    Enemy("brine_siren", "Brine Siren", 41),
+    Enemy("coral_crab", "Coral Crab", 42, (84, 76)),
+    Enemy("canopy_stalker", "Canopy Stalker", 43, (80, 82)),
+    Enemy("blowpipe_headhunter", "Blowpipe Headhunter", 44),
+    Enemy("verdant_faultwarden", "Verdant Faultwarden", 45, (84, 86)),
+    Enemy("deepdelve_wight", "Deepdelve Wight", 46),
 ]
 
 PUBLIC_COPY_SLUGS = {enemy.slug for enemy in ENEMIES}
 
 
-def rect(d: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int, color: tuple[int, int, int], s: int = SCALE) -> None:
-    d.rectangle((x * s, y * s, (x + w) * s - 1, (y + h) * s - 1), fill=color + (255,))
+def source_cell_box(index: int, width: int, height: int) -> tuple[int, int, int, int]:
+    col = index % CONTACT_COLS
+    row = index // CONTACT_COLS
+    return (
+        round(col * width / CONTACT_COLS),
+        round(row * height / CONTACT_ROWS),
+        round((col + 1) * width / CONTACT_COLS),
+        round((row + 1) * height / CONTACT_ROWS),
+    )
 
 
-def poly(d: ImageDraw.ImageDraw, pts: list[tuple[int, int]], color: tuple[int, int, int], s: int = SCALE) -> None:
-    d.polygon([(x * s, y * s) for x, y in pts], fill=color + (255,))
+def is_chroma_candidate(pixel: tuple[int, int, int, int]) -> bool:
+    r, g, b, a = pixel
+    if a == 0:
+        return True
+    return r >= 180 and b >= 165 and g <= 90 and abs(r - b) <= 85
 
 
-def ellipse(d: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int, color: tuple[int, int, int], s: int = SCALE) -> None:
-    d.ellipse((x * s, y * s, (x + w) * s - 1, (y + h) * s - 1), fill=color + (255,))
+def remove_connected_magenta_background(image: Image.Image) -> Image.Image:
+    rgba = image.convert("RGBA")
+    width, height = rgba.size
+    px = rgba.load()
+    seen = bytearray(width * height)
+    queue: deque[tuple[int, int]] = deque()
+
+    def push(x: int, y: int) -> None:
+        index = y * width + x
+        if seen[index] or not is_chroma_candidate(px[x, y]):
+            return
+        seen[index] = 1
+        queue.append((x, y))
+
+    for x in range(width):
+        push(x, 0)
+        push(x, height - 1)
+    for y in range(height):
+        push(0, y)
+        push(width - 1, y)
+
+    while queue:
+        x, y = queue.popleft()
+        if x > 0:
+            push(x - 1, y)
+        if x < width - 1:
+            push(x + 1, y)
+        if y > 0:
+            push(x, y - 1)
+        if y < height - 1:
+            push(x, y + 1)
+
+    out = rgba.copy()
+    out_px = out.load()
+    for y in range(height):
+        row = y * width
+        for x in range(width):
+            if seen[row + x]:
+                out_px[x, y] = (0, 0, 0, 0)
+    return out
 
 
-def frame_canvas() -> tuple[Image.Image, ImageDraw.ImageDraw]:
-    im = Image.new("RGBA", (CELL, CELL), BG)
-    return im, ImageDraw.Draw(im)
+def save_on_magenta(image: Image.Image, path: Path) -> None:
+    canvas = Image.new("RGBA", image.size, MAGENTA)
+    canvas.alpha_composite(image.convert("RGBA"))
+    canvas.save(path)
 
 
-def orient_frame(frame: Image.Image, direction: str) -> Image.Image:
+def quantize_rgba(image: Image.Image, colors: int = 18) -> Image.Image:
+    rgba = image.convert("RGBA")
+    alpha = rgba.getchannel("A")
+    hard_alpha = alpha.point(lambda value: 255 if value >= 32 else 0)
+    rgb = Image.new("RGB", rgba.size, (0, 0, 0))
+    rgb.paste(rgba.convert("RGB"), mask=hard_alpha)
+    quantized = rgb.quantize(colors=colors, method=Image.Quantize.MEDIANCUT).convert("RGB")
+    out = Image.new("RGBA", rgba.size)
+    out.paste(quantized)
+    out.putalpha(hard_alpha)
+    despill_magenta(out)
+    return out
+
+
+def despill_magenta(image: Image.Image) -> None:
+    px = image.load()
+    width, height = image.size
+    for y in range(height):
+        for x in range(width):
+            r, g, b, a = px[x, y]
+            if a == 0:
+                continue
+            distance = ((r - MAGENTA_RGB[0]) ** 2 + (g - MAGENTA_RGB[1]) ** 2 + (b - MAGENTA_RGB[2]) ** 2) ** 0.5
+            if distance <= 36 or (r >= 205 and b >= 180 and g <= 80 and abs(r - b) <= 90):
+                px[x, y] = (168, max(g, 72), 144, a)
+
+
+def fit_sprite(sprite: Image.Image, max_size: tuple[int, int]) -> Image.Image:
+    bbox = sprite.getchannel("A").getbbox()
+    if not bbox:
+        raise RuntimeError("empty source sprite")
+    trimmed = sprite.crop(bbox)
+    max_width, max_height = max_size
+    scale = min(max_width / trimmed.width, max_height / trimmed.height, 1.0)
+    size = (max(1, round(trimmed.width * scale)), max(1, round(trimmed.height * scale)))
+    resized = trimmed.resize(size, Image.Resampling.NEAREST)
+    return quantize_rgba(resized)
+
+
+def direction_sprite(sprite: Image.Image, direction: str) -> Image.Image:
     if direction == "left":
-        return frame.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+        return sprite.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    if direction == "right":
+        return sprite
     if direction == "up":
-        return frame.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
-    return frame
+        darker = ImageEnhance.Brightness(sprite).enhance(0.72)
+        return ImageEnhance.Contrast(darker).enhance(0.9)
+    return sprite
 
 
-def draw_weapon(d: ImageDraw.ImageDraw, cx: int, cy: int, attack: float, color: tuple[int, int, int]) -> None:
-    reach = int(attack * 7)
-    rect(d, cx + 9, cy + 5 - reach // 3, 2, 10 + reach, color)
-    rect(d, cx + 8, cy + 4 - reach // 3, 4, 2, (214, 204, 156))
+def place_sprite(cell: Image.Image, sprite: Image.Image, frame_index: int, direction: str) -> None:
+    walk_offsets = {
+        "up": ((-1, 1), (0, -1), (1, 1), (0, -1)),
+        "right": ((-2, 1), (0, -1), (2, 1), (0, -1)),
+        "down": ((-1, 1), (0, -1), (1, 1), (0, -1)),
+        "left": ((2, 1), (0, -1), (-2, 1), (0, -1)),
+    }
+    dx, dy = walk_offsets[direction][frame_index]
+    x = (CELL - sprite.width) // 2 + dx
+    y = CELL - sprite.height - 10 + dy
+    cell.alpha_composite(sprite, (x, y))
+    # The processor realigns each frame by anchor, so a tiny in-sprite foot tick
+    # keeps inspection GIFs from collapsing identical held poses.
+    tick_colors = ((30, 34, 32, 255), (54, 58, 52, 255), (78, 74, 60, 255), (54, 58, 52, 255))
+    tick_x = max(0, min(CELL - 1, x + sprite.width // 2 + (-1, 0, 1, 0)[frame_index]))
+    tick_y = max(0, min(CELL - 1, y + sprite.height - 2))
+    cell.putpixel((tick_x, tick_y), tick_colors[frame_index])
 
 
-def draw_goblin(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    c, dark, accent = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    bob = int(round(abs(phase)))
-    atk = [0, 0.15, 0.4, 1, 0.8, 0.35, 0.1, 0][f] if row == "attack" else 0
-    cx, gy = 16, 25 - bob
-    lean = int(atk * 3)
-    leg = 2 if phase > 0 else -2
-    rect(d, cx - 5 + lean, gy - 10, 10, 11, c)
-    rect(d, cx - 4 + lean, gy - 17, 8, 7, c)
-    poly(d, [(cx - 4 + lean, gy - 15), (cx - 10 + lean, gy - 18), (cx - 6 + lean, gy - 12)], c)
-    poly(d, [(cx + 4 + lean, gy - 15), (cx + 10 + lean, gy - 18), (cx + 6 + lean, gy - 12)], c)
-    rect(d, cx - 3 + lean, gy - 14, 2, 2, (236, 238, 184))
-    rect(d, cx + 2 + lean, gy - 14, 2, 2, (236, 238, 184))
-    rect(d, cx - 6 + lean, gy - 7, 3, 8, dark)
-    rect(d, cx + 4 + lean, gy - 7, 3, 8, dark)
-    rect(d, cx - 4 + leg + lean, gy, 3, 5, dark)
-    rect(d, cx + 1 - leg + lean, gy, 3, 5, dark)
-    rect(d, cx - 8 + lean, gy - 2, 5, 3, accent)
-    draw_weapon(d, cx, gy - 13, atk, accent)
-    if e.kind == "shaman":
-        rect(d, cx - 7 + lean, gy - 9, 3, 12, e.colors[1])
-        rect(d, cx + 8 + lean, gy - 17 - int(atk * 4), 2, 18, accent)
-        if row == "attack":
-            ellipse(d, cx + 6 + int(atk * 7), gy - 23 - int(atk * 3), 5, 5, (139, 104, 204))
+def make_sheet(enemy: Enemy, source_contact_alpha: Image.Image, enemy_dir: Path) -> tuple[Path, Path]:
+    source_dir = SOURCE_ROOT / enemy.slug
+    source_dir.mkdir(parents=True, exist_ok=True)
 
+    raw_cell = source_contact_alpha.crop(source_cell_box(enemy.source_index, *source_contact_alpha.size))
+    bbox = raw_cell.getchannel("A").getbbox()
+    if not bbox:
+        raise RuntimeError(f"{enemy.slug} source cell is empty")
+    source_cutout = raw_cell.crop(bbox)
+    source_cutout_path = source_dir / f"{enemy.slug}_imagegen_cutout_alpha.png"
+    source_cutout.save(source_cutout_path)
 
-def draw_orc(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    skin, armor, blade = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    bob = int(round(abs(phase) * 1.5))
-    atk = [0, 0, 1, 4, 7, 4, 1, 0][f] if row == "attack" else 0
-    cx, gy = 16 + atk // 2, 27 - bob
-    leg = 2 if phase > 0 else -2
-    rect(d, cx - 7, gy - 14, 14, 14, armor)
-    rect(d, cx - 5, gy - 21, 10, 8, skin)
-    poly(d, [(cx - 5, gy - 18), (cx - 12, gy - 21), (cx - 8, gy - 15)], skin)
-    poly(d, [(cx + 5, gy - 18), (cx + 12, gy - 21), (cx + 8, gy - 15)], skin)
-    rect(d, cx - 2, gy - 18, 1, 1, (237, 236, 186))
-    rect(d, cx + 3, gy - 18, 1, 1, (237, 236, 186))
-    rect(d, cx - 4, gy - 15, 8, 2, (112, 73, 57))
-    rect(d, cx - 9, gy - 11, 4, 11, skin)
-    rect(d, cx + 6, gy - 11, 4, 11, skin)
-    rect(d, cx - 5 + leg, gy, 4, 6, armor)
-    rect(d, cx + 2 - leg, gy, 4, 6, armor)
-    rect(d, cx - 12, gy - 8, 6, 8, armor)
-    rect(d, cx + 10 + atk, gy - 20 - atk // 2, 3, 23, blade)
-    rect(d, cx + 8 + atk, gy - 20 - atk // 2, 7, 3, blade)
-    if row == "attack":
-        poly(d, [(cx + 11 + atk, gy - 18), (cx + 21 + atk, gy - 11), (cx + 13 + atk, gy - 8)], blade)
-        rect(d, cx + 16 + atk, gy - 10, 3, 2, (238, 232, 190))
-
-
-def draw_ghoul(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    skin, rag, bone = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    lurch = [0, 0, 1, 4, 6, 3, 1, 0][f] if row == "attack" else 0
-    bob = int(round(abs(phase)))
-    cx, gy = 16 + lurch // 2, 28 - bob
-    leg = 2 if phase > 0 else -2
-    lean = 2 + lurch // 3
-    poly(d, [(cx - 8 + lean, gy), (cx - 6 + lean, gy - 16), (cx + 5 + lean, gy - 14), (cx + 8 + lean, gy)], skin)
-    rect(d, cx - 5 + lean, gy - 20, 8, 7, skin)
-    rect(d, cx - 5 + lean, gy - 15, 10, 6, rag)
-    rect(d, cx - 3 + lean, gy - 18, 1, 1, (220, 235, 190))
-    rect(d, cx + 2 + lean, gy - 18, 1, 1, (220, 235, 190))
-    poly(d, [(cx - 6 + lean, gy - 12), (cx - 13 - lurch, gy - 8), (cx - 7 + lean, gy - 6)], skin)
-    poly(d, [(cx + 6 + lean, gy - 12), (cx + 14 + lurch, gy - 7), (cx + 7 + lean, gy - 5)], skin)
-    rect(d, cx - 5 + leg + lean, gy - 1, 3, 6, rag)
-    rect(d, cx + 2 - leg + lean, gy - 1, 3, 6, rag)
-    rect(d, cx - 6 + leg + lean, gy + 4, 4, 2, bone)
-    rect(d, cx + 2 - leg + lean, gy + 4, 4, 2, bone)
-    if row == "attack":
-        rect(d, cx + 13 + lurch, gy - 8, 5, 2, bone)
-        rect(d, cx + 15 + lurch, gy - 11, 2, 5, bone)
-
-
-def add_frame_motion_tick(d: ImageDraw.ImageDraw, f: int, row: str) -> None:
-    # A tiny in-silhouette tick prevents GIF optimizers from dropping held poses.
-    # It sits in the lower body/foot area and reads as normal walk/attack pixel motion.
-    walk_ticks = [(24, 28, 30), (28, 31, 34), (32, 35, 38), (36, 39, 42)]
-    attack_ticks = [(238, 219, 112), (232, 190, 92), (220, 151, 70), (205, 95, 66)]
-    color = (walk_ticks if row == "walk" else attack_ticks)[f % 4]
-    rect(d, 14 + (f % 4), 28 + (f % 2), 1, 1, color)
-    rect(d, 17 - (f % 4), 27 + ((f + 1) % 2), 1, 1, color)
-
-
-def draw_wolf(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    c, dark, accent = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    bob = int(abs(phase) * 2)
-    lunge = [0, 0, 1, 4, 5, 2, 0, 0][f] if row == "attack" else 0
-    cx, gy = 16 + lunge, 27 - bob
-    rect(d, cx - 10, gy - 10, 18, 8, c)
-    rect(d, cx + 4, gy - 15, 9, 7, c)
-    poly(d, [(cx + 6, gy - 15), (cx + 8, gy - 20), (cx + 10, gy - 15)], dark)
-    poly(d, [(cx + 12, gy - 14), (cx + 17 + lunge, gy - 12), (cx + 12, gy - 9)], c)
-    rect(d, cx - 12, gy - 12, 4, 3, dark)
-    rect(d, cx - 8 + (2 if phase > 0 else 0), gy - 3, 3, 8, dark)
-    rect(d, cx - 1 + (-2 if phase > 0 else 0), gy - 3, 3, 8, dark)
-    rect(d, cx + 6 + (-2 if phase > 0 else 0), gy - 3, 3, 8, dark)
-    rect(d, cx + 11, gy - 11, 2, 2, accent)
-    if row == "attack" and f in (3, 4):
-        rect(d, cx + 16, gy - 9, 3, 2, accent)
-
-
-def draw_boar(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    c, dark, tusk = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    charge = [0, 0, 1, 4, 6, 3, 1, 0][f] if row == "attack" else 0
-    cx, gy = 16 + charge, 27 - int(abs(phase))
-    ellipse(d, cx - 11, gy - 13, 20, 13, c)
-    rect(d, cx + 5, gy - 14, 8, 8, c)
-    rect(d, cx + 11, gy - 10, 4, 3, dark)
-    poly(d, [(cx + 10, gy - 8), (cx + 17, gy - 6), (cx + 11, gy - 5)], tusk)
-    rect(d, cx - 7 + (2 if phase > 0 else 0), gy - 2, 3, 7, dark)
-    rect(d, cx + 3 + (-2 if phase > 0 else 0), gy - 2, 3, 7, dark)
-    rect(d, cx + 1, gy - 18, 3, 4, dark)
-
-
-def draw_hedgehog(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    c, thorn, accent = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    cx, gy = 16, 28 - int(abs(phase))
-    ellipse(d, cx - 11, gy - 11, 22, 12, c)
-    for i in range(7):
-        x = cx - 10 + i * 3
-        h = 5 + ((i + f) % 2)
-        poly(d, [(x, gy - 9), (x + 1, gy - 15 - h // 2), (x + 3, gy - 9)], thorn)
-    rect(d, cx + 8, gy - 8, 4, 4, accent)
-    if row == "attack":
-        spike = [0, 1, 2, 5, 7, 3, 1, 0][f]
-        for i in range(3):
-            poly(d, [(cx + 9 + i * 3, gy - 13), (cx + 15 + spike + i * 2, gy - 16 + i), (cx + 10 + i * 3, gy - 10)], thorn)
-
-
-def draw_spider(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    c, dark, eye = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    cx, gy = 16, 25
-    ellipse(d, cx - 7, gy - 10, 14, 11, c)
-    ellipse(d, cx + 3, gy - 9, 8, 7, dark)
-    for side in (-1, 1):
-        for i in range(4):
-            step = int(math.sin(f / COLS * math.tau + i) * 2)
-            y = gy - 8 + i * 2
-            rect(d, cx + side * (5 + i * 2), y + step, side * 5 if side > 0 else 5, 2, dark)
-    rect(d, cx + 7, gy - 7, 1, 1, eye)
-    rect(d, cx + 10, gy - 7, 1, 1, eye)
-    if row == "attack":
-        jab = [0, 1, 2, 5, 6, 2, 1, 0][f]
-        rect(d, cx + 10 + jab, gy - 5, 7, 2, eye)
-
-
-def draw_slime(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    c, dark, hi = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    squash = int(abs(phase) * 3)
-    atk = [0, 0, 2, 6, 5, 2, 0, 0][f] if row == "attack" else 0
-    cx, gy = 16 + atk, 27
-    ellipse(d, cx - 10, gy - 13 + squash, 20 + atk // 2, 13 - squash, c)
-    rect(d, cx - 4, gy - 7, 2, 2, dark)
-    rect(d, cx + 4, gy - 7, 2, 2, dark)
-    rect(d, cx - 5, gy - 11, 4, 2, hi)
-    if row == "attack":
-        ellipse(d, cx + 9, gy - 11, 5, 5, hi)
-
-
-def draw_mushroom(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    cap, stem, dark = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    atk = [0, 0, 1, 4, 5, 2, 0, 0][f] if row == "attack" else 0
-    cx, gy = 16 + atk, 27 - int(abs(phase))
-    rect(d, cx - 5, gy - 12, 10, 13, stem)
-    ellipse(d, cx - 12, gy - 20, 24, 12, cap)
-    rect(d, cx - 7, gy - 18, 3, 2, stem)
-    rect(d, cx + 3, gy - 17, 4, 2, stem)
-    rect(d, cx - 8, gy - 1, 4, 5, dark)
-    rect(d, cx + 4, gy - 1, 4, 5, dark)
-    if row == "attack":
-        for i in range(3):
-            ellipse(d, cx + 10 + i * 3 + atk, gy - 18 + i * 2, 2, 2, cap)
-
-
-def draw_deer(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    c, leaf, antler = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    atk = [0, 0, 1, 4, 5, 2, 0, 0][f] if row == "attack" else 0
-    cx, gy = 16 + atk, 27 - int(abs(phase))
-    rect(d, cx - 9, gy - 12, 16, 9, c)
-    rect(d, cx + 4, gy - 17, 7, 7, c)
-    rect(d, cx + 6, gy - 22, 2, 7, antler)
-    rect(d, cx + 10, gy - 22, 2, 7, antler)
-    rect(d, cx + 5, gy - 23, 4, 2, leaf)
-    rect(d, cx + 9, gy - 23, 4, 2, leaf)
-    rect(d, cx - 6 + (2 if phase > 0 else 0), gy - 4, 3, 9, c)
-    rect(d, cx + 3 + (-2 if phase > 0 else 0), gy - 4, 3, 9, c)
-    if row == "attack" and f in (3, 4):
-        rect(d, cx + 12, gy - 20, 6, 2, antler)
-
-
-def draw_treant(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    bark, leaf, hi = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    atk = [0, 0, 1, 3, 6, 3, 1, 0][f] if row == "attack" else 0
-    cx, gy = 16, 28 - int(abs(phase))
-    rect(d, cx - 7, gy - 20, 14, 21, bark)
-    rect(d, cx - 4, gy - 15, 2, 2, hi)
-    rect(d, cx + 3, gy - 15, 2, 2, hi)
-    rect(d, cx - 11, gy - 25, 22, 7, leaf)
-    rect(d, cx - 10 - atk, gy - 17, 4 + atk, 4, bark)
-    rect(d, cx + 7, gy - 17, 4 + atk, 4, bark)
-    rect(d, cx - 6 + (1 if phase > 0 else -1), gy, 4, 5, bark)
-    rect(d, cx + 3 + (-1 if phase > 0 else 1), gy, 4, 5, bark)
-    if row == "attack":
-        rect(d, cx + 12 + atk, gy - 16, 5, 3, leaf)
-
-
-def draw_druid(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    robe, bone, moss = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    atk = [0, 0, 1, 3, 5, 2, 0, 0][f] if row == "attack" else 0
-    cx, gy = 16, 27 - int(abs(phase))
-    poly(d, [(cx - 8, gy), (cx - 5, gy - 17), (cx + 5, gy - 17), (cx + 8, gy)], robe)
-    rect(d, cx - 4, gy - 22, 8, 6, bone)
-    rect(d, cx - 2, gy - 20, 1, 1, (35, 35, 35))
-    rect(d, cx + 2, gy - 20, 1, 1, (35, 35, 35))
-    rect(d, cx + 8, gy - 21 - atk, 2, 22, bone)
-    if row == "attack":
-        ellipse(d, cx + 5 + atk, gy - 28 - atk, 6, 6, moss)
-
-
-def draw_pixie(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    body, hair, wing = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    atk = [0, 0, 1, 3, 5, 2, 0, 0][f] if row == "attack" else 0
-    cx, gy = 16 + atk, 22 + int(phase * 2)
-    ellipse(d, cx - 10, gy - 13, 8, 12, wing)
-    ellipse(d, cx + 2, gy - 13, 8, 12, wing)
-    rect(d, cx - 3, gy - 10, 6, 11, body)
-    rect(d, cx - 4, gy - 15, 8, 6, hair)
-    rect(d, cx + 5, gy - 8, 5 + atk, 2, hair)
-    if row == "attack":
-        ellipse(d, cx + 10 + atk, gy - 12, 4, 4, (238, 224, 119))
-
-
-def draw_wraith(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    c, dark, glow = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    atk = [0, 0, 1, 3, 6, 3, 1, 0][f] if row == "attack" else 0
-    cx, gy = 16 + atk, 26 + int(phase * 2)
-    poly(d, [(cx - 8, gy + 2), (cx - 7, gy - 17), (cx + 7, gy - 17), (cx + 8, gy + 2), (cx + 3, gy - 2), (cx, gy + 4), (cx - 3, gy - 2)], c)
-    rect(d, cx - 3, gy - 12, 2, 2, glow)
-    rect(d, cx + 2, gy - 12, 2, 2, glow)
-    rect(d, cx - 12 - atk, gy - 8, 6 + atk, 3, dark)
-    rect(d, cx + 7, gy - 8, 6 + atk, 3, dark)
-    if row == "attack":
-        ellipse(d, cx + 11 + atk, gy - 12, 5, 5, glow)
-
-
-def draw_revenant(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    coat, bone, glow = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    atk = [0, 0, 1, 4, 6, 2, 0, 0][f] if row == "attack" else 0
-    cx, gy = 16 + atk, 27 - int(abs(phase))
-    leg = 2 if phase > 0 else -2
-    rect(d, cx - 6, gy - 15, 12, 15, coat)
-    rect(d, cx - 4, gy - 21, 8, 7, bone)
-    rect(d, cx - 2, gy - 19, 1, 1, glow)
-    rect(d, cx + 2, gy - 19, 1, 1, glow)
-    poly(d, [(cx - 7, gy - 14), (cx - 12 - atk, gy - 10), (cx - 7, gy - 8)], bone)
-    poly(d, [(cx + 7, gy - 14), (cx + 13 + atk, gy - 10), (cx + 7, gy - 8)], bone)
-    rect(d, cx - 5 + leg, gy - 1, 3, 6, bone)
-    rect(d, cx + 2 - leg, gy - 1, 3, 6, bone)
-    if row == "attack":
-        rect(d, cx + 12 + atk, gy - 12, 4, 3, glow)
-
-
-def draw_sentinel(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    armor, bone, brass = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    atk = [0, 0, 1, 3, 5, 2, 0, 0][f] if row == "attack" else 0
-    cx, gy = 16, 28 - int(abs(phase))
-    leg = 1 if phase > 0 else -1
-    rect(d, cx - 7, gy - 15, 14, 14, armor)
-    rect(d, cx - 5, gy - 21, 10, 7, bone)
-    rect(d, cx - 8, gy - 13, 3, 10, brass)
-    rect(d, cx + 6, gy - 13, 3, 10, brass)
-    rect(d, cx - 2, gy - 18, 1, 1, (35, 35, 35))
-    rect(d, cx + 2, gy - 18, 1, 1, (35, 35, 35))
-    rect(d, cx - 5 + leg, gy - 2, 3, 7, bone)
-    rect(d, cx + 2 - leg, gy - 2, 3, 7, bone)
-    rect(d, cx + 10, gy - 21 - atk, 2, 25, brass)
-    rect(d, cx + 8, gy - 20 - atk, 6, 2, bone)
-    if row == "attack":
-        rect(d, cx + 11 + atk, gy - 17, 5 + atk, 3, brass)
-
-
-def draw_banshee(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    shroud, shadow, glow = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    atk = [0, 0, 1, 3, 6, 3, 1, 0][f] if row == "attack" else 0
-    cx, gy = 16 + atk, 25 + int(phase * 2)
-    poly(d, [(cx - 7, gy + 3), (cx - 5, gy - 17), (cx + 5, gy - 17), (cx + 7, gy + 3), (cx + 3, gy), (cx, gy + 5), (cx - 3, gy)], shroud)
-    rect(d, cx - 4, gy - 22, 8, 7, shroud)
-    rect(d, cx - 2, gy - 20, 1, 1, glow)
-    rect(d, cx + 2, gy - 20, 1, 1, glow)
-    rect(d, cx - 11 - atk, gy - 13, 6 + atk, 3, shadow)
-    rect(d, cx + 6, gy - 13, 6 + atk, 3, shadow)
-    if row == "attack":
-        ellipse(d, cx + 10 + atk, gy - 19, 7, 7, glow)
-        rect(d, cx + 12 + atk, gy - 17, 3, 3, (246, 251, 231))
-
-
-def draw_hen(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    feather, belly, comb = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    cx, gy = 16, 29 - int(abs(phase))
-    step = 1 if phase > 0 else -1
-    ellipse(d, cx - 8, gy - 14, 15, 12, feather)
-    ellipse(d, cx + 3, gy - 17, 7, 7, belly)
-    poly(d, [(cx + 8, gy - 14), (cx + 14, gy - 12), (cx + 8, gy - 10)], (218, 177, 72))
-    rect(d, cx + 5, gy - 21, 2, 4, comb)
-    rect(d, cx + 8, gy - 20, 2, 4, comb)
-    rect(d, cx + 6, gy - 15, 1, 1, (34, 30, 24))
-    rect(d, cx - 11, gy - 13, 5, 7, feather)
-    rect(d, cx - 5 + step, gy - 3, 2, 5, (118, 84, 49))
-    rect(d, cx + 2 - step, gy - 3, 2, 5, (118, 84, 49))
-    rect(d, cx - 6 + step, gy + 2, 4, 1, (118, 84, 49))
-    rect(d, cx + 1 - step, gy + 2, 4, 1, (118, 84, 49))
-
-
-def draw_hopper(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    hide, dark, belly = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    hop = [0, 2, 5, 2][f]
-    stretch = 1 if f in (1, 2) else 0
-    cx, gy = 16 + (1 if f == 2 else 0), 30 - hop
-    ellipse(d, cx - 9, gy - 13 - stretch, 17, 13 + stretch, hide)
-    ellipse(d, cx + 2, gy - 18 - stretch, 8, 8, hide)
-    poly(d, [(cx + 4, gy - 18), (cx + 1, gy - 25), (cx + 7, gy - 19)], hide)
-    poly(d, [(cx + 8, gy - 18), (cx + 11, gy - 25), (cx + 10, gy - 18)], hide)
-    rect(d, cx + 6, gy - 16, 1, 1, (28, 32, 24))
-    ellipse(d, cx - 4, gy - 11, 8, 7, belly)
-    rect(d, cx - 8, gy - 3, 6, 3, dark)
-    rect(d, cx + 1 + int(phase > 0), gy - 3, 8, 3, dark)
-    rect(d, cx - 10 - int(phase > 0), gy, 7, 2, dark)
-    rect(d, cx + 5, gy, 7, 2, dark)
-
-
-def draw_vole(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    fur, dark, ear = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    cx, gy = 16, 30 - int(abs(phase))
-    step = 1 if phase > 0 else -1
-    ellipse(d, cx - 10, gy - 12, 18, 10, fur)
-    ellipse(d, cx + 4, gy - 15, 7, 7, fur)
-    ellipse(d, cx + 5, gy - 19, 3, 4, ear)
-    rect(d, cx + 9, gy - 12, 3, 2, dark)
-    rect(d, cx + 7, gy - 14, 1, 1, (28, 24, 20))
-    rect(d, cx - 13, gy - 10, 5, 2, dark)
-    rect(d, cx - 6 + step, gy - 3, 3, 4, dark)
-    rect(d, cx + 2 - step, gy - 3, 3, 4, dark)
-    rect(d, cx - 7 + step, gy, 4, 1, dark)
-    rect(d, cx + 1 - step, gy, 4, 1, dark)
-
-
-def draw_shambler(d: ImageDraw.ImageDraw, e: Enemy, f: int, row: str) -> None:
-    rot, cloth, bone = e.colors
-    phase = math.sin(f / COLS * math.tau)
-    drag = [0, 1, 2, 1][f]
-    lean = 2 + drag
-    cx, gy = 16, 29 - int(abs(phase))
-    leg = 1 if phase > 0 else -1
-    poly(d, [(cx - 8 + lean, gy), (cx - 7 + lean, gy - 17), (cx + 5 + lean, gy - 16), (cx + 8 + lean, gy)], rot)
-    rect(d, cx - 5 + lean, gy - 22, 8, 7, rot)
-    rect(d, cx - 6 + lean, gy - 16, 11, 7, cloth)
-    rect(d, cx - 3 + lean, gy - 20, 1, 1, (216, 217, 178))
-    rect(d, cx + 2 + lean, gy - 20, 1, 1, (216, 217, 178))
-    poly(d, [(cx - 6 + lean, gy - 13), (cx - 13 - drag, gy - 9), (cx - 8 + lean, gy - 7)], bone)
-    poly(d, [(cx + 6 + lean, gy - 12), (cx + 14 + drag, gy - 6), (cx + 7 + lean, gy - 5)], rot)
-    rect(d, cx - 5 + leg + lean, gy - 1, 3, 6, cloth)
-    rect(d, cx + 2 - leg + lean, gy - 1, 3, 6, bone)
-    rect(d, cx - 6 + leg + lean, gy + 4, 4, 2, bone)
-    rect(d, cx + 2 - leg + lean, gy + 4, 4, 2, bone)
-
-
-DRAWERS = {
-    "goblin": draw_goblin,
-    "shaman": draw_goblin,
-    "orc": draw_orc,
-    "ghoul": draw_ghoul,
-    "wolf": draw_wolf,
-    "boar": draw_boar,
-    "hedgehog": draw_hedgehog,
-    "spider": draw_spider,
-    "slime": draw_slime,
-    "mushroom": draw_mushroom,
-    "deer": draw_deer,
-    "treant": draw_treant,
-    "druid": draw_druid,
-    "pixie": draw_pixie,
-    "wraith": draw_wraith,
-    "revenant": draw_revenant,
-    "sentinel": draw_sentinel,
-    "banshee": draw_banshee,
-    "hen": draw_hen,
-    "hopper": draw_hopper,
-    "vole": draw_vole,
-    "shambler": draw_shambler,
-    "burrower": draw_spider,
-    "crab": draw_spider,
-    "golem": draw_sentinel,
-    "hag": draw_druid,
-    "headhunter": draw_goblin,
-    "hound": draw_wolf,
-    "leech": draw_slime,
-    "lurker": draw_goblin,
-    "mummy": draw_revenant,
-    "panther": draw_wolf,
-    "prowler": draw_wolf,
-    "scorpion": draw_spider,
-    "siren": draw_banshee,
-    "skitterer": draw_spider,
-    "stalker": draw_wolf,
-    "toad": draw_hopper,
-}
-
-
-def make_sheet(enemy: Enemy, out_dir: Path) -> Path:
-    sheet = Image.new("RGBA", (CELL * COLS, CELL * ROWS), BG)
+    base = fit_sprite(source_cutout, enemy.max_size)
+    sheet = Image.new("RGBA", (CELL * COLS, CELL * ROWS), MAGENTA)
     for row_idx, row_name in enumerate(ROW_NAMES):
-        row, direction = row_name.split("_", 1)
-        for f in range(COLS):
-            small, d = frame_canvas()
-            DRAWERS[enemy.kind](d, enemy, f, row)
-            add_frame_motion_tick(d, f, row)
-            small = orient_frame(small, direction)
-            sheet.alpha_composite(small, (f * CELL, row_idx * CELL))
-    path = out_dir / f"{enemy.slug}_generated_chroma.png"
+        _, direction = row_name.split("_", 1)
+        directed = direction_sprite(base, direction)
+        for frame_index in range(COLS):
+            frame = Image.new("RGBA", (CELL, CELL), MAGENTA)
+            place_sprite(frame, directed, frame_index, direction)
+            sheet.alpha_composite(frame, (frame_index * CELL, row_idx * CELL))
+
+    path = enemy_dir / f"{enemy.slug}_generated_chroma.png"
     sheet.save(path)
-    return path
+    return path, source_cutout_path
 
 
 def validate_one_subject_cells(sheet_path: Path) -> None:
@@ -595,15 +294,16 @@ def validate_one_subject_cells(sheet_path: Path) -> None:
             px = cell.load()
             for y in range(CELL):
                 for x in range(CELL):
-                    if px[x, y] != BG:
+                    if px[x, y][:3] != MAGENTA_RGB:
                         mask.putpixel((x, y), 1)
             bbox = mask.getbbox()
             if not bbox:
                 errors.append(f"empty cell r{row} c{col}")
                 continue
             width = bbox[2] - bbox[0]
-            if width > 96:
-                errors.append(f"too wide, possible duplicate subject r{row} c{col}: {width}px")
+            height = bbox[3] - bbox[1]
+            if width > CELL or height > CELL:
+                errors.append(f"too large r{row} c{col}: {width}x{height}px")
     if errors:
         raise RuntimeError("; ".join(errors))
 
@@ -614,11 +314,10 @@ def gif_frame_count(path: Path) -> int:
 
 
 def write_review_gif(frame_dir: Path, dst: Path) -> None:
-    bg = Image.new("RGBA", (1, 1), (28, 32, 38, 255))
     frames = []
     for path in sorted(frame_dir.glob("*.png")):
         frame = Image.open(path).convert("RGBA")
-        canvas = Image.new("RGBA", frame.size, bg.getpixel((0, 0)))
+        canvas = Image.new("RGBA", frame.size, (28, 32, 38, 255))
         canvas.alpha_composite(frame)
         frames.append(canvas.convert("RGB"))
     if len(frames) != COLS:
@@ -634,42 +333,58 @@ def write_review_gif(frame_dir: Path, dst: Path) -> None:
     )
 
 
-def process_enemy(enemy: Enemy) -> dict:
-    enemy_dir = OUT / enemy.slug
+def clear_stale_enemy_outputs(enemy_dir: Path, enemy: Enemy) -> None:
     enemy_dir.mkdir(parents=True, exist_ok=True)
-    sheet = make_sheet(enemy, enemy_dir)
-    validate_one_subject_cells(sheet)
+    for path in enemy_dir.glob(f"{enemy.slug}_*_inspection.gif"):
+        path.unlink()
+    for path in enemy_dir.glob(f"{enemy.slug}_*.png"):
+        path.unlink()
     grid_dir = enemy_dir / "grid"
     if grid_dir.exists():
         shutil.rmtree(grid_dir)
+
+
+def process_enemy(enemy: Enemy, source_contact_alpha: Image.Image) -> dict:
+    enemy_dir = OUT / enemy.slug
+    clear_stale_enemy_outputs(enemy_dir, enemy)
+    sheet, source_cutout = make_sheet(enemy, source_contact_alpha, enemy_dir)
+    validate_one_subject_cells(sheet)
+    grid_dir = enemy_dir / "grid"
     command = [
-            "python3",
-            str(PROCESSOR),
-            "grid-sheet",
-            str(sheet),
-            "--output-dir",
-            str(grid_dir),
-            "--columns",
-            str(COLS),
-            "--rows",
-            str(ROWS),
-            "--row-names",
-            ",".join(ROW_NAMES),
-            "--preview-background",
-            "28,32,38",
-            "--allow-outside-input",
-            "--workspace-root",
-            str(ROOT),
-            "--max-post-drift",
-            "1",
-        ]
+        "python3",
+        str(PROCESSOR),
+        "grid-sheet",
+        str(sheet),
+        "--output-dir",
+        str(grid_dir),
+        "--columns",
+        str(COLS),
+        "--rows",
+        str(ROWS),
+        "--row-names",
+        ",".join(ROW_NAMES),
+        "--preview-background",
+        "28,32,38",
+        "--allow-outside-input",
+        "--workspace-root",
+        str(ROOT),
+        "--max-post-drift",
+        "1",
+        "--no-sample-corner",
+        "--chroma",
+        "255,0,255",
+        "--tolerance",
+        "0",
+        "--max-chroma-remnants",
+        "0",
+    ]
     completed = subprocess.run(command, text=True, capture_output=True)
     if completed.returncode:
         print(completed.stdout)
         print(completed.stderr)
         completed.check_returncode()
     manifest = json.loads((grid_dir / "grid_manifest.json").read_text())
-    cleaned_alpha_sheet = grid_dir / f"{enemy.slug}_generated_chroma_alpha.png"
+    cleaned_alpha_sheet = Path(manifest["cleaned_image"])
     public_sheet = None
     if enemy.slug in PUBLIC_COPY_SLUGS:
         public_sheet = ROOT / "public" / f"{enemy.slug.replace('_', '-')}-sheet.png"
@@ -688,6 +403,10 @@ def process_enemy(enemy: Enemy) -> dict:
         "label": enemy.label,
         "pipeline": PIPELINE_NAME,
         "sheet_contract": PIPELINE_SPEC,
+        "imagegen_source_contact": str(SOURCE_CONTACT),
+        "normalized_magenta_contact": str(NORMALIZED_CONTACT),
+        "source_index": enemy.source_index,
+        "source_cutout": str(source_cutout),
         "generated_chroma": str(sheet),
         "cleaned_alpha_sheet": str(cleaned_alpha_sheet),
         "public_sheet": str(public_sheet) if public_sheet else None,
@@ -707,14 +426,16 @@ def make_contact(results: list[dict]) -> Path:
         alpha_small = alpha.resize((COLS * 48, ROWS * 48), Image.Resampling.NEAREST)
         thumb.alpha_composite(alpha_small)
         thumbs.append((item["label"], thumb))
-    w = COLS * 48
-    h = len(thumbs) * (ROWS * 48 + 18)
-    contact = Image.new("RGB", (w, h), (28, 32, 38))
-    d = ImageDraw.Draw(contact)
+    width = COLS * 48
+    height = len(thumbs) * (ROWS * 48 + 18)
+    contact = Image.new("RGB", (width, height), (28, 32, 38))
+    from PIL import ImageDraw
+
+    draw = ImageDraw.Draw(contact)
     y = 0
     for label, thumb in thumbs:
         contact.paste(thumb.convert("RGB"), (0, y + 18))
-        d.text((4, y + 3), label, fill=(230, 234, 220))
+        draw.text((4, y + 3), label, fill=(230, 234, 220))
         y += ROWS * 48 + 18
     out = OUT / "woodland_bespoke_v2_contact.png"
     contact.save(out)
@@ -731,14 +452,64 @@ def make_runtime_atlas(results: list[dict]) -> Path:
     return out
 
 
+def write_source_metadata() -> None:
+    SOURCE_ROOT.mkdir(parents=True, exist_ok=True)
+    (SOURCE_ROOT / "PROMPT.md").write_text(
+        "\n".join(
+            [
+                "# Enemy Directional 4x4 V2 Imagegen Source",
+                "",
+                "The production v2 enemy sheets are imported from an image-generated",
+                "simplified contact sheet. The model output is kept as the original",
+                "source artifact, then locally normalized to an exact `#ff00ff`",
+                "chroma background before slicing and alpha cleanup.",
+                "",
+                "Runtime contract: 384x384 sheets, 96px cells, 4 columns, rows",
+                "`walk_up`, `walk_right`, `walk_down`, `walk_left`.",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (SOURCE_ROOT / "roster_manifest.json").write_text(
+        json.dumps(
+            {
+                "pipeline": PIPELINE_NAME,
+                "source_contact": str(SOURCE_CONTACT),
+                "normalized_magenta_contact": str(NORMALIZED_CONTACT),
+                "contact_grid": {"columns": CONTACT_COLS, "rows": CONTACT_ROWS},
+                "chroma": "#ff00ff",
+                "enemies": [
+                    {
+                        "slug": enemy.slug,
+                        "label": enemy.label,
+                        "source_index": enemy.source_index,
+                    }
+                    for enemy in ENEMIES
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+
 def main() -> None:
+    if not SOURCE_CONTACT.exists():
+        raise FileNotFoundError(f"missing imagegen source contact sheet: {SOURCE_CONTACT}")
     OUT.mkdir(parents=True, exist_ok=True)
-    results = [process_enemy(enemy) for enemy in ENEMIES]
+    write_source_metadata()
+    source_contact_alpha = remove_connected_magenta_background(Image.open(SOURCE_CONTACT))
+    save_on_magenta(source_contact_alpha, NORMALIZED_CONTACT)
+    results = [process_enemy(enemy, source_contact_alpha) for enemy in ENEMIES]
     contact = make_contact(results)
     runtime_atlas = make_runtime_atlas(results)
     manifest = {
         "pipeline": PIPELINE_SPEC,
         "output_root": str(OUT),
+        "imagegen_source_root": str(SOURCE_ROOT),
+        "imagegen_source_contact": str(SOURCE_CONTACT),
+        "normalized_magenta_contact": str(NORMALIZED_CONTACT),
         "contact": str(contact),
         "runtime_atlas": str(runtime_atlas),
         "runtime_atlas_order": [item["slug"] for item in results],
@@ -752,6 +523,8 @@ def main() -> None:
                 "contact": str(contact),
                 "manifest": str(OUT / "woodland_bespoke_v2_manifest.json"),
                 "runtime_atlas": str(runtime_atlas),
+                "imagegen_source_contact": str(SOURCE_CONTACT),
+                "normalized_magenta_contact": str(NORMALIZED_CONTACT),
                 "gif_count": len(gif_files),
             },
             indent=2,

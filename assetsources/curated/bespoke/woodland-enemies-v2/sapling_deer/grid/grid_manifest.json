@@ -3,11 +3,11 @@
   "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid",
   "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/sapling_deer_generated_chroma_alpha.png",
   "chroma": [
-    0,
     255,
-    0
+    0,
+    255
   ],
-  "tolerance": 40,
+  "tolerance": 0,
   "remove_green_halo": false,
   "grid": {
     "columns": 4,
@@ -34,28 +34,28 @@
       "frames": 4,
       "source_boxes": [
         [
-          21,
-          0,
-          87,
-          84
-        ],
-        [
-          117,
-          3,
-          183,
+          25,
+          5,
+          68,
           87
         ],
         [
-          213,
-          0,
-          279,
-          84
+          122,
+          3,
+          165,
+          85
         ],
         [
-          309,
-          3,
-          375,
+          219,
+          5,
+          262,
           87
+        ],
+        [
+          314,
+          3,
+          357,
+          85
         ]
       ],
       "pre_alignment_drift": {
@@ -64,46 +64,46 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_000.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_001.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_002.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/frame_003.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           }
         ]
@@ -114,57 +114,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1071,
-          0.0049,
-          0.1071
+          0.0006,
+          0.0006,
+          0.0006
         ],
-        "average_changed_fraction": 0.073
+        "average_changed_fraction": 0.0006
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/walk_up_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_up/aligned",
@@ -176,28 +176,28 @@
       "frames": 4,
       "source_boxes": [
         [
-          21,
-          108,
-          87,
-          192
+          24,
+          101,
+          67,
+          183
         ],
         [
-          117,
-          105,
-          183,
-          189
+          122,
+          99,
+          165,
+          181
         ],
         [
-          213,
-          108,
-          279,
-          192
+          220,
+          101,
+          263,
+          183
         ],
         [
-          309,
-          105,
-          375,
-          189
+          314,
+          99,
+          357,
+          181
         ]
       ],
       "pre_alignment_drift": {
@@ -206,46 +206,46 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_000.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_001.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_002.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/frame_003.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           }
         ]
@@ -256,57 +256,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1071,
-          0.0049,
-          0.1071
+          0.0006,
+          0.0006,
+          0.0006
         ],
-        "average_changed_fraction": 0.073
+        "average_changed_fraction": 0.0006
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/walk_right_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_right/aligned",
@@ -318,28 +318,28 @@
       "frames": 4,
       "source_boxes": [
         [
-          21,
-          204,
-          87,
-          288
+          25,
+          197,
+          68,
+          279
         ],
         [
-          117,
-          201,
-          183,
-          285
+          122,
+          195,
+          165,
+          277
         ],
         [
-          213,
-          204,
-          279,
-          288
+          219,
+          197,
+          262,
+          279
         ],
         [
-          309,
-          201,
-          375,
-          285
+          314,
+          195,
+          357,
+          277
         ]
       ],
       "pre_alignment_drift": {
@@ -348,46 +348,46 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_000.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_001.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_002.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/frame_003.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           }
         ]
@@ -398,57 +398,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1071,
-          0.0049,
-          0.1071
+          0.0006,
+          0.0006,
+          0.0006
         ],
-        "average_changed_fraction": 0.073
+        "average_changed_fraction": 0.0006
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/walk_down_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_down/aligned",
@@ -460,28 +460,28 @@
       "frames": 4,
       "source_boxes": [
         [
-          9,
-          300,
-          75,
-          384
+          29,
+          293,
+          72,
+          375
         ],
         [
-          105,
-          297,
-          171,
-          381
+          123,
+          291,
+          166,
+          373
         ],
         [
-          201,
-          300,
-          267,
-          384
+          217,
+          293,
+          260,
+          375
         ],
         [
-          297,
-          297,
-          363,
-          381
+          315,
+          291,
+          358,
+          373
         ]
       ],
       "pre_alignment_drift": {
@@ -490,46 +490,46 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_000.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_001.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_002.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/frame_003.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           }
         ]
@@ -540,57 +540,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 84,
+            "x": 21.5,
+            "y": 82,
             "bbox": [
               0,
               0,
-              66,
-              84
+              43,
+              82
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1071,
-          0.0049,
-          0.1071
+          0.0006,
+          0.0006,
+          0.0006
         ],
-        "average_changed_fraction": 0.073
+        "average_changed_fraction": 0.0006
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/walk_left_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/sapling_deer/grid/walk_left/aligned",

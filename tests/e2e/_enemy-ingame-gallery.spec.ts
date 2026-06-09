@@ -73,7 +73,7 @@ test("capture in-game screenshots of v2 enemy groups", async ({ page }) => {
     content: "#hud,.dialogue-dim{display:none!important;} body{overflow:hidden!important;}"
   });
   await page.evaluate(() => window.__TIB_E2E__?.send({ type: "chat", text: "/dev god" }));
-  await page.evaluate(() => window.__TIB_E2E__?.setUserZoom(2));
+  await page.evaluate(() => window.__TIB_E2E__?.setUserZoom(1));
 
   for (const group of GROUPS) {
     await page.evaluate(
@@ -91,25 +91,29 @@ test("capture in-game screenshots of v2 enemy groups", async ({ page }) => {
       ({ floor, x, y, types }) => {
         const hidden = new Set(["bog_leech", "dust_burrower", "crimson_burrower", "bone_scorpion", "venomous_stalker", "canopy_stalker"]);
         const hiddenOffsets = [
-          [1, 0],
-          [-1, 0],
-          [0, 1],
-          [0, -1],
-          [1, 1],
-          [-1, -1]
+          [-4, -2],
+          [-2, -4],
+          [2, -4],
+          [4, -2],
+          [-4, 3],
+          [4, 3]
         ];
         const regularOffsets = [
-          [-3, -2],
-          [0, -2],
-          [3, -2],
-          [-3, 2],
-          [0, 2],
-          [3, 2]
+          [-7, -4],
+          [0, -4],
+          [7, -4],
+          [-7, 4],
+          [0, 4],
+          [7, 4]
         ];
         let hiddenIndex = 0;
         let regularIndex = 0;
         for (const type of types) {
-          const [dx, dy] = hidden.has(type) ? hiddenOffsets[hiddenIndex++ % hiddenOffsets.length]! : regularOffsets[regularIndex++ % regularOffsets.length]!;
+          const offset = hidden.has(type)
+            ? hiddenOffsets[hiddenIndex++ % hiddenOffsets.length]!
+            : regularOffsets[regularIndex++ % regularOffsets.length]!;
+          const dx = offset[0]!;
+          const dy = offset[1]!;
           window.__TIB_E2E__?.send({ type: "e2eSpawnMonster", monster: type, floor, x: x + dx, y: y + dy });
         }
       },
@@ -126,7 +130,7 @@ test("capture in-game screenshots of v2 enemy groups", async ({ page }) => {
         "background:rgba(10,12,16,.76);color:#f4f0dc;font:13px/1.35 monospace;border:1px solid rgba(244,240,220,.35);";
       document.body.appendChild(el);
     }, group);
-    await page.waitForTimeout(1400);
+    await page.waitForTimeout(400);
     await page.screenshot({ path: path.join(OUT, `${group.name}.png`) });
   }
 });

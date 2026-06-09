@@ -3,11 +3,11 @@
   "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid",
   "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/verdant_faultwarden_generated_chroma_alpha.png",
   "chroma": [
-    0,
     255,
-    0
+    0,
+    255
   ],
-  "tolerance": 40,
+  "tolerance": 0,
   "remove_green_halo": false,
   "grid": {
     "columns": 4,
@@ -34,76 +34,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          15,
-          0,
-          81,
+          5,
+          4,
+          89,
           87
         ],
         [
-          111,
-          0,
-          177,
-          90
+          102,
+          2,
+          186,
+          85
         ],
         [
-          207,
-          0,
-          273,
+          199,
+          4,
+          283,
           87
         ],
         [
-          303,
-          0,
-          369,
-          90
+          294,
+          2,
+          378,
+          85
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_up/frame_000.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              87
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_up/frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_up/frame_002.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              87
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_up/frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           }
         ]
@@ -114,57 +114,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_up/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_up/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_up/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_up/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.0561,
-          0.0167,
-          0.0561
+          0.0003,
+          0.0003,
+          0.0003
         ],
-        "average_changed_fraction": 0.043
+        "average_changed_fraction": 0.0003
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_up/walk_up_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_up/aligned",
@@ -176,76 +176,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          15,
-          105,
-          81,
-          192
+          4,
+          100,
+          88,
+          183
         ],
         [
-          111,
           102,
-          177,
-          192
+          98,
+          186,
+          181
         ],
         [
-          207,
-          105,
-          273,
-          192
+          200,
+          100,
+          284,
+          183
         ],
         [
-          303,
-          102,
-          369,
-          192
+          294,
+          98,
+          378,
+          181
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_right/frame_000.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              87
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_right/frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_right/frame_002.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              87
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_right/frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           }
         ]
@@ -256,57 +256,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_right/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_right/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_right/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_right/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1515,
-          0.1121,
-          0.153
+          0.0003,
+          0.0003,
+          0.0003
         ],
-        "average_changed_fraction": 0.1389
+        "average_changed_fraction": 0.0003
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_right/walk_right_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_right/aligned",
@@ -318,76 +318,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          15,
-          201,
-          81,
-          288
+          5,
+          196,
+          89,
+          279
         ],
         [
-          111,
-          198,
-          177,
-          288
+          102,
+          194,
+          186,
+          277
         ],
         [
-          207,
-          201,
-          273,
-          288
+          199,
+          196,
+          283,
+          279
         ],
         [
-          303,
-          198,
-          369,
-          288
+          294,
+          194,
+          378,
+          277
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_down/frame_000.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              87
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_down/frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_down/frame_002.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              87
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_down/frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           }
         ]
@@ -398,57 +398,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_down/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_down/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_down/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_down/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1515,
-          0.1121,
-          0.153
+          0.0003,
+          0.0003,
+          0.0003
         ],
-        "average_changed_fraction": 0.1389
+        "average_changed_fraction": 0.0003
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_down/walk_down_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_down/aligned",
@@ -460,76 +460,76 @@
       "frames": 4,
       "source_boxes": [
         [
-          15,
-          297,
-          81,
-          384
+          8,
+          292,
+          92,
+          375
         ],
         [
-          111,
+          102,
+          290,
+          186,
+          373
+        ],
+        [
+          196,
+          292,
+          280,
+          375
+        ],
+        [
           294,
-          177,
-          384
-        ],
-        [
-          207,
-          297,
-          273,
-          384
-        ],
-        [
-          303,
-          294,
-          369,
-          384
+          290,
+          378,
+          373
         ]
       ],
       "pre_alignment_drift": {
         "x": 0.0,
-        "y": 3,
+        "y": 0,
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_left/frame_000.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              87
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_left/frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_left/frame_002.png",
-            "x": 33.0,
-            "y": 87,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              87
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_left/frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           }
         ]
@@ -540,57 +540,57 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_left/aligned/000_frame_000.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_left/aligned/001_frame_001.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_left/aligned/002_frame_002.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
-              3,
-              66,
-              90
+              0,
+              84,
+              83
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_left/aligned/003_frame_003.png",
-            "x": 33.0,
-            "y": 90,
+            "x": 42.0,
+            "y": 83,
             "bbox": [
               0,
               0,
-              66,
-              90
+              84,
+              83
             ]
           }
         ]
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1515,
-          0.1121,
-          0.153
+          0.0003,
+          0.0003,
+          0.0003
         ],
-        "average_changed_fraction": 0.1389
+        "average_changed_fraction": 0.0003
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_left/walk_left_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/verdant_faultwarden/grid/walk_left/aligned",

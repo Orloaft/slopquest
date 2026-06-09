@@ -3,11 +3,11 @@
   "output_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid",
   "cleaned_image": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/grave_revenant_generated_chroma_alpha.png",
   "chroma": [
-    0,
     255,
-    0
+    0,
+    255
   ],
-  "tolerance": 40,
+  "tolerance": 0,
   "remove_green_halo": false,
   "grid": {
     "columns": 4,
@@ -35,27 +35,27 @@
       "source_boxes": [
         [
           12,
-          0,
-          88,
-          78
+          9,
+          81,
+          87
         ],
         [
-          108,
-          3,
-          184,
-          81
+          109,
+          7,
+          178,
+          85
         ],
         [
-          204,
-          0,
-          280,
-          78
+          206,
+          9,
+          275,
+          87
         ],
         [
-          300,
-          3,
-          376,
-          81
+          301,
+          7,
+          370,
+          85
         ]
       ],
       "pre_alignment_drift": {
@@ -64,45 +64,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_up/frame_000.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_up/frame_001.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_up/frame_002.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_up/frame_003.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           }
@@ -114,45 +114,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_up/aligned/000_frame_000.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_up/aligned/001_frame_001.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_up/aligned/002_frame_002.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_up/aligned/003_frame_003.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           }
@@ -160,11 +160,11 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1093,
-          0.0046,
-          0.1093
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.0744
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_up/walk_up_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_up/aligned",
@@ -176,28 +176,28 @@
       "frames": 4,
       "source_boxes": [
         [
-          12,
-          114,
-          88,
-          192
+          11,
+          105,
+          80,
+          183
         ],
         [
-          108,
-          111,
-          184,
-          189
+          109,
+          103,
+          178,
+          181
         ],
         [
-          204,
-          114,
-          280,
-          192
+          207,
+          105,
+          276,
+          183
         ],
         [
-          300,
-          111,
-          376,
-          189
+          301,
+          103,
+          370,
+          181
         ]
       ],
       "pre_alignment_drift": {
@@ -206,45 +206,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_right/frame_000.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_right/frame_001.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_right/frame_002.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_right/frame_003.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           }
@@ -256,45 +256,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_right/aligned/000_frame_000.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_right/aligned/001_frame_001.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_right/aligned/002_frame_002.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_right/aligned/003_frame_003.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           }
@@ -302,11 +302,11 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1093,
-          0.0046,
-          0.1093
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.0744
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_right/walk_right_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_right/aligned",
@@ -319,27 +319,27 @@
       "source_boxes": [
         [
           12,
-          210,
-          88,
-          288
+          201,
+          81,
+          279
         ],
         [
-          108,
-          207,
-          184,
-          285
+          109,
+          199,
+          178,
+          277
         ],
         [
-          204,
-          210,
-          280,
-          288
+          206,
+          201,
+          275,
+          279
         ],
         [
-          300,
-          207,
-          376,
-          285
+          301,
+          199,
+          370,
+          277
         ]
       ],
       "pre_alignment_drift": {
@@ -348,45 +348,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_down/frame_000.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_down/frame_001.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_down/frame_002.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_down/frame_003.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           }
@@ -398,45 +398,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_down/aligned/000_frame_000.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_down/aligned/001_frame_001.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_down/aligned/002_frame_002.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_down/aligned/003_frame_003.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           }
@@ -444,11 +444,11 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1093,
-          0.0046,
-          0.1093
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.0744
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_down/walk_down_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_down/aligned",
@@ -460,28 +460,28 @@
       "frames": 4,
       "source_boxes": [
         [
-          8,
-          306,
+          15,
+          297,
           84,
-          384
+          375
         ],
         [
-          104,
-          303,
-          180,
-          381
+          109,
+          295,
+          178,
+          373
         ],
         [
-          200,
-          306,
-          276,
-          384
+          203,
+          297,
+          272,
+          375
         ],
         [
-          296,
-          303,
-          372,
-          381
+          301,
+          295,
+          370,
+          373
         ]
       ],
       "pre_alignment_drift": {
@@ -490,45 +490,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_left/frame_000.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_left/frame_001.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_left/frame_002.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_left/frame_003.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           }
@@ -540,45 +540,45 @@
         "anchors": [
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_left/aligned/000_frame_000.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_left/aligned/001_frame_001.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_left/aligned/002_frame_002.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           },
           {
             "frame": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_left/aligned/003_frame_003.png",
-            "x": 38.0,
+            "x": 34.5,
             "y": 78,
             "bbox": [
               0,
               0,
-              76,
+              69,
               78
             ]
           }
@@ -586,11 +586,11 @@
       },
       "motion": {
         "pair_changed_fraction": [
-          0.1093,
-          0.0046,
-          0.1093
+          0.0004,
+          0.0004,
+          0.0004
         ],
-        "average_changed_fraction": 0.0744
+        "average_changed_fraction": 0.0004
       },
       "preview_gif": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_left/walk_left_preview.gif",
       "aligned_dir": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/grave_revenant/grid/walk_left/aligned",
