@@ -1,6 +1,6 @@
 import { readdirSync, statSync } from "node:fs";
 import { readFileSync } from "node:fs";
-import { join, relative } from "node:path";
+import { dirname, resolve, join, relative } from "node:path";
 
 interface FileEntry {
   path: string;
@@ -9,6 +9,23 @@ interface FileEntry {
 
 interface ParsedArgs {
   [key: string]: string | true;
+}
+
+interface PreloadGroup {
+  label: string;
+  paths: string[];
+  files: FileEntry[];
+  missing: string[];
+  totalBytes: number;
+}
+
+interface PreloadBudget {
+  files: FileEntry[];
+  literalFiles: FileEntry[];
+  dynamicFiles: FileEntry[];
+  dynamic: PreloadGroup[];
+  missing: string[];
+  totalBytes: number;
 }
 
 const options = parseArgs(process.argv.slice(2));
@@ -54,6 +71,23 @@ console.log(
             totalMiB: roundMiB(preload.totalBytes),
             maxTotalMiB: roundMiB(maxPreloadBytes),
             maxFiles: maxPreloadFiles,
+            literal: {
+              files: preload.literalFiles.length,
+              totalBytes: sumBytes(preload.literalFiles),
+              totalMiB: roundMiB(sumBytes(preload.literalFiles))
+            },
+            dynamic: {
+              files: preload.dynamicFiles.length,
+              totalBytes: sumBytes(preload.dynamicFiles),
+              totalMiB: roundMiB(sumBytes(preload.dynamicFiles)),
+              groups: preload.dynamic.map((group) => ({
+                label: group.label,
+                files: group.files.length,
+                totalBytes: group.totalBytes,
+                totalMiB: roundMiB(group.totalBytes),
+                missing: group.missing
+              }))
+            },
             missing: preload.missing,
             largest: preload.files.slice(0, 12).map((file) => ({ ...file, mib: roundMiB(file.bytes) }))
           }
@@ -85,35 +119,115 @@ function listFiles(dir: string): FileEntry[] {
   return entries;
 }
 
-function preloadBudget(entry: string, rootDir: string): { files: FileEntry[]; missing: string[]; totalBytes: number } {
+function preloadBudget(entry: string, rootDir: string): PreloadBudget {
   const source = readFileSync(entry, "utf8");
-  const assetPaths = new Set<string>();
+  const literalAssetPaths = new Set<string>();
   // Only count loads whose key AND path are plain string literals — the
-  // statically-known preload set. Requiring a quoted-literal key (rather than a
-  // permissive `[^,]+`) skips data-driven/template-literal loops like the
-  // nw-sprite and generated-stage loaders, which would otherwise capture a comma
-  // inside the key expression (e.g. padStart(3, "0")) as a bogus asset path.
+  // statically-known preload set. Dynamic preload loops are handled explicitly
+  // below so they show up in the budget instead of being silently undercounted.
   for (const match of source.matchAll(/\bthis\.load\.(?:image|spritesheet|audio)\(\s*["'][^"']*["']\s*,\s*["']([^"']+)["']/g)) {
     const path = match[1];
-    if (path) assetPaths.add(path);
+    if (path) literalAssetPaths.add(path);
   }
-  const found: FileEntry[] = [];
-  const missing: string[] = [];
-  for (const assetPath of [...assetPaths].sort()) {
+  const dynamic = dynamicPreloadGroups(entry, source, rootDir);
+  const dynamicAssetPaths = new Set(dynamic.flatMap((group) => group.paths));
+  const assetPaths = new Set([...literalAssetPaths, ...dynamicAssetPaths]);
+  const resolved = resolveAssetPaths([...assetPaths], rootDir);
+  const literalFiles = resolveAssetPaths([...literalAssetPaths], rootDir).files;
+  const dynamicFiles = resolveAssetPaths([...dynamicAssetPaths], rootDir).files;
+  return {
+    files: resolved.files,
+    literalFiles,
+    dynamicFiles,
+    dynamic,
+    missing: resolved.missing,
+    totalBytes: sumBytes(resolved.files)
+  };
+}
+
+function resolveAssetPaths(assetPaths: string[], rootDir: string): { files: FileEntry[]; missing: string[] } {
+  const found = new Map<string, FileEntry>();
+  const missing = new Set<string>();
+  for (const assetPath of [...new Set(assetPaths)].sort()) {
     const path = join(rootDir, assetPath.replace(/^\//, ""));
     try {
       const stat = statSync(path);
       if (!stat.isFile()) {
-        missing.push(assetPath);
+        missing.add(assetPath);
         continue;
       }
-      found.push({ path: relative(process.cwd(), path), bytes: stat.size });
+      found.set(assetPath, { path: relative(process.cwd(), path), bytes: stat.size });
     } catch {
-      missing.push(assetPath);
+      missing.add(assetPath);
     }
   }
-  found.sort((a, b) => b.bytes - a.bytes);
-  return { files: found, missing, totalBytes: found.reduce((sum, file) => sum + file.bytes, 0) };
+  return { files: [...found.values()].sort((a, b) => b.bytes - a.bytes), missing: [...missing].sort() };
+}
+
+function dynamicPreloadGroups(entry: string, source: string, rootDir: string): PreloadGroup[] {
+  const groups: PreloadGroup[] = [];
+  const northwoodSpritePaths = northwoodSpritePreloadPaths(source);
+  if (northwoodSpritePaths.length > 0) groups.push(preloadGroup("NORTHWOOD_SPRITE_IDS sprite loop", northwoodSpritePaths, rootDir));
+
+  const generatedStagePaths = generatedStagePreloadPaths(entry, source);
+  if (generatedStagePaths.length > 0) groups.push(preloadGroup("GENERATED_STAGES tileset.publicPath loop", generatedStagePaths, rootDir));
+
+  return groups;
+}
+
+function preloadGroup(label: string, paths: string[], rootDir: string): PreloadGroup {
+  const resolved = resolveAssetPaths(paths, rootDir);
+  return { label, paths: [...new Set(paths)].sort(), files: resolved.files, missing: resolved.missing, totalBytes: sumBytes(resolved.files) };
+}
+
+function northwoodSpritePreloadPaths(source: string): string[] {
+  const idsSource = source.match(/\bconst\s+NORTHWOOD_SPRITE_IDS\s*=\s*\[([^\]]*)\]\s*as\s+const\b/s)?.[1];
+  if (!idsSource) return [];
+  const ids = [...idsSource.matchAll(/\b\d+\b/g)].map((match) => Number(match[0]));
+  return ids.map((id) => `/sprites/nw/obj_${String(id).padStart(3, "0")}.png`);
+}
+
+function generatedStagePreloadPaths(entry: string, source: string): string[] {
+  const stageListSource = source.match(/\bconst\s+GENERATED_STAGES\s*:\s*GeneratedStage\[\]\s*=\s*\[([^\]]*)\]/s)?.[1];
+  if (!stageListSource) return [];
+
+  const stageNames = stageListSource
+    .split(",")
+    .map((name) => name.trim())
+    .filter((name) => /^[A-Z][A-Z0-9_]*_STAGE$/.test(name));
+  if (stageNames.length === 0) return [];
+
+  const indexPath = generatedStageIndexPath(entry, source);
+  if (!indexPath) return [];
+
+  const indexSource = readFileSync(indexPath, "utf8");
+  const stageModules = new Map<string, string>();
+  for (const match of indexSource.matchAll(/\bexport\s+\{\s*([A-Z][A-Z0-9_]*_STAGE)\s*\}\s+from\s+["']([^"']+)["']/g)) {
+    const stageName = match[1];
+    const modulePath = match[2];
+    if (stageName && modulePath) stageModules.set(stageName, modulePath);
+  }
+
+  const paths = new Set<string>();
+  for (const stageName of stageNames) {
+    const modulePath = stageModules.get(stageName);
+    if (!modulePath) continue;
+    const stagePath = resolve(dirname(indexPath), modulePath);
+    const stageSource = readFileSync(stagePath, "utf8");
+    for (const match of stageSource.matchAll(/"publicPath"\s*:\s*"([^"]+)"/g)) {
+      const publicPath = match[1];
+      if (publicPath) paths.add(publicPath);
+    }
+  }
+  return [...paths].sort();
+}
+
+function generatedStageIndexPath(entry: string, source: string): string | null {
+  for (const match of source.matchAll(/\bimport\s+\{[^}]*_STAGE[^}]*\}\s+from\s+["']([^"']*generated\/stages\/index\.ts)["']/g)) {
+    const indexPath = match[1];
+    if (indexPath) return resolve(dirname(entry), indexPath);
+  }
+  return null;
 }
 
 function parseArgs(args: string[]): ParsedArgs {
@@ -144,4 +258,8 @@ function stringOption(name: string): string | null {
 
 function roundMiB(bytes: number): number {
   return Math.round((bytes / 1024 / 1024) * 100) / 100;
+}
+
+function sumBytes(files: FileEntry[]): number {
+  return files.reduce((sum, file) => sum + file.bytes, 0);
 }

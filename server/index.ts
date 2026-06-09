@@ -116,6 +116,12 @@ interface AbilityResolution {
   heal: number;
 }
 
+interface PrioritizedEventCandidate {
+  event: GameEvent;
+  priority: number;
+  order: number;
+}
+
 function abilityIdsForPlayer(player: ServerPlayer): string[] {
   const classSpec = CLASSES[player.classKey ?? "adventurer"] ?? CLASSES["adventurer"]!;
   const ids = [...(classSpec.abilities ?? [])];
@@ -643,6 +649,7 @@ const metrics: Metrics = {
 let saveQueued = false;
 let saveInFlight = false;
 const dirtyPlayerKeys = new Set<string>();
+const playerSaveSignatures = new Map<string, string>();
 let snapshotSequence = 0;
 let nextEventOrder = 1;
 // Telegraph-channel instrumentation (logged each second when EVENT_METRICS_LOG).
@@ -851,6 +858,7 @@ function deleteCharacter(socket: ExtWebSocket, rawName: string): void {
   }
   delete db.players[key];
   dirtyPlayerKeys.delete(key);
+  playerSaveSignatures.delete(key);
   void unlink(playerFilePath(key)).catch((error: NodeJS.ErrnoException) => {
     if (error.code !== "ENOENT") console.error(`Failed to delete character save for ${name}:`, error);
   });
@@ -1672,7 +1680,6 @@ function tryUseComposedAbility(player: ServerPlayer, spec: AbilitySpec, now: num
       if (player.dead) return;
       if (!playersById.has(player.id)) return;
       applyResolvedAbility(player, spec, resolution, performance.now());
-      broadcastState();
     }, castTimeMs);
     return true;
   }
@@ -1774,14 +1781,18 @@ function resolveAbilityTargeting(player: ServerPlayer, spec: AbilitySpec): Abili
     const tiles = spec.targeting.tiles;
     const endX = player.x + dir.x * tiles;
     const endY = player.y + dir.y * tiles;
-    const targets = [...monsters.values()].filter((monster) => {
-      if (monster.deadUntil || monster.floor !== player.floor) return false;
+    const centerX = player.x + dir.x * (tiles / 2);
+    const centerY = player.y + dir.y * (tiles / 2);
+    const queryRadius = Math.hypot(tiles / 2, width);
+    const targets: ServerMonster[] = [];
+    forEachSpatial(spatial.monsters, player.floor, centerX, centerY, queryRadius, (monster) => {
+      if (monster.deadUntil || monster.floor !== player.floor) return;
       const relX = monster.x - player.x;
       const relY = monster.y - player.y;
       const forward = relX * dir.x + relY * dir.y;
-      if (forward <= 0 || forward > tiles) return false;
+      if (forward <= 0 || forward > tiles) return;
       const lateral = Math.abs(relX * -dir.y + relY * dir.x);
-      return lateral <= width;
+      if (lateral <= width) targets.push(monster);
     });
     return { origin: { x: endX, y: endY }, targets, targetId: null, heal: 0 };
   }
@@ -5263,34 +5274,82 @@ function visibleEventsFor(viewer: ServerPlayer): GameEvent[] {
   return visible;
 }
 
-// Priority-aware assembly: gather all candidate events, then keep high-priority
-// (telegraphs) ahead of cosmetics when truncating to VISIBLE_EVENT_LIMIT. Only a
-// flood of >192 telegraphs alone could drop one — and that drop is counted.
+// Priority-aware assembly: keep a bounded best-candidate heap so high-priority
+// telegraphs survive cosmetic floods without sorting every visible candidate.
 function visibleEventsForPrioritized(viewer: ServerPlayer, targeted: GameEvent[] | undefined): GameEvent[] {
-  const candidates: GameEvent[] = [];
-  if (targeted) candidates.push(...targeted);
-  if (globalEvents.length) candidates.push(...globalEvents);
+  let selected: GameEvent[] = [];
+  let heap: MinHeap<PrioritizedEventCandidate> | null = null;
+  const keepCandidate = (item: GameEvent): void => {
+    if (!heap && selected.length < VISIBLE_EVENT_LIMIT) {
+      selected.push(item);
+      return;
+    }
+    if (!heap) {
+      heap = prioritizedEventCandidateWorstHeap(selected);
+      selected = [];
+    }
+    keepPrioritizedEventCandidate(heap, item, VISIBLE_EVENT_LIMIT);
+  };
+
+  if (targeted) for (const item of targeted) keepCandidate(item);
+  for (const item of globalEvents) keepCandidate(item);
   forEachEventCell(viewer.floor, viewer.x, viewer.y, SNAPSHOT_RADIUS, (item) => {
-    if (eventVisibleTo(viewer, item)) candidates.push(item);
+    if (eventVisibleTo(viewer, item)) keepCandidate(item);
   });
-  if (candidates.length <= VISIBLE_EVENT_LIMIT) {
-    if (candidates.length > 1) candidates.sort(compareEventsByOrder);
-    return candidates;
+  if (!heap) {
+    if (selected.length > 1) selected.sort(compareEventsByOrder);
+    return selected;
   }
-  // High-priority first, then insertion order within each tier.
-  candidates.sort((a, b) => {
-    const pa = isHighPriorityEvent(a) ? 0 : 1;
-    const pb = isHighPriorityEvent(b) ? 0 : 1;
-    if (pa !== pb) return pa - pb;
-    return compareEventsByOrder(a, b);
-  });
-  const kept = candidates.slice(0, VISIBLE_EVENT_LIMIT);
-  // A telegraph past the cap means >192 telegraphs in view at once — count it.
-  for (let i = VISIBLE_EVENT_LIMIT; i < candidates.length; i += 1) {
-    if (isHighPriorityEvent(candidates[i]!)) telegraphsDroppedThisSecond += 1;
-  }
+  const kept = drainPrioritizedEventCandidateHeap(heap);
   kept.sort(compareEventsByOrder);
   return kept;
+}
+
+function prioritizedEventCandidateWorstHeap(events: GameEvent[]): MinHeap<PrioritizedEventCandidate> {
+  const heap = new MinHeap<PrioritizedEventCandidate>(comparePrioritizedEventCandidatesWorstFirst);
+  for (const event of events) heap.push(prioritizedEventCandidate(event));
+  return heap;
+}
+
+function keepPrioritizedEventCandidate(heap: MinHeap<PrioritizedEventCandidate>, event: GameEvent, limit: number): void {
+  const candidate = prioritizedEventCandidate(event);
+  if (heap.size < limit) {
+    heap.push(candidate);
+    return;
+  }
+  const worst = heap.peek();
+  if (!worst || comparePrioritizedEventCandidates(candidate, worst) >= 0) {
+    if (candidate.priority === 0) telegraphsDroppedThisSecond += 1;
+    return;
+  }
+  const dropped = heap.pop();
+  if (dropped?.priority === 0) telegraphsDroppedThisSecond += 1;
+  heap.push(candidate);
+}
+
+function drainPrioritizedEventCandidateHeap(heap: MinHeap<PrioritizedEventCandidate>): GameEvent[] {
+  const events: GameEvent[] = [];
+  while (heap.size > 0) {
+    const candidate = heap.pop();
+    if (candidate) events.push(candidate.event);
+  }
+  return events;
+}
+
+function prioritizedEventCandidate(event: GameEvent): PrioritizedEventCandidate {
+  return {
+    event,
+    priority: isHighPriorityEvent(event) ? 0 : 1,
+    order: eventOrder.get(event) ?? 0
+  };
+}
+
+function comparePrioritizedEventCandidates(a: PrioritizedEventCandidate, b: PrioritizedEventCandidate): number {
+  return a.priority - b.priority || a.order - b.order;
+}
+
+function comparePrioritizedEventCandidatesWorstFirst(a: PrioritizedEventCandidate, b: PrioritizedEventCandidate): number {
+  return comparePrioritizedEventCandidates(b, a);
 }
 
 function boundedEventList(events: GameEvent[]): GameEvent[] {
@@ -5310,9 +5369,10 @@ function compareEventsByOrder(a: GameEvent, b: GameEvent): number {
   return (eventOrder.get(a) ?? 0) - (eventOrder.get(b) ?? 0);
 }
 
-function persistPlayerToDb(player: ServerPlayer): string {
+function persistPlayerToDb(player: ServerPlayer): string | null {
   const key = player.name.toLowerCase();
-  db.players[key] = {
+  const previous = db.players[key];
+  const next: SavedPlayer = {
     name: player.name,
     classKey: player.classKey,
     floor: player.floor,
@@ -5332,9 +5392,13 @@ function persistPlayerToDb(player: ServerPlayer): string {
     quests: normalizeQuestState(player.quests),
     reputation: normalizeReputationState(player.reputation),
     skills: normalizeSkillState(player.skills),
-    unlockedClasses: [...player.unlockedClasses],
-    updatedAt: new Date().toISOString()
+    unlockedClasses: [...player.unlockedClasses]
   };
+  const signature = playerSaveSignature(next);
+  const previousSignature = playerSaveSignatures.get(key) ?? (previous ? playerSaveSignature(previous) : undefined);
+  if (previousSignature === signature) return null;
+  db.players[key] = { ...next, updatedAt: new Date().toISOString() };
+  playerSaveSignatures.set(key, signature);
   return key;
 }
 
@@ -5349,7 +5413,8 @@ function isEphemeralName(name: string): boolean {
 
 function persistPlayer(player: ServerPlayer): void {
   if (E2E_TEST && isEphemeralName(player.name)) return;
-  dirtyPlayerKeys.add(persistPlayerToDb(player));
+  const key = persistPlayerToDb(player);
+  if (key) dirtyPlayerKeys.add(key);
   refreshSaveMetrics();
   queueSave();
 }
@@ -5357,10 +5422,16 @@ function persistPlayer(player: ServerPlayer): void {
 function persistOnlinePlayers(): void {
   for (const session of clients.values()) {
     if (session.transient || (E2E_TEST && isEphemeralName(session.player.name))) continue;
-    dirtyPlayerKeys.add(persistPlayerToDb(session.player));
+    const key = persistPlayerToDb(session.player);
+    if (key) dirtyPlayerKeys.add(key);
   }
   refreshSaveMetrics();
   queueSave();
+}
+
+function playerSaveSignature(player: SavedPlayer): string {
+  const { updatedAt: _updatedAt, ...content } = player;
+  return JSON.stringify(content);
 }
 
 // Sweep any throwaway e2e characters that leaked to disk (from before the guards

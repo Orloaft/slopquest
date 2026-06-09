@@ -1,8 +1,8 @@
 // --- Jib music manager -----------------------------------------------------
 // Background score with a clean crossfade on zone transitions. Tracks are
-// streamed from /music/<name>.mp3. No audio ships with the repo — drop your own
-// legally-licensed files in public/music/ named per the mapping in
-// public/music/README.md (the OSRS track names in the design doc are just the
+// streamed on demand from /music/<name>.ogg. The repo only carries placeholder
+// project music; keep replacements legally licensed and named per the mapping
+// in public/music/README.md (the OSRS track names in the design doc are just
 // suggested fit per zone; supply audio you have the rights to use).
 
 const TRACK_DIR = "/music/";
@@ -23,7 +23,7 @@ function element(name: string): HTMLAudioElement {
   if (!el) {
     el = new Audio(`${TRACK_DIR}${name}${TRACK_EXT}`);
     el.loop = true;
-    el.preload = "auto";
+    el.preload = "none";
     el.volume = 0;
     // A missing track is fine — the zone just plays silent.
     el.addEventListener("error", () => undefined);

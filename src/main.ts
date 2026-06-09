@@ -538,7 +538,7 @@ dom.mapCloseButton.addEventListener("click", () => hideCenterPanels());
 dom.mapBackButton.addEventListener("click", () => {
   mapView = "region";
   const me = self();
-  if (me) renderMapScreen(me);
+  if (me) renderMapScreen(me, true);
 });
 dom.mapCanvas.addEventListener("click", (event) => handleMapClick(event));
 dom.menuBackdrop.addEventListener("click", () => hideCenterPanels());
@@ -870,6 +870,7 @@ const visibleMiningNodeIds = new Set<string>();
 const visibleHerbNodeIds = new Set<string>();
 const visibleFireIds = new Set<string>();
 const floaters: Floater[] = [];
+let entityLayerSortDirty = true;
 let selectedInventorySlot: number | null = null;
 let selectedInventoryItem: string | null = null;
 let activeDialogue: ActiveDialogue | null = null;
@@ -2168,7 +2169,8 @@ function mergeEntityViews<T extends { id: string }>(previous: T[], updates: T[],
   if (full) return updates;
   if (updates.length === 0 && removedIds.length === 0) return previous;
   if (previous.length === 0) return updates;
-  const byId = new Map(previous.map((item) => [item.id, item]));
+  const byId = new Map<string, T>();
+  for (const item of previous) byId.set(item.id, item);
   for (const id of removedIds) byId.delete(id);
   for (const item of updates) byId.set(item.id, item);
   return [...byId.values()];
@@ -2932,6 +2934,23 @@ function isWorldPointRenderable(x: number, y: number, bounds: RenderBounds): boo
 function setTextIfChanged(text: Phaser.GameObjects.Text, value: string): void {
   if (text.text !== value) text.setText(value);
 }
+
+function markEntityLayerSortDirty(): void {
+  entityLayerSortDirty = true;
+}
+
+function addEntityLayerView(view: Phaser.GameObjects.GameObject): void {
+  entityLayer.add(view);
+  markEntityLayerSortDirty();
+}
+
+function setEntityLayerPosition(view: Phaser.GameObjects.Container, x: number, y: number): void {
+  if (view.x === x && view.y === y) return;
+  const yChanged = view.y !== y;
+  view.setPosition(x, y);
+  if (yChanged) markEntityLayerSortDirty();
+}
+
 function syncEntities(): void {
   const me = self();
   if (!me || !latestState) return;
@@ -2963,7 +2982,7 @@ function syncEntities(): void {
     if (!view) {
       view = createPlayerView(player);
       playerViews.set(player.id, view);
-      entityLayer.add(view);
+      addEntityLayerView(view);
     }
     setEntityTarget(view, player.x * TILE_SIZE, player.y * TILE_SIZE);
     setActorAnimation(view, "knight", player.dir, player.moving || (player.action != null && ["woodcutting", "fishing", "mining", "cooking"].includes(player.action.type)), 40, 48);
@@ -2988,7 +3007,7 @@ function syncEntities(): void {
     if (!view) {
       view = createMonsterView(monster);
       monsterViews.set(monster.id, view);
-      entityLayer.add(view);
+      addEntityLayerView(view);
     }
     setEntityTarget(view, monster.x * TILE_SIZE, monster.y * TILE_SIZE);
     const actor = monsterActorSpec(monster);
@@ -3040,13 +3059,14 @@ function syncEntities(): void {
       });
       view.add(zone);
       corpseViews.set(corpse.id, view);
-      entityLayer.add(view);
+      addEntityLayerView(view);
     }
   }
   for (const [id, view] of corpseViews) {
     if (!visibleCorpses.has(id)) {
       view.destroy();
       corpseViews.delete(id);
+      markEntityLayerSortDirty();
     }
   }
 
@@ -3058,7 +3078,7 @@ function syncEntities(): void {
     if (!view) {
       view = createNpcView(npc);
       npcViews.set(npc.id, view);
-      entityLayer.add(view);
+      addEntityLayerView(view);
     }
     setEntityTarget(view, npc.x * TILE_SIZE, npc.y * TILE_SIZE);
     setActorAnimation(view, npc.role === "quest" ? "caster" : "knight", npc.dir, npc.moving, 40, 48);
@@ -3079,9 +3099,9 @@ function syncEntities(): void {
     if (!view) {
       view = createTreeView(tree);
       treeViews.set(tree.id, view);
-      entityLayer.add(view);
+      addEntityLayerView(view);
     }
-    view.setPosition(tree.x * TILE_SIZE, tree.y * TILE_SIZE);
+    setEntityLayerPosition(view, tree.x * TILE_SIZE, tree.y * TILE_SIZE);
     if (view.treeType !== tree.type) {
       updateTreeViewTexture(view, tree);
     }
@@ -3093,6 +3113,7 @@ function syncEntities(): void {
     if (!visibleTrees.has(id)) {
       view.destroy();
       treeViews.delete(id);
+      markEntityLayerSortDirty();
     }
   }
 
@@ -3104,15 +3125,16 @@ function syncEntities(): void {
     if (!view) {
       view = createFishingNodeView(node);
       fishingViews.set(node.id, view);
-      entityLayer.add(view);
+      addEntityLayerView(view);
     }
-    view.setPosition(node.x * TILE_SIZE, node.y * TILE_SIZE);
+    setEntityLayerPosition(view, node.x * TILE_SIZE, node.y * TILE_SIZE);
     view.sprite.setScale(1 + Math.sin(scene.time.now / 360 + node.x) * 0.04);
   }
   for (const [id, view] of fishingViews) {
     if (!visibleFishingNodes.has(id)) {
       view.destroy();
       fishingViews.delete(id);
+      markEntityLayerSortDirty();
     }
   }
 
@@ -3124,14 +3146,15 @@ function syncEntities(): void {
     if (!view) {
       view = createMiningNodeView(node);
       miningViews.set(node.id, view);
-      entityLayer.add(view);
+      addEntityLayerView(view);
     }
-    view.setPosition(node.x * TILE_SIZE, node.y * TILE_SIZE);
+    setEntityLayerPosition(view, node.x * TILE_SIZE, node.y * TILE_SIZE);
   }
   for (const [id, view] of miningViews) {
     if (!visibleMiningNodes.has(id)) {
       view.destroy();
       miningViews.delete(id);
+      markEntityLayerSortDirty();
     }
   }
 
@@ -3143,9 +3166,9 @@ function syncEntities(): void {
     if (!view) {
       view = createHerbNodeView(node);
       herbViews.set(node.id, view);
-      entityLayer.add(view);
+      addEntityLayerView(view);
     }
-    view.setPosition(node.x * TILE_SIZE, node.y * TILE_SIZE);
+    setEntityLayerPosition(view, node.x * TILE_SIZE, node.y * TILE_SIZE);
     view.setAlpha(node.active ? 1 : 0.3);
     view.bloom.setVisible(node.active);
   }
@@ -3153,6 +3176,7 @@ function syncEntities(): void {
     if (!visibleHerbNodes.has(id)) {
       view.destroy();
       herbViews.delete(id);
+      markEntityLayerSortDirty();
     }
   }
 
@@ -3164,21 +3188,25 @@ function syncEntities(): void {
     if (!view) {
       view = createFireView(fire);
       fireViews.set(fire.id, view);
-      entityLayer.add(view);
+      addEntityLayerView(view);
     }
-    view.setPosition(fire.x * TILE_SIZE, fire.y * TILE_SIZE);
+    setEntityLayerPosition(view, fire.x * TILE_SIZE, fire.y * TILE_SIZE);
   }
   for (const [id, view] of fireViews) {
     if (!visibleFires.has(id)) {
       view.destroy();
       fireViews.delete(id);
+      markEntityLayerSortDirty();
     }
   }
 }
 
 function clearResourceViews(): void {
   for (const views of [treeViews, fishingViews, miningViews, herbViews, fireViews]) {
-    for (const view of views.values()) view.destroy();
+    for (const view of views.values()) {
+      view.destroy();
+      markEntityLayerSortDirty();
+    }
     views.clear();
   }
 }
@@ -3624,8 +3652,10 @@ function setEntityTarget(view: EntityView, x: number, y: number): void {
   const distanceSq = dx * dx + dy * dy;
   const snapDistance = TILE_SIZE * 3;
   if (distanceSq > snapDistance * snapDistance || distanceSq < 0.01) {
+    const yChanged = view.y !== y;
     view.x = x;
     view.y = y;
+    if (yChanged) markEntityLayerSortDirty();
     view.targetX = undefined;
     view.targetY = undefined;
     interpolatingEntityViews.delete(view);
@@ -3645,10 +3675,12 @@ function interpolateEntities(): void {
 // its entity's ground tile (entity.y * TILE_SIZE), so the container `y` is a uniform
 // feet anchor across players, NPCs, monsters and trees. Result: when your feet are
 // above a tree's trunk base you render behind it (the tree's upper half covers you);
-// when your feet are below the base you render in front. Phaser's StableSort is ~O(n)
-// on the near-sorted list each frame (entities move little frame-to-frame).
+// when your feet are below the base you render in front. The layer is only sorted
+// after a y-position, add, or remove changes that order; idle frames skip it.
 function ySortEntities(): void {
+  if (!entityLayerSortDirty) return;
   entityLayer.sort("y");
+  entityLayerSortDirty = false;
 }
 
 function easeToTarget(view: EntityView): void {
@@ -3665,8 +3697,10 @@ function easeToTarget(view: EntityView): void {
     interpolatingEntityViews.delete(view);
     return;
   }
+  const previousY = view.y;
   view.x += dx * 0.32;
   view.y += dy * 0.32;
+  if (view.y !== previousY) markEntityLayerSortDirty();
 }
 
 function setActorAnimation(view: EntityView, family: string, dir: Direction = "down", moving = false, width = 40, height = 48, attacking = false): void {
@@ -3711,6 +3745,7 @@ function destroyEntityView(view: EntityView): void {
   interpolatingEntityViews.delete(view);
   animatingActorViews.delete(view);
   view.destroy();
+  markEntityLayerSortDirty();
 }
 
 function animateActor(view: EntityView): void {
@@ -7744,10 +7779,12 @@ let fogName = "";
 let fogFloor = -1;
 let fogSet = new Set<number>();
 let fogDirty = false;
+let fogRevision = 0;
 let lastFogSave = 0;
 let showFactionMarkers = true;
 let mapView: "region" | "zone" = "region";
 let mapZoneFloor = 0;
+let lastMapScreenRenderKey = "";
 
 // The Broken Reach laid out as it sits in the travel graph: a cross centred on
 // Waystone. col/row are abstract region cells; floor ties a node to its map.
@@ -7846,6 +7883,7 @@ function updateFog(me: PlayerView, time: number): void {
       if (!fogSet.has(idx)) {
         fogSet.add(idx);
         fogDirty = true;
+        fogRevision += 1;
       }
     }
   }
@@ -7893,7 +7931,7 @@ function toggleMapScreen(): void {
   }
   mapView = "region";
   showCenterPanel(dom.mapScreen);
-  renderMapScreen(me);
+  renderMapScreen(me, true);
 }
 
 function canvasPoint(event: MouseEvent): { x: number; y: number } {
@@ -7910,7 +7948,7 @@ function handleMapClick(event: MouseEvent): void {
   if (mapView === "zone") {
     // In a zone, clicking toggles its faction markers.
     showFactionMarkers = !showFactionMarkers;
-    renderMapScreen(me);
+    renderMapScreen(me, true);
     return;
   }
   // In the region view, clicking a charted biome zooms into its detail map.
@@ -7921,7 +7959,7 @@ function handleMapClick(event: MouseEvent): void {
     if (Math.hypot(point.x - center.x, point.y - center.y) <= 42) {
       mapView = "zone";
       mapZoneFloor = node.floor;
-      renderMapScreen(me);
+      renderMapScreen(me, true);
       return;
     }
   }
@@ -7957,7 +7995,25 @@ function markLandmark(ctx: CanvasRenderingContext2D, x: number, y: number, label
   ctx.fillText(label, x, y - 11);
 }
 
-function renderMapScreen(me: PlayerView): void {
+function mapScreenRenderKey(me: PlayerView): string {
+  const playerTileX = mapView === "zone" && mapZoneFloor === me.floor ? Math.floor(me.x) : -1;
+  const playerTileY = mapView === "zone" && mapZoneFloor === me.floor ? Math.floor(me.y) : -1;
+  return [
+    mapView,
+    mapZoneFloor,
+    showFactionMarkers ? 1 : 0,
+    me.name,
+    me.floor,
+    playerTileX,
+    playerTileY,
+    fogRevision
+  ].join(":");
+}
+
+function renderMapScreen(me: PlayerView, force = false): void {
+  const renderKey = mapScreenRenderKey(me);
+  if (!force && renderKey === lastMapScreenRenderKey) return;
+  lastMapScreenRenderKey = renderKey;
   dom.mapBackButton.classList.toggle("hidden", mapView !== "zone");
   if (mapView === "zone") renderZoneMap(me, mapZoneFloor);
   else renderRegionMap(me);

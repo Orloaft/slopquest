@@ -181,10 +181,11 @@ const gateScenarios: Scenario[] = [
     ]
   },
   {
-    name: "150 capped town crowd clients",
+    name: "150 capped compressed town crowd clients",
     serverEnv: {
       TIB_MAX_VISIBLE_PLAYERS: "50",
-      TIB_WS_COMPRESSION: "1"
+      TIB_WS_COMPRESSION: "1",
+      TIB_WS_COMPRESSION_THRESHOLD: "1024"
     },
     args: [
       "--clients",

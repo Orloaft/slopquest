@@ -24,7 +24,7 @@
     "balance:areas": "node scripts/balance-areas.ts",
     "balance:bands": "node scripts/balance-bands.ts",
     "balance:combat": "node scripts/balance-combat.ts",
-    "assets:budget": "node scripts/asset-budget.ts --preload-entry src/main.ts --max-preload-bytes 57671680 --max-preload-files 65",
+    "assets:budget": "node scripts/asset-budget.ts --preload-entry src/main.ts --max-preload-bytes 57671680 --max-preload-files 80",
     "assets:fix:road-corners": "node tools/harmonize-road-corners.ts",
     "assets:bridge:northwood": "node tools/build-northwood-from-authored.ts",
     "assets:northwood": "npm run assets:bridge:northwood && npm run assets:stage:northwood",
