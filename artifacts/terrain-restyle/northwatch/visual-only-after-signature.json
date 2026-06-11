@@ -1,0 +1,67 @@
+{
+  "stage": "northwatch",
+  "rowsHash": "e195775b6225ab6f56963fe39e0a6de73543a8d022f8f112077b9f81f7e2f867",
+  "legend": {
+    "8": "northwatch:1",
+    "9": "northwatch:0",
+    "f": "northwatch:2",
+    ":": "northwatch:3",
+    "_": "northwatch:4",
+    "O": "northwatch:5",
+    "S": "northwatch:6"
+  },
+  "collisionHash": "709490b16774edb914501828813470426129519e4ad8ebf7ed1ef3e63d60a3b4",
+  "objectsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "layerShape": [
+    {
+      "name": "base",
+      "type": "tile",
+      "rows": 72,
+      "cols": 110
+    }
+  ],
+  "vocabChars": {
+    "8": {
+      "role": "city-cobble",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false
+    },
+    "9": {
+      "role": "city-grass",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false
+    },
+    "f": {
+      "role": "forest",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false
+    },
+    ":": {
+      "role": "city-moat",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": true
+    },
+    "_": {
+      "role": "city-wall",
+      "blocked": true,
+      "sightBlocked": false,
+      "road": false
+    },
+    "O": {
+      "role": "grass",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false
+    },
+    "S": {
+      "role": "dirt",
+      "blocked": false,
+      "sightBlocked": false,
+      "road": false
+    }
+  }
+}

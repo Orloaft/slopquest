@@ -34,7 +34,7 @@ const src = readFileSync(nodePath.join(repoRoot, "src/main.ts"), "utf8");
 
 type Tex = { sheet: string; sx: number; sy: number; sw: number; sh: number; inset?: number; preserve: boolean };
 const TEX: Record<string, Tex> = {};
-for (const m of src.matchAll(/makeTileTexture\(\s*this\s*,\s*"([^"]+)"\s*,\s*"([^"]+)"\s*,([^;]*?)\)\s*;/g)) {
+for (const m of src.matchAll(/makeTileTexture\(\s*(?:this|[A-Za-z_$][\w$]*)\s*,\s*"([^"]+)"\s*,\s*"([^"]+)"\s*,([^;]*?)\)\s*;/g)) {
   const sheet = m[1], key = m[2];
   const rest = m[3].split(",").map((s) => s.trim());
   const num = (s: string | undefined) => (s === undefined || s === "undefined" ? undefined : Number(s));
@@ -45,6 +45,7 @@ for (const m of src.matchAll(/makeTileTexture\(\s*this\s*,\s*"([^"]+)"\s*,\s*"([
 
 const SHEET_PATH: Record<string, string> = {};
 for (const m of src.matchAll(/load\.image\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)/g)) SHEET_PATH[m[1]] = m[2];
+for (const m of src.matchAll(/runtimeImageAsset\(\s*"([^"]+)"\s*,\s*"([^"]+)"/g)) SHEET_PATH[m[1]] = m[2];
 
 function parseMap(mapName: string): Record<string, string> {
   const start = src.indexOf(`const ${mapName}`);
@@ -139,8 +140,6 @@ const roleOf = (ch: string) => (BASE[ch] ?? `tile-${ch}`).replace(/^tile/, "").r
 const rows = makeFloorTiles(floor).map((r) => r.split(""));
 const R = rows.length, C = rows[0].length;
 const chars = [...new Set(rows.flat())];
-const missing = chars.filter((ch) => !TEX[BASE[ch] ?? ""]);
-if (missing.length) console.warn(`WARN: chars with no sheet texture (flat-color fallback): ${missing.map((c) => `'${c}'`).join(" ")}`);
 
 const tileBuf: Buffer[] = [];
 const legend: Record<string, string> = {};
@@ -184,12 +183,24 @@ const deepmineFillForChar: Record<string, string> = {
   r: "deepmine-ore-rock.png",
   "<": "deepmine-worn-dirt.png",
 };
+const northwatchFillForChar: Record<string, string> = {
+  "8": "northwatch-road.png",
+  "9": "northwatch-grass-v0.png",
+  ":": "northwatch-moat.png",
+  "_": "northwatch-wall.png",
+  f: "northwatch-grass-v2.png",
+  O: "northwatch-grass-v1.png",
+  S: "northwatch-road.png",
+};
 const stageFillForChar: Record<string, Record<string, string>> = {
   desert: desertFillForChar,
   cemetery: cemeteryFillForChar,
   crypt: cryptFillForChar,
   deepmine: deepmineFillForChar,
+  northwatch: northwatchFillForChar,
 };
+const missing = chars.filter((ch) => !TEX[BASE[ch] ?? ""] && !stageFillForChar[name]?.[ch]);
+if (missing.length) console.warn(`WARN: chars with no sheet texture (flat-color fallback): ${missing.map((c) => `'${c}'`).join(" ")}`);
 function maybeApplyStageFill(ch: string, tile: Buffer): void {
   const file = stageFillForChar[name]?.[ch];
   if (!file) return;

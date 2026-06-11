@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/northwatch-wall.png",
+  "material": "northwatch-wall",
+  "recipe": "procedural/northwatch_tuft",
+  "ramp": [
+    "#3d4140",
+    "#565b58",
+    "#71756f",
+    "#8c8d83",
+    "#aaa89a"
+  ],
+  "seed": 5309,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.418,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

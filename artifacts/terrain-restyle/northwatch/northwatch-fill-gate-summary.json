@@ -1,0 +1,218 @@
+{
+  "northwatch-grass-v0": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/northwatch-grass-v0.png",
+    "material": "northwatch-grass",
+    "recipe": "procedural/northwatch_tuft",
+    "ramp": [
+      "#2d431c",
+      "#3e5d28",
+      "#537637",
+      "#698c49",
+      "#82a55e"
+    ],
+    "seed": 5113,
+    "gates": {
+      "color_count": {
+        "value": 4,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.821,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "northwatch-grass-v1": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/northwatch-grass-v1.png",
+    "material": "northwatch-grass",
+    "recipe": "procedural/northwatch_tuft",
+    "ramp": [
+      "#2d431c",
+      "#3e5d28",
+      "#537637",
+      "#698c49",
+      "#82a55e"
+    ],
+    "seed": 5129,
+    "gates": {
+      "color_count": {
+        "value": 4,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.404,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "northwatch-grass-v2": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/northwatch-grass-v2.png",
+    "material": "northwatch-grass",
+    "recipe": "procedural/northwatch_tuft",
+    "ramp": [
+      "#2d431c",
+      "#3e5d28",
+      "#537637",
+      "#698c49",
+      "#82a55e"
+    ],
+    "seed": 5147,
+    "gates": {
+      "color_count": {
+        "value": 4,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.6,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "northwatch-road": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/northwatch-road.png",
+    "material": "northwatch-road",
+    "recipe": "procedural/northwatch_tuft",
+    "ramp": [
+      "#6f5130",
+      "#927044",
+      "#b58f5c",
+      "#cfaa74",
+      "#e3c38d"
+    ],
+    "seed": 5203,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.375,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "northwatch-wall": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/northwatch-wall.png",
+    "material": "northwatch-wall",
+    "recipe": "procedural/northwatch_tuft",
+    "ramp": [
+      "#3d4140",
+      "#565b58",
+      "#71756f",
+      "#8c8d83",
+      "#aaa89a"
+    ],
+    "seed": 5309,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.418,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "northwatch-moat": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/northwatch-moat.png",
+    "material": "northwatch-moat",
+    "recipe": "procedural/northwatch_tuft",
+    "ramp": [
+      "#173946",
+      "#205566",
+      "#2d7384",
+      "#3d8d9b",
+      "#58a9af"
+    ],
+    "seed": 5407,
+    "gates": {
+      "color_count": {
+        "value": 4,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0029,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.397,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  }
+}

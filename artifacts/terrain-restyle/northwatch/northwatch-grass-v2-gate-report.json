@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/northwatch-grass-v2.png",
+  "material": "northwatch-grass",
+  "recipe": "procedural/northwatch_tuft",
+  "ramp": [
+    "#2d431c",
+    "#3e5d28",
+    "#537637",
+    "#698c49",
+    "#82a55e"
+  ],
+  "seed": 5147,
+  "gates": {
+    "color_count": {
+      "value": 4,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.6,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

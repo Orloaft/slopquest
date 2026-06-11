@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/northwatch-road.png",
+  "material": "northwatch-road",
+  "recipe": "procedural/northwatch_tuft",
+  "ramp": [
+    "#6f5130",
+    "#927044",
+    "#b58f5c",
+    "#cfaa74",
+    "#e3c38d"
+  ],
+  "seed": 5203,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.375,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/northwatch-moat.png",
+  "material": "northwatch-moat",
+  "recipe": "procedural/northwatch_tuft",
+  "ramp": [
+    "#173946",
+    "#205566",
+    "#2d7384",
+    "#3d8d9b",
+    "#58a9af"
+  ],
+  "seed": 5407,
+  "gates": {
+    "color_count": {
+      "value": 4,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0029,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.397,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}
