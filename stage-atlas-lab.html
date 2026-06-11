@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stage Atlas Lab</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; font: 12px/1.35 system-ui, sans-serif; background: #15191e; color: #d8dee4; }
+      button, select { font: inherit; }
+      #app { display: grid; grid-template-columns: 292px minmax(640px, 1fr) 320px; height: 100vh; overflow: hidden; }
+      aside { min-width: 0; background: #1b2128; border-right: 1px solid #303943; display: flex; flex-direction: column; overflow: hidden; }
+      aside.right { border-right: 0; border-left: 1px solid #303943; }
+      main { min-width: 0; display: grid; grid-template-rows: auto 1fr; background: #0e1115; overflow: hidden; }
+      h1 { font-size: 14px; margin: 0; padding: 10px 12px; border-bottom: 1px solid #303943; }
+      h2 { margin: 12px 10px 6px; color: #8a98a6; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+      .row { display: flex; gap: 6px; padding: 4px 10px; align-items: center; }
+      .row.wrap { flex-wrap: wrap; }
+      select, button {
+        min-height: 28px; border: 1px solid #3d4853; border-radius: 5px;
+        background: #10151a; color: #d8dee4; padding: 4px 8px;
+      }
+      button { cursor: pointer; }
+      button:hover { background: #27313a; }
+      button.on { background: #2f6fda; border-color: #3a7eea; color: #fff; }
+      button.subtle { background: #20272f; }
+      #stageSel { flex: 1; min-width: 0; }
+      #meta, #status { color: #91a0ad; padding: 6px 10px; white-space: pre-wrap; }
+      #status { border-top: 1px solid #303943; min-height: 42px; }
+      #slotList { overflow: auto; padding: 4px 8px 10px; }
+      .slot {
+        display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center;
+        width: 100%; margin: 4px 0; padding: 5px; border: 1px solid #303943; border-radius: 6px;
+        background: #20272f; text-align: left;
+      }
+      .slot:hover { background: #26313a; }
+      .slot.on { border-color: #e4b342; box-shadow: 0 0 0 1px #e4b342 inset; }
+      .tile {
+        width: 32px; height: 32px; image-rendering: pixelated; background-repeat: no-repeat;
+        background-color: #0e1115; border: 1px solid #3d4853;
+      }
+      .slot .name { min-width: 0; overflow: hidden; }
+      .slot b { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .slot small { display: block; color: #8996a3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .badge { color: #9eacb8; font-variant-numeric: tabular-nums; }
+      #toolbar { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #303943; background: #161b21; }
+      #sampleInfo { color: #a6b4c0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; align-self: center; }
+      #previewWrap { display: grid; place-items: center; overflow: auto; padding: 14px; }
+      #preview {
+        width: min(100%, 896px); aspect-ratio: 28 / 18; max-height: calc(100vh - 82px);
+        border: 1px solid #303943; background: #080a0d; image-rendering: pixelated;
+      }
+      #atlasGrid {
+        display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px;
+        overflow: auto; padding: 8px; align-content: start;
+      }
+      .atlasCell {
+        aspect-ratio: 1; min-width: 0; image-rendering: pixelated; background-repeat: no-repeat;
+        background-color: #0e1115; border: 1px solid #303943; border-radius: 4px; cursor: pointer; position: relative;
+      }
+      .atlasCell:hover { outline: 2px solid #e4b342; outline-offset: -2px; }
+      .atlasCell.on { border-color: #4d8dff; box-shadow: 0 0 0 1px #4d8dff inset; }
+      .atlasCell span {
+        position: absolute; right: 2px; bottom: 1px; color: #fff; font-size: 9px;
+        text-shadow: 0 0 2px #000, 0 0 2px #000;
+      }
+      .muted { color: #7f8b96; }
+      .spacer { flex: 1; }
+      @media (max-width: 980px) {
+        #app { grid-template-columns: 260px 1fr; }
+        aside.right { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <aside>
+        <h1>Stage Atlas Lab</h1>
+        <h2>Stage</h2>
+        <div class="row">
+          <select id="stageSel"></select>
+        </div>
+        <div id="meta"></div>
+
+        <h2>Seed Samples</h2>
+        <div class="row wrap" id="seedButtons"></div>
+        <div class="row">
+          <button id="prevSeed" class="subtle">Prev</button>
+          <button id="nextSeed" class="subtle">Next</button>
+          <button id="resetAll" class="subtle">Reset overrides</button>
+        </div>
+
+        <h2>Tile Slots</h2>
+        <div class="row">
+          <select id="slotFilter">
+            <option value="all">All used slots</option>
+            <option value="changed">Changed only</option>
+            <option value="blocked">Blocked</option>
+            <option value="walkable">Walkable</option>
+            <option value="road">Road</option>
+          </select>
+        </div>
+        <div id="slotList"></div>
+        <div class="spacer"></div>
+        <div id="status">Loading...</div>
+      </aside>
+
+      <main>
+        <div id="toolbar">
+          <div id="sampleInfo"></div>
+          <div class="row" style="padding:0">
+            <button id="copyReport" class="subtle">Copy report</button>
+          </div>
+        </div>
+        <div id="previewWrap">
+          <canvas id="preview" width="896" height="576"></canvas>
+        </div>
+      </main>
+
+      <aside class="right">
+        <h1>Atlas Browser</h1>
+        <div class="row wrap">
+          <button id="applyAtlas" class="on">Assign selected</button>
+          <button id="resetSlot" class="subtle">Reset slot</button>
+        </div>
+        <div class="muted" style="padding:0 10px 6px">Click a tile slot, then pick an atlas tile.</div>
+        <div id="atlasGrid"></div>
+      </aside>
+    </div>
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id);
+      const canvas = $("preview");
+      const ctx = canvas.getContext("2d");
+      const SAMPLE_W = 28;
+      const SAMPLE_H = 18;
+      const SEEDS = [11, 29, 47, 83, 131, 197];
+      let D = null;
+      let atlas = null;
+      let atlasCols = 1;
+      let atlasRows = 1;
+      let tileSize = 32;
+      let slots = [];
+      let activeSeed = SEEDS[0];
+      let activeSlotRef = null;
+      let pickedRef = null;
+      const overrides = new Map();
+
+      function setStatus(text) { $("status").textContent = text; }
+      function refIndex(ref) { return Number(String(ref).split(":")[1] ?? 0); }
+      function makeRef(index) { return `${D.atlasName}:${index}`; }
+      function tileStyle(ref) {
+        const index = refIndex(ref);
+        const x = (index % atlasCols) * tileSize;
+        const y = Math.floor(index / atlasCols) * tileSize;
+        return `background-image:url("${D.atlasUrl}");background-size:${atlasCols * 32}px ${atlasRows * 32}px;background-position:-${x}px -${y}px`;
+      }
+      function remap(ref) { return overrides.get(ref) ?? ref; }
+      function stableHash(seed, salt) {
+        let v = (seed * 2654435761) >>> 0;
+        for (let i = 0; i < salt.length; i += 1) v = (Math.imul(v ^ salt.charCodeAt(i), 2246822519)) >>> 0;
+        return v >>> 0;
+      }
+      function sampleFor(seed) {
+        const maxX = Math.max(0, D.cols - SAMPLE_W);
+        const maxY = Math.max(0, D.rows - SAMPLE_H);
+        const x = maxX ? stableHash(seed, `${D.name}:x`) % (maxX + 1) : 0;
+        const y = maxY ? stableHash(seed, `${D.name}:y`) % (maxY + 1) : 0;
+        return { x, y, w: Math.min(SAMPLE_W, D.cols), h: Math.min(SAMPLE_H, D.rows) };
+      }
+      function drawTile(ref, dx, dy) {
+        const index = refIndex(remap(ref));
+        const sx = (index % atlasCols) * tileSize;
+        const sy = Math.floor(index / atlasCols) * tileSize;
+        ctx.drawImage(atlas, sx, sy, tileSize, tileSize, dx, dy, 32, 32);
+      }
+      function draw() {
+        if (!D || !atlas?.complete) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = false;
+        const s = sampleFor(activeSeed);
+        for (let y = 0; y < s.h; y += 1) {
+          for (let x = 0; x < s.w; x += 1) {
+            const mx = s.x + x;
+            const my = s.y + y;
+            const base = D.base?.[my]?.[mx] || D.legend[D.ascii[my]?.[mx]];
+            if (base) drawTile(base, x * 32, y * 32);
+            const fringe = D.fringe?.[my]?.[mx];
+            if (fringe) drawTile(fringe, x * 32, y * 32);
+          }
+        }
+        ctx.strokeStyle = "rgba(255,255,255,.1)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= s.w; x += 1) {
+          ctx.beginPath(); ctx.moveTo(x * 32 + .5, 0); ctx.lineTo(x * 32 + .5, s.h * 32); ctx.stroke();
+        }
+        for (let y = 0; y <= s.h; y += 1) {
+          ctx.beginPath(); ctx.moveTo(0, y * 32 + .5); ctx.lineTo(s.w * 32, y * 32 + .5); ctx.stroke();
+        }
+        $("sampleInfo").textContent = `seed ${activeSeed} · stage window x:${s.x}-${s.x + s.w - 1}, y:${s.y}-${s.y + s.h - 1} · ${overrides.size} override${overrides.size === 1 ? "" : "s"}`;
+      }
+      function buildSlots() {
+        const used = new Map();
+        const visit = (ref, ch) => {
+          if (!ref) return;
+          const row = used.get(ref) ?? { ref, chars: new Set(), count: 0 };
+          if (ch) row.chars.add(ch);
+          row.count += 1;
+          used.set(ref, row);
+        };
+        for (let y = 0; y < D.rows; y += 1) {
+          for (let x = 0; x < D.cols; x += 1) {
+            const ch = D.ascii[y]?.[x];
+            visit(D.base?.[y]?.[x] || D.legend[ch], ch);
+            visit(D.fringe?.[y]?.[x], null);
+          }
+        }
+        slots = [...used.values()].map((slot) => {
+          const chars = [...slot.chars].sort();
+          const first = chars[0];
+          const vocab = first ? D.vocab[first] : null;
+          return {
+            ...slot,
+            chars,
+            role: vocab?.role ?? (chars.length ? "legend" : "fringe-only"),
+            blocked: !!vocab?.blocked,
+            road: !!vocab?.road
+          };
+        }).sort((a, b) => refIndex(a.ref) - refIndex(b.ref));
+        activeSlotRef = slots[0]?.ref ?? null;
+      }
+      function renderSeeds() {
+        $("seedButtons").innerHTML = SEEDS.map((seed) => `<button data-seed="${seed}" class="${seed === activeSeed ? "on" : ""}">${seed}</button>`).join("");
+        $("seedButtons").querySelectorAll("button").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            activeSeed = Number(btn.dataset.seed);
+            renderSeeds();
+            draw();
+          });
+        });
+      }
+      function renderSlots() {
+        const filter = $("slotFilter").value;
+        const filtered = slots.filter((slot) => {
+          if (filter === "changed") return overrides.has(slot.ref);
+          if (filter === "blocked") return slot.blocked;
+          if (filter === "walkable") return !slot.blocked;
+          if (filter === "road") return slot.road;
+          return true;
+        });
+        $("slotList").innerHTML = filtered.map((slot) => {
+          const target = remap(slot.ref);
+          const changed = target !== slot.ref;
+          const chars = slot.chars.length ? slot.chars.join(" ") : "fringe";
+          const label = `${chars} · ${slot.role}`;
+          return `<button class="slot ${slot.ref === activeSlotRef ? "on" : ""}" data-ref="${slot.ref}">
+            <span class="tile" style='${tileStyle(target)}'></span>
+            <span class="name"><b>${label}</b><small>${slot.ref}${changed ? ` -> ${target}` : ""}</small></span>
+            <span class="badge">${slot.count}</span>
+          </button>`;
+        }).join("");
+        $("slotList").querySelectorAll(".slot").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            activeSlotRef = btn.dataset.ref;
+            pickedRef = remap(activeSlotRef);
+            renderSlots();
+            renderAtlas();
+          });
+        });
+      }
+      function renderAtlas() {
+        const count = atlasCols * atlasRows;
+        $("atlasGrid").innerHTML = Array.from({ length: count }, (_, index) => {
+          const ref = makeRef(index);
+          return `<button class="atlasCell ${ref === pickedRef ? "on" : ""}" data-ref="${ref}" style='${tileStyle(ref)}'><span>${index}</span></button>`;
+        }).join("");
+        $("atlasGrid").querySelectorAll(".atlasCell").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            pickedRef = btn.dataset.ref;
+            if (activeSlotRef) overrides.set(activeSlotRef, pickedRef);
+            renderSlots();
+            renderAtlas();
+            draw();
+          });
+        });
+      }
+      function report() {
+        const changes = [...overrides.entries()]
+          .filter(([from, to]) => from !== to)
+          .map(([from, to]) => `${from} -> ${to}`)
+          .join("\n");
+        return [`Stage Atlas Lab`, `stage: ${D?.name}`, `seed: ${activeSeed}`, changes ? `overrides:\n${changes}` : "overrides: none"].join("\n");
+      }
+      async function loadStage(name) {
+        setStatus(`Loading ${name}...`);
+        D = await (await fetch(`/editor/api/state?stage=${encodeURIComponent(name)}`)).json();
+        if (D.error) throw new Error(D.error);
+        tileSize = D.tileSize || 32;
+        atlasCols = D.atlasCols || 1;
+        overrides.clear();
+        atlas = new Image();
+        await new Promise((resolve, reject) => {
+          atlas.onload = resolve;
+          atlas.onerror = reject;
+          atlas.src = D.atlasUrl;
+        });
+        atlasRows = Math.max(1, Math.ceil(atlas.naturalHeight / tileSize));
+        buildSlots();
+        pickedRef = activeSlotRef;
+        $("meta").textContent = `${D.cols}x${D.rows} · ${D.atlasName} · ${slots.length} used refs`;
+        renderSeeds();
+        renderSlots();
+        renderAtlas();
+        draw();
+        setStatus("Read-only lab. Overrides affect this preview only; no stage files are saved.");
+      }
+      async function init() {
+        const { stages, error } = await (await fetch("/editor/api/stages")).json();
+        if (error) throw new Error(error);
+        $("stageSel").innerHTML = stages.map((s) => `<option value="${s}">${s}</option>`).join("");
+        $("stageSel").value = stages.includes("northwood") ? "northwood" : stages[0];
+        $("stageSel").addEventListener("change", () => loadStage($("stageSel").value).catch((e) => setStatus(String(e))));
+        $("slotFilter").addEventListener("change", renderSlots);
+        $("prevSeed").addEventListener("click", () => {
+          const i = SEEDS.indexOf(activeSeed);
+          activeSeed = SEEDS[(i - 1 + SEEDS.length) % SEEDS.length];
+          renderSeeds(); draw();
+        });
+        $("nextSeed").addEventListener("click", () => {
+          const i = SEEDS.indexOf(activeSeed);
+          activeSeed = SEEDS[(i + 1) % SEEDS.length];
+          renderSeeds(); draw();
+        });
+        $("resetAll").addEventListener("click", () => { overrides.clear(); renderSlots(); renderAtlas(); draw(); });
+        $("applyAtlas").addEventListener("click", () => {
+          if (!activeSlotRef || !pickedRef) return;
+          overrides.set(activeSlotRef, pickedRef);
+          renderSlots(); draw();
+        });
+        $("resetSlot").addEventListener("click", () => {
+          if (!activeSlotRef) return;
+          overrides.delete(activeSlotRef);
+          pickedRef = activeSlotRef;
+          renderSlots(); renderAtlas(); draw();
+        });
+        $("copyReport").addEventListener("click", async () => {
+          await navigator.clipboard.writeText(report());
+          setStatus("Copied current lab report.");
+        });
+        await loadStage($("stageSel").value);
+        window.__atlasLab = {
+          stage: () => D?.name,
+          slots: () => slots.length,
+          overrides: () => overrides.size,
+          setSeed: (seed) => { activeSeed = seed; renderSeeds(); draw(); },
+          assignFirstDifferent: () => {
+            const slot = slots[0];
+            if (!slot) return false;
+            activeSlotRef = slot.ref;
+            const next = makeRef((refIndex(slot.ref) + 1) % (atlasCols * atlasRows));
+            overrides.set(slot.ref, next);
+            renderSlots(); renderAtlas(); draw();
+            return true;
+          },
+          report
+        };
+      }
+      init().catch((e) => setStatus(`Failed: ${e.message || e}`));
+    </script>
+  </body>
+</html>
