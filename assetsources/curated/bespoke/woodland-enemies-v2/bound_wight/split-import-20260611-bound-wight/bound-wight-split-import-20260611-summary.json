@@ -1,0 +1,21 @@
+{
+  "slug": "bound_wight",
+  "derived_from_read_only": "/mnt/nxt-dev/tib-gathering/public/grave-revenant-sheet.png",
+  "candidate": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/split-import-20260611-bound-wight/bound-wight-split-import-20260611-candidate.png",
+  "public_sheet": "/mnt/nxt-dev/tib-gathering/public/bound-wight-sheet.png",
+  "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/grid_manifest.json",
+  "transform": {
+    "palette": "wight",
+    "max_colors": 18,
+    "scale": 0.94,
+    "xshift": 1,
+    "yshift": 2,
+    "frame_offsets": [
+      -2,
+      0,
+      2,
+      0
+    ]
+  },
+  "contract": "enemy-directional-4x4-v2 384x384 RGBA, 4x4 96px cells, exact #ff00ff background"
+}

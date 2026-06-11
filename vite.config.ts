@@ -135,7 +135,8 @@ interface SpriteIcon { url: string; sx?: number; sy?: number; sw?: number; sh?: 
 const WOODLAND_BESPOKE_FAMILIES = [
   "dire_wolf", "orc", "ghoul", "wild_boar", "thorn_hedgehog", "forest_spider",
   "forest_slime", "mushroom_brute", "sapling_deer", "ancient_treant", "bone_druid",
-  "forest_pixie", "bog_wraith", "grave_revenant", "crypt_sentinel", "pale_banshee"
+  "forest_pixie", "bog_wraith", "grave_revenant", "crypt_sentinel", "pale_banshee",
+  "restless_husk", "bound_wight"
 ];
 const NEW_ENEMY_FAMILIES = [
   "canyon_scavenger", "dust_burrower", "dune_skitterer", "sun_wraith",
@@ -178,7 +179,7 @@ const MONSTER_FAMILY: Record<string, string> = {
   dust_burrower: "dust_burrower", dune_skitterer: "dune_skitterer", sun_wraith: "sun_wraith",
   reef_prowler: "reef_prowler", venomous_stalker: "venomous_stalker", totem_wraith: "totem_wraith",
   reach_hen: "rat", meadow_hopper: "rat", reach_vole: "rat",
-  restless_husk: "ghoul", grave_shambler: "skeleton", bound_wight: "grave_revenant",
+  restless_husk: "restless_husk", grave_shambler: "skeleton", bound_wight: "bound_wight",
 };
 function monsterIcon(type: string): SpriteIcon | null {
   return MONSTER_ICON_BY_FAMILY[MONSTER_FAMILY[type] ?? "goblin"] ?? null;

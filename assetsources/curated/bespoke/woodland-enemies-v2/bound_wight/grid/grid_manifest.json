@@ -1,0 +1,46 @@
+{
+  "cell_px": 96,
+  "columns": 4,
+  "rows": [
+    {
+      "name": "walk_up",
+      "index": 0,
+      "frames": [
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_up/frame_000.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_up/frame_001.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_up/frame_002.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_up/frame_003.png"
+      ]
+    },
+    {
+      "name": "walk_right",
+      "index": 1,
+      "frames": [
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_right/frame_000.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_right/frame_001.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_right/frame_002.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_right/frame_003.png"
+      ]
+    },
+    {
+      "name": "walk_down",
+      "index": 2,
+      "frames": [
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_down/frame_000.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_down/frame_001.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_down/frame_002.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_down/frame_003.png"
+      ]
+    },
+    {
+      "name": "walk_left",
+      "index": 3,
+      "frames": [
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_left/frame_000.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_left/frame_001.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_left/frame_002.png",
+        "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/bound_wight/grid/walk_left/frame_003.png"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "slug": "restless_husk",
+  "derived_from_read_only": "/mnt/nxt-dev/tib-gathering/public/ghoul-sheet.png",
+  "candidate": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/restless_husk/split-import-20260611-restless-husk/restless-husk-split-import-20260611-candidate.png",
+  "public_sheet": "/mnt/nxt-dev/tib-gathering/public/restless-husk-sheet.png",
+  "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/restless_husk/grid/grid_manifest.json",
+  "transform": {
+    "palette": "husk",
+    "max_colors": 18,
+    "scale": 0.92,
+    "xshift": -1,
+    "yshift": 4,
+    "frame_offsets": [
+      -2,
+      0,
+      2,
+      0
+    ]
+  },
+  "contract": "enemy-directional-4x4-v2 384x384 RGBA, 4x4 96px cells, exact #ff00ff background"
+}

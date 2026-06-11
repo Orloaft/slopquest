@@ -1119,7 +1119,9 @@ const WOODLAND_BESPOKE_FAMILIES = [
   "reach_hen",
   "meadow_hopper",
   "reach_vole",
+  "restless_husk",
   "grave_shambler",
+  "bound_wight",
   "skitterer",
   "mire_spitter",
   "canyon_scavenger",
@@ -4294,9 +4296,9 @@ function computeMonsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "reach_hen") return { family: "reach_hen", width: 38, height: 32, yOffset: -2 };
   if (monster.type === "meadow_hopper") return { family: "meadow_hopper", width: 42, height: 38, yOffset: -5 };
   if (monster.type === "reach_vole") return { family: "reach_vole", width: 42, height: 28, yOffset: 1 };
-  if (monster.type === "restless_husk") return { family: "ghoul", width: 44, height: 52, yOffset: -12 };
+  if (monster.type === "restless_husk") return { family: "restless_husk", width: 44, height: 52, yOffset: -12 };
   if (monster.type === "grave_shambler") return { family: "grave_shambler", width: 44, height: 52, yOffset: -12 };
-  if (monster.type === "bound_wight") return { family: "grave_revenant", width: 46, height: 56, yOffset: -16 };
+  if (monster.type === "bound_wight") return { family: "bound_wight", width: 46, height: 56, yOffset: -16 };
   return { family: "goblin", width: 42, height: 46, yOffset: -10 };
 }
 
