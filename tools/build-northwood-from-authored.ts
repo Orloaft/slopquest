@@ -61,9 +61,11 @@ const isR = (r: number, c: number) => at(r, c) === "t";
 
 // ---- atlases ---------------------------------------------------------------
 const sliced = (name: string) => PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/sliced/${name}`)));
-const water = sliced("water-wang.png");
-const road = sliced("road-wang.png");
-const ptop = sliced("plateau-top-v2.png");
+// tuft re-materialed atlases (approved terrain style — docs/terrain-style-bible.md);
+// regenerate with tools/rematerial-northwood-atlases.py
+const water = sliced("water-wang-tuft.png");
+const road = sliced("road-wang-tuft.png");
+const ptop = sliced("plateau-top-v2-tuft.png");
 const face = sliced("cliff-face.png");
 const ladder = sliced("ladder.png");
 const wCols = water.width / ts, rCols = road.width / ts, PTCOLS = ptop.width / ts, FCOLS = 5;
@@ -99,12 +101,14 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   else { kind[r][c] = eh(r, c) >= 1 ? "plateau" : "grass"; }
 }
 
-// ---- ground fill: interior grass on ALL land (plateau idx 0 = surrounded) ---
-const GRASS_IDX0 = 0; // EDGE-NONE tile = fully-surrounded plateau surface
+// ---- ground fill: interior grass on ALL land, 4 tuft variants by cell hash ---
+// (variant fills break grid repetition — docs/terrain-style-bible.md "alive" §1)
+const grassFills = [0, 1, 2, 3].map((i) =>
+  PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/fills/northwood-grass-v${i}.png`))));
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const ch = at(r, c);
   if (ch === "~" || ch === "^" || ch === ".") continue;
-  blitTile(ptop, PTCOLS, GRASS_IDX0, c * ts, r * ts);
+  blitTile(grassFills[Math.floor(hrand(r, c) * grassFills.length)], 1, 0, c * ts, r * ts);
 }
 
 // ---- water corner-Wang dual-grid (exact-parity composite per cell) ---------
