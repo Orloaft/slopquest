@@ -1,0 +1,358 @@
+{
+  "dimensions": {
+    "width": 384,
+    "height": 384
+  },
+  "cell_size": {
+    "width": 96,
+    "height": 96
+  },
+  "per_cell_non_magenta_counts": [
+    [
+      3682,
+      3815,
+      3864,
+      3704
+    ],
+    [
+      3084,
+      3232,
+      3377,
+      3171
+    ],
+    [
+      3683,
+      3815,
+      3868,
+      3704
+    ],
+    [
+      3101,
+      3222,
+      3375,
+      3166
+    ]
+  ],
+  "per_cell_bounding_boxes": [
+    [
+      {
+        "x": 6,
+        "y": 14,
+        "width": 77,
+        "height": 82,
+        "right": 82,
+        "bottom": 95
+      },
+      {
+        "x": 12,
+        "y": 11,
+        "width": 79,
+        "height": 85,
+        "right": 90,
+        "bottom": 95
+      },
+      {
+        "x": 15,
+        "y": 13,
+        "width": 79,
+        "height": 83,
+        "right": 93,
+        "bottom": 95
+      },
+      {
+        "x": 8,
+        "y": 15,
+        "width": 77,
+        "height": 81,
+        "right": 84,
+        "bottom": 95
+      }
+    ],
+    [
+      {
+        "x": 14,
+        "y": 0,
+        "width": 76,
+        "height": 96,
+        "right": 89,
+        "bottom": 95
+      },
+      {
+        "x": 14,
+        "y": 0,
+        "width": 82,
+        "height": 95,
+        "right": 95,
+        "bottom": 94
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "width": 96,
+        "height": 96,
+        "right": 95,
+        "bottom": 95
+      },
+      {
+        "x": 9,
+        "y": 0,
+        "width": 78,
+        "height": 96,
+        "right": 86,
+        "bottom": 95
+      }
+    ],
+    [
+      {
+        "x": 6,
+        "y": 0,
+        "width": 77,
+        "height": 96,
+        "right": 82,
+        "bottom": 95
+      },
+      {
+        "x": 12,
+        "y": 11,
+        "width": 79,
+        "height": 85,
+        "right": 90,
+        "bottom": 95
+      },
+      {
+        "x": 15,
+        "y": 0,
+        "width": 79,
+        "height": 96,
+        "right": 93,
+        "bottom": 95
+      },
+      {
+        "x": 8,
+        "y": 15,
+        "width": 77,
+        "height": 81,
+        "right": 84,
+        "bottom": 95
+      }
+    ],
+    [
+      {
+        "x": 4,
+        "y": 0,
+        "width": 92,
+        "height": 96,
+        "right": 95,
+        "bottom": 95
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "width": 96,
+        "height": 95,
+        "right": 95,
+        "bottom": 94
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "width": 91,
+        "height": 96,
+        "right": 90,
+        "bottom": 95
+      },
+      {
+        "x": 7,
+        "y": 0,
+        "width": 83,
+        "height": 96,
+        "right": 89,
+        "bottom": 95
+      }
+    ]
+  ],
+  "row_motion_scores": [
+    {
+      "row": 0,
+      "direction": "up",
+      "average_mask_difference": 0.2075,
+      "pair_mask_differences": [
+        0.2496,
+        0.1316,
+        0.2412
+      ],
+      "pair_changed_pixels": [
+        1069,
+        541,
+        1038
+      ],
+      "pair_union_pixels": [
+        4283,
+        4110,
+        4303
+      ]
+    },
+    {
+      "row": 1,
+      "direction": "right",
+      "average_mask_difference": 0.2218,
+      "pair_mask_differences": [
+        0.1871,
+        0.2548,
+        0.2235
+      ],
+      "pair_changed_pixels": [
+        652,
+        965,
+        824
+      ],
+      "pair_union_pixels": [
+        3484,
+        3787,
+        3686
+      ]
+    },
+    {
+      "row": 2,
+      "direction": "down",
+      "average_mask_difference": 0.2081,
+      "pair_mask_differences": [
+        0.2498,
+        0.1325,
+        0.2419
+      ],
+      "pair_changed_pixels": [
+        1070,
+        545,
+        1042
+      ],
+      "pair_union_pixels": [
+        4284,
+        4114,
+        4307
+      ]
+    },
+    {
+      "row": 3,
+      "direction": "left",
+      "average_mask_difference": 0.2428,
+      "pair_mask_differences": [
+        0.2199,
+        0.3205,
+        0.1881
+      ],
+      "pair_changed_pixels": [
+        781,
+        1259,
+        679
+      ],
+      "pair_union_pixels": [
+        3552,
+        3928,
+        3610
+      ]
+    }
+  ],
+  "row_bbox_variance": [
+    {
+      "row": 0,
+      "direction": "up",
+      "width_range": 2.0,
+      "height_range": 4.0,
+      "center_x_range": 10.0,
+      "baseline_range": 0.0,
+      "width_range_ratio": 0.0256,
+      "height_range_ratio": 0.0483
+    },
+    {
+      "row": 1,
+      "direction": "right",
+      "width_range": 20.0,
+      "height_range": 1.0,
+      "center_x_range": 7.0,
+      "baseline_range": 1.0,
+      "width_range_ratio": 0.241,
+      "height_range_ratio": 0.0104
+    },
+    {
+      "row": 2,
+      "direction": "down",
+      "width_range": 2.0,
+      "height_range": 15.0,
+      "center_x_range": 10.0,
+      "baseline_range": 0.0,
+      "width_range_ratio": 0.0256,
+      "height_range_ratio": 0.1676
+    },
+    {
+      "row": 3,
+      "direction": "left",
+      "width_range": 13.0,
+      "height_range": 1.0,
+      "center_x_range": 4.5,
+      "baseline_range": 1.0,
+      "width_range_ratio": 0.1436,
+      "height_range_ratio": 0.0104
+    }
+  ],
+  "right_left_mirror_similarity": {
+    "rows": {
+      "right": 1,
+      "left": 3
+    },
+    "average_similarity": 0.894,
+    "frame_similarities": [
+      0.8845,
+      0.9611,
+      0.8473,
+      0.8832
+    ]
+  },
+  "exact_magenta_pixel_count": 91593,
+  "exact_magenta_percentage": 62.1155,
+  "near_magenta_pixel_count": 0,
+  "palette_count": 15,
+  "max_colors": 24,
+  "runtime_cell_size": {
+    "width": 32,
+    "height": 32
+  },
+  "strict_prototype": true,
+  "transparent_corners": true,
+  "transparent_corner_list": [
+    {
+      "name": "top_left",
+      "transparent": true
+    },
+    {
+      "name": "top_right",
+      "transparent": true
+    },
+    {
+      "name": "bottom_left",
+      "transparent": true
+    },
+    {
+      "name": "bottom_right",
+      "transparent": true
+    }
+  ],
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    "row 0 walk_up bounding box alignment varies heavily (center x range 10.0 px, baseline range 0.0 px)",
+    "row 2 walk_down bounding box alignment varies heavily (center x range 10.0 px, baseline range 0.0 px)"
+  ],
+  "keyed_png": "assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/parallel-wave-20260611-mirage-shade/public-import-review-20260611-batch-7/mirage-shade-public-import-20260611-batch-7-keyed.png",
+  "artifacts": {
+    "keyed_png": "assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/parallel-wave-20260611-mirage-shade/public-import-review-20260611-batch-7/mirage-shade-public-import-20260611-batch-7-keyed.png",
+    "contact_png": "assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/parallel-wave-20260611-mirage-shade/public-import-review-20260611-batch-7/mirage-shade-public-import-20260611-batch-7-contact.png",
+    "runtime_contact_png": "assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/parallel-wave-20260611-mirage-shade/public-import-review-20260611-batch-7/mirage-shade-public-import-20260611-batch-7-runtime-contact.png",
+    "row_gifs": {
+      "up": "assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/parallel-wave-20260611-mirage-shade/public-import-review-20260611-batch-7/mirage-shade-public-import-20260611-batch-7-walk-up.gif",
+      "right": "assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/parallel-wave-20260611-mirage-shade/public-import-review-20260611-batch-7/mirage-shade-public-import-20260611-batch-7-walk-right.gif",
+      "down": "assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/parallel-wave-20260611-mirage-shade/public-import-review-20260611-batch-7/mirage-shade-public-import-20260611-batch-7-walk-down.gif",
+      "left": "assetsources/curated/bespoke/woodland-enemies-v2/mirage_shade/parallel-wave-20260611-mirage-shade/public-import-review-20260611-batch-7/mirage-shade-public-import-20260611-batch-7-walk-left.gif"
+    }
+  }
+}
