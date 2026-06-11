@@ -75,6 +75,20 @@ def base_mottle(material: str, seed: int, low_q: float = 0.4) -> np.ndarray:
     return a
 
 
+def cleanup_isolates(a: np.ndarray, passes: int = 2) -> np.ndarray:
+    out = a.copy()
+    for _ in range(passes):
+        same = np.zeros(out.shape[:2], bool)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            same |= (np.roll(np.roll(out, dy, 0), dx, 1) == out).all(-1)
+        isolated = ~same
+        if not isolated.any():
+            break
+        replacement = np.roll(out, 1, 1)
+        out[isolated] = replacement[isolated]
+    return out
+
+
 def sand_fill(seed: int) -> Image.Image:
     dark2, dark, base, light, bright = hexes("sand")
     rng = np.random.default_rng(seed)
@@ -130,9 +144,22 @@ def rock_fill(material: str, seed: int) -> Image.Image:
     rng = np.random.default_rng(seed)
     a = base_mottle(material, seed, 0.44)
     if material.endswith("cliff"):
-        for x in range(3, TS, 8):
-            a[:, x:x + 2] = dark
-            a[0:TS:5, x - 1:x + 1] = light
+        # Red-rock canyon face: horizontal benches and faceted fracture chunks.
+        for y in (3, 11, 20, 30):
+            a[y, :] = dark2
+            a[(y - 1) % TS, :] = light
+        for x in range(3, TS, 12):
+            a[4:12, x] = dark
+            a[12:21, (x + 6) % TS] = dark
+            a[21:30, (x + 3) % TS] = dark
+        for x, y in scatter(rng, 7, 7):
+            for dx, dy in ((0, 0), (1, 0), (2, 1), (3, 1)):
+                px(a, x + dx, y + dy, dark)
+            px(a, x, y - 1, light)
+            px(a, x + 1, y - 1, bright)
+            px(a, x + 3, y + 2, dark2)
+            px(a, x + 2, y, base)
+        a = cleanup_isolates(a)
     else:
         for x, y in scatter(rng, 4, 8):
             for dx, dy in ((0, 0), (1, 0), (2, 0), (1, 1), (2, 1)):

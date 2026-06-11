@@ -73,21 +73,46 @@ def base_mottle(material: str, seed: int, low_q: float = 0.43) -> np.ndarray:
     return a
 
 
+def cleanup_isolates(a: np.ndarray, passes: int = 2) -> np.ndarray:
+    out = a.copy()
+    for _ in range(passes):
+        same = np.zeros(out.shape[:2], bool)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            same |= (np.roll(np.roll(out, dy, 0), dx, 1) == out).all(-1)
+        isolated = ~same
+        if not isolated.any():
+            break
+        replacement = np.roll(out, 1, 1)
+        out[isolated] = replacement[isolated]
+    return out
+
+
 def wall_fill(seed: int) -> Image.Image:
-    dark2, dark, _base, light, bright = hexes("deepmine-wall")
+    dark2, dark, base, light, bright = hexes("deepmine-wall")
     rng = np.random.default_rng(seed)
     a = base_mottle("deepmine-wall", seed, 0.5)
-    for x in range(2, TS, 9):
-        a[:, x] = dark
-    for y in range(5, TS, 10):
+    # Layered mine shale: chunky horizontal strata with ore-fleck highlights.
+    for y in (3, 11, 20, 29):
         a[y, :] = dark2
-        a[(y - 1) % TS, :] = tuple(int(v * 0.96) for v in light)
-    for x, y in scatter(rng, 5, 8):
-        px(a, x, y, light)
+        a[(y - 1) % TS, :] = light
+    for y in (7, 16, 25):
+        for x in range(1, TS, 10):
+            px(a, x, y, dark)
+            px(a, x + 1, y, dark)
+            px(a, x + 2, y - 1, light)
+    for x in range(4, TS, 14):
+        a[5:18, x] = dark
+        a[18:30, (x + 7) % TS] = dark
+    for x, y in scatter(rng, 7, 7):
+        px(a, x, y, dark)
+        px(a, x + 1, y, dark)
+        px(a, x, y - 1, light)
+        px(a, x + 1, y - 1, bright)
+        px(a, x + 2, y + 1, dark2)
+    for x, y in scatter(rng, 3, 9):
+        px(a, x, y, base)
         px(a, x + 1, y, light)
-        px(a, x, y - 1, bright)
-        px(a, x + 1, y + 1, dark2)
-    return Image.fromarray(a)
+    return Image.fromarray(cleanup_isolates(a))
 
 
 def floor_fill(seed: int) -> Image.Image:

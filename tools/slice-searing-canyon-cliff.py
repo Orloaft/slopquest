@@ -23,11 +23,11 @@ SRC = os.path.join(ROOT, "assetsources/curated/sliced/cliff-red.png")
 OUT = os.path.join(ROOT, "public/tilesets/searing-canyon-cliff.png")
 
 # --- contrast/volume tuning (edit these to taste) -------------------------------
-CONTRAST = 1.50            # >1 deepens the fracture shadows / sharpens columns
-RGB_MUL = (0.78, 0.58, 0.52)  # per-channel multiply: deepen toward cool maroon, away
+CONTRAST = 1.34            # >1 deepens the fracture shadows / sharpens columns
+RGB_MUL = (0.72, 0.50, 0.45)  # per-channel multiply: deepen toward cool maroon, away
                               # from the floor's bright orange (R kept high, G/B pulled)
-VOL_TOP = 1.18             # vertical brightness at the rim (atlas y=0): sun-catch lift
-VOL_BOTTOM = 0.52          # ...and at the foot (atlas y=95): deep shadow
+VOL_TOP = 1.10             # vertical brightness at the rim (atlas y=0): sun-catch lift
+VOL_BOTTOM = 0.48          # ...and at the foot (atlas y=95): deep shadow
 
 
 def enhance(face: Image.Image) -> Image.Image:

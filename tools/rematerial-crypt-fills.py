@@ -74,20 +74,26 @@ def base_mottle(material: str, seed: int, low_q: float = 0.43) -> np.ndarray:
 
 
 def wall_fill(seed: int) -> Image.Image:
-    dark2, dark, _base, light, bright = hexes("crypt-wall")
+    dark2, dark, base, light, bright = hexes("crypt-wall")
     rng = np.random.default_rng(seed)
-    a = base_mottle("crypt-wall", seed, 0.48)
-    for x in range(4, TS, 8):
-        a[:, x] = dark
-        a[:, (x + 1) % TS] = tuple(int(v * 0.96) for v in dark)
-    for y in range(6, TS, 9):
+    a = base_mottle("crypt-wall", seed, 0.46)
+    # Mortared dungeon blocks: broad courses with top-left bevels, not noisy columns.
+    for y in (0, 9, 19, 31):
         a[y, :] = dark2
-        a[(y + 1) % TS, :] = dark
-    for x, y in scatter(rng, 5, 8):
-        px(a, x, y, light)
-        px(a, x + 1, y, light)
-        px(a, x, y - 1, bright)
-        px(a, x + 1, y + 1, dark2)
+        a[(y - 1) % TS, :] = light
+    courses = [(0, 9, 5), (9, 19, 17), (19, 31, 9)]
+    for y0, y1, offset in courses:
+        for x in range(offset, TS + offset, 13):
+            xx = x % TS
+            a[y0:y1, xx] = dark
+            a[y0:y1, (xx + 1) % TS] = dark2
+            a[y0:y1, (xx - 1) % TS] = base
+    for x, y in scatter(rng, 6, 7):
+        for dx, dy in ((0, 0), (1, 0), (2, 0), (1, 1)):
+            px(a, x + dx, y + dy, dark)
+        px(a, x, y - 1, light)
+        px(a, x + 1, y - 1, bright)
+        px(a, x + 2, y + 1, dark2)
     return Image.fromarray(a)
 
 

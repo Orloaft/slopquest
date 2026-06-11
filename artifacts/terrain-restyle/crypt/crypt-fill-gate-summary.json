@@ -13,7 +13,7 @@
     "seed": 3101,
     "gates": {
       "color_count": {
-        "value": 7,
+        "value": 6,
         "limit": 16,
         "pass": true
       },
@@ -23,12 +23,12 @@
         "pass": true
       },
       "isolated_pixels": {
-        "value": 0.0127,
+        "value": 0.0156,
         "limit": 0.02,
         "pass": true
       },
       "seamless": {
-        "value": 0.336,
+        "value": 1.048,
         "limit": 1.6,
         "pass": true
       },

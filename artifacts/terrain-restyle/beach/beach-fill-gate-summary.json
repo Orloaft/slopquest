@@ -491,12 +491,12 @@
         "pass": true
       },
       "isolated_pixels": {
-        "value": 0.0127,
+        "value": 0.001,
         "limit": 0.02,
         "pass": true
       },
       "seamless": {
-        "value": 1.442,
+        "value": 0.0,
         "limit": 1.6,
         "pass": true
       },

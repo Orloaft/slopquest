@@ -1,0 +1,77 @@
+{
+  "crypt": {
+    "semantic_sha_before": "aefc407074579e9d7819aad76c0243f921b977245f42ed54e874444cc2fa0aa8",
+    "semantic_sha_after": "aefc407074579e9d7819aad76c0243f921b977245f42ed54e874444cc2fa0aa8",
+    "semantic_unchanged": true,
+    "rows": 72,
+    "cols": 110,
+    "objects_before": 0,
+    "objects_after": 0,
+    "layers": [
+      "base"
+    ]
+  },
+  "deepmine": {
+    "semantic_sha_before": "97b4decc14b633720a1cc9e551f4091d09e49a30511ef6195be149bb342ba26b",
+    "semantic_sha_after": "97b4decc14b633720a1cc9e551f4091d09e49a30511ef6195be149bb342ba26b",
+    "semantic_unchanged": true,
+    "rows": 60,
+    "cols": 90,
+    "objects_before": 0,
+    "objects_after": 0,
+    "layers": [
+      "base"
+    ]
+  },
+  "beach": {
+    "semantic_sha_before": "a497f464bbdb7f1e8d019cc52c834003c8a113c6afe4b40155b2e3abed2c1212",
+    "semantic_sha_after": "a497f464bbdb7f1e8d019cc52c834003c8a113c6afe4b40155b2e3abed2c1212",
+    "semantic_unchanged": true,
+    "rows": 72,
+    "cols": 110,
+    "objects_before": 0,
+    "objects_after": 0,
+    "layers": [
+      "base"
+    ]
+  },
+  "desert": {
+    "semantic_sha_before": "4875e4045d193eeb3f27e3d869e9b5b862f714558dd596c56ae127c3815790d0",
+    "semantic_sha_after": "4875e4045d193eeb3f27e3d869e9b5b862f714558dd596c56ae127c3815790d0",
+    "semantic_unchanged": true,
+    "rows": 72,
+    "cols": 110,
+    "objects_before": 0,
+    "objects_after": 0,
+    "layers": [
+      "base",
+      "fringe-water",
+      "fringe-relief"
+    ]
+  },
+  "jungle": {
+    "semantic_sha_before": "aec0f254e2e0530cca385875b82ee8ed7238954037bca710d4857770dd5cebbd",
+    "semantic_sha_after": "aec0f254e2e0530cca385875b82ee8ed7238954037bca710d4857770dd5cebbd",
+    "semantic_unchanged": true,
+    "rows": 72,
+    "cols": 110,
+    "objects_before": 0,
+    "objects_after": 0,
+    "layers": [
+      "base"
+    ]
+  },
+  "searing-canyon": {
+    "semantic_sha_before": "18aa5ed3ead3c8302ad8bf04376e663f3fd9ac8d9d2ed8f2aaae6eb7dceaa466",
+    "semantic_sha_after": "18aa5ed3ead3c8302ad8bf04376e663f3fd9ac8d9d2ed8f2aaae6eb7dceaa466",
+    "semantic_unchanged": true,
+    "rows": 72,
+    "cols": 110,
+    "objects_before": 482,
+    "objects_after": 482,
+    "layers": [
+      "base",
+      "fringe"
+    ]
+  }
+}

@@ -157,16 +157,25 @@ def cliff_fill(seed: int) -> Image.Image:
     dark2, dark, base, light, bright = hexes("jungle-cliff")
     rng = np.random.default_rng(seed)
     a = base_mottle("jungle-cliff", seed, 0.48)
-    for x in range(3, TS, 8):
-        a[:, x : x + 2] = dark
-        a[0:TS:6, x - 1 : x + 1] = light
-    for x, y in scatter(rng, 5, 8):
+    # Damp vine-draped cliff face: broad strata plus sparse leaf/moss catches.
+    for y in (5, 14, 23, 31):
+        a[y, :] = dark2
+        a[(y - 1) % TS, :] = light
+    for x in range(4, TS, 12):
+        a[6:15, x] = dark
+        a[15:24, (x + 5) % TS] = dark
+        a[24:31, (x + 2) % TS] = dark
+    for x, y in scatter(rng, 7, 7):
         px(a, x, y, dark)
         px(a, x + 1, y, dark)
         px(a, x, y - 1, light)
         px(a, x + 1, y - 1, bright)
         px(a, x + 1, y + 1, dark2)
         px(a, x + 2, y + 1, base)
+    for x, y in scatter(rng, 4, 8):
+        px(a, x, y, bright)
+        px(a, x, y + 1, light)
+        px(a, x + 1, y + 1, dark)
     return Image.fromarray(cleanup_isolates(a))
 
 

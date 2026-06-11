@@ -85,6 +85,20 @@ def base_mottle(material: str, seed: int, low_q: float = 0.42) -> np.ndarray:
     return a
 
 
+def cleanup_isolates(a: np.ndarray, passes: int = 2) -> np.ndarray:
+    out = a.copy()
+    for _ in range(passes):
+        same = np.zeros(out.shape[:2], bool)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            same |= (np.roll(np.roll(out, dy, 0), dx, 1) == out).all(-1)
+        isolated = ~same
+        if not isolated.any():
+            break
+        replacement = np.roll(out, 1, 1)
+        out[isolated] = replacement[isolated]
+    return out
+
+
 def sand_fill(material: str, seed: int, shell: bool = False) -> Image.Image:
     dark2, dark, _base, light, bright = hexes(material)
     rng = np.random.default_rng(seed)
@@ -163,20 +177,28 @@ def water_fill(material: str, seed: int, glints: int) -> Image.Image:
 
 
 def rock_fill(material: str, seed: int, cliff: bool = False) -> Image.Image:
-    dark2, dark, _base, light, bright = hexes(material)
+    dark2, dark, base, light, bright = hexes(material)
     rng = np.random.default_rng(seed)
     a = base_mottle(material, seed, 0.45)
     if cliff:
-        for x, y in scatter(rng, 9, 6):
-            for dx, dy in ((0, 0), (1, 0), (2, 0), (1, 1), (2, 1), (3, 1)):
+        # Sandstone bluff courses with a sunlit lip and shadowed foot.
+        for y in (4, 13, 22, 31):
+            a[y, :] = dark2
+            a[(y - 1) % TS, :] = light
+        for x in range(2, TS, 11):
+            a[5:14, x] = dark
+            a[14:23, (x + 5) % TS] = dark
+            a[23:31, (x + 2) % TS] = dark
+        for x, y in scatter(rng, 8, 6):
+            for dx, dy in ((0, 0), (1, 0), (2, 0), (1, 1)):
                 px(a, x + dx, y + dy, dark)
             px(a, x, y - 1, light)
-            px(a, x + 1, y - 1, light)
-        for y in (7, 16, 25):
-            for x in range(0, TS, 9):
-                px(a, x, y, dark2)
-                px(a, x + 1, y, dark2)
-                px(a, x, y - 1, light)
+            px(a, x + 1, y - 1, bright)
+            px(a, x + 2, y + 1, dark2)
+            px(a, x + 3, y, base)
+        a = cleanup_isolates(a)
+        a[0, :] = a[-1, :]
+        a[:, 0] = a[:, -1]
     else:
         for x, y in scatter(rng, 5, 8):
             for dx, dy in ((0, 0), (1, 0), (2, 0), (1, 1), (2, 1)):

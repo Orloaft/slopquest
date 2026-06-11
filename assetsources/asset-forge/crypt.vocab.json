@@ -11,7 +11,7 @@
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#303136"
+      "minimapColor": "#323338"
     },
     "d": {
       "role": "dirt",
