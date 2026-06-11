@@ -14,7 +14,7 @@
 // the in-game floor exactly.
 //
 //   node tools/build-stage-from-textures.ts --floor <N> --name <stage-id>
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import nodePath from "node:path";
 import { PNG } from "pngjs";
 import { isBlockedTile, isRoadTile, isSightBlocked, makeFloorTiles } from "../src/shared.ts";
@@ -144,12 +144,34 @@ if (missing.length) console.warn(`WARN: chars with no sheet texture (flat-color 
 
 const tileBuf: Buffer[] = [];
 const legend: Record<string, string> = {};
+const desertFillForChar: Record<string, string> = {
+  a: "desert-sand-v0.png",
+  G: "desert-sand-v1.png",
+  H: "desert-sand-v2.png",
+  U: "desert-sand-v3.png",
+  Y: "desert-road.png",
+  V: "desert-oasis-water.png",
+  Q: "desert-quicksand.png",
+  w: "desert-red-rock-top.png",
+  X: "desert-red-rock-cliff.png",
+};
+function maybeApplyStageFill(ch: string, tile: Buffer): void {
+  if (name !== "desert") return;
+  const file = desertFillForChar[ch];
+  if (!file) return;
+  const p = nodePath.join(repoRoot, "assetsources/curated/fills", file);
+  if (!existsSync(p)) return;
+  const fill = PNG.sync.read(readFileSync(p));
+  if (fill.width !== ts || fill.height !== ts) throw new Error(`${p} must be ${ts}x${ts}`);
+  fill.data.copy(tile, 0, 0, ts * ts * 4);
+}
 chars.forEach((ch, idx) => {
   const tile = Buffer.alloc(ts * ts * 4);
   const u = UNDER[ch]; if (u && TEX[u]) over(tile, extractRaw(u));
   const base = BASE[ch];
   if (base && TEX[base]) over(tile, extractRaw(base));
   flatten(tile);
+  maybeApplyStageFill(ch, tile);
   tileBuf.push(tile);
   legend[ch] = `${name}:${idx}`;
 });

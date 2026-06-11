@@ -11,63 +11,63 @@
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#e1a247"
+      "minimapColor": "#dea95b"
     },
     "G": {
       "role": "sand",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#e1a247"
+      "minimapColor": "#dea95b"
     },
     "w": {
       "role": "massif",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#7a371c"
+      "minimapColor": "#a95434"
     },
     "X": {
       "role": "cliff",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#903d29"
+      "minimapColor": "#843628"
     },
     "U": {
       "role": "sand",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#e1a247"
+      "minimapColor": "#dea95b"
     },
     "Q": {
       "role": "quicksand",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#825625"
+      "minimapColor": "#a67f3f"
     },
     "V": {
       "role": "oasis-water",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4e6a5a"
+      "minimapColor": "#1b828b"
     },
     "Y": {
       "role": "beach-path",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#c89259"
+      "minimapColor": "#be8749"
     },
     "H": {
       "role": "sand",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#e1a247"
+      "minimapColor": "#dea95b"
     }
   }
 }
