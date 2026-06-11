@@ -212,7 +212,7 @@ interface EntityView extends Phaser.GameObjects.Container {
 
 interface ActorView extends EntityView {
   sprite: Phaser.GameObjects.Sprite;
-  shadow: Phaser.GameObjects.Ellipse;
+  shadow: Phaser.GameObjects.Image;
   crowdImportant?: boolean;
 }
 
@@ -239,7 +239,7 @@ interface NpcEntityView extends ActorView {
 
 interface TreeEntityView extends Phaser.GameObjects.Container {
   treeSprite: Phaser.GameObjects.Image;
-  shadow: Phaser.GameObjects.Ellipse;
+  shadow: Phaser.GameObjects.Image;
   stump: Phaser.GameObjects.Rectangle;
   zone: Phaser.GameObjects.Zone;
   treeType: string;
@@ -251,14 +251,17 @@ interface FishingEntityView extends Phaser.GameObjects.Container {
 
 interface MiningEntityView extends Phaser.GameObjects.Container {
   sprite: Phaser.GameObjects.Image;
+  shadow: Phaser.GameObjects.Image;
 }
 
 interface HerbEntityView extends Phaser.GameObjects.Container {
   bloom: Phaser.GameObjects.Arc | Phaser.GameObjects.Image;
+  shadow: Phaser.GameObjects.Image;
 }
 
 interface FireEntityView extends Phaser.GameObjects.Container {
   sprite: Phaser.GameObjects.Image;
+  shadow: Phaser.GameObjects.Image;
   flame?: Phaser.GameObjects.GameObject & { setScale(x: number, y?: number): unknown };
 }
 
@@ -3427,6 +3430,30 @@ function setRectangleWidthIfChanged(rectangle: Phaser.GameObjects.Rectangle, wid
   if (rectangle.width !== width) rectangle.width = width;
 }
 
+const CONTACT_SHADOW_TEXTURE = "contactShadowSoft";
+
+function ensureContactShadowTexture(): void {
+  if (scene.textures.exists(CONTACT_SHADOW_TEXTURE)) return;
+  const canvas = document.createElement("canvas");
+  canvas.width = 96;
+  canvas.height = 48;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  const gradient = ctx.createRadialGradient(48, 24, 4, 48, 24, 47);
+  gradient.addColorStop(0, "rgba(0, 0, 0, 1)");
+  gradient.addColorStop(0.48, "rgba(0, 0, 0, 0.58)");
+  gradient.addColorStop(0.78, "rgba(0, 0, 0, 0.18)");
+  gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  scene.textures.addCanvas(CONTACT_SHADOW_TEXTURE, canvas);
+}
+
+function createContactShadow(x: number, y: number, width: number, height: number, alpha: number): Phaser.GameObjects.Image {
+  ensureContactShadowTexture();
+  return scene.add.image(x, y, CONTACT_SHADOW_TEXTURE).setDisplaySize(width, height).setAlpha(alpha);
+}
+
 function markEntityLayerSortDirty(): void {
   entityLayerSortDirty = true;
 }
@@ -3682,6 +3709,7 @@ function syncEntities(): void {
     let view = corpseViews.get(corpse.id);
     if (!view) {
       view = scene.add.container(corpse.x * TILE_SIZE, corpse.y * TILE_SIZE);
+      view.add(createContactShadow(0, 8, 28, 11, 0.2));
       view.add(scene.add.ellipse(0, 6, 24, 12, 0x3b2017, 0.9));
       const isDrop = corpse.kind === "drop";
       if (isDrop) view.add(scene.add.rectangle(0, -4, 22, 10, 0x7b5434).setStrokeStyle(2, 0x2c1b10));
@@ -3892,7 +3920,7 @@ function createPlayerView(player: PlayerView): PlayerEntityView {
   view.targetX = view.x;
   view.targetY = view.y;
   const targetRing = scene.add.ellipse(0, 8, 34, 18).setStrokeStyle(2, 0x86efac, 0.8);
-  const shadow = scene.add.ellipse(0, 13, 26, 10, 0x000000, 0.26);
+  const shadow = createContactShadow(0, 13, 26, 10, 0.26);
   const family = "knight";
   const sprite = scene.add.sprite(0, -10, actorTextureKey(family, player.dir, 0)).setDisplaySize(40, 48);
   const nameText = scene.add.text(0, -43, player.name, textStyle(11, "#eef6ee")).setOrigin(0.5);
@@ -3913,7 +3941,7 @@ function createNpcView(npc: NpcView): NpcEntityView {
   const view = scene.add.container(npc.x * TILE_SIZE, npc.y * TILE_SIZE) as NpcEntityView;
   view.targetX = view.x;
   view.targetY = view.y;
-  const shadow = scene.add.ellipse(0, 13, 26, 10, 0x000000, 0.26);
+  const shadow = createContactShadow(0, 13, 26, 10, 0.26);
   const family = npc.role === "quest" ? "caster" : "knight";
   const sprite = scene.add.sprite(0, -10, actorTextureKey(family, npc.dir, 0)).setDisplaySize(40, 48);
   const nameText = scene.add.text(0, -45, npc.name, textStyle(11, npc.role === "quest" ? "#f7d486" : "#f5ddb1")).setOrigin(0.5);
@@ -3971,13 +3999,13 @@ function treeJitter(tree: TreeView): { flip: boolean; scale: number } {
 function applyTreeJitter(view: TreeEntityView, spec: { width: number; height: number }, tree: TreeView): void {
   const { flip, scale } = treeJitter(tree);
   view.treeSprite.setDisplaySize(spec.width * scale, spec.height * scale).setFlipX(flip);
-  view.shadow?.setSize(Math.max(22, spec.width * 0.5) * scale, Math.max(9, spec.width * 0.16) * scale);
+  view.shadow?.setDisplaySize(Math.max(22, spec.width * 0.5) * scale, Math.max(9, spec.width * 0.16) * scale);
 }
 
 function createTreeView(tree: TreeView): TreeEntityView {
   const view = scene.add.container(tree.x * TILE_SIZE, tree.y * TILE_SIZE) as TreeEntityView;
   const spec = authoredTreeSpec(tree) ?? treeTypeSpec(tree);
-  const shadow = scene.add.ellipse(0, 8, Math.max(22, spec.width * 0.5), Math.max(9, spec.width * 0.16), 0x000000, 0.22);
+  const shadow = createContactShadow(0, 8, Math.max(22, spec.width * 0.5), Math.max(9, spec.width * 0.16), 0.22);
   const treeSprite = scene.add.image(0, 4, spec.textureKey).setOrigin(0.5, 1).setDisplaySize(spec.width, spec.height);
   const stump = scene.add.rectangle(0, 12, 20, 12, 0x705036).setStrokeStyle(2, 0x2d1f14).setVisible(false);
   const zone = scene.add.zone(0, -18, spec.zoneWidth, spec.zoneHeight).setInteractive({ cursor: "pointer" });
@@ -4057,14 +4085,16 @@ const ORE_VEIN_TINTS: Record<string, number> = {
 function createMiningNodeView(node: MiningNodeView): MiningEntityView {
   const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE) as MiningEntityView;
   const texture = ORE_VEIN_TEXTURES[node.kind] ?? "spriteCopperVein";
+  const shadow = createContactShadow(0, 8, 32, 10, 0.2);
   const sprite = scene.add.image(0, -2, texture).setOrigin(0.5, 1).setDisplaySize(46, 30);
   const tint = ORE_VEIN_TINTS[node.kind];
   if (tint !== undefined) sprite.setTint(tint);
   const zone = scene.add.zone(0, -12, 48, 36).setInteractive({ cursor: "pointer" });
   attachZoneMenu(zone, () => startMiningPath(node), `${titleCase(node.kind)} Vein`, () => miningMenuActions(node));
   attachHoverTint(zone, sprite);
-  view.add([sprite, zone]);
+  view.add([shadow, sprite, zone]);
   view.sprite = sprite;
+  view.shadow = shadow;
   return view;
 }
 
@@ -4091,6 +4121,7 @@ function createHerbNodeView(node: HerbNodeView): HerbEntityView {
   const view = scene.add.container(node.x * TILE_SIZE, node.y * TILE_SIZE) as HerbEntityView;
   const zone = scene.add.zone(0, -4, 40, 40).setInteractive({ cursor: "pointer" });
   attachZoneMenu(zone, () => startHerbPath(node), node.label, () => herbMenuActions(node));
+  const shadow = createContactShadow(0, 8, 24, 8, 0.17);
 
   if (node.label.toLowerCase().includes("mushroom")) {
     const base = scene.add.ellipse(0, 7, 22, 10, 0x25381d, 0.18);
@@ -4099,8 +4130,9 @@ function createHerbNodeView(node: HerbNodeView): HerbEntityView {
     const spotA = scene.add.circle(-7, -8, 2, 0xf1dfc4, 0.95);
     const spotB = scene.add.circle(4, -9, 2, 0xf1dfc4, 0.95);
     const spotC = scene.add.circle(9, -4, 1.6, 0xf1dfc4, 0.95);
-    view.add([base, stem, cap, spotA, spotB, spotC, zone]);
+    view.add([shadow, base, stem, cap, spotA, spotB, spotC, zone]);
     view.bloom = cap;
+    view.shadow = shadow;
     return view;
   }
 
@@ -4108,8 +4140,10 @@ function createHerbNodeView(node: HerbNodeView): HerbEntityView {
     // Mire-Lotus keeps its bespoke swamp-lotus sprite.
     const lotus = scene.add.image(0, 8, "spriteMireLotus").setOrigin(0.5, 1).setDisplaySize(36, 34);
     attachHoverTint(zone, lotus);
-    view.add([lotus, zone]);
+    shadow.setDisplaySize(28, 9);
+    view.add([shadow, lotus, zone]);
     view.bloom = lotus;
+    view.shadow = shadow;
     return view;
   }
 
@@ -4117,8 +4151,9 @@ function createHerbNodeView(node: HerbNodeView): HerbEntityView {
   if (plant) {
     const sprite = scene.add.image(0, 9, plant.key).setOrigin(0.5, 1).setDisplaySize(plant.w, plant.h);
     attachHoverTint(zone, sprite);
-    view.add([sprite, zone]);
+    view.add([shadow, sprite, zone]);
     view.bloom = sprite;
+    view.shadow = shadow;
     return view;
   }
 
@@ -4128,13 +4163,15 @@ function createHerbNodeView(node: HerbNodeView): HerbEntityView {
   const leafB = scene.add.ellipse(5, -1, 10, 18, 0x66bb6a, 0.95).setRotation(0.4);
   const leafC = scene.add.ellipse(0, -5, 9, 17, 0x81c784, 0.95);
   const bloom = scene.add.circle(0, -10, 3, 0xf6c9e0, 0.95);
-  view.add([base, leafA, leafB, leafC, bloom, zone]);
+  view.add([shadow, base, leafA, leafB, leafC, bloom, zone]);
   view.bloom = bloom;
+  view.shadow = shadow;
   return view;
 }
 
 function createFireView(fire: FireView): FireEntityView {
   const view = scene.add.container(fire.x * TILE_SIZE, fire.y * TILE_SIZE) as FireEntityView;
+  const shadow = createContactShadow(0, 10, 32, 11, 0.2);
   const glow = scene.add.ellipse(0, 7, 34, 16, 0xff7a2f, 0.28);
   const sprite = scene.add.image(0, 1, "spriteCampfire").setDisplaySize(58, 58);
   const zone = scene.add.zone(0, -2, 48, 48).setInteractive({ cursor: "pointer" });
@@ -4142,8 +4179,9 @@ function createFireView(fire: FireView): FireEntityView {
     event.stopPropagation();
     startCookingPath(fire);
   });
-  view.add([glow, sprite, zone]);
+  view.add([shadow, glow, sprite, zone]);
   view.sprite = sprite;
+  view.shadow = shadow;
   return view;
 }
 
@@ -4165,7 +4203,7 @@ function createMonsterView(monster: MonsterView): MonsterEntityView {
     })
     .setOrigin(0.5)
     .setVisible(false);
-  const shadow = scene.add.ellipse(0, 13, 30, 12, 0x000000, 0.28);
+  const shadow = createContactShadow(0, 13, 30, 12, 0.28);
   const actor = monsterActorSpec(monster);
   const sprite = scene.add.sprite(0, actor.yOffset, actorTextureKey(actor.family, monster.dir, 0)).setDisplaySize(actor.width, actor.height);
   if (actor.tint) sprite.setTint(actor.tint);
@@ -6820,14 +6858,9 @@ function placeMapSprite(item: DecorationSprite, parent: Phaser.GameObjects.Conta
   const baseX = item.x * TILE_SIZE;
   const baseY = item.y * TILE_SIZE;
   if (!NO_GROUND_SHADOW.has(item.key)) {
-    // Soft contact shadow at the base so the prop reads as seated on the ground
-    // rather than a flat sticker — the same grounding every character sprite
-    // already gets. Width tracks the footprint; a shallow ellipse, nudged up a
-    // hair so it tucks under the base.
     const shadowW = Math.max(14, item.w * 0.66);
     const shadowH = Math.max(7, Math.min(40, item.w * 0.16));
-    const shadow = scene.add.ellipse(baseX, baseY - shadowH * 0.32, shadowW, shadowH, 0x000000, 0.22);
-    parent.add(shadow);
+    parent.add(createContactShadow(baseX, baseY - shadowH * 0.32, shadowW, shadowH, 0.22));
   }
   const sprite = scene.add.image(baseX, baseY, item.key).setOrigin(0.5, 1);
   sprite.setDisplaySize(item.w, item.h);
