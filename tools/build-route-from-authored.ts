@@ -151,10 +151,11 @@ const isR = (r: number, c: number) => at(r, c) === "t";
 
 // ---- atlases (shared with Northwood) ---------------------------------------
 const sliced = (name: string) => PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/sliced/${name}`)));
-const water = sliced("water-wang.png");
-const road = sliced("road-wang.png");
-const ptop = sliced("plateau-top-v2.png");
+const water = sliced("water-wang-tuft.png");
+const road = sliced("road-wang-tuft.png");
+const ptop = sliced("plateau-top-v2-tuft.png");
 const wCols = water.width / ts, rCols = road.width / ts, PTCOLS = ptop.width / ts;
+const grassFills = [0, 1, 2, 3].map((i) => PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/fills/route-grass-v${i}.png`))));
 
 const W = C * ts, H = R * ts;
 const out = new PNG({ width: W, height: H });
@@ -166,6 +167,13 @@ function blitTile(sheet: PNG, cols: number, idx: number, dx: number, dy: number)
     const si = ((sy + y) * sheet.width + (sx + x)) * 4; if (sheet.data[si + 3] === 0) continue;
     const di = (py * W + px) * 4;
     out.data[di] = sheet.data[si]; out.data[di + 1] = sheet.data[si + 1]; out.data[di + 2] = sheet.data[si + 2]; out.data[di + 3] = 255;
+  }
+}
+function blitFill(fill: PNG, dx: number, dy: number) {
+  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
+    const si = (y * fill.width + x) * 4;
+    const di = ((dy + y) * W + dx + x) * 4;
+    out.data[di] = fill.data[si]; out.data[di + 1] = fill.data[si + 1]; out.data[di + 2] = fill.data[si + 2]; out.data[di + 3] = 255;
   }
 }
 const hrand = (a: number, b: number) => {
@@ -193,7 +201,8 @@ const GRASS_IDX0 = 0;
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const ch = at(r, c);
   if (ch === "~" || ch === "s" || ch === "^" || ch === ".") continue;
-  blitTile(ptop, PTCOLS, GRASS_IDX0, c * ts, r * ts);
+  if (ch === "F" || ch === "f") blitFill(grassFills[Math.floor(hrand(c, r) * grassFills.length)], c * ts, r * ts);
+  else blitTile(ptop, PTCOLS, GRASS_IDX0, c * ts, r * ts);
 }
 // ---- water corner-Wang dual-grid -------------------------------------------
 for (let i = 0; i <= R; i++) for (let j = 0; j <= C; j++) {
