@@ -7628,32 +7628,6 @@ function createActorFrames(scene: Phaser.Scene): void {
   const casterRows: Record<Direction, number> = { up: 692, right: 818, down: 948, left: 1078 };
   const knightXs = [330, 456, 582, 708];
   const casterXs = [334, 460, 586, 712];
-  const goblinFrames: DirectionFrames = {
-    up: paddedSpriteFrames([
-      [305, 46, 100, 113],
-      [496, 41, 100, 118],
-      [687, 41, 99, 118],
-      [876, 41, 101, 118]
-    ]),
-    right: paddedSpriteFrames([
-      [305, 190, 95, 110],
-      [502, 190, 90, 110],
-      [694, 190, 89, 110],
-      [878, 190, 94, 110]
-    ]),
-    down: paddedSpriteFrames([
-      [303, 346, 99, 108],
-      [492, 346, 101, 108],
-      [685, 346, 99, 108],
-      [873, 346, 101, 108]
-    ]),
-    left: paddedSpriteFrames([
-      [307, 490, 89, 114],
-      [499, 490, 89, 114],
-      [689, 490, 86, 114],
-      [877, 490, 89, 114]
-    ])
-  };
   const skeletonFrames: DirectionFrames = {
     up: paddedSpriteFrames([
       [298, 54, 96, 116],
@@ -7683,7 +7657,7 @@ function createActorFrames(scene: Phaser.Scene): void {
 
   createFrameSet(scene, "playerSheet", "knight", knightRows, knightXs, 78, 92);
   createFrameSet(scene, "playerSheet", "caster", casterRows, casterXs, 82, 96);
-  createExplicitFrameSet(scene, "goblinSheet", "goblin", goblinFrames);
+  createExplicitFrameSet(scene, "goblinSheet", "goblin", uniformDirectionFrames(96, 96, 4));
   createExplicitFrameSet(scene, "skeletonSheet", "skeleton", skeletonFrames);
   createExplicitFrameSet(scene, "goblinScoutSheet", "goblinScout", uniformDirectionFrames(281, 293, 4));
   createExplicitFrameSet(scene, "goblinShamanSheet", "goblinShaman", uniformDirectionFrames(313, 313, 4));
