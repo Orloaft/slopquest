@@ -1,0 +1,355 @@
+{
+  "dimensions": {
+    "width": 384,
+    "height": 384
+  },
+  "cell_size": {
+    "width": 96,
+    "height": 96
+  },
+  "per_cell_non_magenta_counts": [
+    [
+      2471,
+      2412,
+      2316,
+      2415
+    ],
+    [
+      1945,
+      1922,
+      1835,
+      1905
+    ],
+    [
+      2557,
+      2674,
+      2415,
+      2592
+    ],
+    [
+      1885,
+      2010,
+      1886,
+      2007
+    ]
+  ],
+  "per_cell_bounding_boxes": [
+    [
+      {
+        "x": 18,
+        "y": 13,
+        "width": 64,
+        "height": 71,
+        "right": 81,
+        "bottom": 83
+      },
+      {
+        "x": 15,
+        "y": 11,
+        "width": 62,
+        "height": 72,
+        "right": 76,
+        "bottom": 82
+      },
+      {
+        "x": 20,
+        "y": 17,
+        "width": 60,
+        "height": 66,
+        "right": 79,
+        "bottom": 82
+      },
+      {
+        "x": 17,
+        "y": 15,
+        "width": 62,
+        "height": 69,
+        "right": 78,
+        "bottom": 83
+      }
+    ],
+    [
+      {
+        "x": 21,
+        "y": 13,
+        "width": 59,
+        "height": 71,
+        "right": 79,
+        "bottom": 83
+      },
+      {
+        "x": 26,
+        "y": 12,
+        "width": 54,
+        "height": 72,
+        "right": 79,
+        "bottom": 83
+      },
+      {
+        "x": 23,
+        "y": 17,
+        "width": 57,
+        "height": 67,
+        "right": 79,
+        "bottom": 83
+      },
+      {
+        "x": 24,
+        "y": 16,
+        "width": 56,
+        "height": 68,
+        "right": 79,
+        "bottom": 83
+      }
+    ],
+    [
+      {
+        "x": 14,
+        "y": 17,
+        "width": 69,
+        "height": 67,
+        "right": 82,
+        "bottom": 83
+      },
+      {
+        "x": 11,
+        "y": 11,
+        "width": 75,
+        "height": 72,
+        "right": 85,
+        "bottom": 82
+      },
+      {
+        "x": 16,
+        "y": 18,
+        "width": 65,
+        "height": 65,
+        "right": 80,
+        "bottom": 82
+      },
+      {
+        "x": 13,
+        "y": 15,
+        "width": 71,
+        "height": 69,
+        "right": 83,
+        "bottom": 83
+      }
+    ],
+    [
+      {
+        "x": 15,
+        "y": 17,
+        "width": 56,
+        "height": 67,
+        "right": 70,
+        "bottom": 83
+      },
+      {
+        "x": 15,
+        "y": 14,
+        "width": 59,
+        "height": 70,
+        "right": 73,
+        "bottom": 83
+      },
+      {
+        "x": 15,
+        "y": 16,
+        "width": 58,
+        "height": 68,
+        "right": 72,
+        "bottom": 83
+      },
+      {
+        "x": 15,
+        "y": 14,
+        "width": 61,
+        "height": 70,
+        "right": 75,
+        "bottom": 83
+      }
+    ]
+  ],
+  "row_motion_scores": [
+    {
+      "row": 0,
+      "direction": "up",
+      "average_mask_difference": 0.2353,
+      "pair_mask_differences": [
+        0.2467,
+        0.263,
+        0.1963
+      ],
+      "pair_changed_pixels": [
+        687,
+        716,
+        515
+      ],
+      "pair_union_pixels": [
+        2785,
+        2722,
+        2623
+      ]
+    },
+    {
+      "row": 1,
+      "direction": "right",
+      "average_mask_difference": 0.2496,
+      "pair_mask_differences": [
+        0.2502,
+        0.2907,
+        0.208
+      ],
+      "pair_changed_pixels": [
+        553,
+        639,
+        434
+      ],
+      "pair_union_pixels": [
+        2210,
+        2198,
+        2087
+      ]
+    },
+    {
+      "row": 2,
+      "direction": "down",
+      "average_mask_difference": 0.2817,
+      "pair_mask_differences": [
+        0.2673,
+        0.3254,
+        0.2524
+      ],
+      "pair_changed_pixels": [
+        807,
+        989,
+        723
+      ],
+      "pair_union_pixels": [
+        3019,
+        3039,
+        2865
+      ]
+    },
+    {
+      "row": 3,
+      "direction": "left",
+      "average_mask_difference": 0.2394,
+      "pair_mask_differences": [
+        0.2312,
+        0.2599,
+        0.2272
+      ],
+      "pair_changed_pixels": [
+        509,
+        582,
+        499
+      ],
+      "pair_union_pixels": [
+        2202,
+        2239,
+        2196
+      ]
+    }
+  ],
+  "row_bbox_variance": [
+    {
+      "row": 0,
+      "direction": "up",
+      "width_range": 4.0,
+      "height_range": 6.0,
+      "center_x_range": 4.0,
+      "baseline_range": 1.0,
+      "width_range_ratio": 0.0645,
+      "height_range_ratio": 0.0863
+    },
+    {
+      "row": 1,
+      "direction": "right",
+      "width_range": 5.0,
+      "height_range": 5.0,
+      "center_x_range": 2.5,
+      "baseline_range": 0.0,
+      "width_range_ratio": 0.0885,
+      "height_range_ratio": 0.0719
+    },
+    {
+      "row": 2,
+      "direction": "down",
+      "width_range": 10.0,
+      "height_range": 7.0,
+      "center_x_range": 0.0,
+      "baseline_range": 1.0,
+      "width_range_ratio": 0.1429,
+      "height_range_ratio": 0.1026
+    },
+    {
+      "row": 3,
+      "direction": "left",
+      "width_range": 5.0,
+      "height_range": 3.0,
+      "center_x_range": 2.5,
+      "baseline_range": 0.0,
+      "width_range_ratio": 0.0855,
+      "height_range_ratio": 0.0436
+    }
+  ],
+  "right_left_mirror_similarity": {
+    "rows": {
+      "right": 1,
+      "left": 3
+    },
+    "average_similarity": 0.7193,
+    "frame_similarities": [
+      0.6984,
+      0.7036,
+      0.7593,
+      0.7158
+    ]
+  },
+  "exact_magenta_pixel_count": 112209,
+  "exact_magenta_percentage": 76.0966,
+  "near_magenta_pixel_count": 0,
+  "palette_count": 18,
+  "max_colors": 24,
+  "runtime_cell_size": {
+    "width": 48,
+    "height": 48
+  },
+  "strict_prototype": true,
+  "transparent_corners": true,
+  "transparent_corner_list": [
+    {
+      "name": "top_left",
+      "transparent": true
+    },
+    {
+      "name": "top_right",
+      "transparent": true
+    },
+    {
+      "name": "bottom_left",
+      "transparent": true
+    },
+    {
+      "name": "bottom_right",
+      "transparent": true
+    }
+  ],
+  "pass": true,
+  "errors": [],
+  "warnings": [],
+  "keyed_png": "assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/parallel-wave-20260610-forest-pixie/public-import-review-20260611/forest-pixie-public-import-20260611-keyed.png",
+  "artifacts": {
+    "keyed_png": "assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/parallel-wave-20260610-forest-pixie/public-import-review-20260611/forest-pixie-public-import-20260611-keyed.png",
+    "contact_png": "assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/parallel-wave-20260610-forest-pixie/public-import-review-20260611/forest-pixie-public-import-20260611-contact.png",
+    "runtime_contact_png": "assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/parallel-wave-20260610-forest-pixie/public-import-review-20260611/forest-pixie-public-import-20260611-runtime-contact.png",
+    "row_gifs": {
+      "up": "assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/parallel-wave-20260610-forest-pixie/public-import-review-20260611/forest-pixie-public-import-20260611-walk-up.gif",
+      "right": "assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/parallel-wave-20260610-forest-pixie/public-import-review-20260611/forest-pixie-public-import-20260611-walk-right.gif",
+      "down": "assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/parallel-wave-20260610-forest-pixie/public-import-review-20260611/forest-pixie-public-import-20260611-walk-down.gif",
+      "left": "assetsources/curated/bespoke/woodland-enemies-v2/forest_pixie/parallel-wave-20260610-forest-pixie/public-import-review-20260611/forest-pixie-public-import-20260611-walk-left.gif"
+    }
+  }
+}
