@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-ocean.png",
+  "material": "ocean",
+  "recipe": "procedural/beach_tuft",
+  "ramp": [
+    "#083f68",
+    "#0c5a82",
+    "#14779a",
+    "#2593ad",
+    "#55b2be"
+  ],
+  "seed": 1627,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0049,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 1.087,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

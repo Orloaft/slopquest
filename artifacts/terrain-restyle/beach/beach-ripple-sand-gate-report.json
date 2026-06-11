@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-ripple-sand.png",
+  "material": "ripple-sand",
+  "recipe": "procedural/beach_tuft",
+  "ramp": [
+    "#8d7659",
+    "#aa8d66",
+    "#c6a775",
+    "#d7bb8a",
+    "#e6cfa4"
+  ],
+  "seed": 1423,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0068,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.225,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

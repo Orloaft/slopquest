@@ -10,7 +10,7 @@
 // beach.tileset.json + beach.stage.json + beach.vocab.json for
 // tools/import-asset-forge-stage.ts. Collision/sight mirror shared.ts exactly so
 // the editable stage matches the in-game floor.
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import nodePath from "node:path";
 import { PNG } from "pngjs";
 
@@ -136,11 +136,47 @@ const tex = (key: string) => { let t = texCache.get(key); if (!t) { t = extractR
 const chars = Object.keys(BASE);
 const tileBuf: Buffer[] = [];
 const legend: Record<string, string> = {};
+const beachFillForChar: Record<string, string> = {
+  e: "beach-sand-v0.png",
+  l: "beach-shell-sand.png",
+  ",": "beach-wet-sand.png",
+  ";": "beach-ripple-sand.png",
+  z: "beach-path.png",
+  Y: "beach-path.png",
+  j: "beach-path.png",
+  "2": "beach-stair.png",
+  "[": "beach-stair.png",
+  "]": "beach-stair.png",
+  v: "beach-lagoon.png",
+  "{": "beach-lagoon.png",
+  "}": "beach-lagoon.png",
+  "(": "beach-lagoon.png",
+  ")": "beach-lagoon.png",
+  "=": "beach-shallow.png",
+  I: "beach-ocean.png",
+  "!": "beach-ocean.png",
+  "?": "beach-rock.png",
+  x: "beach-cliff.png",
+  "0": "beach-cliff.png",
+  "1": "beach-cliff.png",
+  "|": "beach-cliff.png",
+  u: "beach-rock.png",
+};
+function maybeApplyBeachFill(ch: string, tile: Buffer): void {
+  const file = beachFillForChar[ch];
+  if (!file) return;
+  const p = nodePath.join(repoRoot, "assetsources/curated/fills", file);
+  if (!existsSync(p)) return;
+  const fill = PNG.sync.read(readFileSync(p));
+  if (fill.width !== ts || fill.height !== ts) throw new Error(`${p} must be ${ts}x${ts}`);
+  fill.data.copy(tile, 0, 0, ts * ts * 4);
+}
 chars.forEach((ch, idx) => {
   const tile = Buffer.alloc(ts * ts * 4); // transparent
   if (UNDER[ch]) over(tile, tex(UNDER[ch]));
   over(tile, tex(BASE[ch]));
   flatten(tile);
+  maybeApplyBeachFill(ch, tile);
   tileBuf.push(tile);
   legend[ch] = `beach:${idx}`;
 });

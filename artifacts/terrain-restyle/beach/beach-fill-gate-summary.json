@@ -1,0 +1,506 @@
+{
+  "beach-sand-v0": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-sand-v0.png",
+    "material": "sand",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#b88a52",
+      "#d0a465",
+      "#e2bd7d",
+      "#edce95",
+      "#f6dfb2"
+    ],
+    "seed": 1201,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0088,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.357,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-sand-v1": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-sand-v1.png",
+    "material": "sand",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#b88a52",
+      "#d0a465",
+      "#e2bd7d",
+      "#edce95",
+      "#f6dfb2"
+    ],
+    "seed": 1213,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0098,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.682,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-sand-v2": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-sand-v2.png",
+    "material": "sand",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#b88a52",
+      "#d0a465",
+      "#e2bd7d",
+      "#edce95",
+      "#f6dfb2"
+    ],
+    "seed": 1229,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0088,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.435,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-sand-v3": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-sand-v3.png",
+    "material": "sand",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#b88a52",
+      "#d0a465",
+      "#e2bd7d",
+      "#edce95",
+      "#f6dfb2"
+    ],
+    "seed": 1237,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0088,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.879,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-shell-sand": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-shell-sand.png",
+    "material": "shell-sand",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#9b8d74",
+      "#b6a486",
+      "#d0bd98",
+      "#e1cfad",
+      "#efe0c1"
+    ],
+    "seed": 1301,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0078,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.521,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-wet-sand": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-wet-sand.png",
+    "material": "wet-sand",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#776652",
+      "#92795d",
+      "#aa8f6f",
+      "#bea47f",
+      "#d0b892"
+    ],
+    "seed": 1409,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0039,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.696,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-ripple-sand": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-ripple-sand.png",
+    "material": "ripple-sand",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#8d7659",
+      "#aa8d66",
+      "#c6a775",
+      "#d7bb8a",
+      "#e6cfa4"
+    ],
+    "seed": 1423,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0068,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.225,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-path": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-path.png",
+    "material": "path",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#72533a",
+      "#8e6847",
+      "#aa7f55",
+      "#c09766",
+      "#d3ad78"
+    ],
+    "seed": 1511,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0098,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.637,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-stair": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-stair.png",
+    "material": "stair",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#6d5a47",
+      "#87705a",
+      "#a0876d",
+      "#baa183",
+      "#cfb797"
+    ],
+    "seed": 1523,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0078,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.188,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-lagoon": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-lagoon.png",
+    "material": "lagoon",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#0a6074",
+      "#11788a",
+      "#2094a2",
+      "#43adb4",
+      "#78c9c4"
+    ],
+    "seed": 1601,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0078,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.336,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-shallow": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-shallow.png",
+    "material": "shallow",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#2c8690",
+      "#45a0a4",
+      "#66b9b1",
+      "#8fcfc0",
+      "#b7dfcf"
+    ],
+    "seed": 1613,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0068,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.861,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-ocean": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-ocean.png",
+    "material": "ocean",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#083f68",
+      "#0c5a82",
+      "#14779a",
+      "#2593ad",
+      "#55b2be"
+    ],
+    "seed": 1627,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0049,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.087,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-rock": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-rock.png",
+    "material": "rock",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#4d4c4e",
+      "#686468",
+      "#837d7c",
+      "#9c9490",
+      "#b6aca4"
+    ],
+    "seed": 1709,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0107,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.473,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "beach-cliff": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-cliff.png",
+    "material": "cliff",
+    "recipe": "procedural/beach_tuft",
+    "ramp": [
+      "#4c382a",
+      "#684b34",
+      "#866241",
+      "#a47a51",
+      "#bf9568"
+    ],
+    "seed": 1721,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0127,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.442,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  }
+}

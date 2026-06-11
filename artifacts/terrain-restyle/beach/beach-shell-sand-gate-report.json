@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-shell-sand.png",
+  "material": "shell-sand",
+  "recipe": "procedural/beach_tuft",
+  "ramp": [
+    "#9b8d74",
+    "#b6a486",
+    "#d0bd98",
+    "#e1cfad",
+    "#efe0c1"
+  ],
+  "seed": 1301,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0078,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.521,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

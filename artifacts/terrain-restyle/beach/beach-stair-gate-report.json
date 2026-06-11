@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-stair.png",
+  "material": "stair",
+  "recipe": "procedural/beach_tuft",
+  "ramp": [
+    "#6d5a47",
+    "#87705a",
+    "#a0876d",
+    "#baa183",
+    "#cfb797"
+  ],
+  "seed": 1523,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0078,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.188,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

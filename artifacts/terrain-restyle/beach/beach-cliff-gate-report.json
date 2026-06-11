@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-cliff.png",
+  "material": "cliff",
+  "recipe": "procedural/beach_tuft",
+  "ramp": [
+    "#4c382a",
+    "#684b34",
+    "#866241",
+    "#a47a51",
+    "#bf9568"
+  ],
+  "seed": 1721,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0127,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 1.442,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

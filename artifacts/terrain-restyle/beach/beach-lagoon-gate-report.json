@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-lagoon.png",
+  "material": "lagoon",
+  "recipe": "procedural/beach_tuft",
+  "ramp": [
+    "#0a6074",
+    "#11788a",
+    "#2094a2",
+    "#43adb4",
+    "#78c9c4"
+  ],
+  "seed": 1601,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0078,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 1.336,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

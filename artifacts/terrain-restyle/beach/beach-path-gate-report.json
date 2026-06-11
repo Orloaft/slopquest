@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-path.png",
+  "material": "path",
+  "recipe": "procedural/beach_tuft",
+  "ramp": [
+    "#72533a",
+    "#8e6847",
+    "#aa7f55",
+    "#c09766",
+    "#d3ad78"
+  ],
+  "seed": 1511,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0098,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.637,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

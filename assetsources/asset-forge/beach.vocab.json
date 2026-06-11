@@ -20,168 +20,168 @@
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#7b5030"
+      "minimapColor": "#815f3f"
     },
     "1": {
       "role": "beach-cliff-right",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#754d2e"
+      "minimapColor": "#815f3f"
     },
     "2": {
       "role": "beach-stairs",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#b58552"
+      "minimapColor": "#a1896f"
     },
     "e": {
       "role": "beach-sand",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#f2ca89"
+      "minimapColor": "#ddb87a"
     },
     "l": {
       "role": "beach-shell-sand",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#e4b169"
+      "minimapColor": "#cbb894"
     },
     ",": {
       "role": "beach-wet-sand",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#d8b176"
+      "minimapColor": "#a58a6c"
     },
     ";": {
       "role": "beach-ripple-sand",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#f3cc8b"
+      "minimapColor": "#c3a575"
     },
     "z": {
       "role": "beach-path",
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#c89259"
+      "minimapColor": "#a57b52"
     },
     "[": {
       "role": "beach-stairs-left",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#c79961"
+      "minimapColor": "#a1896f"
     },
     "]": {
       "role": "beach-stairs-right",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#a97c4c"
+      "minimapColor": "#a1896f"
     },
     "x": {
       "role": "beach-cliff",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#784f2f"
+      "minimapColor": "#815f3f"
     },
     "|": {
       "role": "beach-rock-wall",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#784f2f"
+      "minimapColor": "#815f3f"
     },
     "u": {
       "role": "beach-rock",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#997e5b"
+      "minimapColor": "#807a79"
     },
     "v": {
       "role": "beach-lagoon",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4da69a"
+      "minimapColor": "#1e8d9c"
     },
     "{": {
       "role": "beach-lagoon",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4da69a"
+      "minimapColor": "#1e8d9c"
     },
     "}": {
       "role": "beach-lagoon",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4da69a"
+      "minimapColor": "#1e8d9c"
     },
     "(": {
       "role": "beach-lagoon",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4da69a"
+      "minimapColor": "#1e8d9c"
     },
     ")": {
       "role": "beach-lagoon",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4da69a"
+      "minimapColor": "#1e8d9c"
     },
     "=": {
       "role": "beach-shallow",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4da69a"
+      "minimapColor": "#5fb2ac"
     },
     "I": {
       "role": "beach-ocean",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#49a79a"
+      "minimapColor": "#126c8f"
     },
     "!": {
       "role": "beach-ocean-ripple",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#47a59a"
+      "minimapColor": "#126c8f"
     },
     "?": {
       "role": "beach-ocean-rock",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4ca69c"
+      "minimapColor": "#807a79"
     },
     "Y": {
       "role": "portal-desert",
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#c89259"
+      "minimapColor": "#a57b52"
     },
     "j": {
       "role": "portal-jungle",
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#c89259"
+      "minimapColor": "#a57b52"
     }
   }
 }

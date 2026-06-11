@@ -1,0 +1,14 @@
+{
+  "stage_ascii_rows_identical": true,
+  "stage_ascii_legend_keys_identical": true,
+  "collision_identical": true,
+  "objects_identical": true,
+  "base_layer_refs_identical": true,
+  "portals_identical": true,
+  "vocab_semantics_identical_excluding_minimapColor": true,
+  "expected_visual_changes": [
+    "assetsources/asset-forge/exports/beach/beach.png",
+    "public/tilesets/beach/beach.png",
+    "assetsources/asset-forge/beach.vocab.json minimapColor only"
+  ]
+}

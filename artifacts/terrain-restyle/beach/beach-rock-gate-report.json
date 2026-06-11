@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/beach-rock.png",
+  "material": "rock",
+  "recipe": "procedural/beach_tuft",
+  "ramp": [
+    "#4d4c4e",
+    "#686468",
+    "#837d7c",
+    "#9c9490",
+    "#b6aca4"
+  ],
+  "seed": 1709,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0107,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.473,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}
