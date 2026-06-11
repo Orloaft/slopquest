@@ -1,0 +1,290 @@
+{
+  "waystone-grass-v0": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/waystone-grass-v0.png",
+    "material": "grass",
+    "recipe": "cand_tuft/route-grass",
+    "ramp": [
+      "#426212",
+      "#557916",
+      "#698f1c",
+      "#769e23",
+      "#86b02e"
+    ],
+    "seed": 270,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0098,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.802,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "waystone-grass-v1": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/waystone-grass-v1.png",
+    "material": "grass",
+    "recipe": "cand_tuft/route-grass",
+    "ramp": [
+      "#426212",
+      "#557916",
+      "#698f1c",
+      "#769e23",
+      "#86b02e"
+    ],
+    "seed": 281,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0098,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.583,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "waystone-grass-v2": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/waystone-grass-v2.png",
+    "material": "grass",
+    "recipe": "cand_tuft/route-grass",
+    "ramp": [
+      "#426212",
+      "#557916",
+      "#698f1c",
+      "#769e23",
+      "#86b02e"
+    ],
+    "seed": 292,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0107,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.489,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "waystone-grass-v3": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/waystone-grass-v3.png",
+    "material": "grass",
+    "recipe": "cand_tuft/route-grass",
+    "ramp": [
+      "#426212",
+      "#557916",
+      "#698f1c",
+      "#769e23",
+      "#86b02e"
+    ],
+    "seed": 303,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0098,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.866,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "waystone-dirt-v0": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/waystone-dirt-v0.png",
+    "material": "dirt",
+    "recipe": "cand_tuft/road",
+    "ramp": [
+      "#a06a22",
+      "#c4882c",
+      "#e3a036",
+      "#edb14d",
+      "#f5c168"
+    ],
+    "seed": 371,
+    "gates": {
+      "color_count": {
+        "value": 7,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0117,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.763,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "waystone-dirt-v1": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/waystone-dirt-v1.png",
+    "material": "dirt",
+    "recipe": "cand_tuft/road",
+    "ramp": [
+      "#a06a22",
+      "#c4882c",
+      "#e3a036",
+      "#edb14d",
+      "#f5c168"
+    ],
+    "seed": 382,
+    "gates": {
+      "color_count": {
+        "value": 7,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0117,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.069,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "waystone-dirt-v2": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/waystone-dirt-v2.png",
+    "material": "dirt",
+    "recipe": "cand_tuft/road",
+    "ramp": [
+      "#a06a22",
+      "#c4882c",
+      "#e3a036",
+      "#edb14d",
+      "#f5c168"
+    ],
+    "seed": 393,
+    "gates": {
+      "color_count": {
+        "value": 7,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0127,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.493,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "waystone-dirt-v3": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/waystone-dirt-v3.png",
+    "material": "dirt",
+    "recipe": "cand_tuft/road",
+    "ramp": [
+      "#a06a22",
+      "#c4882c",
+      "#e3a036",
+      "#edb14d",
+      "#f5c168"
+    ],
+    "seed": 404,
+    "gates": {
+      "color_count": {
+        "value": 7,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0137,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.363,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  }
+}

@@ -9,7 +9,7 @@
 // Output: assetsources/asset-forge/exports/waystone/{waystone.png,
 //   waystone.tileset.json, waystone.stage.json} + assetsources/asset-forge/
 //   waystone.vocab.json -- consumed by the existing import-asset-forge-stage.ts.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import nodePath from "node:path";
 import { PNG } from "pngjs";
 
@@ -36,7 +36,6 @@ const elev = readFileSync(nodePath.join(repoRoot, "assetsources/waystone/elevati
   .replace(/\n$/, "").split("\n").map((l) => l.split("").map(Number));
 const at = (r: number, c: number) => (r >= 0 && c >= 0 && r < R && c < C ? rows[r][c] : "^");
 const eh = (r: number, c: number) => (r >= 0 && c >= 0 && r < R && c < C ? elev[r][c] : 0);
-const topLvl = Math.max(...elev.flat());
 
 // ---- STRUCTURE PLACEMENT ----------------------------------------------------
 // tx,ty = base-center TILE (sprite bottom-center plants there). dispW = display
@@ -246,47 +245,13 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {       // pass 2: bushe
 
 // ---- atlases ---------------------------------------------------------------
 const sliced = (name: string) => PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/sliced/${name}`)));
-const water = sliced("water-wang.png");
-const road = sliced("road-wang.png");
-const ptop = sliced("plateau-top-v2.png");
+const water = sliced("water-wang-tuft.png");
 const face = sliced("cliff-face.png");     // 5col[Lcap,str,Rcap,innerL,innerR] x 3row[top,mid,base]
 const ladder = sliced("ladder.png");       // 1col x 3row[top,mid,base] wooden stairs
 const FCOLS = 5;
-const wCols = water.width / ts, rCols = road.width / ts, PTCOLS = ptop.width / ts;
-// optional bespoke grass-variation atlas (8x1). Falls back to the single ptop grass tile
-// until tools/slice-grass-v1.py has produced it. See bespoke/waystone-grass-v1/PROMPT.md.
-const grassVarPath = nodePath.join(repoRoot, "assetsources/curated/sliced/grass-v1.png");
-const grassVar = existsSync(grassVarPath) ? PNG.sync.read(readFileSync(grassVarPath)) : null;
-const GVCOLS = grassVar ? grassVar.width / ts : 0;
-// optional bespoke packed-dirt atlas (4x1) for path/plaza interiors. Falls back to the
-// procedural roadFill below. See bespoke/waystone-dirt-v1/PROMPT.md.
-const dirtVarPath = nodePath.join(repoRoot, "assetsources/curated/sliced/dirt-v1.png");
-const dirtVar = existsSync(dirtVarPath) ? PNG.sync.read(readFileSync(dirtVarPath)) : null;
-const DVCOLS = dirtVar ? dirtVar.width / ts : 0;
-
-// Solid packed-dirt fill derived from the road interior tile (idx 15): the road-wang set is
-// authored as 1-cell paths and even its interior tile is ~20% transparent, so wide paths/plaza
-// leak grass through and render as a lattice. We underlay this solid version beneath every road
-// cell (transparent pixels filled with the tile's mean dirt colour); the road-wang overlay then
-// only contributes its opaque grass borders at path edges. Result: solid dirt, clean edges.
-const roadFill = new PNG({ width: ts, height: ts });
-{
-  const rfx = (15 % rCols) * ts, rfy = Math.floor(15 / rCols) * ts;
-  let mr = 0, mg = 0, mb = 0, n = 0;
-  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
-    const si = ((rfy + y) * road.width + (rfx + x)) * 4;
-    if (road.data[si + 3] !== 0) { mr += road.data[si]; mg += road.data[si + 1]; mb += road.data[si + 2]; n++; }
-  }
-  mr = Math.round(mr / n); mg = Math.round(mg / n); mb = Math.round(mb / n);
-  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
-    const si = ((rfy + y) * road.width + (rfx + x)) * 4, di = (y * ts + x) * 4;
-    const op = road.data[si + 3] !== 0;
-    roadFill.data[di] = op ? road.data[si] : mr;
-    roadFill.data[di + 1] = op ? road.data[si + 1] : mg;
-    roadFill.data[di + 2] = op ? road.data[si + 2] : mb;
-    roadFill.data[di + 3] = 255;
-  }
-}
+const wCols = water.width / ts;
+const grassFills = [0, 1, 2, 3].map((i) => PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/fills/waystone-grass-v${i}.png`))));
+const dirtFills = [0, 1, 2, 3].map((i) => PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/fills/waystone-dirt-v${i}.png`))));
 
 const out = new PNG({ width: W, height: H });
 out.data.fill(0);
@@ -297,6 +262,13 @@ function blitTile(sheet: PNG, cols: number, idx: number, dx: number, dy: number)
     const si = ((sy + y) * sheet.width + (sx + x)) * 4; if (sheet.data[si + 3] === 0) continue;
     const di = (py * W + px) * 4;
     out.data[di] = sheet.data[si]; out.data[di + 1] = sheet.data[si + 1]; out.data[di + 2] = sheet.data[si + 2]; out.data[di + 3] = 255;
+  }
+}
+function blitFill(fill: PNG, dx: number, dy: number) {
+  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
+    const si = (y * fill.width + x) * 4;
+    const di = ((dy + y) * W + dx + x) * 4;
+    out.data[di] = fill.data[si]; out.data[di + 1] = fill.data[si + 1]; out.data[di + 2] = fill.data[si + 2]; out.data[di + 3] = 255;
   }
 }
 const hrand = (a: number, b: number) => {
@@ -319,64 +291,27 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
 }
 
 // ---- ground fill: interior grass on ALL land ------------------------------
-// With the bespoke grass-variation atlas present, scatter variants (mostly the plain
-// base tile, with sparse flower/patch/scuff accents) deterministically so the green
-// reads textured like the mockup instead of one flat fill. Road/water/plateau passes
-// paint over covered cells, so variants only ever show on exposed grass.
-const GRASS_IDX0 = 0;
-let gseed = 20260602;
-const grand = () => { gseed = (gseed * 1103515245 + 12345) & 0x7fffffff; return gseed / 0x7fffffff; };
-const pickGrassVariant = () => {
-  const roll = grand();
-  if (roll < 0.58) return 0;            // plain base turf dominates
-  if (roll < 0.72) return 1;            // denser blade texture
-  return 2 + Math.floor(((roll - 0.72) / 0.28) * (GVCOLS - 2)); // sparse accents 2..GVCOLS-1
-};
+// Scatter bible-compliant Waystone-local grass variants deterministically. Road/water/
+// plateau passes paint over covered cells, so variants only ever show on exposed grass.
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const ch = at(r, c);
   if (ch === "~" || ch === "^" || ch === ".") continue;
-  if (grassVar) blitTile(grassVar, GVCOLS, Math.min(pickGrassVariant(), GVCOLS - 1), c * ts, r * ts);
-  else blitTile(ptop, PTCOLS, GRASS_IDX0, c * ts, r * ts);
+  blitFill(grassFills[Math.floor(hrand(c + 101, r + 313) * grassFills.length)], c * ts, r * ts);
 }
 
 // ---- water corner-Wang dual-grid -------------------------------------------
-// mask 0 (all-land corner) is an OPAQUE bright-green grass tile in the water set; left
-// on, it repaints the whole map and hides the grass ground-fill. With the bespoke
-// grass atlas present we skip it so the dark-olive variants show; without it we keep
-// the legacy behaviour (water tile-0 is the grass) to avoid a no-art regression.
+// mask 0 (all-land corner) is an opaque grass tile in the water set; skip it so the
+// local grass variants remain the single exposed land source.
 for (let i = 0; i <= R; i++) for (let j = 0; j <= C; j++) {
   const m = (isW(i - 1, j - 1) ? 1 : 0) | (isW(i - 1, j) ? 2 : 0) | (isW(i, j) ? 4 : 0) | (isW(i, j - 1) ? 8 : 0);
-  if (m === 0 && grassVar) continue;
+  if (m === 0) continue;
   blitTile(water, wCols, m, Math.round((j - 0.5) * ts), Math.round((i - 0.5) * ts));
 }
 
-// ---- plateau-top edge autotile (uniform tier => interior grass everywhere) --
-const maskToIdx = [15, 13, 14, 7, 12, 10, 8, 4, 11, 6, 9, 3, 5, 2, 1, 0];
-for (let L = 1; L <= topLvl; L++) {
-  // OOB counts as same-tier so the uniform-flat town gets no false rim at the map border.
-  const up = (r: number, c: number) => (r < 0 || c < 0 || r >= R || c >= C ? true : eh(r, c) >= L);
-  for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
-    if (!up(r, c)) continue;
-    const ch = at(r, c); if (ch === "~" || ch === "^" || ch === ".") continue;
-    const mask = (up(r - 1, c) ? 1 : 0) | (up(r, c + 1) ? 2 : 0) | (up(r + 1, c) ? 4 : 0) | (up(r, c - 1) ? 8 : 0);
-    // With the bespoke dark-olive grass atlas present, skip the plateau-top tiles ENTIRELY:
-    // the interior tile (idx 0) repaints over the grass, and the bright ptop RIM tiles clash
-    // hard against the dark grass at every tier boundary (a lime lattice). The terraced read
-    // comes from the stone cliff FACES (south step-downs) + wall-foot AO instead, which match
-    // the mockup's stone retaining walls. Legacy no-art path still uses ptop for a clean fill.
-    if (grassVar) continue;
-    blitTile(ptop, PTCOLS, maskToIdx[mask], c * ts, r * ts);
-  }
-}
-
 // ---- roads edge-Wang (solid-dirt underlay + road-wang edge overlay) --------
-let dseed = 71777;
-const drand = () => { dseed = (dseed * 1103515245 + 12345) & 0x7fffffff; return dseed / 0x7fffffff; };
-const pickDirt = () => (drand() < 0.7 ? 0 : 1 + Math.floor(drand() * (DVCOLS - 1))); // plain dominates
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   if (!isR(r, c)) continue;
-  if (dirtVar) blitTile(dirtVar, DVCOLS, Math.min(pickDirt(), DVCOLS - 1), c * ts, r * ts);
-  else blitTile(roadFill, 1, 0, c * ts, r * ts); // solid dirt -> no grass leak on interiors/plaza
+  blitFill(dirtFills[Math.floor(hrand(c + 707, r + 919) * dirtFills.length)], c * ts, r * ts);
   // Grass border is applied by the edge-dither pass below (samples the real neighbour grass).
 }
 const isGrassCell = (r: number, c: number) => { const ch = at(r, c); return ch === "F" || ch === "f" || ch === "q"; };

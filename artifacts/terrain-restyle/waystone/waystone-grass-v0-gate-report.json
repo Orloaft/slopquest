@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/waystone-grass-v0.png",
+  "material": "grass",
+  "recipe": "cand_tuft/route-grass",
+  "ramp": [
+    "#426212",
+    "#557916",
+    "#698f1c",
+    "#769e23",
+    "#86b02e"
+  ],
+  "seed": 270,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0098,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.802,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

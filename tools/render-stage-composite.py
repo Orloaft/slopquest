@@ -20,6 +20,56 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 TS = 32
+ATLAS_FILE = {
+    "townTiles": "assetsources/towntiles.png",
+    "beachTiles": "public/beach-tiles.png",
+    "graveyardTiles": "public/graveyardtiles.png",
+    "northwoodTreeSheet": "assetsources/curated/bespoke/northwood-trees-v1/northwood-trees-source-alpha.png",
+}
+
+
+def is_magenta_key(r: int, g: int, b: int) -> bool:
+    if r > 95 and b > 90 and g < 135 and abs(r - b) < 95 and r > g * 1.35 and b > g * 1.25:
+        return True
+    return g < 10 and r > 70 and b > 42 and r > b - 5 and r > g * 7 and b > g * 7
+
+
+def load_sprite(o: dict, cache: dict[str, Image.Image]) -> Image.Image | None:
+    src = o.get("src")
+    cache_key = json.dumps(src, sort_keys=True) if src else o["key"]
+    if cache_key in cache:
+        return cache[cache_key]
+    if src and src.get("file"):
+        f = ROOT / src["file"]
+        if not f.exists():
+            return None
+        spr = Image.open(f).convert("RGBA")
+    elif src and src.get("atlas"):
+        atlas_path = ATLAS_FILE.get(src["atlas"])
+        if not atlas_path:
+            return None
+        f = ROOT / atlas_path
+        if not f.exists():
+            return None
+        atlas = Image.open(f).convert("RGBA")
+        spr = atlas.crop((src["sx"], src["sy"], src["sx"] + src["sw"], src["sy"] + src["sh"]))
+    elif o["key"].startswith("spriteNw"):
+        num = o["key"].replace("spriteNw", "")
+        f = ROOT / f"public/sprites/nw/obj_{num}.png"
+        if not f.exists():
+            return None
+        spr = Image.open(f).convert("RGBA")
+    else:
+        return None
+
+    pix = spr.load()
+    for y in range(spr.height):
+        for x in range(spr.width):
+            r, g, b, a = pix[x, y]
+            if a and is_magenta_key(r, g, b):
+                pix[x, y] = (r, g, b, 0)
+    cache[cache_key] = spr
+    return spr
 
 
 def main() -> None:
@@ -61,13 +111,10 @@ def main() -> None:
             d.ellipse((cx - w / 2, cy - w / 8, cx + w / 2, cy + w / 8), fill=(15, 25, 8, 80))
         img.alpha_composite(ov)
     for o in objs:
-        key = o["key"]
-        if key not in cache:
-            num = key.replace("spriteNw", "")
-            f = ROOT / f"public/sprites/nw/obj_{num}.png"
-            spr = Image.open(f).convert("RGBA")
-            cache[key] = spr
-        spr = cache[key].resize((int(o["w"]), int(o["h"])), Image.LANCZOS)
+        spr = load_sprite(o, cache)
+        if spr is None:
+            continue
+        spr = spr.resize((int(o["w"]), int(o["h"])), Image.LANCZOS)
         px = int(o["x"] * TS - o["w"] / 2)
         py = int(o["y"] * TS - o["h"])
         img.alpha_composite(spr, (max(0, px), max(0, py)))

@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/waystone-dirt-v3.png",
+  "material": "dirt",
+  "recipe": "cand_tuft/road",
+  "ramp": [
+    "#a06a22",
+    "#c4882c",
+    "#e3a036",
+    "#edb14d",
+    "#f5c168"
+  ],
+  "seed": 404,
+  "gates": {
+    "color_count": {
+      "value": 7,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0137,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.363,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}
