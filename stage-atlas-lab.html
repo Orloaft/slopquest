@@ -77,13 +77,13 @@
     <div id="app">
       <aside>
         <h1>Stage Atlas Lab</h1>
-        <h2>Stage</h2>
+        <h2>Bow Sample</h2>
         <div class="row">
           <select id="stageSel"></select>
         </div>
         <div id="meta"></div>
 
-        <h2>Seed Samples</h2>
+        <h2>Sample Steps</h2>
         <div class="row wrap" id="seedButtons"></div>
         <div class="row">
           <button id="prevSeed" class="subtle">Prev</button>
@@ -135,14 +135,18 @@
       const ctx = canvas.getContext("2d");
       const SAMPLE_W = 28;
       const SAMPLE_H = 18;
-      const SEEDS = [11, 29, 47, 83, 131, 197];
+      const TIB_STAGE = "northwood";
+      const BOW_FIXTURE_URL = "/debug/bow-mapgen-samples.json";
       let D = null;
+      let tibStage = null;
+      let fixture = null;
+      let samples = [];
       let atlas = null;
       let atlasCols = 1;
       let atlasRows = 1;
       let tileSize = 32;
       let slots = [];
-      let activeSeed = SEEDS[0];
+      let activeSampleIndex = 0;
       let activeSlotRef = null;
       let pickedRef = null;
       const overrides = new Map();
@@ -162,11 +166,12 @@
         for (let i = 0; i < salt.length; i += 1) v = (Math.imul(v ^ salt.charCodeAt(i), 2246822519)) >>> 0;
         return v >>> 0;
       }
-      function sampleFor(seed) {
+      function sampleFor(sample) {
         const maxX = Math.max(0, D.cols - SAMPLE_W);
         const maxY = Math.max(0, D.rows - SAMPLE_H);
-        const x = maxX ? stableHash(seed, `${D.name}:x`) % (maxX + 1) : 0;
-        const y = maxY ? stableHash(seed, `${D.name}:y`) % (maxY + 1) : 0;
+        const salt = `${D.name}:${sample.seed}:${sample.floorId}:${sample.worldSeed}`;
+        const x = maxX ? stableHash(sample.seed, `${salt}:x`) % (maxX + 1) : 0;
+        const y = maxY ? stableHash(sample.seed, `${salt}:y`) % (maxY + 1) : 0;
         return { x, y, w: Math.min(SAMPLE_W, D.cols), h: Math.min(SAMPLE_H, D.rows) };
       }
       function drawTile(ref, dx, dy) {
@@ -179,7 +184,8 @@
         if (!D || !atlas?.complete) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.imageSmoothingEnabled = false;
-        const s = sampleFor(activeSeed);
+        const sample = samples[activeSampleIndex];
+        const s = sampleFor(sample);
         for (let y = 0; y < s.h; y += 1) {
           for (let x = 0; x < s.w; x += 1) {
             const mx = s.x + x;
@@ -198,7 +204,7 @@
         for (let y = 0; y <= s.h; y += 1) {
           ctx.beginPath(); ctx.moveTo(0, y * 32 + .5); ctx.lineTo(s.w * 32, y * 32 + .5); ctx.stroke();
         }
-        $("sampleInfo").textContent = `seed ${activeSeed} · stage window x:${s.x}-${s.x + s.w - 1}, y:${s.y}-${s.y + s.h - 1} · ${overrides.size} override${overrides.size === 1 ? "" : "s"}`;
+        $("sampleInfo").textContent = `Bow seed ${sample.seed} · floor ${sample.floorId} · ${sample.biome} · window x:${s.x}-${s.x + s.w - 1}, y:${s.y}-${s.y + s.h - 1} · ${overrides.size} override${overrides.size === 1 ? "" : "s"}`;
       }
       function buildSlots() {
         const used = new Map();
@@ -212,8 +218,9 @@
         for (let y = 0; y < D.rows; y += 1) {
           for (let x = 0; x < D.cols; x += 1) {
             const ch = D.ascii[y]?.[x];
+            const marker = D.markers?.[y]?.[x];
             visit(D.base?.[y]?.[x] || D.legend[ch], ch);
-            visit(D.fringe?.[y]?.[x], null);
+            visit(D.fringe?.[y]?.[x], marker);
           }
         }
         slots = [...used.values()].map((slot) => {
@@ -231,14 +238,140 @@
         activeSlotRef = slots[0]?.ref ?? null;
       }
       function renderSeeds() {
-        $("seedButtons").innerHTML = SEEDS.map((seed) => `<button data-seed="${seed}" class="${seed === activeSeed ? "on" : ""}">${seed}</button>`).join("");
+        $("seedButtons").innerHTML = samples.map((sample, index) => (
+          `<button data-index="${index}" class="${index === activeSampleIndex ? "on" : ""}">${sample.seed}/${sample.floorId}</button>`
+        )).join("");
         $("seedButtons").querySelectorAll("button").forEach((btn) => {
           btn.addEventListener("click", () => {
-            activeSeed = Number(btn.dataset.seed);
-            renderSeeds();
-            draw();
+            activeSampleIndex = Number(btn.dataset.index);
+            $("stageSel").value = String(activeSampleIndex);
+            loadSample(activeSampleIndex).catch((e) => setStatus(String(e)));
           });
         });
+      }
+      function renderSampleSelect() {
+        $("stageSel").innerHTML = samples.map((sample, index) => (
+          `<option value="${index}">seed ${sample.seed} · floor ${sample.floorId} · ${sample.biome} · ${sample.cols}x${sample.rows}</option>`
+        )).join("");
+        $("stageSel").value = String(activeSampleIndex);
+      }
+      function refForChar(ch) {
+        return tibStage.legend?.[ch] || null;
+      }
+      function firstRef(...chars) {
+        for (const ch of chars) {
+          const ref = refForChar(ch);
+          if (ref) return ref;
+        }
+        return `${tibStage.atlasName}:0`;
+      }
+      function atlasRef(index) {
+        return `${tibStage.atlasName}:${index}`;
+      }
+      function roleDefaults(sample) {
+        const dungeon = sample.floorId > 0;
+        const floor = sample.biome === "snake"
+          ? firstRef(".")
+          : sample.biome === "underdungeon"
+            ? firstRef("m", "F")
+            : sample.biome === "hive"
+              ? firstRef("t", "F")
+              : firstRef("F", ".");
+        const wall = dungeon ? firstRef("q", "^") : firstRef("^", "q");
+        return {
+          ".": floor,
+          "#": wall,
+          "R": atlasRef(94),
+          "E": atlasRef(232),
+          "P": atlasRef(110),
+          "$": atlasRef(191),
+          "T": firstRef("q", "^"),
+          "!": atlasRef(253),
+          "i": atlasRef(321),
+          "s": atlasRef(327),
+        };
+      }
+      function putMarker(fringe, markers, sample, x, y, ch, ref) {
+        if (x < 0 || y < 0 || x >= sample.cols || y >= sample.rows) return;
+        fringe[y][x] = ref;
+        markers[y][x] = ch;
+      }
+      function makeBowStage(sample) {
+        const refs = roleDefaults(sample);
+        const fringe = Array.from({ length: sample.rows }, () => Array(sample.cols).fill(null));
+        const markers = Array.from({ length: sample.rows }, () => Array(sample.cols).fill(null));
+        for (const [x, y] of sample.rooms ?? []) putMarker(fringe, markers, sample, x, y, "R", refs.R);
+        for (const [x, y] of sample.entrances ?? []) putMarker(fringe, markers, sample, x, y, "E", refs.E);
+        for (const [x, y] of sample.spawnPoints ?? []) putMarker(fringe, markers, sample, x, y, "P", refs.P);
+        for (const [x, y] of sample.shops ?? []) putMarker(fringe, markers, sample, x, y, "$", refs.$);
+        for (const f of sample.features ?? []) putMarker(fringe, markers, sample, f.x, f.y, f.kind, refs[f.kind] || refs.T);
+        return {
+          name: `bow-${sample.seed}-floor-${sample.floorId}`,
+          cols: sample.cols,
+          rows: sample.rows,
+          tileSize: tibStage.tileSize,
+          atlasName: tibStage.atlasName,
+          atlasCols: tibStage.atlasCols,
+          atlasUrl: tibStage.atlasUrl,
+          ascii: sample.ascii,
+          legend: { "#": refs["#"], ".": refs["."] },
+          vocab: {
+            "#": { role: `Bow ${sample.biome} solid`, blocked: true },
+            ".": { role: `Bow ${sample.biome} floor`, blocked: false },
+            R: { role: "Bow room centre", blocked: false },
+            E: { role: "Bow dungeon entrance", blocked: false },
+            P: { role: "Bow spawn point", blocked: false },
+            "$": { role: "Bow shop", blocked: false },
+            T: { role: "Bow statue/solid feature", blocked: true },
+            "!": { role: "Bow guard feature", blocked: false },
+            i: { role: "Bow item feature", blocked: false },
+            s: { role: "Bow prize feature", blocked: false },
+          },
+          base: null,
+          fringe,
+          markers,
+        };
+      }
+      async function loadFixture() {
+        fixture = await (await fetch(BOW_FIXTURE_URL)).json();
+        samples = fixture.samples ?? [];
+        if (!samples.length) throw new Error("Bow fixture has no samples");
+      }
+      async function loadTibStage() {
+        tibStage = await (await fetch(`/editor/api/state?stage=${encodeURIComponent(TIB_STAGE)}`)).json();
+        if (tibStage.error) throw new Error(tibStage.error);
+        tileSize = tibStage.tileSize || 32;
+        atlasCols = tibStage.atlasCols || 1;
+        atlas = new Image();
+        await new Promise((resolve, reject) => {
+          atlas.onload = resolve;
+          atlas.onerror = reject;
+          atlas.src = tibStage.atlasUrl;
+        });
+        atlasRows = Math.max(1, Math.ceil(atlas.naturalHeight / tileSize));
+      }
+      async function loadSample(index) {
+        activeSampleIndex = index;
+        const sample = samples[activeSampleIndex];
+        setStatus(`Loading Bow seed ${sample.seed}, floor ${sample.floorId}...`);
+        D = makeBowStage(sample);
+        overrides.clear();
+        buildSlots();
+        pickedRef = activeSlotRef;
+        $("meta").textContent = [
+          `Bow ${fixture.source}`,
+          `worldSeed ${sample.worldSeed} · floor ${sample.floorId} · ${sample.biome}`,
+          `${D.cols}x${D.rows} · TIB ${TIB_STAGE}/${D.atlasName} · ${slots.length} used refs`
+        ].join("\n");
+        renderSeeds();
+        renderSlots();
+        renderAtlas();
+        draw();
+        setStatus("Read-only lab. Geometry is Bow-generated fixture data; atlas overrides affect this preview only.");
+      }
+      async function loadStage(name) {
+        const index = Number(name);
+        await loadSample(Number.isFinite(index) ? index : 0);
       }
       function renderSlots() {
         const filter = $("slotFilter").value;
@@ -286,51 +419,36 @@
         });
       }
       function report() {
+        const sample = samples[activeSampleIndex];
         const changes = [...overrides.entries()]
           .filter(([from, to]) => from !== to)
           .map(([from, to]) => `${from} -> ${to}`)
           .join("\n");
-        return [`Stage Atlas Lab`, `stage: ${D?.name}`, `seed: ${activeSeed}`, changes ? `overrides:\n${changes}` : "overrides: none"].join("\n");
-      }
-      async function loadStage(name) {
-        setStatus(`Loading ${name}...`);
-        D = await (await fetch(`/editor/api/state?stage=${encodeURIComponent(name)}`)).json();
-        if (D.error) throw new Error(D.error);
-        tileSize = D.tileSize || 32;
-        atlasCols = D.atlasCols || 1;
-        overrides.clear();
-        atlas = new Image();
-        await new Promise((resolve, reject) => {
-          atlas.onload = resolve;
-          atlas.onerror = reject;
-          atlas.src = D.atlasUrl;
-        });
-        atlasRows = Math.max(1, Math.ceil(atlas.naturalHeight / tileSize));
-        buildSlots();
-        pickedRef = activeSlotRef;
-        $("meta").textContent = `${D.cols}x${D.rows} · ${D.atlasName} · ${slots.length} used refs`;
-        renderSeeds();
-        renderSlots();
-        renderAtlas();
-        draw();
-        setStatus("Read-only lab. Overrides affect this preview only; no stage files are saved.");
+        return [
+          "Stage Atlas Lab",
+          `geometry: Bow Online CollisionMap.Generate`,
+          `seed: ${sample?.seed}`,
+          `floorId: ${sample?.floorId}`,
+          `worldSeed: ${sample?.worldSeed}`,
+          `biome: ${sample?.biome}`,
+          `atlas: TIB ${TIB_STAGE}/${D?.atlasName}`,
+          changes ? `overrides:\n${changes}` : "overrides: none"
+        ].join("\n");
       }
       async function init() {
-        const { stages, error } = await (await fetch("/editor/api/stages")).json();
-        if (error) throw new Error(error);
-        $("stageSel").innerHTML = stages.map((s) => `<option value="${s}">${s}</option>`).join("");
-        $("stageSel").value = stages.includes("northwood") ? "northwood" : stages[0];
+        await Promise.all([loadFixture(), loadTibStage()]);
+        renderSampleSelect();
         $("stageSel").addEventListener("change", () => loadStage($("stageSel").value).catch((e) => setStatus(String(e))));
         $("slotFilter").addEventListener("change", renderSlots);
         $("prevSeed").addEventListener("click", () => {
-          const i = SEEDS.indexOf(activeSeed);
-          activeSeed = SEEDS[(i - 1 + SEEDS.length) % SEEDS.length];
-          renderSeeds(); draw();
+          activeSampleIndex = (activeSampleIndex - 1 + samples.length) % samples.length;
+          $("stageSel").value = String(activeSampleIndex);
+          loadSample(activeSampleIndex).catch((e) => setStatus(String(e)));
         });
         $("nextSeed").addEventListener("click", () => {
-          const i = SEEDS.indexOf(activeSeed);
-          activeSeed = SEEDS[(i + 1) % SEEDS.length];
-          renderSeeds(); draw();
+          activeSampleIndex = (activeSampleIndex + 1) % samples.length;
+          $("stageSel").value = String(activeSampleIndex);
+          loadSample(activeSampleIndex).catch((e) => setStatus(String(e)));
         });
         $("resetAll").addEventListener("click", () => { overrides.clear(); renderSlots(); renderAtlas(); draw(); });
         $("applyAtlas").addEventListener("click", () => {
@@ -348,12 +466,13 @@
           await navigator.clipboard.writeText(report());
           setStatus("Copied current lab report.");
         });
-        await loadStage($("stageSel").value);
+        await loadSample(activeSampleIndex);
         window.__atlasLab = {
           stage: () => D?.name,
+          sample: () => samples[activeSampleIndex],
           slots: () => slots.length,
           overrides: () => overrides.size,
-          setSeed: (seed) => { activeSeed = seed; renderSeeds(); draw(); },
+          setSample: (index) => loadStage(String(index)),
           assignFirstDifferent: () => {
             const slot = slots[0];
             if (!slot) return false;

@@ -10,13 +10,16 @@ test("stage atlas lab previews a stage and applies live tile overrides", async (
 
   const initial = await page.evaluate(() => ({
     stage: (window as any).__atlasLab.stage(),
+    sample: (window as any).__atlasLab.sample(),
     slots: (window as any).__atlasLab.slots(),
     overrides: (window as any).__atlasLab.overrides(),
     report: (window as any).__atlasLab.report()
   }));
-  expect(initial.stage).toBe("northwood");
-  expect(initial.slots).toBeGreaterThan(10);
+  expect(initial.stage).toBe("bow-11-floor-0");
+  expect(initial.sample).toMatchObject({ seed: 11, floorId: 0, worldSeed: 11 });
+  expect(initial.slots).toBeGreaterThan(3);
   expect(initial.overrides).toBe(0);
+  expect(initial.report).toContain("geometry: Bow Online CollisionMap.Generate");
   expect(initial.report).toContain("overrides: none");
 
   const changed = await page.evaluate(() => (window as any).__atlasLab.assignFirstDifferent());
