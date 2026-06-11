@@ -1,0 +1,25 @@
+{
+  "source": "assetsources/curated/bespoke/woodland-enemies-v2/spider/manager-spider-redesign-v2-20260611/spider-manager-redesign-v2-20260611-imagegen-source.png",
+  "output": "assetsources/curated/bespoke/woodland-enemies-v2/spider/manager-spider-redesign-v2-20260611/spider-manager-redesign-v2-20260611-candidate.png",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "crop_bounds": [
+    0,
+    314,
+    627,
+    940,
+    1254
+  ],
+  "row_order": [
+    "walk_up",
+    "walk_right",
+    "walk_down",
+    "walk_left"
+  ],
+  "cell_size": 96,
+  "non_magenta_palette_colors": 11,
+  "normalization": "proportional 4x4 crop, nearest resize, magenta threshold cleanup, 11-color quantization preserving #ff00ff background for budgeted runtime delivery",
+  "budgeted_runtime_candidate_bytes": 61972
+}
