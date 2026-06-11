@@ -20,5 +20,6 @@ public/music/*.mp3
 .env
 .env.*
 *.log
+*.bak-prederim
 .DS_Store
 artifacts/
