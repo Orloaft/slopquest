@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/crypt-dark-moss.png",
+  "material": "crypt-dark-moss",
+  "recipe": "procedural/crypt_tuft",
+  "ramp": [
+    "#141d16",
+    "#223022",
+    "#31432f",
+    "#455940",
+    "#5c7052"
+  ],
+  "seed": 3500,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0195,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.731,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

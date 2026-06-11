@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/crypt-floor-v1.png",
+  "material": "crypt-floor",
+  "recipe": "procedural/crypt_tuft",
+  "ramp": [
+    "#272624",
+    "#393632",
+    "#4e4841",
+    "#655d53",
+    "#7c7366"
+  ],
+  "seed": 3217,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0195,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.356,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

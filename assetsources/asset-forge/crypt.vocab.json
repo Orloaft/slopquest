@@ -11,42 +11,42 @@
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#4f4438"
+      "minimapColor": "#303136"
     },
     "d": {
       "role": "dirt",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#7d5e2d"
+      "minimapColor": "#4c463f"
     },
     "T": {
       "role": "dirt",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#7d5e2d"
+      "minimapColor": "#453930"
     },
     "r": {
       "role": "forest",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#546d13"
+      "minimapColor": "#2f412d"
     },
     "b": {
       "role": "grave-path",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4d3c37"
+      "minimapColor": "#4c463f"
     },
     "c": {
       "role": "grave-path",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4d3c37"
+      "minimapColor": "#453930"
     }
   }
 }

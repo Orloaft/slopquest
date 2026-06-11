@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/crypt-wall.png",
+  "material": "crypt-wall",
+  "recipe": "procedural/crypt_tuft",
+  "ramp": [
+    "#18191d",
+    "#27282d",
+    "#393a40",
+    "#505058",
+    "#686771"
+  ],
+  "seed": 3101,
+  "gates": {
+    "color_count": {
+      "value": 7,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0127,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.336,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

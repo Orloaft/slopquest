@@ -1,0 +1,218 @@
+{
+  "crypt-wall": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/crypt-wall.png",
+    "material": "crypt-wall",
+    "recipe": "procedural/crypt_tuft",
+    "ramp": [
+      "#18191d",
+      "#27282d",
+      "#393a40",
+      "#505058",
+      "#686771"
+    ],
+    "seed": 3101,
+    "gates": {
+      "color_count": {
+        "value": 7,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0127,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.336,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "crypt-floor-v0": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/crypt-floor-v0.png",
+    "material": "crypt-floor",
+    "recipe": "procedural/crypt_tuft",
+    "ramp": [
+      "#272624",
+      "#393632",
+      "#4e4841",
+      "#655d53",
+      "#7c7366"
+    ],
+    "seed": 3203,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0195,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.512,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "crypt-floor-v1": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/crypt-floor-v1.png",
+    "material": "crypt-floor",
+    "recipe": "procedural/crypt_tuft",
+    "ramp": [
+      "#272624",
+      "#393632",
+      "#4e4841",
+      "#655d53",
+      "#7c7366"
+    ],
+    "seed": 3217,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0195,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.356,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "crypt-worn-floor": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/crypt-worn-floor.png",
+    "material": "crypt-worn-floor",
+    "recipe": "procedural/crypt_tuft",
+    "ramp": [
+      "#231f1c",
+      "#342d27",
+      "#473b32",
+      "#5c4c40",
+      "#736252"
+    ],
+    "seed": 3301,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0098,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.682,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "crypt-tomb-stone": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/crypt-tomb-stone.png",
+    "material": "crypt-tomb-stone",
+    "recipe": "procedural/crypt_tuft",
+    "ramp": [
+      "#2b2f2e",
+      "#424643",
+      "#5b5e58",
+      "#73746b",
+      "#8e8b80"
+    ],
+    "seed": 3407,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0176,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.657,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "crypt-dark-moss": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/crypt-dark-moss.png",
+    "material": "crypt-dark-moss",
+    "recipe": "procedural/crypt_tuft",
+    "ramp": [
+      "#141d16",
+      "#223022",
+      "#31432f",
+      "#455940",
+      "#5c7052"
+    ],
+    "seed": 3500,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0195,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.731,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  }
+}

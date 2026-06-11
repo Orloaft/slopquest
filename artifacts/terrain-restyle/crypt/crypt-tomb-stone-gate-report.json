@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/crypt-tomb-stone.png",
+  "material": "crypt-tomb-stone",
+  "recipe": "procedural/crypt_tuft",
+  "ramp": [
+    "#2b2f2e",
+    "#424643",
+    "#5b5e58",
+    "#73746b",
+    "#8e8b80"
+  ],
+  "seed": 3407,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0176,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.657,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}
