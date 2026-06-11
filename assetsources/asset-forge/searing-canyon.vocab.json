@@ -11,7 +11,7 @@
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#d05e2a"
+      "minimapColor": "#563c2e"
     },
     "~": {
       "role": "deep-water",
@@ -25,21 +25,21 @@
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#876a3a"
+      "minimapColor": "#855b3a"
     },
     ".": {
       "role": "sand-shore",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#d05e2a"
+      "minimapColor": "#563c2e"
     },
     "^": {
       "role": "forest-border-canopy",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#d05e2a"
+      "minimapColor": "#563c2e"
     },
     "q": {
       "role": "town-cliff-face",
@@ -60,7 +60,7 @@
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#d05e2a"
+      "minimapColor": "#563c2e"
     }
   }
 }

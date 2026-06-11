@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/searing-canyon-trail-v0.png",
+  "material": "searing-canyon-trail",
+  "recipe": "procedural/searing_canyon_tuft",
+  "ramp": [
+    "#4c3729",
+    "#6d4a32",
+    "#92633e",
+    "#b77e4f",
+    "#d99d68"
+  ],
+  "seed": 6701,
+  "gates": {
+    "color_count": {
+      "value": 3,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.487,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

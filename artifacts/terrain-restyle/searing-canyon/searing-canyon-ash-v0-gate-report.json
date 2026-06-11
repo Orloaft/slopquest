@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/searing-canyon-ash-v0.png",
+  "material": "searing-canyon-ash",
+  "recipe": "procedural/searing_canyon_tuft",
+  "ramp": [
+    "#2a241f",
+    "#443328",
+    "#654432",
+    "#895d3e",
+    "#ad7a4f"
+  ],
+  "seed": 6500,
+  "gates": {
+    "color_count": {
+      "value": 4,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.001,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.992,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

@@ -193,6 +193,17 @@ const crop = (sheet: PNG, c0: number, r0: number, wc: number, hr: number) => {
   }
   return sub;
 };
+const fillStrip = (files: string[]) => {
+  const strip = new PNG({ width: files.length * ts, height: ts });
+  for (let i = 0; i < files.length; i++) {
+    const fill = PNG.sync.read(readFileSync(nodePath.join(repoRoot, files[i])));
+    if (fill.width !== ts || fill.height !== ts) throw new Error(`${files[i]} must be ${ts}x${ts}`);
+    for (let y = 0; y < ts; y++) {
+      fill.data.copy(strip.data, (y * strip.width + i * ts) * 4, y * ts * 4, y * ts * 4 + ts * 4);
+    }
+  }
+  return strip;
+};
 const cliffRed = sliced("cliff-red.png");
 const face = crop(cliffRed, 0, 0, 5, 3);   // Group B SOUTH: 5col[Lcap,str,Rcap,innerL,innerR] x 3row[top,mid,base]
 const faceSide = crop(cliffRed, 0, 3, 2, 3); // Group C SIDE: 2col[facing-left,facing-right] x 3row[top,mid,base]
@@ -206,9 +217,16 @@ const grassVarPath = nodePath.join(repoRoot, "assetsources/curated/sliced/grass-
 // M3: the forged sun-baked cracked-earth atlas (16x1) supersedes the recolored grass atlas as
 // the ground fill once tools/slice-searing-canyon-m3.py has produced it. It rides the existing
 // grassVar slot, so the ground-fill / water-mask / plateau-skip passes all pick it up unchanged.
+const canyonGroundFiles = [
+  "assetsources/curated/fills/searing-canyon-ash-v0.png",
+  "assetsources/curated/fills/searing-canyon-ash-v1.png",
+  "assetsources/curated/fills/searing-canyon-ash-v2.png",
+  "assetsources/curated/fills/searing-canyon-ash-v3.png",
+];
 const crackedPath = nodePath.join(repoRoot, "assetsources/curated/sliced/cracked-earth-v1.png");
-const groundReal = existsSync(crackedPath);
-const grassVar = groundReal ? PNG.sync.read(readFileSync(crackedPath))
+const groundReal = canyonGroundFiles.every((p) => existsSync(nodePath.join(repoRoot, p))) || existsSync(crackedPath);
+const grassVar = canyonGroundFiles.every((p) => existsSync(nodePath.join(repoRoot, p))) ? fillStrip(canyonGroundFiles)
+  : existsSync(crackedPath) ? PNG.sync.read(readFileSync(crackedPath))
   : existsSync(grassVarPath) ? PNG.sync.read(readFileSync(grassVarPath)) : null;
 const GVCOLS = grassVar ? grassVar.width / ts : 0;
 // PLACEHOLDER desert recolor: green -> orange sun-baked cracked-earth, applied in-place to the
@@ -227,9 +245,16 @@ desertRecolor(ptop);
 if (grassVar && !groundReal) desertRecolor(grassVar);          // cracked-earth ships already sun-baked; only the legacy green atlas needs the recolor
 // optional bespoke packed-dirt atlas (4x1) for path/plaza interiors. Falls back to the
 // procedural roadFill below. See bespoke/waystone-dirt-v1/PROMPT.md.
+const canyonTrailFiles = [
+  "assetsources/curated/fills/searing-canyon-trail-v0.png",
+  "assetsources/curated/fills/searing-canyon-trail-v1.png",
+];
 const dirtVarPath = nodePath.join(repoRoot, "assetsources/curated/sliced/dirt-v1.png");
-const dirtVar = existsSync(dirtVarPath) ? PNG.sync.read(readFileSync(dirtVarPath)) : null;
+const dirtVar = canyonTrailFiles.every((p) => existsSync(nodePath.join(repoRoot, p))) ? fillStrip(canyonTrailFiles)
+  : existsSync(dirtVarPath) ? PNG.sync.read(readFileSync(dirtVarPath)) : null;
 const DVCOLS = dirtVar ? dirtVar.width / ts : 0;
+const canyonSandPath = nodePath.join(repoRoot, "assetsources/curated/fills/searing-canyon-sand.png");
+const canyonSand = existsSync(canyonSandPath) ? PNG.sync.read(readFileSync(canyonSandPath)) : null;
 
 // Solid packed-dirt fill derived from the road interior tile (idx 15): the road-wang set is
 // authored as 1-cell paths and even its interior tile is ~20% transparent, so wide paths/plaza
@@ -367,6 +392,10 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
 // ---- beach -----------------------------------------------------------------
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   if (at(r, c) !== ".") continue;
+  if (canyonSand) {
+    blitTile(canyonSand, 1, 0, c * ts, r * ts);
+    continue;
+  }
   for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
     const n = ((y * 73 + x * 31) % 17) - 8;
     const di = ((r * ts + y) * W + (c * ts + x)) * 4;

@@ -1,0 +1,15 @@
+{
+  "rows": 72,
+  "cols": 110,
+  "layerNames": [
+    "base",
+    "fringe"
+  ],
+  "asciiRowsHash": "d476391726d10dea321ffd20acec8d25a3e2926c4785cf75f7c0968b9232141a",
+  "legendHash": "3a85e625d9ab502fb53178108b72d15ff2afc8e09d80be3a0ff32cdc69a21edd",
+  "collisionHash": "3c7f2dc1eab37f3023cf23dcfaa438a38d87ade93a9da3f1f4144c990ed59090",
+  "objectsHash": "f478c19b3c4103892d5f1426ba414c39965266b8798f7ad62d875e39cd3126be",
+  "objectCount": 482,
+  "baseLayerHash": "ff021cdb060b77346c7a78b8424e22a511d5b2966c091caffecafae7ab7cf41c",
+  "fringeLayerHash": "dc8aa755c13891b52cb48eced45c19bca10cfd86fbf0ea1f94b448e98c877027"
+}
