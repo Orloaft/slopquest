@@ -7659,7 +7659,7 @@ function createActorFrames(scene: Phaser.Scene): void {
   createFrameSet(scene, "playerSheet", "caster", casterRows, casterXs, 82, 96);
   createExplicitFrameSet(scene, "goblinSheet", "goblin", uniformDirectionFrames(96, 96, 4));
   createExplicitFrameSet(scene, "skeletonSheet", "skeleton", skeletonFrames);
-  createExplicitFrameSet(scene, "goblinScoutSheet", "goblinScout", uniformDirectionFrames(281, 293, 4));
+  createExplicitFrameSet(scene, "goblinScoutSheet", "goblinScout", uniformDirectionFrames(96, 96, 4));
   createExplicitFrameSet(scene, "goblinShamanSheet", "goblinShaman", uniformDirectionFrames(313, 313, 4));
   createExplicitFrameSet(scene, "goblinRaiderSheet", "goblinRaider", uniformDirectionFrames(320, 320, 4));
   createExplicitFrameSet(scene, "greyWolfSheet", "greyWolf", uniformDirectionFrames(320, 320, 4));
