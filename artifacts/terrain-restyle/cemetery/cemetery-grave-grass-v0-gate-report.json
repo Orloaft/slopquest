@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-grass-v0.png",
+  "material": "grave-grass",
+  "recipe": "procedural/cemetery_tuft",
+  "ramp": [
+    "#263818",
+    "#344d21",
+    "#49682e",
+    "#5d7c3d",
+    "#748f50"
+  ],
+  "seed": 2101,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0059,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.754,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

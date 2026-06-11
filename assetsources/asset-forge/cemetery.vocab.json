@@ -11,77 +11,77 @@
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#4f4438"
+      "minimapColor": "#61625b"
     },
     "g": {
       "role": "grave-dirt",
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#4a3d27"
+      "minimapColor": "#4b402a"
     },
     "c": {
       "role": "grave-path",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4d3c37"
+      "minimapColor": "#594e46"
     },
     "T": {
       "role": "dirt",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#7d5e2d"
+      "minimapColor": "#554e42"
     },
     "h": {
       "role": "grave-dirt",
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#4a3d27"
+      "minimapColor": "#4b402a"
     },
     "r": {
       "role": "forest",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#546d13"
+      "minimapColor": "#334722"
     },
     "q": {
       "role": "grave-dirt",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#4a3d27"
+      "minimapColor": "#4b402a"
     },
     "b": {
       "role": "grave-path",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4d3c37"
+      "minimapColor": "#594e46"
     },
     "O": {
       "role": "grass",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#5d7016"
+      "minimapColor": "#47642d"
     },
     "C": {
       "role": "grave-path",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4d3c37"
+      "minimapColor": "#594e46"
     },
     "G": {
       "role": "sand",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#e1a247"
+      "minimapColor": "#554e42"
     }
   }
 }

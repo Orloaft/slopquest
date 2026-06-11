@@ -155,9 +155,25 @@ const desertFillForChar: Record<string, string> = {
   w: "desert-red-rock-top.png",
   X: "desert-red-rock-cliff.png",
 };
+const cemeteryFillForChar: Record<string, string> = {
+  "#": "cemetery-grave-stone.png",
+  g: "cemetery-grave-dirt-v0.png",
+  h: "cemetery-grave-dirt-v1.png",
+  q: "cemetery-grave-dirt-v0.png",
+  b: "cemetery-grave-path.png",
+  c: "cemetery-grave-path.png",
+  C: "cemetery-grave-path.png",
+  T: "cemetery-dead-ground.png",
+  G: "cemetery-dead-ground.png",
+  r: "cemetery-dark-moss.png",
+  O: "cemetery-grave-grass-v0.png",
+};
+const stageFillForChar: Record<string, Record<string, string>> = {
+  desert: desertFillForChar,
+  cemetery: cemeteryFillForChar,
+};
 function maybeApplyStageFill(ch: string, tile: Buffer): void {
-  if (name !== "desert") return;
-  const file = desertFillForChar[ch];
+  const file = stageFillForChar[name]?.[ch];
   if (!file) return;
   const p = nodePath.join(repoRoot, "assetsources/curated/fills", file);
   if (!existsSync(p)) return;

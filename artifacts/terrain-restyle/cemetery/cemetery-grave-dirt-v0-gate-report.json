@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-dirt-v0.png",
+  "material": "grave-dirt",
+  "recipe": "procedural/cemetery_tuft",
+  "ramp": [
+    "#282419",
+    "#3a3322",
+    "#4d422c",
+    "#67583a",
+    "#7d6d4d"
+  ],
+  "seed": 2203,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0137,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 1.595,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

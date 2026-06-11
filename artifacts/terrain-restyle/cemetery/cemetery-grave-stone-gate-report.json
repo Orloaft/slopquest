@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-stone.png",
+  "material": "grave-stone",
+  "recipe": "procedural/cemetery_tuft",
+  "ramp": [
+    "#343633",
+    "#4b4d48",
+    "#63645d",
+    "#7d7c72",
+    "#99978a"
+  ],
+  "seed": 2401,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0186,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.77,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

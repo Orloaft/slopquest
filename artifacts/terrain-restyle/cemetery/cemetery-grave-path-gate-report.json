@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-path.png",
+  "material": "grave-path",
+  "recipe": "procedural/cemetery_tuft",
+  "ramp": [
+    "#302b28",
+    "#453d38",
+    "#5c5148",
+    "#74675b",
+    "#918371"
+  ],
+  "seed": 2309,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0117,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.773,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

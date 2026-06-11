@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-dark-moss.png",
+  "material": "dark-moss",
+  "recipe": "procedural/cemetery_tuft",
+  "ramp": [
+    "#182412",
+    "#26351a",
+    "#354923",
+    "#49602f",
+    "#617a42"
+  ],
+  "seed": 2503,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0195,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 1.1,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

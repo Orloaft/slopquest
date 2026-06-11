@@ -1,0 +1,32 @@
+{
+  "ascii": {
+    "before": "51f2655cd1c824b76732f7091c037213d78c3a0fc1407e4557ccf1aeddf37f7a",
+    "after": "51f2655cd1c824b76732f7091c037213d78c3a0fc1407e4557ccf1aeddf37f7a",
+    "unchanged": true
+  },
+  "collision": {
+    "before": "dc93c1b061716e0de0e7be8f95a0650bf45f36e68fddbe84e7af263d6db36b1c",
+    "after": "dc93c1b061716e0de0e7be8f95a0650bf45f36e68fddbe84e7af263d6db36b1c",
+    "unchanged": true
+  },
+  "objects": {
+    "before": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "after": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "unchanged": true
+  },
+  "base_refs": {
+    "before": "2d8f68a00f08d3d34be56afce3855fd654b93b11e3e2e3ad189a91530752a9a5",
+    "after": "2d8f68a00f08d3d34be56afce3855fd654b93b11e3e2e3ad189a91530752a9a5",
+    "unchanged": true
+  },
+  "cols": {
+    "before": 110,
+    "after": 110,
+    "unchanged": true
+  },
+  "rows": {
+    "before": 72,
+    "after": 72,
+    "unchanged": true
+  }
+}

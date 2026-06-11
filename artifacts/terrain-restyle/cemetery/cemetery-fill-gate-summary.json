@@ -1,0 +1,362 @@
+{
+  "cemetery-grave-grass-v0": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-grass-v0.png",
+    "material": "grave-grass",
+    "recipe": "procedural/cemetery_tuft",
+    "ramp": [
+      "#263818",
+      "#344d21",
+      "#49682e",
+      "#5d7c3d",
+      "#748f50"
+    ],
+    "seed": 2101,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0059,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.754,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "cemetery-grave-grass-v1": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-grass-v1.png",
+    "material": "grave-grass",
+    "recipe": "procedural/cemetery_tuft",
+    "ramp": [
+      "#263818",
+      "#344d21",
+      "#49682e",
+      "#5d7c3d",
+      "#748f50"
+    ],
+    "seed": 2113,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0059,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.925,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "cemetery-grave-grass-v2": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-grass-v2.png",
+    "material": "grave-grass",
+    "recipe": "procedural/cemetery_tuft",
+    "ramp": [
+      "#263818",
+      "#344d21",
+      "#49682e",
+      "#5d7c3d",
+      "#748f50"
+    ],
+    "seed": 2129,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0059,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.485,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "cemetery-grave-grass-v3": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-grass-v3.png",
+    "material": "grave-grass",
+    "recipe": "procedural/cemetery_tuft",
+    "ramp": [
+      "#263818",
+      "#344d21",
+      "#49682e",
+      "#5d7c3d",
+      "#748f50"
+    ],
+    "seed": 2141,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0088,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.078,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "cemetery-grave-dirt-v0": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-dirt-v0.png",
+    "material": "grave-dirt",
+    "recipe": "procedural/cemetery_tuft",
+    "ramp": [
+      "#282419",
+      "#3a3322",
+      "#4d422c",
+      "#67583a",
+      "#7d6d4d"
+    ],
+    "seed": 2203,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0137,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.595,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "cemetery-grave-dirt-v1": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-dirt-v1.png",
+    "material": "grave-dirt",
+    "recipe": "procedural/cemetery_tuft",
+    "ramp": [
+      "#282419",
+      "#3a3322",
+      "#4d422c",
+      "#67583a",
+      "#7d6d4d"
+    ],
+    "seed": 2213,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0146,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.936,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "cemetery-grave-path": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-path.png",
+    "material": "grave-path",
+    "recipe": "procedural/cemetery_tuft",
+    "ramp": [
+      "#302b28",
+      "#453d38",
+      "#5c5148",
+      "#74675b",
+      "#918371"
+    ],
+    "seed": 2309,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0117,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.773,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "cemetery-grave-stone": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-grave-stone.png",
+    "material": "grave-stone",
+    "recipe": "procedural/cemetery_tuft",
+    "ramp": [
+      "#343633",
+      "#4b4d48",
+      "#63645d",
+      "#7d7c72",
+      "#99978a"
+    ],
+    "seed": 2401,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0186,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.77,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "cemetery-dark-moss": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-dark-moss.png",
+    "material": "dark-moss",
+    "recipe": "procedural/cemetery_tuft",
+    "ramp": [
+      "#182412",
+      "#26351a",
+      "#354923",
+      "#49602f",
+      "#617a42"
+    ],
+    "seed": 2503,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0195,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.1,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "cemetery-dead-ground": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-dead-ground.png",
+    "material": "dead-ground",
+    "recipe": "procedural/cemetery_tuft",
+    "ramp": [
+      "#2e2c25",
+      "#413d33",
+      "#585144",
+      "#6f6655",
+      "#887d68"
+    ],
+    "seed": 2609,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0137,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.023,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/cemetery-dead-ground.png",
+  "material": "dead-ground",
+  "recipe": "procedural/cemetery_tuft",
+  "ramp": [
+    "#2e2c25",
+    "#413d33",
+    "#585144",
+    "#6f6655",
+    "#887d68"
+  ],
+  "seed": 2609,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0137,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 1.023,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}
