@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-leaf-floor-v0.png",
+  "material": "jungle-leaf-floor",
+  "recipe": "procedural/jungle_tuft",
+  "ramp": [
+    "#25350f",
+    "#365217",
+    "#4f7120",
+    "#668b2e",
+    "#83a847"
+  ],
+  "seed": 9101,
+  "gates": {
+    "color_count": {
+      "value": 4,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 1.139,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

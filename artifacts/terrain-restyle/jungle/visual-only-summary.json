@@ -1,0 +1,8 @@
+{
+  "stage": "jungle",
+  "floor": 9,
+  "geometry_source": "src/shared.ts makeFloorTiles(9)",
+  "shared_ts_changed_in_slice": false,
+  "collision_source": "isBlockedTile(char) via build-stage-from-textures/import-asset-forge-stage",
+  "proof": "src/shared.ts was not edited; before/after makeFloorTiles(9) signatures are identical; bridge rebuild changed only material atlas/vocab colors and picked up existing | elevation char."
+}

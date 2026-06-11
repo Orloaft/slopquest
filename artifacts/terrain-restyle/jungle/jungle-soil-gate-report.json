@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-soil.png",
+  "material": "jungle-soil",
+  "recipe": "procedural/jungle_tuft",
+  "ramp": [
+    "#3a2a17",
+    "#563c20",
+    "#76542c",
+    "#96713d",
+    "#b59256"
+  ],
+  "seed": 9257,
+  "gates": {
+    "color_count": {
+      "value": 3,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.827,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

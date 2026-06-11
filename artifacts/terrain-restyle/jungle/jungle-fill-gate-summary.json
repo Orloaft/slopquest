@@ -1,0 +1,290 @@
+{
+  "jungle-leaf-floor-v0": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-leaf-floor-v0.png",
+    "material": "jungle-leaf-floor",
+    "recipe": "procedural/jungle_tuft",
+    "ramp": [
+      "#25350f",
+      "#365217",
+      "#4f7120",
+      "#668b2e",
+      "#83a847"
+    ],
+    "seed": 9101,
+    "gates": {
+      "color_count": {
+        "value": 4,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.139,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "jungle-leaf-floor-v1": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-leaf-floor-v1.png",
+    "material": "jungle-leaf-floor",
+    "recipe": "procedural/jungle_tuft",
+    "ramp": [
+      "#25350f",
+      "#365217",
+      "#4f7120",
+      "#668b2e",
+      "#83a847"
+    ],
+    "seed": 9113,
+    "gates": {
+      "color_count": {
+        "value": 3,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.449,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "jungle-leaf-floor-v2": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-leaf-floor-v2.png",
+    "material": "jungle-leaf-floor",
+    "recipe": "procedural/jungle_tuft",
+    "ramp": [
+      "#25350f",
+      "#365217",
+      "#4f7120",
+      "#668b2e",
+      "#83a847"
+    ],
+    "seed": 9133,
+    "gates": {
+      "color_count": {
+        "value": 3,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.936,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "jungle-leaf-floor-v3": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-leaf-floor-v3.png",
+    "material": "jungle-leaf-floor",
+    "recipe": "procedural/jungle_tuft",
+    "ramp": [
+      "#25350f",
+      "#365217",
+      "#4f7120",
+      "#668b2e",
+      "#83a847"
+    ],
+    "seed": 9151,
+    "gates": {
+      "color_count": {
+        "value": 3,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.069,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "jungle-undergrowth": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-undergrowth.png",
+    "material": "jungle-undergrowth",
+    "recipe": "procedural/jungle_tuft",
+    "ramp": [
+      "#18240b",
+      "#263d11",
+      "#385b18",
+      "#4e7421",
+      "#6d9235"
+    ],
+    "seed": 9203,
+    "gates": {
+      "color_count": {
+        "value": 4,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0078,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.79,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "jungle-soil": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-soil.png",
+    "material": "jungle-soil",
+    "recipe": "procedural/jungle_tuft",
+    "ramp": [
+      "#3a2a17",
+      "#563c20",
+      "#76542c",
+      "#96713d",
+      "#b59256"
+    ],
+    "seed": 9257,
+    "gates": {
+      "color_count": {
+        "value": 3,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.827,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "jungle-river": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-river.png",
+    "material": "jungle-river",
+    "recipe": "procedural/jungle_tuft",
+    "ramp": [
+      "#073837",
+      "#0d514f",
+      "#176b66",
+      "#278982",
+      "#4aa89a"
+    ],
+    "seed": 9301,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.538,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "jungle-cliff": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-cliff.png",
+    "material": "jungle-cliff",
+    "recipe": "procedural/jungle_tuft",
+    "ramp": [
+      "#2b271b",
+      "#443b25",
+      "#5d5132",
+      "#766941",
+      "#958451"
+    ],
+    "seed": 9403,
+    "gates": {
+      "color_count": {
+        "value": 4,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.639,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  }
+}

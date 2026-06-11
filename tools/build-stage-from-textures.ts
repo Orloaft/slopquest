@@ -134,7 +134,20 @@ function avgColor(buf: Buffer): string {
   const hx = (v: number) => Math.round(v / n).toString(16).padStart(2, "0");
   return `#${hx(r)}${hx(g)}${hx(b)}`;
 }
-const roleOf = (ch: string) => (BASE[ch] ?? `tile-${ch}`).replace(/^tile/, "").replace(/^./, (m) => m.toLowerCase()).replace(/([A-Z])/g, "-$1").toLowerCase() || `tile-${ch}`;
+const roleOf = (ch: string) => {
+  if (name === "jungle") {
+    const jungleRole: Record<string, string> = {
+      E: "jungle-wall",
+      i: "jungle-river",
+      "-": "jungle",
+      K: "jungle",
+      j: "portal-beach",
+      "|": "jungle-cliff",
+    };
+    if (jungleRole[ch]) return jungleRole[ch];
+  }
+  return (BASE[ch] ?? `tile-${ch}`).replace(/^tile/, "").replace(/^./, (m) => m.toLowerCase()).replace(/([A-Z])/g, "-$1").toLowerCase() || `tile-${ch}`;
+};
 
 // ---- bake ------------------------------------------------------------------
 const rows = makeFloorTiles(floor).map((r) => r.split(""));
@@ -192,13 +205,35 @@ const northwatchFillForChar: Record<string, string> = {
   O: "northwatch-grass-v1.png",
   S: "northwatch-road.png",
 };
+const jungleFillForChar: Record<string, string> = {
+  "-": "jungle-leaf-floor-v0.png",
+  y: "jungle-leaf-floor-v1.png",
+  K: "jungle-leaf-floor-v2.png",
+  E: "jungle-undergrowth.png",
+  i: "jungle-river.png",
+  j: "jungle-soil.png",
+  "|": "jungle-cliff.png",
+};
 const stageFillForChar: Record<string, Record<string, string>> = {
   desert: desertFillForChar,
   cemetery: cemeteryFillForChar,
   crypt: cryptFillForChar,
   deepmine: deepmineFillForChar,
   northwatch: northwatchFillForChar,
+  jungle: jungleFillForChar,
 };
+const stageRoleForChar: Record<string, Record<string, string>> = {
+  jungle: {
+    "-": "jungle-leaf-floor",
+    y: "jungle-leaf-floor",
+    K: "jungle-vault-floor",
+    E: "jungle-undergrowth",
+    i: "jungle-river",
+    j: "jungle-soil-trail",
+    "|": "jungle-cliff",
+  },
+};
+const charRole = (ch: string) => stageRoleForChar[name]?.[ch] ?? roleOf(ch);
 const missing = chars.filter((ch) => !TEX[BASE[ch] ?? ""] && !stageFillForChar[name]?.[ch]);
 if (missing.length) console.warn(`WARN: chars with no sheet texture (flat-color fallback): ${missing.map((c) => `'${c}'`).join(" ")}`);
 function maybeApplyStageFill(ch: string, tile: Buffer): void {
@@ -231,7 +266,7 @@ for (let i = 0; i < N; i++) {
 
 const vocab: Record<string, { role: string; blocked: boolean; sightBlocked: boolean; road: boolean; minimapColor: string }> = {};
 chars.forEach((ch, idx) => {
-  vocab[ch] = { role: roleOf(ch), blocked: isBlockedTile(ch), sightBlocked: isSightBlocked(ch), road: isRoadTile(ch), minimapColor: avgColor(tileBuf[idx]) };
+  vocab[ch] = { role: charRole(ch), blocked: isBlockedTile(ch), sightBlocked: isSightBlocked(ch), road: isRoadTile(ch), minimapColor: avgColor(tileBuf[idx]) };
 });
 
 const ascii: string[] = [];
@@ -253,7 +288,7 @@ mkdirSync(exportDir, { recursive: true });
 writeFileSync(nodePath.join(exportDir, `${name}.png`), PNG.sync.write(atlas));
 writeFileSync(nodePath.join(exportDir, `${name}.tileset.json`), JSON.stringify({
   schema: "asset-forge/tileset@1", name, image: `${name}.png`, tileSize: ts, columns: PACK_COLS, rows: packRows,
-  tiles: chars.map((ch, i) => ({ index: i, role: roleOf(ch), blocked: isBlockedTile(ch) }))
+  tiles: chars.map((ch, i) => ({ index: i, role: charRole(ch), blocked: isBlockedTile(ch) }))
 }, null, 2));
 writeFileSync(nodePath.join(exportDir, `${name}.stage.json`), JSON.stringify({
   schema: "asset-forge/stage@1", name, tileSize: ts, cols: C, rows: R,

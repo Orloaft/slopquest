@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-undergrowth.png",
+  "material": "jungle-undergrowth",
+  "recipe": "procedural/jungle_tuft",
+  "ramp": [
+    "#18240b",
+    "#263d11",
+    "#385b18",
+    "#4e7421",
+    "#6d9235"
+  ],
+  "seed": 9203,
+  "gates": {
+    "color_count": {
+      "value": 4,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0078,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.79,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

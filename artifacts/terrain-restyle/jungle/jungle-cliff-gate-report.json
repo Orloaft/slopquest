@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/jungle-cliff.png",
+  "material": "jungle-cliff",
+  "recipe": "procedural/jungle_tuft",
+  "ramp": [
+    "#2b271b",
+    "#443b25",
+    "#5d5132",
+    "#766941",
+    "#958451"
+  ],
+  "seed": 9403,
+  "gates": {
+    "color_count": {
+      "value": 4,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.639,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

@@ -8,7 +8,7 @@
   "tiles": [
     {
       "index": 0,
-      "role": "jungle-wall",
+      "role": "jungle-undergrowth",
       "blocked": true
     },
     {
@@ -18,17 +18,22 @@
     },
     {
       "index": 2,
-      "role": "jungle",
+      "role": "jungle-leaf-floor",
       "blocked": false
     },
     {
       "index": 3,
-      "role": "beach-path",
+      "role": "jungle-soil-trail",
       "blocked": false
     },
     {
       "index": 4,
-      "role": "jungle",
+      "role": "jungle-cliff",
+      "blocked": true
+    },
+    {
+      "index": 5,
+      "role": "jungle-vault-floor",
       "blocked": false
     }
   ]

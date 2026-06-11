@@ -7,39 +7,46 @@
   "requiredWalkable": [],
   "chars": {
     "E": {
-      "role": "jungle-wall",
+      "role": "jungle-undergrowth",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#434623"
+      "minimapColor": "#365817"
     },
     "i": {
       "role": "jungle-river",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#1a564f"
+      "minimapColor": "#166661"
     },
     "-": {
-      "role": "jungle",
+      "role": "jungle-leaf-floor",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4a5c1f"
+      "minimapColor": "#4d6e1f"
     },
     "j": {
-      "role": "beach-path",
+      "role": "jungle-soil-trail",
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#c89259"
+      "minimapColor": "#73512a"
+    },
+    "|": {
+      "role": "jungle-cliff",
+      "blocked": true,
+      "sightBlocked": true,
+      "road": false,
+      "minimapColor": "#574b2f"
     },
     "K": {
-      "role": "jungle",
+      "role": "jungle-vault-floor",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#4a5c1f"
+      "minimapColor": "#4d6e1f"
     }
   }
 }
