@@ -1,0 +1,10 @@
+{
+  "runtimeGameplaySourcesTouched": false,
+  "runtimeStageMatchesExportAfterBridge": true,
+  "afterStageMatchesRuntimeSha256": "9690a7285ab97088c3a232263e747036fe42f9c65fa0709c708264c43070f76a",
+  "previousExportAsciiRowsIdenticalToAfter": false,
+  "previousExportCollisionIdenticalToAfter": false,
+  "previousExportNote": "The pre-existing deepmine asset-forge export was stale versus current src/shared.ts makeFloorTiles(10); npm run assets:bridge:deepmine regenerated it to the current runtime geometry while this slice left runtime gameplay sources untouched.",
+  "previousExportSha256": "18ab9390b2e6c1b69c29caf3069d9b37cb6113ed2fd1a9cd15bae14ee2d716f4",
+  "afterExportSha256": "c6e88fd534cc2e15ad7a9d0f0185c84e7816daead8bd2de49c17d3ef4354d50f"
+}

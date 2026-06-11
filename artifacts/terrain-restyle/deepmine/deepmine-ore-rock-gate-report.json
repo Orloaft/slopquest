@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/deepmine-ore-rock.png",
+  "material": "deepmine-ore-rock",
+  "recipe": "procedural/deepmine_tuft",
+  "ramp": [
+    "#14191b",
+    "#223033",
+    "#33474a",
+    "#496165",
+    "#667d80"
+  ],
+  "seed": 4500,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0078,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.721,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

@@ -176,10 +176,19 @@ const cryptFillForChar: Record<string, string> = {
   T: "crypt-worn-floor.png",
   r: "crypt-dark-moss.png",
 };
+const deepmineFillForChar: Record<string, string> = {
+  "#": "deepmine-wall.png",
+  d: "deepmine-worn-dirt.png",
+  b: "deepmine-floor-v0.png",
+  c: "deepmine-track-bed.png",
+  r: "deepmine-ore-rock.png",
+  "<": "deepmine-worn-dirt.png",
+};
 const stageFillForChar: Record<string, Record<string, string>> = {
   desert: desertFillForChar,
   cemetery: cemeteryFillForChar,
   crypt: cryptFillForChar,
+  deepmine: deepmineFillForChar,
 };
 function maybeApplyStageFill(ch: string, tile: Buffer): void {
   const file = stageFillForChar[name]?.[ch];

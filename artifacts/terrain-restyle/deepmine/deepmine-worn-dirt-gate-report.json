@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/deepmine-worn-dirt.png",
+  "material": "deepmine-worn-dirt",
+  "recipe": "procedural/deepmine_tuft",
+  "ramp": [
+    "#2c2118",
+    "#433222",
+    "#5a4129",
+    "#745334",
+    "#8f6841"
+  ],
+  "seed": 4301,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0137,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 1.439,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

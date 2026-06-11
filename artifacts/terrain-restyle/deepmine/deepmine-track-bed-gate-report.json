@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/deepmine-track-bed.png",
+  "material": "deepmine-track-bed",
+  "recipe": "procedural/deepmine_tuft",
+  "ramp": [
+    "#201f1d",
+    "#302d28",
+    "#443e35",
+    "#5b5245",
+    "#756a59"
+  ],
+  "seed": 4407,
+  "gates": {
+    "color_count": {
+      "value": 7,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0117,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.689,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

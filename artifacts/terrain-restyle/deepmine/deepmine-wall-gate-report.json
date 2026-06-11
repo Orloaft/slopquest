@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/deepmine-wall.png",
+  "material": "deepmine-wall",
+  "recipe": "procedural/deepmine_tuft",
+  "ramp": [
+    "#171614",
+    "#25231f",
+    "#36332d",
+    "#4a453b",
+    "#615949"
+  ],
+  "seed": 4101,
+  "gates": {
+    "color_count": {
+      "value": 7,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0127,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.461,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "deepmine-wall": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/deepmine-wall.png",
+    "material": "deepmine-wall",
+    "recipe": "procedural/deepmine_tuft",
+    "ramp": [
+      "#171614",
+      "#25231f",
+      "#36332d",
+      "#4a453b",
+      "#615949"
+    ],
+    "seed": 4101,
+    "gates": {
+      "color_count": {
+        "value": 7,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0127,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.461,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "deepmine-floor-v0": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/deepmine-floor-v0.png",
+    "material": "deepmine-floor",
+    "recipe": "procedural/deepmine_tuft",
+    "ramp": [
+      "#2b2924",
+      "#3d3930",
+      "#514b3f",
+      "#686051",
+      "#807768"
+    ],
+    "seed": 4203,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0186,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.362,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "deepmine-floor-v1": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/deepmine-floor-v1.png",
+    "material": "deepmine-floor",
+    "recipe": "procedural/deepmine_tuft",
+    "ramp": [
+      "#2b2924",
+      "#3d3930",
+      "#514b3f",
+      "#686051",
+      "#807768"
+    ],
+    "seed": 4217,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0176,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.743,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "deepmine-worn-dirt": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/deepmine-worn-dirt.png",
+    "material": "deepmine-worn-dirt",
+    "recipe": "procedural/deepmine_tuft",
+    "ramp": [
+      "#2c2118",
+      "#433222",
+      "#5a4129",
+      "#745334",
+      "#8f6841"
+    ],
+    "seed": 4301,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0137,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 1.439,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "deepmine-track-bed": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/deepmine-track-bed.png",
+    "material": "deepmine-track-bed",
+    "recipe": "procedural/deepmine_tuft",
+    "ramp": [
+      "#201f1d",
+      "#302d28",
+      "#443e35",
+      "#5b5245",
+      "#756a59"
+    ],
+    "seed": 4407,
+    "gates": {
+      "color_count": {
+        "value": 7,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0117,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.689,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "deepmine-ore-rock": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/deepmine-ore-rock.png",
+    "material": "deepmine-ore-rock",
+    "recipe": "procedural/deepmine_tuft",
+    "ramp": [
+      "#14191b",
+      "#223033",
+      "#33474a",
+      "#496165",
+      "#667d80"
+    ],
+    "seed": 4500,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0078,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.721,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  }
+}
