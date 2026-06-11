@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-water.png",
+  "material": "water",
+  "recipe": "swamp-proc-normalized",
+  "ramp": [
+    "#12383f",
+    "#1b4d54",
+    "#23656a",
+    "#2d7a7a",
+    "#3f918a"
+  ],
+  "seed": 710,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0039,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.0,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

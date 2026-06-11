@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-mud.png",
+  "material": "mud",
+  "recipe": "swamp-proc-normalized",
+  "ramp": [
+    "#4b3224",
+    "#62412b",
+    "#7c5638",
+    "#966d48",
+    "#ad835d"
+  ],
+  "seed": 610,
+  "gates": {
+    "color_count": {
+      "value": 6,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0088,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.0,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

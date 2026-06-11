@@ -1,0 +1,290 @@
+{
+  "swamp-lichen-v0": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-lichen-v0.png",
+    "material": "lichen",
+    "recipe": "swamp-proc-tuft",
+    "ramp": [
+      "#313c32",
+      "#46583f",
+      "#5d704f",
+      "#728862",
+      "#8aa174"
+    ],
+    "seed": 510,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0117,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.0,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "swamp-lichen-v1": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-lichen-v1.png",
+    "material": "lichen",
+    "recipe": "swamp-proc-tuft",
+    "ramp": [
+      "#313c32",
+      "#46583f",
+      "#5d704f",
+      "#728862",
+      "#8aa174"
+    ],
+    "seed": 521,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0137,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.0,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "swamp-lichen-v2": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-lichen-v2.png",
+    "material": "lichen",
+    "recipe": "swamp-proc-tuft",
+    "ramp": [
+      "#313c32",
+      "#46583f",
+      "#5d704f",
+      "#728862",
+      "#8aa174"
+    ],
+    "seed": 532,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0117,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.0,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "swamp-lichen-v3": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-lichen-v3.png",
+    "material": "lichen",
+    "recipe": "swamp-proc-tuft",
+    "ramp": [
+      "#313c32",
+      "#46583f",
+      "#5d704f",
+      "#728862",
+      "#8aa174"
+    ],
+    "seed": 543,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0146,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.0,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "swamp-mud": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-mud.png",
+    "material": "mud",
+    "recipe": "swamp-proc-normalized",
+    "ramp": [
+      "#4b3224",
+      "#62412b",
+      "#7c5638",
+      "#966d48",
+      "#ad835d"
+    ],
+    "seed": 610,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0088,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.0,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "swamp-water": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-water.png",
+    "material": "water",
+    "recipe": "swamp-proc-normalized",
+    "ramp": [
+      "#12383f",
+      "#1b4d54",
+      "#23656a",
+      "#2d7a7a",
+      "#3f918a"
+    ],
+    "seed": 710,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0039,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.0,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "swamp-rock": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-rock.png",
+    "material": "rock",
+    "recipe": "swamp-proc-normalized",
+    "ramp": [
+      "#30323c",
+      "#444752",
+      "#575a66",
+      "#6b6f7a",
+      "#808590"
+    ],
+    "seed": 810,
+    "gates": {
+      "color_count": {
+        "value": 6,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0068,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.0,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  },
+  "swamp-plank": {
+    "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-plank.png",
+    "material": "plank",
+    "recipe": "swamp-proc-normalized",
+    "ramp": [
+      "#4f3523",
+      "#67482e",
+      "#805d3c",
+      "#997349",
+      "#b18b5e"
+    ],
+    "seed": 910,
+    "gates": {
+      "color_count": {
+        "value": 5,
+        "limit": 16,
+        "pass": true
+      },
+      "ramp_adherence": {
+        "value": 1.0,
+        "limit": 0.95,
+        "pass": true
+      },
+      "isolated_pixels": {
+        "value": 0.0039,
+        "limit": 0.02,
+        "pass": true
+      },
+      "seamless": {
+        "value": 0.0,
+        "limit": 1.6,
+        "pass": true
+      },
+      "all_pass": true
+    }
+  }
+}

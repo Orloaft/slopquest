@@ -1,0 +1,10 @@
+{
+  "ascii_rows": true,
+  "collision": true,
+  "objects": true,
+  "requiredPortals": true,
+  "requiredWalkable": true,
+  "chars_semantics": true,
+  "before_sha256": "1ccabfbc8ca3f91a3480b198399729ea921d3254af165a1737efb7b72af6e7a4",
+  "after_sha256": "1ccabfbc8ca3f91a3480b198399729ea921d3254af165a1737efb7b72af6e7a4"
+}

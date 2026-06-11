@@ -1,0 +1,36 @@
+{
+  "src": "/mnt/nxt-dev/tib-gathering/assetsources/curated/fills/swamp-plank.png",
+  "material": "plank",
+  "recipe": "swamp-proc-normalized",
+  "ramp": [
+    "#4f3523",
+    "#67482e",
+    "#805d3c",
+    "#997349",
+    "#b18b5e"
+  ],
+  "seed": 910,
+  "gates": {
+    "color_count": {
+      "value": 5,
+      "limit": 16,
+      "pass": true
+    },
+    "ramp_adherence": {
+      "value": 1.0,
+      "limit": 0.95,
+      "pass": true
+    },
+    "isolated_pixels": {
+      "value": 0.0039,
+      "limit": 0.02,
+      "pass": true
+    },
+    "seamless": {
+      "value": 0.0,
+      "limit": 1.6,
+      "pass": true
+    },
+    "all_pass": true
+  }
+}

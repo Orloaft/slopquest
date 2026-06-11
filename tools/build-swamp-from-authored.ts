@@ -51,7 +51,8 @@ const sightChar = (ch: string) => ROCK.has(ch);
 
 // ---- atlases ---------------------------------------------------------------
 const sliced = (name: string) => PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/sliced/${name}`)));
-const lichen = sliced("swamp-lichen-base.png");   // 32x32 seamless
+const lichen = sliced("swamp-lichen-base.png");   // 32x32 seamless fallback
+const lichenFills = [0, 1, 2, 3].map((i) => PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/fills/swamp-lichen-v${i}.png`))));
 const waterW = sliced("swamp-water-wang.png");    // 128x128 (4x4 corner-Wang)
 const pathW = sliced("swamp-path-wang.png");      // 128x128 (4x4 corner-Wang)
 const rockT = sliced("swamp-rock.png");           // 32x32
@@ -88,7 +89,11 @@ const kind: Kind[][] = Array.from({ length: R }, (_, r) => Array.from({ length: 
 const blocked: boolean[][] = Array.from({ length: R }, (_, r) => Array.from({ length: C }, (_, c) => blockedChar(rows[r][c])));
 
 // PASS 1: lichen carpet on every cell (water/path/rock overlay on top) --------
-for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) blitOne(lichen, c * ts, r * ts);
+// Use four gated tuft variants by position hash to avoid a visible repeated
+// marsh-ground tile while preserving the authored geometry exactly.
+for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+  blitOne(lichenFills[Math.floor(hrand(c + 501, r + 607) * lichenFills.length)] ?? lichen, c * ts, r * ts);
+}
 
 // PASS 2: water corner-Wang dual-grid (vertex (i,j); NW=1 NE=2 SE=4 SW=8) ------
 for (let i = 0; i <= R; i++) for (let j = 0; j <= C; j++) {
