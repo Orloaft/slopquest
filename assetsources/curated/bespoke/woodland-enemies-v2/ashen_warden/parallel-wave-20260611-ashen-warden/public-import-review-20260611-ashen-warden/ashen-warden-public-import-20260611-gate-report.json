@@ -1,0 +1,355 @@
+{
+  "dimensions": {
+    "width": 384,
+    "height": 384
+  },
+  "cell_size": {
+    "width": 96,
+    "height": 96
+  },
+  "per_cell_non_magenta_counts": [
+    [
+      3707,
+      3759,
+      3705,
+      3740
+    ],
+    [
+      3422,
+      3447,
+      3416,
+      3388
+    ],
+    [
+      3709,
+      3761,
+      3707,
+      3742
+    ],
+    [
+      3212,
+      3296,
+      3293,
+      3251
+    ]
+  ],
+  "per_cell_bounding_boxes": [
+    [
+      {
+        "x": 5,
+        "y": 10,
+        "width": 78,
+        "height": 86,
+        "right": 82,
+        "bottom": 95
+      },
+      {
+        "x": 2,
+        "y": 7,
+        "width": 78,
+        "height": 89,
+        "right": 79,
+        "bottom": 95
+      },
+      {
+        "x": 1,
+        "y": 10,
+        "width": 78,
+        "height": 86,
+        "right": 78,
+        "bottom": 95
+      },
+      {
+        "x": 4,
+        "y": 9,
+        "width": 78,
+        "height": 87,
+        "right": 81,
+        "bottom": 95
+      }
+    ],
+    [
+      {
+        "x": 7,
+        "y": 12,
+        "width": 84,
+        "height": 84,
+        "right": 90,
+        "bottom": 95
+      },
+      {
+        "x": 7,
+        "y": 9,
+        "width": 84,
+        "height": 87,
+        "right": 90,
+        "bottom": 95
+      },
+      {
+        "x": 7,
+        "y": 8,
+        "width": 84,
+        "height": 88,
+        "right": 90,
+        "bottom": 95
+      },
+      {
+        "x": 7,
+        "y": 11,
+        "width": 84,
+        "height": 85,
+        "right": 90,
+        "bottom": 95
+      }
+    ],
+    [
+      {
+        "x": 5,
+        "y": 10,
+        "width": 78,
+        "height": 86,
+        "right": 82,
+        "bottom": 95
+      },
+      {
+        "x": 2,
+        "y": 7,
+        "width": 78,
+        "height": 89,
+        "right": 79,
+        "bottom": 95
+      },
+      {
+        "x": 1,
+        "y": 10,
+        "width": 78,
+        "height": 86,
+        "right": 78,
+        "bottom": 95
+      },
+      {
+        "x": 4,
+        "y": 9,
+        "width": 78,
+        "height": 87,
+        "right": 81,
+        "bottom": 95
+      }
+    ],
+    [
+      {
+        "x": 6,
+        "y": 12,
+        "width": 83,
+        "height": 84,
+        "right": 88,
+        "bottom": 95
+      },
+      {
+        "x": 6,
+        "y": 9,
+        "width": 83,
+        "height": 87,
+        "right": 88,
+        "bottom": 95
+      },
+      {
+        "x": 6,
+        "y": 8,
+        "width": 83,
+        "height": 88,
+        "right": 88,
+        "bottom": 95
+      },
+      {
+        "x": 6,
+        "y": 11,
+        "width": 83,
+        "height": 85,
+        "right": 88,
+        "bottom": 95
+      }
+    ]
+  ],
+  "row_motion_scores": [
+    {
+      "row": 0,
+      "direction": "up",
+      "average_mask_difference": 0.2133,
+      "pair_mask_differences": [
+        0.2458,
+        0.1988,
+        0.1952
+      ],
+      "pair_changed_pixels": [
+        1046,
+        824,
+        805
+      ],
+      "pair_union_pixels": [
+        4256,
+        4144,
+        4125
+      ]
+    },
+    {
+      "row": 1,
+      "direction": "right",
+      "average_mask_difference": 0.2208,
+      "pair_mask_differences": [
+        0.2672,
+        0.1767,
+        0.2184
+      ],
+      "pair_changed_pixels": [
+        1059,
+        665,
+        834
+      ],
+      "pair_union_pixels": [
+        3964,
+        3764,
+        3819
+      ]
+    },
+    {
+      "row": 2,
+      "direction": "down",
+      "average_mask_difference": 0.2123,
+      "pair_mask_differences": [
+        0.2448,
+        0.1979,
+        0.1942
+      ],
+      "pair_changed_pixels": [
+        1042,
+        820,
+        801
+      ],
+      "pair_union_pixels": [
+        4256,
+        4144,
+        4125
+      ]
+    },
+    {
+      "row": 3,
+      "direction": "left",
+      "average_mask_difference": 0.2498,
+      "pair_mask_differences": [
+        0.3061,
+        0.2076,
+        0.2356
+      ],
+      "pair_changed_pixels": [
+        1176,
+        763,
+        874
+      ],
+      "pair_union_pixels": [
+        3842,
+        3676,
+        3709
+      ]
+    }
+  ],
+  "row_bbox_variance": [
+    {
+      "row": 0,
+      "direction": "up",
+      "width_range": 0.0,
+      "height_range": 3.0,
+      "center_x_range": 4.0,
+      "baseline_range": 0.0,
+      "width_range_ratio": 0.0,
+      "height_range_ratio": 0.0345
+    },
+    {
+      "row": 1,
+      "direction": "right",
+      "width_range": 0.0,
+      "height_range": 4.0,
+      "center_x_range": 0.0,
+      "baseline_range": 0.0,
+      "width_range_ratio": 0.0,
+      "height_range_ratio": 0.0465
+    },
+    {
+      "row": 2,
+      "direction": "down",
+      "width_range": 0.0,
+      "height_range": 3.0,
+      "center_x_range": 4.0,
+      "baseline_range": 0.0,
+      "width_range_ratio": 0.0,
+      "height_range_ratio": 0.0345
+    },
+    {
+      "row": 3,
+      "direction": "left",
+      "width_range": 0.0,
+      "height_range": 4.0,
+      "center_x_range": 0.0,
+      "baseline_range": 0.0,
+      "width_range_ratio": 0.0,
+      "height_range_ratio": 0.0465
+    }
+  ],
+  "right_left_mirror_similarity": {
+    "rows": {
+      "right": 1,
+      "left": 3
+    },
+    "average_similarity": 0.7479,
+    "frame_similarities": [
+      0.7389,
+      0.7546,
+      0.7045,
+      0.7934
+    ]
+  },
+  "exact_magenta_pixel_count": 90901,
+  "exact_magenta_percentage": 61.6462,
+  "near_magenta_pixel_count": 0,
+  "palette_count": 15,
+  "max_colors": 24,
+  "runtime_cell_size": {
+    "width": 32,
+    "height": 32
+  },
+  "strict_prototype": true,
+  "transparent_corners": true,
+  "transparent_corner_list": [
+    {
+      "name": "top_left",
+      "transparent": true
+    },
+    {
+      "name": "top_right",
+      "transparent": true
+    },
+    {
+      "name": "bottom_left",
+      "transparent": true
+    },
+    {
+      "name": "bottom_right",
+      "transparent": true
+    }
+  ],
+  "pass": true,
+  "errors": [],
+  "warnings": [],
+  "keyed_png": "assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-keyed.png",
+  "artifacts": {
+    "keyed_png": "assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-keyed.png",
+    "contact_png": "assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-contact.png",
+    "runtime_contact_png": "assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-runtime-contact.png",
+    "row_gifs": {
+      "up": "assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-walk-up.gif",
+      "right": "assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-walk-right.gif",
+      "down": "assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-walk-down.gif",
+      "left": "assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-walk-left.gif"
+    }
+  }
+}

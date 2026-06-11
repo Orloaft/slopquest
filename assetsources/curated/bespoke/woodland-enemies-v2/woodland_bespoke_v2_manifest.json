@@ -82,6 +82,7 @@
     "coral_crab",
     "canopy_stalker",
     "blowpipe_headhunter",
+    "ashen_warden",
     "verdant_faultwarden",
     "deepdelve_wight",
     "restless_husk",
@@ -2695,6 +2696,60 @@
         0,
         0,
         0
+      ],
+      "single_subject_cells": true
+    },
+    {
+      "slug": "ashen_warden",
+      "label": "Ashen Warden",
+      "pipeline": "enemy-directional-4x4-v2",
+      "sheet_contract": {
+        "name": "enemy-directional-4x4-v2",
+        "source_reference": "Image-generated simplified enemy contact sheet on bright magenta chroma; locally normalized to exact #ff00ff, keyed to alpha, and packed into the walk-only 4-direction runtime contract.",
+        "cell_px": 96,
+        "columns": 4,
+        "rows": 4,
+        "row_order": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "frames_per_direction": 4,
+        "animations": [
+          "walk"
+        ],
+        "directions": [
+          "up",
+          "right",
+          "down",
+          "left"
+        ],
+        "runtime_contract": {
+          "walk_rows": "rows 0-3, ordered up/right/down/left",
+          "attack_rows": "none; attacks reuse the walk pose plus shared slash/missile effects",
+          "texture_count": {
+            "walk": 16,
+            "attack": 0
+          }
+        }
+      },
+      "source_reference": "READY_FOR_IMPORT Ashen Warden parallel-wave 20260611 candidate reviewed and keyed for public runtime import",
+      "candidate_png": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/ashen-warden-parallel-wave-20260611-candidate.png",
+      "public_sheet": "/mnt/nxt-dev/tib-gathering/public/ashen-warden-sheet.png",
+      "grid_manifest": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/grid_manifest.json",
+      "gifs": {
+        "walk_up": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-walk-up.gif",
+        "walk_right": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-walk-right.gif",
+        "walk_down": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-walk-down.gif",
+        "walk_left": "/mnt/nxt-dev/tib-gathering/assetsources/curated/bespoke/woodland-enemies-v2/ashen_warden/parallel-wave-20260611-ashen-warden/public-import-review-20260611-ashen-warden/ashen-warden-public-import-20260611-walk-left.gif"
+      },
+      "chroma_remnant_pixels": 0,
+      "alpha_corners": [
+        true,
+        true,
+        true,
+        true
       ],
       "single_subject_cells": true
     },

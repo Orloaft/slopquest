@@ -1147,6 +1147,7 @@ const WOODLAND_BESPOKE_FAMILIES = [
   "coral_crab",
   "canopy_stalker",
   "blowpipe_headhunter",
+  "ashen_warden",
   "verdant_faultwarden",
   "deepdelve_wight"
 ] as const;
@@ -4243,7 +4244,7 @@ function computeMonsterActorSpec(monster: { type: string }): MonsterActorSpec {
   if (monster.type === "spider") return { family: "spider", width: 48, height: 34, yOffset: -1 };
   if (monster.type === "skeleton") return { family: "skeleton", width: 42, height: 48, yOffset: -10 };
   if (monster.type === "ghoul") return { family: "ghoul", width: 46, height: 54, yOffset: -13 };
-  if (monster.type === "boss") return { family: "skeleton", width: 62, height: 66, yOffset: -18, tint: 0xff8a5c };
+  if (monster.type === "boss") return { family: "ashen_warden", width: 62, height: 66, yOffset: -18 };
   if (monster.type === "orc") return { family: "orc", width: 56, height: 60, yOffset: -17 };
   if (monster.type === "goblin") return { family: "goblin", width: 42, height: 46, yOffset: -10 };
   if (monster.type === "goblin_scout") return { family: "goblinScout", width: 42, height: 52, yOffset: -14 };

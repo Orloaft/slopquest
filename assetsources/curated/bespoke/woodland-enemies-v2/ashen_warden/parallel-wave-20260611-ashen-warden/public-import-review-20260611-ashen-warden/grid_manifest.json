@@ -1,0 +1,26 @@
+{
+  "cell_px": 96,
+  "columns": 4,
+  "rows": [
+    {
+      "name": "walk_up",
+      "index": 0,
+      "frames": []
+    },
+    {
+      "name": "walk_right",
+      "index": 1,
+      "frames": []
+    },
+    {
+      "name": "walk_down",
+      "index": 2,
+      "frames": []
+    },
+    {
+      "name": "walk_left",
+      "index": 3,
+      "frames": []
+    }
+  ]
+}
