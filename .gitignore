@@ -20,6 +20,18 @@ public/music/*.mp3
 .env
 .env.*
 *.log
+*.bak
+*.bak-*
 *.bak-prederim
 .DS_Store
 artifacts/
+tools/__pycache__/
+
+# Local/generated enemy sprite candidate and review batches. Commit promoted
+# runtime sheets and intentional docs/tools, not every raw review artifact.
+assetsources/curated/bespoke/prototype-probes/
+assetsources/curated/bespoke/woodland-enemies-v2/*/parallel-wave-*/
+assetsources/curated/bespoke/woodland-enemies-v2/*/production-review-*/
+assetsources/curated/bespoke/woodland-enemies-v2/*/manager-*/
+assetsources/curated/bespoke/woodland-enemies-v2/*/candidates/
+assetsources/curated/bespoke/woodland-enemies-v2/*/prototypes/

@@ -19,9 +19,12 @@ their original sheets._
 - **384×384 px**, **96 px cells**, **4 columns × 4 rows (walk only)**, transparent background.
 - Rows in order: `walk_up, walk_right, walk_down, walk_left`. **No attack rows** — attacks reuse the
   walk pose + the shared slash/missile effect overlays.
-- 4 frames per row. Side art faces LEFT; right is mirrored. Validated by `npm run assets:enemies:check`.
-- **Style:** simpler painterly pixel — strong silhouette, limited palette (~8–16 colours, hard cap 64),
-  one clear key/rim light, low interior noise. Full spec in `docs/enemy-asset-pipeline.md`.
+- 4 authored frames per row. Left and right facings must both be authored under
+  `docs/enemy-sprite-style-bible.md`; the old "side art faces LEFT; right is mirrored" note is no
+  longer a current requirement.
+- **Style:** follow `docs/enemy-sprite-style-bible.md` as the current source of truth. Legacy
+  "simpler painterly pixel" and "key/rim light" wording is superseded by the bible's crisp pixel-art,
+  top-left lighting, measurable-motion, authored-facing, and review-gate requirements.
 - ~16 cells per creature (was 64). See `docs/enemy-asset-pipeline.md` for the authoritative contract.
 
 ---

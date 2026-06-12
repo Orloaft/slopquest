@@ -38,6 +38,7 @@ it before working (`losetup -a` to find the backing `.ext4` file, then
 - Use `public/` only for game-ready assets.
 - Use lowercase hyphenated runtime filenames.
 - For top-down character/enemy sprites, game-ready means four-direction movement in row order `up`, `right`, `down`, `left`.
-- Treat the approved walk sheet as the identity lock. Attack/action sheets must match the walk sheet's proportions, palette, outline weight, gear, and silhouette before import.
-- Send dark-background GIF previews for walk, attack/action, and walk-vs-action identity comparison before copying generated sprites into `public/`.
+- Current enemy sprites are walk-sheet first: use `docs/enemy-sprite-style-bible.md` plus the enemy asset pipeline/review gates as the active art-direction authority. Do not add enemy attack/action sheet requirements unless a new bible/pipeline explicitly calls for them.
+- For non-enemy character/action work, treat the approved walk sheet as the identity lock. Attack/action sheets must match the walk sheet's proportions, palette, outline weight, gear, and silhouette before import.
+- Send dark-background GIF previews for walk, and for non-enemy action work include attack/action plus walk-vs-action identity comparison before copying generated sprites into `public/`.
 - Validate generated sheets through `sprite_processor grid-sheet`; require transparent corners, `0` chroma remnants, stable post-alignment drift, and matching runtime frame counts.

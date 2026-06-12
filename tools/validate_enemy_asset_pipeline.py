@@ -24,10 +24,11 @@ ROW_NAMES = (
     "walk_left",
 )
 ROWS = len(ROW_NAMES)
-# Style guard: the v2 look is "simpler painterly pixel" — a limited palette. We
-# cap the number of distinct opaque colours per sheet so over-detailed / heavily
-# anti-aliased art is rejected at the gate. Generous enough for soft painterly
-# shading; tune here if the agreed style allows more.
+# Style/readability guard: current enemy sprites follow
+# docs/enemy-sprite-style-bible.md: crisp pixel-art clusters, restrained palette,
+# strong outline, clean alpha, and gameplay-scale readability. This check caps
+# distinct opaque colours so over-detailed, blurry, or heavily anti-aliased art
+# is rejected at the gate.
 MAX_SHEET_COLORS = 64
 KEEPER_ART_SLUGS = {
     "goblin",
@@ -249,7 +250,8 @@ def validate_sheet(path: Path) -> None:
         if len(opaque_colors) > MAX_SHEET_COLORS:
             fail(
                 f"{path} uses {len(opaque_colors)} opaque colours, exceeds the "
-                f"limited-palette cap of {MAX_SHEET_COLORS} (style: simpler painterly pixel)"
+                f"limited-palette cap of {MAX_SHEET_COLORS} "
+                "(style: bible-aligned crisp pixel-art readability)"
             )
 
 
@@ -265,7 +267,10 @@ def validate_runtime_actor_sheet(path: Path) -> None:
 
 def main() -> None:
     if not MANIFEST_PATH.exists():
-        fail(f"missing manifest {MANIFEST_PATH}; run tools/generate_woodland_enemy_sprites_v2.py")
+        fail(
+            f"missing manifest {MANIFEST_PATH}; restore/review the current enemy asset "
+            "pipeline artifacts before validation"
+        )
 
     manifest = json.loads(MANIFEST_PATH.read_text())
     pipeline = manifest.get("pipeline") or {}

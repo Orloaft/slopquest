@@ -83,23 +83,23 @@ def main() -> None:
     args = p.parse_args()
 
     st = json.loads(Path(args.stage).read_text())
-    at = Image.open(args.atlas).convert("RGB")
+    at = Image.open(args.atlas).convert("RGBA")
     acols = at.width // TS
     rows = st["ascii"]["rows"]
     W, H = st["cols"], len(rows)
-    base, fringe = st["layers"][0]["data"], st["layers"][1]["data"]
-
     img = Image.new("RGB", (W * TS, H * TS))
-    for r in range(H):
-        for c in range(W):
-            ref = fringe[r][c] or base[r][c]
-            if not ref:
-                continue
-            i = int(ref.split(":")[1])
-            x, y = (i % acols) * TS, (i // acols) * TS
-            img.paste(at.crop((x, y, x + TS, y + TS)), (c * TS, r * TS))
-
     img = img.convert("RGBA")
+    for layer in st["layers"]:
+        data = layer["data"]
+        for r in range(H):
+            for c in range(W):
+                ref = data[r][c]
+                if not ref:
+                    continue
+                i = int(ref.split(":")[1])
+                x, y = (i % acols) * TS, (i // acols) * TS
+                tile = at.crop((x, y, x + TS, y + TS)).convert("RGBA")
+                img.alpha_composite(tile, (c * TS, r * TS))
     objs = sorted(st.get("objects", []), key=lambda o: o["y"])
     cache: dict[str, Image.Image] = {}
     if args.shadows:

@@ -2,6 +2,10 @@
 
 Read this before changing enemy sprites, enemy texture registration, or enemy asset generation.
 
+Style source of truth: `docs/enemy-sprite-style-bible.md`. Follow its approved anchor, prompt
+template, source-sheet contract, motion rules, and validation gates whenever this brief touches
+style or asset readiness.
+
 ## Non-Negotiable Contract
 
 All bespoke runtime enemy sprites use `enemy-directional-4x4-v2`.
@@ -15,7 +19,13 @@ All bespoke runtime enemy sprites use `enemy-directional-4x4-v2`.
   - `walk_down`
   - `walk_left`
 - Runtime output per enemy: `16` walk textures
-- Palette/style: simpler painterly pixel, roughly `8-16` intentional colours per creature, with a hard cap of `64` distinct opaque colours per sheet enforced by `tools/validate_enemy_asset_pipeline.py`
+- Source background: pure magenta `#ff00ff` for extraction; creature pixels must not use `#ff00ff`
+- Facings: all four rows must be authored, including distinct left and right rows; no flip, mirror,
+  darken, or recolor substitutions for missing facings
+- Motion: every walk row needs measurable authored paw, body, and/or head pose changes, not tiny
+  translations or copied frames
+- Palette/style: follow `docs/enemy-sprite-style-bible.md`; the validator still enforces a hard cap
+  of `64` distinct opaque colours per sheet via `tools/validate_enemy_asset_pipeline.py`
 
 The reference is the in-game goblin scout directional movement contract, simplified to four walk frames per direction. There are no bespoke attack rows: attacks reuse the walk pose plus shared slash/missile effect overlays from `public/sprites/effects/combat-effects-runtime.png`, matching keeper-family behavior.
 
@@ -63,11 +73,16 @@ npm run check
 8. Run `npm run check`.
 9. Inspect the contact sheet and per-row GIFs before calling the work done.
 10. Send or surface the new enemy's per-row GIF previews for review. Each preview must animate exactly one walk/direction row, never multiple directions at once.
+11. Do not copy or wire a candidate into runtime assets until the raw magenta sheet, keyed sheet,
+    contact sheet, walking GIFs, and gate report have been reviewed.
 
 ## Common Mistakes To Avoid
 
 - Do not hand-copy partial or temporary sheets into `public/`.
 - Do not reuse one directional row for all facings.
+- Do not mirror side art for the opposite side; left and right facings must be separately authored.
+- Do not accept a walk row without measurable frame-to-frame motion.
+- Do not start runtime wiring before review gates pass.
 - Do not add bespoke attack rows for this pipeline.
 - Do not use multi-direction animated previews for inspection; they make direction problems too easy to miss.
 - Do not accept any shape other than `384x384` for this pipeline.
@@ -80,5 +95,7 @@ npm run check
 - Every public bespoke runtime sheet is `384x384` RGBA.
 - Every public bespoke runtime enemy has 4 row GIFs with 4 frames each.
 - The reviewer has one-at-a-time GIF previews for the changed enemy's walk rows.
+- The raw source sheet used pure `#ff00ff`, all facings were authored, walk motion is measurable,
+  and the review gates passed before runtime wiring.
 - `npm run check` passes.
 - The game texture registry exposes `16` walk frames and no bespoke attack family for each bespoke runtime enemy.

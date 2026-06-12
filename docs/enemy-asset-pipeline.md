@@ -1,20 +1,24 @@
 # Enemy Asset Pipeline
 
 All new bespoke runtime enemy sprites should use the `enemy-directional-4x4-v2` contract.
+Current style authority: `docs/enemy-sprite-style-bible.md`. If this pipeline doc or any
+legacy prompt conflicts with that bible, the bible wins.
 
-## Art Style: simpler painterly pixel
+## Art Style
 
-The roster target is a **simplified painterly pixel-art** look — lower interior detail than a
-fully-rendered pixel sheet, but the same painterly family as the keeper sprites (skeleton, goblins).
-The point is small-screen readability (sprites render ~60–130px tall) and frame-to-frame
-consistency for image-model generation.
+Follow the approved style anchor, prompt discipline, artifact review, and validation gates in
+`docs/enemy-sprite-style-bible.md`. Older "simpler painterly pixel" phrasing is historical
+shorthand only and must not override the bible's crisp pixel-art finish, top-left lighting,
+authored-facing, and review-gate requirements. The point is small-screen readability (sprites
+render ~60–130px tall) and frame-to-frame consistency for image-model generation.
 
 - **Strong silhouette** first — the shape reads at a glance.
-- **Limited palette** — roughly 8–16 intentional colours per creature; soft painterly shading
-  within that. The pipeline enforces a hard cap of `64` distinct opaque colours per sheet
+- **Restrained palette** — follow the bible's target range unless a creature needs a justified
+  exception. The pipeline enforces a hard cap of `64` distinct opaque colours per sheet
   (`MAX_SHEET_COLORS` in `tools/validate_enemy_asset_pipeline.py`); over-detailed or heavily
   anti-aliased art is rejected at the gate.
-- **One clear key/rim light**, minimal interior noise.
+- **Crisp top-left lighting**, clean clusters, and hard edges; do not use old "key/rim light"
+  wording to justify painterly blur, soft smearing, or noisy interior texture.
 - Use explicit art for all four rows; do not depend on runtime mirroring for bespoke v2 families.
 
 ## Runtime Sheet Contract

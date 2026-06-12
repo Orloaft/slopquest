@@ -58,21 +58,21 @@
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#b9b23e"
+      "minimapColor": "#658b1b"
     },
     "~": {
       "role": "deep-water",
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#087696"
+      "minimapColor": "#086e8d"
     },
     "t": {
       "role": "packed-road",
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#b79a31"
+      "minimapColor": "#9a8e22"
     },
     ".": {
       "role": "sand-shore",
@@ -93,21 +93,21 @@
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#705c2b"
+      "minimapColor": "#6c5b27"
     },
     "m": {
       "role": "mossy-stone-stairs",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#7b5e33"
+      "minimapColor": "#7a5e33"
     },
     "y": {
       "role": "tree-trunk",
       "blocked": true,
       "sightBlocked": true,
       "road": false,
-      "minimapColor": "#b9b23e"
+      "minimapColor": "#658b1b"
     },
     "S": {
       "role": "portal-south",

@@ -1155,6 +1155,8 @@ const WOODLAND_BESPOKE_FAMILIES = [
   "deepdelve_wight"
 ] as const;
 const WOODLAND_BESPOKE_FAMILY_SET = new Set<string>(WOODLAND_BESPOKE_FAMILIES);
+const DIRECTIONAL_KEEPER_FAMILIES = ["rat", "spider"] as const;
+const DIRECTIONAL_KEEPER_FAMILY_SET = new Set<string>(DIRECTIONAL_KEEPER_FAMILIES);
 // Northwood authored-layout tree/prop sprite catalogue ids (obj_NNN). Sprites are
 // exported to public/sprites/nw/ by tools/build-northwood-from-authored.ts and
 // referenced by the stage's objects[] as keys spriteNw<NNN>.
@@ -1189,6 +1191,10 @@ function woodlandBespokeSheetKey(family: string): string {
   return `woodlandBespokeSheet:${family}`;
 }
 
+function directionalKeeperSheetKey(family: string): string {
+  return `${actorSheetSlug(family)}Sheet`;
+}
+
 function woodlandBespokeRuntimeAsset(family: string, floor?: number): RuntimeImageAsset {
   return runtimeImageAsset(
     woodlandBespokeSheetKey(family),
@@ -1199,31 +1205,36 @@ function woodlandBespokeRuntimeAsset(family: string, floor?: number): RuntimeIma
   );
 }
 
-const RAT_SPIDER_RUNTIME_IMAGE_ASSET = runtimeImageAsset(
-  "ratSpiderSheet",
-  "/sprites/actors/rat-spider-runtime.png",
-  "play-context",
-  "rat/spider actor runtime crops",
-  3,
-  "northwood"
-);
+function directionalKeeperRuntimeAsset(family: string, floor?: number): RuntimeImageAsset {
+  const slug = actorSheetSlug(family);
+  return runtimeImageAsset(
+    directionalKeeperSheetKey(family),
+    `/${slug}-sheet.png`,
+    "play-context",
+    `${slug} actor sheet`,
+    floor,
+    "northwood"
+  );
+}
 
-function floorActorFamilies(floor: number): { woodland: string[]; needsRatSpider: boolean } {
-  const families = new Set<string>();
-  let needsRatSpider = false;
+function floorActorFamilies(floor: number): { woodland: string[]; directionalKeepers: string[] } {
+  const woodland = new Set<string>();
+  const directionalKeepers = new Set<string>();
   for (const spawn of MONSTER_SPAWNS) {
     if (spawn.floor !== floor) continue;
     const family = computeMonsterActorSpec({ type: spawn.type }).family;
-    if (family === "rat" || family === "spider") needsRatSpider = true;
-    if (WOODLAND_BESPOKE_FAMILY_SET.has(family)) families.add(family);
+    if (DIRECTIONAL_KEEPER_FAMILY_SET.has(family)) directionalKeepers.add(family);
+    if (WOODLAND_BESPOKE_FAMILY_SET.has(family)) woodland.add(family);
   }
-  return { woodland: [...families].sort(), needsRatSpider };
+  return { woodland: [...woodland].sort(), directionalKeepers: [...directionalKeepers].sort() };
 }
 
 function floorActorImageAssets(floor: number): RuntimeImageAsset[] {
   const families = floorActorFamilies(floor);
-  const assets = families.woodland.map((family) => woodlandBespokeRuntimeAsset(family, floor));
-  if (families.needsRatSpider) assets.unshift(RAT_SPIDER_RUNTIME_IMAGE_ASSET);
+  const assets = [
+    ...families.directionalKeepers.map((family) => directionalKeeperRuntimeAsset(family, floor)),
+    ...families.woodland.map((family) => woodlandBespokeRuntimeAsset(family, floor))
+  ];
   return assets;
 }
 
@@ -7699,38 +7710,7 @@ function createActorFrames(scene: Phaser.Scene): void {
   createExplicitFrameSet(scene, "goblinShamanSheet", "goblinShaman", uniformDirectionFrames(313, 313, 4));
   createExplicitFrameSet(scene, "goblinRaiderSheet", "goblinRaider", uniformDirectionFrames(320, 320, 4));
   createExplicitFrameSet(scene, "greyWolfSheet", "greyWolf", uniformDirectionFrames(320, 320, 4));
-  // wisp-sheet.png is an 8-col x 2-row grid (cell ~221x443): row 0 idle flames,
-  // row 1 the attack. We use the first 4 idle frames. The flame only occupies the
-  // lower-middle of the 443-tall cell (y~125-339), so slicing the full cell baked
-  // ~half the texture as empty headroom — and since frames aren't trimmed, every
-  // wisp rendered at half size, low to the ground. Bound the flame tightly (y/h).
-  const wispRow = spriteFrames([0, 221, 442, 663], 118, 221, 224);
-  createExplicitFrameSet(scene, "wispSheet", "wisp", {
-    up: wispRow,
-    right: wispRow,
-    down: wispRow,
-    left: wispRow
-  });
-}
-
-function createRatSpiderFrames(scene: Phaser.Scene): void {
-  if (!scene.textures.exists("ratSpiderSheet")) return;
-  if (!actorFamilyFramesReady("rat")) {
-    createExplicitFrameSet(scene, "ratSpiderSheet", "rat", {
-      up: spriteFrames([8, 8, 8, 8], 8, 50, 64),
-      right: spriteFrames([168, 306, 444, 582], 8, 114, 52),
-      down: spriteFrames([88, 88, 88, 88], 8, 50, 64),
-      left: spriteFrames([168, 306, 444, 582], 8, 114, 52)
-    });
-  }
-  if (!actorFamilyFramesReady("spider")) {
-    createExplicitFrameSet(scene, "ratSpiderSheet", "spider", {
-      up: spriteFrames([8, 8, 8, 8], 104, 54, 46),
-      right: spriteFrames([164, 286, 408, 530], 104, 90, 44),
-      down: spriteFrames([86, 86, 86, 86], 104, 54, 46),
-      left: spriteFrames([164, 286, 408, 530], 104, 90, 44)
-    });
-  }
+  createExplicitFrameSet(scene, "wispSheet", "wisp", uniformDirectionFrames(96, 96, 4));
 }
 
 function createWoodlandBespokeFrames(scene: Phaser.Scene, families: readonly string[]): void {
@@ -7740,6 +7720,16 @@ function createWoodlandBespokeFrames(scene: Phaser.Scene, families: readonly str
   for (const family of families) {
     if (actorFamilyFramesReady(family)) continue;
     const sourceKey = woodlandBespokeSheetKey(family);
+    if (!scene.textures.exists(sourceKey)) continue;
+    createExplicitFrameSet(scene, sourceKey, family, frames);
+  }
+}
+
+function createDirectionalKeeperFrames(scene: Phaser.Scene, families: readonly string[]): void {
+  const frames = uniformDirectionFrames(96, 96, 4);
+  for (const family of families) {
+    if (actorFamilyFramesReady(family)) continue;
+    const sourceKey = directionalKeeperSheetKey(family);
     if (!scene.textures.exists(sourceKey)) continue;
     createExplicitFrameSet(scene, sourceKey, family, frames);
   }
@@ -7896,8 +7886,7 @@ function textureResidency(keys: string[]): TextureResidency[] {
 }
 
 function mirrorRightFromLeft(family: string): boolean {
-  // rat/spider side art is drawn facing LEFT, so mirror the right facing from it.
-  return family === "knight" || family === "caster" || family === "goblin" || family === "skeleton" || family === "rat" || family === "spider";
+  return family === "knight" || family === "caster" || family === "goblin" || family === "skeleton";
 }
 
 function mirrorLeftFromRight(_family: string): boolean {
@@ -7937,7 +7926,6 @@ function createAlignedTransparentFrames(scene: Phaser.Scene, sourceKey: string, 
     if (!ctx) continue;
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(crop.canvas, Math.round(targetAnchor.x - crop.anchor.x), Math.round(targetAnchor.y - crop.anchor.y));
-    if (sourceKey === "ratSpiderSheet") clearOpaqueEdgePixels(ctx, canvasW, canvasH);
     addNearestCanvasTexture(scene, crop.key, canvas);
   }
 }
@@ -7945,11 +7933,10 @@ function createAlignedTransparentFrames(scene: Phaser.Scene, sourceKey: string, 
 function createTransparentCropCanvas(scene: Phaser.Scene, sourceKey: string, sx: number, sy: number, sw: number, sh: number): HTMLCanvasElement {
   const source = scene.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
   const sourceImage = source as { width?: number; height?: number };
-  const pad = sourceKey === "ratSpiderSheet" ? 8 : 0;
-  const cropX = Math.max(0, sx - pad);
-  const cropY = Math.max(0, sy - pad);
-  const cropW = Math.min(sourceImage.width ?? sx + sw + pad, sx + sw + pad) - cropX;
-  const cropH = Math.min(sourceImage.height ?? sy + sh + pad, sy + sh + pad) - cropY;
+  const cropX = Math.max(0, sx);
+  const cropY = Math.max(0, sy);
+  const cropW = Math.min(sourceImage.width ?? sx + sw, sx + sw) - cropX;
+  const cropH = Math.min(sourceImage.height ?? sy + sh, sy + sh) - cropY;
   const canvas = document.createElement("canvas");
   canvas.width = cropW;
   canvas.height = cropH;
@@ -7958,10 +7945,6 @@ function createTransparentCropCanvas(scene: Phaser.Scene, sourceKey: string, sx:
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(source, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
   chromaKeyMagenta(ctx, cropW, cropH);
-  if (sourceKey === "ratSpiderSheet") {
-    clearConnectedBackground(ctx, cropW, cropH, isNearBlackBackground);
-    clearEdgePixels(ctx, cropW, cropH, isNearBlackBackground);
-  }
   return canvas;
 }
 
@@ -8324,78 +8307,6 @@ function defringeMagentaHalo(ctx: CanvasRenderingContext2D, width: number, heigh
     }
     if (kill.length === 0) break;
     for (const a of kill) d[a] = 0;
-  }
-  ctx.putImageData(image, 0, 0);
-}
-
-function clearConnectedBackground(ctx: CanvasRenderingContext2D, width: number, height: number, isBackground: (r: number, g: number, b: number, a: number) => boolean): void {
-  const image = ctx.getImageData(0, 0, width, height);
-  const queue: Array<[number, number]> = [];
-  const seen = new Uint8Array(width * height);
-  const enqueue = (x: number, y: number): void => {
-    if (x < 0 || y < 0 || x >= width || y >= height) return;
-    const pos = y * width + x;
-    if (seen[pos]) return;
-    const i = pos * 4;
-    if (!isBackground(image.data[i] ?? 0, image.data[i + 1] ?? 0, image.data[i + 2] ?? 0, image.data[i + 3] ?? 0)) return;
-    seen[pos] = 1;
-    queue.push([x, y]);
-  };
-
-  for (let x = 0; x < width; x += 1) {
-    enqueue(x, 0);
-    enqueue(x, height - 1);
-  }
-  for (let y = 1; y < height - 1; y += 1) {
-    enqueue(0, y);
-    enqueue(width - 1, y);
-  }
-
-  while (queue.length > 0) {
-    const [x, y] = queue.pop()!;
-    const i = (y * width + x) * 4;
-    image.data[i + 3] = 0;
-    enqueue(x + 1, y);
-    enqueue(x - 1, y);
-    enqueue(x, y + 1);
-    enqueue(x, y - 1);
-  }
-  ctx.putImageData(image, 0, 0);
-}
-
-function isNearBlackBackground(r: number, g: number, b: number, a: number): boolean {
-  return a > 0 && r < 38 && g < 38 && b < 38;
-}
-
-function clearEdgePixels(ctx: CanvasRenderingContext2D, width: number, height: number, isBackground: (r: number, g: number, b: number, a: number) => boolean): void {
-  const image = ctx.getImageData(0, 0, width, height);
-  const clear = (x: number, y: number): void => {
-    const i = (y * width + x) * 4;
-    if (isBackground(image.data[i] ?? 0, image.data[i + 1] ?? 0, image.data[i + 2] ?? 0, image.data[i + 3] ?? 0)) image.data[i + 3] = 0;
-  };
-  for (let x = 0; x < width; x += 1) {
-    clear(x, 0);
-    clear(x, height - 1);
-  }
-  for (let y = 1; y < height - 1; y += 1) {
-    clear(0, y);
-    clear(width - 1, y);
-  }
-  ctx.putImageData(image, 0, 0);
-}
-
-function clearOpaqueEdgePixels(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-  const image = ctx.getImageData(0, 0, width, height);
-  const clear = (x: number, y: number): void => {
-    image.data[(y * width + x) * 4 + 3] = 0;
-  };
-  for (let x = 0; x < width; x += 1) {
-    clear(x, 0);
-    clear(x, height - 1);
-  }
-  for (let y = 1; y < height - 1; y += 1) {
-    clear(0, y);
-    clear(width - 1, y);
   }
   ctx.putImageData(image, 0, 0);
 }
@@ -9501,9 +9412,10 @@ function ensureFloorContextTextures(floor: number): void {
 
 function ensureFloorActorTextures(floor: number): boolean {
   const families = floorActorFamilies(floor);
-  if (families.needsRatSpider) {
-    if (!scene.textures.exists("ratSpiderSheet")) return false;
-    createRatSpiderFrames(scene);
+  if (families.directionalKeepers.length > 0) {
+    const missing = families.directionalKeepers.some((family) => !scene.textures.exists(directionalKeeperSheetKey(family)));
+    if (missing) return false;
+    createDirectionalKeeperFrames(scene, families.directionalKeepers);
   }
   if (families.woodland.length > 0) {
     const missing = families.woodland.some((family) => !scene.textures.exists(woodlandBespokeSheetKey(family)));

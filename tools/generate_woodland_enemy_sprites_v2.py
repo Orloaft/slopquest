@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import json
 import shutil
 import subprocess
@@ -59,6 +60,14 @@ PIPELINE_SPEC = {
     },
 }
 Image.MAX_IMAGE_PIXELS = None
+
+LEGACY_NOTICE = (
+    "LEGACY/SUPERSEDED: this v2 batch generator predates "
+    "docs/enemy-sprite-style-bible.md. It derives left/up facings from a single "
+    "source cell with flip/darken substitutions and fakes walk motion locally, "
+    "so it is not current style-authoritative generation. Use the style bible "
+    "and current enemy asset review pipeline for new enemy sprites."
+)
 
 
 @dataclass(frozen=True)
@@ -449,6 +458,14 @@ def write_source_metadata() -> None:
             [
                 "# Enemy Directional 4x4 V2 Imagegen Source",
                 "",
+                "Historical source metadata only. This prompt is superseded as style authority by",
+                "`docs/enemy-sprite-style-bible.md`; use that bible for current style, prompt template,",
+                "authored-facing, motion, and review-gate requirements.",
+                "",
+                "Generator warning: `tools/generate_woodland_enemy_sprites_v2.py` is legacy.",
+                "It can derive rows with flip/darken substitutions and synthetic motion, so",
+                "outputs from that script are not acceptable as current authored-facing sprites.",
+                "",
                 "The production v2 enemy sheets are imported from an image-generated",
                 "simplified contact sheet. The model output is kept as the original",
                 "source artifact, then locally normalized to an exact `#ff00ff`",
@@ -485,6 +502,19 @@ def write_source_metadata() -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=LEGACY_NOTICE)
+    parser.add_argument(
+        "--legacy-confirm",
+        action="store_true",
+        help="Allow this superseded historical generator to rewrite legacy artifacts.",
+    )
+    args = parser.parse_args()
+    if not args.legacy_confirm:
+        raise SystemExit(
+            f"{LEGACY_NOTICE}\n"
+            "Refusing to run without --legacy-confirm so workers do not treat this "
+            "as the current enemy sprite generator."
+        )
     if not SOURCE_CONTACT.exists():
         raise FileNotFoundError(f"missing imagegen source contact sheet: {SOURCE_CONTACT}")
     OUT.mkdir(parents=True, exist_ok=True)

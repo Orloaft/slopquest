@@ -147,8 +147,8 @@ const NEW_ENEMY_FAMILIES = [
 const MONSTER_ICON_BY_FAMILY: Record<string, SpriteIcon> = {
   goblin:       { url: "/goblin.png",             sx: 295, sy: 338, sw: 115, sh: 124 },
   skeleton:     { url: "/skeleton.png",           sx: 288, sy: 344, sw: 108, sh: 127 },
-  rat:          { url: "/sprites/actors/rat-spider-runtime.png", sx: 88, sy: 8,   sw: 50, sh: 64, chroma: false },
-  spider:       { url: "/sprites/actors/rat-spider-runtime.png", sx: 86, sy: 104, sw: 54, sh: 46, chroma: false },
+  rat:          { url: "/rat-sheet.png",          sx: 0,   sy: 192, sw: 96, sh: 96 },
+  spider:       { url: "/spider-sheet.png",       sx: 0,   sy: 192, sw: 96, sh: 96 },
   goblinScout:  { url: "/goblin-scout-sheet.png", sx: 0,   sy: 586, sw: 281, sh: 293 },
   goblinShaman: { url: "/goblin-shaman-sheet.png",sx: 0,   sy: 626, sw: 313, sh: 313 },
   goblinRaider: { url: "/goblin-raider-sheet.png",sx: 0,   sy: 640, sw: 320, sh: 320 },
