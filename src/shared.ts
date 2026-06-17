@@ -1059,6 +1059,7 @@ export function makeFloorTiles(floor: number): string[] {
     fillRect(rows, 45, 14, 3, 19, "c");
     fillRect(rows, 38, 31, 24, 12, "b");
     fillRect(rows, 58, 36, 20, 3, "c");
+    fillRect(rows, 74, 38, 3, 5, "c");
     fillRect(rows, 72, 42, 13, 13, "d");
     fillRect(rows, 64, 18, 3, 24, "c");
     fillRect(rows, 54, 16, 17, 11, "b");
