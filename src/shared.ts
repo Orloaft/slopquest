@@ -64,11 +64,16 @@ const FLOOR_DIMS: Record<number, { cols: number; rows: number }> = {
   8: ENLARGED,
   9: ENLARGED,
   10: EXPANDED, // Deepdelve Mine (cave floor reached from the Searing Badlands)
-  11: ENLARGED // The Waystone Trail (Route 1) — generated stage between Waystone and Northwood
+  11: ENLARGED, // The Waystone Trail (Route 1) — generated stage between Waystone and Northwood
+  12: EXPANDED, // The Wastestone Descent 1: Old Crypt Intake
+  13: EXPANDED, // The Wastestone Descent 2: Blackwater Sluice
+  14: EXPANDED, // The Wastestone Descent 3: Ember Rift
+  15: EXPANDED, // The Wastestone Descent 4: Oathless Delve
+  16: EXPANDED // The Wastestone Descent 5: Heart Vault
 };
 // Floors authored directly at the expanded size (their content is already
 // placed in expanded coordinates, so it must NOT be scaled again).
-const AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+const AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
 const SWAMP_WATER_TILES = new Set(["W", "3", "4"]);
 const NORTHWOOD_WATER_TILES = new Set(["~", "!", "?", "=", "{", "}", "(", ")", "/", "P", "w", "Q", "V", "U", "x", "0", "J"]);
 const SWAMP_LAND_TILES = new Set(["m", "k", "B", "M", "L", "o"]);
@@ -173,7 +178,12 @@ export const ZONES: Record<ZoneId, Zone> = {
   beach: { id: "beach", label: "The Sunken Beach", floor: 8, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   jungle: { id: "jungle", label: "The Untamed Jungle", floor: 9, x1: 0, y1: 0, x2: MAP_COLS - 1, y2: MAP_ROWS - 1 },
   deepMine: { id: "deepMine", label: "The Deepdelve Mine", floor: 10, x1: 0, y1: 0, x2: floorCols(10) - 1, y2: floorRows(10) - 1 },
-  route: { id: "route", label: "The Waystone Trail", floor: 11, x1: 0, y1: 0, x2: floorCols(11) - 1, y2: floorRows(11) - 1 }
+  route: { id: "route", label: "The Waystone Trail", floor: 11, x1: 0, y1: 0, x2: floorCols(11) - 1, y2: floorRows(11) - 1 },
+  wastestoneDescent1: { id: "wastestoneDescent1", label: "Old Crypt Intake", floor: 12, x1: 0, y1: 0, x2: floorCols(12) - 1, y2: floorRows(12) - 1 },
+  wastestoneDescent2: { id: "wastestoneDescent2", label: "Blackwater Sluice", floor: 13, x1: 0, y1: 0, x2: floorCols(13) - 1, y2: floorRows(13) - 1 },
+  wastestoneDescent3: { id: "wastestoneDescent3", label: "Ember Rift", floor: 14, x1: 0, y1: 0, x2: floorCols(14) - 1, y2: floorRows(14) - 1 },
+  wastestoneDescent4: { id: "wastestoneDescent4", label: "Oathless Delve", floor: 15, x1: 0, y1: 0, x2: floorCols(15) - 1, y2: floorRows(15) - 1 },
+  wastestoneDescent5: { id: "wastestoneDescent5", label: "Heart Vault", floor: 16, x1: 0, y1: 0, x2: floorCols(16) - 1, y2: floorRows(16) - 1 }
 };
 const FLOOR_TILE_CACHE = new Map<number, string[]>();
 
@@ -347,6 +357,9 @@ export function makeFloorTiles(floor: number): string[] {
     setTile(rows, 64, 70, "S"); // south -> Southgate Cemetery (floor 1)
     // Approach stub so the south gate opens onto walkable lane, not raw grass/edge.
     setTile(rows, 64, 68, "d");
+    // Wastestone Descent entrance: a stair pad at the existing cave arch's feet.
+    fillRect(rows, 96, 33, 5, 5, "d");
+    setTile(rows, 98, 35, "A");
 
     // Woodland framing the clearing (kept clear of the lanes/plaza by seed).
     scatter(rows, ".", "f", 132, 15);
@@ -1035,6 +1048,143 @@ export function makeFloorTiles(floor: number): string[] {
     }
   }
 
+  if (floor === 12) {
+    // The Wastestone Descent I: Old Crypt Intake. A safe cave-arch landing opens
+    // into three crypt rooms with a short loop and a west treasure alcove.
+    fillRect(rows, 0, 0, 90, 60, "#");
+    fillRect(rows, 4, 4, 14, 10, "d");
+    setTile(rows, 8, 8, "A"); // up to Waystone's cave arch
+    fillRect(rows, 16, 8, 19, 3, "c");
+    fillRect(rows, 32, 7, 15, 12, "b");
+    fillRect(rows, 45, 14, 3, 19, "c");
+    fillRect(rows, 38, 31, 24, 12, "b");
+    fillRect(rows, 58, 36, 20, 3, "c");
+    fillRect(rows, 72, 42, 13, 13, "d");
+    fillRect(rows, 64, 18, 3, 24, "c");
+    fillRect(rows, 54, 16, 17, 11, "b");
+    fillRect(rows, 32, 39, 8, 3, "c");
+    fillRect(rows, 24, 35, 10, 10, "b"); // treasure alcove
+    setTile(rows, 80, 51, "A"); // down to Blackwater Sluice
+    for (const [ax, ay, px, py, floorCh] of [
+      [26, 36, 27, 36, "b"],
+      [31, 43, 31, 42, "b"]
+    ] as Array<[number, number, number, number, string]>) {
+      setTile(rows, ax, ay, "r");
+      setTile(rows, px, py, floorCh);
+    }
+    scatter(rows, "b", "r", 24, 91);
+    scatter(rows, "c", "r", 12, 92);
+    setTile(rows, 8, 8, "A");
+    setTile(rows, 80, 51, "A");
+  }
+
+  if (floor === 13) {
+    // The Wastestone Descent II: Blackwater Sluice. Deep water blocks movement;
+    // narrow causeways create ranged angles, with a small rest alcove by the up stair.
+    fillRect(rows, 0, 0, 90, 60, "W");
+    fillRect(rows, 4, 5, 14, 10, "m"); // rest alcove
+    setTile(rows, 8, 9, "A"); // up to Old Crypt Intake
+    fillRect(rows, 16, 9, 18, 3, "k");
+    fillRect(rows, 31, 8, 10, 12, "m");
+    fillRect(rows, 38, 18, 3, 21, "k");
+    fillRect(rows, 28, 36, 28, 5, "B");
+    fillRect(rows, 52, 24, 3, 17, "k");
+    fillRect(rows, 52, 24, 21, 5, "m");
+    fillRect(rows, 70, 24, 4, 25, "k");
+    fillRect(rows, 66, 46, 16, 9, "m");
+    fillRect(rows, 18, 22, 16, 8, "m");
+    fillRect(rows, 25, 29, 3, 9, "k");
+    setTile(rows, 77, 50, "A"); // down to Ember Rift
+    for (const [x, y] of [[24, 38], [42, 38], [57, 26], [73, 34], [68, 50]] as Array<[number, number]>) {
+      setTile(rows, x, y, "o");
+    }
+    setTile(rows, 8, 9, "A");
+    setTile(rows, 77, 50, "A");
+  }
+
+  if (floor === 14) {
+    // The Wastestone Descent III: Ember Rift. Choke corridors cross hot canyon
+    // rooms, ending at a guarded rift stair.
+    fillRect(rows, 0, 0, 90, 60, "w");
+    fillRect(rows, 5, 5, 15, 11, "R");
+    setTile(rows, 9, 9, "A"); // up to Blackwater Sluice
+    fillRect(rows, 18, 10, 20, 3, "R");
+    fillRect(rows, 34, 7, 16, 13, "R");
+    fillRect(rows, 47, 16, 3, 16, "R");
+    fillRect(rows, 40, 30, 24, 7, "R");
+    fillRect(rows, 62, 20, 18, 11, "R");
+    fillRect(rows, 64, 31, 4, 20, "R");
+    fillRect(rows, 58, 48, 22, 7, "R");
+    fillRect(rows, 23, 33, 19, 10, "R");
+    fillRect(rows, 38, 37, 3, 9, "R");
+    setTile(rows, 73, 52, "A"); // down to Oathless Delve
+    for (const [x, y] of [[31, 11], [49, 25], [58, 34], [66, 39], [73, 26], [28, 39]] as Array<[number, number]>) {
+      setTile(rows, x, y, "P");
+    }
+    setTile(rows, 9, 9, "A");
+    setTile(rows, 73, 52, "A");
+  }
+
+  if (floor === 15) {
+    // The Wastestone Descent IV: Oathless Delve. A deeper mine-crypt braid with
+    // elite patrol pockets and ore tucked into side chambers.
+    fillRect(rows, 0, 0, 90, 60, "#");
+    fillRect(rows, 5, 5, 14, 10, "d");
+    setTile(rows, 8, 9, "A"); // up to Ember Rift
+    fillRect(rows, 17, 9, 18, 3, "c");
+    fillRect(rows, 32, 6, 18, 12, "b");
+    fillRect(rows, 47, 14, 3, 18, "c");
+    fillRect(rows, 36, 30, 23, 11, "b");
+    fillRect(rows, 57, 35, 22, 3, "c");
+    fillRect(rows, 72, 29, 13, 14, "b");
+    fillRect(rows, 42, 41, 3, 11, "c");
+    fillRect(rows, 31, 49, 24, 8, "b");
+    fillRect(rows, 18, 26, 18, 9, "b");
+    fillRect(rows, 26, 18, 3, 9, "c");
+    setTile(rows, 48, 53, "A"); // down to Heart Vault
+    for (const [ax, ay, px, py, floorCh] of [
+      [35, 7, 35, 8, "b"],
+      [47, 16, 46, 16, "b"],
+      [24, 27, 25, 27, "b"],
+      [77, 31, 76, 31, "b"],
+      [34, 55, 34, 54, "b"],
+      [52, 55, 52, 54, "b"]
+    ] as Array<[number, number, number, number, string]>) {
+      setTile(rows, ax, ay, "r");
+      setTile(rows, px, py, floorCh);
+    }
+    scatter(rows, "b", "r", 20, 73);
+    scatter(rows, "c", "r", 12, 74);
+    setTile(rows, 8, 9, "A");
+    setTile(rows, 48, 53, "A");
+  }
+
+  if (floor === 16) {
+    // The Wastestone Descent V: Heart Vault. Short approach, capstone arena,
+    // no trash maze.
+    fillRect(rows, 0, 0, 90, 60, "#");
+    fillRect(rows, 5, 6, 14, 10, "d");
+    setTile(rows, 9, 10, "A"); // up to Oathless Delve
+    fillRect(rows, 17, 10, 18, 3, "c");
+    fillRect(rows, 32, 8, 12, 7, "b");
+    fillRect(rows, 41, 12, 3, 15, "c");
+    fillRect(rows, 36, 25, 18, 5, "b");
+    fillRect(rows, 51, 20, 3, 11, "c");
+    fillRect(rows, 50, 15, 30, 27, "d");
+    fillRect(rows, 61, 42, 4, 9, "c");
+    fillRect(rows, 54, 49, 18, 7, "b"); // reward/resource pocket after the boss
+    for (const [ax, ay, px, py, floorCh] of [
+      [56, 51, 56, 50, "b"],
+      [70, 54, 70, 53, "b"]
+    ] as Array<[number, number, number, number, string]>) {
+      setTile(rows, ax, ay, "r");
+      setTile(rows, px, py, floorCh);
+    }
+    scatter(rows, "d", "r", 8, 45);
+    scatter(rows, "b", "r", 7, 46);
+    setTile(rows, 9, 10, "A");
+  }
+
   const sized = authored || !FLOOR_DIMS[floor] ? rows : scaleFloorTiles(rows, floorCols(floor), floorRows(floor));
   frameFloorEdge(sized, floor);
   stampBuildingCollision(sized, floor);
@@ -1056,7 +1206,9 @@ const FLOOR_EDGE: Record<number, string> = {
   7: "X", // The Sunken Desert — sandstone walls
   8: "I", // The Sunken Beach — open sea
   9: "E", // The Untamed Jungle — impassable canopy
-  11: "f" // The Waystone Trail — framed by treeline
+  11: "f", // The Waystone Trail — framed by treeline
+  13: "W",
+  14: "X"
 };
 
 // Door/portal/landmark tiles that must stay walkable even if a building
@@ -1444,6 +1596,9 @@ export function isSafeZone(floor: number, x: number, y: number): boolean {
   if (inRect(7, 22, 55, 57, 66)) return true;
   // The Deepdelve Mine entry chamber — a lit, safe staging cave by the stair up.
   if (inRect(10, 3, 4, 20, 16)) return true;
+  // Wastestone Descent rest pockets.
+  if (inRect(12, 4, 4, 17, 13)) return true;
+  if (inRect(13, 4, 5, 17, 14)) return true;
   return false;
 }
 
@@ -1499,6 +1654,16 @@ function portalForRaw(floor: number, x: number, y: number): Portal | null {
   if (floor === 9 && tile === "j") return { floor: 8, x: 60.5, y: 17.5 };
   if (floor === 6 && tile === ">") return { floor: 10, x: 8.5, y: 11.5 }; // down into the Deepdelve Mine entry chamber
   if (floor === 10 && tile === "<") return { floor: 6, x: 11.5, y: 52.5 }; // back up to the badlands copper dead-end
+  if (floor === 0 && tile === "A" && tx === 98 && ty === 35) return { floor: 12, x: 8.5, y: 8.5 };
+  if (floor === 12 && tile === "A" && tx === 8 && ty === 8) return { floor: 0, x: 98.5, y: 35.5 };
+  if (floor === 12 && tile === "A" && tx === 80 && ty === 51) return { floor: 13, x: 8.5, y: 9.5 };
+  if (floor === 13 && tile === "A" && tx === 8 && ty === 9) return { floor: 12, x: 80.5, y: 51.5 };
+  if (floor === 13 && tile === "A" && tx === 77 && ty === 50) return { floor: 14, x: 9.5, y: 9.5 };
+  if (floor === 14 && tile === "A" && tx === 9 && ty === 9) return { floor: 13, x: 77.5, y: 50.5 };
+  if (floor === 14 && tile === "A" && tx === 73 && ty === 52) return { floor: 15, x: 8.5, y: 9.5 };
+  if (floor === 15 && tile === "A" && tx === 8 && ty === 9) return { floor: 14, x: 73.5, y: 52.5 };
+  if (floor === 15 && tile === "A" && tx === 48 && ty === 53) return { floor: 16, x: 9.5, y: 10.5 };
+  if (floor === 16 && tile === "A" && tx === 9 && ty === 10) return { floor: 15, x: 48.5, y: 53.5 };
   return null;
 }
 

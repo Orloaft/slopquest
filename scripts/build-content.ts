@@ -238,7 +238,25 @@ const itemIds = new Set(items.map((i) => i.id));
 const monsterIds = new Set(monsters.map((m) => m.id));
 const treeTypeIds = new Set(treeTypes.map((t) => t.id));
 const npcIdsByRole = new Map(npcs.map((n) => [n.id, n.role]));
-const zoneIds = new Set(["southTown", "cemetery", "crypt", "woods", "northTown", "marsh", "badlands", "desert", "beach", "jungle", "deepMine", "route"]);
+const zoneIds = new Set([
+  "southTown",
+  "cemetery",
+  "crypt",
+  "woods",
+  "northTown",
+  "marsh",
+  "badlands",
+  "desert",
+  "beach",
+  "jungle",
+  "deepMine",
+  "route",
+  "wastestoneDescent1",
+  "wastestoneDescent2",
+  "wastestoneDescent3",
+  "wastestoneDescent4",
+  "wastestoneDescent5"
+]);
 const useKinds = new Set(["eat", "light_fire", "cook_on_fire", "drink_potion"]);
 const capabilityIds = new Set(["chop_tree", "fish", "mine", "ranged"]);
 const skillIds = new Set(["attack", "defense", "magic", "woodcutting", "fishing", "mining", "firemaking", "cooking", "agility", "alchemy", "ranged", "foraging", "smithing", "faith"]);
@@ -648,10 +666,10 @@ const TREE_TYPES = Object.fromEntries(
 // Regions are upscaled to a fixed expanded footprint (see FLOOR_DIMS in
 // shared.ts: every floor -> 90x60). Floors authored at the native 52x34 have
 // their content stretched by the same factor so it stays aligned with the
-// scaled map; floor 3 is authored directly at the target size, so its content
-// is left as-is. A gathering node's "approach" keeps its 1-tile offset from the
-// node (rather than scaling the gap) so the standing spot stays adjacent.
-const SCALE_AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+// scaled map; authored-at-target floors leave content as-is. A gathering node's
+// "approach" keeps its 1-tile offset from the node (rather than scaling the
+// gap) so the standing spot stays adjacent.
+const SCALE_AUTHORED_AT_TARGET = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
 const EXP_COLS = 90;
 const EXP_ROWS = 60;
 const NAT_COLS = 52;

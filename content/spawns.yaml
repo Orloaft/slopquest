@@ -188,6 +188,63 @@ monsters:
   - { type: meadow_hopper, at: { floor: 11, x: 56, y: 18 }, zone: route }
   - { type: reach_vole,    at: { floor: 11, x: 61, y: 17 }, zone: route }
   - { type: reach_vole,    at: { floor: 11, x: 57, y: 13 }, zone: route }
+  # The Wastestone Descent (floors 12-16): a compact five-floor dungeon reached
+  # from the Waystone cave arch. Existing monster families only; rewards lean on
+  # corpse gold/drops and mining pockets rather than new chest/key mechanics.
+  # Floor 12 - Old Crypt Intake (8): safe entry, three rooms, loop and ore alcove.
+  - { type: restless_husk,  at: { floor: 12, x: 35, y: 10 }, zone: wastestoneDescent1 }
+  - { type: restless_husk,  at: { floor: 12, x: 42, y: 16 }, zone: wastestoneDescent1 }
+  - { type: grave_shambler, at: { floor: 12, x: 55, y: 21 }, zone: wastestoneDescent1 }
+  - { type: grave_shambler, at: { floor: 12, x: 48, y: 36 }, zone: wastestoneDescent1 }
+  - { type: skeleton,      at: { floor: 12, x: 61, y: 39 }, zone: wastestoneDescent1 }
+  - { type: ghoul,         at: { floor: 12, x: 77, y: 45 }, zone: wastestoneDescent1 }
+  - { type: skeleton,      at: { floor: 12, x: 30, y: 39 }, zone: wastestoneDescent1 }
+  - { type: pale_banshee,  at: { floor: 12, x: 78, y: 51 }, zone: wastestoneDescent1 }
+  # Floor 13 - Blackwater Sluice (11): channels, causeways, rest alcove near up-stair.
+  - { type: gloom_toad,    at: { floor: 13, x: 34, y: 12 }, zone: wastestoneDescent2 }
+  - { type: gloom_toad,    at: { floor: 13, x: 39, y: 33 }, zone: wastestoneDescent2 }
+  - { type: bog_leech,     at: { floor: 13, x: 25, y: 25 }, zone: wastestoneDescent2 }
+  - { type: bog_leech,     at: { floor: 13, x: 47, y: 39 }, zone: wastestoneDescent2 }
+  - { type: bog_leech,     at: { floor: 13, x: 70, y: 47 }, zone: wastestoneDescent2 }
+  - { type: mire_spitter,  at: { floor: 13, x: 55, y: 26 }, zone: wastestoneDescent2 }
+  - { type: mire_spitter,  at: { floor: 13, x: 72, y: 33 }, zone: wastestoneDescent2 }
+  - { type: mire_spitter,  at: { floor: 13, x: 73, y: 42 }, zone: wastestoneDescent2 }
+  - { type: marsh_hag,     at: { floor: 13, x: 51, y: 37 }, zone: wastestoneDescent2 }
+  - { type: marsh_hag,     at: { floor: 13, x: 76, y: 51 }, zone: wastestoneDescent2 }
+  - { type: gloom_toad,    at: { floor: 13, x: 68, y: 27 }, zone: wastestoneDescent2 }
+  # Floor 14 - Ember Rift (12): canyon rooms, hot choke corridors.
+  - { type: canyon_scavenger, at: { floor: 14, x: 24, y: 11 }, zone: wastestoneDescent3 }
+  - { type: canyon_scavenger, at: { floor: 14, x: 36, y: 13 }, zone: wastestoneDescent3 }
+  - { type: canyon_scavenger, at: { floor: 14, x: 45, y: 34 }, zone: wastestoneDescent3 }
+  - { type: dust_burrower,    at: { floor: 14, x: 48, y: 25 }, zone: wastestoneDescent3 }
+  - { type: dust_burrower,    at: { floor: 14, x: 63, y: 50 }, zone: wastestoneDescent3 }
+  - { type: magma_hound,      at: { floor: 14, x: 54, y: 34 }, zone: wastestoneDescent3 }
+  - { type: magma_hound,      at: { floor: 14, x: 68, y: 22 }, zone: wastestoneDescent3 }
+  - { type: cinder_shade,     at: { floor: 14, x: 63, y: 28 }, zone: wastestoneDescent3 }
+  - { type: cinder_shade,     at: { floor: 14, x: 76, y: 51 }, zone: wastestoneDescent3 }
+  - { type: basalt_brute,     at: { floor: 14, x: 73, y: 28 }, zone: wastestoneDescent3 }
+  - { type: basalt_brute,     at: { floor: 14, x: 33, y: 39 }, zone: wastestoneDescent3 }
+  - { type: magma_hound,      at: { floor: 14, x: 73, y: 52 }, zone: wastestoneDescent3 }
+  # Floor 15 - Oathless Delve (13): elite mine/crypt patrols and ore pockets.
+  - { type: deepdelve_wight,  at: { floor: 15, x: 35, y: 12 }, zone: wastestoneDescent4 }
+  - { type: deepdelve_wight,  at: { floor: 15, x: 45, y: 35 }, zone: wastestoneDescent4 }
+  - { type: deepdelve_wight,  at: { floor: 15, x: 78, y: 36 }, zone: wastestoneDescent4 }
+  - { type: crypt_sentinel,   at: { floor: 15, x: 48, y: 16 }, zone: wastestoneDescent4 }
+  - { type: crypt_sentinel,   at: { floor: 15, x: 52, y: 53 }, zone: wastestoneDescent4 }
+  - { type: pale_banshee,     at: { floor: 15, x: 27, y: 31 }, zone: wastestoneDescent4 }
+  - { type: pale_banshee,     at: { floor: 15, x: 76, y: 31 }, zone: wastestoneDescent4 }
+  - { type: crimson_burrower, at: { floor: 15, x: 41, y: 37 }, zone: wastestoneDescent4 }
+  - { type: crimson_burrower, at: { floor: 15, x: 35, y: 53 }, zone: wastestoneDescent4 }
+  - { type: crimson_burrower, at: { floor: 15, x: 74, y: 39 }, zone: wastestoneDescent4 }
+  - { type: totem_wraith,     at: { floor: 15, x: 34, y: 8 }, zone: wastestoneDescent4 }
+  - { type: totem_wraith,     at: { floor: 15, x: 48, y: 53 }, zone: wastestoneDescent4 }
+  - { type: crypt_sentinel,   at: { floor: 15, x: 22, y: 31 }, zone: wastestoneDescent4 }
+  # Floor 16 - Heart Vault (4 adds + capstone boss): short approach, arena, reward pocket.
+  - { type: deepdelve_wight,    at: { floor: 16, x: 39, y: 13 }, zone: wastestoneDescent5 }
+  - { type: cinder_shade,       at: { floor: 16, x: 43, y: 27 }, zone: wastestoneDescent5 }
+  - { type: totem_wraith,       at: { floor: 16, x: 57, y: 26 }, zone: wastestoneDescent5 }
+  - { type: deepdelve_wight,    at: { floor: 16, x: 72, y: 34 }, zone: wastestoneDescent5 }
+  - { type: verdant_faultwarden, at: { floor: 16, x: 66, y: 28 }, zone: wastestoneDescent5 }
 
 trees:
   - { type: oak,  at: { floor: 0, x: 25.1, y: 57.0 } }

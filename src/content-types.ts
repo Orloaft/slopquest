@@ -19,7 +19,24 @@ export type SkillId =
   | "smithing"
   | "faith";
 
-export type ZoneId = "southTown" | "cemetery" | "crypt" | "woods" | "northTown" | "marsh" | "badlands" | "desert" | "beach" | "jungle" | "deepMine" | "route";
+export type ZoneId =
+  | "southTown"
+  | "cemetery"
+  | "crypt"
+  | "woods"
+  | "northTown"
+  | "marsh"
+  | "badlands"
+  | "desert"
+  | "beach"
+  | "jungle"
+  | "deepMine"
+  | "route"
+  | "wastestoneDescent1"
+  | "wastestoneDescent2"
+  | "wastestoneDescent3"
+  | "wastestoneDescent4"
+  | "wastestoneDescent5";
 
 export type Capability = "chop_tree" | "fish" | "mine" | "ranged";
 

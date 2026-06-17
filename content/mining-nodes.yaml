@@ -190,3 +190,54 @@
   kind: mithril
   at: { floor: 10, x: 82.5, y: 56.5 }
   approach: { x: 82.5, y: 55.5 }
+
+# The Wastestone Descent: small reward pockets embedded in blocked rubble.
+- id: mine-12-26-36
+  kind: silver
+  at: { floor: 12, x: 26.5, y: 36.5 }
+  approach: { x: 27.5, y: 36.5 }
+
+- id: mine-12-31-43
+  kind: gold
+  at: { floor: 12, x: 31.5, y: 43.5 }
+  approach: { x: 31.5, y: 42.5 }
+
+- id: mine-15-35-7
+  kind: mithril
+  at: { floor: 15, x: 35.5, y: 7.5 }
+  approach: { x: 35.5, y: 8.5 }
+
+- id: mine-15-47-16
+  kind: gold
+  at: { floor: 15, x: 47.5, y: 16.5 }
+  approach: { x: 46.5, y: 16.5 }
+
+- id: mine-15-24-27
+  kind: silver
+  at: { floor: 15, x: 24.5, y: 27.5 }
+  approach: { x: 25.5, y: 27.5 }
+
+- id: mine-15-77-31
+  kind: adamant
+  at: { floor: 15, x: 77.5, y: 31.5 }
+  approach: { x: 76.5, y: 31.5 }
+
+- id: mine-15-34-55
+  kind: mithril
+  at: { floor: 15, x: 34.5, y: 55.5 }
+  approach: { x: 34.5, y: 54.5 }
+
+- id: mine-15-52-55
+  kind: adamant
+  at: { floor: 15, x: 52.5, y: 55.5 }
+  approach: { x: 52.5, y: 54.5 }
+
+- id: mine-16-56-51
+  kind: mithril
+  at: { floor: 16, x: 56.5, y: 51.5 }
+  approach: { x: 56.5, y: 50.5 }
+
+- id: mine-16-70-54
+  kind: adamant
+  at: { floor: 16, x: 70.5, y: 54.5 }
+  approach: { x: 70.5, y: 53.5 }
