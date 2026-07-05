@@ -1,0 +1,50 @@
+{
+  "commit": "bbcd8962",
+  "port": "5222",
+  "captureSurface": "#game canvas",
+  "trace": [
+    {
+      "name": "runtime-01-waystone-route-gate",
+      "requested": {
+        "floor": 0,
+        "x": 55.5,
+        "y": 20.5
+      },
+      "actual": "0:55.5,20.5 dir=down",
+      "captureSurface": "#game canvas",
+      "port": "5222",
+      "commit": "bbcd8962"
+    },
+    {
+      "name": "runtime-02-route-south-gate",
+      "requested": {
+        "floor": 11,
+        "x": 55.5,
+        "y": 69.5
+      },
+      "actual": "11:55.5,69.5 dir=down",
+      "captureSurface": "#game canvas",
+      "port": "5222",
+      "commit": "bbcd8962"
+    },
+    {
+      "name": "runtime-03-route-stream-ford",
+      "requested": {
+        "floor": 11,
+        "x": 66.5,
+        "y": 34.5
+      },
+      "actual": "11:66.5,34.5 dir=down",
+      "captureSurface": "#game canvas",
+      "port": "5222",
+      "commit": "bbcd8962",
+      "crop": {
+        "x": 529,
+        "y": 267,
+        "width": 220,
+        "height": 160,
+        "scale": 2
+      }
+    }
+  ]
+}

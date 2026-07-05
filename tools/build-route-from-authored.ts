@@ -110,9 +110,12 @@ for (let k = 0; k < 30; k++) {
 }
 // 5) Meandering stream (organic centreline + varying width). The trail keeps its
 //    1-wide ford; the water autotiles a finished shore around it.
+const streamProfile = (x: number): { cy: number; hw: number } => ({
+  cy: 34.5 + 1.6 * Math.sin(x / 9) + 0.9 * Math.sin(x / 4 + 1.3),
+  hw: 1.0 + 0.9 * (0.5 + 0.5 * Math.sin(x / 6 + 0.5)),
+});
 for (let c = 6; c < C - 6; c++) {
-  const cy = 34.5 + 1.6 * Math.sin(c / 9) + 0.9 * Math.sin(c / 4 + 1.3);
-  const hw = 1.0 + 0.9 * (0.5 + 0.5 * Math.sin(c / 6 + 0.5));
+  const { cy, hw } = streamProfile(c);
   const y0 = Math.round(cy - hw), y1 = Math.round(cy + hw);
   for (let y = y0; y <= y1; y++) {
     if (y < 1 || y >= R - 1) continue;
@@ -148,6 +151,13 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
 // 's' (walkable shallows) renders as water, so the water autotiler treats it as water.
 const isW = (r: number, c: number) => at(r, c) === "~" || at(r, c) === "s";
 const isR = (r: number, c: number) => at(r, c) === "t";
+const isFordRoad = (r: number, c: number) => {
+  if (!isR(r, c)) return false;
+  if (isW(r - 1, c) || isW(r + 1, c) || isW(r, c - 1) || isW(r, c + 1)) return true;
+  const { cy, hw } = streamProfile(c + 0.5);
+  return c > 5 && c < C - 5 && Math.abs(r + 0.5 - cy) <= hw + 1.1;
+};
+const isWaterVisual = (r: number, c: number) => isW(r, c) || isFordRoad(r, c);
 
 const W = C * ts, H = R * ts;
 const out = new PNG({ width: W, height: H });
@@ -189,38 +199,89 @@ const drawSourceCell = (r: number, c: number, fn: (x: number, y: number) => Rgb)
   const ox = c * sourceTs, oy = r * sourceTs;
   for (let y = 0; y < sourceTs; y++) for (let x = 0; x < sourceTs; x++) setSourcePixel(ox + x, oy + y, fn(x, y));
 };
-const drawGrassCell = (r: number, c: number, treeReserve = false) => {
+const grassPixel = (r: number, c: number, x: number, y: number, treeReserve = false): Rgb => {
   const variant = Math.floor(hrand(c, r) * 4);
-  drawSourceCell(r, c, (x, y) => {
-    const h = hrand(variant * 31 + x, variant * 37 + y);
-    if (treeReserve && ((x + y + variant) % 5 === 0)) return GBC.grassDark;
-    if (((x * 3 + y * 5 + variant) % 17 === 0) || h > 0.965) return GBC.grassLight;
-    if (((x + y * 2 + variant) % 11 === 0) || h < 0.08) return GBC.grassDark;
-    return GBC.grassMid;
-  });
+  const h = hrand(variant * 31 + x, variant * 37 + y);
+  if (treeReserve && ((x + y + variant) % 5 === 0)) return GBC.grassDark;
+  if (((x * 3 + y * 5 + variant) % 17 === 0) || h > 0.965) return GBC.grassLight;
+  if (((x + y * 2 + variant) % 11 === 0) || h < 0.08) return GBC.grassDark;
+  return GBC.grassMid;
+};
+const drawGrassCell = (r: number, c: number, treeReserve = false) => {
+  drawSourceCell(r, c, (x, y) => grassPixel(r, c, x, y, treeReserve));
 };
 const drawRoadCell = (r: number, c: number) => {
   const mask = (isR(r - 1, c) ? 1 : 0) | (isR(r, c + 1) ? 2 : 0) | (isR(r + 1, c) ? 4 : 0) | (isR(r, c - 1) ? 8 : 0);
+  const ford = isFordRoad(r, c);
   const ox = c * sourceTs, oy = r * sourceTs;
   for (let y = 0; y < sourceTs; y++) for (let x = 0; x < sourceTs; x++) {
-    const inVertical = x >= 5 && x <= 10 && (y >= 5 || (mask & 1)) && (y <= 10 || (mask & 4));
-    const inHorizontal = y >= 5 && y <= 10 && (x >= 5 || (mask & 8)) && (x <= 10 || (mask & 2));
-    const inCenter = x >= 5 && x <= 10 && y >= 5 && y <= 10;
+    const roadMin = ford ? 6 : 5, roadMax = ford ? 9 : 10;
+    const inVertical = x >= roadMin && x <= roadMax && (y >= roadMin || (mask & 1)) && (y <= roadMax || (mask & 4));
+    const inHorizontal = y >= roadMin && y <= roadMax && (x >= roadMin || (mask & 8)) && (x <= roadMax || (mask & 2));
+    const inCenter = x >= roadMin && x <= roadMax && y >= roadMin && y <= roadMax;
     if (!(inVertical || inHorizontal || inCenter)) continue;
-    const edge = x === 5 || x === 10 || y === 5 || y === 10;
-    const pebble = (x * 7 + y * 3 + mask) % 19 === 0;
-    setSourcePixel(ox + x, oy + y, edge ? GBC.roadDark : pebble ? GBC.roadLight : GBC.roadMid);
+    const edge = x === roadMin || x === roadMax || y === roadMin || y === roadMax;
+    setSourcePixel(ox + x, oy + y, edge ? GBC.roadDark : GBC.roadMid);
   }
 };
+const bankPixel = (x: number, y: number, salt: number): Rgb => {
+  void x; void y; void salt;
+  return GBC.roadMid;
+};
+const bankGrassPixel = (x: number, y: number, salt: number): Rgb =>
+  (x * 3 + y * 5 + salt) % 7 === 0 ? GBC.grassDark : GBC.grassMid;
+const waterPixel = (x: number, y: number, salt: number, shallow = false): Rgb => {
+  if (shallow && ((x + y + salt) % 11 === 0 || (x * 2 + y + salt) % 17 === 0)) return GBC.waterLight;
+  if (!shallow && ((y + salt) % 7 === 2) && ((x + salt) % 5 >= 1) && ((x + salt) % 5 <= 3)) return GBC.waterLight;
+  return GBC.waterMid;
+};
 const drawWaterCell = (r: number, c: number) => {
-  const landN = !isW(r - 1, c), landS = !isW(r + 1, c), landW = !isW(r, c - 1), landE = !isW(r, c + 1);
+  const landN = !isWaterVisual(r - 1, c), landS = !isWaterVisual(r + 1, c), landW = !isWaterVisual(r, c - 1), landE = !isWaterVisual(r, c + 1);
+  const shallow = at(r, c) === "s";
   drawSourceCell(r, c, (x, y) => {
-    if ((landN && y <= 1) || (landS && y >= 14) || (landW && x <= 1) || (landE && x >= 14)) return GBC.shore;
-    const edgeMask = (landN ? 1 : 0) | (landE ? 2 : 0) | (landS ? 4 : 0) | (landW ? 8 : 0);
-    const wave = ((x + y * 2 + edgeMask) % 13 === 0) || ((x * 2 + y + edgeMask) % 17 === 0);
-    const dark = ((x + edgeMask) % 7 === 0 && (y + edgeMask) % 3 === 0);
-    return wave ? GBC.waterLight : dark ? GBC.waterDark : GBC.waterMid;
+    const salt = r * 7 + c * 11;
+    const cornerCut = 5;
+    const cornerShore = 9;
+    if (landN && landW && x + y < cornerCut) return GBC.grassMid;
+    if (landN && landE && (15 - x) + y < cornerCut) return GBC.grassMid;
+    if (landS && landW && x + (15 - y) < cornerCut) return GBC.grassMid;
+    if (landS && landE && (15 - x) + (15 - y) < cornerCut) return GBC.grassMid;
+    if (landN && landW && x + y < cornerShore) return bankPixel(x, y, salt);
+    if (landN && landE && (15 - x) + y < cornerShore) return bankPixel(x, y, salt + 1);
+    if (landS && landW && x + (15 - y) < cornerShore) return bankPixel(x, y, salt + 2);
+    if (landS && landE && (15 - x) + (15 - y) < cornerShore) return bankPixel(x, y, salt + 3);
+
+    const edgeD = Math.min(landN ? y : 99, landS ? 15 - y : 99, landW ? x : 99, landE ? 15 - x : 99);
+    if (edgeD <= 1) return GBC.roadDark;
+    if (edgeD <= 3) return bankPixel(x, y, salt);
+    if (shallow && ((x * 7 + y * 3 + salt) % 23 === 0)) return GBC.waterLight;
+    return waterPixel(x, y, salt, shallow);
   });
+};
+const drawStreamShapePass = () => {
+  const minY = 29 * sourceTs, maxY = 40 * sourceTs;
+  for (let py = minY; py < maxY; py++) for (let px = 5 * sourceTs; px < (C - 5) * sourceTs; px++) {
+    const u = (px + 0.5) / sourceTs;
+    const v = (py + 0.5) / sourceTs;
+    const r = Math.floor(v), c = Math.floor(u);
+    if (at(r, c) === "^") continue;
+    const { cy, hw } = streamProfile(u);
+    const d = Math.abs(v - cy);
+    const waterR = hw + 0.48;
+    const bankR = hw + 0.82;
+    const lx = px - c * sourceTs, ly = py - r * sourceTs;
+    const salt = r * 7 + c * 11;
+    const fordDx = Math.abs(u - (FORD_X + 0.5));
+    const fordShallow = fordDx <= 1.45 && d <= waterR - 0.1;
+    if (d <= waterR) {
+      const nearBank = d > waterR - 0.55;
+      setSourcePixel(px, py, nearBank ? GBC.waterMid : waterPixel(lx, ly, salt, fordShallow || isFordRoad(r, c)));
+    } else if (d <= bankR) {
+      setSourcePixel(px, py, bankPixel(lx, ly, salt));
+    } else if (d <= bankR + 0.7 || isW(r, c)) {
+      setSourcePixel(px, py, bankGrassPixel(lx, ly, salt));
+    }
+  }
 };
 const drawBlockerCell = (r: number, c: number) => {
   drawSourceCell(r, c, (x, y) => {
@@ -263,9 +324,11 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const ch = at(r, c);
   if (ch === "^") drawBlockerCell(r, c);
   else if (ch === "~" || ch === "s") drawWaterCell(r, c);
+  else if (ch === "t" && isFordRoad(r, c)) drawSourceCell(r, c, (x, y) => waterPixel(x, y, r * 7 + c * 11, true));
   else if (ch === "t") drawSourceCell(r, c, () => GBC.grassMid);
   else drawGrassCell(r, c, ch === "f");
 }
+drawStreamShapePass();
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   if (isR(r, c)) drawRoadCell(r, c);
 }

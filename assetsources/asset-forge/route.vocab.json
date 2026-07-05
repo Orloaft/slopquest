@@ -50,21 +50,21 @@
       "blocked": true,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#328598"
+      "minimapColor": "#2f8699"
     },
     "s": {
       "role": "shallow-ford",
       "blocked": false,
       "sightBlocked": false,
       "road": false,
-      "minimapColor": "#3c8384"
+      "minimapColor": "#348a9a"
     },
     "t": {
       "role": "packed-road",
       "blocked": false,
       "sightBlocked": false,
       "road": true,
-      "minimapColor": "#78873a"
+      "minimapColor": "#77873a"
     },
     "^": {
       "role": "forest-border-canopy",

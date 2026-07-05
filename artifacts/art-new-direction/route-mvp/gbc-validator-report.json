@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "generatedAt": "2026-07-05T20:48:14.744Z",
+  "generatedAt": "2026-07-05T21:27:35.601Z",
   "allowlist": [
     "route-forest-terrain"
   ],
@@ -9,26 +9,23 @@
       "id": "route-forest-terrain",
       "sourceSize": [
         384,
-        32
+        368
       ],
       "runtimeSize": [
         768,
-        64
+        736
       ],
       "usedColors": [
-        "#1c5076",
         "#1d392b",
         "#2a8297",
         "#2d5734",
         "#436c2a",
         "#49763e",
-        "#5b7441",
         "#63953a",
         "#6eb5ae",
         "#7d5b30",
         "#8bb84d",
         "#ad7f41",
-        "#d2ab5e",
         "transparent"
       ],
       "nearestMismatchPixels": 0,
