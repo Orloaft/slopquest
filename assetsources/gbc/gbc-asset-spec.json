@@ -2,7 +2,8 @@
   "schema": "tib/gbc-asset-spec@1",
   "artifactsDir": "artifacts/art-new-direction/route-mvp",
   "reportMirrorDirs": [
-    "artifacts/art-new-direction/player-actor-mvp"
+    "artifacts/art-new-direction/player-actor-mvp",
+    "artifacts/art-new-direction/player-actor-gen2-quality"
   ],
   "allowlist": [
     {

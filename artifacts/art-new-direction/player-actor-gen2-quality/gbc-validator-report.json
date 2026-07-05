@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "generatedAt": "2026-07-05T19:26:58.700Z",
+  "allowlist": [
+    "route-forest-terrain",
+    "player-gbc-actor"
+  ],
+  "summaries": [
+    {
+      "id": "route-forest-terrain",
+      "type": "tileset",
+      "sourceSize": [
+        384,
+        32
+      ],
+      "runtimeSize": [
+        768,
+        64
+      ],
+      "usedColors": [
+        "#1c5076",
+        "#1d392b",
+        "#2a8297",
+        "#2d5734",
+        "#436c2a",
+        "#49763e",
+        "#5b7441",
+        "#63953a",
+        "#6eb5ae",
+        "#7d5b30",
+        "#8bb84d",
+        "#ad7f41",
+        "#d2ab5e",
+        "transparent"
+      ],
+      "nearestMismatchPixels": 0,
+      "overBudget8x8Cells": 0
+    },
+    {
+      "id": "player-gbc-actor",
+      "type": "actor",
+      "sourceSize": [
+        80,
+        96
+      ],
+      "runtimeSize": [
+        160,
+        192
+      ],
+      "actorContract": {
+        "sourceFrame": [
+          20,
+          24
+        ],
+        "runtimeFrame": [
+          40,
+          48
+        ],
+        "rows": [
+          "walk_up",
+          "walk_right",
+          "walk_down",
+          "walk_left"
+        ],
+        "framesPerRow": 4
+      },
+      "usedColors": [
+        "#1b1b24",
+        "#1c5076",
+        "#1d392b",
+        "#2a8297",
+        "#7d5b30",
+        "#d2ab5e",
+        "transparent"
+      ],
+      "nearestMismatchPixels": 0,
+      "overBudget8x8Cells": 0
+    }
+  ],
+  "findings": []
+}

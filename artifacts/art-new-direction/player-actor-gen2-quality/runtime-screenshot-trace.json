@@ -1,0 +1,60 @@
+{
+  "commit": "05acac6e",
+  "captureSurface": "#game canvas",
+  "trace": [
+    {
+      "name": "runtime-01-waystone-route-gate",
+      "requested": {
+        "floor": 0,
+        "x": 55.5,
+        "y": 20.5
+      },
+      "actual": "0:55.5,20.5 dir=down",
+      "captureSurface": "#game canvas",
+      "crop": {
+        "x": 598,
+        "y": 305,
+        "width": 84,
+        "height": 96,
+        "scale": 4
+      },
+      "commit": "05acac6e"
+    },
+    {
+      "name": "runtime-02-route-south-gate",
+      "requested": {
+        "floor": 11,
+        "x": 55.5,
+        "y": 69.5
+      },
+      "actual": "11:55.5,69.5 dir=down",
+      "captureSurface": "#game canvas",
+      "crop": {
+        "x": 598,
+        "y": 558,
+        "width": 84,
+        "height": 96,
+        "scale": 4
+      },
+      "commit": "05acac6e"
+    },
+    {
+      "name": "runtime-03-route-stream-ford",
+      "requested": {
+        "floor": 11,
+        "x": 66.5,
+        "y": 34.5
+      },
+      "actual": "11:66.5,34.5 dir=down",
+      "captureSurface": "#game canvas",
+      "crop": {
+        "x": 598,
+        "y": 305,
+        "width": 84,
+        "height": 96,
+        "scale": 4
+      },
+      "commit": "05acac6e"
+    }
+  ]
+}
