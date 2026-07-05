@@ -1,7 +1,21 @@
 {
-  "commit": "bd220126",
-  "port": "5222",
+  "commit": "2e9065d5",
+  "port": "5223",
   "captureSurface": "#game canvas",
+  "textureResidency": [
+    {
+      "key": "playerSheet",
+      "exists": true,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "key": "playerGbcSheet",
+      "exists": false,
+      "width": 0,
+      "height": 0
+    }
+  ],
   "trace": [
     {
       "name": "runtime-01-waystone-route-gate",
@@ -12,8 +26,8 @@
       },
       "actual": "0:55.5,20.5 dir=down",
       "captureSurface": "#game canvas",
-      "port": "5222",
-      "commit": "bd220126"
+      "port": "5223",
+      "commit": "2e9065d5"
     },
     {
       "name": "runtime-02-route-south-gate",
@@ -24,8 +38,8 @@
       },
       "actual": "11:55.5,69.5 dir=down",
       "captureSurface": "#game canvas",
-      "port": "5222",
-      "commit": "bd220126"
+      "port": "5223",
+      "commit": "2e9065d5"
     },
     {
       "name": "runtime-03-route-stream-ford",
@@ -36,8 +50,8 @@
       },
       "actual": "11:66.5,34.5 dir=down",
       "captureSurface": "#game canvas",
-      "port": "5222",
-      "commit": "bd220126",
+      "port": "5223",
+      "commit": "2e9065d5",
       "crop": {
         "x": 529,
         "y": 267,

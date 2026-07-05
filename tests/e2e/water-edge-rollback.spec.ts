@@ -1,23 +1,24 @@
 import { expect, test } from "@playwright/test";
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { PNG } from "pngjs";
 
-const OUT = path.join(process.cwd(), "artifacts", "art-new-direction", "water-edge-fix");
+const OUT = path.join(process.cwd(), "artifacts", "art-new-direction", "water-edge-rollback-to-before");
+const BAD_RUNTIME_BLOB = "2e9065d5:artifacts/art-new-direction/water-edge-fix/runtime-03-route-stream-ford.png";
 const CROP_W = 220;
 const CROP_H = 160;
 const CROP_SCALE = 2;
 
 async function join(page: any): Promise<void> {
   await page.goto("/?e2e");
-  await page.locator("#nameInput").fill(`water_edge_${Date.now().toString(36)}`);
+  await page.locator("#nameInput").fill(`water_rollback_${Date.now().toString(36)}`);
   await page.locator("#joinButton").click();
   await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.self()));
   await page.evaluate(() => window.__TIB_E2E__?.setUserZoom(1.4));
 }
 
-test("water edge fix runtime screenshots", async ({ page }) => {
+test("water edge rollback runtime proof", async ({ page }) => {
   test.setTimeout(180000);
   mkdirSync(OUT, { recursive: true });
   await join(page);
@@ -42,7 +43,8 @@ test("water edge fix runtime screenshots", async ({ page }) => {
     commit: string;
     crop?: { x: number; y: number; width: number; height: number; scale: number };
   }> = [];
-  let fordCrop: PNG | null = null;
+  let restoredCrop: PNG | null = null;
+  let cropRect: { x: number; y: number; width: number; height: number; scale: number } | null = null;
 
   for (const shot of shots) {
     await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), shot);
@@ -77,19 +79,26 @@ test("water edge fix runtime screenshots", async ({ page }) => {
       expect(screenPoint).not.toBeNull();
       const cropX = Math.round((screenPoint?.x ?? 0) - CROP_W / 2);
       const cropY = Math.round((screenPoint?.y ?? 0) - 92);
-      fordCrop = nearestScale(cropPng(screenshot, cropX, cropY, CROP_W, CROP_H), CROP_SCALE);
-      Object.assign(entry, { crop: { x: cropX, y: cropY, width: CROP_W, height: CROP_H, scale: CROP_SCALE } });
+      cropRect = { x: cropX, y: cropY, width: CROP_W, height: CROP_H, scale: CROP_SCALE };
+      restoredCrop = nearestScale(cropPng(screenshot, cropX, cropY, CROP_W, CROP_H), CROP_SCALE);
+      Object.assign(entry, { crop: cropRect });
     }
     trace.push(entry);
   }
 
-  expect(fordCrop).not.toBeNull();
-  writeFileSync(path.join(OUT, "water-edge-gameplay-crop-contact-sheet.png"), PNG.sync.write(cropContactSheet([fordCrop!])));
-  writeFileSync(path.join(OUT, "runtime-screenshot-trace.json"), JSON.stringify({ commit, port, captureSurface: "#game canvas", trace }, null, 2));
+  expect(restoredCrop).not.toBeNull();
+  expect(cropRect).not.toBeNull();
+  const badRuntime = PNG.sync.read(execFileSync("git", ["show", BAD_RUNTIME_BLOB]));
+  const badCrop = nearestScale(cropPng(badRuntime, cropRect!.x, cropRect!.y, CROP_W, CROP_H), CROP_SCALE);
+
+  writeFileSync(path.join(OUT, "restored-route-stream-ford-runtime-crop.png"), PNG.sync.write(restoredCrop!));
+  writeFileSync(path.join(OUT, "route-stream-ford-gameplay-crop-contact-sheet.png"), PNG.sync.write(cropContactSheet([restoredCrop!])));
+  writeFileSync(path.join(OUT, "rejected-vs-restored-route-stream-ford.png"), PNG.sync.write(cropContactSheet([badCrop, restoredCrop!])));
+  writeFileSync(path.join(OUT, "runtime-screenshot-trace.json"), JSON.stringify({ commit, port, captureSurface: "#game canvas", textureResidency: residency, trace }, null, 2));
   writeFileSync(path.join(OUT, "runtime-screenshot-trace.txt"), trace.map((entry) => `${entry.name} -> ${entry.actual} surface=${entry.captureSurface} port=${entry.port} commit=${entry.commit}`).join("\n"));
 });
 
-test("water edge fix editor route screenshot", async ({ page }) => {
+test("water edge rollback editor route screenshot", async ({ page }) => {
   test.setTimeout(120000);
   mkdirSync(OUT, { recursive: true });
   await page.goto("/editor.html?__test=1", { waitUntil: "networkidle" });
