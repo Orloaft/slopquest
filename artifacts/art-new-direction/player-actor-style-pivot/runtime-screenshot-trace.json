@@ -1,5 +1,5 @@
 {
-  "commit": "d7e0a376",
+  "commit": "8869fad9",
   "captureSurface": "#game canvas",
   "actorFamily": "knight",
   "trace": [
@@ -19,7 +19,7 @@
         "height": 112,
         "scale": 3
       },
-      "commit": "d7e0a376"
+      "commit": "8869fad9"
     },
     {
       "name": "runtime-02-route-south-gate",
@@ -37,7 +37,7 @@
         "height": 112,
         "scale": 3
       },
-      "commit": "d7e0a376"
+      "commit": "8869fad9"
     },
     {
       "name": "runtime-03-route-stream-ford",
@@ -55,7 +55,7 @@
         "height": 112,
         "scale": 3
       },
-      "commit": "d7e0a376"
+      "commit": "8869fad9"
     }
   ]
 }
