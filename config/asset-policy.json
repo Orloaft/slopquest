@@ -91,7 +91,6 @@
       "description": "Player, enemy, and shared effect sheets needed before login and first spawn.",
       "include": [
         "public/player-sheet.png",
-        "public/sprites/actors/player-gbc-runtime.png",
         "public/goblin*.png",
         "public/skeleton.png",
         "public/grey-wolf-sheet.png",

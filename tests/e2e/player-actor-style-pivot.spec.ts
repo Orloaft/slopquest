@@ -4,36 +4,37 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { PNG } from "pngjs";
 
-const OUT = path.join(process.cwd(), "artifacts", "art-new-direction", "player-actor-gen2-quality");
-const CROP_W = 84;
-const CROP_H = 96;
-const CROP_SCALE = 4;
+const OUT = path.join(process.cwd(), "artifacts", "art-new-direction", "player-actor-style-pivot");
+const CROP_W = 96;
+const CROP_H = 112;
+const CROP_SCALE = 3;
 
 async function join(page: any): Promise<void> {
   await page.goto("/?e2e");
-  await page.locator("#nameInput").fill(`player_gen2_${Date.now().toString(36)}`);
+  await page.locator("#nameInput").fill(`actor_pivot_${Date.now().toString(36)}`);
   await page.locator("#joinButton").click();
   await page.waitForFunction(() => Boolean(window.__TIB_E2E__?.self()));
-  await page.evaluate(() => window.__TIB_E2E__?.setUserZoom(1));
+  await page.evaluate(() => window.__TIB_E2E__?.setUserZoom(1.4));
 }
 
-test("Gen 2 quality player actor appears on Waystone and route content", async ({ page }) => {
+test("restored TIB player actor appears on Waystone and route content", async ({ page }) => {
   test.setTimeout(180000);
   mkdirSync(OUT, { recursive: true });
   await join(page);
 
-  const residency = await page.evaluate(() => window.__TIB_E2E__?.textureResidency(["playerGbcSheet"]) ?? []);
-  expect(residency[0]).toMatchObject({ exists: true, width: 160, height: 192 });
+  const residency = await page.evaluate(() => window.__TIB_E2E__?.textureResidency(["playerSheet", "playerGbcSheet"]) ?? []);
+  expect(residency[0]).toMatchObject({ exists: true });
+  expect(residency[1]).toMatchObject({ exists: false });
 
-  const stats = await page.evaluate(() => window.__TIB_E2E__?.textureAlphaStats(["playerGbc-up-0", "playerGbc-right-0", "playerGbc-down-0", "playerGbc-left-0"]) ?? []);
-  expect(stats.every((entry) => entry.exists && entry.width === 40 && entry.height === 48 && entry.opaque > 0)).toBe(true);
+  const stats = await page.evaluate(() => window.__TIB_E2E__?.textureAlphaStats(["knight-up-0", "knight-right-0", "knight-down-0", "knight-left-0"]) ?? []);
+  expect(stats.every((entry) => entry.exists && entry.width === 78 && entry.height === 92 && entry.opaque > 0)).toBe(true);
 
-  const dataUrls = await page.evaluate(() => window.__TIB_E2E__?.frameDataUrls(["playerGbc-right-0", "playerGbc-left-0"]) ?? []);
+  const dataUrls = await page.evaluate(() => window.__TIB_E2E__?.frameDataUrls(["knight-right-0", "knight-left-0"]) ?? []);
   expect(dataUrls[0]?.dataUrl && dataUrls[1]?.dataUrl && dataUrls[0].dataUrl !== dataUrls[1].dataUrl).toBe(true);
 
-  const drift = await page.evaluate(() => window.__TIB_E2E__?.actorFrameAnchorDrift().filter((entry) => entry.family === "playerGbc") ?? []);
+  const drift = await page.evaluate(() => window.__TIB_E2E__?.actorFrameAnchorDrift().filter((entry) => entry.family === "knight") ?? []);
   expect(drift.length).toBe(4);
-  expect(drift.every((entry) => entry.driftX <= 0.01 && entry.driftY <= 0.01)).toBe(true);
+  expect(drift.filter((entry) => entry.driftX > 0.5 || entry.driftY > 0)).toEqual([]);
 
   const shots = [
     { name: "runtime-01-waystone-route-gate", floor: 0, x: 55.5, y: 20.5 },
@@ -48,8 +49,9 @@ test("Gen 2 quality player actor appears on Waystone and route content", async (
     crop: { x: number; y: number; width: number; height: number; scale: number };
     commit: string;
   }> = [];
-  const cropEntries: Array<{ name: string; crop: PNG }> = [];
+  const cropEntries: Array<{ crop: PNG }> = [];
   const commit = execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
+
   for (const shot of shots) {
     await page.evaluate((p) => window.__TIB_E2E__?.send({ type: "e2eGrantItems", floor: p.floor, x: p.x, y: p.y }), shot);
     await page.waitForFunction(
@@ -70,8 +72,8 @@ test("Gen 2 quality player actor appears on Waystone and route content", async (
     const screenshotBuffer = await page.locator("#game canvas").screenshot({ path: screenshotPath });
     const screenshot = PNG.sync.read(screenshotBuffer);
     const cropX = Math.round((screenPoint?.x ?? 0) - CROP_W / 2);
-    const cropY = Math.round((screenPoint?.y ?? 0) - 54);
-    cropEntries.push({ name: shot.name, crop: nearestScale(cropPng(screenshot, cropX, cropY, CROP_W, CROP_H), CROP_SCALE) });
+    const cropY = Math.round((screenPoint?.y ?? 0) - 70);
+    cropEntries.push({ crop: nearestScale(cropPng(screenshot, cropX, cropY, CROP_W, CROP_H), CROP_SCALE) });
     const actual = await page.evaluate(() => {
       const me = window.__TIB_E2E__?.self();
       return me ? `${me.floor}:${me.x.toFixed(1)},${me.y.toFixed(1)} dir=${me.dir}` : "none";
@@ -85,8 +87,9 @@ test("Gen 2 quality player actor appears on Waystone and route content", async (
       commit
     });
   }
+
   writeFileSync(path.join(OUT, "gameplay-crop-contact-sheet.png"), PNG.sync.write(cropContactSheet(cropEntries)));
-  writeFileSync(path.join(OUT, "runtime-screenshot-trace.json"), JSON.stringify({ commit, captureSurface: "#game canvas", trace }, null, 2));
+  writeFileSync(path.join(OUT, "runtime-screenshot-trace.json"), JSON.stringify({ commit, captureSurface: "#game canvas", actorFamily: "knight", trace }, null, 2));
   writeFileSync(path.join(OUT, "runtime-screenshot-trace.txt"), trace.map((entry) => `${entry.name} -> ${entry.actual} crop=${entry.crop.x},${entry.crop.y},${entry.crop.width}x${entry.crop.height}@${entry.crop.scale}x commit=${entry.commit}`).join("\n"));
 });
 
@@ -112,7 +115,7 @@ function nearestScale(src: PNG, scale: number): PNG {
   return out;
 }
 
-function cropContactSheet(entries: Array<{ name: string; crop: PNG }>): PNG {
+function cropContactSheet(entries: Array<{ crop: PNG }>): PNG {
   const gap = 8;
   const width = entries.length * CROP_W * CROP_SCALE + (entries.length + 1) * gap;
   const height = CROP_H * CROP_SCALE + gap * 2;

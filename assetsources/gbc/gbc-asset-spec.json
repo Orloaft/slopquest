@@ -1,14 +1,9 @@
 {
   "schema": "tib/gbc-asset-spec@1",
   "artifactsDir": "artifacts/art-new-direction/route-mvp",
-  "reportMirrorDirs": [
-    "artifacts/art-new-direction/player-actor-mvp",
-    "artifacts/art-new-direction/player-actor-gen2-quality"
-  ],
   "allowlist": [
     {
       "id": "route-forest-terrain",
-      "type": "tileset",
       "stage": "route",
       "stageFile": "assetsources/asset-forge/exports/route/route.stage.json",
       "tilesetName": "forest",
@@ -20,30 +15,6 @@
       "sourceTileSize": 16,
       "runtimeTileSize": 32,
       "scale": 2,
-      "maxColorsPerSource8x8Cell": 4,
-      "transitionExceptions": []
-    },
-    {
-      "id": "player-gbc-actor",
-      "type": "actor",
-      "source": "assetsources/gbc/actors/player-source.png",
-      "runtime": "assetsources/gbc/actors/player-runtime.png",
-      "publicRuntime": "public/sprites/actors/player-gbc-runtime.png",
-      "palette": "player-gbc",
-      "sourceTileSize": 20,
-      "runtimeTileSize": 40,
-      "sourceFrameWidth": 20,
-      "sourceFrameHeight": 24,
-      "runtimeFrameWidth": 40,
-      "runtimeFrameHeight": 48,
-      "scale": 2,
-      "rows": [
-        "walk_up",
-        "walk_right",
-        "walk_down",
-        "walk_left"
-      ],
-      "framesPerRow": 4,
       "maxColorsPerSource8x8Cell": 4,
       "transitionExceptions": []
     }

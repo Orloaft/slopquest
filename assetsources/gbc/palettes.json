@@ -18,17 +18,6 @@
         "#2d5734",
         "#49763e"
       ]
-    },
-    "player-gbc": {
-      "description": "Compact original TIB handheld protagonist palette.",
-      "colors": [
-        "#1b1b24",
-        "#1d392b",
-        "#1c5076",
-        "#2a8297",
-        "#7d5b30",
-        "#d2ab5e"
-      ]
     }
   }
 }
