@@ -1,0 +1,47 @@
+{
+  "ok": true,
+  "trace": [
+    {
+      "label": "Waystone north gate arrival",
+      "x": 55,
+      "y": 70,
+      "char": "S",
+      "blocked": false
+    },
+    {
+      "label": "south trail approach",
+      "x": 55,
+      "y": 61,
+      "char": "t",
+      "blocked": false
+    },
+    {
+      "label": "south encounter clearing",
+      "x": 52,
+      "y": 53,
+      "char": "F",
+      "blocked": false
+    },
+    {
+      "label": "stream ford",
+      "x": 66,
+      "y": 34,
+      "char": "t",
+      "blocked": false
+    },
+    {
+      "label": "north encounter clearing",
+      "x": 58,
+      "y": 16,
+      "char": "F",
+      "blocked": false
+    },
+    {
+      "label": "Northwood south arrival",
+      "x": 55,
+      "y": 1,
+      "char": "N",
+      "blocked": false
+    }
+  ]
+}

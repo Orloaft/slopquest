@@ -18,11 +18,11 @@ import { PNG } from "pngjs";
 const repoRoot = process.cwd();
 const ts = 32;
 
-// ---- locked tunables (mirror build-northwood-from-authored.ts) -------------
+// ---- locked tunables --------------------------------------------------------
 const TREE_TARGET_W_PX = 60;
 const TREE_MIN_SPACING_CELLS = 2;
-const ROAD_DITHER_EDGE_PX = 3;
-const ROAD_DITHER_PROB_BY_DEPTH = [0.2, 0.1, 0.04];
+const sourceTs = 16;
+const runtimeScale = ts / sourceTs;
 
 // ===========================================================================
 // PROCEDURAL ROUTE-1 LAYOUT (chars: F grass, f tree, ~ water, t trail, ^ void)
@@ -149,37 +149,99 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
 const isW = (r: number, c: number) => at(r, c) === "~" || at(r, c) === "s";
 const isR = (r: number, c: number) => at(r, c) === "t";
 
-// ---- atlases (shared with Northwood) ---------------------------------------
-const sliced = (name: string) => PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/sliced/${name}`)));
-const water = sliced("water-wang-tuft.png");
-const road = sliced("road-wang-tuft.png");
-const ptop = sliced("plateau-top-v2-tuft.png");
-const wCols = water.width / ts, rCols = road.width / ts, PTCOLS = ptop.width / ts;
-const grassFills = [0, 1, 2, 3].map((i) => PNG.sync.read(readFileSync(nodePath.join(repoRoot, `assetsources/curated/fills/route-grass-v${i}.png`))));
-
 const W = C * ts, H = R * ts;
 const out = new PNG({ width: W, height: H });
 out.data.fill(0);
-function blitTile(sheet: PNG, cols: number, idx: number, dx: number, dy: number) {
-  const sx = (idx % cols) * ts, sy = Math.floor(idx / cols) * ts;
-  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
-    const px = dx + x, py = dy + y; if (px < 0 || py < 0 || px >= W || py >= H) continue;
-    const si = ((sy + y) * sheet.width + (sx + x)) * 4; if (sheet.data[si + 3] === 0) continue;
-    const di = (py * W + px) * 4;
-    out.data[di] = sheet.data[si]; out.data[di + 1] = sheet.data[si + 1]; out.data[di + 2] = sheet.data[si + 2]; out.data[di + 3] = 255;
-  }
-}
-function blitFill(fill: PNG, dx: number, dy: number) {
-  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) {
-    const si = (y * fill.width + x) * 4;
-    const di = ((dy + y) * W + dx + x) * 4;
-    out.data[di] = fill.data[si]; out.data[di + 1] = fill.data[si + 1]; out.data[di + 2] = fill.data[si + 2]; out.data[di + 3] = 255;
-  }
-}
+const sourceW = C * sourceTs, sourceH = R * sourceTs;
+const sourceOut = new PNG({ width: sourceW, height: sourceH });
+sourceOut.data.fill(0);
 const hrand = (a: number, b: number) => {
   let h = (Math.imul(a, 374761393) + Math.imul(b, 668265263)) | 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h >>> 0) % 100000) / 100000;
+};
+
+type Rgb = [number, number, number];
+const GBC = {
+  grassDark: [67, 108, 42] as Rgb,
+  grassMid: [99, 149, 58] as Rgb,
+  grassLight: [139, 184, 77] as Rgb,
+  roadDark: [125, 91, 48] as Rgb,
+  roadMid: [173, 127, 65] as Rgb,
+  roadLight: [210, 171, 94] as Rgb,
+  waterDark: [28, 80, 118] as Rgb,
+  waterMid: [42, 130, 151] as Rgb,
+  waterLight: [110, 181, 174] as Rgb,
+  shore: [91, 116, 65] as Rgb,
+  canopyDark: [29, 57, 43] as Rgb,
+  canopyMid: [45, 87, 52] as Rgb,
+  canopyLight: [73, 118, 62] as Rgb,
+};
+const setSourcePixel = (px: number, py: number, rgb: Rgb) => {
+  if (px < 0 || py < 0 || px >= sourceW || py >= sourceH) return;
+  const di = (py * sourceW + px) * 4;
+  sourceOut.data[di] = rgb[0];
+  sourceOut.data[di + 1] = rgb[1];
+  sourceOut.data[di + 2] = rgb[2];
+  sourceOut.data[di + 3] = 255;
+};
+const drawSourceCell = (r: number, c: number, fn: (x: number, y: number) => Rgb) => {
+  const ox = c * sourceTs, oy = r * sourceTs;
+  for (let y = 0; y < sourceTs; y++) for (let x = 0; x < sourceTs; x++) setSourcePixel(ox + x, oy + y, fn(x, y));
+};
+const drawGrassCell = (r: number, c: number, treeReserve = false) => {
+  const variant = Math.floor(hrand(c, r) * 4);
+  drawSourceCell(r, c, (x, y) => {
+    const h = hrand(variant * 31 + x, variant * 37 + y);
+    if (treeReserve && ((x + y + variant) % 5 === 0)) return GBC.grassDark;
+    if (((x * 3 + y * 5 + variant) % 17 === 0) || h > 0.965) return GBC.grassLight;
+    if (((x + y * 2 + variant) % 11 === 0) || h < 0.08) return GBC.grassDark;
+    return GBC.grassMid;
+  });
+};
+const drawRoadCell = (r: number, c: number) => {
+  const mask = (isR(r - 1, c) ? 1 : 0) | (isR(r, c + 1) ? 2 : 0) | (isR(r + 1, c) ? 4 : 0) | (isR(r, c - 1) ? 8 : 0);
+  const ox = c * sourceTs, oy = r * sourceTs;
+  for (let y = 0; y < sourceTs; y++) for (let x = 0; x < sourceTs; x++) {
+    const inVertical = x >= 5 && x <= 10 && (y >= 5 || (mask & 1)) && (y <= 10 || (mask & 4));
+    const inHorizontal = y >= 5 && y <= 10 && (x >= 5 || (mask & 8)) && (x <= 10 || (mask & 2));
+    const inCenter = x >= 5 && x <= 10 && y >= 5 && y <= 10;
+    if (!(inVertical || inHorizontal || inCenter)) continue;
+    const edge = x === 5 || x === 10 || y === 5 || y === 10;
+    const pebble = (x * 7 + y * 3 + mask) % 19 === 0;
+    setSourcePixel(ox + x, oy + y, edge ? GBC.roadDark : pebble ? GBC.roadLight : GBC.roadMid);
+  }
+};
+const drawWaterCell = (r: number, c: number) => {
+  const landN = !isW(r - 1, c), landS = !isW(r + 1, c), landW = !isW(r, c - 1), landE = !isW(r, c + 1);
+  drawSourceCell(r, c, (x, y) => {
+    if ((landN && y <= 1) || (landS && y >= 14) || (landW && x <= 1) || (landE && x >= 14)) return GBC.shore;
+    const edgeMask = (landN ? 1 : 0) | (landE ? 2 : 0) | (landS ? 4 : 0) | (landW ? 8 : 0);
+    const wave = ((x + y * 2 + edgeMask) % 13 === 0) || ((x * 2 + y + edgeMask) % 17 === 0);
+    const dark = ((x + edgeMask) % 7 === 0 && (y + edgeMask) % 3 === 0);
+    return wave ? GBC.waterLight : dark ? GBC.waterDark : GBC.waterMid;
+  });
+};
+const drawBlockerCell = (r: number, c: number) => {
+  drawSourceCell(r, c, (x, y) => {
+    if (x === 0 || y === 0 || x === 15 || y === 15) return GBC.canopyDark;
+    if (((x - 4) ** 2 + (y - 5) ** 2 < 12) || ((x - 11) ** 2 + (y - 10) ** 2 < 10)) return GBC.canopyLight;
+    if ((x + y) % 5 === 0) return GBC.canopyDark;
+    return GBC.canopyMid;
+  });
+};
+const scaleSourceToRuntime = () => {
+  for (let sy = 0; sy < sourceH; sy++) for (let sx = 0; sx < sourceW; sx++) {
+    const si = (sy * sourceW + sx) * 4;
+    for (let yy = 0; yy < runtimeScale; yy++) for (let xx = 0; xx < runtimeScale; xx++) {
+      const dx = sx * runtimeScale + xx, dy = sy * runtimeScale + yy;
+      const di = (dy * W + dx) * 4;
+      out.data[di] = sourceOut.data[si];
+      out.data[di + 1] = sourceOut.data[si + 1];
+      out.data[di + 2] = sourceOut.data[si + 2];
+      out.data[di + 3] = sourceOut.data[si + 3];
+    }
+  }
 };
 
 // ---- per-cell semantics (drives collision + vocab) -------------------------
@@ -196,77 +258,50 @@ for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   else { kind[r][c] = "grass"; }
 }
 
-// ---- ground fill: interior grass on ALL land -------------------------------
-const GRASS_IDX0 = 0;
+// ---- original GBC terrain source, authored at 16px then scaled 2x ----------
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
   const ch = at(r, c);
-  if (ch === "~" || ch === "s" || ch === "^" || ch === ".") continue;
-  if (ch === "F" || ch === "f") blitFill(grassFills[Math.floor(hrand(c, r) * grassFills.length)], c * ts, r * ts);
-  else blitTile(ptop, PTCOLS, GRASS_IDX0, c * ts, r * ts);
+  if (ch === "^") drawBlockerCell(r, c);
+  else if (ch === "~" || ch === "s") drawWaterCell(r, c);
+  else if (ch === "t") drawSourceCell(r, c, () => GBC.grassMid);
+  else drawGrassCell(r, c, ch === "f");
 }
-// ---- water corner-Wang dual-grid -------------------------------------------
-for (let i = 0; i <= R; i++) for (let j = 0; j <= C; j++) {
-  const m = (isW(i - 1, j - 1) ? 1 : 0) | (isW(i - 1, j) ? 2 : 0) | (isW(i, j) ? 4 : 0) | (isW(i, j - 1) ? 8 : 0);
-  blitTile(water, wCols, m, Math.round((j - 0.5) * ts), Math.round((i - 0.5) * ts));
-}
-// ---- roads edge-Wang -------------------------------------------------------
-// road-wang.png IS laid out in NESW-mask order: the connectivity mask is the atlas
-// index directly. This is exactly how the Northwood baker (the visual quality bar)
-// renders its own 1-wide painted trails and corners, and it reads cleanly. The
-// earlier ROAD_TILE remaps were the real bug — they shuffled correct mask-indexed
-// tiles into the wrong slots, which is why the bends stopped blending. Mask-direct,
-// matching Northwood, restores all four painted corners (N=1,E=2,S=4,W=8).
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
-  if (!isR(r, c)) continue;
-  const m = (isR(r - 1, c) ? 1 : 0) | (isR(r, c + 1) ? 2 : 0) | (isR(r + 1, c) ? 4 : 0) | (isR(r, c - 1) ? 8 : 0);
-  blitTile(road, rCols, m, c * ts, r * ts);
+  if (isR(r, c)) drawRoadCell(r, c);
 }
-const isGrassCell = (r: number, c: number) => { const ch = at(r, c); return ch === "F" || ch === "f"; };
-for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
-  if (!isR(r, c)) continue;
-  const sides = [isGrassCell(r - 1, c) && "N", isGrassCell(r + 1, c) && "S", isGrassCell(r, c - 1) && "W", isGrassCell(r, c + 1) && "E"].filter(Boolean) as string[];
-  for (const side of sides) for (let d = 0; d < ROAD_DITHER_EDGE_PX; d++) for (let t = 0; t < ts; t++) {
-    let px: number, py: number, sx: number, sy: number;
-    if (side === "N") { px = c * ts + t; py = r * ts + d; sx = px; sy = r * ts - 1 - d; }
-    else if (side === "S") { px = c * ts + t; py = (r + 1) * ts - 1 - d; sx = px; sy = (r + 1) * ts + d; }
-    else if (side === "W") { px = c * ts + d; py = r * ts + t; sx = c * ts - 1 - d; sy = py; }
-    else { px = (c + 1) * ts - 1 - d; py = r * ts + t; sx = (c + 1) * ts + d; sy = py; }
-    if (hrand(px % ts, py % ts) > ROAD_DITHER_PROB_BY_DEPTH[d]) continue;
-    if (sx < 0 || sy < 0 || sx >= W || sy >= H) continue;
-    const di = (py * W + px) * 4, si = (sy * W + sx) * 4; if (out.data[si + 3] === 0) continue;
-    out.data[di] = out.data[si]; out.data[di + 1] = out.data[si + 1]; out.data[di + 2] = out.data[si + 2];
-  }
-}
-// border void fill
-for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
-  if (at(r, c) !== "^") continue;
-  for (let y = 0; y < ts; y++) for (let x = 0; x < ts; x++) { const di = ((r * ts + y) * W + (c * ts + x)) * 4; out.data[di] = 26; out.data[di + 1] = 42; out.data[di + 2] = 58; out.data[di + 3] = 255; }
-}
+scaleSourceToRuntime();
 
 // ===========================================================================
 // SLICE + DEDUPE -> tileset
 // ===========================================================================
 const cellTile: number[][] = Array.from({ length: R }, () => new Array(C).fill(0));
 const tileBuf: Buffer[] = [];
+const sourceTileBuf: Buffer[] = [];
 const tileBlocked: boolean[] = [];
 const tileKind: Kind[] = [];
 const tileByKey = new Map<string, number>();
-function cellKey(r: number, c: number): { key: string; buf: Buffer } {
+function cellKey(r: number, c: number): { key: string; buf: Buffer; sourceBuf: Buffer } {
   const buf = Buffer.alloc(ts * ts * 4);
   for (let y = 0; y < ts; y++) {
     const srcStart = ((r * ts + y) * W + c * ts) * 4;
     out.data.copy(buf, y * ts * 4, srcStart, srcStart + ts * 4);
   }
-  return { key: buf.toString("latin1"), buf };
+  const sourceBuf = Buffer.alloc(sourceTs * sourceTs * 4);
+  for (let y = 0; y < sourceTs; y++) {
+    const srcStart = ((r * sourceTs + y) * sourceW + c * sourceTs) * 4;
+    sourceOut.data.copy(sourceBuf, y * sourceTs * 4, srcStart, srcStart + sourceTs * 4);
+  }
+  return { key: buf.toString("latin1"), buf, sourceBuf };
 }
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
-  const { key, buf } = cellKey(r, c);
+  const { key, buf, sourceBuf } = cellKey(r, c);
   const fullKey = `${blocked[r][c] ? "1" : "0"}|${key}`;
   let idx = tileByKey.get(fullKey);
   if (idx === undefined) {
     idx = tileBuf.length;
     tileByKey.set(fullKey, idx);
     tileBuf.push(buf);
+    sourceTileBuf.push(sourceBuf);
     tileBlocked.push(blocked[r][c]);
     tileKind.push(kind[r][c]);
   }
@@ -281,11 +316,18 @@ const PACK_COLS = 24;
 const packRows = Math.ceil(N / PACK_COLS);
 const sheet = new PNG({ width: PACK_COLS * ts, height: packRows * ts });
 sheet.data.fill(0);
+const sourceSheet = new PNG({ width: PACK_COLS * sourceTs, height: packRows * sourceTs });
+sourceSheet.data.fill(0);
 for (let i = 0; i < N; i++) {
   const tx = (i % PACK_COLS) * ts, ty = Math.floor(i / PACK_COLS) * ts;
   for (let y = 0; y < ts; y++) {
     const dst = ((ty + y) * sheet.width + tx) * 4;
     tileBuf[i].copy(sheet.data, dst, y * ts * 4, y * ts * 4 + ts * 4);
+  }
+  const stx = (i % PACK_COLS) * sourceTs, sty = Math.floor(i / PACK_COLS) * sourceTs;
+  for (let y = 0; y < sourceTs; y++) {
+    const dst = ((sty + y) * sourceSheet.width + stx) * 4;
+    sourceTileBuf[i].copy(sourceSheet.data, dst, y * sourceTs * 4, y * sourceTs * 4 + sourceTs * 4);
   }
 }
 function avgColor(buf: Buffer): string {
@@ -453,7 +495,12 @@ for (const id of spriteIds) {
 // ===========================================================================
 const exportDir = nodePath.join(repoRoot, "assetsources/asset-forge/exports/route");
 mkdirSync(exportDir, { recursive: true });
+const gbcRouteDir = nodePath.join(repoRoot, "assetsources/gbc/route");
+mkdirSync(gbcRouteDir, { recursive: true });
 writeFileSync(nodePath.join(exportDir, "forest.png"), PNG.sync.write(sheet));
+writeFileSync(nodePath.join(gbcRouteDir, "forest-source.png"), PNG.sync.write(sourceSheet));
+writeFileSync(nodePath.join(gbcRouteDir, "route-source-composite.png"), PNG.sync.write(sourceOut));
+writeFileSync(nodePath.join(gbcRouteDir, "route-runtime-composite.png"), PNG.sync.write(out));
 writeFileSync(nodePath.join(exportDir, "forest.tileset.json"), JSON.stringify({ schema: "asset-forge/tileset@1", name: "forest", image: "forest.png", tileSize: ts, columns: PACK_COLS, rows: packRows, tiles: Array.from({ length: N }, (_, i) => ({ index: i, role: ROLE_BY_KIND[tileKind[i]], blocked: tileBlocked[i] })) }, null, 2));
 
 const stage = {

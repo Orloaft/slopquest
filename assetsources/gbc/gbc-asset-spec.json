@@ -1,0 +1,22 @@
+{
+  "schema": "tib/gbc-asset-spec@1",
+  "artifactsDir": "artifacts/art-new-direction/route-mvp",
+  "allowlist": [
+    {
+      "id": "route-forest-terrain",
+      "stage": "route",
+      "stageFile": "assetsources/asset-forge/exports/route/route.stage.json",
+      "tilesetName": "forest",
+      "source": "assetsources/gbc/route/forest-source.png",
+      "runtime": "assetsources/asset-forge/exports/route/forest.png",
+      "publicRuntime": "public/tilesets/route/forest.png",
+      "manifest": "assetsources/asset-forge/exports/route/forest.tileset.json",
+      "palette": "route-overworld",
+      "sourceTileSize": 16,
+      "runtimeTileSize": 32,
+      "scale": 2,
+      "maxColorsPerSource8x8Cell": 4,
+      "transitionExceptions": []
+    }
+  ]
+}

@@ -4,7 +4,7 @@
   "image": "forest.png",
   "tileSize": 32,
   "columns": 24,
-  "rows": 3,
+  "rows": 2,
   "tiles": [
     {
       "index": 0,
@@ -18,73 +18,73 @@
     },
     {
       "index": 2,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 3,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 4,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 5,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 6,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 7,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 8,
-      "role": "packed-road",
+      "role": "forest-floor",
       "blocked": false
     },
     {
       "index": 9,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 10,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 11,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 12,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 13,
-      "role": "forest-floor",
+      "role": "packed-road",
       "blocked": false
     },
     {
       "index": 14,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 15,
-      "role": "deep-water",
-      "blocked": true
+      "role": "packed-road",
+      "blocked": false
     },
     {
       "index": 16,
@@ -93,8 +93,8 @@
     },
     {
       "index": 17,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 18,
@@ -114,17 +114,17 @@
     {
       "index": 21,
       "role": "deep-water",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 22,
       "role": "deep-water",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 23,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 24,
@@ -133,186 +133,36 @@
     },
     {
       "index": 25,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 26,
-      "role": "forest-floor",
-      "blocked": false
+      "role": "deep-water",
+      "blocked": true
     },
     {
       "index": 27,
       "role": "deep-water",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 28,
       "role": "deep-water",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 29,
       "role": "deep-water",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 30,
       "role": "deep-water",
-      "blocked": true
+      "blocked": false
     },
     {
       "index": 31,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 32,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 33,
-      "role": "deep-water",
-      "blocked": false
-    },
-    {
-      "index": 34,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 35,
-      "role": "deep-water",
-      "blocked": false
-    },
-    {
-      "index": 36,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 37,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 38,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 39,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 40,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 41,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 42,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 43,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 44,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 45,
-      "role": "deep-water",
-      "blocked": false
-    },
-    {
-      "index": 46,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 47,
-      "role": "deep-water",
-      "blocked": false
-    },
-    {
-      "index": 48,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 49,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 50,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 51,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 52,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 53,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 54,
-      "role": "deep-water",
-      "blocked": false
-    },
-    {
-      "index": 55,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 56,
-      "role": "deep-water",
-      "blocked": false
-    },
-    {
-      "index": 57,
-      "role": "packed-road",
-      "blocked": false
-    },
-    {
-      "index": 58,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 59,
-      "role": "forest-floor",
-      "blocked": false
-    },
-    {
-      "index": 60,
-      "role": "deep-water",
-      "blocked": true
-    },
-    {
-      "index": 61,
       "role": "packed-road",
       "blocked": false
     }

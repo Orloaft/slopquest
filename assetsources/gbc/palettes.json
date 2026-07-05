@@ -1,0 +1,23 @@
+{
+  "schema": "tib/gbc-palettes@1",
+  "palettes": {
+    "route-overworld": {
+      "description": "Original Waystone Trail terrain palette for the GBC route MVP.",
+      "colors": [
+        "#436c2a",
+        "#63953a",
+        "#8bb84d",
+        "#7d5b30",
+        "#ad7f41",
+        "#d2ab5e",
+        "#1c5076",
+        "#2a8297",
+        "#6eb5ae",
+        "#5b7441",
+        "#1d392b",
+        "#2d5734",
+        "#49763e"
+      ]
+    }
+  }
+}

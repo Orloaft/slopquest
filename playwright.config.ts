@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const e2ePort = process.env.TIB_E2E_PORT ?? "5173";
+
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 60000,
@@ -14,13 +16,15 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
-    baseURL: "http://127.0.0.1:5173",
+    baseURL: `http://127.0.0.1:${e2ePort}`,
     trace: "retain-on-failure",
     screenshot: "only-on-failure"
   },
   webServer: {
-    command: "npm run dev:e2e",
-    url: "http://127.0.0.1:5173",
+    command: process.env.TIB_E2E_PORT
+      ? `E2E_TEST=1 concurrently "vite --host 127.0.0.1 --port ${e2ePort}" "node server/index.ts"`
+      : "npm run dev:e2e",
+    url: `http://127.0.0.1:${e2ePort}`,
     reuseExistingServer: false,
     timeout: 60000
   },

@@ -1,0 +1,5 @@
+runtime-01-waystone-north-gate -> 0:55.5,20.5
+runtime-02-route-south-gate -> 11:55.5,69.5
+runtime-03-route-encounter-clearing -> 11:52.5,53.5
+runtime-04-route-stream-ford -> 11:66.5,34.5
+runtime-05-northwood-south-arrival -> 3:55.5,67.5
