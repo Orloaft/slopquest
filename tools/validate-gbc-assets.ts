@@ -8,16 +8,23 @@ interface PaletteFile {
 
 interface AllowlistEntry {
   id: string;
-  stage: string;
-  stageFile: string;
-  tilesetName: string;
+  type?: "tileset" | "actor";
+  stage?: string;
+  stageFile?: string;
+  tilesetName?: string;
   source: string;
   runtime: string;
   publicRuntime: string;
-  manifest: string;
+  manifest?: string;
   palette: string;
   sourceTileSize: number;
   runtimeTileSize: number;
+  sourceFrameWidth?: number;
+  sourceFrameHeight?: number;
+  runtimeFrameWidth?: number;
+  runtimeFrameHeight?: number;
+  rows?: string[];
+  framesPerRow?: number;
   scale: number;
   maxColorsPerSource8x8Cell: number;
   transitionExceptions?: Array<{ check: string; reason: string }>;
@@ -25,6 +32,7 @@ interface AllowlistEntry {
 
 interface Spec {
   artifactsDir: string;
+  reportMirrorDirs?: string[];
   allowlist: AllowlistEntry[];
 }
 
@@ -66,23 +74,27 @@ function validateEntry(entry: AllowlistEntry, palettes: PaletteFile, findings: F
   const sourcePath = path.join(repoRoot, entry.source);
   const runtimePath = path.join(repoRoot, entry.runtime);
   const publicRuntimePath = path.join(repoRoot, entry.publicRuntime);
-  const manifestPath = path.join(repoRoot, entry.manifest);
-  const stagePath = path.join(repoRoot, entry.stageFile);
+  const manifestPath = entry.manifest ? path.join(repoRoot, entry.manifest) : null;
+  const stagePath = entry.stageFile ? path.join(repoRoot, entry.stageFile) : null;
   const source = loadPng(sourcePath, findings, entry.id);
   const runtime = loadPng(runtimePath, findings, entry.id);
   const allowed = new Set((palettes.palettes[entry.palette]?.colors ?? []).map((color) => color.toLowerCase()));
-  const stats: Record<string, unknown> = { id: entry.id };
+  const kind = entry.type ?? "tileset";
+  const stats: Record<string, unknown> = { id: entry.id, type: kind };
 
   if (!palettes.palettes[entry.palette]) {
     findings.push({ id: entry.id, level: "error", message: `Unknown palette '${entry.palette}'` });
   }
-  if (!existsSync(manifestPath)) findings.push({ id: entry.id, level: "error", message: `Missing manifest: ${entry.manifest}` });
-  if (!existsSync(stagePath)) findings.push({ id: entry.id, level: "error", message: `Missing stage file: ${entry.stageFile}` });
+  if (kind === "tileset") {
+    if (!manifestPath || !entry.manifest || !existsSync(manifestPath)) findings.push({ id: entry.id, level: "error", message: `Missing manifest: ${entry.manifest ?? "(unset)"}` });
+    if (!stagePath || !entry.stageFile || !existsSync(stagePath)) findings.push({ id: entry.id, level: "error", message: `Missing stage file: ${entry.stageFile ?? "(unset)"}` });
+    if (!entry.stage || !entry.tilesetName) findings.push({ id: entry.id, level: "error", message: "Tileset entries require stage and tilesetName" });
+  }
   if (existsSync(runtimePath) && existsSync(publicRuntimePath) && !readFileSync(runtimePath).equals(readFileSync(publicRuntimePath))) {
     findings.push({ id: entry.id, level: "error", message: `${entry.publicRuntime} is stale; run npm run assets:stage:route` });
   }
 
-  if (existsSync(stagePath)) {
+  if (kind === "tileset" && stagePath && manifestPath && entry.tilesetName && entry.manifest && existsSync(stagePath)) {
     const stage = readJson<{ tilesets: Array<{ name: string; image: string; manifest: string }> }>(stagePath);
     const referenced = stage.tilesets.find((tileset) => tileset.name === entry.tilesetName);
     if (!referenced) {
@@ -104,11 +116,37 @@ function validateEntry(entry: AllowlistEntry, palettes: PaletteFile, findings: F
   if (runtime.width !== expectedRuntime[0] || runtime.height !== expectedRuntime[1]) {
     findings.push({ id: entry.id, level: "error", message: `Runtime sheet must be ${entry.scale}x source (${expectedRuntime.join("x")}), got ${runtime.width}x${runtime.height}` });
   }
-  if (source.width % entry.sourceTileSize !== 0 || source.height % entry.sourceTileSize !== 0) {
+  if (kind === "tileset" && (source.width % entry.sourceTileSize !== 0 || source.height % entry.sourceTileSize !== 0)) {
     findings.push({ id: entry.id, level: "error", message: `Source sheet is not aligned to ${entry.sourceTileSize}px tiles` });
   }
-  if (runtime.width % entry.runtimeTileSize !== 0 || runtime.height % entry.runtimeTileSize !== 0) {
+  if (kind === "tileset" && (runtime.width % entry.runtimeTileSize !== 0 || runtime.height % entry.runtimeTileSize !== 0)) {
     findings.push({ id: entry.id, level: "error", message: `Runtime sheet is not aligned to ${entry.runtimeTileSize}px tiles` });
+  }
+  if (kind === "actor") {
+    const sourceFrameWidth = entry.sourceFrameWidth ?? entry.sourceTileSize;
+    const sourceFrameHeight = entry.sourceFrameHeight ?? entry.sourceTileSize;
+    const runtimeFrameWidth = entry.runtimeFrameWidth ?? entry.runtimeTileSize;
+    const runtimeFrameHeight = entry.runtimeFrameHeight ?? entry.runtimeTileSize;
+    const expectedRows = entry.rows?.length ?? 0;
+    const expectedFrames = entry.framesPerRow ?? 0;
+    if (source.width % sourceFrameWidth !== 0 || source.height % sourceFrameHeight !== 0) {
+      findings.push({ id: entry.id, level: "error", message: `Actor source is not aligned to ${sourceFrameWidth}x${sourceFrameHeight}px frames` });
+    }
+    if (runtime.width % runtimeFrameWidth !== 0 || runtime.height % runtimeFrameHeight !== 0) {
+      findings.push({ id: entry.id, level: "error", message: `Actor runtime is not aligned to ${runtimeFrameWidth}x${runtimeFrameHeight}px frames` });
+    }
+    if (expectedRows && source.height !== expectedRows * sourceFrameHeight) {
+      findings.push({ id: entry.id, level: "error", message: `Actor source row count must match rows (${expectedRows}), got ${source.height / sourceFrameHeight}` });
+    }
+    if (expectedFrames && source.width !== expectedFrames * sourceFrameWidth) {
+      findings.push({ id: entry.id, level: "error", message: `Actor source frame count must be ${expectedFrames} per row, got ${source.width / sourceFrameWidth}` });
+    }
+    stats.actorContract = {
+      sourceFrame: [sourceFrameWidth, sourceFrameHeight],
+      runtimeFrame: [runtimeFrameWidth, runtimeFrameHeight],
+      rows: entry.rows,
+      framesPerRow: entry.framesPerRow
+    };
   }
 
   const usedColors = new Set<string>();
@@ -137,12 +175,16 @@ function validateEntry(entry: AllowlistEntry, palettes: PaletteFile, findings: F
   }
 
   const overBudgetCells: Array<{ tileX: number; tileY: number; cellX: number; cellY: number; colors: number }> = [];
-  for (let ty = 0; ty < source.height; ty += entry.sourceTileSize) for (let tx = 0; tx < source.width; tx += entry.sourceTileSize) {
-    for (let cy = 0; cy < entry.sourceTileSize; cy += 8) for (let cx = 0; cx < entry.sourceTileSize; cx += 8) {
+  const sourceCellWidth = entry.sourceFrameWidth ?? entry.sourceTileSize;
+  const sourceCellHeight = entry.sourceFrameHeight ?? entry.sourceTileSize;
+  for (let ty = 0; ty < source.height; ty += sourceCellHeight) for (let tx = 0; tx < source.width; tx += sourceCellWidth) {
+    for (let cy = 0; cy < sourceCellHeight; cy += 8) for (let cx = 0; cx < sourceCellWidth; cx += 8) {
       const colors = new Set<string>();
-      for (let y = 0; y < 8; y += 1) for (let x = 0; x < 8; x += 1) colors.add(hexAt(source, tx + cx + x, ty + cy + y));
+      const cellW = Math.min(8, source.width - tx - cx, sourceCellWidth - cx);
+      const cellH = Math.min(8, source.height - ty - cy, sourceCellHeight - cy);
+      for (let y = 0; y < cellH; y += 1) for (let x = 0; x < cellW; x += 1) colors.add(hexAt(source, tx + cx + x, ty + cy + y));
       if (colors.size > entry.maxColorsPerSource8x8Cell) {
-        overBudgetCells.push({ tileX: tx / entry.sourceTileSize, tileY: ty / entry.sourceTileSize, cellX: cx / 8, cellY: cy / 8, colors: colors.size });
+        overBudgetCells.push({ tileX: tx / sourceCellWidth, tileY: ty / sourceCellHeight, cellX: cx / 8, cellY: cy / 8, colors: colors.size });
       }
     }
   }
@@ -160,24 +202,27 @@ const palettes = readJson<PaletteFile>(palettePath);
 const findings: Finding[] = [];
 const summaries = spec.allowlist.map((entry) => validateEntry(entry, palettes, findings));
 const ok = findings.every((finding) => finding.level !== "error");
-const outDir = path.join(repoRoot, spec.artifactsDir);
-mkdirSync(outDir, { recursive: true });
 const report = { ok, generatedAt: new Date().toISOString(), allowlist: spec.allowlist.map((entry) => entry.id), summaries, findings };
-writeFileSync(path.join(outDir, "gbc-validator-report.json"), JSON.stringify(report, null, 2));
-writeFileSync(
-  path.join(outDir, "gbc-validator-report.md"),
-  [
-    "# GBC Asset Validator Report",
-    "",
-    `Status: ${ok ? "PASS" : "FAIL"}`,
-    "",
-    "## Allowlist",
-    ...spec.allowlist.map((entry) => `- ${entry.id}: ${entry.source} -> ${entry.runtime}`),
-    "",
-    "## Findings",
-    ...(findings.length ? findings.map((finding) => `- ${finding.level.toUpperCase()} ${finding.id}: ${finding.message}`) : ["- None."])
-  ].join("\n")
-);
+const reportDirs = [spec.artifactsDir, ...(spec.reportMirrorDirs ?? [])];
+for (const reportDir of reportDirs) {
+  const outDir = path.join(repoRoot, reportDir);
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(path.join(outDir, "gbc-validator-report.json"), JSON.stringify(report, null, 2));
+  writeFileSync(
+    path.join(outDir, "gbc-validator-report.md"),
+    [
+      "# GBC Asset Validator Report",
+      "",
+      `Status: ${ok ? "PASS" : "FAIL"}`,
+      "",
+      "## Allowlist",
+      ...spec.allowlist.map((entry) => `- ${entry.id}: ${entry.source} -> ${entry.runtime}`),
+      "",
+      "## Findings",
+      ...(findings.length ? findings.map((finding) => `- ${finding.level.toUpperCase()} ${finding.id}: ${finding.message}`) : ["- None."])
+    ].join("\n")
+  );
+}
 
 console.log(`${ok ? "PASS" : "FAIL"} GBC asset validator: ${findings.length} findings`);
 if (!ok) process.exit(1);

@@ -1171,6 +1171,7 @@ const ATTACK_FAMILY: Record<string, string> = {};
 const ATTACK_FAMILY_FRAMES: Record<string, number> = {};
 const DYNAMIC_PATH_REFRESH_MS = 350;
 const DYNAMIC_PATH_REFRESH_DISTANCE = 0.65;
+const PLAYER_ACTOR_FAMILY = "playerGbc";
 
 function runtimeImageAsset(
   key: string,
@@ -1239,6 +1240,7 @@ function floorActorImageAssets(floor: number): RuntimeImageAsset[] {
 }
 
 const CORE_BOOTSTRAP_IMAGE_ASSETS: RuntimeImageAsset[] = [
+  runtimeImageAsset("playerGbcSheet", "/sprites/actors/player-gbc-runtime.png", "startup", "GBC player actor sheet"),
   runtimeImageAsset("playerSheet", "/player-sheet.png", "startup", "player actor sheet"),
   runtimeImageAsset("goblinSheet", "/goblin.png", "startup", "legacy goblin actor sheet"),
   runtimeImageAsset("skeletonSheet", "/skeleton.png", "startup", "skeleton actor sheet"),
@@ -3657,7 +3659,7 @@ function syncEntities(): void {
       addEntityLayerView(view);
     }
     setEntityTarget(view, player.x * TILE_SIZE, player.y * TILE_SIZE);
-    setActorAnimation(view, "knight", player.dir, player.moving || (player.action != null && ["woodcutting", "fishing", "mining", "cooking"].includes(player.action.type)), 40, 48);
+    setActorAnimation(view, PLAYER_ACTOR_FAMILY, player.dir, player.moving || (player.action != null && ["woodcutting", "fishing", "mining", "cooking"].includes(player.action.type)), 40, 48);
     setAlphaIfChanged(view, player.dead ? 0.45 : 1);
     setTextIfChanged(view.nameText, player.name);
     setRectangleWidthIfChanged(view.hp, 34 * (player.hp / player.maxHp));
@@ -3932,7 +3934,7 @@ function createPlayerView(player: PlayerView): PlayerEntityView {
   view.targetY = view.y;
   const targetRing = scene.add.ellipse(0, 8, 34, 18).setStrokeStyle(2, 0x86efac, 0.8);
   const shadow = createContactShadow(0, 13, 26, 10, 0.26);
-  const family = "knight";
+  const family = PLAYER_ACTOR_FAMILY;
   const sprite = scene.add.sprite(0, -10, actorTextureKey(family, player.dir, 0)).setDisplaySize(40, 48);
   const nameText = scene.add.text(0, -43, player.name, textStyle(11, "#eef6ee")).setOrigin(0.5);
   const hpBack = scene.add.rectangle(-17, -31, 34, 4, 0x191d1a).setOrigin(0, 0.5);
@@ -7704,6 +7706,7 @@ function createActorFrames(scene: Phaser.Scene): void {
 
   createFrameSet(scene, "playerSheet", "knight", knightRows, knightXs, 78, 92);
   createFrameSet(scene, "playerSheet", "caster", casterRows, casterXs, 82, 96);
+  createExplicitFrameSet(scene, "playerGbcSheet", PLAYER_ACTOR_FAMILY, uniformDirectionFrames(40, 48, 4));
   createExplicitFrameSet(scene, "goblinSheet", "goblin", uniformDirectionFrames(96, 96, 4));
   createExplicitFrameSet(scene, "skeletonSheet", "skeleton", skeletonFrames);
   createExplicitFrameSet(scene, "goblinScoutSheet", "goblinScout", uniformDirectionFrames(96, 96, 4));
@@ -7820,6 +7823,7 @@ function actorFrameAnchorDrift(): Array<{ family: string; dir: Direction; driftX
   if (!scene) return [];
   const families = [
     "knight",
+    PLAYER_ACTOR_FAMILY,
     "caster",
     "goblin",
     "skeleton",
