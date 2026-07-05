@@ -4,7 +4,7 @@ Status: complete
 
 Initial HEAD: bbcd8962
 
-Capture commit in traces: bbcd8962 (pre-commit worktree with this fix applied)
+Capture commit in traces: bd220126 (final committed route shoreline fix)
 
 ## Goal
 
