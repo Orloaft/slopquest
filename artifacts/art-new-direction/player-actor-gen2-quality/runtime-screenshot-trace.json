@@ -1,5 +1,5 @@
 {
-  "commit": "05acac6e",
+  "commit": "1f001aa4",
   "captureSurface": "#game canvas",
   "trace": [
     {
@@ -18,7 +18,7 @@
         "height": 96,
         "scale": 4
       },
-      "commit": "05acac6e"
+      "commit": "1f001aa4"
     },
     {
       "name": "runtime-02-route-south-gate",
@@ -36,7 +36,7 @@
         "height": 96,
         "scale": 4
       },
-      "commit": "05acac6e"
+      "commit": "1f001aa4"
     },
     {
       "name": "runtime-03-route-stream-ford",
@@ -54,7 +54,7 @@
         "height": 96,
         "scale": 4
       },
-      "commit": "05acac6e"
+      "commit": "1f001aa4"
     }
   ]
 }
