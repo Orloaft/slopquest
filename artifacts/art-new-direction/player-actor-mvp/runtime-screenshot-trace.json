@@ -1,5 +1,5 @@
 {
-  "commit": "5682e7f2",
+  "commit": "309a7a34",
   "trace": [
     {
       "name": "runtime-01-waystone-route-gate",
@@ -9,7 +9,7 @@
         "y": 20.5
       },
       "actual": "0:55.5,20.5 dir=down",
-      "commit": "5682e7f2"
+      "commit": "309a7a34"
     },
     {
       "name": "runtime-02-route-south-gate",
@@ -19,7 +19,7 @@
         "y": 69.5
       },
       "actual": "11:55.5,69.5 dir=down",
-      "commit": "5682e7f2"
+      "commit": "309a7a34"
     },
     {
       "name": "runtime-03-route-stream-ford",
@@ -29,7 +29,7 @@
         "y": 34.5
       },
       "actual": "11:66.5,34.5 dir=down",
-      "commit": "5682e7f2"
+      "commit": "309a7a34"
     }
   ]
 }
