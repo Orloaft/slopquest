@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node ../../node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5220",
     "build": "node ../../node_modules/vite/bin/vite.js build",
+    "test:mechanics": "node scripts/test-mechanics.mjs",
     "normalize:terrain": "node scripts/normalize-terrain-tiles.mjs",
     "build:flat-board": "node scripts/build-flat-board-compositor.mjs",
     "actors:v4": "python3 scripts/process-actor-feet-outline-v4.py --source artifacts/battle-stage-generated-low-res-actors-v1/generated-actor-source.png --artifact-dir artifacts/battle-stage-actor-feet-outline-v4 --runtime-dir assets/generated/actor-feet-outline-v4 --media-dir $HOME/.openclaw/media/tib-gathering/battle-stage-actor-feet-outline-v4",

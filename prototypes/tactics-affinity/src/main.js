@@ -7,10 +7,22 @@ import {
   terrain as baseTerrain,
   units as baseUnits
 } from "./battle-data.js";
+import {
+  abilityCost,
+  canUseAbility as canUseAbilityRule,
+  damageUnit as getDamagedUnit,
+  isSafeState,
+  keyFor,
+  movementPreview as previewMovement,
+  pushDestination as findPushDestination,
+  relationFor,
+  resolveWait,
+  terrainDamage as resolveTerrainDamage,
+  tileState as getTileState,
+  unitAt as findUnitAt
+} from "./mechanics.js";
 
 const clone = (value) => structuredClone(value);
-const keyFor = (col, row) => `${col},${row}`;
-const inBounds = (col, row) => col >= 0 && row >= 0 && col < BOARD_SIZE && row < BOARD_SIZE;
 
 const state = createInitialState();
 
@@ -49,16 +61,12 @@ function getAbility(id = state.selectedAbilityId) {
   return abilities.find((ability) => ability.id === id);
 }
 
-function liveUnits() {
-  return state.units.filter((unit) => !unit.dead);
-}
-
 function unitAt(col, row) {
-  return liveUnits().find((unit) => unit.col === col && unit.row === row);
+  return findUnitAt(state.units, col, row);
 }
 
 function tileState(col, row) {
-  return state.tiles.get(keyFor(col, row)) ?? "plain";
+  return getTileState(state.tiles, col, row);
 }
 
 function setTileState(col, row, value) {
@@ -75,25 +83,12 @@ function apText(unit) {
   return `${unit.ap}/${unit.maxAp}`;
 }
 
-function relationFor(unit, ability) {
-  if (!unit || !ability) return "unavailable";
-  if (ability.id === "void-snare") return "opposite";
-  if (ability.affinity === unit.primary) return "primary";
-  if (ability.affinity === unit.secondary) return "secondary";
-  return "opposite";
-}
-
-function abilityCost(unit, ability) {
-  const relation = relationFor(unit, ability);
-  if (relation === "primary") return 1;
-  if (relation === "secondary") return 2;
-  return 4;
-}
-
 function canUseAbility(unit, ability) {
-  if (!unit || !ability || unit.dead || state.phase !== "player") return false;
-  if (relationFor(unit, ability) === "opposite") return false;
-  return unit.ap >= abilityCost(unit, ability);
+  return canUseAbilityRule(unit, ability, state.phase);
+}
+
+function applyDamageUnit(unit, amount) {
+  Object.assign(unit, getDamagedUnit(unit, amount));
 }
 
 function addLog(line) {
@@ -151,54 +146,26 @@ function selectTargetUnit(unitId) {
 }
 
 function movementPreview(unit, col, row) {
-  if (!unit) return { ok: false, detail: "No unit selected." };
-  if (!inBounds(col, row)) return { ok: false, detail: "Outside the board." };
-  if (unitAt(col, row)) return { ok: false, detail: "Occupied by another unit." };
-  if (state.objective.col === col && state.objective.row === row) return { ok: false, detail: "The beacon blocks this tile." };
-
-  const distance = Math.abs(unit.col - col) + Math.abs(unit.row - row);
-  const stateName = tileState(col, row);
-  if (distance > 8) return { ok: false, detail: "Too far for this whitebox move." };
-  if (!unit.flying && ["water", "oil", "fire", "block"].includes(stateName)) {
-    return { ok: false, detail: `${unit.shortName} is grounded and cannot enter ${stateName} terrain.` };
-  }
-  if (unit.ap < 1) return { ok: false, detail: `${unit.shortName} lacks the 1 AP move cost.` };
-
-  return {
-    ok: true,
-    detail: unit.flying
-      ? `Flying move to (${col}, ${row}) costs 1 AP and ignores liquid/block routes.`
-      : `Ground move to (${col}, ${row}) costs 1 AP.`
-  };
+  return previewMovement({
+    unit,
+    col,
+    row,
+    boardSize: BOARD_SIZE,
+    units: state.units,
+    objective: state.objective,
+    tiles: state.tiles
+  });
 }
 
 function pushDestination(actor, target) {
-  const dx = Math.sign(target.col - actor.col);
-  const dy = Math.sign(target.row - actor.row);
-  const col = target.col + dx;
-  const row = target.row + dy;
-  if (!dx && !dy) return null;
-  if (!inBounds(col, row)) return null;
-  if (unitAt(col, row)) return null;
-  if (state.objective.col === col && state.objective.row === row) return null;
-  return { col, row, state: tileState(col, row) };
-}
-
-function damageUnit(unit, amount) {
-  unit.hp = Math.max(0, unit.hp - amount);
-  if (unit.hp <= 0) {
-    unit.dead = true;
-    unit.hp = 0;
-  }
-}
-
-function terrainDamage(unit) {
-  const stateName = tileState(unit.col, unit.row);
-  if (stateName === "fire") {
-    damageUnit(unit, 3);
-    return `${unit.name} burned for 3 on fire`;
-  }
-  return null;
+  return findPushDestination({
+    actor,
+    target,
+    boardSize: BOARD_SIZE,
+    units: state.units,
+    objective: state.objective,
+    tiles: state.tiles
+  });
 }
 
 function previewAbility(unit, ability, target) {
@@ -285,11 +252,11 @@ function buildPreview() {
   if (state.phase === "won") return { title: "Victory", detail: "All forecast threats are neutralized; the beacon is safe." };
   if (state.phase === "lost") return { title: "Defeat", detail: "The one-turn forecast was not solved before waiting." };
   if (state.mode === "wait") {
-    const liveEnemies = state.units.filter((candidate) => candidate.team === "enemy" && !candidate.dead);
+    const result = resolveWait(state.units);
     return {
       title: "Wait / End Turn",
-      detail: liveEnemies.length
-        ? `Waiting now fails: ${liveEnemies.map((enemy) => enemy.name).join(" and ")} still threaten the Signal Beacon.`
+      detail: result.liveEnemies.length
+        ? `Waiting now fails: ${result.liveEnemies.map((enemy) => enemy.name).join(" and ")} still threaten the Signal Beacon.`
         : "Waiting now resolves safely because every enemy intent is neutralized."
     };
   }
@@ -342,7 +309,7 @@ function commitAbility() {
     setTileState(target.col, target.row, "fire");
     const occupant = unitAt(target.col, target.row);
     const before = occupant?.hp ?? null;
-    if (occupant) damageUnit(occupant, 3);
+    if (occupant) applyDamageUnit(occupant, 3);
     actor.ap -= cost;
     addLog(
       `${actor.name} used Ignis Spark (${relationFor(actor, ability)}, ${cost} AP): oil ignited into fire at (${target.col}, ${target.row})${
@@ -358,13 +325,14 @@ function commitAbility() {
     } else {
       const destination = pushDestination(actor, targetUnit);
       const before = targetUnit.hp;
-      damageUnit(targetUnit, 1);
+      applyDamageUnit(targetUnit, 1);
       let terrainLine = "";
       if (destination && !targetUnit.dead) {
         targetUnit.col = destination.col;
         targetUnit.row = destination.row;
-        const terrainResult = terrainDamage(targetUnit);
-        terrainLine = terrainResult ? `; ${terrainResult}` : `; pushed to (${destination.col}, ${destination.row}) ${destination.state}`;
+        const terrainResult = resolveTerrainDamage(targetUnit, state.tiles);
+        Object.assign(targetUnit, terrainResult.unit);
+        terrainLine = terrainResult.log ? `; ${terrainResult.log}` : `; pushed to (${destination.col}, ${destination.row}) ${destination.state}`;
       }
       addLog(`${actor.name} used Force Push (${relationFor(actor, ability)}, ${cost} AP): ${targetUnit.name} took 1 (${before}->${targetUnit.hp})${terrainLine}.`);
     }
@@ -376,20 +344,18 @@ function commitAbility() {
 }
 
 function waitTurn() {
-  const liveEnemies = state.units.filter((unit) => unit.team === "enemy" && !unit.dead);
-  if (liveEnemies.length) {
-    state.phase = "lost";
-    addLog(`Defeat: ${liveEnemies.map((enemy) => enemy.name).join(" and ")} carried out the forecast against the Signal Beacon.`);
+  const result = resolveWait(state.units);
+  state.phase = result.phase;
+  if (result.liveEnemies.length) {
+    addLog(`Defeat: ${result.liveEnemies.map((enemy) => enemy.name).join(" and ")} carried out the forecast against the Signal Beacon.`);
   } else {
-    state.phase = "won";
     addLog("Victory: wait resolved safely because every hostile forecast was neutralized.");
   }
   renderApp();
 }
 
 function checkSolved() {
-  const liveEnemies = state.units.filter((unit) => unit.team === "enemy" && !unit.dead);
-  if (!liveEnemies.length && !state.safe) {
+  if (isSafeState(state.units) && !state.safe) {
     state.safe = true;
     addLog("Safe state: all forecasted threats are neutralized. Wait to lock the victory.");
   }
