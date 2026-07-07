@@ -3,7 +3,7 @@
 - Dev server: http://127.0.0.1:5220
 - Port: 5220
 - Classification: working
-- Commit at run time: 697fea22
+- Commit at run time: 680b3445
 - Screenshot: artifacts/playable-combat-v1/playable-combat-after-end-turn.png
 
 ## Commands
@@ -23,8 +23,8 @@
 ## Final Git Status At Smoke Time
 
 ```
-M prototypes/tactics-affinity/scripts/smoke-combat-loop.mjs
- M prototypes/tactics-affinity/src/main.js
- M prototypes/tactics-affinity/src/styles.css
+M prototypes/tactics-affinity/artifacts/playable-combat-v1/report.md
+ M prototypes/tactics-affinity/package.json
 ?? prototypes/tactics-affinity/scripts/__pycache__/
+?? prototypes/tactics-affinity/scripts/functional-test-sweep-v1.mjs
 ```
