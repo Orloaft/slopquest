@@ -10,6 +10,7 @@
     "build:flat-board": "node scripts/build-flat-board-compositor.mjs",
     "actors:v4": "python3 scripts/process-actor-feet-outline-v4.py --source artifacts/battle-stage-generated-low-res-actors-v1/generated-actor-source.png --artifact-dir artifacts/battle-stage-actor-feet-outline-v4 --runtime-dir assets/generated/actor-feet-outline-v4 --media-dir $HOME/.openclaw/media/tib-gathering/battle-stage-actor-feet-outline-v4",
     "screenshots:v4": "node scripts/capture-battle-stage-actor-feet-outline-v4.mjs",
-    "screenshots": "node scripts/capture-battle-stage.mjs"
+    "screenshots": "node scripts/capture-battle-stage.mjs",
+    "smoke:combat": "node scripts/smoke-combat-loop.mjs"
   }
 }
