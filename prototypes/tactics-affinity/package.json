@@ -12,6 +12,7 @@
     "screenshots:v4": "node scripts/capture-battle-stage-actor-feet-outline-v4.mjs",
     "screenshots": "node scripts/capture-battle-stage.mjs",
     "smoke:combat": "node scripts/smoke-combat-loop.mjs",
-    "smoke:functional": "node scripts/functional-test-sweep-v1.mjs"
+    "smoke:functional": "node scripts/functional-test-sweep-v1.mjs",
+    "smoke:mvp-affinity": "node scripts/smoke-mvp-affinity.mjs"
   }
 }

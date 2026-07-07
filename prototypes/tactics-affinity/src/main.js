@@ -1,112 +1,41 @@
 import "./styles.css";
 import {
-  intents as baseIntents,
-  logLines as baseLogLines,
+  BOARD_SIZE,
+  abilities,
   objective as baseObjective,
-  overlays,
-  props,
+  openingLog,
+  terrain as baseTerrain,
   units as baseUnits
 } from "./battle-data.js";
 
-const SPRITE_ROOT = "/assets/generated/ruined-crossing-v1/sprites";
-const FLAT_BOARD_ROOT = "/assets/generated/ruined-crossing-v1/flat-board";
-const ACTOR_SHEET = "/assets/generated/actor-feet-outline-v4/generated-low-res-actor-poses.png";
-const BOARD_SIZE = 8;
-const actorRows = {
-  "iron-guard": 0,
-  "verdant-ranger": 1,
-  "radiant-acolyte": 2,
-  "grave-skitter": 3,
-  "stone-brute": 4,
-  "grave-archer": 5
-};
-const poseColumns = {
-  idle: 0,
-  windup: 1,
-  hit: 2,
-  move: 3
-};
+const clone = (value) => structuredClone(value);
+const keyFor = (col, row) => `${col},${row}`;
+const inBounds = (col, row) => col >= 0 && row >= 0 && col < BOARD_SIZE && row < BOARD_SIZE;
 
-const abilities = {
-  "iron-guard": [
-    {
-      id: "shield-bash",
-      name: "Shield Bash",
-      detail: "Deal 3 and push Stone Brute 1 tile. Pushed brutes miss the shrine line.",
-      targetTeam: "enemy"
-    }
-  ],
-  "verdant-ranger": [
-    {
-      id: "root-shot",
-      name: "Root Shot",
-      detail: "Deal 2 and root Grave Skitter, preventing its leap this enemy turn.",
-      targetTeam: "enemy"
-    }
-  ],
-  "radiant-acolyte": [
-    {
-      id: "ward",
-      name: "Ward",
-      detail: "Ward the shrine, absorbing the next incoming objective hit.",
-      targetTeam: "objective"
-    }
-  ]
-};
-
-const initialAbilityByUnit = {
-  "iron-guard": "shield-bash",
-  "verdant-ranger": "root-shot",
-  "radiant-acolyte": "ward"
-};
-
-const sprite = (name) => `${SPRITE_ROOT}/${name}.png`;
-const clampHp = (value, max) => Math.max(0, Math.min(max, value));
-
-function parseHp(hp) {
-  const [current, max] = hp.split("/").map((part) => Number.parseInt(part, 10));
-  return { hp: current, maxHp: max };
-}
-
-function hpText(entity) {
-  return `${entity.hp}/${entity.maxHp}`;
-}
-
-function cellVars({ col, row }, layer = 0) {
-  return `--col:${col}; --row:${row}; --iso-x:${col - row}; --iso-y:${col + row}; --z:${(col + row) * 12 + col + layer};`;
-}
-
-function img(name, alt, className = "") {
-  return `<img class="${className}" src="${sprite(name)}" alt="${alt}" draggable="false" />`;
-}
+const state = createInitialState();
 
 function createInitialState() {
-  const selectedUnitId = "iron-guard";
-
+  const units = clone(baseUnits).map((unit) => ({ ...unit, dead: false, acted: false }));
   return {
-    turn: 3,
     phase: "player",
-    selectedUnitId,
-    selectedAbilityId: initialAbilityByUnit[selectedUnitId],
-    selectedTargetId: "stone-brute",
-    combatResult: null,
-    objective: {
-      ...baseObjective,
-      ...parseHp(baseObjective.hp),
-      warded: false
-    },
-    units: baseUnits.map((unit) => ({
-      ...unit,
-      ...parseHp(unit.hp),
-      acted: false,
-      dead: false,
-      statuses: []
-    })),
-    log: [...baseLogLines]
+    safe: false,
+    turn: 1,
+    mode: "attack",
+    selectedUnitId: "sprite",
+    selectedAbilityId: "oil-font",
+    selectedTarget: { type: "cell", col: 5, row: 3 },
+    tiles: new Map(baseTerrain.map((tile) => [keyFor(tile.col, tile.row), tile.state])),
+    objective: clone(baseObjective),
+    units,
+    log: [...openingLog]
   };
 }
 
-const state = createInitialState();
+function resetScenario() {
+  const next = createInitialState();
+  Object.assign(state, next);
+  renderApp();
+}
 
 function getUnit(id) {
   return state.units.find((unit) => unit.id === id);
@@ -116,487 +45,563 @@ function getSelectedUnit() {
   return getUnit(state.selectedUnitId) ?? state.units.find((unit) => unit.team === "ally" && !unit.dead);
 }
 
-function getSelectedAbility() {
-  const selected = getSelectedUnit();
-  return selected ? abilities[selected.id]?.find((ability) => ability.id === state.selectedAbilityId) : null;
+function getAbility(id = state.selectedAbilityId) {
+  return abilities.find((ability) => ability.id === id);
+}
+
+function liveUnits() {
+  return state.units.filter((unit) => !unit.dead);
+}
+
+function unitAt(col, row) {
+  return liveUnits().find((unit) => unit.col === col && unit.row === row);
+}
+
+function tileState(col, row) {
+  return state.tiles.get(keyFor(col, row)) ?? "plain";
+}
+
+function setTileState(col, row, value) {
+  const key = keyFor(col, row);
+  if (value === "plain") state.tiles.delete(key);
+  else state.tiles.set(key, value);
+}
+
+function hpText(unit) {
+  return `${unit.hp}/${unit.maxHp}`;
+}
+
+function apText(unit) {
+  return `${unit.ap}/${unit.maxAp}`;
+}
+
+function relationFor(unit, ability) {
+  if (!unit || !ability) return "unavailable";
+  if (ability.id === "void-snare") return "opposite";
+  if (ability.affinity === unit.primary) return "primary";
+  if (ability.affinity === unit.secondary) return "secondary";
+  return "opposite";
+}
+
+function abilityCost(unit, ability) {
+  const relation = relationFor(unit, ability);
+  if (relation === "primary") return 1;
+  if (relation === "secondary") return 2;
+  return 4;
+}
+
+function canUseAbility(unit, ability) {
+  if (!unit || !ability || unit.dead || state.phase !== "player") return false;
+  if (relationFor(unit, ability) === "opposite") return false;
+  return unit.ap >= abilityCost(unit, ability);
+}
+
+function addLog(line) {
+  state.log = [line, ...state.log].slice(0, 10);
 }
 
 function selectUnit(unitId) {
   const unit = getUnit(unitId);
   if (!unit || unit.dead || unit.team !== "ally" || state.phase !== "player") return;
   state.selectedUnitId = unitId;
-  state.selectedAbilityId = initialAbilityByUnit[unitId] ?? abilities[unitId]?.[0]?.id ?? null;
-  state.selectedTargetId = defaultTargetForAbility(state.selectedAbilityId);
-  state.combatResult = null;
+  const firstUsable = abilities.find((ability) => relationFor(unit, ability) !== "opposite");
+  state.selectedAbilityId = firstUsable?.id ?? null;
+  state.selectedTarget = null;
+  state.mode = "attack";
   renderApp();
 }
 
 function selectAbility(abilityId) {
-  const selected = getSelectedUnit();
-  if (!selected || selected.acted || state.phase !== "player") return;
+  const ability = getAbility(abilityId);
+  const unit = getSelectedUnit();
+  if (!ability || !unit || state.phase !== "player") return;
+  state.mode = "attack";
   state.selectedAbilityId = abilityId;
-  state.selectedTargetId = defaultTargetForAbility(abilityId);
-  state.combatResult = null;
+  state.selectedTarget = ability.target === "cell" ? { type: "cell", col: 5, row: 3 } : null;
   renderApp();
 }
 
-function selectTarget(targetId) {
+function selectMode(mode) {
   if (state.phase !== "player") return;
-  const ability = getSelectedAbility();
-  const target = targetId === "objective" ? state.objective : getUnit(targetId);
-  if (!ability || !target || target.dead) return;
-  if (ability.targetTeam === "objective" && targetId !== "objective") return;
-  if (ability.targetTeam === "enemy" && target.team !== "enemy") return;
-  state.selectedTargetId = targetId;
+  state.mode = mode;
+  state.selectedTarget = null;
+  if (mode === "wait") state.selectedAbilityId = null;
   renderApp();
 }
 
-function defaultTargetForAbility(abilityId) {
-  if (abilityId === "shield-bash") return "stone-brute";
-  if (abilityId === "root-shot") return "grave-skitter";
-  if (abilityId === "ward") return "objective";
-  return null;
+function selectCell(col, row) {
+  if (state.phase !== "player") return;
+  if (state.mode === "move") {
+    state.selectedTarget = { type: "move", col, row };
+  } else if (state.mode === "attack") {
+    const ability = getAbility();
+    if (ability?.target === "cell") state.selectedTarget = { type: "cell", col, row };
+  }
+  renderApp();
 }
 
-function occupiedCell(col, row, ignoreUnitId) {
-  if (state.objective.col === col && state.objective.row === row) return true;
-  if (props.some((prop) => prop.col === col && prop.row === row && prop.className.includes("low-prop"))) return true;
-  return state.units.some((unit) => !unit.dead && unit.id !== ignoreUnitId && unit.col === col && unit.row === row);
+function selectTargetUnit(unitId) {
+  if (state.phase !== "player") return;
+  const unit = getUnit(unitId);
+  if (!unit || unit.dead) return;
+  if (state.mode === "attack" && getAbility()?.target === "unit") {
+    state.selectedTarget = { type: "unit", id: unitId };
+  }
+  renderApp();
 }
 
-function pushDestination(attacker, target) {
-  const dx = Math.sign(target.col - attacker.col);
-  const dy = Math.sign(target.row - attacker.row);
-  const col = target.col + dx;
-  const row = target.row + dy;
-  if (col < 0 || row < 0 || col >= BOARD_SIZE || row >= BOARD_SIZE) return null;
-  if (occupiedCell(col, row, target.id)) return null;
-  return { col, row };
-}
+function movementPreview(unit, col, row) {
+  if (!unit) return { ok: false, detail: "No unit selected." };
+  if (!inBounds(col, row)) return { ok: false, detail: "Outside the board." };
+  if (unitAt(col, row)) return { ok: false, detail: "Occupied by another unit." };
+  if (state.objective.col === col && state.objective.row === row) return { ok: false, detail: "The beacon blocks this tile." };
 
-function targetName(targetId) {
-  if (targetId === "objective") return "Shrine";
-  return getUnit(targetId)?.name ?? "No target";
-}
-
-function buildPreview() {
-  const actor = getSelectedUnit();
-  const ability = getSelectedAbility();
-  if (!actor || !ability) {
-    return {
-      title: "No action selected",
-      detail: "Select an adventurer and choose an ability."
-    };
+  const distance = Math.abs(unit.col - col) + Math.abs(unit.row - row);
+  const stateName = tileState(col, row);
+  if (distance > 8) return { ok: false, detail: "Too far for this whitebox move." };
+  if (!unit.flying && ["water", "oil", "fire", "block"].includes(stateName)) {
+    return { ok: false, detail: `${unit.shortName} is grounded and cannot enter ${stateName} terrain.` };
   }
-
-  if (actor.acted) {
-    return {
-      title: `${actor.name} has acted`,
-      detail: "Choose another adventurer or end the player turn."
-    };
-  }
-
-  if (!state.selectedTargetId) {
-    return {
-      title: `${ability.name} -> choose target`,
-      detail: ability.detail
-    };
-  }
-
-  if (ability.id === "shield-bash") {
-    const target = getUnit(state.selectedTargetId);
-    const push = target ? pushDestination(actor, target) : null;
-    return {
-      title: `Shield Bash -> ${targetName(state.selectedTargetId)}`,
-      detail: push
-        ? `Deals 3 damage and pushes 1 tile to (${push.col}, ${push.row}); Stone Brute will miss the shrine line.`
-        : "Deals 3 damage; push is blocked, so the brute keeps its shrine line."
-    };
-  }
-
-  if (ability.id === "root-shot") {
-    return {
-      title: `Root Shot -> ${targetName(state.selectedTargetId)}`,
-      detail: "Deals 2 damage and roots Grave Skitter; rooted Skitter cannot leap during enemy resolution."
-    };
-  }
-
-  if (ability.id === "ward") {
-    return {
-      title: "Ward -> Shrine",
-      detail: "Applies a ward to absorb the next objective hit during enemy resolution."
-    };
-  }
+  if (unit.ap < 1) return { ok: false, detail: `${unit.shortName} lacks the 1 AP move cost.` };
 
   return {
-    title: `${ability.name} -> ${targetName(state.selectedTargetId)}`,
-    detail: ability.detail
+    ok: true,
+    detail: unit.flying
+      ? `Flying move to (${col}, ${row}) costs 1 AP and ignores liquid/block routes.`
+      : `Ground move to (${col}, ${row}) costs 1 AP.`
   };
 }
 
-function addStatus(unit, status) {
-  if (!unit.statuses.includes(status)) unit.statuses.push(status);
+function pushDestination(actor, target) {
+  const dx = Math.sign(target.col - actor.col);
+  const dy = Math.sign(target.row - actor.row);
+  const col = target.col + dx;
+  const row = target.row + dy;
+  if (!dx && !dy) return null;
+  if (!inBounds(col, row)) return null;
+  if (unitAt(col, row)) return null;
+  if (state.objective.col === col && state.objective.row === row) return null;
+  return { col, row, state: tileState(col, row) };
 }
 
 function damageUnit(unit, amount) {
-  unit.hp = clampHp(unit.hp - amount, unit.maxHp);
-  unit.dead = unit.hp <= 0;
-  unit.poseState = unit.dead ? "hit" : "hit";
+  unit.hp = Math.max(0, unit.hp - amount);
+  if (unit.hp <= 0) {
+    unit.dead = true;
+    unit.hp = 0;
+  }
 }
 
-function commitAction() {
-  const actor = getSelectedUnit();
-  const ability = getSelectedAbility();
-  if (!actor || !ability || actor.acted || state.phase !== "player") return;
-  if (!state.selectedTargetId) return;
+function terrainDamage(unit) {
+  const stateName = tileState(unit.col, unit.row);
+  if (stateName === "fire") {
+    damageUnit(unit, 3);
+    return `${unit.name} burned for 3 on fire`;
+  }
+  return null;
+}
 
-  const target = state.selectedTargetId === "objective" ? state.objective : getUnit(state.selectedTargetId);
-  if (!target || target.dead) return;
+function previewAbility(unit, ability, target) {
+  if (!unit || !ability) return { title: "Choose a unit and action", detail: "Move, Attack, or Wait are available in this MVP." };
 
-  const newLog = [];
-  if (ability.id === "shield-bash" && target.id === "stone-brute") {
-    const push = pushDestination(actor, target);
-    damageUnit(target, 3);
-    if (push && !target.dead) {
-      target.col = push.col;
-      target.row = push.row;
-      target.poseState = "move";
-      newLog.push("Iron Guard used Shield Bash: Stone Brute took 3 and was pushed off the shrine line.");
-    } else {
-      newLog.push("Iron Guard used Shield Bash: Stone Brute took 3, but the push lane was blocked.");
+  const cost = abilityCost(unit, ability);
+  const relation = relationFor(unit, ability);
+  if (relation === "opposite") {
+    return {
+      title: `${ability.name} unavailable`,
+      detail: `Opposite affinity ${ability.affinity} is shown at 4 AP and disabled for ${unit.shortName}.`
+    };
+  }
+  if (!canUseAbility(unit, ability)) {
+    return {
+      title: `${ability.name} lacks AP`,
+      detail: `${unit.shortName} needs ${cost} AP for this ${relation} affinity skill.`
+    };
+  }
+  if (!target) {
+    return {
+      title: `${ability.name} ready`,
+      detail: `${relation} ${ability.affinity} skill costs ${cost} AP. Choose a ${ability.target}.`
+    };
+  }
+
+  if (ability.id === "oil-font" && target.type === "cell") {
+    const occupant = unitAt(target.col, target.row);
+    const existing = tileState(target.col, target.row);
+    return {
+      title: `Oil Font -> (${target.col}, ${target.row})`,
+      detail: occupant
+        ? "Cannot set oil under a standing unit in this MVP."
+        : `Costs ${cost} AP. Sets ${existing} tile to oil/liquid; preview chain marks this as the push destination for Oilbound Wrecker and an Ignis Spark fuel tile.`
+    };
+  }
+
+  if (ability.id === "ignis-spark" && target.type === "cell") {
+    const occupant = unitAt(target.col, target.row);
+    const existing = tileState(target.col, target.row);
+    const burn = occupant ? ` ${occupant.name} takes 3 fire damage and ${occupant.hp <= 3 ? "is neutralized" : "survives"}.` : "";
+    return {
+      title: `Ignis Spark -> (${target.col}, ${target.row})`,
+      detail:
+        existing === "oil"
+          ? `Costs ${cost} AP. Ignites oil into fire, creates a burning tile, and resolves fire damage.${burn}`
+          : `Costs ${cost} AP. Creates fire on ${existing} terrain; oil gives the cleanest chain preview.${burn}`
+    };
+  }
+
+  if (ability.id === "terra-push" && target.type === "unit") {
+    const targetUnit = getUnit(target.id);
+    if (!targetUnit) return { title: "No push target", detail: "Choose a unit to push." };
+    if (targetUnit.immovable) {
+      return {
+        title: `Force Push -> ${targetUnit.shortName}`,
+        detail: `${targetUnit.name} has Immovable shell; the push is resisted and displacement is blocked.`
+      };
     }
-  } else if (ability.id === "root-shot" && target.id === "grave-skitter") {
-    damageUnit(target, 2);
-    if (!target.dead) addStatus(target, "rooted");
-    newLog.push("Verdant Ranger used Root Shot: Grave Skitter took 2 and is rooted for enemy resolution.");
-  } else if (ability.id === "ward" && state.selectedTargetId === "objective") {
-    state.objective.warded = true;
-    newLog.push("Radiant Acolyte used Ward: the shrine will absorb the next objective hit.");
-  } else {
+    const destination = pushDestination(unit, targetUnit);
+    if (!destination) {
+      return {
+        title: `Force Push -> ${targetUnit.name}`,
+        detail: `Costs ${cost} AP. Deals 1 damage, but no legal push destination is open.`
+      };
+    }
+    const terrainLine =
+      destination.state === "fire"
+        ? " Fire damage adds 3 more and neutralizes the forecast if HP reaches 0."
+        : destination.state === "oil"
+          ? " Target lands in oil; Ignis Spark preview will ignite it next."
+          : "";
+    return {
+      title: `Force Push -> ${targetUnit.name}`,
+      detail: `Costs ${cost} AP. Push destination (${destination.col}, ${destination.row}) is ${destination.state}; push damage 1.${terrainLine}`
+    };
+  }
+
+  return { title: ability.name, detail: ability.detail };
+}
+
+function buildPreview() {
+  const unit = getSelectedUnit();
+  if (state.phase === "won") return { title: "Victory", detail: "All forecast threats are neutralized; the beacon is safe." };
+  if (state.phase === "lost") return { title: "Defeat", detail: "The one-turn forecast was not solved before waiting." };
+  if (state.mode === "wait") {
+    const liveEnemies = state.units.filter((candidate) => candidate.team === "enemy" && !candidate.dead);
+    return {
+      title: "Wait / End Turn",
+      detail: liveEnemies.length
+        ? `Waiting now fails: ${liveEnemies.map((enemy) => enemy.name).join(" and ")} still threaten the Signal Beacon.`
+        : "Waiting now resolves safely because every enemy intent is neutralized."
+    };
+  }
+  if (state.mode === "move") {
+    const target = state.selectedTarget;
+    if (!target) return { title: "Move", detail: "Choose a destination tile. Sprite can fly over liquid and blockers; Tortollan cannot." };
+    return {
+      title: `Move -> (${target.col}, ${target.row})`,
+      detail: movementPreview(unit, target.col, target.row).detail
+    };
+  }
+  return previewAbility(unit, getAbility(), state.selectedTarget);
+}
+
+function commitMove() {
+  const unit = getSelectedUnit();
+  const target = state.selectedTarget;
+  if (!unit || !target || target.type !== "move") return;
+  const preview = movementPreview(unit, target.col, target.row);
+  if (!preview.ok) {
+    addLog(`Move blocked: ${preview.detail}`);
+    renderApp();
     return;
   }
-
-  actor.acted = true;
-  actor.poseState = "windup";
-  state.combatResult = `${ability.name} committed`;
-  state.log = [...newLog, ...state.log].slice(0, 8);
-  if (state.units.every((unit) => unit.team !== "enemy" || unit.dead)) {
-    state.phase = "won";
-    state.log = ["Victory: all hostile intent has been cleared.", ...state.log].slice(0, 8);
-  }
+  unit.col = target.col;
+  unit.row = target.row;
+  unit.ap -= 1;
+  addLog(`${unit.name} moved to (${target.col}, ${target.row}) for 1 AP. ${unit.flying ? "Flying ignored liquid/block routes." : "Grounded movement respected terrain."}`);
+  state.selectedTarget = null;
   renderApp();
 }
 
-function damageObjective(amount) {
-  state.objective.hp = clampHp(state.objective.hp - amount, state.objective.maxHp);
-  if (state.objective.hp <= 0) state.phase = "lost";
-}
+function commitAbility() {
+  const actor = getSelectedUnit();
+  const ability = getAbility();
+  const target = state.selectedTarget;
+  if (!actor || !ability || !target || !canUseAbility(actor, ability)) return;
+  const cost = abilityCost(actor, ability);
 
-function resolveEnemyTurn() {
-  if (state.phase !== "player") return;
-
-  const newLog = [`Enemy resolution starts for turn ${state.turn}.`];
-  const archer = getUnit("grave-archer");
-  const guard = getUnit("iron-guard");
-  if (archer && !archer.dead && guard && !guard.dead) {
-    damageUnit(guard, 2);
-    newLog.push("Grave Archer pierces Iron Guard for 2.");
-  }
-
-  const brute = getUnit("stone-brute");
-  if (brute && !brute.dead) {
-    if (brute.col === 6 && brute.row === 3) {
-      if (state.objective.warded) {
-        state.objective.warded = false;
-        newLog.push("Stone Brute struck the shrine line, but Ward absorbed the objective damage.");
-      } else {
-        damageObjective(3);
-        newLog.push("Stone Brute crushed the shrine for 3 objective damage.");
-      }
+  if (ability.id === "oil-font" && target.type === "cell") {
+    if (unitAt(target.col, target.row)) {
+      addLog("Oil Font blocked: occupied tiles cannot receive liquid in this MVP.");
+      renderApp();
+      return;
+    }
+    setTileState(target.col, target.row, "oil");
+    actor.ap -= cost;
+    addLog(`${actor.name} used Oil Font (${relationFor(actor, ability)}, ${cost} AP): oil/liquid set at (${target.col}, ${target.row}).`);
+  } else if (ability.id === "ignis-spark" && target.type === "cell") {
+    setTileState(target.col, target.row, "fire");
+    const occupant = unitAt(target.col, target.row);
+    const before = occupant?.hp ?? null;
+    if (occupant) damageUnit(occupant, 3);
+    actor.ap -= cost;
+    addLog(
+      `${actor.name} used Ignis Spark (${relationFor(actor, ability)}, ${cost} AP): oil ignited into fire at (${target.col}, ${target.row})${
+        occupant ? `; ${occupant.name} took 3 (${before}->${occupant.hp}).` : "."
+      }`
+    );
+  } else if (ability.id === "terra-push" && target.type === "unit") {
+    const targetUnit = getUnit(target.id);
+    if (!targetUnit || targetUnit.dead) return;
+    actor.ap -= cost;
+    if (targetUnit.immovable) {
+      addLog(`${actor.name} used Force Push (${relationFor(actor, ability)}, ${cost} AP): ${targetUnit.name}'s Immovable shell blocked displacement.`);
     } else {
-      newLog.push("Stone Brute missed the shrine line after being pushed out of position.");
+      const destination = pushDestination(actor, targetUnit);
+      const before = targetUnit.hp;
+      damageUnit(targetUnit, 1);
+      let terrainLine = "";
+      if (destination && !targetUnit.dead) {
+        targetUnit.col = destination.col;
+        targetUnit.row = destination.row;
+        const terrainResult = terrainDamage(targetUnit);
+        terrainLine = terrainResult ? `; ${terrainResult}` : `; pushed to (${destination.col}, ${destination.row}) ${destination.state}`;
+      }
+      addLog(`${actor.name} used Force Push (${relationFor(actor, ability)}, ${cost} AP): ${targetUnit.name} took 1 (${before}->${targetUnit.hp})${terrainLine}.`);
     }
   }
 
-  const skitter = getUnit("grave-skitter");
-  const ranger = getUnit("verdant-ranger");
-  if (skitter && !skitter.dead) {
-    if (skitter.statuses.includes("rooted")) {
-      skitter.statuses = skitter.statuses.filter((status) => status !== "rooted");
-      newLog.push("Grave Skitter's leap was prevented by Root Shot.");
-    } else if (ranger && !ranger.dead) {
-      damageUnit(ranger, 2);
-      newLog.push("Grave Skitter leapt at Verdant Ranger for 2.");
-    }
-  }
-
-  state.units.forEach((unit) => {
-    if (unit.team === "ally" && !unit.dead) unit.acted = false;
-    if (!unit.dead) unit.poseState = unit.team === "enemy" ? "windup" : "idle";
-  });
-  state.turn += 1;
-  state.selectedUnitId = state.units.find((unit) => unit.team === "ally" && !unit.dead)?.id ?? null;
-  state.selectedAbilityId = initialAbilityByUnit[state.selectedUnitId] ?? null;
-  state.selectedTargetId = defaultTargetForAbility(state.selectedAbilityId);
-  state.combatResult = null;
-
-  if (state.objective.hp <= 0) {
-    state.phase = "lost";
-    newLog.push("Defeat: the shrine has fallen.");
-  }
-
-  state.log = [...newLog, ...state.log].slice(0, 10);
+  state.selectedTarget = null;
+  checkSolved();
   renderApp();
 }
 
-function renderOverlay(overlay) {
-  return `<div class="tile-overlay ${overlay.tone}" style="${cellVars(overlay)}">${img(overlay.name, "", "overlay-art")}</div>`;
+function waitTurn() {
+  const liveEnemies = state.units.filter((unit) => unit.team === "enemy" && !unit.dead);
+  if (liveEnemies.length) {
+    state.phase = "lost";
+    addLog(`Defeat: ${liveEnemies.map((enemy) => enemy.name).join(" and ")} carried out the forecast against the Signal Beacon.`);
+  } else {
+    state.phase = "won";
+    addLog("Victory: wait resolved safely because every hostile forecast was neutralized.");
+  }
+  renderApp();
 }
 
-function renderProp(prop) {
-  return `<div class="prop ${prop.className}" style="${cellVars(prop)}">${img(prop.name, prop.name.replaceAll("_", " "), "prop-art")}</div>`;
+function checkSolved() {
+  const liveEnemies = state.units.filter((unit) => unit.team === "enemy" && !unit.dead);
+  if (!liveEnemies.length && !state.safe) {
+    state.safe = true;
+    addLog("Safe state: all forecasted threats are neutralized. Wait to lock the victory.");
+  }
 }
 
-function renderGeneratedActor(unit, extraClass = "") {
-  const stateName = unit.poseState ?? "idle";
-  const row = actorRows[unit.id] ?? 0;
-  const col = poseColumns[stateName] ?? 0;
+function terrainLabel(col, row) {
+  const stateName = tileState(col, row);
+  if (stateName === "plain") return "plain tile";
+  if (stateName === "block") return "raised blocker";
+  return `${stateName} tile`;
+}
+
+function renderCell(col, row) {
+  const stateName = tileState(col, row);
+  const target = state.selectedTarget;
+  const selected =
+    target && (target.type === "cell" || target.type === "move") && target.col === col && target.row === row;
   return `
-    <span class="generated-actor ${unit.team} ${unit.className} pose-${stateName} ${extraClass}" data-actor-sheet="actor-feet-outline-v4" style="--actor-row:${row}; --actor-col:${col};" aria-hidden="true">
-      <span class="generated-actor-shadow"></span>
-      <span class="generated-actor-sprite" style="background-image:url('${ACTOR_SHEET}')"></span>
-    </span>
+    <button
+      class="cell ${stateName} ${selected ? "selected-cell" : ""}"
+      style="--col:${col}; --row:${row};"
+      data-cell="${col},${row}"
+      aria-label="Tile ${col},${row} ${terrainLabel(col, row)}">
+      <span>${stateName === "plain" ? "" : stateName}</span>
+    </button>
   `;
 }
 
 function renderUnit(unit) {
   if (unit.dead) return "";
-  const isSelected = unit.id === state.selectedUnitId;
-  const isTarget = unit.id === state.selectedTargetId;
-  const select = isSelected
-    ? `<div class="selection-ring">${img("overlay_ally_select", "", "selection-art")}</div>`
-    : unit.team === "enemy" || isTarget
-      ? `<div class="selection-ring enemy-ring">${img("overlay_enemy_select", "", "selection-art")}</div>`
-      : "";
-  const statusText = unit.statuses.length ? ` ${unit.statuses.join(", ")}` : "";
-  const actedText = unit.acted ? " acted" : "";
-
+  const selected = unit.id === state.selectedUnitId;
+  const target = state.selectedTarget?.type === "unit" && state.selectedTarget.id === unit.id;
+  const traitText = unit.team === "ally" ? ` ${unit.primary}/${unit.secondary} ${unit.traits.join(", ")}` : ` ${unit.intent}`;
   return `
     <button
-      class="unit ${unit.team} ${isSelected ? "selected" : ""} ${isTarget ? "targeted" : ""} ${unit.acted ? "acted" : ""} ${unit.className} pose-${unit.poseState ?? "idle"}"
-      style="${cellVars(unit)}"
-      aria-label="${unit.name} HP ${hpText(unit)} at ${unit.col},${unit.row}${statusText}${actedText}"
-      data-unit-id="${unit.id}">
-      ${select}
-      ${renderGeneratedActor(unit)}
-      <span class="unit-chip">${unit.chip} ${hpText(unit)}</span>
+      class="unit-token ${unit.team} ${unit.color} ${selected ? "selected" : ""} ${target ? "targeted" : ""}"
+      style="--col:${unit.col}; --row:${unit.row};"
+      data-unit-id="${unit.id}"
+      aria-label="${unit.name} HP ${hpText(unit)} AP ${apText(unit)} at ${unit.col},${unit.row}${traitText}">
+      <strong>${unit.chip}</strong>
+      <span>${unit.shortName ?? unit.name}</span>
+      <em>HP ${hpText(unit)}${unit.team === "ally" ? ` AP ${apText(unit)}` : ""}</em>
     </button>
   `;
 }
 
-function renderIntent(intent) {
+function renderObjective() {
   return `
-    <div class="intent ${intent.length}" style="${cellVars(intent)} --angle:${intent.angle}deg;" aria-label="${intent.label} intent">
-      ${img(intent.sprite, intent.label, "intent-art")}
-      <span>${intent.label}</span>
-    </div>
-  `;
-}
-
-function renderUnitList(team) {
-  return state.units
-    .filter((unit) => unit.team === team)
-    .map(
-      (unit) => `
-        <li class="${unit.id === state.selectedUnitId ? "active" : ""} ${unit.dead ? "dead" : ""}">
-          <strong>${unit.name}</strong>
-          <span>${hpText(unit)}</span>
-          <em>${unit.dead ? "Down" : unit.statuses[0] ?? (unit.acted ? "Acted" : unit.badge)}</em>
-        </li>
-      `
-    )
-    .join("");
-}
-
-function renderPosePreview(unit) {
-  const poses = [
-    { state: "idle", label: "Idle" },
-    { state: "windup", label: "Windup" },
-    { state: "hit", label: "Hit" },
-    { state: "move", label: "Move" }
-  ];
-
-  return `
-    <div class="pose-preview" aria-label="${unit.name} low-res pose proof">
-      ${poses
-        .map(
-          (pose) => `
-            <div class="pose-cell">
-              ${renderGeneratedActor({ ...unit, poseState: pose.state }, "preview-token")}
-              <span>${pose.label}</span>
-            </div>
-          `
-        )
-        .join("")}
+    <div class="objective-token" style="--col:${state.objective.col}; --row:${state.objective.row};" aria-label="TIB Gathering Signal Beacon objective HP ${state.objective.hp}/${state.objective.maxHp}">
+      <strong>Beacon</strong>
+      <span>one-turn fail target</span>
     </div>
   `;
 }
 
 function renderBoard() {
-  const objectiveLabel = `Shrine objective HP ${hpText(state.objective)}${state.objective.warded ? " warded" : ""}`;
-
+  const cells = [];
+  for (let row = 0; row < BOARD_SIZE; row += 1) {
+    for (let col = 0; col < BOARD_SIZE; col += 1) cells.push(renderCell(col, row));
+  }
   return `
-    <section class="battlefield" aria-label="Ruined Crossing battle board">
-      <div class="board-frame">
-        <div class="board" aria-label="8 by 8 oblique tactics board">
-          <img class="flat-board flat-board-skirt" src="${FLAT_BOARD_ROOT}/ruined-crossing-board-skirt.png" alt="" draggable="false" aria-hidden="true" />
-          <img class="flat-board flat-board-surface" src="${FLAT_BOARD_ROOT}/ruined-crossing-board-surface.png" alt="" draggable="false" aria-hidden="true" />
-          <img class="flat-board flat-board-decals" src="${FLAT_BOARD_ROOT}/ruined-crossing-board-decals.png" alt="" draggable="false" aria-hidden="true" />
-          <img class="flat-board flat-board-grid" src="${FLAT_BOARD_ROOT}/ruined-crossing-board-grid.png" alt="" draggable="false" aria-hidden="true" />
-          ${overlays.map(renderOverlay).join("")}
-          <button class="objective ${state.selectedTargetId === "objective" ? "targeted" : ""} ${state.objective.warded ? "warded" : ""}" style="${cellVars(state.objective)}" aria-label="${objectiveLabel}" data-target-id="objective">
-            ${img("overlay_objective_badge", "objective marker", "objective-badge")}
-            ${img(state.objective.name, "Shrine objective", "objective-art")}
-            <span>Shrine ${hpText(state.objective)}${state.objective.warded ? " Ward" : ""}</span>
-          </button>
-          ${props.map(renderProp).join("")}
-          ${baseIntents.map(renderIntent).join("")}
-          ${state.units.map(renderUnit).join("")}
-        </div>
+    <section class="board-wrap" aria-label="TIB Gathering Tactics MVP board">
+      <div class="grid-board">
+        ${cells.join("")}
+        ${renderObjective()}
+        ${state.units.map(renderUnit).join("")}
       </div>
     </section>
   `;
 }
 
-function renderAbilityControls(selected) {
-  const unitAbilities = abilities[selected.id] ?? [];
-  if (!unitAbilities.length) return "";
-
+function renderAbilityButton(unit, ability) {
+  const relation = relationFor(unit, ability);
+  const cost = abilityCost(unit, ability);
+  const disabled = relation === "opposite" || unit.ap < cost || state.phase !== "player";
   return `
-    <div class="action-controls" aria-label="Ability controls">
-      ${unitAbilities
-        .map(
-          (ability) => `
-            <button
-              class="ability-button ${state.selectedAbilityId === ability.id ? "active" : ""}"
-              type="button"
-              data-ability-id="${ability.id}"
-              ${selected.acted || state.phase !== "player" ? "disabled" : ""}>
-              <strong>${ability.name}</strong>
-              <span>${ability.detail}</span>
-            </button>
-          `
-        )
-        .join("")}
-      <button class="commit-button" type="button" data-action="commit" ${!state.selectedTargetId || selected.acted || state.phase !== "player" ? "disabled" : ""}>
-        Commit Action
-      </button>
-      <button class="end-turn-button" type="button" data-action="end-turn" ${state.phase !== "player" ? "disabled" : ""}>
-        End Turn
-      </button>
-    </div>
+    <button
+      class="ability-card ${state.selectedAbilityId === ability.id ? "active" : ""}"
+      data-ability-id="${ability.id}"
+      type="button"
+      ${disabled ? "disabled" : ""}
+      aria-label="${ability.name} ${ability.affinity} ${relation} cost ${cost} AP ${disabled ? "disabled" : "available"}">
+      <strong>${ability.name}</strong>
+      <span>${ability.kind} / ${ability.affinity}</span>
+      <em>${relation} cost ${cost} AP${relation === "opposite" ? " unavailable" : ""}</em>
+    </button>
+  `;
+}
+
+function renderUnitCard(unit) {
+  return `
+    <button class="roster-card ${unit.id === state.selectedUnitId ? "active" : ""}" data-roster-id="${unit.id}" type="button">
+      <strong>${unit.name}</strong>
+      <span>HP ${hpText(unit)} / AP ${apText(unit)}</span>
+      <em>${unit.race}: ${unit.traits.join(" + ")}</em>
+      <small>Primary ${unit.primary} = 1 AP; Sub-job ${unit.secondary} = 2 AP; opposite = 4 AP unavailable.</small>
+    </button>
+  `;
+}
+
+function renderEnemyCard(unit) {
+  return `
+    <li>
+      <strong>${unit.name}</strong>
+      <span>HP ${hpText(unit)} at (${unit.col}, ${unit.row})</span>
+      <em>${unit.dead ? "Neutralized" : unit.intent}</em>
+    </li>
+  `;
+}
+
+function renderHud() {
+  const selected = getSelectedUnit();
+  const preview = buildPreview();
+  const phaseText = state.phase === "player" ? "Player Turn 1" : state.phase === "won" ? "Victory / Safe" : "Defeat / Forecast hit";
+  return `
+    <aside class="hud" aria-label="MVP combat HUD">
+      <section class="panel status-panel">
+        <p>TIB Gathering Prototype</p>
+        <h1>Tactics Affinity MVP</h1>
+        <div class="phase-pill">${phaseText}</div>
+      </section>
+
+      <section class="panel selected-panel">
+        <div class="selected-title">
+          <div>
+            <p>Selected build</p>
+            <h2>${selected?.name ?? "None"}</h2>
+          </div>
+          <strong>${selected ? `HP ${hpText(selected)} AP ${apText(selected)}` : "--"}</strong>
+        </div>
+        <div class="build-grid">
+          <span>Primary ${selected?.primary ?? "--"}: 1 AP</span>
+          <span>Sub-job ${selected?.secondary ?? "--"}: 2 AP</span>
+          <span>Opposite: 4 AP unavailable</span>
+        </div>
+        <div class="preview" aria-live="polite">
+          <span>Preview</span>
+          <strong>${preview.title}</strong>
+          <small>${preview.detail}</small>
+        </div>
+      </section>
+
+      <section class="panel mode-panel" aria-label="Action controls">
+        <div class="segmented">
+          <button class="${state.mode === "move" ? "active" : ""}" data-mode="move" type="button">Move</button>
+          <button class="${state.mode === "attack" ? "active" : ""}" data-mode="attack" type="button">Attack</button>
+          <button class="${state.mode === "wait" ? "active" : ""}" data-mode="wait" type="button">Wait</button>
+        </div>
+        <div class="ability-list">
+          ${selected ? abilities.map((ability) => renderAbilityButton(selected, ability)).join("") : ""}
+        </div>
+        <div class="commit-row">
+          <button class="commit-button" data-action="commit" type="button" ${state.phase !== "player" ? "disabled" : ""}>Commit</button>
+          <button class="wait-button" data-action="wait" type="button" ${state.phase !== "player" ? "disabled" : ""}>Wait / End Turn</button>
+          <button class="reset-button" data-action="reset" type="button">Reset</button>
+        </div>
+      </section>
+
+      <section class="panel roster-panel">
+        <p>Two-build roster</p>
+        <div class="roster-list">
+          ${state.units.filter((unit) => unit.team === "ally").map(renderUnitCard).join("")}
+        </div>
+      </section>
+
+      <section class="panel enemy-panel">
+        <p>Deterministic forecast</p>
+        <ul>${state.units.filter((unit) => unit.team === "enemy").map(renderEnemyCard).join("")}</ul>
+      </section>
+
+      <section class="panel log-panel" aria-label="Combat log">
+        <p>Combat log</p>
+        <ol>${state.log.map((line) => `<li>${line}</li>`).join("")}</ol>
+      </section>
+    </aside>
   `;
 }
 
 function renderApp() {
-  const selected = getSelectedUnit();
-  const preview = buildPreview();
-  const selectedHpPct = selected ? (selected.hp / selected.maxHp) * 100 : 0;
-  const objectiveHpPct = (state.objective.hp / state.objective.maxHp) * 100;
-  const phaseText =
-    state.phase === "won" ? "Victory" : state.phase === "lost" ? "Defeat" : `Player Turn ${state.turn}`;
-
-  document.documentElement.classList.toggle("grayscale", new URLSearchParams(window.location.search).get("gray") === "1");
   document.querySelector("#app").innerHTML = `
-    <div class="stage-shell">
-      <header class="top-bar">
-        <div>
-          <p>Ruined Crossing</p>
-          <h1>Tactics Battle Stage V4</h1>
-        </div>
-        <div class="turn-pill">${phaseText}</div>
-      </header>
-
-      <div class="stage-layout">
+    <main class="app-shell">
+      <div class="layout">
         ${renderBoard()}
-
-        <aside class="hud" aria-label="Battle state">
-          <section class="panel selected-panel">
-            <div class="panel-head">
-              ${img("icon_ward", "ward affinity", "panel-icon")}
-              <div>
-                <p>Selected</p>
-                <h2>${selected?.name ?? "None"}</h2>
-              </div>
-            </div>
-            <div class="forecast" aria-live="polite">
-              <span>Action preview</span>
-              <strong>${preview.title}</strong>
-              <small>${preview.detail}</small>
-              ${state.combatResult ? `<small>${state.combatResult}</small>` : ""}
-            </div>
-            ${selected ? renderPosePreview(selected) : ""}
-            <div class="meter">
-              <span>HP</span>
-              <div><i style="width:${selectedHpPct}%"></i></div>
-              <b>${selected ? hpText(selected) : "--"}</b>
-            </div>
-            ${selected ? renderAbilityControls(selected) : ""}
-          </section>
-
-          <section class="panel objective-panel">
-            <div class="panel-head">
-              ${img("overlay_objective_badge", "objective badge", "panel-icon")}
-              <div>
-                <p>Objective</p>
-                <h2>Hold the shrine</h2>
-              </div>
-            </div>
-            <div class="meter shrine-meter">
-              <span>Ward</span>
-              <div><i style="width:${objectiveHpPct}%"></i></div>
-              <b>${hpText(state.objective)}</b>
-            </div>
-            <p class="compact-note">${state.objective.warded ? "Ward active" : "Ward stable"}; one enemy intent is targeting the pad.</p>
-          </section>
-
-          <section class="panel roster-panel">
-            <div class="rosters">
-              <div>
-                <h3>Adventurers</h3>
-                <ul>${renderUnitList("ally")}</ul>
-              </div>
-              <div>
-                <h3>Enemy intent</h3>
-                <ul>${renderUnitList("enemy")}</ul>
-              </div>
-            </div>
-          </section>
-
-          <section class="panel log-panel" aria-label="Combat log">
-            <h3>Combat forecast</h3>
-            <ol>
-              ${state.log.map((line) => `<li>${line}</li>`).join("")}
-            </ol>
-          </section>
-        </aside>
+        ${renderHud()}
       </div>
-    </div>
+    </main>
   `;
 }
 
 document.addEventListener("click", (event) => {
-  const unitButton = event.target.closest("[data-unit-id]");
-  if (unitButton) {
-    const unit = getUnit(unitButton.dataset.unitId);
-    if (unit?.team === "ally") selectUnit(unit.id);
-    if (unit?.team === "enemy") selectTarget(unit.id);
+  const rosterButton = event.target.closest("[data-roster-id]");
+  if (rosterButton) {
+    selectUnit(rosterButton.dataset.rosterId);
     return;
   }
 
-  const targetButton = event.target.closest("[data-target-id]");
-  if (targetButton) {
-    selectTarget(targetButton.dataset.targetId);
+  const unitButton = event.target.closest("[data-unit-id]");
+  if (unitButton) {
+    const unit = getUnit(unitButton.dataset.unitId);
+    if (unit && state.mode === "attack" && getAbility()?.target === "cell") {
+      selectCell(unit.col, unit.row);
+    } else if (unit?.team === "ally" && state.mode === "attack" && getAbility()?.target === "unit" && unit.id !== state.selectedUnitId) {
+      selectTargetUnit(unit.id);
+    } else if (unit?.team === "ally") selectUnit(unit.id);
+    else if (unit?.team === "enemy") selectTargetUnit(unit.id);
+    return;
+  }
+
+  const cellButton = event.target.closest("[data-cell]");
+  if (cellButton) {
+    const [col, row] = cellButton.dataset.cell.split(",").map(Number);
+    selectCell(col, row);
     return;
   }
 
@@ -606,9 +611,21 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const modeButton = event.target.closest("[data-mode]");
+  if (modeButton) {
+    selectMode(modeButton.dataset.mode);
+    return;
+  }
+
   const actionButton = event.target.closest("[data-action]");
-  if (actionButton?.dataset.action === "commit") commitAction();
-  if (actionButton?.dataset.action === "end-turn") resolveEnemyTurn();
+  if (!actionButton) return;
+  if (actionButton.dataset.action === "commit") {
+    if (state.mode === "move") commitMove();
+    else if (state.mode === "attack") commitAbility();
+    else waitTurn();
+  }
+  if (actionButton.dataset.action === "wait") waitTurn();
+  if (actionButton.dataset.action === "reset") resetScenario();
 });
 
 renderApp();
