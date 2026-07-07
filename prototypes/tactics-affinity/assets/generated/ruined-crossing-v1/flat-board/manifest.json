@@ -22,6 +22,13 @@
     "bottomY": 80,
     "halfWidth": 44
   },
+  "terrainStateTiles": {
+    "plain": "tile_grass",
+    "water": "tile_shallow_water",
+    "block": "tile_raised_block",
+    "oil": "tile_dirt_path",
+    "fire": "tile_cracked_earth"
+  },
   "baseTerrainByFeature": {
     "tile_bramble": "tile_grass",
     "tile_rock_blocker": "tile_moss_stone",

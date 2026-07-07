@@ -1,24 +1,14 @@
 # MVP Affinity Vertical Slice V1
 
 - Start HEAD: 1714ca38
-- Final HEAD/commit hash at smoke time: 1714ca38
+- Final HEAD/commit hash at smoke time: b6b6f86e
 - Classification: good testbed
 - Dev server: http://127.0.0.1:5220
 - Chosen port: 5220
 
 ## Changed Files
 
-- prototypes/tactics-affinity/package.json
-- prototypes/tactics-affinity/scripts/functional-test-sweep-v1.mjs
-- prototypes/tactics-affinity/scripts/smoke-combat-loop.mjs
-- prototypes/tactics-affinity/scripts/smoke-mvp-affinity.mjs
-- prototypes/tactics-affinity/src/battle-data.js
-- prototypes/tactics-affinity/src/main.js
-- prototypes/tactics-affinity/src/styles.css
-- prototypes/tactics-affinity/artifacts/mvp-affinity-vertical-slice-v1/report.md
-- prototypes/tactics-affinity/artifacts/mvp-affinity-vertical-slice-v1/mvp-preview-chain.png
-- prototypes/tactics-affinity/artifacts/mvp-affinity-vertical-slice-v1/mvp-after-solve.png
-- prototypes/tactics-affinity/artifacts/mvp-affinity-vertical-slice-v1/mvp-fail-path.png
+- (none at smoke time)
 
 ## Commands Run
 
@@ -67,7 +57,7 @@
 ## Server Log
 
 ```
-VITE v6.4.2  ready in 80 ms
+VITE v6.4.2  ready in 85 ms
 
   ➜  Local:   http://127.0.0.1:5220/
 ```
@@ -75,12 +65,5 @@ VITE v6.4.2  ready in 80 ms
 ## Final Git Status At Smoke Time
 
 ```
-M prototypes/tactics-affinity/package.json
- M prototypes/tactics-affinity/scripts/functional-test-sweep-v1.mjs
- M prototypes/tactics-affinity/scripts/smoke-combat-loop.mjs
- M prototypes/tactics-affinity/src/battle-data.js
- M prototypes/tactics-affinity/src/main.js
- M prototypes/tactics-affinity/src/styles.css
 ?? prototypes/tactics-affinity/scripts/__pycache__/
-?? prototypes/tactics-affinity/scripts/smoke-mvp-affinity.mjs
 ```

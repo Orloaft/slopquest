@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { PNG } from "pngjs";
-import { baseTerrainByFeature, board, objective, terrainFeatureTiles } from "../src/battle-data.js";
+import { BOARD_SIZE, objective, terrain } from "../src/battle-data.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const prototypeRoot = path.resolve(__dirname, "..");
@@ -13,6 +13,24 @@ const outDir = path.join(prototypeRoot, "assets/generated/ruined-crossing-v1/fla
 const tile = { width: 160, height: 96 };
 const step = { x: 80, y: 48 };
 const skirtDepth = 30;
+const baseTerrainByFeature = {
+  tile_bramble: "tile_grass",
+  tile_rock_blocker: "tile_moss_stone",
+  tile_rubble: "tile_dirt_path",
+  tile_raised_block: "tile_moss_stone",
+  tile_spawn_crack_inactive: "tile_cracked_earth",
+  tile_spawn_crack_active: "tile_cracked_earth",
+  tile_objective_pad: "tile_dirt_path"
+};
+const terrainFeatureTiles = new Set(Object.keys(baseTerrainByFeature));
+const terrainStateTiles = {
+  plain: "tile_grass",
+  water: "tile_shallow_water",
+  block: "tile_raised_block",
+  oil: "tile_dirt_path",
+  fire: "tile_cracked_earth"
+};
+const board = buildBoardFromCombatData();
 const rows = board.length;
 const cols = board[0].length;
 const size = {
@@ -49,6 +67,41 @@ const featureDecals = {
   tile_spawn_crack_active: { alpha: 0.5, scale: 0.62, tint: [133, 71, 49] },
   tile_objective_pad: { alpha: 0.42, scale: 0.62, tint: [177, 145, 72] }
 };
+
+function assertInBounds(label, col, row) {
+  const valid = Number.isInteger(col) && Number.isInteger(row) && col >= 0 && row >= 0 && col < BOARD_SIZE && row < BOARD_SIZE;
+
+  if (!valid) {
+    throw new Error(`${label} coordinate (${col}, ${row}) is outside the ${BOARD_SIZE}x${BOARD_SIZE} board`);
+  }
+}
+
+function buildBoardFromCombatData() {
+  const authoredTerrain = new Map();
+
+  for (const tileData of terrain) {
+    assertInBounds("terrain", tileData.col, tileData.row);
+
+    const tileName = terrainStateTiles[tileData.state];
+    if (!tileName) {
+      throw new Error(`No flat-board art mapping for terrain state "${tileData.state}"`);
+    }
+
+    authoredTerrain.set(`${tileData.col},${tileData.row}`, tileName);
+  }
+
+  assertInBounds("objective", objective.col, objective.row);
+
+  return Array.from({ length: BOARD_SIZE }, (_, row) =>
+    Array.from({ length: BOARD_SIZE }, (_, col) => {
+      if (objective.col === col && objective.row === row) {
+        return "tile_objective_pad";
+      }
+
+      return authoredTerrain.get(`${col},${row}`) ?? "tile_grass";
+    })
+  );
+}
 
 function blank() {
   return new PNG({ width: size.width, height: size.height });
@@ -376,7 +429,11 @@ async function main() {
   await writeFile(path.join(outDir, "ruined-crossing-board-skirt.png"), PNG.sync.write(skirt));
   await writeFile(
     path.join(outDir, "manifest.json"),
-    `${JSON.stringify({ tile, step, skirtDepth, size, origin, sourceTop, baseTerrainByFeature, featureDecals }, null, 2)}\n`
+    `${JSON.stringify(
+      { tile, step, skirtDepth, size, origin, sourceTop, terrainStateTiles, baseTerrainByFeature, featureDecals },
+      null,
+      2
+    )}\n`
   );
 
   console.log(`built flat board compositor assets in ${outDir}`);
