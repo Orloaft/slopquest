@@ -1,33 +1,20 @@
 import { chromium } from "@playwright/test";
+import { execFile } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
+import { promisify } from "node:util";
 
+const execFileAsync = promisify(execFile);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const prototypeRoot = path.resolve(__dirname, "..");
 const repoRoot = path.resolve(prototypeRoot, "../..");
 const viteBin = path.join(repoRoot, "node_modules/vite/bin/vite.js");
-const artifactDir = path.join(prototypeRoot, "artifacts/e2e-combat-smoke");
-const screenshotPath = path.join(artifactDir, "combat-smoke-board.png");
+const artifactDir = path.join(prototypeRoot, "artifacts/playable-combat-v1");
+const screenshotPath = path.join(artifactDir, "playable-combat-after-end-turn.png");
 const reportPath = path.join(artifactDir, "report.md");
-
-const expectedText = [
-  "Ruined Crossing",
-  "Tactics Battle Stage V4",
-  "Player Turn 3",
-  "Selected",
-  "Iron Guard",
-  "Action preview",
-  "Shield Bash -> Stone Brute",
-  "Objective",
-  "Hold the shrine",
-  "Adventurers",
-  "Enemy intent",
-  "Combat forecast",
-  "Grave Archer intent"
-];
 
 async function isPortFree(port) {
   return new Promise((resolve) => {
@@ -61,14 +48,19 @@ async function waitForServer(url) {
   throw new Error(`Timed out waiting for ${url}`);
 }
 
+async function git(args) {
+  const { stdout } = await execFileAsync("git", args, { cwd: repoRoot });
+  return stdout.trim();
+}
+
 async function readCombatState(page) {
   return page.evaluate(() => {
-    const text = document.body.innerText;
-    const selected = document.querySelector(".unit.selected")?.getAttribute("aria-label") ?? "";
-    const forecast = document.querySelector(".forecast")?.innerText ?? "";
     const log = Array.from(document.querySelectorAll(".log-panel li")).map((node) => node.textContent?.trim() ?? "");
     const unitLabels = Array.from(document.querySelectorAll(".unit")).map((node) => node.getAttribute("aria-label") ?? "");
-    return { text, selected, forecast, log, unitLabels };
+    const objective = document.querySelector(".objective")?.getAttribute("aria-label") ?? "";
+    const forecast = document.querySelector(".forecast")?.innerText ?? "";
+    const turn = document.querySelector(".turn-pill")?.textContent?.trim() ?? "";
+    return { log, unitLabels, objective, forecast, turn };
   });
 }
 
@@ -90,10 +82,10 @@ async function main() {
   });
 
   const baseUrl = `http://127.0.0.1:${port}`;
-  let browser;
   const checks = [];
+  let browser;
   let classification = "nonfunctional";
-  let exitCode = 1;
+  let failure = null;
 
   try {
     await waitForServer(baseUrl);
@@ -102,68 +94,63 @@ async function main() {
     await page.goto(baseUrl, { waitUntil: "networkidle" });
     await page.waitForFunction(() => Array.from(document.images).every((image) => image.complete && image.naturalWidth > 0));
 
-    for (const text of expectedText) {
-      await page.getByText(text, { exact: false }).first().waitFor({ state: "visible", timeout: 5000 });
-      checks.push(`PASS visible text: ${text}`);
+    await page.getByText("Ruined Crossing", { exact: false }).first().waitFor({ state: "visible", timeout: 5000 });
+    await page.getByText("Tactics Battle Stage V4", { exact: false }).first().waitFor({ state: "visible", timeout: 5000 });
+    await page.getByRole("button", { name: /Iron Guard HP 9\/10/i }).click();
+    checks.push("PASS selected Iron Guard by accessible button.");
+
+    await page.getByRole("button", { name: /Shield Bash/i }).click();
+    checks.push("PASS chose Shield Bash.");
+
+    await page.getByRole("button", { name: /Stone Brute HP 12\/12/i }).click();
+    await page.getByText(/Deals 3 damage and pushes 1 tile/i).waitFor({ state: "visible", timeout: 5000 });
+    await page.locator(".forecast").getByText(/miss the shrine line/i).waitFor({ state: "visible", timeout: 5000 });
+    checks.push("PASS preview mentions damage, push, and shrine-line intent miss.");
+
+    const beforeCommit = await readCombatState(page);
+    await page.getByRole("button", { name: /Commit Action/i }).click();
+    await page.getByText(/Stone Brute took 3 and was pushed off the shrine line/i).waitFor({
+      state: "visible",
+      timeout: 5000
+    });
+    const afterCommit = await readCombatState(page);
+    if (!afterCommit.unitLabels.some((label) => /Stone Brute HP 9\/12 at 7,2/i.test(label))) {
+      throw new Error(`Expected Stone Brute HP 9/12 at 7,2, got ${afterCommit.unitLabels.join(" | ")}`);
     }
-
-    const unitCount = await page.locator(".unit").count();
-    const enemyIntentCount = await page.locator(".intent").count();
-    if (unitCount !== 6) throw new Error(`Expected 6 board units, found ${unitCount}`);
-    if (enemyIntentCount < 4) throw new Error(`Expected at least 4 intent markers, found ${enemyIntentCount}`);
-    checks.push(`PASS board units: ${unitCount}`);
-    checks.push(`PASS intent markers: ${enemyIntentCount}`);
-
-    const before = await readCombatState(page);
-    await page.locator(".unit.selected").click();
-    await page.locator(".unit.brute").click();
-    const after = await readCombatState(page);
-
-    if (JSON.stringify(before) !== JSON.stringify(after)) {
-      classification = "partial";
-      exitCode = 0;
-      checks.push("PARTIAL board state changed after selecting the active unit and target.");
-    } else {
-      checks.push("FAIL no combat state changed after clicking the selected Iron Guard and Stone Brute target.");
+    if (JSON.stringify(beforeCommit.log) === JSON.stringify(afterCommit.log)) {
+      throw new Error("Combat log did not change after committing Shield Bash.");
     }
+    checks.push("PASS commit changed Stone Brute HP, position, and combat log.");
 
-    const actionControls = await page
-      .getByRole("button", { name: /shield bash|attack|end turn|confirm|commit|ability/i })
-      .count();
-    if (actionControls > 0) {
-      checks.push(`PARTIAL action-like controls found: ${actionControls}`);
-      if (classification === "nonfunctional") classification = "partial";
-    } else {
-      checks.push("FAIL no ability, commit, attack, or end-turn controls are exposed as buttons.");
+    await page.getByRole("button", { name: /End Turn/i }).click();
+    await page.getByText(/Enemy resolution starts/i).waitFor({ state: "visible", timeout: 5000 });
+    await page.locator(".log-panel").getByText(/Stone Brute missed the shrine line/i).waitFor({
+      state: "visible",
+      timeout: 5000
+    });
+    const afterEndTurn = await readCombatState(page);
+    if (!/Shrine objective HP 6\/8/i.test(afterEndTurn.objective)) {
+      throw new Error(`Expected shrine HP to remain 6/8 after pushed brute misses, got ${afterEndTurn.objective}`);
     }
+    if (!/Player Turn 4/i.test(afterEndTurn.turn)) {
+      throw new Error(`Expected next player turn, got ${afterEndTurn.turn}`);
+    }
+    checks.push("PASS end turn resolved enemy intents and preserved shrine HP after push.");
 
     await page.screenshot({ path: screenshotPath, fullPage: false });
-
-    const report = [
-      "# E2E Combat Smoke",
-      "",
-      `- Dev server: ${baseUrl}`,
-      `- Port: ${port}`,
-      `- Screenshot: ${path.relative(prototypeRoot, screenshotPath)}`,
-      `- Classification: ${classification}`,
-      "",
-      "## Checks",
-      "",
-      ...checks.map((check) => `- ${check}`),
-      "",
-      "## Result",
-      "",
-      classification === "nonfunctional"
-        ? "The Ruined Crossing proof loads, but the combat loop is not wired for E2E interaction. Clicking the selected adventurer and Stone Brute target leaves selected unit, forecast text, combat log, and board unit labels unchanged, and there are no ability/commit/end-turn controls to drive."
-        : "The proof exposes some interaction affordance, but this smoke did not verify full deterministic turn resolution.",
-      ""
-    ].join("\n");
-    await writeFile(reportPath, report);
-
-    console.log(`combat smoke opened ${baseUrl}`);
-    console.log(`classification: ${classification}`);
-    console.log(`report: ${path.relative(prototypeRoot, reportPath)}`);
-    for (const check of checks) console.log(check);
+    checks.push(`PASS screenshot captured: ${path.relative(prototypeRoot, screenshotPath)}`);
+    classification = "working";
+  } catch (error) {
+    failure = error;
+    if (checks.length > 2) classification = "partial";
+    if (browser) {
+      try {
+        const pages = browser.contexts().flatMap((context) => context.pages());
+        if (pages[0]) await pages[0].screenshot({ path: screenshotPath, fullPage: false });
+      } catch {
+        // Keep the original failure.
+      }
+    }
   } finally {
     if (browser) await browser.close();
     server.kill("SIGTERM");
@@ -176,11 +163,40 @@ async function main() {
     });
   }
 
-  if (server.exitCode && server.exitCode !== 0 && !server.killed) {
-    throw new Error(serverLog);
-  }
+  const commitHash = await git(["rev-parse", "--short", "HEAD"]);
+  const status = await git(["status", "--short"]);
+  const report = [
+    "# Playable Combat V1 Smoke",
+    "",
+    `- Dev server: ${baseUrl}`,
+    `- Port: ${port}`,
+    `- Classification: ${classification}`,
+    `- Commit at run time: ${commitHash}`,
+    `- Screenshot: ${path.relative(prototypeRoot, screenshotPath)}`,
+    "",
+    "## Commands",
+    "",
+    "- `npm run smoke:combat`",
+    "",
+    "## Checks",
+    "",
+    ...checks.map((check) => `- ${check}`),
+    failure ? `- FAIL ${failure.message}` : "- PASS playable combat loop verified.",
+    "",
+    "## Final Git Status At Smoke Time",
+    "",
+    "```",
+    status || "(clean)",
+    "```",
+    ""
+  ].join("\n");
+  await writeFile(reportPath, report);
 
-  process.exit(exitCode);
+  console.log(`combat smoke opened ${baseUrl}`);
+  console.log(`classification: ${classification}`);
+  console.log(`report: ${path.relative(prototypeRoot, reportPath)}`);
+  for (const check of checks) console.log(check);
+  if (failure) throw failure;
 }
 
 main().catch((error) => {

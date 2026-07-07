@@ -36,6 +36,10 @@ button {
   font: inherit;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 .grayscale .stage-shell {
   filter: grayscale(1);
 }
@@ -215,9 +219,17 @@ button {
 .objective {
   width: var(--tile-w);
   height: var(--unit-h);
+  padding: 0;
+  border: 0;
+  background: transparent;
   transform: translate(-50%, -88%);
   z-index: calc(var(--z) + 4);
-  pointer-events: none;
+  cursor: pointer;
+}
+
+.objective.targeted,
+.objective.warded {
+  z-index: 224;
 }
 
 .objective-art {
@@ -305,12 +317,17 @@ button {
   border: 0;
   background: transparent;
   transform: translate(-50%, -88%);
-  cursor: default;
+  cursor: pointer;
   z-index: calc(var(--z) + 8);
 }
 
-.unit.selected {
+.unit.selected,
+.unit.targeted {
   z-index: 220;
+}
+
+.unit.acted {
+  opacity: 0.72;
 }
 
 .lowres-actor {
@@ -804,8 +821,15 @@ button {
 
 .selection-ring.enemy-ring {
   width: calc(var(--tile-w) * 0.72);
-  opacity: 0.28;
+  opacity: 0.36;
   filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.42)) grayscale(0.2);
+}
+
+.unit.targeted .selection-ring.enemy-ring,
+.objective.targeted .objective-badge,
+.objective.warded .objective-badge {
+  opacity: 0.86;
+  filter: drop-shadow(0 0 8px rgba(222, 239, 142, 0.5));
 }
 
 .selection-art {
@@ -1034,6 +1058,71 @@ button {
   margin: 9px 0 0;
 }
 
+.action-controls {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ability-button,
+.commit-button,
+.end-turn-button {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid rgba(226, 208, 150, 0.2);
+  background: rgba(19, 23, 18, 0.92);
+  color: #f4e7b2;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ability-button {
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+}
+
+.ability-button strong {
+  color: #fff4c2;
+  font-size: 0.85rem;
+}
+
+.ability-button span {
+  color: #cbbd9a;
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.ability-button.active {
+  border-color: rgba(207, 226, 122, 0.74);
+  background: rgba(95, 119, 61, 0.22);
+}
+
+.commit-button,
+.end-turn-button {
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.commit-button {
+  background: rgba(73, 101, 64, 0.72);
+  border-color: rgba(207, 226, 122, 0.5);
+}
+
+.end-turn-button {
+  background: rgba(91, 62, 48, 0.78);
+  border-color: rgba(232, 174, 112, 0.44);
+}
+
+.ability-button:disabled,
+.commit-button:disabled,
+.end-turn-button:disabled {
+  opacity: 0.48;
+}
+
 .rosters {
   display: grid;
   gap: 13px;
@@ -1076,6 +1165,11 @@ button {
 
 .rosters li.active {
   color: #fff4c2;
+}
+
+.rosters li.dead {
+  opacity: 0.48;
+  text-decoration: line-through;
 }
 
 .log-panel li {
