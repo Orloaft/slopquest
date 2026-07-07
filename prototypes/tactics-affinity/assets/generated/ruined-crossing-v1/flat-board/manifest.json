@@ -1,0 +1,99 @@
+{
+  "tile": {
+    "width": 160,
+    "height": 96
+  },
+  "step": {
+    "x": 80,
+    "y": 48
+  },
+  "skirtDepth": 30,
+  "size": {
+    "width": 1280,
+    "height": 798
+  },
+  "origin": {
+    "x": 640,
+    "y": 96
+  },
+  "sourceTop": {
+    "centerX": 80,
+    "topY": 34,
+    "bottomY": 80,
+    "halfWidth": 44
+  },
+  "baseTerrainByFeature": {
+    "tile_bramble": "tile_grass",
+    "tile_rock_blocker": "tile_moss_stone",
+    "tile_rubble": "tile_dirt_path",
+    "tile_raised_block": "tile_moss_stone",
+    "tile_spawn_crack_inactive": "tile_cracked_earth",
+    "tile_spawn_crack_active": "tile_cracked_earth",
+    "tile_objective_pad": "tile_dirt_path"
+  },
+  "featureDecals": {
+    "tile_bramble": {
+      "alpha": 0.3,
+      "scale": 0.78,
+      "tint": [
+        67,
+        92,
+        52
+      ]
+    },
+    "tile_rock_blocker": {
+      "alpha": 0.34,
+      "scale": 0.68,
+      "tint": [
+        111,
+        111,
+        94
+      ]
+    },
+    "tile_rubble": {
+      "alpha": 0.34,
+      "scale": 0.7,
+      "tint": [
+        122,
+        102,
+        79
+      ]
+    },
+    "tile_raised_block": {
+      "alpha": 0.36,
+      "scale": 0.72,
+      "tint": [
+        111,
+        111,
+        96
+      ]
+    },
+    "tile_spawn_crack_inactive": {
+      "alpha": 0.44,
+      "scale": 0.62,
+      "tint": [
+        92,
+        65,
+        51
+      ]
+    },
+    "tile_spawn_crack_active": {
+      "alpha": 0.5,
+      "scale": 0.62,
+      "tint": [
+        133,
+        71,
+        49
+      ]
+    },
+    "tile_objective_pad": {
+      "alpha": 0.42,
+      "scale": 0.62,
+      "tint": [
+        177,
+        145,
+        72
+      ]
+    }
+  }
+}

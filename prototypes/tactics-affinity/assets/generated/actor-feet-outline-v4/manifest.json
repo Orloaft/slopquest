@@ -1,0 +1,1158 @@
+{
+  "version": "battle-stage-actor-feet-outline-v4",
+  "source": "artifacts/battle-stage-generated-low-res-actors-v1/generated-actor-source.png",
+  "sheet": "generated-low-res-actor-poses.png",
+  "frameSize": {
+    "width": 96,
+    "height": 96
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 6
+  },
+  "frameOrder": [
+    "idle",
+    "windup",
+    "hit",
+    "move"
+  ],
+  "anchorContract": "Each runtime frame is a 96x96 transparent cell. Anchor.x is centered at 48px. Anchor.y is the role foot contact line; opaque actor pixels end above the cell bottom with visible transparent margin.",
+  "processing": {
+    "sourceBottomPadPx": 34,
+    "sourceSidePadPx": 40,
+    "sourceTopPadPx": 24,
+    "uniformOutline": "disabled",
+    "edgeTreatment": "dark perimeter pixels below luminance 34 are recolored to role-local edge colors instead of adding a dilated black stroke",
+    "contactShadow": "not baked into the actor sheet; runtime CSS draws a separate ellipse below the feet"
+  },
+  "roles": [
+    {
+      "id": "iron-guard",
+      "label": "Iron Guard",
+      "row": 0,
+      "scale": 0.4713,
+      "anchor": {
+        "x": 48,
+        "y": 84
+      },
+      "baseline": {
+        "y": 84,
+        "units": "frame-pixels"
+      },
+      "frames": [
+        {
+          "name": "idle",
+          "column": 0,
+          "row": 0,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 0,
+            "row": 0
+          },
+          "contentBounds": {
+            "x": 11,
+            "y": 10,
+            "width": 74,
+            "height": 75,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 11,
+            "right": 11,
+            "top": 10,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 318,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 0,
+            "y": 0,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 177,
+            "y": 55,
+            "width": 156,
+            "height": 157
+          }
+        },
+        {
+          "name": "windup",
+          "column": 1,
+          "row": 0,
+          "rect": {
+            "x": 96,
+            "y": 0,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 1,
+            "row": 0
+          },
+          "contentBounds": {
+            "x": 10,
+            "y": 2,
+            "width": 77,
+            "height": 83,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 10,
+            "right": 9,
+            "top": 2,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 360,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 362,
+            "y": 0,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 147,
+            "y": 38,
+            "width": 163,
+            "height": 174
+          }
+        },
+        {
+          "name": "hit",
+          "column": 2,
+          "row": 0,
+          "rect": {
+            "x": 192,
+            "y": 0,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 2,
+            "row": 0
+          },
+          "contentBounds": {
+            "x": 5,
+            "y": 20,
+            "width": 86,
+            "height": 65,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 5,
+            "right": 5,
+            "top": 20,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 340,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 724,
+            "y": 0,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 96,
+            "y": 77,
+            "width": 183,
+            "height": 136
+          }
+        },
+        {
+          "name": "move",
+          "column": 3,
+          "row": 0,
+          "rect": {
+            "x": 288,
+            "y": 0,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 3,
+            "row": 0
+          },
+          "contentBounds": {
+            "x": 9,
+            "y": 22,
+            "width": 78,
+            "height": 63,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 9,
+            "right": 9,
+            "top": 22,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 303,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 1086,
+            "y": 0,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 81,
+            "y": 81,
+            "width": 165,
+            "height": 131
+          }
+        }
+      ]
+    },
+    {
+      "id": "verdant-ranger",
+      "label": "Verdant Ranger",
+      "row": 1,
+      "scale": 0.4265,
+      "anchor": {
+        "x": 48,
+        "y": 84
+      },
+      "baseline": {
+        "y": 84,
+        "units": "frame-pixels"
+      },
+      "frames": [
+        {
+          "name": "idle",
+          "column": 0,
+          "row": 1,
+          "rect": {
+            "x": 0,
+            "y": 96,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 0,
+            "row": 1
+          },
+          "contentBounds": {
+            "x": 12,
+            "y": 26,
+            "width": 73,
+            "height": 59,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 12,
+            "right": 11,
+            "top": 26,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 305,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 0,
+            "y": 181,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 168,
+            "y": 77,
+            "width": 171,
+            "height": 136
+          }
+        },
+        {
+          "name": "windup",
+          "column": 1,
+          "row": 1,
+          "rect": {
+            "x": 96,
+            "y": 96,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 1,
+            "row": 1
+          },
+          "contentBounds": {
+            "x": 10,
+            "y": 25,
+            "width": 75,
+            "height": 60,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 10,
+            "right": 11,
+            "top": 25,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 380,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 362,
+            "y": 181,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 138,
+            "y": 75,
+            "width": 177,
+            "height": 138
+          }
+        },
+        {
+          "name": "hit",
+          "column": 2,
+          "row": 1,
+          "rect": {
+            "x": 192,
+            "y": 96,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 2,
+            "row": 1
+          },
+          "contentBounds": {
+            "x": 16,
+            "y": 30,
+            "width": 65,
+            "height": 55,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 16,
+            "right": 15,
+            "top": 30,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 254,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 724,
+            "y": 181,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 119,
+            "y": 85,
+            "width": 152,
+            "height": 126
+          }
+        },
+        {
+          "name": "move",
+          "column": 3,
+          "row": 1,
+          "rect": {
+            "x": 288,
+            "y": 96,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 3,
+            "row": 1
+          },
+          "contentBounds": {
+            "x": 3,
+            "y": 29,
+            "width": 90,
+            "height": 56,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 3,
+            "right": 3,
+            "top": 29,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 380,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 1086,
+            "y": 181,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 49,
+            "y": 85,
+            "width": 211,
+            "height": 130
+          }
+        }
+      ]
+    },
+    {
+      "id": "radiant-acolyte",
+      "label": "Radiant Acolyte",
+      "row": 2,
+      "scale": 0.4398,
+      "anchor": {
+        "x": 48,
+        "y": 84
+      },
+      "baseline": {
+        "y": 84,
+        "units": "frame-pixels"
+      },
+      "frames": [
+        {
+          "name": "idle",
+          "column": 0,
+          "row": 2,
+          "rect": {
+            "x": 0,
+            "y": 192,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 0,
+            "row": 2
+          },
+          "contentBounds": {
+            "x": 24,
+            "y": 16,
+            "width": 49,
+            "height": 69,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 24,
+            "right": 23,
+            "top": 16,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 263,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 0,
+            "y": 362,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 183,
+            "y": 55,
+            "width": 111,
+            "height": 154
+          }
+        },
+        {
+          "name": "windup",
+          "column": 1,
+          "row": 2,
+          "rect": {
+            "x": 96,
+            "y": 192,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 1,
+            "row": 2
+          },
+          "contentBounds": {
+            "x": 12,
+            "y": 12,
+            "width": 71,
+            "height": 73,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 12,
+            "right": 13,
+            "top": 12,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 347,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 362,
+            "y": 362,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 141,
+            "y": 49,
+            "width": 162,
+            "height": 163
+          }
+        },
+        {
+          "name": "hit",
+          "column": 2,
+          "row": 2,
+          "rect": {
+            "x": 192,
+            "y": 192,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 2,
+            "row": 2
+          },
+          "contentBounds": {
+            "x": 18,
+            "y": 32,
+            "width": 61,
+            "height": 53,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 18,
+            "right": 17,
+            "top": 32,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 232,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 724,
+            "y": 362,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 115,
+            "y": 92,
+            "width": 138,
+            "height": 119
+          }
+        },
+        {
+          "name": "move",
+          "column": 3,
+          "row": 2,
+          "rect": {
+            "x": 288,
+            "y": 192,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 3,
+            "row": 2
+          },
+          "contentBounds": {
+            "x": 6,
+            "y": 24,
+            "width": 84,
+            "height": 61,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 6,
+            "right": 6,
+            "top": 24,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 363,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 1086,
+            "y": 362,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 49,
+            "y": 77,
+            "width": 191,
+            "height": 137
+          }
+        }
+      ]
+    },
+    {
+      "id": "grave-skitter",
+      "label": "Grave Skitter",
+      "row": 3,
+      "scale": 0.2945,
+      "anchor": {
+        "x": 48,
+        "y": 78
+      },
+      "baseline": {
+        "y": 78,
+        "units": "frame-pixels"
+      },
+      "frames": [
+        {
+          "name": "idle",
+          "column": 0,
+          "row": 3,
+          "rect": {
+            "x": 0,
+            "y": 288,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 0,
+            "row": 3
+          },
+          "contentBounds": {
+            "x": 18,
+            "y": 43,
+            "width": 59,
+            "height": 35,
+            "bottom": 78
+          },
+          "margins": {
+            "left": 18,
+            "right": 19,
+            "top": 43,
+            "bottom": 18,
+            "edgeDarkPixels": 0,
+            "edgePixels": 192,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 0,
+            "y": 543,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 152,
+            "y": 67,
+            "width": 199,
+            "height": 120
+          }
+        },
+        {
+          "name": "windup",
+          "column": 1,
+          "row": 3,
+          "rect": {
+            "x": 96,
+            "y": 288,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 1,
+            "row": 3
+          },
+          "contentBounds": {
+            "x": 20,
+            "y": 35,
+            "width": 56,
+            "height": 43,
+            "bottom": 78
+          },
+          "margins": {
+            "left": 20,
+            "right": 20,
+            "top": 35,
+            "bottom": 18,
+            "edgeDarkPixels": 0,
+            "edgePixels": 250,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 362,
+            "y": 543,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 114,
+            "y": 37,
+            "width": 189,
+            "height": 146
+          }
+        },
+        {
+          "name": "hit",
+          "column": 2,
+          "row": 3,
+          "rect": {
+            "x": 192,
+            "y": 288,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 2,
+            "row": 3
+          },
+          "contentBounds": {
+            "x": 2,
+            "y": 48,
+            "width": 91,
+            "height": 30,
+            "bottom": 78
+          },
+          "margins": {
+            "left": 2,
+            "right": 3,
+            "top": 48,
+            "bottom": 18,
+            "edgeDarkPixels": 0,
+            "edgePixels": 192,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 724,
+            "y": 543,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 93,
+            "y": 79,
+            "width": 309,
+            "height": 103
+          }
+        },
+        {
+          "name": "move",
+          "column": 3,
+          "row": 3,
+          "rect": {
+            "x": 288,
+            "y": 288,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 3,
+            "row": 3
+          },
+          "contentBounds": {
+            "x": 18,
+            "y": 43,
+            "width": 60,
+            "height": 35,
+            "bottom": 78
+          },
+          "margins": {
+            "left": 18,
+            "right": 18,
+            "top": 43,
+            "bottom": 18,
+            "edgeDarkPixels": 0,
+            "edgePixels": 204,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 1086,
+            "y": 543,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 40,
+            "y": 63,
+            "width": 205,
+            "height": 120
+          }
+        }
+      ]
+    },
+    {
+      "id": "stone-brute",
+      "label": "Stone Brute",
+      "row": 4,
+      "scale": 0.3863,
+      "anchor": {
+        "x": 48,
+        "y": 86
+      },
+      "baseline": {
+        "y": 86,
+        "units": "frame-pixels"
+      },
+      "frames": [
+        {
+          "name": "idle",
+          "column": 0,
+          "row": 4,
+          "rect": {
+            "x": 0,
+            "y": 384,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 0,
+            "row": 4
+          },
+          "contentBounds": {
+            "x": 9,
+            "y": 33,
+            "width": 78,
+            "height": 53,
+            "bottom": 86
+          },
+          "margins": {
+            "left": 9,
+            "right": 9,
+            "top": 33,
+            "bottom": 10,
+            "edgeDarkPixels": 0,
+            "edgePixels": 283,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 0,
+            "y": 724,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 149,
+            "y": 24,
+            "width": 202,
+            "height": 138
+          }
+        },
+        {
+          "name": "windup",
+          "column": 1,
+          "row": 4,
+          "rect": {
+            "x": 96,
+            "y": 384,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 1,
+            "row": 4
+          },
+          "contentBounds": {
+            "x": 5,
+            "y": 30,
+            "width": 86,
+            "height": 56,
+            "bottom": 86
+          },
+          "margins": {
+            "left": 5,
+            "right": 5,
+            "top": 30,
+            "bottom": 10,
+            "edgeDarkPixels": 0,
+            "edgePixels": 319,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 362,
+            "y": 724,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 99,
+            "y": 24,
+            "width": 222,
+            "height": 145
+          }
+        },
+        {
+          "name": "hit",
+          "column": 2,
+          "row": 4,
+          "rect": {
+            "x": 192,
+            "y": 384,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 2,
+            "row": 4
+          },
+          "contentBounds": {
+            "x": 12,
+            "y": 40,
+            "width": 72,
+            "height": 46,
+            "bottom": 86
+          },
+          "margins": {
+            "left": 12,
+            "right": 12,
+            "top": 40,
+            "bottom": 10,
+            "edgeDarkPixels": 0,
+            "edgePixels": 244,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 724,
+            "y": 724,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 88,
+            "y": 47,
+            "width": 187,
+            "height": 119
+          }
+        },
+        {
+          "name": "move",
+          "column": 3,
+          "row": 4,
+          "rect": {
+            "x": 288,
+            "y": 384,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 3,
+            "row": 4
+          },
+          "contentBounds": {
+            "x": 3,
+            "y": 34,
+            "width": 90,
+            "height": 52,
+            "bottom": 86
+          },
+          "margins": {
+            "left": 3,
+            "right": 3,
+            "top": 34,
+            "bottom": 10,
+            "edgeDarkPixels": 0,
+            "edgePixels": 307,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 1086,
+            "y": 724,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 40,
+            "y": 31,
+            "width": 233,
+            "height": 135
+          }
+        }
+      ]
+    },
+    {
+      "id": "grave-archer",
+      "label": "Grave Archer",
+      "row": 5,
+      "scale": 0.4762,
+      "anchor": {
+        "x": 48,
+        "y": 84
+      },
+      "baseline": {
+        "y": 84,
+        "units": "frame-pixels"
+      },
+      "frames": [
+        {
+          "name": "idle",
+          "column": 0,
+          "row": 5,
+          "rect": {
+            "x": 0,
+            "y": 480,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 0,
+            "row": 5
+          },
+          "contentBounds": {
+            "x": 10,
+            "y": 12,
+            "width": 75,
+            "height": 73,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 10,
+            "right": 11,
+            "top": 12,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 540,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 0,
+            "y": 905,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 174,
+            "y": 24,
+            "width": 157,
+            "height": 152
+          }
+        },
+        {
+          "name": "windup",
+          "column": 1,
+          "row": 5,
+          "rect": {
+            "x": 96,
+            "y": 480,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 1,
+            "row": 5
+          },
+          "contentBounds": {
+            "x": 4,
+            "y": 11,
+            "width": 87,
+            "height": 74,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 4,
+            "right": 5,
+            "top": 11,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 615,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 362,
+            "y": 905,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 117,
+            "y": 24,
+            "width": 183,
+            "height": 153
+          }
+        },
+        {
+          "name": "hit",
+          "column": 2,
+          "row": 5,
+          "rect": {
+            "x": 192,
+            "y": 480,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 2,
+            "row": 5
+          },
+          "contentBounds": {
+            "x": 15,
+            "y": 14,
+            "width": 66,
+            "height": 71,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 15,
+            "right": 15,
+            "top": 14,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 408,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 724,
+            "y": 905,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 124,
+            "y": 24,
+            "width": 138,
+            "height": 146
+          }
+        },
+        {
+          "name": "move",
+          "column": 3,
+          "row": 5,
+          "rect": {
+            "x": 288,
+            "y": 480,
+            "width": 96,
+            "height": 96
+          },
+          "grid": {
+            "column": 3,
+            "row": 5
+          },
+          "contentBounds": {
+            "x": 3,
+            "y": 13,
+            "width": 90,
+            "height": 72,
+            "bottom": 85
+          },
+          "margins": {
+            "left": 3,
+            "right": 3,
+            "top": 13,
+            "bottom": 11,
+            "edgeDarkPixels": 0,
+            "edgePixels": 620,
+            "edgeDarkRatio": 0.0
+          },
+          "sourceCell": {
+            "x": 1086,
+            "y": 905,
+            "width": 362,
+            "height": 181
+          },
+          "sourceBounds": {
+            "x": 40,
+            "y": 24,
+            "width": 189,
+            "height": 149
+          }
+        }
+      ]
+    }
+  ]
+}

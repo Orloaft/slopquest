@@ -1,0 +1,19 @@
+{
+  "source_chroma": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/source-chroma.png",
+  "source_alpha": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/source-alpha.png",
+  "extraction": "Connected-component crops after chroma-key alpha removal; original generated sheet was not a rigid grid.",
+  "sprite_count_raw": 52,
+  "aliases": {
+    "tile_spawn_crack_active.png": "tile_objective_pad.png",
+    "tile_spawn_crack_inactive.png": "tile_spawn_crack_active_alias.png",
+    "overlay_danger_border.png": "overlay_objective_badge_alias.png",
+    "row04_asset15.png": "overlay_danger_border_alias.png",
+    "row05_asset12.png": "marker_guarded_alias.png"
+  },
+  "known_first_pass_issues": [
+    "Generated sheet provided 12 board tiles, not all 13 requested; objective pad is aliased from the final golden tile.",
+    "Only one clear spawn-crack tile appeared; active/inactive variants need a later focused generation pass if accepted.",
+    "Several Fieldcraft icons are usable as placeholders but not semantically perfect; refine after art direction approval.",
+    "Some props/units have contact shadows baked into the crop, acceptable for mock review but may need cleanup for runtime."
+  ]
+}

@@ -1,0 +1,266 @@
+{
+  "canvas": {
+    "width": 160,
+    "height": 144
+  },
+  "anchor": {
+    "x": 80,
+    "y": 136
+  },
+  "alphaThreshold": 12,
+  "topFaceMask": [
+    {
+      "x": 80,
+      "y": 7
+    },
+    {
+      "x": 159,
+      "y": 62
+    },
+    {
+      "x": 80,
+      "y": 134
+    },
+    {
+      "x": 1,
+      "y": 62
+    }
+  ],
+  "topFaceTargetBottomY": 136,
+  "tiles": [
+    {
+      "name": "tile_grass",
+      "sourceSize": [
+        145,
+        133
+      ],
+      "alphaBounds": [
+        8,
+        8,
+        144,
+        124
+      ],
+      "offset": [
+        4,
+        12
+      ],
+      "topFace": "top-face/tile_grass.png"
+    },
+    {
+      "name": "tile_moss_stone",
+      "sourceSize": [
+        142,
+        132
+      ],
+      "alphaBounds": [
+        0,
+        7,
+        141,
+        123
+      ],
+      "offset": [
+        10,
+        13
+      ],
+      "topFace": "top-face/tile_moss_stone.png"
+    },
+    {
+      "name": "tile_dirt_path",
+      "sourceSize": [
+        137,
+        131
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        136,
+        122
+      ],
+      "offset": [
+        12,
+        14
+      ],
+      "topFace": "top-face/tile_dirt_path.png"
+    },
+    {
+      "name": "tile_cracked_earth",
+      "sourceSize": [
+        140,
+        133
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        139,
+        124
+      ],
+      "offset": [
+        11,
+        12
+      ],
+      "topFace": "top-face/tile_cracked_earth.png"
+    },
+    {
+      "name": "tile_shallow_water",
+      "sourceSize": [
+        142,
+        134
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        141,
+        125
+      ],
+      "offset": [
+        10,
+        11
+      ],
+      "topFace": "top-face/tile_shallow_water.png"
+    },
+    {
+      "name": "tile_water_edge",
+      "sourceSize": [
+        149,
+        138
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        148,
+        129
+      ],
+      "offset": [
+        6,
+        7
+      ],
+      "topFace": "top-face/tile_water_edge.png"
+    },
+    {
+      "name": "tile_bramble",
+      "sourceSize": [
+        138,
+        136
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        137,
+        127
+      ],
+      "offset": [
+        12,
+        9
+      ],
+      "topFace": "top-face/tile_bramble.png"
+    },
+    {
+      "name": "tile_rock_blocker",
+      "sourceSize": [
+        130,
+        139
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        129,
+        130
+      ],
+      "offset": [
+        16,
+        6
+      ],
+      "topFace": "top-face/tile_rock_blocker.png"
+    },
+    {
+      "name": "tile_rubble",
+      "sourceSize": [
+        133,
+        129
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        132,
+        120
+      ],
+      "offset": [
+        14,
+        16
+      ],
+      "topFace": "top-face/tile_rubble.png"
+    },
+    {
+      "name": "tile_raised_block",
+      "sourceSize": [
+        128,
+        138
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        127,
+        129
+      ],
+      "offset": [
+        17,
+        7
+      ],
+      "topFace": "top-face/tile_raised_block.png"
+    },
+    {
+      "name": "tile_spawn_crack_inactive",
+      "sourceSize": [
+        126,
+        134
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        125,
+        125
+      ],
+      "offset": [
+        18,
+        11
+      ],
+      "topFace": "top-face/tile_spawn_crack_inactive.png"
+    },
+    {
+      "name": "tile_spawn_crack_active",
+      "sourceSize": [
+        135,
+        127
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        126,
+        118
+      ],
+      "offset": [
+        17,
+        18
+      ],
+      "topFace": "top-face/tile_spawn_crack_active.png"
+    },
+    {
+      "name": "tile_objective_pad",
+      "sourceSize": [
+        135,
+        127
+      ],
+      "alphaBounds": [
+        0,
+        8,
+        126,
+        118
+      ],
+      "offset": [
+        17,
+        18
+      ],
+      "topFace": "top-face/tile_objective_pad.png"
+    }
+  ]
+}

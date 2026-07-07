@@ -1,0 +1,994 @@
+{
+  "source": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/source-alpha.png",
+  "sprite_count": 52,
+  "sprites": [
+    {
+      "name": "tile_grass",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_grass.png",
+      "source_bbox": [
+        21,
+        53,
+        150,
+        170
+      ],
+      "crop_box": [
+        13,
+        45,
+        158,
+        178
+      ],
+      "row": 1,
+      "index": 1,
+      "area": 9043
+    },
+    {
+      "name": "tile_moss_stone",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_moss_stone.png",
+      "source_bbox": [
+        154,
+        54,
+        280,
+        170
+      ],
+      "crop_box": [
+        146,
+        46,
+        288,
+        178
+      ],
+      "row": 1,
+      "index": 2,
+      "area": 8847
+    },
+    {
+      "name": "tile_dirt_path",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_dirt_path.png",
+      "source_bbox": [
+        283,
+        55,
+        404,
+        170
+      ],
+      "crop_box": [
+        275,
+        47,
+        412,
+        178
+      ],
+      "row": 1,
+      "index": 3,
+      "area": 8520
+    },
+    {
+      "name": "tile_cracked_earth",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_cracked_earth.png",
+      "source_bbox": [
+        408,
+        54,
+        532,
+        171
+      ],
+      "crop_box": [
+        400,
+        46,
+        540,
+        179
+      ],
+      "row": 1,
+      "index": 4,
+      "area": 8905
+    },
+    {
+      "name": "tile_shallow_water",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_shallow_water.png",
+      "source_bbox": [
+        536,
+        55,
+        662,
+        173
+      ],
+      "crop_box": [
+        528,
+        47,
+        670,
+        181
+      ],
+      "row": 1,
+      "index": 5,
+      "area": 9029
+    },
+    {
+      "name": "tile_water_edge",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_water_edge.png",
+      "source_bbox": [
+        665,
+        56,
+        798,
+        178
+      ],
+      "crop_box": [
+        657,
+        48,
+        806,
+        186
+      ],
+      "row": 1,
+      "index": 6,
+      "area": 9772
+    },
+    {
+      "name": "tile_bramble",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_bramble.png",
+      "source_bbox": [
+        800,
+        57,
+        922,
+        177
+      ],
+      "crop_box": [
+        792,
+        49,
+        930,
+        185
+      ],
+      "row": 1,
+      "index": 7,
+      "area": 8950
+    },
+    {
+      "name": "tile_rock_blocker",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_rock_blocker.png",
+      "source_bbox": [
+        926,
+        54,
+        1040,
+        177
+      ],
+      "crop_box": [
+        918,
+        46,
+        1048,
+        185
+      ],
+      "row": 1,
+      "index": 8,
+      "area": 8933
+    },
+    {
+      "name": "tile_rubble",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_rubble.png",
+      "source_bbox": [
+        1045,
+        62,
+        1162,
+        175
+      ],
+      "crop_box": [
+        1037,
+        54,
+        1170,
+        183
+      ],
+      "row": 1,
+      "index": 9,
+      "area": 7758
+    },
+    {
+      "name": "tile_raised_block",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_raised_block.png",
+      "source_bbox": [
+        1167,
+        54,
+        1279,
+        176
+      ],
+      "crop_box": [
+        1159,
+        46,
+        1287,
+        184
+      ],
+      "row": 1,
+      "index": 10,
+      "area": 8912
+    },
+    {
+      "name": "tile_spawn_crack_inactive",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_spawn_crack_inactive.png",
+      "source_bbox": [
+        1286,
+        56,
+        1396,
+        174
+      ],
+      "crop_box": [
+        1278,
+        48,
+        1404,
+        182
+      ],
+      "row": 1,
+      "index": 11,
+      "area": 8462
+    },
+    {
+      "name": "tile_spawn_crack_active",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/tile_spawn_crack_active.png",
+      "source_bbox": [
+        1397,
+        62,
+        1516,
+        173
+      ],
+      "crop_box": [
+        1389,
+        54,
+        1524,
+        181
+      ],
+      "row": 1,
+      "index": 12,
+      "area": 8033
+    },
+    {
+      "name": "objective_shrine",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/objective_shrine.png",
+      "source_bbox": [
+        24,
+        191,
+        194,
+        388
+      ],
+      "crop_box": [
+        16,
+        183,
+        202,
+        396
+      ],
+      "row": 2,
+      "index": 1,
+      "area": 16803
+    },
+    {
+      "name": "objective_wagon",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/objective_wagon.png",
+      "source_bbox": [
+        252,
+        204,
+        462,
+        387
+      ],
+      "crop_box": [
+        244,
+        196,
+        470,
+        395
+      ],
+      "row": 2,
+      "index": 2,
+      "area": 23976
+    },
+    {
+      "name": "prop_barricade",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/prop_barricade.png",
+      "source_bbox": [
+        533,
+        225,
+        695,
+        381
+      ],
+      "crop_box": [
+        525,
+        217,
+        703,
+        389
+      ],
+      "row": 2,
+      "index": 3,
+      "area": 14302
+    },
+    {
+      "name": "prop_broken_wall",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/prop_broken_wall.png",
+      "source_bbox": [
+        750,
+        241,
+        935,
+        384
+      ],
+      "crop_box": [
+        742,
+        233,
+        943,
+        392
+      ],
+      "row": 2,
+      "index": 4,
+      "area": 14742
+    },
+    {
+      "name": "prop_low_pillar",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/prop_low_pillar.png",
+      "source_bbox": [
+        1003,
+        223,
+        1133,
+        385
+      ],
+      "crop_box": [
+        995,
+        215,
+        1141,
+        393
+      ],
+      "row": 2,
+      "index": 5,
+      "area": 11168
+    },
+    {
+      "name": "prop_supply_crate",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/prop_supply_crate.png",
+      "source_bbox": [
+        1192,
+        237,
+        1324,
+        370
+      ],
+      "crop_box": [
+        1184,
+        229,
+        1332,
+        378
+      ],
+      "row": 2,
+      "index": 6,
+      "area": 12066
+    },
+    {
+      "name": "prop_banner",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/prop_banner.png",
+      "source_bbox": [
+        1395,
+        202,
+        1473,
+        378
+      ],
+      "crop_box": [
+        1387,
+        194,
+        1481,
+        386
+      ],
+      "row": 2,
+      "index": 7,
+      "area": 8022
+    },
+    {
+      "name": "adventurer_iron_guard",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/adventurer_iron_guard.png",
+      "source_bbox": [
+        48,
+        417,
+        195,
+        602
+      ],
+      "crop_box": [
+        40,
+        409,
+        203,
+        610
+      ],
+      "row": 3,
+      "index": 1,
+      "area": 19349
+    },
+    {
+      "name": "adventurer_verdant_ranger",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/adventurer_verdant_ranger.png",
+      "source_bbox": [
+        280,
+        417,
+        444,
+        610
+      ],
+      "crop_box": [
+        272,
+        409,
+        452,
+        618
+      ],
+      "row": 3,
+      "index": 2,
+      "area": 18385
+    },
+    {
+      "name": "adventurer_radiant_acolyte",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/adventurer_radiant_acolyte.png",
+      "source_bbox": [
+        515,
+        417,
+        635,
+        601
+      ],
+      "crop_box": [
+        507,
+        409,
+        643,
+        609
+      ],
+      "row": 3,
+      "index": 3,
+      "area": 14643
+    },
+    {
+      "name": "enemy_grave_skitter",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/enemy_grave_skitter.png",
+      "source_bbox": [
+        759,
+        466,
+        950,
+        614
+      ],
+      "crop_box": [
+        751,
+        458,
+        958,
+        622
+      ],
+      "row": 3,
+      "index": 4,
+      "area": 17164
+    },
+    {
+      "name": "enemy_stone_brute",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/enemy_stone_brute.png",
+      "source_bbox": [
+        989,
+        426,
+        1179,
+        621
+      ],
+      "crop_box": [
+        981,
+        418,
+        1187,
+        629
+      ],
+      "row": 3,
+      "index": 5,
+      "area": 25559
+    },
+    {
+      "name": "enemy_grave_archer",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/enemy_grave_archer.png",
+      "source_bbox": [
+        1260,
+        423,
+        1423,
+        610
+      ],
+      "crop_box": [
+        1252,
+        415,
+        1431,
+        618
+      ],
+      "row": 3,
+      "index": 6,
+      "area": 16557
+    },
+    {
+      "name": "overlay_ally_select",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_ally_select.png",
+      "source_bbox": [
+        20,
+        680,
+        126,
+        778
+      ],
+      "crop_box": [
+        12,
+        672,
+        134,
+        786
+      ],
+      "row": 4,
+      "index": 1,
+      "area": 2832
+    },
+    {
+      "name": "overlay_enemy_select",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_enemy_select.png",
+      "source_bbox": [
+        127,
+        682,
+        228,
+        779
+      ],
+      "crop_box": [
+        119,
+        674,
+        236,
+        787
+      ],
+      "row": 4,
+      "index": 2,
+      "area": 2738
+    },
+    {
+      "name": "overlay_move_tile",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_move_tile.png",
+      "source_bbox": [
+        231,
+        682,
+        338,
+        780
+      ],
+      "crop_box": [
+        223,
+        674,
+        346,
+        788
+      ],
+      "row": 4,
+      "index": 3,
+      "area": 5811
+    },
+    {
+      "name": "overlay_attack_tile",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_attack_tile.png",
+      "source_bbox": [
+        347,
+        684,
+        454,
+        783
+      ],
+      "crop_box": [
+        339,
+        676,
+        462,
+        791
+      ],
+      "row": 4,
+      "index": 4,
+      "area": 5939
+    },
+    {
+      "name": "overlay_shield_tile",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_shield_tile.png",
+      "source_bbox": [
+        456,
+        682,
+        564,
+        782
+      ],
+      "crop_box": [
+        448,
+        674,
+        572,
+        790
+      ],
+      "row": 4,
+      "index": 5,
+      "area": 5989
+    },
+    {
+      "name": "overlay_root_tile",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_root_tile.png",
+      "source_bbox": [
+        568,
+        685,
+        679,
+        786
+      ],
+      "crop_box": [
+        560,
+        677,
+        687,
+        794
+      ],
+      "row": 4,
+      "index": 6,
+      "area": 6289
+    },
+    {
+      "name": "overlay_melee_arrow",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_melee_arrow.png",
+      "source_bbox": [
+        703,
+        721,
+        744,
+        763
+      ],
+      "crop_box": [
+        695,
+        713,
+        752,
+        771
+      ],
+      "row": 4,
+      "index": 7,
+      "area": 835
+    },
+    {
+      "name": "overlay_line_arrow",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_line_arrow.png",
+      "source_bbox": [
+        775,
+        726,
+        904,
+        763
+      ],
+      "crop_box": [
+        767,
+        718,
+        912,
+        771
+      ],
+      "row": 4,
+      "index": 8,
+      "area": 1842
+    },
+    {
+      "name": "overlay_charge_chevrons",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_charge_chevrons.png",
+      "source_bbox": [
+        914,
+        712,
+        1000,
+        796
+      ],
+      "crop_box": [
+        906,
+        704,
+        1008,
+        804
+      ],
+      "row": 4,
+      "index": 9,
+      "area": 2494
+    },
+    {
+      "name": "overlay_push_arrow",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_push_arrow.png",
+      "source_bbox": [
+        1028,
+        722,
+        1099,
+        768
+      ],
+      "crop_box": [
+        1020,
+        714,
+        1107,
+        776
+      ],
+      "row": 4,
+      "index": 10,
+      "area": 1589
+    },
+    {
+      "name": "overlay_pull_arrow",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_pull_arrow.png",
+      "source_bbox": [
+        1118,
+        726,
+        1191,
+        766
+      ],
+      "crop_box": [
+        1110,
+        718,
+        1199,
+        774
+      ],
+      "row": 4,
+      "index": 11,
+      "area": 1713
+    },
+    {
+      "name": "overlay_spawn_warning",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_spawn_warning.png",
+      "source_bbox": [
+        1209,
+        694,
+        1317,
+        790
+      ],
+      "crop_box": [
+        1201,
+        686,
+        1325,
+        798
+      ],
+      "row": 4,
+      "index": 12,
+      "area": 2213
+    },
+    {
+      "name": "overlay_objective_badge",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_objective_badge.png",
+      "source_bbox": [
+        1226,
+        713,
+        1301,
+        775
+      ],
+      "crop_box": [
+        1218,
+        705,
+        1309,
+        783
+      ],
+      "row": 4,
+      "index": 13,
+      "area": 1702
+    },
+    {
+      "name": "overlay_danger_border",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/overlay_danger_border.png",
+      "source_bbox": [
+        1330,
+        685,
+        1391,
+        791
+      ],
+      "crop_box": [
+        1322,
+        677,
+        1399,
+        799
+      ],
+      "row": 4,
+      "index": 14,
+      "area": 4823
+    },
+    {
+      "name": "row04_asset15",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/row04_asset15.png",
+      "source_bbox": [
+        1402,
+        696,
+        1512,
+        799
+      ],
+      "crop_box": [
+        1394,
+        688,
+        1520,
+        807
+      ],
+      "row": 4,
+      "index": 15,
+      "area": 2555
+    },
+    {
+      "name": "icon_ward",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/icon_ward.png",
+      "source_bbox": [
+        51,
+        854,
+        143,
+        968
+      ],
+      "crop_box": [
+        43,
+        846,
+        151,
+        976
+      ],
+      "row": 5,
+      "index": 1,
+      "area": 7780
+    },
+    {
+      "name": "icon_vector",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/icon_vector.png",
+      "source_bbox": [
+        194,
+        864,
+        258,
+        960
+      ],
+      "crop_box": [
+        186,
+        856,
+        266,
+        968
+      ],
+      "row": 5,
+      "index": 2,
+      "area": 2980
+    },
+    {
+      "name": "icon_veil",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/icon_veil.png",
+      "source_bbox": [
+        228,
+        860,
+        290,
+        960
+      ],
+      "crop_box": [
+        220,
+        852,
+        298,
+        968
+      ],
+      "row": 5,
+      "index": 3,
+      "area": 2475
+    },
+    {
+      "name": "icon_signal",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/icon_signal.png",
+      "source_bbox": [
+        338,
+        848,
+        451,
+        977
+      ],
+      "crop_box": [
+        330,
+        840,
+        459,
+        985
+      ],
+      "row": 5,
+      "index": 4,
+      "area": 8476
+    },
+    {
+      "name": "icon_echo",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/icon_echo.png",
+      "source_bbox": [
+        501,
+        860,
+        587,
+        977
+      ],
+      "crop_box": [
+        493,
+        852,
+        595,
+        985
+      ],
+      "row": 5,
+      "index": 5,
+      "area": 5857
+    },
+    {
+      "name": "icon_root",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/icon_root.png",
+      "source_bbox": [
+        655,
+        889,
+        775,
+        970
+      ],
+      "crop_box": [
+        647,
+        881,
+        783,
+        978
+      ],
+      "row": 5,
+      "index": 6,
+      "area": 6676
+    },
+    {
+      "name": "marker_strong",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/marker_strong.png",
+      "source_bbox": [
+        697,
+        872,
+        756,
+        897
+      ],
+      "crop_box": [
+        689,
+        864,
+        764,
+        905
+      ],
+      "row": 5,
+      "index": 7,
+      "area": 728
+    },
+    {
+      "name": "marker_neutral",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/marker_neutral.png",
+      "source_bbox": [
+        834,
+        858,
+        942,
+        973
+      ],
+      "crop_box": [
+        826,
+        850,
+        950,
+        981
+      ],
+      "row": 5,
+      "index": 8,
+      "area": 6965
+    },
+    {
+      "name": "marker_guarded",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/marker_guarded.png",
+      "source_bbox": [
+        1023,
+        870,
+        1069,
+        923
+      ],
+      "crop_box": [
+        1015,
+        862,
+        1077,
+        931
+      ],
+      "row": 5,
+      "index": 9,
+      "area": 1053
+    },
+    {
+      "name": "row05_asset10",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/row05_asset10.png",
+      "source_bbox": [
+        1013,
+        910,
+        1080,
+        970
+      ],
+      "crop_box": [
+        1005,
+        902,
+        1088,
+        978
+      ],
+      "row": 5,
+      "index": 10,
+      "area": 2323
+    },
+    {
+      "name": "row05_asset11",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/row05_asset11.png",
+      "source_bbox": [
+        1148,
+        886,
+        1216,
+        959
+      ],
+      "crop_box": [
+        1140,
+        878,
+        1224,
+        967
+      ],
+      "row": 5,
+      "index": 11,
+      "area": 3413
+    },
+    {
+      "name": "row05_asset12",
+      "path": "/mnt/nxt-dev/tib-gathering/prototypes/tactics-affinity/assets/generated/ruined-crossing-v1/sprites/row05_asset12.png",
+      "source_bbox": [
+        1297,
+        865,
+        1375,
+        973
+      ],
+      "crop_box": [
+        1289,
+        857,
+        1383,
+        981
+      ],
+      "row": 5,
+      "index": 12,
+      "area": 4570
+    }
+  ]
+}
