@@ -129,14 +129,16 @@ async function runRosterAndTraitChecks(browser, baseUrl, checks) {
 
   await selectRoster(page, /Tortollan/i);
   await page.getByRole("button", { name: /Force Push Terra primary cost 1 AP available/i }).waitFor({ state: "visible", timeout: 5000 });
+  await page.getByRole("button", { name: /Arc Pull Fulgur secondary cost 2 AP available/i }).waitFor({ state: "visible", timeout: 5000 });
   await page.getByRole("button", { name: /Ignis Spark Fulgur secondary cost 2 AP available/i }).waitFor({ state: "visible", timeout: 5000 });
   await page.getByRole("button", { name: /Void Snare Umbra opposite cost 4 AP disabled/i }).waitFor({ state: "visible", timeout: 5000 });
-  checks.push("PASS Tortollan primary Terra costs 1 AP, sub-job Fulgur costs 2 AP, and opposite Umbra is disabled at 4 AP.");
+  checks.push("PASS Tortollan primary Terra costs 1 AP, Fulgur pull/spark sub-job costs 2 AP, and opposite Umbra is disabled at 4 AP.");
 
   await selectRoster(page, /Sprite/i);
   await page.getByRole("button", { name: /Ignis Spark Fulgur primary cost 1 AP available/i }).waitFor({ state: "visible", timeout: 5000 });
+  await page.getByRole("button", { name: /Arc Pull Fulgur primary cost 1 AP available/i }).waitFor({ state: "visible", timeout: 5000 });
   await page.getByRole("button", { name: /Force Push Terra secondary cost 2 AP available/i }).waitFor({ state: "visible", timeout: 5000 });
-  checks.push("PASS Sprite flips the same job tree: Fulgur primary is 1 AP and Terra sub-job is 2 AP.");
+  checks.push("PASS Sprite flips the same job tree: Fulgur pull/spark primary is 1 AP and Terra push sub-job is 2 AP.");
 
   await page.getByRole("button", { name: /Force Push Terra secondary cost 2 AP available/i }).click();
   await clickUnit(page, /Tortollan/i);
@@ -279,8 +281,8 @@ async function main() {
     "## Commands Run",
     "",
     "- `npm run build`",
-    "- `npm run smoke:combat` (superseded wrapper for MVP smoke)",
-    "- `npm run smoke:functional` (superseded wrapper for MVP smoke)",
+    "- `npm run smoke:combat`",
+    "- `npm run smoke:functional`",
     "- `npm run smoke:mvp-affinity`",
     "",
     "## Verification Output",
@@ -294,10 +296,10 @@ async function main() {
     `- ${path.relative(prototypeRoot, solvedScreenshotPath)}`,
     `- ${path.relative(prototypeRoot, failScreenshotPath)}`,
     "",
-    "## Superseded Old Smoke Behavior",
+    "## Smoke Coverage Notes",
     "",
     "- The old Iron Guard / Verdant Ranger / Radiant Acolyte combat slice is intentionally superseded on this MVP screen.",
-    "- `smoke:combat` and `smoke:functional` now execute the MVP affinity smoke so legacy assertions do not conflict with the two-build roster.",
+    "- `smoke:mvp-affinity` remains the full solve-path smoke; `smoke:combat` and `smoke:functional` now own separate edge-case browser checks.",
     "",
     "## Caveats",
     "",

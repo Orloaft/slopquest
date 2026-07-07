@@ -14,6 +14,8 @@ import {
   isSafeState,
   keyFor,
   movementPreview as previewMovement,
+  forcedMovementDestination as previewForcedMovementDestination,
+  pullDestination as findPullDestination,
   pushDestination as findPushDestination,
   relationFor,
   resolveWait,
@@ -168,6 +170,35 @@ function pushDestination(actor, target) {
   });
 }
 
+function pullDestination(actor, target) {
+  return findPullDestination({
+    actor,
+    target,
+    boardSize: BOARD_SIZE,
+    units: state.units,
+    objective: state.objective,
+    tiles: state.tiles
+  });
+}
+
+function forcedMovementPreview(actor, target, intent) {
+  return previewForcedMovementDestination({
+    actor,
+    target,
+    intent,
+    boardSize: BOARD_SIZE,
+    units: state.units,
+    objective: state.objective,
+    tiles: state.tiles
+  });
+}
+
+function forcedMovementConfig(ability) {
+  if (ability?.id === "terra-push") return { intent: "push", verb: "Push", label: "Force Push" };
+  if (ability?.id === "fulgur-pull") return { intent: "pull", verb: "Pull", label: "Arc Pull" };
+  return null;
+}
+
 function previewAbility(unit, ability, target) {
   if (!unit || !ability) return { title: "Choose a unit and action", detail: "Move, Attack, or Wait are available in this MVP." };
 
@@ -216,22 +247,24 @@ function previewAbility(unit, ability, target) {
     };
   }
 
-  if (ability.id === "terra-push" && target.type === "unit") {
+  const movementConfig = forcedMovementConfig(ability);
+  if (movementConfig && target.type === "unit") {
     const targetUnit = getUnit(target.id);
-    if (!targetUnit) return { title: "No push target", detail: "Choose a unit to push." };
+    if (!targetUnit) return { title: `No ${movementConfig.intent} target`, detail: `Choose a unit to ${movementConfig.intent}.` };
     if (targetUnit.immovable) {
       return {
-        title: `Force Push -> ${targetUnit.shortName}`,
-        detail: `${targetUnit.name} has Immovable shell; the push is resisted and displacement is blocked.`
+        title: `${movementConfig.label} -> ${targetUnit.shortName}`,
+        detail: `${targetUnit.name} has Immovable shell; the ${movementConfig.intent} is resisted and displacement is blocked.`
       };
     }
-    const destination = pushDestination(unit, targetUnit);
-    if (!destination) {
+    const result = forcedMovementPreview(unit, targetUnit, movementConfig.intent);
+    if (!result.ok) {
       return {
-        title: `Force Push -> ${targetUnit.name}`,
-        detail: `Costs ${cost} AP. Deals 1 damage, but no legal push destination is open.`
+        title: `${movementConfig.label} -> ${targetUnit.name}`,
+        detail: `Costs ${cost} AP. Deals 1 damage, but no legal ${movementConfig.intent} destination is open: ${result.detail}`
       };
     }
+    const destination = result.destination;
     const terrainLine =
       destination.state === "fire"
         ? " Fire damage adds 3 more and neutralizes the forecast if HP reaches 0."
@@ -239,8 +272,8 @@ function previewAbility(unit, ability, target) {
           ? " Target lands in oil; Ignis Spark preview will ignite it next."
           : "";
     return {
-      title: `Force Push -> ${targetUnit.name}`,
-      detail: `Costs ${cost} AP. Push destination (${destination.col}, ${destination.row}) is ${destination.state}; push damage 1.${terrainLine}`
+      title: `${movementConfig.label} -> ${targetUnit.name}`,
+      detail: `Costs ${cost} AP. ${movementConfig.verb} destination (${destination.col}, ${destination.row}) is ${destination.state}; ${movementConfig.intent} damage 1.${terrainLine}`
     };
   }
 
@@ -316,14 +349,16 @@ function commitAbility() {
         occupant ? `; ${occupant.name} took 3 (${before}->${occupant.hp}).` : "."
       }`
     );
-  } else if (ability.id === "terra-push" && target.type === "unit") {
+  } else if (forcedMovementConfig(ability) && target.type === "unit") {
+    const movementConfig = forcedMovementConfig(ability);
     const targetUnit = getUnit(target.id);
     if (!targetUnit || targetUnit.dead) return;
     actor.ap -= cost;
     if (targetUnit.immovable) {
-      addLog(`${actor.name} used Force Push (${relationFor(actor, ability)}, ${cost} AP): ${targetUnit.name}'s Immovable shell blocked displacement.`);
+      addLog(`${actor.name} used ${movementConfig.label} (${relationFor(actor, ability)}, ${cost} AP): ${targetUnit.name}'s Immovable shell blocked displacement.`);
     } else {
-      const destination = pushDestination(actor, targetUnit);
+      const result = forcedMovementPreview(actor, targetUnit, movementConfig.intent);
+      const destination = movementConfig.intent === "pull" ? pullDestination(actor, targetUnit) : pushDestination(actor, targetUnit);
       const before = targetUnit.hp;
       applyDamageUnit(targetUnit, 1);
       let terrainLine = "";
@@ -332,9 +367,11 @@ function commitAbility() {
         targetUnit.row = destination.row;
         const terrainResult = resolveTerrainDamage(targetUnit, state.tiles);
         Object.assign(targetUnit, terrainResult.unit);
-        terrainLine = terrainResult.log ? `; ${terrainResult.log}` : `; pushed to (${destination.col}, ${destination.row}) ${destination.state}`;
+        terrainLine = terrainResult.log ? `; ${terrainResult.log}` : `; ${movementConfig.intent}ed to (${destination.col}, ${destination.row}) ${destination.state}`;
+      } else if (!result.ok) {
+        terrainLine = `; displacement blocked: ${result.detail}`;
       }
-      addLog(`${actor.name} used Force Push (${relationFor(actor, ability)}, ${cost} AP): ${targetUnit.name} took 1 (${before}->${targetUnit.hp})${terrainLine}.`);
+      addLog(`${actor.name} used ${movementConfig.label} (${relationFor(actor, ability)}, ${cost} AP): ${targetUnit.name} took 1 (${before}->${targetUnit.hp})${terrainLine}.`);
     }
   }
 

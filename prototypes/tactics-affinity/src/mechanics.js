@@ -59,16 +59,41 @@ export function movementPreview({ unit, col, row, boardSize, units, objective, t
   };
 }
 
-export function pushDestination({ actor, target, boardSize, units, objective, tiles }) {
+export function forcedMovementDestination({ actor, target, intent = "push", boardSize, units, objective, tiles }) {
+  if (!actor || !target) return { ok: false, reason: "missing-unit", detail: "Forced movement needs an actor and target." };
+
   const dx = Math.sign(target.col - actor.col);
   const dy = Math.sign(target.row - actor.row);
-  const col = target.col + dx;
-  const row = target.row + dy;
-  if (!dx && !dy) return null;
-  if (!inBounds(col, row, boardSize)) return null;
-  if (unitAt(units, col, row)) return null;
-  if (objective.col === col && objective.row === row) return null;
-  return { col, row, state: tileState(tiles, col, row) };
+  if (!dx && !dy) {
+    return { ok: false, reason: "same-cell", detail: "Forced movement needs a direction." };
+  }
+
+  const force = intent === "pull" ? -1 : 1;
+  const col = target.col + dx * force;
+  const row = target.row + dy * force;
+  if (!inBounds(col, row, boardSize)) {
+    return { ok: false, reason: "bounds", detail: "Destination is outside the board." };
+  }
+  if (unitAt(units, col, row)) {
+    return { ok: false, reason: "occupied", detail: "Destination is occupied by another unit." };
+  }
+  if (objective.col === col && objective.row === row) {
+    return { ok: false, reason: "objective", detail: "The beacon blocks the destination." };
+  }
+
+  const state = tileState(tiles, col, row);
+  if (state === "block") {
+    return { ok: false, reason: "blocker-terrain", detail: "Raised blocker terrain stops forced movement." };
+  }
+  return { ok: true, destination: { col, row, state }, detail: `Destination (${col}, ${row}) is ${state}.` };
+}
+
+export function pushDestination(args) {
+  return forcedMovementDestination({ ...args, intent: "push" }).destination ?? null;
+}
+
+export function pullDestination(args) {
+  return forcedMovementDestination({ ...args, intent: "pull" }).destination ?? null;
 }
 
 export function damageUnit(unit, amount) {

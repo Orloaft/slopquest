@@ -102,6 +102,14 @@ export const abilities = [
     detail: "Push one unit away from the caster, deal 1 push damage, then resolve terrain."
   },
   {
+    id: "fulgur-pull",
+    name: "Arc Pull",
+    affinity: "Fulgur",
+    kind: "Mover",
+    target: "unit",
+    detail: "Pull one unit toward the caster, deal 1 pull damage, then resolve terrain."
+  },
+  {
     id: "oil-font",
     name: "Oil Font",
     affinity: "Terra",

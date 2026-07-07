@@ -10,8 +10,10 @@ import {
   abilityCost,
   canUseAbility,
   damageUnit,
+  forcedMovementDestination,
   keyFor,
   movementPreview,
+  pullDestination,
   pushDestination,
   relationFor,
   resolveWait,
@@ -58,6 +60,8 @@ function runAffinityTests() {
 
   assert.equal(relationFor(tortollan, ability("terra-push")), "primary");
   assert.equal(abilityCost(tortollan, ability("terra-push")), 1);
+  assert.equal(relationFor(tortollan, ability("fulgur-pull")), "secondary");
+  assert.equal(abilityCost(tortollan, ability("fulgur-pull")), 2);
   assert.equal(relationFor(tortollan, ability("ignis-spark")), "secondary");
   assert.equal(abilityCost(tortollan, ability("ignis-spark")), 2);
   assert.equal(relationFor(tortollan, ability("void-snare")), "opposite");
@@ -102,6 +106,16 @@ function runPushTests() {
   });
   assert.deepEqual(openDestination, { col: 5, row: 3, state: "oil" });
 
+  const pullDestinationResult = pullDestination({
+    actor: unit(currentUnits, "tortollan"),
+    target: unit(currentUnits, "oilbound-wrecker"),
+    boardSize: BOARD_SIZE,
+    units: currentUnits,
+    objective,
+    tiles
+  });
+  assert.deepEqual(pullDestinationResult, { col: 3, row: 3, state: "plain" });
+
   assert.equal(
     pushDestination({
       actor: { id: "actor", col: 6, row: 3 },
@@ -140,6 +154,57 @@ function runPushTests() {
     null,
     "push blocks on objective destination"
   );
+
+  assert.equal(
+    pushDestination({
+      actor: { id: "actor", col: 1, row: 1 },
+      target: { id: "target", col: 2, row: 1 },
+      boardSize: BOARD_SIZE,
+      units: [],
+      objective,
+      tiles
+    }),
+    null,
+    "push blocks on raised blocker terrain"
+  );
+
+  assert.equal(
+    pullDestination({
+      actor: { id: "actor", col: 4, row: 1 },
+      target: { id: "target", col: 5, row: 1 },
+      boardSize: BOARD_SIZE,
+      units: [],
+      objective,
+      tiles
+    }),
+    null,
+    "pull blocks on raised blocker terrain"
+  );
+
+  assert.equal(
+    pullDestination({
+      actor: { id: "actor", col: 3, row: 3 },
+      target: { id: "target", col: 4, row: 3 },
+      boardSize: BOARD_SIZE,
+      units: [{ id: "actor", col: 3, row: 3 }],
+      objective,
+      tiles
+    }),
+    null,
+    "pull blocks on occupied actor cell"
+  );
+
+  const blockedByTerrain = forcedMovementDestination({
+    actor: { id: "actor", col: 1, row: 1 },
+    target: { id: "target", col: 2, row: 1 },
+    intent: "push",
+    boardSize: BOARD_SIZE,
+    units: [],
+    objective,
+    tiles
+  });
+  assert.equal(blockedByTerrain.ok, false);
+  assert.equal(blockedByTerrain.reason, "blocker-terrain");
 }
 
 function runTerrainAndWaitTests() {
