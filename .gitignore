@@ -25,6 +25,8 @@ public/music/*.mp3
 *.bak-prederim
 .DS_Store
 artifacts/
+__pycache__/
+*.pyc
 tools/__pycache__/
 
 # Local/generated enemy sprite candidate and review batches. Commit promoted
